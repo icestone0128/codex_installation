@@ -5,7 +5,7 @@
 專案名稱：codex_installation
 專案用途：Codex 安裝、連線、工作模式與教學工具專案初始化設定。
 主要工作目錄：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation`
-GitHub repo：`icestone0128/codex_installation`
+GitHub repo：`icestone0128/codex_installation`（Public）
 預設 branch：main
 
 ## Obsidian 對應筆記
@@ -19,7 +19,7 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 ## 工作桌 + 三個家
 
 - 工作桌：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation`
-- GitHub：`icestone0128/codex_installation`
+- GitHub：`icestone0128/codex_installation`（Public）
 - Obsidian：主要 vault + `專案庫/codex_installation/專案工作流程.md`
 - Firebase：`codex-4e80b`
 
@@ -57,6 +57,7 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 入口檔：`docs/index.html`
 設定檔：`.firebaserc`、`firebase.json`、`firestore.rules`
 部署位置：GitHub Pages，來源為 `main` branch 的 `/docs` 目錄
+部署網址：`https://icestone0128.github.io/codex_installation/`
 
 ## 不要做
 
