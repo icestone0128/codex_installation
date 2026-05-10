@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>codex_installation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #202124;
+      --muted: #5f6368;
+      --line: #dadce0;
+      --paper: #ffffff;
+      --wash: #f7f8fa;
+      --accent: #0b57d0;
+      --accent-soft: #e8f0fe;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--wash);
+      line-height: 1.6;
+    }
+
+    main {
+      width: min(920px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 56px 0;
+    }
+
+    header {
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 680px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 1.125rem;
+    }
+
+    section {
+      margin-top: 32px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.15rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .item {
+      min-height: 132px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    .item h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    footer {
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>codex_installation</h1>
+      <p class="lead">Codex 安裝、連線、工作模式與教學工具專案初始化設定的版本入口。</p>
+      <div class="status"><span class="dot" aria-hidden="true"></span>GitHub Pages enabled</div>
+    </header>
+
+    <section aria-labelledby="contents-title">
+      <h2 id="contents-title">主要內容</h2>
+      <div class="grid">
+        <article class="item">
+          <h3>Lazy Pack</h3>
+          <p>NotebookLM、GitHub、Obsidian、Firebase 與新專案初始化流程的實測懶人包。</p>
+        </article>
+        <article class="item">
+          <h3>Project Rules</h3>
+          <p>固定工作規則保存在 <a href="../AGENTS.md">AGENTS.md</a>，進度紀錄保存在 Obsidian 專案駕駛艙。</p>
+        </article>
+        <article class="item">
+          <h3>Lifecycle Skills</h3>
+          <p>新專案初始化、開工接續、收工同步流程已整理為全域 Codex skills。</p>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      Source repository: icestone0128/codex_installation
+    </footer>
+  </main>
+</body>
+</html>

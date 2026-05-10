@@ -54,9 +54,9 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 
 ## 主要檔案
 
-入口檔：無應用入口
+入口檔：`docs/index.html`
 設定檔：`.firebaserc`、`firebase.json`、`firestore.rules`
-部署位置：不部署
+部署位置：GitHub Pages，來源為 `main` branch 的 `/docs` 目錄
 
 ## 不要做
 
