@@ -5,7 +5,7 @@
 專案名稱：codex_installation
 專案用途：Codex 安裝、連線、工作模式與教學工具專案初始化設定。
 主要工作目錄：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation`
-GitHub repo：未建立
+GitHub repo：`icestone0128/codex_installation`
 預設 branch：main
 
 ## Obsidian 對應筆記
@@ -19,7 +19,7 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 ## 工作桌 + 三個家
 
 - 工作桌：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation`
-- GitHub：未建立
+- GitHub：`icestone0128/codex_installation`
 - Obsidian：主要 vault + `專案庫/codex_installation/專案工作流程.md`
 - Firebase：`codex-4e80b`
 
@@ -40,16 +40,23 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 - 如規則、路徑、專案邊界改變才更新本檔。
 - 需要時才 commit + push GitHub。
 
+全域 Skill 同步：
+
+- 全域 skills 預設位置：`/Users/arrywu/.codex/skills`
+- Obsidian 同步索引：`專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
+- 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
+- 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
+
 新專案初始化時：
 
 - 使用 `project-init-sync` 流程。
-- 以 `/Users/arrywu/Downloads/07-初始化班級工具工作模式.md` 為全域標準。
+- 以 `lazy-pack/07-初始化班級工具工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `/Users/arrywu/.codex/AGENTS.md`。
 
 ## 主要檔案
 
-入口檔：待定
+入口檔：無應用入口
 設定檔：`.firebaserc`、`firebase.json`、`firestore.rules`
-部署位置：未設定
+部署位置：不部署
 
 ## 不要做
 
