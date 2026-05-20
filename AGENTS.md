@@ -3,7 +3,7 @@
 ## 專案入口
 
 專案名稱：codex_installation
-專案用途：Codex 安裝、連線、工作模式與教學工具專案初始化設定。
+專案用途：Codex 安裝、連線、工作模式與專案初始化設定。
 主要工作目錄：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation`
 GitHub repo：`icestone0128/codex_installation`（Public）
 預設 branch：main
@@ -47,10 +47,23 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
 - 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
 
+Arry 助手 AI 分身資料層：
+
+- AI 分身名稱：Arry 助手。
+- Arry 助手資料層放在本專案：
+  - `000_Agent/`
+  - `100_Todo/`
+  - `200_Reference/`
+- Arry 助手是 Codex App 版設定，不使用 Claude Code 專用的 `CLAUDE.md` 或 `~/.claude/skills` symlink。
+- 可被所有專案呼叫的部分放在全域 skill：`/Users/arrywu/.codex/skills/arry-assistant/SKILL.md`。
+- 若來源文件含 AI 分身預設名稱，不使用來源預設名，改用「Arry 助手」。
+- 若 Arry 助手資料層與新專案初始化規則衝突，先詢問使用者再決定。
+- `project-init-sync`、`startup-sync`、`shutdown-sync` 已整合 Arry 助手雙層資料層：未來新專案預設建立本地 `100_Todo/`、`200_Reference/`，並引用全域 Arry 助手核心層；現有專案開工/收工時可同步跨專案記憶。
+
 新專案初始化時：
 
 - 使用 `project-init-sync` 流程。
-- 以 `lazy-pack/07-初始化班級工具工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `/Users/arrywu/.codex/AGENTS.md`。
+- 以 `lazy-pack/07-專案初始化工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `/Users/arrywu/.codex/AGENTS.md`。
 
 ## 主要檔案
 
@@ -64,4 +77,4 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 - 不要把每日進度寫進 AGENTS.md。
 - 不要自動納入無關 git 變更。
 - 不要把 API key、token、密碼寫進 repo。
-- 不要儲存學生姓名；正式資料只用座號與班級代號。
+- 不要把不必要的個資或敏感資料寫進 repo。
