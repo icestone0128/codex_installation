@@ -54,9 +54,11 @@ Codex 通常已內建：
 - `codex-skill-creator`：把 Claude / Anthropic skill 教學轉成 Codex 相容 skill。
 - `secondbrain-research-digest`：整理 Secondbrain 研究資料、查詢、決策與筆記。
 - `tool-integration-workflow`：外部工具整合、安裝、驗證與 CLI / API / MCP / connector 路線判斷。
+- `brainstorm`：先規劃再執行，用引導式問答把模糊想法轉成可執行計劃，確認前不實作。
 
 下載者可照 `10-Codex版SkillCreator工作流.md` 建立自己的版本，不需要沿用 `Arry` 命名。
 `tool-integration-workflow` 已附可直接安裝版本，可照 `11-外部工具整合工作流.md` 複製到 `{{CODEX_HOME}}/skills/`。
+`brainstorm` 已附可直接安裝版本，可照 `12-Brainstorm規劃模式.md` 複製到 `{{CODEX_HOME}}/skills/`。
 
 ## Gmail 驗證流程
 
