@@ -19,6 +19,7 @@
 - Gmail：信件搜尋、摘要、草稿。
 - Google Calendar：行程、會議準備、空檔查詢。
 - Google Drive：Drive、Docs、Sheets、Slides。
+- Notion：workspace 搜尋、頁面讀取、database 讀取與明確確認後的頁面建立/更新。
 - Browser：本機或遠端網頁測試。
 - Documents：Word / docx 文件處理。
 - Spreadsheets：xlsx / csv / Sheets 類任務。
@@ -79,6 +80,15 @@ Codex 通常已內建：
 2. 連接自己的 Google 帳號。
 3. 請 Codex 搜尋一個測試文件或列出最近檔案。
 4. 若要編輯文件，先指定明確檔案，避免誤改。
+
+## Notion 驗證流程
+
+1. 啟用 Notion plugin / connector。
+2. 連接自己的 Notion workspace。
+3. 請 Codex 用只讀方式驗證，例如讀取目前連線使用者資訊，或搜尋一個你指定的測試頁面。
+4. 若要寫入 Notion page 或 database，先指定目標頁面 / database，並要求 Codex 先讀取 schema 再寫入。
+
+不要把 Notion token、workspace ID、page ID 或 database ID 寫進 repo、README、AGENTS.md、skills 或公開筆記。若 Codex plugin 已可用，優先用 plugin，不要先手動建立 API token。
 
 ## 驗證全域 Skills
 
