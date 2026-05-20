@@ -15,6 +15,7 @@ Project workspace initialized on 2026-05-07.
 - `tests/` - test files
 - `docs/` - project documentation
 - `lazy-pack/` - verified Codex setup notes and troubleshooting records
+- `lazy-pack/skills/` - installable custom Codex skill packages used by the lazy pack
 
 ## Getting Started
 
