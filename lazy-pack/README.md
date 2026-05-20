@@ -14,6 +14,7 @@
 6. [[05-第二大腦設定指南]]
 7. [[06-連接-Firebase-資料庫]]
 8. [[07-初始化班級工具工作模式]]
+9. [[08-Codex-MCP-essentials]]
 
 ## 本版共同修正
 
@@ -25,6 +26,8 @@
 - MCP 或 skills 設定改完後，通常要重開 Codex 對話或重啟 Codex App 才會載入。
 - Firebase Project ID 不能改名；資料夾改名後要同步更新 Firebase MCP 的 project directory。
 - 不把 `.env`、API key、token、密碼、Admin 憑證、學生真名寫入 repo 或筆記。
+- MCP 設定使用 `/Users/arrywu/.codex/config.toml`；不要把 Claude Code CLI 的 `~/.claude.json` 指令直接套用到 Codex App。
+- 需要 API key 的 MCP 只能記錄遮蔽範例，實際密鑰不可提交。
 
 ## 固定路徑
 
@@ -32,4 +35,3 @@
 - Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain`
 - Obsidian 專案庫：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫`
 - NotebookLM 輸出資料夾：`/Users/arrywu/Documents/NotebookLM`
-

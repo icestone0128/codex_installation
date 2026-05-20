@@ -14,6 +14,7 @@ Project workspace initialized on 2026-05-07.
 - `src/` - application source files
 - `tests/` - test files
 - `docs/` - project documentation
+- `lazy-pack/` - verified Codex setup notes and troubleshooting records
 
 ## Getting Started
 
