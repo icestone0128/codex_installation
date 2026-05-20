@@ -51,6 +51,13 @@ updated: 2026-05-20
 - 需要使用時可做當次公開網頁驗證。
 - API key 不放進 GitHub、repo 文件、AGENTS.md 或公開同步筆記。
 
+### Notion（Codex Notion plugin｜2026-05-20 驗證）
+
+- 搜尋 Notion workspace 內容、讀取頁面或 database。
+- 可在使用者指定與確認後建立、更新 Notion 頁面。
+- 寫入 database 前必須先讀 schema，確認屬性名稱與目標位置。
+- 不手動保存 Notion token；不把 token 或權限細節寫進 repo 或公開筆記。
+
 ## 待整合清單
 
 參考 `100_Todo/integrations/2026-05-20-tool-integration-plan.md`。
@@ -59,7 +66,6 @@ updated: 2026-05-20
 
 目前待確認是否需要：
 
-- Notion
 - Slack / Linear / Outlook
 
 ## 範本：每次整合完一個工具，加一段

@@ -130,21 +130,22 @@ adapted_for: Codex App
   - [ ] 若本機設定失效，再查官方最新文件重設。
 - 備註：API key 只留在本機安全位置；不要在 repo、AGENTS.md、skill 文件或 Obsidian 公開同步筆記內寫入 API key。
 
-### [待確認] Notion
+### [已知已整合] Notion
 
 - 用途：如果仍在使用 Notion，可查資料庫、建立頁面或更新任務。
-- 建議路線：REST API + `.env`；讀取可視情況評估 connector / MCP。
-- 目前狀態：尚未確認使用者是否需要。
+- 建議路線：Codex Notion plugin / connector。只有 plugin 不足以處理的特殊 API 工作，才另評估 REST API + 本機 `.env`。
+- 目前狀態：2026-05-20 已安裝 Notion plugin，並以讀取目前連線使用者資訊做低風險驗證成功。
 - 執行時要查的事情：
-  - [ ] 使用者是否仍使用 Notion。
-  - [ ] 需要讀取、寫入，還是只做搜尋。
-  - [ ] 官方 API 權限與 integration 邀請範圍。
+  - [x] 使用者是否仍使用 Notion。
+  - [x] 是否已有 Codex Notion plugin / connector 可用。
+  - [x] 以讀取目前連線使用者資訊完成驗證。
+  - [ ] 若要寫入特定 database，先 fetch schema 並確認目標 database / page。
 - 安裝 checklist：
-  - [ ] 確認需要後再執行。
-  - [ ] 建立 token 並存入安全 `.env` 位置。
-  - [ ] 建立 Notion API 使用 skill 或 SOP。
-  - [ ] 用一個測試 page / database 驗證。
-- 備註：未確認前不安裝。
+  - [x] 確認需要後再執行。
+  - [x] 安裝 Codex Notion plugin。
+  - [x] 用目前連線使用者資訊做只讀驗證。
+  - [ ] 未來若要建立或更新 Notion 頁面，先取得使用者明確確認。
+- 備註：目前不需要手動建立 Notion token，也不要把 token、workspace ID、頁面權限細節寫入 repo 或公開筆記。
 
 ### [待確認] Slack / Linear / Outlook
 
@@ -164,10 +165,10 @@ adapted_for: Codex App
 
 ## 進度總覽
 
-- 已知已整合待複驗：7 個
+- 已知已整合待複驗：8 個
 - 待整合：0 個
-- 待確認：2 組
-- 今天新增工具安裝：0 個
+- 待確認：1 組
+- 今天新增工具安裝：1 個（Notion plugin）
 
 下次執行建議：補 Firecrawl 的額度/隱私備註；不需要重新安裝，也不要把 API key 放進 GitHub。
 
