@@ -49,6 +49,7 @@
 11. [[10-Codex版SkillCreator工作流]]
 12. [[11-外部工具整合工作流]]
 13. [[12-Brainstorm規劃模式]]
+14. [[13-Social-Cards圖卡Skill安裝]]
 
 ## 共用前置條件
 
@@ -93,3 +94,4 @@ rg -n "arrywu|icestone0128|codex-4e80b|我的雲端硬碟|{{" lazy-pack
 - Skill Creator 啟動包以 `10-Codex版SkillCreator工作流` 為準；Claude / Anthropic skill 教學只作為轉換來源，不直接照做。
 - 外部工具整合以 `11-外部工具整合工作流` 為準；下載者可直接複製 `lazy-pack/skills/tool-integration-workflow/` 到自己的 `{{CODEX_HOME}}/skills/` 使用。
 - Brainstorm 規劃模式以 `12-Brainstorm規劃模式` 為準；下載者可直接複製 `lazy-pack/skills/brainstorm/` 到自己的 `{{CODEX_HOME}}/skills/` 使用。
+- Social Cards 圖卡 skill 以 `13-Social-Cards圖卡Skill安裝` 為準；下載者可直接複製 `lazy-pack/skills/social-cards/` 到自己的 `{{CODEX_HOME}}/skills/social-cards/`，再安裝 Playwright 依賴使用。
