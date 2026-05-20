@@ -10,33 +10,82 @@
 - Obsidian：專案駕駛艙、進度、下一步、踩坑、SOP。
 - Codex：讀取專案 `AGENTS.md` 與 Obsidian 駕駛艙，協助執行。
 
-## Obsidian MCP 實測設定
+## 前置條件
 
-使用 `mcpvault`：
+- 已完成 `02-連接-GitHub`。
+- 已建立 Obsidian vault：`{{OBSIDIAN_VAULT}}`。
+- 已決定專案工作根目錄：`{{WORK_ROOT}}`。
+
+## Obsidian 存取方式
+
+優先順序：
+
+1. Codex 工作區或沙箱已授權讀寫 `{{OBSIDIAN_VAULT}}`。
+2. 使用 Filesystem MCP 授權 `{{OBSIDIAN_VAULT}}` 或其上層必要資料夾。
+3. 使用 Obsidian MCP，例如 `mcpvault`。
+
+如果使用 `mcpvault`，先找 command：
+
+```bash
+command -v mcpvault
+```
+
+在 `{{CODEX_CONFIG}}` 加入：
 
 ```toml
 [mcp_servers.obsidian]
-command = "/opt/homebrew/bin/mcpvault"
-args = ["/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain"]
+command = "{{MCPVAULT_COMMAND}}"
+args = ["{{OBSIDIAN_VAULT}}"]
 startup_timeout_sec = 20
 tool_timeout_sec = 60
 ```
 
-## 專案駕駛艙新規則
+## 專案駕駛艙規則
 
 所有 Codex 專案駕駛艙一律放在：
 
-`專案庫/<專案名稱>/專案工作流程.md`
+```text
+{{OBSIDIAN_PROJECTS}}/<專案名稱>/專案工作流程.md
+```
 
-例如：
+不要把駕駛艙放在 repo 裡，避免把日常進度和程式碼版本混在一起。
 
-`專案庫/codex_installation/專案工作流程.md`
+## 專案 AGENTS.md 要寫什麼
+
+每個專案根目錄建立 `AGENTS.md`，至少包含：
+
+```markdown
+# <專案名稱> — AGENTS.md
+
+## 專案入口
+
+- 工作資料夾：`{{WORK_ROOT}}/<專案名稱>`
+- GitHub repo：`{{GITHUB_USER}}/<REPO_NAME>` 或 `未建立`
+- Obsidian vault：`{{OBSIDIAN_VAULT}}`
+- 專案駕駛艙：`專案庫/<專案名稱>/專案工作流程.md`
+
+## 工作規則
+
+- 開工先讀本檔與 Obsidian 駕駛艙。
+- 收工更新 Obsidian 駕駛艙。
+- 不把 secrets 寫進 repo 或筆記。
+```
+
+## 驗證
+
+1. Codex 能讀專案 `AGENTS.md`。
+2. Codex 能讀 Obsidian 駕駛艙。
+3. `git remote -v` 能顯示 GitHub remote。
+4. 收工時能清楚說明：repo 狀態、Obsidian 駕駛艙位置、下一步。
+
+## 本機實測例
+
+曾使用 `mcpvault` 指向本機 `secondbrain` vault。這只是實測例，下載者要改成自己的 `{{OBSIDIAN_VAULT}}`。
 
 ## 踩坑修正
 
 - 不要把專案駕駛艙建在工作資料夾 repo 裡；它應該在 Obsidian vault 內。
 - Obsidian Web Clipper 的 vault 名稱要和 Obsidian Desktop 開啟的 vault 完全一致。
-- 曾發生 Web Clipper URL 帶 `vault=Codex`，但真正 vault 是 `secondbrain`，導致 `Vault not found`。
-- Google Drive 資料夾名稱有空格時，部分補丁或工具處理會不穩；新專案優先用底線命名。
+- `Vault not found` 通常是 Web Clipper 或 Obsidian URI 的 vault 名稱錯，不是筆記內容錯。
+- Google Drive 資料夾名稱有空格時，部分工具處理會不穩；新專案優先用底線或連字號命名。
 - Codex 側邊欄不一定即時反映資料夾改名，需要重新開啟專案或重啟 App。
-
