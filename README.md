@@ -7,7 +7,7 @@ Project workspace initialized on 2026-05-07.
 ## Links
 
 - GitHub repo: https://github.com/icestone0128/codex_installation
-- GitHub Pages: https://icestone0128.github.io/codex_installation/
+- GitHub Pages: disabled
 
 ## Structure
 
@@ -19,4 +19,4 @@ Project workspace initialized on 2026-05-07.
 
 ## Getting Started
 
-This repository is documentation-first. The public entry page is `docs/index.html`, served by GitHub Pages from the `main` branch `/docs` directory.
+This repository is documentation-first. The local entry page is `docs/index.html`; GitHub Pages is currently disabled.
