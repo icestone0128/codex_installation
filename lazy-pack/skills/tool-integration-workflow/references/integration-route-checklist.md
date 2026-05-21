@@ -9,7 +9,7 @@ Ask only what is needed:
 - What tool or service should be connected?
 - What should Codex be able to do with it?
 - Is read-only enough, or is write access required?
-- Is this for one project, all future projects, or a personal assistant global workflow?
+- Is this for one project, all future projects, or Arry assistant global use?
 - Are credentials already available locally?
 
 If the user only asks for analysis, do not configure anything until they approve execution.
@@ -80,4 +80,4 @@ Common project destinations:
 
 ## 6. Firecrawl Note
 
-Firecrawl can be verified by scraping `https://example.com` and checking for Markdown plus HTTP 200. The API key must remain local and must not be uploaded to GitHub.
+For this user's current machine, Firecrawl has been verified in Codex on 2026-05-20 by scraping `https://example.com` and receiving Markdown with HTTP 200. The API key must remain local and must not be uploaded to GitHub.

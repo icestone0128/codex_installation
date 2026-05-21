@@ -1,0 +1,4 @@
+interface:
+  display_name: "Presentation Workflow"
+  short_description: "NotebookLM YAML slide control"
+  default_prompt: "Use $presentation-workflow to create a NotebookLM YAML style specification for this presentation."

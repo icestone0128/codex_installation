@@ -67,5 +67,6 @@ metadata:
 
 - 不依賴 Claude Code slash-command 系統；`/cards` 只是使用者可能輸入的觸發語。
 - 不使用 Claude 專用 frontmatter 或工具欄位。
-- 若 Playwright 或 Chromium 尚未安裝，先告知需要安裝本 skill 的截圖依賴，再執行低風險安裝與驗證。
+- 若 Playwright、Chromium 或 `node_modules/` 尚未安裝，先告知需要安裝本 skill 的截圖依賴，再於本 skill 資料夾執行 `npm install` 並驗證。
+- 複製給其他使用者或其他電腦時，不必複製 `node_modules/`；保留 `package.json` 與 `package-lock.json`，在新環境重新安裝依賴。
 - 匯出後可刪除中間 HTML，保留 PNG；除非使用者要求保留可編輯 HTML。

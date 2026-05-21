@@ -1,10 +1,10 @@
 # Brainstorm 來源轉換說明
 
-來源檔：`04-brainstorm.md`
+來源檔：`/Users/arrywu/Downloads/04-brainstorm.md`
 
 原始來源是 Claude Code 的 `/brainstorm` 安裝劇本，包含 `~/.claude/skills`、`AskUserQuestion`、slash command 與 Claude Code Plan Mode 比較。安裝到 Codex App 時已做以下轉換：
 
-- 安裝位置改為 `{{CODEX_HOME}}/skills/brainstorm/`。
+- 安裝位置改為 `/Users/arrywu/.codex/skills/brainstorm/`。
 - 觸發方式改為 Codex skill metadata 與自然語意，例如「brainstorm」、「/brainstorm」、「先想清楚再動手」。
 - 移除 Claude 專用路徑：`~/.claude/skills`、專案 `000_Agent/skills` symlink、Claude command shim。
 - 移除 Claude 專用工具名稱 `AskUserQuestion`，改為 Codex 對話中的單題引導；若未來 Codex App 提供可用選項 UI，可用該 UI 呈現選項。
