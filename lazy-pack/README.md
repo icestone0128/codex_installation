@@ -84,7 +84,8 @@ test -f "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md" && echo "<skill-name> inst
 | 7 | `tool-integration-workflow` | [[12-外部工具整合工作流]] | 可直接安裝 |
 | 8 | `brainstorm` | [[13-Brainstorm-規劃模式]] | 可直接安裝 |
 | 9 | `cross-device-sync` | [[15-Codex-全域-Skills-跨裝置同步]] | 需設定 `{{SYNC_ROOT}}` |
-| 10 | 內容製作類 skills | `lazy-pack/skills/README.md` | 視需求安裝相依套件 |
+| 10 | `pdf`, `playwright` | `lazy-pack/skills/README.md` | 可直接安裝；PDF 需 Poppler/Python 依賴，Playwright 需 Node/npm |
+| 11 | 內容製作類 skills | `lazy-pack/skills/README.md` | 視需求安裝相依套件 |
 
 ## 共用前置條件
 

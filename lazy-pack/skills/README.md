@@ -35,8 +35,8 @@ The skills are organized into five layers:
 | Governance and maintenance | `codex-skill-creator`, `cross-device-sync` | Create, validate, sync, migrate, and document skills |
 | Project lifecycle | `project-init-sync`, `startup-sync`, `shutdown-sync` | Standardize project setup, opening checks, and close-out |
 | Personal knowledge layer | `arry-assistant`, `secondbrain-research-digest` | Personal assistant memory, Obsidian research, and durable notes |
-| Content and teaching workflows | `notebooklm-architecture`, `presentation-workflow`, `visual-note-generator`, `social-cards`, `doc-to-md` | NotebookLM control, slides, visual notes, cards, and document conversion |
-| Tools and thinking workflows | `tool-integration-workflow`, `heptabase-cli`, `brainstorm`, `rightproblem-coach` | External tool routing, Heptabase CLI, planning, and problem framing |
+| Content and teaching workflows | `notebooklm-architecture`, `presentation-workflow`, `visual-note-generator`, `social-cards`, `doc-to-md`, `pdf` | NotebookLM control, slides, visual notes, cards, document conversion, and PDF work |
+| Tools and thinking workflows | `tool-integration-workflow`, `heptabase-cli`, `playwright`, `brainstorm`, `rightproblem-coach` | External tool routing, Heptabase CLI, browser automation, planning, and problem framing |
 
 ## Portability Status
 
@@ -50,6 +50,8 @@ The skills are organized into five layers:
 | `visual-note-generator` | Portable | Bundled prompt reference is included. |
 | `social-cards` | Portable with dependency | Requires Node dependencies before PNG export. Templates and script are bundled. |
 | `doc-to-md` | Portable with dependency | Requires Python dependencies from bundled `scripts/requirements.txt`. |
+| `pdf` | Portable with dependency | Requires Python PDF packages and Poppler for visual rendering checks. |
+| `playwright` | Portable with dependency | Requires Node/npm and uses the bundled `scripts/playwright_cli.sh` wrapper. |
 | `tool-integration-workflow` | Portable | Replace any source example path with the user's project notes if needed. |
 | `codex-skill-creator` | Portable with local mirror config | Replace Obsidian mirror path if the user wants skill inventory sync. |
 | `cross-device-sync` | Portable with local sync config | Replace storage provider paths and assistant data roots. |
@@ -70,6 +72,8 @@ The skills are organized into five layers:
 - Use `secondbrain-research-digest` for Obsidian research outputs; use `arry-assistant` only for personal assistant memory and cross-project preferences.
 - Use `presentation-workflow`, `notebooklm-architecture`, and `visual-note-generator` together for teaching decks: architecture controls NotebookLM behavior, presentation workflow controls slide narrative and YAML, visual note generator controls educational image prompts.
 - Use `doc-to-md` before `secondbrain-research-digest` when a PDF/EPUB/TXT must first become Markdown.
+- Use `pdf` when PDF layout, rendering, generation, or visual QA matters.
+- Use `playwright` for terminal-based browser automation, screenshots, snapshots, and UI-flow debugging.
 - Use `social-cards` after a draft article, note, or digest exists and the user asks for social-media image cards.
 
 ## Completeness Checklist
