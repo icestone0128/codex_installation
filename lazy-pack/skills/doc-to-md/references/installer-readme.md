@@ -1,6 +1,6 @@
 # doc-to-md 安裝與使用說明
 
-> 把 PDF / EPUB / TXT 檔案轉成乾淨的 Markdown 知識庫，搭配 Claude 自動寫章節摘要
+> 把 PDF / EPUB / TXT 檔案轉成乾淨的 Markdown 知識庫，搭配 AI 助手自動寫章節摘要
 
 ---
 
@@ -43,9 +43,9 @@ bash /Users/你的名字/Downloads/doc-to-md-安裝包/install.sh
 4. 安裝完成後，**關閉 Terminal / 命令提示字元 重新開啟**
 5. 再次執行安裝程式
 
-### Step 3：在 Claude Desktop 加入技能
+### Step 3：在 Codex App 加入技能
 
-1. 打開 **Claude Desktop**
+1. 打開 **Codex App**
 2. 點左上方 **Customize** → **Skills** → **+** 號 → **Create Skill** → **Upload a skill**
 3. 選擇安裝包裡的 **skill.zip** 上傳
 4. 確認 `doc-to-md` 出現在 Skills 列表中
@@ -54,9 +54,9 @@ bash /Users/你的名字/Downloads/doc-to-md-安裝包/install.sh
 
 ## 使用方式
 
-### 方式 A：直接跟 Claude 說（推薦）
+### 方式 A：直接跟 AI 助手說（推薦）
 
-在 Claude Desktop 的對話框中輸入：
+在 Codex App 的對話框中輸入：
 
 **Mac：**
 ```
@@ -68,7 +68,7 @@ bash /Users/你的名字/Downloads/doc-to-md-安裝包/install.sh
 幫我把這個 PDF 轉成 Markdown：C:\Users\你的名字\Desktop\書名.pdf
 ```
 
-Claude 會自動：
+AI 助手會自動：
 1. 執行轉換腳本
 2. 讀取輸出的 Markdown
 3. 為每個章節填寫摘要和關鍵字
@@ -86,7 +86,7 @@ Claude 會自動：
 %USERPROFILE%\.doc-to-md\doc-to-md.bat --auto C:\Users\你的名字\Desktop\書名.pdf -o C:\Users\你的名字\Desktop\
 ```
 
-轉換完成後，把輸出的 `.md` 檔案丟給 Claude 填寫摘要。
+轉換完成後，把輸出的 `.md` 檔案丟給 Codex 填寫摘要。
 
 ---
 
@@ -122,7 +122,7 @@ converted_at: "2026-04-25 17:00"
 |------|------|
 | 安裝時說「Python 版本太舊」 | 到 python.org 下載 Python 3.12，安裝後重開 Terminal 再試 |
 | Windows 顯示「已保護您的電腦」 | 點「其他資訊」→「仍要執行」 |
-| Claude 說找不到轉換器 | 確認有執行過安裝程式，Mac 試 `~/.doc-to-md/doc-to-md --help`，Windows 試 `%USERPROFILE%\.doc-to-md\doc-to-md.bat --help` |
+| AI 助手說找不到轉換器 | 確認有執行過安裝程式，Mac 試 `~/.doc-to-md/doc-to-md --help`，Windows 試 `%USERPROFILE%\.doc-to-md\doc-to-md.bat --help` |
 | 轉出來是亂碼 | 加上 `--no-convert-chinese` 參數再試一次 |
 | PDF 內容是掃描圖片 | 這種 PDF 需要先用 OCR 軟體處理（如 Adobe Acrobat） |
 | EPUB 章節是空的 | 可能有 DRM 保護，需先移除 |
@@ -142,7 +142,7 @@ rm -rf ~/.doc-to-md
 Remove-Item -Recurse -Force "$env:USERPROFILE\.doc-to-md"
 ```
 
-然後在 Claude Desktop → Skills 中移除 `doc-to-md`。
+然後在 Codex App → Skills 中移除 `doc-to-md`。
 
 ---
 

@@ -1,8 +1,8 @@
 # Source Adaptation: 07-cross-device-sync.md
 
-Source file: `/Users/arrywu/Downloads/07-cross-device-sync.md`
+Source file: `source cross-device-sync guide`
 
-The source document is a Claude Code pro-kit for moving Claude configuration into a portable "AI brain" folder, backing it up, symlinking it back into `~/.claude`, adding optional GitHub backup, generating a health-check script, and writing a migration manual.
+The source document is a 來源工具 pro-kit for moving source-tool configuration into a portable "AI brain" folder, backing it up, symlinking it back into `來源工具設定資料夾`, adding optional GitHub backup, generating a health-check script, and writing a migration manual.
 
 This Codex version keeps the useful operating model but changes the target surfaces and safety rules.
 
@@ -17,24 +17,24 @@ This Codex version keeps the useful operating model but changes the target surfa
 
 ## Converted Assumptions
 
-| Original Claude guide | Codex-compatible conversion |
+| Original source guide | Codex-compatible conversion |
 |---|---|
-| `~/.claude/` is the main config root | `/Users/arrywu/.codex` is the Codex root |
-| `~/.claude/skills` stores skills | `/Users/arrywu/.codex/skills` stores global Codex skills |
-| `CLAUDE.md` is the rule file | `AGENTS.md` is the project rule file |
-| Claude slash commands are user-facing entry points | Codex skills trigger by metadata and user intent |
-| Claude subagents are part of the workflow | Codex subagents are only used when explicitly requested or clearly useful |
+| 來源工具設定資料夾 is the main config root | `{{CODEX_HOME}}` is the Codex root |
+| 來源工具的 skills 路徑 stores skills | `{{CODEX_HOME}}/skills` stores global Codex skills |
+| 來源工具規則檔 is the rule file | `AGENTS.md` is the project rule file |
+| 來源工具 slash commands are user-facing entry points | Codex skills trigger by metadata and user intent |
+| 來源工具 subagents are part of the workflow | Codex subagents are only used when explicitly requested or clearly useful |
 | `000_Agent/` is created by pro-kit 01 | This user already has Arry Assistant data under `codex_installation/000_Agent` |
 | Source examples refer to Raymond/Raymond-Agent | Use Arry Assistant and the user's existing Google Drive/Obsidian paths |
 
 ## Codex-Specific Safety Changes
 
-- The skill must not automatically move or symlink `/Users/arrywu/.codex` assets during installation.
+- The skill must not automatically move or symlink `{{CODEX_HOME}}` assets during installation.
 - Any future sync setup must be plan-first and approval-gated because it can affect all Codex sessions.
-- The default sync approach for this user should align with Google Drive project folders and Obsidian project cockpits.
+- The default sync approach should align with the user's chosen cloud project folders and Obsidian project cockpits.
 - The existing Arry Assistant architecture uses `codex_installation` as the data-layer root with `000_Agent/`, `100_Todo/`, and `200_Reference/` as sibling layers; do not treat `000_Agent/` as the whole mother folder for every use case.
-- `icestone0128/codex_installation` is public, so private backups and personal memory must not be staged or tracked there.
-- System skills under `/Users/arrywu/.codex/skills/.system` are Codex-managed and should not be edited or moved manually.
+- `{{GITHUB_USER}}/{{SETUP_PROJECT_NAME}}` is public, so private backups and personal memory must not be staged or tracked there.
+- System skills under `{{CODEX_HOME}}/skills/.system` are Codex-managed and should not be edited or moved manually.
 - Global skill changes must update the Obsidian mirror note at `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`.
 
 ## Interview Questions
@@ -124,4 +124,4 @@ The first installed version summarized the source at a high level. The complete 
 - Section E Codex health-check script shape
 - Section F migration manual template
 - Section G completion checklist
-- pitfalls and FAQ converted from Claude Code to Codex App
+- pitfalls and FAQ converted from 來源工具 to Codex App

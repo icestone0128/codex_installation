@@ -9,7 +9,7 @@ metadata:
 
 Use this skill to help the user make their Codex App setup portable across devices without binding their assistant memory, skills, or rules to one local machine.
 
-This is a Codex App conversion of a Claude Code-oriented cross-device sync guide. Do not apply the source guide literally. In this environment, the default surfaces are:
+This is a Codex App conversion of a 來源工具-oriented cross-device sync guide. Do not apply the source guide literally. In this environment, the default surfaces are:
 
 - Codex config and skills: `$CODEX_HOME`, or `~/.codex` when `$CODEX_HOME` is not set
 - Custom global skills: `$CODEX_HOME/skills`, or `~/.codex/skills` when `$CODEX_HOME` is not set
@@ -20,11 +20,11 @@ This is a Codex App conversion of a Claude Code-oriented cross-device sync guide
 - Optional Obsidian vault: `OBSIDIAN_VAULT`
 - Optional project cockpit: `PROJECT_LIBRARY/<project-name>/專案工作流程.md`
 
-This user's current defaults are documented in the root `README.md`; treat them as examples to replace, not universal paths.
+Default placeholders are documented in the root `README.md`; replace them before use.
 
 ## Non-Negotiables
 
-- Do not create, depend on, or repair Claude-only paths such as `~/.claude`, `CLAUDE.md`, `.claude/skills`, Claude slash commands, or Claude subagents unless the user explicitly asks to migrate from Claude.
+- Do not create, depend on, or repair 來源工具專用 paths such as `來源工具設定資料夾`, 來源工具規則檔, 來源工具的專案級 skills 路徑, 來源工具 slash commands, or 來源工具 subagents unless the user explicitly asks to migrate from 來源工具.
 - Do not move, symlink, delete, or overwrite the user's existing Codex config, skills, memories, or Obsidian notes without first showing the concrete plan and getting explicit confirmation.
 - Always make a timestamped backup before any operation that moves files, rewrites symlinks, changes Git remotes, or edits shared assistant memory.
 - Never sync secrets, OAuth tokens, API keys, local credentials, app caches, shell snapshots, or machine-specific state across devices.
@@ -67,17 +67,17 @@ This user's current defaults are documented in the root `README.md`; treat them 
 
 ## Codex Portability Map
 
-Use this mapping when converting Claude-oriented instructions:
+Use this mapping when converting source-oriented instructions:
 
 | Source guide concept | Codex App version |
 |---|---|
-| `~/.claude/skills` | `$CODEX_HOME/skills` or `~/.codex/skills` |
-| `CLAUDE.md` | `AGENTS.md` |
-| Claude slash commands | Codex skill metadata and normal user prompts |
-| Claude subagents | Codex subagents only when explicitly requested; otherwise use validation passes |
-| Claude memory | `$CODEX_HOME/memories` plus optional personal assistant durable data when relevant |
+| 來源工具的 skills 路徑 | `$CODEX_HOME/skills` or `~/.codex/skills` |
+| 來源工具規則檔 | `AGENTS.md` |
+| 來源工具 slash commands | Codex skill metadata and normal user prompts |
+| 來源工具 subagents | Codex subagents only when explicitly requested; otherwise use validation passes |
+| 來源工具記憶 | `$CODEX_HOME/memories` plus optional personal assistant durable data when relevant |
 | `000_Agent` from source kit | Optional personal assistant core layer at `ASSISTANT_ROOT/000_Agent` |
-| Claude credentials/local state | Do not sync; each device logs in independently |
+| 來源工具憑證與本機狀態 | Do not sync; each device logs in independently |
 
 ## Sync Route Guidance
 
@@ -108,4 +108,4 @@ Usually not portable:
 When more detail is needed:
 
 - Read `references/codex-playbook.md` before executing a real cross-device setup, audit, repair, GitHub backup, health-check script, or migration-manual task. It contains the full Codex-converted Section A-G workflow, routes, templates, checks, pitfalls, and FAQ.
-- Read `references/source-adaptation.md` when you need to understand how the original `07-cross-device-sync.md` was converted from Claude Code assumptions into Codex App-safe behavior.
+- Read `references/source-adaptation.md` when you need to understand how the original `07-cross-device-sync.md` was converted from 來源工具 assumptions into Codex App-safe behavior.

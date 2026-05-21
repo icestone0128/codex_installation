@@ -1,4 +1,4 @@
-# 03-連接 GitHub 與 Obsidian
+# 06-連接-GitHub-與-Obsidian
 
 ## 目標
 
@@ -12,7 +12,7 @@
 
 ## 前置條件
 
-- 已完成 `02-連接-GitHub`。
+- 已完成 `03-連接-GitHub`。
 - 已建立 Obsidian vault：`{{OBSIDIAN_VAULT}}`。
 - 已決定專案工作根目錄：`{{WORK_ROOT}}`。
 
@@ -78,9 +78,9 @@ tool_timeout_sec = 60
 3. `git remote -v` 能顯示 GitHub remote。
 4. 收工時能清楚說明：repo 狀態、Obsidian 駕駛艙位置、下一步。
 
-## 本機實測例
+## 設定範例
 
-曾使用 `mcpvault` 指向本機 `secondbrain` vault。這只是實測例，下載者要改成自己的 `{{OBSIDIAN_VAULT}}`。
+可使用 `mcpvault` 指向自己的 Obsidian vault。下載者要改成自己的 `{{OBSIDIAN_VAULT}}`。
 
 ## 踩坑修正
 

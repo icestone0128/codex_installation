@@ -1,4 +1,4 @@
-# 06-連接 Firebase 資料庫
+# 08-連接-Firebase-資料庫
 
 ## 目標
 
@@ -98,7 +98,7 @@ npx -y firebase-tools@latest firestore:databases:list --project "{{FIREBASE_PROJ
 
 如果要測試寫入，使用專門的測試 collection，測完刪除。
 
-## 本機實測例
+## 設定範例
 
 曾使用：
 
@@ -106,7 +106,7 @@ npx -y firebase-tools@latest firestore:databases:list --project "{{FIREBASE_PROJ
 - Firestore location：`asia-east1`
 - Firestore mode：Native
 
-這只是實測例，下載者要換成自己的 Firebase project。
+這只是設定範例，下載者要換成自己的 Firebase project。
 
 ## 踩坑修正
 

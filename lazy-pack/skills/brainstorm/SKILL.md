@@ -7,9 +7,9 @@ metadata:
 
 # Brainstorm 規劃模式
 
-把模糊想法變成可執行計劃。這是 Codex App 版的規劃流程：不依賴 Claude Code slash command 或 Claude 專用互動工具；使用者可以用「brainstorm」、「/brainstorm」、「先幫我規劃」等語意觸發。
+把模糊想法變成可執行計劃。這是 Codex App 版的規劃流程：不依賴 來源工具 slash command 或 來源工具專用互動工具；使用者可以用「brainstorm」、「/brainstorm」、「先幫我規劃」等語意觸發。
 
-> 來源改編：核心理念來自「AI 規劃模式 by 雷小蒙」與 obra/superpowers brainstorming skill。Claude Code 專用安裝、路徑、slash command 與工具名稱已轉成 Codex App 可用規則。
+> 來源改編：核心理念來自「AI 規劃模式 by 雷小蒙」與 obra/superpowers brainstorming skill。來源工具 專用安裝、路徑、slash command 與工具名稱已轉成 Codex App 可用規則。
 
 ## 硬性閘門
 

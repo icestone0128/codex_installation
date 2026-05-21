@@ -10,7 +10,7 @@ tags:
 
 # Codex Skill Creator Bootstrap Adapter
 
-This reference adapts `/Users/arrywu/Downloads/02-skill-creator-bootstrap.md` for Codex App. The source is useful as a workflow pattern, but it is Claude Code-oriented and must not be copied verbatim.
+This reference adapts `source skill-creator guide` for Codex App. The source is useful as a workflow pattern, but it is 來源工具-oriented and must not be copied verbatim.
 
 ## Keep From The Source
 
@@ -24,15 +24,15 @@ This reference adapts `/Users/arrywu/Downloads/02-skill-creator-bootstrap.md` fo
 
 | Source assumption | Codex-compatible version |
 |---|---|
-| `~/.claude/skills` | `/Users/arrywu/.codex/skills` |
-| `000_Agent/skills` as Claude symlink target | Arry assistant core may live in `codex_installation/000_Agent`, but Codex skills still live in `/Users/arrywu/.codex/skills` |
+| 來源工具的 skills 路徑 | `{{CODEX_HOME}}/skills` |
+| `000_Agent/skills` as 來源工具 symlink target | Arry assistant core may live in `codex_installation/000_Agent`, but Codex skills still live in `{{CODEX_HOME}}/skills` |
 | slash command `/skill-name` | Skill metadata triggers; the user can name the skill, but do not depend on a slash-command menu |
-| Claude `AskUserQuestion` | Ask concise questions in Codex; use available UI tools only when present |
-| Claude subagents in `agents/*.md` | Use Codex subagents only when explicitly authorized by the user; otherwise use local validation checklists |
+| 來源工具 `AskUserQuestion` | Ask concise questions in Codex; use available UI tools only when present |
+| 來源工具 subagents in `agents/*.md` | Use Codex subagents only when explicitly authorized by the user; otherwise use local validation checklists |
 | `allowed-tools` | Omit; Codex tool access is controlled by the session and plugin permissions |
 | `disable-model-invocation` / `user-invocable` | Omit; express trigger boundaries in `description` and body instructions |
 | Anthropic sparse checkout install | Use only when the user explicitly wants a third-party skill package; otherwise create a Codex-native custom skill |
-| Tell user to restart Claude Code | Say a new Codex conversation or app restart may be needed for new skill metadata to appear |
+| Tell user to restart 來源工具 | Say a new Codex conversation or app restart may be needed for new skill metadata to appear |
 
 ## Codex Skill Package Standard
 
@@ -77,7 +77,7 @@ Rules:
 
 After any custom global skill change, update:
 
-`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
+`{{OBSIDIAN_VAULT}}/專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
 
 Update three areas when applicable:
 

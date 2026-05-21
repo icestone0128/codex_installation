@@ -11,11 +11,11 @@ Use this workflow for every new project unless the user explicitly says not to.
 
 ## Default Paths
 
-- Main Obsidian vault: `OBSIDIAN_VAULT`; for this user, `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain`
-- Default work root: `WORK_ROOT`; for this user, `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟`
+- Main Obsidian vault: `{{OBSIDIAN_VAULT}}`
+- Default work root: `{{WORK_ROOT}}`
 - Project cockpit root: `專案庫` inside the Obsidian vault
 - Project cockpit note: `專案庫/<project-name>/專案工作流程.md` inside the Obsidian vault
-- Optional personal assistant core layer: `ASSISTANT_ROOT/000_Agent`; for this user, `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/000_Agent`
+- Optional personal assistant core layer: `{{ASSISTANT_ROOT}}/000_Agent`
 - Optional personal assistant skill: `$CODEX_HOME/skills/arry-assistant/SKILL.md`, or `~/.codex/skills/arry-assistant/SKILL.md` when `$CODEX_HOME` is not set
 - Optional personal assistant setup document: ask the user for the path if no local setup document exists
 - Project-local assistant folders: `100_Todo/`, `200_Reference/`, and optional `000_Agent/project-memory/`
@@ -69,7 +69,7 @@ When adapting this skill for another user, replace `OBSIDIAN_VAULT`, `WORK_ROOT`
 
 ## Safety Rules
 
-- Do not commit `.codex/`, `.claude/`, `.env`, API keys, tokens, passwords, admin credentials, personal data, or sensitive data.
+- Do not commit local assistant config folders, `.env`, API keys, tokens, passwords, admin credentials, personal data, or sensitive data.
 - Do not store unnecessary personal or sensitive data in the repo.
 - AGENTS.md stores fixed rules. Obsidian cockpit stores progress and next steps.
 - A personal assistant layer, if used, has a two-layer model. Do not duplicate or move the shared assistant core layer.

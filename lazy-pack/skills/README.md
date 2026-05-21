@@ -1,6 +1,6 @@
 # Codex Skills Portfolio
 
-This folder contains reusable Codex skills. It is designed to be copied as a package, but several skills are intentionally personal-workflow templates and need local path configuration before another user runs them.
+This folder contains reusable Codex skills for the lazy pack. Use the numbered guides in `lazy-pack/README.md` first; this file is the skill inventory and copy checklist.
 
 ## Copy Setup
 
@@ -17,6 +17,14 @@ This folder contains reusable Codex skills. It is designed to be copied as a pac
    - `WORK_ROOT`: the default project workspace root.
 5. Start with the skills that are fully portable, then adapt the configured skills.
 6. After adding or changing skills, start a new Codex conversation or restart Codex if skill metadata does not refresh immediately.
+
+Standard copy command:
+
+```bash
+mkdir -p "{{CODEX_HOME}}/skills/<skill-name>"
+rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/<skill-name>/" "{{CODEX_HOME}}/skills/<skill-name>/"
+test -f "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md" && echo "<skill-name> installed"
+```
 
 ## Architecture
 
@@ -74,6 +82,6 @@ Before sharing the package with another user:
 - Bundled scripts referenced in `SKILL.md` exist.
 - Bundled references referenced in `SKILL.md` exist.
 - Node dependencies such as `social-cards/node_modules/` are either present locally or rebuilt with `npm install`.
-- Claude-only frontmatter fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, and `when_to_use` are absent from active `SKILL.md` files.
+- 來源工具專用 frontmatter fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, and `when_to_use` are absent from active `SKILL.md` files.
 - Personal paths are either documented as local defaults or replaced by placeholders before sharing.
 - No API keys, tokens, passwords, OAuth files, or private memory are included.

@@ -1,10 +1,10 @@
-# 10-Codex 版 Skill Creator 工作流
+# 11-Codex-Skill-Creator-工作流
 
 ## 目標
 
-把 Claude / Anthropic 取向的 Skill Creator 啟動包，轉成 Codex App 可用的全域 skill 建立流程。
+把 外部 / Anthropic 取向的 Skill Creator 啟動包，轉成 Codex App 可用的全域 skill 建立流程。
 
-這份文件是之後建立、優化、驗證 Codex skills 的正式懶人包。若來源文件提到 Claude Code、`~/.claude/skills`、slash command、Claude subagent 或 Claude 專用 frontmatter，一律先依本文件轉換，不直接照做。
+這份文件是之後建立、優化、驗證 Codex skills 的正式懶人包。若來源文件提到 來源工具、來源工具的 skills 路徑、slash command、來源工具 subagent 或 來源工具專用 frontmatter，一律先依本文件轉換，不直接照做。
 
 ## 前置條件
 
@@ -42,24 +42,36 @@ codex-skill-creator
 
 用途：
 
-- 把 Claude / Anthropic skill 教學轉成 Codex App 相容流程。
+- 把 外部 / Anthropic skill 教學轉成 Codex App 相容流程。
 - 建立、優化、驗證自訂全域 skills。
 - 記得同步 Obsidian 全域 skill 索引。
 
-## Claude 啟動包轉換規則
+## 直接安裝本懶人包版本
 
-| Claude / Anthropic 啟動包項目 | Codex App 相容做法 |
+下載本 repo 後，可直接複製已整理好的 companion skill：
+
+```bash
+mkdir -p "{{CODEX_HOME}}/skills/codex-skill-creator"
+rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/codex-skill-creator/" "{{CODEX_HOME}}/skills/codex-skill-creator/"
+test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill-creator installed"
+```
+
+若下載者沒有使用 Obsidian 全域 skill 索引，安裝後可跳過本文的 Obsidian 同步步驟。
+
+## 來源啟動包轉換規則
+
+| 外部 / Anthropic 啟動包項目 | Codex App 相容做法 |
 | --- | --- |
-| `~/.claude/skills` | 改用 `{{CODEX_HOME}}/skills` |
-| `.claude/skills` 專案 skill | 預設不要用；除非另有 Codex 專案級 skill 機制 |
+| 來源工具的 skills 路徑 | 改用 `{{CODEX_HOME}}/skills` |
+| 來源工具的專案級 skills 路徑 專案 skill | 預設不要用；除非另有 Codex 專案級 skill 機制 |
 | `000_Agent/skills` symlink | 不建立；個人助手核心可在 `{{SETUP_REPO}}/000_Agent`，但正式 Codex skill 放 `{{CODEX_HOME}}/skills` |
-| Claude slash command `/skill-name` | 不依賴；Codex 以 skill metadata 與任務語意觸發 |
+| 來源工具 slash command `/skill-name` | 不依賴；Codex 以 skill metadata 與任務語意觸發 |
 | `allowed-tools` | 不寫入；Codex 工具權限由當前 session、plugin、connector 與沙箱控制 |
 | `disable-model-invocation` / `user-invocable` | 不寫入；觸發邊界寫在 `description` 與本文規則 |
 | `when_to_use` | 轉成 `description` 的觸發語意與本文工作流程 |
-| Claude subagent 設定 | 不照搬；Codex 只有在使用者明確要求副代理時才使用 subagent |
+| 來源工具 subagent 設定 | 不照搬；Codex 只有在使用者明確要求副代理時才使用 subagent |
 | 安裝官方 Anthropic skill-creator | Codex 已有內建 `.system/skill-creator`；通常不安裝、不覆蓋 |
-| 告知重啟 Claude Code | 改成開新 Codex 對話或重啟 Codex App |
+| 告知重啟 來源工具 | 改成開新 Codex 對話或重啟 Codex App |
 
 ## Codex Skill 標準結構
 
@@ -102,7 +114,7 @@ metadata:
 
 - `name` 必須與資料夾名稱一致。
 - `description` 要把最常用觸發場景放前面。
-- 不放 Claude-only 欄位。
+- 不放 來源工具專用 欄位。
 - 不寫 API key、token、密碼或個資。
 
 ## 建立第一個真實 Skill 的流程
@@ -150,7 +162,7 @@ metadata:
 - `name` 等於資料夾名稱。
 - `description` 有具體觸發語。
 - `references/` 內被引用的檔案真的存在。
-- 沒有誤放 Claude-only 欄位或路徑。
+- 沒有誤放 來源工具專用 欄位或路徑。
 
 範例檢查：
 
@@ -175,18 +187,18 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 
 若下載者沒有使用 Obsidian，也至少在 `{{SETUP_REPO}}/README.md` 或專案駕駛艙記錄 skill 清單。
 
-## 本機實測例
+## 本懶人包內含範例
 
-本機曾建立：
+本懶人包已附：
 
 ```text
-/Users/arrywu/.codex/skills/codex-skill-creator/SKILL.md
-/Users/arrywu/.codex/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
-/Users/arrywu/.codex/skills/secondbrain-research-digest/SKILL.md
-/Users/arrywu/.codex/skills/secondbrain-research-digest/references/research-note-template.md
+{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md
+{{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
+{{CODEX_HOME}}/skills/secondbrain-research-digest/SKILL.md
+{{CODEX_HOME}}/skills/secondbrain-research-digest/references/research-note-template.md
 ```
 
-這些是實測例。下載者應使用自己的 `{{CODEX_HOME}}` 與自己的 skill 名稱。
+下載者應使用自己的 `{{CODEX_HOME}}` 與自己的 skill 名稱。
 
 ## 驗證
 
@@ -208,18 +220,18 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
    - `name` 等於資料夾名。
    - `description` 有明確觸發情境。
    - 引用的 `references/` 檔案存在。
-   - 沒有 `~/.claude/skills`、`allowed-tools`、`disable-model-invocation`、`user-invocable` 等 Claude-only 正式設定。
+   - 沒有 來源工具的 skills 路徑、`allowed-tools`、`disable-model-invocation`、`user-invocable` 等 來源工具專用 正式設定。
 4. 開新 Codex 對話，使用自然語言觸發該 skill 的任務。
 5. 同步 Obsidian 全域 Skills 索引或專案 README。
 
 ## 踩坑修正
 
-- 原始 `02-skill-creator-bootstrap.md` 是 Claude Code 啟動包，不能原樣執行。
+- 原始 `02-skill-creator-bootstrap.md` 是 來源工具 啟動包，不能原樣執行。
 - 不要把官方 Anthropic `skill-creator` sparse checkout 到 Codex 系統 skill 位置；Codex 已有內建 `.system/skill-creator`。
 - 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`，因為它由 Codex 管理。
-- Codex skills 不放在 `~/.claude/skills`，也不建立 `.claude/skills` 或 symlink。
+- Codex skills 不放在 來源工具的 skills 路徑，也不建立 來源工具的專案級 skills 路徑 或 symlink。
 - Codex 不應依賴 `/skill-name` slash command；要靠 `description` 寫清楚觸發語意。
-- Claude-only frontmatter 欄位要轉成 Codex 可理解的文字規則，不要照抄。
+- 來源工具專用 frontmatter 欄位要轉成 Codex 可理解的文字規則，不要照抄。
 - 新增 skill 後不代表本對話立即可見；通常要開新對話或重啟 Codex App。
 - Obsidian 同步紀錄要放在「最近同步紀錄」表格，不要誤插到自訂 skills 表格。
 - Markdown 範本內若有巢狀 code fence，外層要用 `~~~markdown`，避免 YAML 範例提早結束區塊。
@@ -227,7 +239,7 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 
 ## 之後怎麼用
 
-當使用者要求「建立 skill」、「優化 skill」、「把 Claude skill 教學轉成 Codex」、「跑 Skill Creator 啟動包」時：
+當使用者要求「建立 skill」、「優化 skill」、「把 來源 skill 教學轉成 Codex」、「跑 Skill Creator 啟動包」時：
 
 1. 先套用本文件的 Codex 相容規則。
 2. 使用 `codex-skill-creator` companion skill。

@@ -1,8 +1,8 @@
-# 12-Brainstorm 規劃模式
+# 13-Brainstorm-規劃模式
 
 ## 目標
 
-把 Claude Code 取向的 `/brainstorm` 規劃流程，轉成 Codex App 可用的全域 skill。
+把 來源工具 取向的 `/brainstorm` 規劃流程，轉成 Codex App 可用的全域 skill。
 
 這個 skill 用在「先想清楚再動手」的情境：當使用者只有模糊想法、怕 AI 直接開工做錯方向，或想先得到一份計劃書時，Codex 會先釐清需求、列假設、比較方案，直到使用者確認計劃後才開始實作。
 
@@ -10,7 +10,7 @@
 
 - 已完成 `README.md` 的設定表。
 - 已知道 Codex skills 位置：`{{CODEX_HOME}}/skills`。
-- 已完成或讀過 `10-Codex版SkillCreator工作流.md`。
+- 已完成或讀過 `11-Codex-Skill-Creator-工作流.md`。
 - 若使用 Obsidian 全域 skill 索引，已知道位置：
 
 ```text
@@ -33,7 +33,7 @@
 {{SETUP_REPO}}/lazy-pack/skills/brainstorm/references/source-adaptation.md
 ```
 
-- Codex 版觸發方式不是 Claude Code slash command，而是靠 skill metadata 與自然語意觸發，例如：
+- Codex 版觸發方式不是 來源工具 slash command，而是靠 skill metadata 與自然語意觸發，例如：
   - `brainstorm 我想做一個記帳 App`
   - `/brainstorm 我想改善目前的工作流程`
   - `先幫我規劃，不要直接執行`
@@ -44,15 +44,15 @@
 下載本 repo 後，將整個 skill 資料夾複製到自己的 Codex skills 位置：
 
 ```bash
-mkdir -p "{{CODEX_HOME}}/skills"
-cp -R "{{SETUP_REPO}}/lazy-pack/skills/brainstorm" "{{CODEX_HOME}}/skills/"
+mkdir -p "{{CODEX_HOME}}/skills/brainstorm"
+rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/brainstorm/" "{{CODEX_HOME}}/skills/brainstorm/"
 ```
 
 如果你已經有同名 skill，先備份再覆蓋：
 
 ```bash
 cp -R "{{CODEX_HOME}}/skills/brainstorm" "{{CODEX_HOME}}/skills/brainstorm.backup.$(date +%Y%m%d-%H%M%S)"
-cp -R "{{SETUP_REPO}}/lazy-pack/skills/brainstorm" "{{CODEX_HOME}}/skills/"
+rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/brainstorm/" "{{CODEX_HOME}}/skills/brainstorm/"
 ```
 
 ## 驗證安裝
@@ -168,26 +168,26 @@ YYYY-MM-DD-[主題關鍵字].md
 | `brainstorm` | `{{CODEX_HOME}}/skills/brainstorm/SKILL.md` | Brainstorm 規劃模式；用引導式問答把模糊想法轉成可執行計劃，確認前不實作 | 已同步 |
 ```
 
-## Claude Code 轉換重點
+## 來源工具 轉換重點
 
-| Claude Code 原流程 | Codex App 相容做法 |
+| 來源工具 原流程 | Codex App 相容做法 |
 | --- | --- |
 | `/brainstorm` slash command | 可保留為觸發語，但不依賴 slash command 機制 |
-| `~/.claude/skills` | 改用 `{{CODEX_HOME}}/skills` |
+| 來源工具的 skills 路徑 | 改用 `{{CODEX_HOME}}/skills` |
 | `000_Agent/skills` symlink | 不建立；正式 Codex skill 放在 `{{CODEX_HOME}}/skills` |
 | `AskUserQuestion` | 改成 Codex 對話中的單題引導 |
 | 安裝時固定 `PLANS_DIR` | 使用 skill 時依專案決定 |
-| Claude Code Plan Mode 比較 | 改成 Codex 的「確認計劃前不實作」硬性閘門 |
+| 來源工具 Plan Mode 比較 | 改成 Codex 的「確認計劃前不實作」硬性閘門 |
 
 ## 踩坑修正
 
-- 不要把原始 Claude Code 安裝段落直接照貼到 Codex。
-- 不要建立 `~/.claude/skills`、`.claude/skills` 或 Claude command shim。
-- Codex 不保證 `/brainstorm` 會像 Claude slash command 一樣被 UI 特別處理；要在 `description` 寫清楚自然語意觸發。
+- 不要把原始 來源工具 安裝段落直接照貼到 Codex。
+- 不要建立 來源工具的 skills 路徑、來源工具的專案級 skills 路徑 或 來源工具 command shim。
+- Codex 不保證 `/brainstorm` 會像 來源工具 slash command 一樣被 UI 特別處理；要在 `description` 寫清楚自然語意觸發。
 - 安裝後通常要開新 Codex 對話或重啟 Codex App。
 - 這個 skill 是規劃閘門，不是自動執行工具；使用者確認前不要動檔案。
 
-## 本機實測例
+## 設定範例
 
 本機曾建立：
 
@@ -196,4 +196,4 @@ YYYY-MM-DD-[主題關鍵字].md
 {{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md
 ```
 
-並已把原始 Claude Code `/brainstorm` 安裝劇本轉成 Codex App 相容流程。下載者應使用自己的 `{{CODEX_HOME}}` 與自己的專案位置。
+並已把原始 來源工具 `/brainstorm` 安裝劇本轉成 Codex App 相容流程。下載者應使用自己的 `{{CODEX_HOME}}` 與自己的專案位置。

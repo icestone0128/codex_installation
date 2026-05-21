@@ -1,7 +1,7 @@
-# Social Cards 圖卡 Skill 安裝
+# 14-Social-Cards-圖卡-Skill-安裝
 
 > 版本：2026-05-21 Codex App 版
-> 用途：把 Raymond Hou / 雷蒙的 `skills/social-cards` Claude Code 安裝劇本，轉成可直接安裝到 Codex App 的全域 Skill。
+> 用途：把 Raymond Hou / 雷蒙的 `skills/social-cards` 來源工具 安裝劇本，轉成可直接安裝到 Codex App 的全域 Skill。
 > 成品：下載者可把本懶人包內的 `lazy-pack/skills/social-cards/` 複製到自己的 `{{CODEX_HOME}}/skills/social-cards/`，再安裝 Playwright 依賴後使用。
 
 ## 來源與授權
@@ -14,11 +14,11 @@
 
 本文件只做 Codex App 相容改寫。若要商業使用，請先確認原始授權與作者授權。
 
-## 這版和原始 Claude Code 文件的差異
+## 這版和原始 來源工具 文件的差異
 
 | 原始文件 | Codex 版 |
 |---|---|
-| 安裝到 `000_Agent/skills` 或 `~/.claude/skills` | 安裝到 `{{CODEX_HOME}}/skills/social-cards` |
+| 安裝到 `000_Agent/skills` 或 來源工具的 skills 路徑 | 安裝到 `{{CODEX_HOME}}/skills/social-cards` |
 | skill 名稱為 `cards` | skill id 為 `social-cards`，顯示名稱為 Social Cards |
 | `/cards` 是 slash command | `/cards` 只是觸發語；Codex 依 `SKILL.md` metadata 觸發 |
 | `blue-dark` / `orange-light` | 已改為 `brand-dark` / `brand-light` |
@@ -56,7 +56,7 @@ git -C "$TMPDIR_CARDS" pull --depth 1 origin master
 
 1. 安裝路徑改成 `{{CODEX_HOME}}/skills/social-cards`。
 2. `SKILL.md` frontmatter 只保留 Codex 可用欄位：`name`、`description`、`metadata.short-description`。
-3. 移除 Claude 專用欄位與 slash command 假設。
+3. 移除 來源工具專用欄位與 slash command 假設。
 4. 若要沿用本懶人包品牌版，把模板資料夾改為 `brand-dark` / `brand-light`，並把主色改成 `#0072CE`。
 5. 把原始 sample handle 改成 `@yourhandle`。
 6. 安裝 Playwright 與 Chromium。
@@ -98,9 +98,9 @@ Codex 會依 Skill 流程：收集內容、確認尺寸、確認 handle、拆卡
 
 ## 踩坑紀錄
 
-### 1. 不要把 Claude 路徑照搬到 Codex
+### 1. 不要把來源工具路徑照搬到 Codex
 
-原始文件會偵測 `000_Agent/skills` 和 `~/.claude/skills`。Codex App 的全域 skill 位置是：
+原始文件會偵測 `000_Agent/skills` 和 來源工具的 skills 路徑。Codex App 的全域 skill 位置是：
 
 ```text
 {{CODEX_HOME}}/skills
@@ -128,7 +128,7 @@ Social Cards
 
 ### 3. `/cards` 不是 Codex slash command
 
-在 Codex 裡，`/cards` 只能當作使用者可能輸入的觸發文字。不要期待它出現在 Claude Code 的 `/` 選單。
+在 Codex 裡，`/cards` 只能當作使用者可能輸入的觸發文字。不要期待它出現在 來源工具 的 `/` 選單。
 
 ### 4. npm cache 可能遇到權限錯誤
 

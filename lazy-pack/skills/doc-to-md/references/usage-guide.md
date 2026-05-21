@@ -29,7 +29,7 @@ python3 -m venv doc-env
 source doc-env/bin/activate        # macOS/Linux
 # doc-env\Scripts\activate.bat     # Windows
 pip install PyMuPDF ebooklib beautifulsoup4 chardet opencc-python-reimplemented lxml
-python3 ~/.claude/skills/doc-to-md/scripts/doc_to_md.py book.pdf
+python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py book.pdf
 ```
 
 ---
@@ -38,27 +38,27 @@ python3 ~/.claude/skills/doc-to-md/scripts/doc_to_md.py book.pdf
 
 ### Basic PDF conversion
 ```bash
-python3 ~/.claude/skills/doc-to-md/scripts/doc_to_md.py "Atomic Habits.pdf"
+python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py "Atomic Habits.pdf"
 # Output: Atomic_Habits_知識庫.md  (same folder)
 ```
 
 ### PDF to specific output folder
 ```bash
-python3 ~/.claude/skills/doc-to-md/scripts/doc_to_md.py \
+python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
   "第一性原理.pdf" \
   -o ~/Documents/Obsidian/original/ebook/
 ```
 
 ### EPUB book
 ```bash
-python3 ~/.claude/skills/doc-to-md/scripts/doc_to_md.py \
+python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
   --auto "deep_work.epub" \
   -o ~/Documents/output/
 ```
 
 ### TXT transcript (no Chinese conversion)
 ```bash
-python3 ~/.claude/skills/doc-to-md/scripts/doc_to_md.py \
+python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
   --auto "lecture_transcript.txt" \
   --no-convert-chinese \
   -o ~/Documents/output/
@@ -85,14 +85,14 @@ converted_at: "2026-04-14 10:30"
 ## 第1章 微小改變帶來的驚人力量 ^ch-01
 ```
 
-### Section Placeholder (before Claude fills it)
+### Section Placeholder (before the assistant fills it)
 ```markdown
 > [!note] 章節摘要
-> **摘要**：（Claude 將在此填入本節摘要）
-> **關鍵字**：（Claude 將在此填入關鍵字）
+> **摘要**：（AI 助手將在此填入本節摘要）
+> **關鍵字**：（AI 助手將在此填入關鍵字）
 ```
 
-### After Claude Annotation
+### After AI Assistant Annotation
 ```markdown
 > [!note] 章節摘要
 > **摘要**：本章介紹「1%法則」——每天微小的改善，一年後會帶來37倍的複利效果。作者以英國自行車隊為例，說明累積優勢如何創造非凡成果。
@@ -164,7 +164,7 @@ python3 doc_to_md.py input_utf8.txt
 
 **Cause:** File uses non-standard heading format
 
-**Solution:** After conversion, manually add headings in the Markdown, or ask Claude to detect and insert headings based on content flow.
+**Solution:** After conversion, manually add headings in the Markdown, or ask 來源工具 to detect and insert headings based on content flow.
 
 ### DRM-Protected EPUBs
 
@@ -195,9 +195,9 @@ python3 doc_to_md.py book.pdf --no-convert-chinese
 
 ---
 
-## Claude Annotation — Prompt Template
+## AI Assistant Annotation — Prompt Template
 
-When Claude fills in the summaries, it uses this internal logic:
+When the assistant fills in the summaries, it uses this internal logic:
 
 ```
 For each section in the Markdown file:
@@ -208,7 +208,7 @@ For each section in the Markdown file:
 5. Preserve all ^anchor tags and other content unchanged
 ```
 
-**Example sections Claude handles well:**
+**Example sections the assistant handles well:**
 - Dense academic text: extracts core arguments
 - Narrative examples: identifies the principle being illustrated  
 - Step-by-step instructions: summarizes the procedure

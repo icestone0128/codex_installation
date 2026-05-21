@@ -1,4 +1,4 @@
-# 02-連接 GitHub
+# 03-連接-GitHub
 
 ## 目標
 
@@ -88,11 +88,11 @@ gh api "repos/{{GITHUB_USER}}/{{REPO_NAME}}/pages"
 curl -I "https://{{GITHUB_USER}}.github.io/{{REPO_NAME}}/"
 ```
 
-## 本機實測例
+## 設定範例
 
 曾在本機使用：
 
-- GitHub user：`icestone0128`
+- GitHub user：`{{GITHUB_USER}}`
 - GitHub Pages source：`main` branch `/docs`
 
 這只是實測值，下載者必須改成自己的 GitHub 帳號與 repo。

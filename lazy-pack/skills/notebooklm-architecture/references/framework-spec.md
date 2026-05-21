@@ -1,6 +1,6 @@
 # NotebookLM Framework Spec
 
-Source: `/Users/arrywu/Downloads/NotebookLM 系統架構大師.docx`
+Source: `source NotebookLM architecture document`
 
 ## Role
 
