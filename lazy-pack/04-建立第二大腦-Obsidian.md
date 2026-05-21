@@ -1,4 +1,4 @@
-# 04-建立第二大腦 Obsidian
+# 04-建立第二大腦-Obsidian
 
 ## 目標
 
@@ -91,9 +91,9 @@ touch "{{OBSIDIAN_VAULT}}/知識庫/log.md"
 3. Codex 能建立一個測試 note，Obsidian Desktop 能看到。
 4. 測試 note 刪除前要確認不是正式筆記。
 
-## 本機實測例
+## 設定範例
 
-本機實測 vault 名稱為 `secondbrain`。下載者可使用自己的 vault 名稱，不要硬套 `secondbrain`。
+範例 vault 名稱為 `secondbrain`。下載者可使用自己的 vault 名稱，不要硬套 `secondbrain`。
 
 ## 踩坑修正
 

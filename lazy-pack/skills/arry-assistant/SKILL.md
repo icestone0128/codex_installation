@@ -1,6 +1,6 @@
 ---
 name: arry-assistant
-description: Use when the user asks to use Arry 助手, AI 分身, personal assistant memory, cross-project assistant workflow, Codex App conversion of Claude-style assistant setup, or shared global preferences. This skill reads the Arry assistant data layer in codex_installation, applies Codex-only rules, and syncs durable journal or setup changes to Obsidian when relevant.
+description: Use when the user asks to use Arry 助手, AI 分身, personal assistant memory, cross-project assistant workflow, Codex App conversion of external-assistant-style assistant setup, or shared global preferences. This skill reads the Arry assistant data layer in codex_installation, applies Codex-only rules, and syncs durable journal or setup changes to Obsidian when relevant.
 ---
 
 # Arry 助手
@@ -16,11 +16,11 @@ This skill is a personal-assistant template. When copying it for another user, r
 - 使用者角色：科技業一線主管。
 - 優先協助任務：資料研究與知識管理。
 - 主要輸出：Facebook 貼文、Email/客戶溝通、書籍或 Podcast 的讀後心得。
-- 不使用 Claude Code 專用設定：不要建立或依賴 `CLAUDE.md`、`~/.claude/skills`、Claude slash command shim。
-- Codex 全域 skills 正式位置：`/Users/arrywu/.codex/skills`。
-- Arry 助手資料層：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/000_Agent`。
-- 個人助手設定：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/lazy-pack/09-個人助手設定.md`。
-- Obsidian 同步位置：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/Arry 助手`。
+- 不使用 來源工具 專用設定：不要建立或依賴 來源工具規則檔、來源工具的 skills 路徑、來源工具 slash command shim。
+- Codex 全域 skills 正式位置：`{{CODEX_HOME}}/skills`。
+- 個人助手資料層：`{{ASSISTANT_ROOT}}/000_Agent`。
+- 個人助手設定：`{{SETUP_REPO}}/lazy-pack/09-個人助手設定.md`。
+- Obsidian 同步位置：`{{OBSIDIAN_VAULT}}/專案庫/{{SETUP_PROJECT_NAME}}/{{ASSISTANT_NAME}}`。
 
 Portable placeholders:
 
@@ -34,10 +34,10 @@ Portable placeholders:
 1. 先讀取專案 `AGENTS.md`，若任務涉及筆記或同步，再讀取 Obsidian vault 的 `AGENTS.md`。
 2. 讀取個人助手記憶：`ASSISTANT_ROOT/000_Agent/memory/MEMORY.md`；在本機 Arry 設定中等同於 `000_Agent/memory/MEMORY.md`。
 3. 若任務涉及新專案初始化，遵守既有 `project-init-sync` 規則，並參照 `09-個人助手設定`；不要讓 Arry 助手資料層覆蓋新專案標準流程。
-4. 若來源文件是 Claude Code 教學，轉成 Codex App 版本：
-   - `CLAUDE.md` 規則改寫到 Codex 可讀的 `AGENTS.md` 或全域 skill。
-   - `~/.claude/skills` 改成 `/Users/arrywu/.codex/skills`。
-   - Claude command / symlink / terminal-only 步驟只保留為參考，除非使用者明確要支援 Claude。
+4. 若來源文件是 來源工具 教學，轉成 Codex App 版本：
+   - 來源工具規則檔 規則改寫到 Codex 可讀的 `AGENTS.md` 或全域 skill。
+   - 來源工具的 skills 路徑改成 `{{CODEX_HOME}}/skills`。
+   - 來源工具 command / symlink / terminal-only 步驟只保留為參考，除非使用者明確要支援來源工具。
 5. 若新增、修改、刪除全域 skill，更新 Obsidian 的全域 Skills 同步筆記。
 
 ## 輸出路由

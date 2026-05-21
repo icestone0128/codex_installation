@@ -1,13 +1,13 @@
 # Brainstorm 來源轉換說明
 
-來源檔：`/Users/arrywu/Downloads/04-brainstorm.md`
+來源檔：`source brainstorm guide`
 
-原始來源是 Claude Code 的 `/brainstorm` 安裝劇本，包含 `~/.claude/skills`、`AskUserQuestion`、slash command 與 Claude Code Plan Mode 比較。安裝到 Codex App 時已做以下轉換：
+原始來源是 來源工具 的 `/brainstorm` 安裝劇本，包含 來源工具的 skills 路徑、`AskUserQuestion`、slash command 與 來源工具 Plan Mode 比較。安裝到 Codex App 時已做以下轉換：
 
-- 安裝位置改為 `/Users/arrywu/.codex/skills/brainstorm/`。
+- 安裝位置改為 `{{CODEX_HOME}}/skills/brainstorm/`。
 - 觸發方式改為 Codex skill metadata 與自然語意，例如「brainstorm」、「/brainstorm」、「先想清楚再動手」。
-- 移除 Claude 專用路徑：`~/.claude/skills`、專案 `000_Agent/skills` symlink、Claude command shim。
-- 移除 Claude 專用工具名稱 `AskUserQuestion`，改為 Codex 對話中的單題引導；若未來 Codex App 提供可用選項 UI，可用該 UI 呈現選項。
+- 移除 來源工具專用路徑：來源工具的 skills 路徑、專案 `000_Agent/skills` symlink、來源工具 command shim。
+- 移除 來源工具專用工具名稱 `AskUserQuestion`，改為 Codex 對話中的單題引導；若未來 Codex App 提供可用選項 UI，可用該 UI 呈現選項。
 - 保留硬性閘門：使用者確認計劃前不實作、不 scaffold、不修改檔案。
 - 保留四種溝通模式：小白、半技術、工程師、AI 判斷。
 - 保留核心階段：確認主題、掃描上下文、列假設、深度釐清、方案比較、計劃書、下一步確認。

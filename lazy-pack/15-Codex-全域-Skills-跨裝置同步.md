@@ -1,4 +1,4 @@
-# Codex 全域 Skills 跨裝置同步
+# 15-Codex-全域-Skills-跨裝置同步
 
 > 版本：2026-05-21 Codex App 版
 > 用途：把 Codex 全域 skills 搬到雲端同步資料夾，並讓 `{{CODEX_HOME}}/skills` 用 symlink 指回雲端實體資料夾。
@@ -45,14 +45,7 @@
 | `{{SYNC_ROOT}}` | 雲端同步母資料夾 | `/Users/alex/Library/CloudStorage/GoogleDrive-alex@example.com/My Drive/codex_symlink` |
 | `{{BACKUP_ROOT}}` | 本機備份位置 | `/Users/alex` |
 
-本機實測值：
-
-```text
-{{CODEX_HOME}} = /Users/arrywu/.codex
-{{SYNC_ROOT}} = /Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink
-```
-
-下載者不要直接照抄本機實測路徑。
+請先把上表變數替換成自己的實際路徑；不要直接複製其他人的本機路徑。
 
 ## Step 1：安裝 cross-device-sync skill
 
@@ -207,23 +200,18 @@ mv "{{CODEX_HOME}}/skills.before-symlink-YYYYMMDD-HHMMSS" "{{CODEX_HOME}}/skills
 - 先備份，再 symlink。
 - 改完後重開 Codex 新對話或重啟 Codex App。
 
-## 本機實測紀錄
+## 驗收紀錄範本
 
-本機已完成：
-
-```text
-/Users/arrywu/.codex/skills
-→ /Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills
-```
-
-保留備份：
+完成後請記錄自己的結果：
 
 ```text
-/Users/arrywu/codex-backup-20260521-081840/skills
-/Users/arrywu/.codex/skills.before-symlink-20260521-081840
-```
+{{CODEX_HOME}}/skills
+→ {{SYNC_ROOT}}/skills
 
-實測結果：Google Drive 目標內可讀到 16 個自訂 skill，`cross-device-sync` 可正常讀取。
+BACKUP={{BACKUP_ROOT}}/codex-backup-YYYYMMDD-HHMMSS
+OLD={{CODEX_HOME}}/skills.before-symlink-YYYYMMDD-HHMMSS
+RESULT=<可讀到的自訂 skill 數量與抽測結果>
+```
 
 ## 最終檢查清單
 

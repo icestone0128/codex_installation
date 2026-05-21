@@ -1,8 +1,8 @@
-# 08-Codex MCP Essentials
+# 02-Codex-MCP-Essentials
 
 ## 目標
 
-把 Claude Code CLI 取向的 MCP 安裝概念，改成適合 Codex App 的 MCP / plugin 設定方式。
+把 來源工具 CLI 取向的 MCP 安裝概念，改成適合 Codex App 的 MCP / plugin 設定方式。
 
 ## 前置條件
 
@@ -12,9 +12,9 @@
 - 需要 Firecrawl 時，準備 `{{FIRECRAWL_API_KEY}}`。
 - 需要 Filesystem MCP 時，先決定最小授權資料夾。
 
-## Codex App 與 Claude Code CLI 差異
+## Codex App 與 來源工具 CLI 差異
 
-Claude Code CLI 常用 `claude mcp add ...` 或 `~/.claude.json`。
+來源工具 CLI 常用 `claude mcp add ...` 或 來源工具 MCP 設定檔。
 
 Codex App 使用：
 
@@ -143,7 +143,7 @@ args = ["NPM_CONFIG_CACHE=/private/tmp/npm-cache", "npx", ...]
 
 避免去改 `~/.npm` 權限，也避免使用 `sudo`。
 
-## 本機實測例
+## 設定範例
 
 本機曾成功測試：
 

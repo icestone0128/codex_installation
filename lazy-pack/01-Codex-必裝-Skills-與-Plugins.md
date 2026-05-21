@@ -1,4 +1,4 @@
-# 01-Codex 必裝 Skills 與 Plugins
+# 01-Codex-必裝-Skills-與-Plugins
 
 ## 目標
 
@@ -45,20 +45,32 @@ Codex 通常已內建：
 {{CODEX_HOME}}/skills
 ```
 
-本懶人包已實測可用的自訂 skill 類型：
+本懶人包附的自訂 skill 已放在 `lazy-pack/skills/`。先安裝基礎工作流：
 
-- `project-init-sync`：新專案初始化。
-- `startup-sync`：開工接續。
-- `shutdown-sync`：收工同步。
-- `arry-assistant` 或 `{{ASSISTANT_NAME}}-assistant`：個人助手資料層。
-- `codex-skill-creator`：把 Claude / Anthropic skill 教學轉成 Codex 相容 skill。
-- `secondbrain-research-digest`：整理 Secondbrain 研究資料、查詢、決策與筆記。
-- `tool-integration-workflow`：外部工具整合、安裝、驗證與 CLI / API / MCP / connector 路線判斷。
-- `brainstorm`：先規劃再執行，用引導式問答把模糊想法轉成可執行計劃，確認前不實作。
+```bash
+mkdir -p "{{CODEX_HOME}}/skills"
 
-下載者可照 `10-Codex版SkillCreator工作流.md` 建立自己的版本，不需要沿用 `Arry` 命名。
-`tool-integration-workflow` 已附可直接安裝版本，可照 `11-外部工具整合工作流.md` 複製到 `{{CODEX_HOME}}/skills/`。
-`brainstorm` 已附可直接安裝版本，可照 `12-Brainstorm規劃模式.md` 複製到 `{{CODEX_HOME}}/skills/`。
+for skill in codex-skill-creator project-init-sync startup-sync shutdown-sync tool-integration-workflow brainstorm; do
+  rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/$skill/" "{{CODEX_HOME}}/skills/$skill/"
+done
+
+find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print
+```
+
+再依需求安裝個人與內容製作類 skill：
+
+| Skill | 用途 | 安裝時機 |
+| --- | --- | --- |
+| `arry-assistant` 或自訂助手名稱 | 個人助手資料層 | 完成 `09-個人助手設定` 後 |
+| `secondbrain-research-digest` | Obsidian 研究整理 | 完成 `05-第二大腦設定指南` 後 |
+| `cross-device-sync` | 全域 skills 跨裝置同步 | 完成主線後，需要同步多台裝置時 |
+| `social-cards` | 圖卡輸出 | 需要社群圖卡時，並安裝 Node 依賴 |
+| `doc-to-md` | PDF / EPUB / TXT 轉 Markdown | 需要文件轉換時，並安裝 Python 依賴 |
+| `notebooklm-architecture`、`presentation-workflow`、`visual-note-generator` | NotebookLM / 簡報 / 視覺筆記 | 需要教學內容製作時 |
+| `heptabase-cli` | Heptabase CLI 工作流 | 已安裝並啟動 Heptabase CLI 後 |
+| `rightproblem-coach` | 問題結構化 | 需要問題規格書或教練流程時 |
+
+下載者可照 `11-Codex-Skill-Creator-工作流.md` 建立自己的版本，不需要沿用 `Arry` 命名。
 
 ## Gmail 驗證流程
 
@@ -123,5 +135,5 @@ description: Use when...
 - 新增或修改 skills 後，通常要重開 Codex 對話或重啟 Codex App。
 - 工具不在目前可呼叫清單時，先用 tool search 或 Codex plugin 清單檢查，不要假設已載入。
 - 全域規則放 `{{CODEX_HOME}}/AGENTS.md`，專案規則放專案根目錄 `AGENTS.md`。
-- Claude / Anthropic skill 教學不能直接照搬；Codex 自訂 skills 放 `{{CODEX_HOME}}/skills`，不要放 `~/.claude/skills`。
+- 外部 / Anthropic skill 教學不能直接照搬；Codex 自訂 skills 放 `{{CODEX_HOME}}/skills`，不要放 來源工具的 skills 路徑。
 - 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`；需要優化時建立 companion skill。

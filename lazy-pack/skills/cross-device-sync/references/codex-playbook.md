@@ -1,8 +1,8 @@
 # Codex Cross-Device Sync Playbook
 
-This is the Codex App-compatible execution version of `/Users/arrywu/Downloads/07-cross-device-sync.md`.
+This is the Codex App-compatible execution version of `source cross-device-sync guide`.
 
-The original file targets Claude Code. This playbook keeps the full intent and operational coverage, but replaces Claude-specific assumptions with Codex App, Arry Assistant, Google Drive, Obsidian, and `AGENTS.md` conventions.
+The original file targets 來源工具. This playbook keeps the full intent and operational coverage, but replaces source-specific assumptions with Codex App, Arry Assistant, Google Drive, Obsidian, and `AGENTS.md` conventions.
 
 ## Purpose
 
@@ -32,22 +32,22 @@ Default Codex surfaces on this machine:
 
 | Purpose | Path or rule |
 |---|---|
-| Codex home | `/Users/arrywu/.codex` |
-| Custom global skills | `/Users/arrywu/.codex/skills` symlinked to `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills` |
-| System skills | `/Users/arrywu/.codex/skills/.system` |
+| Codex home | `{{CODEX_HOME}}` |
+| Custom global skills | `{{CODEX_HOME}}/skills` symlinked to `{{SYNC_ROOT}}/skills` |
+| System skills | `{{CODEX_HOME}}/skills/.system` |
 | Project rules | `AGENTS.md` |
-| Main project | `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation` |
-| Arry Assistant data-layer root | `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation` |
-| Arry Assistant global core layer | `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/000_Agent` |
+| Main project | `{{SETUP_REPO}}` |
+| Arry Assistant data-layer root | `{{SETUP_REPO}}` |
+| Arry Assistant global core layer | `{{SETUP_REPO}}/000_Agent` |
 | Arry Assistant local work/reference layers | `100_Todo/` and `200_Reference/` under `codex_installation` |
-| Obsidian vault | `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain` |
+| Obsidian vault | `{{OBSIDIAN_VAULT}}` |
 | Global skill mirror note | `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md` |
-| GitHub repo visibility | `icestone0128/codex_installation` is public |
+| GitHub repo visibility | `{{GITHUB_USER}}/{{SETUP_PROJECT_NAME}}` is public |
 
 ## Absolute Safety Rules
 
 1. Do not perform real sync setup during skill installation.
-2. Do not move, delete, symlink, or overwrite `/Users/arrywu/.codex`, `AGENTS.md`, Obsidian notes, Arry Assistant data, or Git history without explicit user approval after showing a concrete plan.
+2. Do not move, delete, symlink, or overwrite `{{CODEX_HOME}}`, `AGENTS.md`, Obsidian notes, Arry Assistant data, or Git history without explicit user approval after showing a concrete plan.
 3. Make a timestamped backup before moving files, replacing files with symlinks, changing remotes, or editing shared memory.
 4. Do not sync secrets or machine state:
    - `.env`, API keys, tokens, passwords
@@ -56,7 +56,7 @@ Default Codex surfaces on this machine:
    - cache, telemetry, shell snapshots, session state
    - generated logs unless the user explicitly wants archival logs
 5. Treat `codex_installation` as a public repo. Do not place private backups, credentials, private memory, drafts, or personal logs in tracked project paths.
-6. Do not edit system skills under `/Users/arrywu/.codex/skills/.system`.
+6. Do not edit system skills under `{{CODEX_HOME}}/skills/.system`.
 7. If Obsidian notes are involved, read the vault `AGENTS.md` and update additively.
 
 ## Section A: Preflight And Interview
@@ -66,13 +66,13 @@ Default Codex surfaces on this machine:
 Check whether the user's existing Codex App assistant base is present:
 
 ```bash
-test -d "/Users/arrywu/.codex" && echo "Codex home exists"
-test -d "/Users/arrywu/.codex/skills" && echo "Codex skills folder exists"
-test -d "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation" && echo "Arry Assistant data-layer root exists"
-test -d "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/000_Agent" && echo "Arry Assistant core exists"
-test -d "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/100_Todo" && echo "Arry Assistant work layer exists"
-test -d "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/200_Reference" && echo "Arry Assistant reference layer exists"
-test -f "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/AGENTS.md" && echo "codex_installation AGENTS.md exists"
+test -d "{{CODEX_HOME}}" && echo "Codex home exists"
+test -d "{{CODEX_HOME}}/skills" && echo "Codex skills folder exists"
+test -d "{{SETUP_REPO}}" && echo "Arry Assistant data-layer root exists"
+test -d "{{SETUP_REPO}}/000_Agent" && echo "Arry Assistant core exists"
+test -d "{{SETUP_REPO}}/100_Todo" && echo "Arry Assistant work layer exists"
+test -d "{{SETUP_REPO}}/200_Reference" && echo "Arry Assistant reference layer exists"
+test -f "{{SETUP_REPO}}/AGENTS.md" && echo "codex_installation AGENTS.md exists"
 ```
 
 If core pieces are missing, stop and explain the missing prerequisite. Do not invent a second assistant data layer. The existing architecture is a root plus layers: `codex_installation/` contains `000_Agent/`, `100_Todo/`, and `200_Reference/`.
@@ -82,10 +82,10 @@ If core pieces are missing, stop and explain the missing prerequisite. Do not in
 Gather only metadata unless the user asks for deeper inspection:
 
 ```bash
-ls -la "/Users/arrywu/.codex" 2>/dev/null | head -40
-find "/Users/arrywu/.codex/skills" -maxdepth 2 -name SKILL.md -print 2>/dev/null | sort
-find "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation" -maxdepth 1 -type d -print 2>/dev/null | sort
-find "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/000_Agent" -maxdepth 2 -type f -print 2>/dev/null | sort | head -80
+ls -la "{{CODEX_HOME}}" 2>/dev/null | head -40
+find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print 2>/dev/null | sort
+find "{{SETUP_REPO}}" -maxdepth 1 -type d -print 2>/dev/null | sort
+find "{{SETUP_REPO}}/000_Agent" -maxdepth 2 -type f -print 2>/dev/null | sort | head -80
 ```
 
 Record:
@@ -151,9 +151,9 @@ cp -a "$HOME/.codex/skills" "$BACKUP_DIR/skills" 2>/dev/null || true
 If Arry Assistant data will be changed:
 
 ```bash
-cp -a "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/000_Agent" "$BACKUP_DIR/000_Agent" 2>/dev/null || true
-cp -a "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/100_Todo" "$BACKUP_DIR/100_Todo" 2>/dev/null || true
-cp -a "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/200_Reference" "$BACKUP_DIR/200_Reference" 2>/dev/null || true
+cp -a "{{SETUP_REPO}}/000_Agent" "$BACKUP_DIR/000_Agent" 2>/dev/null || true
+cp -a "{{SETUP_REPO}}/100_Todo" "$BACKUP_DIR/100_Todo" 2>/dev/null || true
+cp -a "{{SETUP_REPO}}/200_Reference" "$BACKUP_DIR/200_Reference" 2>/dev/null || true
 ```
 
 Verify backup:
@@ -179,8 +179,8 @@ Possible mother folders:
 
 | Route | Example mother folder |
 |---|---|
-| Existing Google Drive workflow | `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation` as the data-layer root |
-| Arry Assistant global core only | `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/000_Agent` |
+| Existing Google Drive workflow | `{{SETUP_REPO}}` as the data-layer root |
+| Arry Assistant global core only | `{{SETUP_REPO}}/000_Agent` |
 | iCloud | `$HOME/Library/Mobile Documents/com~apple~CloudDocs/Arry-Agent` |
 | Dropbox | `$HOME/Dropbox/Arry-Agent` |
 | OneDrive | `$HOME/Library/CloudStorage/OneDrive-Personal/Arry-Agent` |
@@ -202,7 +202,7 @@ Portable candidates:
 
 Avoid syncing:
 
-- `/Users/arrywu/.codex/skills/.system`
+- `{{CODEX_HOME}}/skills/.system`
 - credentials, OAuth state, secrets, `.env`
 - session state, temporary caches, logs
 - per-device config unless confirmed safe
@@ -214,15 +214,15 @@ Use symlinks only when they solve a real duplication problem and the user unders
 
 Safer default:
 
-- keep the Codex-facing path as `/Users/arrywu/.codex/skills`; on this machine it is symlinked to Google Drive `codex_symlink/skills`
+- keep the Codex-facing path as `{{CODEX_HOME}}/skills`; on this machine it is symlinked to Google Drive `codex_symlink/skills`
 - mirror documentation, install instructions, and inventory into Obsidian and the existing project notes
 - back up and version controlled exports as needed
-- on a second device, recreate the symlink only after confirming the Google Drive folder has synced and the local `/Users/arrywu/.codex/skills` target has been backed up
+- on a second device, recreate the symlink only after confirming the Google Drive folder has synced and the local `{{CODEX_HOME}}/skills` target has been backed up
 
 Riskier route:
 
 - move selected custom skills into the mother folder
-- symlink them back into `/Users/arrywu/.codex/skills/<skill-name>`
+- symlink them back into `{{CODEX_HOME}}/skills/<skill-name>`
 
 Before symlinking, verify:
 
@@ -346,7 +346,7 @@ If using GitHub CLI or connector, prefer private repositories for assistant memo
 
 ## Section E: Health Check Script
 
-Generate a health check only after the target architecture is known. A Codex version should check Codex assets, not Claude assets.
+Generate a health check only after the target architecture is known. A Codex version should check Codex assets, not source-tool assets.
 
 Suggested `sync-health.sh` shape:
 

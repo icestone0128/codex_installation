@@ -11,7 +11,7 @@ Use this skill for repeated research, lookup, decision, and note-organization wo
 
 ## Default Paths
 
-- Secondbrain vault: `OBSIDIAN_VAULT`; for this user, `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain`
+- Secondbrain vault: `{{OBSIDIAN_VAULT}}`
 - Vault rules: `OBSIDIAN_VAULT/AGENTS.md`
 - Main knowledge index: `OBSIDIAN_VAULT/知識庫/index.md`
 - Knowledge log: `OBSIDIAN_VAULT/知識庫/log.md`

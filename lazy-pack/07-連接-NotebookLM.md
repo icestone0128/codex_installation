@@ -1,4 +1,4 @@
-# 00-連接 NotebookLM
+# 07-連接-NotebookLM
 
 ## 目標
 
@@ -60,6 +60,18 @@ startup_timeout_sec = 30
 tool_timeout_sec = 120
 ```
 
+## 可選：安裝 NotebookLM 內容製作 Skills
+
+如果下載者要用 NotebookLM 做簡報、資訊圖表或教學內容，可安裝：
+
+```bash
+for skill in notebooklm-architecture presentation-workflow visual-note-generator; do
+  mkdir -p "{{CODEX_HOME}}/skills/$skill"
+  rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/$skill/" "{{CODEX_HOME}}/skills/$skill/"
+  test -f "{{CODEX_HOME}}/skills/$skill/SKILL.md" && echo "$skill installed"
+done
+```
+
 ## 驗證
 
 1. 重啟 Codex App 或開新對話。
@@ -67,19 +79,19 @@ tool_timeout_sec = 120
 3. 測試列出 notebooks 或讀取一個測試 notebook。
 4. 下載任何 NotebookLM 成品後，放入 `{{NOTEBOOKLM_OUTPUT}}` 對應子資料夾。
 
-## 本機實測例
+## 設定範本
 
 曾成功使用：
 
 ```toml
 [mcp_servers.notebooklm]
-command = "/Users/arrywu/.local/bin/notebooklm-mcp"
+command = "{{NOTEBOOKLM_MCP_COMMAND}}"
 args = []
 startup_timeout_sec = 30
 tool_timeout_sec = 120
 ```
 
-這只是實測例，下載者不可直接照抄 `/Users/arrywu/...`。
+這是模板值，下載者必須改成自己的 `{{NOTEBOOKLM_MCP_COMMAND}}`。
 
 ## 踩坑修正
 

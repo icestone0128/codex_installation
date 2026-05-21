@@ -24,11 +24,11 @@ This skill adapts the third-party `skills/social-cards` package from:
 
 ## Codex Conversion
 
-- Target Codex global skill path: `/Users/arrywu/.codex/skills/social-cards`.
+- Target Codex global skill path: `{{CODEX_HOME}}/skills/social-cards`.
 - Display name requested by user: Social Cards.
 - Previous temporary package path: `codex_installation/converted-skills/cards`（已清理）。
-- Removed source-only Claude-specific metadata fields.
-- Replaced Claude command assumptions with Codex trigger metadata and procedural instructions.
+- Removed source-only source-specific metadata fields.
+- Replaced 來源工具 command assumptions with Codex trigger metadata and procedural instructions.
 - Renamed template sets from `blue-dark` / `orange-light` to `brand-dark` / `brand-light`.
 - Updated the default brand color to Pantone 285C, using digital HEX `#0072CE` for templates.
 - Replaced the original sample handle with `@yourhandle` so generated cards do not inherit the source author's handle by default.
@@ -37,7 +37,7 @@ This skill adapts the third-party `skills/social-cards` package from:
 
 | Source instruction | Codex-compatible result |
 |---|---|
-| Install into `000_Agent/skills` or `~/.claude/skills` | Installed into `/Users/arrywu/.codex/skills/social-cards` |
+| Install into `000_Agent/skills` or 來源工具的 skills 路徑 | Installed into `{{CODEX_HOME}}/skills/social-cards` |
 | Rename install folder to `cards` | Renamed to `social-cards`; display name is Social Cards |
 | Use `/cards` as a slash command | Kept `/cards` as a trigger phrase only; Codex uses skill metadata |
 | Keep `blue-dark` and `orange-light` template sets | Converted to `brand-dark` and `brand-light` for Pantone 285C branding |

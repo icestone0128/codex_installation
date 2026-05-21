@@ -179,12 +179,10 @@ echo ============================================================
 echo   安裝完成！
 echo ============================================================
 echo.
-echo 接下來請在 Claude Desktop 加入技能：
-echo 1. 打開 Claude Desktop
-echo 2. 點左上方 Customize - Skills - + 號
-echo 3. 選 Create Skill - Upload a skill
-echo 4. 上傳安裝包裡的 skill.zip
-echo 5. 確認 doc-to-md 出現在 Skills 列表中
+echo 接下來把 doc-to-md skill 複製到 Codex 全域 skills：
+echo 1. 建立 %%CODEX_HOME%%\skills\doc-to-md
+echo 2. 複製本資料夾的 SKILL.md、scripts、references
+echo 3. 開新 Codex 對話，確認 doc-to-md 可被觸發
 echo.
 echo 手動使用：
 echo "%INSTALL_DIR%\doc-to-md.bat" --auto C:\Users\你的名字\Desktop\mybook.pdf -o C:\Users\你的名字\Desktop\

@@ -2,7 +2,7 @@
 """
 doc_to_md.py — Student-friendly document to Markdown converter
 Supports: PDF, EPUB, TXT
-Output: Clean Markdown with YAML frontmatter + section anchors for Claude to annotate
+Output: Clean Markdown with YAML frontmatter + section anchors for the assistant to annotate
 """
 
 import sys
@@ -400,11 +400,11 @@ def make_section_heading(sec: dict) -> str:
     return heading
 
 def section_placeholder(anchor: str) -> str:
-    """Generate the placeholder callout block Claude will fill in."""
+    """Generate the placeholder callout block the assistant will fill in."""
     return (
         f"> [!note] 章節摘要\n"
-        f"> **摘要**：（Claude 將在此填入本節摘要）\n"
-        f"> **關鍵字**：（Claude 將在此填入關鍵字）"
+        f"> **摘要**：（AI 助手將在此填入本節摘要）\n"
+        f"> **關鍵字**：（AI 助手將在此填入關鍵字）"
     )
 
 def build_markdown(meta: dict, full_text: str, sections: list[dict], convert_chinese: bool) -> str:
@@ -596,7 +596,7 @@ Examples:
     # Run pipeline
     out_path = process_file(input_path, output_dir, convert_chinese)
     print(f"\n[DONE] Markdown saved to:\n  {out_path}")
-    print("\nNext step: Ask Claude to read this file and fill in the 章節摘要 callouts.")
+    print("\nNext step: Ask the assistant to read this file and fill in the 章節摘要 callouts.")
 
 if __name__ == '__main__':
     main()

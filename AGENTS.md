@@ -64,7 +64,7 @@ Arry 助手 AI 分身資料層：
 新專案初始化時：
 
 - 使用 `project-init-sync` 流程。
-- 以 `lazy-pack/07-專案初始化工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `/Users/arrywu/.codex/AGENTS.md`。
+- 以 `lazy-pack/10-專案初始化工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `/Users/arrywu/.codex/AGENTS.md`。
 
 ## 主要檔案
 
