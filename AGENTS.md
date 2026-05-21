@@ -46,6 +46,8 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 - 目前 `/Users/arrywu/.codex/skills` 是 symlink，實體位置在 `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`
 - Obsidian 同步索引：`專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
+- 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `lazy-pack/skills/` 與 `lazy-pack/skills/README.md`，讓 LazyPack 可攜化版本和實際全域 skills 保持一致。
+- 同步後要實際比對 `/Users/arrywu/.codex/skills`、`lazy-pack/skills/` 與 Obsidian `全域 Skills 同步.md` 的 skill 名稱；不可只更新其中一處。
 - 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
 
 Arry 助手 AI 分身資料層：
