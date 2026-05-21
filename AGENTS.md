@@ -73,6 +73,16 @@ Arry 助手 AI 分身資料層：
 部署位置：未啟用。GitHub Pages 已關閉；`docs/index.html` 只保留為本地入口檔。
 部署網址：未啟用
 
+## 初始化架構狀態
+
+- `AGENTS.md`、`README.md`、`.gitignore` 已存在。
+- Git repo 已存在，remote 為 `origin https://github.com/icestone0128/codex_installation.git`。
+- GitHub repo 為 Public；GitHub Pages 目前未啟用。
+- Firebase 使用既有 project `codex-4e80b`；本 repo 目前只有 Firestore rules，沒有 Hosting 設定。
+- Obsidian 駕駛艙位於 `專案庫/codex_installation/專案工作流程.md`。
+- Arry 助手雙層資料層已存在：本專案包含 `000_Agent/`、`100_Todo/`、`200_Reference/`。
+- 既有專案重新初始化時，只依架構補缺與更新狀態，不覆蓋既有設定或 Git 歷史。
+
 ## 不要做
 
 - 不要把每日進度寫進 AGENTS.md。
