@@ -1,6 +1,6 @@
 # Source Adaptation: 07-cross-device-sync.md
 
-Source file: `07-cross-device-sync.md`
+Source file: `/Users/arrywu/Downloads/07-cross-device-sync.md`
 
 The source document is a Claude Code pro-kit for moving Claude configuration into a portable "AI brain" folder, backing it up, symlinking it back into `~/.claude`, adding optional GitHub backup, generating a health-check script, and writing a migration manual.
 
@@ -19,23 +19,23 @@ This Codex version keeps the useful operating model but changes the target surfa
 
 | Original Claude guide | Codex-compatible conversion |
 |---|---|
-| `~/.claude/` is the main config root | `{{CODEX_HOME}}` is the Codex root |
-| `~/.claude/skills` stores skills | `{{CODEX_HOME}}/skills` stores global Codex skills |
+| `~/.claude/` is the main config root | `/Users/arrywu/.codex` is the Codex root |
+| `~/.claude/skills` stores skills | `/Users/arrywu/.codex/skills` stores global Codex skills |
 | `CLAUDE.md` is the rule file | `AGENTS.md` is the project rule file |
 | Claude slash commands are user-facing entry points | Codex skills trigger by metadata and user intent |
 | Claude subagents are part of the workflow | Codex subagents are only used when explicitly requested or clearly useful |
-| `000_Agent/` is created by pro-kit 01 | A Codex user may keep personal assistant data under `{{SETUP_PROJECT_NAME}}/000_Agent` |
-| Source examples refer to Raymond/Raymond-Agent | Use personal assistant and the user's existing Google Drive/Obsidian paths |
+| `000_Agent/` is created by pro-kit 01 | This user already has Arry Assistant data under `codex_installation/000_Agent` |
+| Source examples refer to Raymond/Raymond-Agent | Use Arry Assistant and the user's existing Google Drive/Obsidian paths |
 
 ## Codex-Specific Safety Changes
 
-- The skill must not automatically move or symlink `{{CODEX_HOME}}` assets during installation.
+- The skill must not automatically move or symlink `/Users/arrywu/.codex` assets during installation.
 - Any future sync setup must be plan-first and approval-gated because it can affect all Codex sessions.
-- The default sync approach should align with Google Drive project folders and Obsidian project cockpits.
-- The existing personal assistant architecture uses `{{SETUP_PROJECT_NAME}}` as the data-layer root with `000_Agent/`, `100_Todo/`, and `200_Reference/` as sibling layers; do not treat `000_Agent/` as the whole mother folder for every use case.
-- If `{{GITHUB_USER}}/{{SETUP_PROJECT_NAME}}` is public, private backups and personal memory must not be staged or tracked there.
-- System skills under `{{CODEX_HOME}}/skills/.system` are Codex-managed and should not be edited or moved manually.
-- Global skill changes must update the Obsidian mirror note at `專案庫/{{SETUP_PROJECT_NAME}}/全域 Skills/全域 Skills 同步.md`.
+- The default sync approach for this user should align with Google Drive project folders and Obsidian project cockpits.
+- The existing Arry Assistant architecture uses `codex_installation` as the data-layer root with `000_Agent/`, `100_Todo/`, and `200_Reference/` as sibling layers; do not treat `000_Agent/` as the whole mother folder for every use case.
+- `icestone0128/codex_installation` is public, so private backups and personal memory must not be staged or tracked there.
+- System skills under `/Users/arrywu/.codex/skills/.system` are Codex-managed and should not be edited or moved manually.
+- Global skill changes must update the Obsidian mirror note at `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`.
 
 ## Interview Questions
 

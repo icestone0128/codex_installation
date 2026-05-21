@@ -1,0 +1,7 @@
+interface:
+  display_name: "圖解筆記生成"
+  short_description: "把手繪筆記、語音逐字稿與文章轉成教學圖解素材與簡報結構"
+  default_prompt: "Use $visual-note-generator to turn my hand-drawn notes or draft text into a clean educational visual note."
+
+policy:
+  allow_implicit_invocation: true

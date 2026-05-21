@@ -60,3 +60,4 @@ Use this skill only for external tool integration work. Do not apply it to ordin
 ## References
 
 - Detailed route checklist: `references/integration-route-checklist.md`
+- Optional source project plan example for this user's local setup: `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/100_Todo/integrations/2026-05-20-tool-integration-plan.md`

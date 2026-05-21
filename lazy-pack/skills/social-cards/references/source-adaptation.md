@@ -24,7 +24,7 @@ This skill adapts the third-party `skills/social-cards` package from:
 
 ## Codex Conversion
 
-- Target Codex global skill path: `{{CODEX_HOME}}/skills/social-cards`.
+- Target Codex global skill path: `/Users/arrywu/.codex/skills/social-cards`.
 - Display name requested by user: Social Cards.
 - Previous temporary package path: `codex_installation/converted-skills/cards`（已清理）。
 - Removed source-only Claude-specific metadata fields.
@@ -37,7 +37,7 @@ This skill adapts the third-party `skills/social-cards` package from:
 
 | Source instruction | Codex-compatible result |
 |---|---|
-| Install into `000_Agent/skills` or `~/.claude/skills` | Install into `{{CODEX_HOME}}/skills/social-cards` |
+| Install into `000_Agent/skills` or `~/.claude/skills` | Installed into `/Users/arrywu/.codex/skills/social-cards` |
 | Rename install folder to `cards` | Renamed to `social-cards`; display name is Social Cards |
 | Use `/cards` as a slash command | Kept `/cards` as a trigger phrase only; Codex uses skill metadata |
 | Keep `blue-dark` and `orange-light` template sets | Converted to `brand-dark` and `brand-light` for Pantone 285C branding |
