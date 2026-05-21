@@ -70,8 +70,8 @@ Arry 助手 AI 分身資料層：
 
 入口檔：`docs/index.html`
 設定檔：`.firebaserc`、`firebase.json`、`firestore.rules`
-部署位置：GitHub Pages，來源為 `main` branch 的 `/docs` 目錄
-部署網址：`https://icestone0128.github.io/codex_installation/`
+部署位置：未啟用。GitHub Pages 已關閉；`docs/index.html` 只保留為本地入口檔。
+部署網址：未啟用
 
 ## 不要做
 
