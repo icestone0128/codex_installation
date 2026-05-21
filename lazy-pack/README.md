@@ -16,6 +16,8 @@
 | `{{CODEX_CONFIG}}` | Codex MCP 設定檔 | `/Users/alex/.codex/config.toml` |
 | `{{WORK_ROOT}}` | 專案工作根目錄 | `/Users/alex/Projects` 或 Google Drive 內的工作資料夾 |
 | `{{SETUP_REPO}}` | 這份懶人包所在專案 | `{{WORK_ROOT}}/codex_installation` |
+| `{{SYNC_ROOT}}` | Codex symlink 雲端同步母資料夾 | Google Drive / iCloud / Dropbox 內的 `codex_symlink` |
+| `{{BACKUP_ROOT}}` | 本機備份位置 | `/Users/alex` |
 | `{{OBSIDIAN_VAULT}}` | Obsidian vault 絕對路徑 | `/Users/alex/Obsidian/secondbrain` |
 | `{{OBSIDIAN_PROJECTS}}` | Obsidian 專案庫資料夾 | `{{OBSIDIAN_VAULT}}/專案庫` |
 | `{{NOTEBOOKLM_OUTPUT}}` | NotebookLM 成品下載整理資料夾 | `/Users/alex/Documents/NotebookLM` |
@@ -50,6 +52,7 @@
 12. [[11-外部工具整合工作流]]
 13. [[12-Brainstorm規劃模式]]
 14. [[13-Social-Cards圖卡Skill安裝]]
+15. [[14-Codex全域Skills跨裝置同步]]
 
 ## 共用前置條件
 
@@ -95,3 +98,4 @@ rg -n "arrywu|icestone0128|codex-4e80b|我的雲端硬碟|{{" lazy-pack
 - 外部工具整合以 `11-外部工具整合工作流` 為準；下載者可直接複製 `lazy-pack/skills/tool-integration-workflow/` 到自己的 `{{CODEX_HOME}}/skills/` 使用。
 - Brainstorm 規劃模式以 `12-Brainstorm規劃模式` 為準；下載者可直接複製 `lazy-pack/skills/brainstorm/` 到自己的 `{{CODEX_HOME}}/skills/` 使用。
 - Social Cards 圖卡 skill 以 `13-Social-Cards圖卡Skill安裝` 為準；下載者可直接複製 `lazy-pack/skills/social-cards/` 到自己的 `{{CODEX_HOME}}/skills/social-cards/`，再安裝 Playwright 依賴使用。
+- Codex 全域 skills 跨裝置同步以 `14-Codex全域Skills跨裝置同步` 為準；下載者可直接複製 `lazy-pack/skills/cross-device-sync/` 到自己的 `{{CODEX_HOME}}/skills/cross-device-sync/`，再依文件把 `{{CODEX_HOME}}/skills` symlink 到自己的雲端同步資料夾。

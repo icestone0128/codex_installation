@@ -43,6 +43,7 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 全域 Skill 同步：
 
 - 全域 skills 預設位置：`/Users/arrywu/.codex/skills`
+- 目前 `/Users/arrywu/.codex/skills` 是 symlink，實體位置在 `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`
 - Obsidian 同步索引：`專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
 - 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
