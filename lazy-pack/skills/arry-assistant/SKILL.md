@@ -63,7 +63,7 @@ Portable placeholders:
 - 專案本地層：每個專案建立自己的 `100_Todo/` 與 `200_Reference/`，存放該專案的草稿、進行中事項、素材、範例與模板。
 - 專案本地 skill 層：只有當專案需要自己的 assistant skill 或局部流程時，建立 `<project-root>/000_Agent/skills`。
 - Obsidian 知識層：專案駕駛艙與既有每日筆記系統留在 Obsidian。
-- 專案本地記憶：只有在專案需要獨立助手記憶時，才建立 `000_Agent/project-memory/`。
+- 專案本地記憶：只有在專案需要獨立助手記憶時，才建立 `000_Agent/memory/`。
 - 未來新專案：由 `project-init-sync` 在專案 `AGENTS.md` 與 Obsidian 駕駛艙加入雙層資料層說明，並補齊本地資料夾。
 - 現有專案：補上整合段落與本地 `100_Todo/`、`200_Reference/`，不複製或搬移全域核心層。
 - 專案自己的進度、下一步、部署狀態留在該專案駕駛艙。
