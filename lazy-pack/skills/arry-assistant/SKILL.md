@@ -50,9 +50,9 @@ Portable placeholders:
 
 ## 輸出路由
 
-- Facebook 貼文：草稿放 `100_Todo/drafts/social-posts/`，範例讀 `200_Reference/writing-samples/social/`。
-- Email/客戶溝通：草稿放 `100_Todo/drafts/emails/`，範例讀 `200_Reference/writing-samples/emails/`，模板讀 `200_Reference/templates/email-templates/`。
-- 書籍或 Podcast 讀後心得：草稿放 `100_Todo/drafts/articles/`；若是口語或節目腳本型心得，放 `100_Todo/drafts/scripts/`。範例優先讀 `200_Reference/writing-samples/articles/` 與 `200_Reference/writing-samples/scripts/`。
+- Facebook 貼文：草稿放 `100_Todo/drafts/`，範例讀 `200_Reference/writing-samples/`。
+- Email/客戶溝通：草稿放 `100_Todo/drafts/`，範例讀 `200_Reference/writing-samples/`，模板讀 `200_Reference/templates/`。
+- 書籍或 Podcast 讀後心得：草稿放 `100_Todo/drafts/`。範例優先讀 `200_Reference/writing-samples/`。
 - 資料研究與知識管理輸出：先整理來源、脈絡、關鍵發現、可用行動，再判斷要寫入專案本地 `200_Reference/`、Obsidian 知識庫或專案駕駛艙。
 
 ## 雙層專案整合模式
@@ -60,8 +60,8 @@ Portable placeholders:
 - 預設採用 `09-個人助手設定` 的四盒結構：助手核心盒、行動工作盒、參考素材盒、Obsidian 知識盒。
 - 全域共用層：`codex_symlink/`，存放 Arry 助手核心記憶、跨專案偏好、踩坑、全域 skills 與 workflow 草稿。
 - 專案本地層：每個專案建立自己的 `100_Todo/` 與 `200_Reference/`，存放該專案的草稿、進行中事項、素材、範例與模板。
-- 專案本地任務細節目錄：`100_Todo/drafts/emails/`、`100_Todo/drafts/articles/`、`100_Todo/drafts/scripts/`、`100_Todo/drafts/social-posts/`、`100_Todo/projects/`、`100_Todo/archive/`。
-- 專案本地參考細節目錄：`200_Reference/writing-samples/emails/`、`200_Reference/writing-samples/articles/`、`200_Reference/writing-samples/social/`、`200_Reference/writing-samples/scripts/`、`200_Reference/templates/email-templates/`、`200_Reference/past-work/`。
+- 專案本地任務目錄只延伸到：`100_Todo/drafts/`、`100_Todo/projects/`、`100_Todo/archive/`。
+- 專案本地參考目錄只延伸到：`200_Reference/writing-samples/`、`200_Reference/templates/`、`200_Reference/past-work/`。
 - 專案本地 skill 層：只有當專案需要自己的 assistant skill 或局部流程時，建立 `<project-root>/000_Agent/skills`。
 - Obsidian 知識層：專案駕駛艙與既有每日筆記系統留在 Obsidian。
 - 專案本地記憶：只有在專案需要獨立助手記憶時，才建立 `000_Agent/memory/`。
