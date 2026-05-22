@@ -13,7 +13,7 @@ Use this workflow at the beginning of a work session.
 2. Find and read the Obsidian cockpit note listed in `AGENTS.md`.
 3. If the project references a personal assistant skill such as `arry-assistant`, read:
    - `$CODEX_HOME/skills/<assistant-skill>/SKILL.md`, or `~/.codex/skills/<assistant-skill>/SKILL.md` when `$CODEX_HOME` is not set
-   - `ASSISTANT_ROOT/000_Agent/memory/MEMORY.md` when the project documents an assistant root
+   - `ASSISTANT_ROOT/memory/MEMORY.md` when the project documents a global assistant root
 4. Check Git status and current branch.
 5. Check GitHub remote if present.
 6. Check Firebase project if the project uses Firebase.

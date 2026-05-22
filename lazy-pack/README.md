@@ -32,6 +32,9 @@
 | `{{MCPVAULT_COMMAND}}` | Obsidian MCP 可執行檔 | `/opt/homebrew/bin/mcpvault` |
 | `{{ASSISTANT_NAME}}` | 個人助手名稱 | `我的助手` |
 | `{{ASSISTANT_SKILL_NAME}}` | 個人助手 skill 名稱 | `my-assistant` |
+| `{{ASSISTANT_ROOT}}` | 個人助手全域資料層 | `{{SYNC_ROOT}}` |
+| `{{ASSISTANT_MEMORY}}` | 個人助手跨專案記憶 | `{{ASSISTANT_ROOT}}/memory/MEMORY.md` |
+| `{{ASSISTANT_WORKFLOWS}}` | 個人助手跨專案 workflow 草稿 | `{{ASSISTANT_ROOT}}/workflows` |
 | `{{SETUP_PROJECT_NAME}}` | 設定專案在 Obsidian 的名稱 | `codex_installation` |
 
 後續文件若出現範例值，只能作為格式參考；下載者必須替換成自己的實際路徑與帳號。
@@ -63,13 +66,31 @@
 
 ## 全域 Skills 安裝總表
 
-可直接複製的 skill 都放在 `lazy-pack/skills/`。安裝方式一致：
+可直接複製成 Codex 全域 skill 的套件放在 `lazy-pack/skills/`。安裝方式一致：
 
 ```bash
 mkdir -p "{{CODEX_HOME}}/skills/<skill-name>"
 rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/<skill-name>/" "{{CODEX_HOME}}/skills/<skill-name>/"
 test -f "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md" && echo "<skill-name> installed"
 ```
+
+路徑邊界固定如下：
+
+| 類型 | 正式位置 | 用途 |
+| --- | --- | --- |
+| Codex 全域 skills | `{{CODEX_HOME}}/skills`；若跨裝置同步，才 symlink 到 `{{SYNC_ROOT}}/skills` | 需要被 Codex App 全域觸發的 skills |
+| LazyPack 可攜化副本 | `{{SETUP_REPO}}/lazy-pack/skills` | 供複製、安裝、版本化的全域 skills 套件 |
+| Arry/個人助手全域入口 | `{{CODEX_HOME}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
+| 個人助手跨專案記憶 | `{{ASSISTANT_ROOT}}/memory` | 個人偏好、踩坑、跨專案可重用決策 |
+| 個人助手跨專案 workflow | `{{ASSISTANT_ROOT}}/workflows` | 尚未升級成全域 skill 的 workflow 草稿 |
+| 專案本地 skills | 各專案 `000_Agent/skills` | 只服務該專案的 assistant skill 或 workflow；這個資料夾本身就是專案可攜式 skill 包 |
+
+不要把專案 `000_Agent/skills` symlink 到 `{{CODEX_HOME}}/skills`。只有全域 Codex skills 才使用 `{{CODEX_HOME}}/skills`，也只有這一層需要指向雲端 `codex_symlink/skills`。
+
+任何新建或修改的 skill 都要做成可攜式版本：
+
+- 全域 skill：同步 `{{CODEX_HOME}}/skills/<skill-name>`、`{{SETUP_REPO}}/lazy-pack/skills/<skill-name>` 與 Obsidian 全域 Skills 索引。
+- 專案 skill：放在 `<project-root>/000_Agent/skills/<skill-name>`，保留完整 `SKILL.md`、references、scripts、assets；若該專案使用 Git，這個資料夾應跟著專案版本化。
 
 建議安裝順序：
 
@@ -107,7 +128,7 @@ test -f "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md" && echo "<skill-name> inst
 - Obsidian 專案駕駛艙一律放在 `{{OBSIDIAN_PROJECTS}}/<專案名稱>/專案工作流程.md`。
 - MCP 或 skills 設定改完後，通常要開新 Codex 對話或重啟 Codex App 才會載入。
 - MCP 設定使用 `{{CODEX_CONFIG}}`；不要把其他工具的 CLI 或 MCP 設定檔指令直接套用到 Codex App。
-- 外部 / Anthropic 文件只作為轉換來源；正式 Codex skills 放在 `{{CODEX_HOME}}/skills`。
+- 外部 / Anthropic 文件只作為轉換來源；需要全域觸發的正式 Codex skills 放在 `{{CODEX_HOME}}/skills`，專案或個人助手本地 skills 放在對應的 `000_Agent/skills`。
 
 ## 檢查下載者是否已替換成功
 

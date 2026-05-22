@@ -1,6 +1,6 @@
 ---
 name: arry-assistant
-description: Use when the user asks to use Arry 助手, AI 分身, personal assistant memory, cross-project assistant workflow, Codex App conversion of external-assistant-style assistant setup, or shared global preferences. This skill reads the Arry assistant data layer in codex_installation, applies Codex-only rules, and syncs durable journal or setup changes to Obsidian when relevant.
+description: Use when the user asks to use Arry 助手, AI 分身, personal assistant memory, cross-project assistant workflow, Codex App conversion of external-assistant-style assistant setup, or shared global preferences. This skill reads the Arry assistant global data layer in codex_symlink, applies Codex-only rules, and syncs durable journal or setup changes to Obsidian when relevant.
 ---
 
 # Arry 助手
@@ -18,27 +18,35 @@ This skill is a personal-assistant template. When copying it for another user, r
 - 主要輸出：Facebook 貼文、Email/客戶溝通、書籍或 Podcast 的讀後心得。
 - 不使用 來源工具 專用設定：不要建立或依賴 來源工具規則檔、來源工具的 skills 路徑、來源工具 slash command shim。
 - Codex 全域 skills 正式位置：`{{CODEX_HOME}}/skills`。
-- 個人助手資料層：`{{ASSISTANT_ROOT}}/000_Agent`。
+- 個人助手全域資料層：`{{ASSISTANT_ROOT}}`，固定包含 `skills/`、`memory/`、`workflows/` 與 `knowledge/`。
+- Arry 助手本身是全域入口 skill，專案初始化時預設帶入。
+- Codex 全域 skills：`{{ASSISTANT_ROOT}}/skills`；`{{CODEX_HOME}}/skills` 可 symlink 指向這裡。
+- 個人助手跨專案記憶：`{{ASSISTANT_ROOT}}/memory/MEMORY.md`。
+- 個人助手跨專案 workflow 草稿：`{{ASSISTANT_ROOT}}/workflows`。
 - 個人助手設定：`{{SETUP_REPO}}/lazy-pack/09-個人助手設定.md`。
 - Obsidian 同步位置：`{{OBSIDIAN_VAULT}}/專案庫/{{SETUP_PROJECT_NAME}}/{{ASSISTANT_NAME}}`。
 
 Portable placeholders:
 
 - `ASSISTANT_NAME`: the personal assistant name.
-- `ASSISTANT_ROOT`: the folder that contains `000_Agent/`, `100_Todo/`, and `200_Reference/`.
+- `ASSISTANT_ROOT`: the global assistant asset root that contains `skills/`, `memory/`, `workflows/`, and `knowledge/`.
 - `OBSIDIAN_VAULT`: the user's Obsidian vault, if used.
 - `PROJECT_LIBRARY`: the vault-relative project cockpit folder, if used.
 
 ## 使用流程
 
 1. 先讀取專案 `AGENTS.md`，若任務涉及筆記或同步，再讀取 Obsidian vault 的 `AGENTS.md`。
-2. 讀取個人助手記憶：`ASSISTANT_ROOT/000_Agent/memory/MEMORY.md`；在本機 Arry 設定中等同於 `000_Agent/memory/MEMORY.md`。
+2. 讀取個人助手記憶：`ASSISTANT_ROOT/memory/MEMORY.md`。
 3. 若任務涉及新專案初始化，遵守既有 `project-init-sync` 規則，並參照 `09-個人助手設定`；不要讓 Arry 助手資料層覆蓋新專案標準流程。
 4. 若來源文件是 來源工具 教學，轉成 Codex App 版本：
-   - 來源工具規則檔 規則改寫到 Codex 可讀的 `AGENTS.md` 或全域 skill。
-   - 來源工具的 skills 路徑改成 `{{CODEX_HOME}}/skills`。
+   - 來源工具規則檔 規則改寫到 Codex 可讀的 `AGENTS.md`、全域 skill 或本地 `000_Agent/skills`。
+   - 來源工具的全域 skills 路徑改成 `{{CODEX_HOME}}/skills`。
+   - 來源工具的專案級 skills 改放該專案 `000_Agent/skills`。
    - 來源工具 command / symlink / terminal-only 步驟只保留為參考，除非使用者明確要支援來源工具。
 5. 若新增、修改、刪除全域 skill，更新 Obsidian 的全域 Skills 同步筆記。
+6. 若使用者要新增 skill，先判斷歸屬：
+   - 跨專案可重用或需要全域觸發：放 `{{CODEX_HOME}}/skills/<skill-name>`，並同步 `{{SETUP_REPO}}/lazy-pack/skills/<skill-name>` 與 Obsidian 全域 Skills 索引。
+   - 只服務目前專案：放 `<project-root>/000_Agent/skills/<skill-name>`，保留完整可攜式 skill 包並記錄到專案駕駛艙。
 
 ## 輸出路由
 
@@ -50,8 +58,10 @@ Portable placeholders:
 ## 雙層專案整合模式
 
 - 預設採用 `09-個人助手設定` 的四盒結構：助手核心盒、行動工作盒、參考素材盒、Obsidian 知識盒。
-- 全域共用層：`codex_installation/000_Agent`，存放 Arry 助手核心記憶、跨專案偏好與踩坑。
+- 全域共用層：`ASSISTANT_ROOT`，存放 Arry 助手核心記憶、跨專案偏好、踩坑、全域 skills 與 workflow 草稿。
+- 全域 skill 層：`ASSISTANT_ROOT/skills`，存放需要跨專案觸發的 Codex skills。
 - 專案本地層：每個專案建立自己的 `100_Todo/` 與 `200_Reference/`，存放該專案的草稿、進行中事項、素材、範例與模板。
+- 專案本地 skill 層：只有當專案需要自己的 assistant skill 或局部流程時，建立 `<project-root>/000_Agent/skills`。
 - Obsidian 知識層：專案駕駛艙與既有每日筆記系統留在 Obsidian。
 - 專案本地記憶：只有在專案需要獨立助手記憶時，才建立 `000_Agent/project-memory/`。
 - 未來新專案：由 `project-init-sync` 在專案 `AGENTS.md` 與 Obsidian 駕駛艙加入雙層資料層說明，並補齊本地資料夾。
@@ -61,8 +71,8 @@ Portable placeholders:
 
 ## 記憶
 
-- 新偏好、踩坑、跨專案可重用決策，先追加到 `000_Agent/memory/MEMORY.md`。
-- For another user, write memory to `ASSISTANT_ROOT/000_Agent/memory/MEMORY.md` only after they confirm that this is their durable assistant memory location.
+- 新偏好、踩坑、跨專案可重用決策，先追加到 `ASSISTANT_ROOT/memory/MEMORY.md`。
+- For another user, write memory to `ASSISTANT_ROOT/memory/MEMORY.md` only after they confirm that this is their durable assistant memory location.
 - Obsidian 寫入採取補缺與追加，不覆寫既有筆記。
 
 ## 衝突處理

@@ -25,6 +25,7 @@ This skill adapts the third-party `skills/social-cards` package from:
 ## Codex Conversion
 
 - Target Codex global skill path: `{{CODEX_HOME}}/skills/social-cards`.
+- Project-local option: if this card workflow is only for one project, use `<project-root>/000_Agent/skills/social-cards` instead and keep it as that project's portable skill package.
 - Display name requested by user: Social Cards.
 - Previous temporary package path: `codex_installation/converted-skills/cards`（已清理）。
 - Removed source-only source-specific metadata fields.
@@ -37,7 +38,8 @@ This skill adapts the third-party `skills/social-cards` package from:
 
 | Source instruction | Codex-compatible result |
 |---|---|
-| Install into `000_Agent/skills` or 來源工具的 skills 路徑 | Installed into `{{CODEX_HOME}}/skills/social-cards` |
+| Install into 來源工具的全域 skills 路徑 | Installed into `{{CODEX_HOME}}/skills/social-cards` |
+| Install into `000_Agent/skills` | Valid only for a project-local or assistant-local workflow; do not symlink it into global skills |
 | Rename install folder to `cards` | Renamed to `social-cards`; display name is Social Cards |
 | Use `/cards` as a slash command | Kept `/cards` as a trigger phrase only; Codex uses skill metadata |
 | Keep `blue-dark` and `orange-light` template sets | Converted to `brand-dark` and `brand-light` for Pantone 285C branding |

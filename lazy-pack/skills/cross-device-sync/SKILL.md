@@ -15,7 +15,8 @@ This is a Codex App conversion of a 來源工具-oriented cross-device sync guid
 - Custom global skills: `$CODEX_HOME/skills`, or `~/.codex/skills` when `$CODEX_HOME` is not set
 - Project rules: `AGENTS.md`
 - Optional assistant data-layer root: `ASSISTANT_ROOT`
-- Optional assistant global core layer: `ASSISTANT_ROOT/000_Agent`
+- Optional assistant global layer: `ASSISTANT_ROOT`, containing `skills/`, `memory/`, `workflows/`, and `knowledge/`
+- Optional project-local skills: `<project-root>/000_Agent/skills`
 - Optional assistant local work/reference layers: `100_Todo/` and `200_Reference/` under the selected assistant or project root
 - Optional Obsidian vault: `OBSIDIAN_VAULT`
 - Optional project cockpit: `PROJECT_LIBRARY/<project-name>/專案工作流程.md`
@@ -71,12 +72,13 @@ Use this mapping when converting source-oriented instructions:
 
 | Source guide concept | Codex App version |
 |---|---|
-| 來源工具的 skills 路徑 | `$CODEX_HOME/skills` or `~/.codex/skills` |
+| 來源工具的全域 skills 路徑 | `$CODEX_HOME/skills` or `~/.codex/skills` |
+| 來源工具的專案級 skills 路徑 | `<project-root>/000_Agent/skills` |
 | 來源工具規則檔 | `AGENTS.md` |
 | 來源工具 slash commands | Codex skill metadata and normal user prompts |
 | 來源工具 subagents | Codex subagents only when explicitly requested; otherwise use validation passes |
 | 來源工具記憶 | `$CODEX_HOME/memories` plus optional personal assistant durable data when relevant |
-| `000_Agent` from source kit | Optional personal assistant core layer at `ASSISTANT_ROOT/000_Agent` |
+| `000_Agent` from source kit | Project-local assistant layer only; this user's global assistant layer is `ASSISTANT_ROOT` with `memory/`, `workflows/`, `knowledge/`, and `skills/` |
 | 來源工具憑證與本機狀態 | Do not sync; each device logs in independently |
 
 ## Sync Route Guidance
@@ -92,6 +94,7 @@ Use this mapping when converting source-oriented instructions:
 Usually portable:
 
 - custom global skills under `$CODEX_HOME/skills` or `~/.codex/skills`, excluding `.system`
+- assistant global memory/workflows under `ASSISTANT_ROOT/memory` and `ASSISTANT_ROOT/workflows`, plus project-local skills under `<project-root>/000_Agent/skills`
 - reusable project rules and templates
 - personal assistant durable references and reusable memory, when the user explicitly wants that layer synced
 - migration docs, health-check scripts, and setup notes

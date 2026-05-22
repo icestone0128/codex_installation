@@ -37,8 +37,8 @@ Default Codex surfaces on this machine:
 | System skills | `{{CODEX_HOME}}/skills/.system` |
 | Project rules | `AGENTS.md` |
 | Main project | `{{SETUP_REPO}}` |
-| Arry Assistant data-layer root | `{{SETUP_REPO}}` |
-| Arry Assistant global core layer | `{{SETUP_REPO}}/000_Agent` |
+| Arry Assistant global data-layer root | `{{SYNC_ROOT}}` |
+| Arry Assistant memory/workflow layer | `{{SYNC_ROOT}}/memory`, `{{SYNC_ROOT}}/workflows`, `{{SYNC_ROOT}}/knowledge` |
 | Arry Assistant local work/reference layers | `100_Todo/` and `200_Reference/` under `codex_installation` |
 | Obsidian vault | `{{OBSIDIAN_VAULT}}` |
 | Global skill mirror note | `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md` |
@@ -68,14 +68,15 @@ Check whether the user's existing Codex App assistant base is present:
 ```bash
 test -d "{{CODEX_HOME}}" && echo "Codex home exists"
 test -d "{{CODEX_HOME}}/skills" && echo "Codex skills folder exists"
-test -d "{{SETUP_REPO}}" && echo "Arry Assistant data-layer root exists"
-test -d "{{SETUP_REPO}}/000_Agent" && echo "Arry Assistant core exists"
+test -d "{{SYNC_ROOT}}" && echo "Arry Assistant global root exists"
+test -d "{{SYNC_ROOT}}/memory" && echo "Arry Assistant memory exists"
+test -d "{{SYNC_ROOT}}/workflows" && echo "Arry Assistant workflows exists"
 test -d "{{SETUP_REPO}}/100_Todo" && echo "Arry Assistant work layer exists"
 test -d "{{SETUP_REPO}}/200_Reference" && echo "Arry Assistant reference layer exists"
 test -f "{{SETUP_REPO}}/AGENTS.md" && echo "codex_installation AGENTS.md exists"
 ```
 
-If core pieces are missing, stop and explain the missing prerequisite. Do not invent a second assistant data layer. The existing architecture is a root plus layers: `codex_installation/` contains `000_Agent/`, `100_Todo/`, and `200_Reference/`.
+If core pieces are missing, stop and explain the missing prerequisite. Do not invent a second assistant data layer. The global architecture is `codex_symlink/` with `skills/`, `memory/`, `workflows/`, and `knowledge/`; project-local layers remain inside each project.
 
 ### A-2. Inventory Current Assets
 
@@ -84,8 +85,8 @@ Gather only metadata unless the user asks for deeper inspection:
 ```bash
 ls -la "{{CODEX_HOME}}" 2>/dev/null | head -40
 find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print 2>/dev/null | sort
-find "{{SETUP_REPO}}" -maxdepth 1 -type d -print 2>/dev/null | sort
-find "{{SETUP_REPO}}/000_Agent" -maxdepth 2 -type f -print 2>/dev/null | sort | head -80
+find "{{SYNC_ROOT}}" -maxdepth 2 -type d -print 2>/dev/null | sort
+find "{{SYNC_ROOT}}/memory" -maxdepth 2 -type f -print 2>/dev/null | sort | head -80
 ```
 
 Record:
@@ -151,7 +152,9 @@ cp -a "$HOME/.codex/skills" "$BACKUP_DIR/skills" 2>/dev/null || true
 If Arry Assistant data will be changed:
 
 ```bash
-cp -a "{{SETUP_REPO}}/000_Agent" "$BACKUP_DIR/000_Agent" 2>/dev/null || true
+cp -a "{{SYNC_ROOT}}/memory" "$BACKUP_DIR/memory" 2>/dev/null || true
+cp -a "{{SYNC_ROOT}}/workflows" "$BACKUP_DIR/workflows" 2>/dev/null || true
+cp -a "{{SYNC_ROOT}}/knowledge" "$BACKUP_DIR/knowledge" 2>/dev/null || true
 cp -a "{{SETUP_REPO}}/100_Todo" "$BACKUP_DIR/100_Todo" 2>/dev/null || true
 cp -a "{{SETUP_REPO}}/200_Reference" "$BACKUP_DIR/200_Reference" 2>/dev/null || true
 ```
@@ -179,14 +182,14 @@ Possible mother folders:
 
 | Route | Example mother folder |
 |---|---|
-| Existing Google Drive workflow | `{{SETUP_REPO}}` as the data-layer root |
-| Arry Assistant global core only | `{{SETUP_REPO}}/000_Agent` |
+| Existing Google Drive workflow | `{{SYNC_ROOT}}` as the global data-layer root |
+| Arry Assistant global memory/workflows | `{{SYNC_ROOT}}/memory` and `{{SYNC_ROOT}}/workflows` |
 | iCloud | `$HOME/Library/Mobile Documents/com~apple~CloudDocs/Arry-Agent` |
 | Dropbox | `$HOME/Dropbox/Arry-Agent` |
 | OneDrive | `$HOME/Library/CloudStorage/OneDrive-Personal/Arry-Agent` |
 | GitHub only | `$HOME/Arry-Agent` or an approved project folder |
 
-For this user, prefer the existing Google Drive `codex_installation` root when the task concerns the whole Arry Assistant data layer. Use `codex_installation/000_Agent` only when the task is specifically about the global core layer. Do not collapse `100_Todo/` and `200_Reference/` into `000_Agent/`.
+For this user, prefer the existing Google Drive `codex_symlink` root when the task concerns the global Arry Assistant data layer. Do not put private memory back into the public `codex_installation` repo.
 
 ### C-2. Decide What To Sync
 
@@ -412,7 +415,7 @@ Cadence:
 
 Create or update a migration note when the user asks for a durable setup. Suggested location:
 
-- assistant data-layer root: `codex_installation/000_Agent/MIGRATION.md` for global assistant migration
+- assistant data-layer root: `{{SYNC_ROOT}}/MIGRATION.md` for global assistant migration
 - Obsidian cockpit summary: `專案庫/<project>/專案工作流程.md`
 
 Suggested sections:
@@ -487,7 +490,7 @@ Before reporting done, verify:
 
 ### I already have Arry Assistant. Does this replace it?
 
-No. Use the existing `codex_installation` as the data-layer root and `codex_installation/000_Agent` as the global core layer unless the user explicitly wants a new architecture.
+No. Use the existing `codex_symlink` as the global data-layer root. Keep private memory out of the public `codex_installation` repo.
 
 ### Should Codex credentials be synced?
 

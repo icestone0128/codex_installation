@@ -4,14 +4,14 @@ This folder contains reusable Codex skills for the lazy pack. Use the numbered g
 
 ## Copy Setup
 
-1. Copy the custom skill folders into the target user's Codex skills directory.
+1. Copy only global Codex skill folders into the target user's Codex skills directory.
    - Default Codex path: `$CODEX_HOME/skills`
    - If `$CODEX_HOME` is not set, use `~/.codex/skills`.
 2. Do not copy or edit `.system/` unless the target Codex installation explicitly requires it. System skills are managed by Codex.
 3. When sharing `social-cards`, copying `node_modules/` is optional and usually not recommended across computers. Copy `package.json` and `package-lock.json`, then run `npm install` in the target `social-cards` folder.
 4. For personal-workflow skills, set or replace these local values before use:
    - `ASSISTANT_NAME`: the personal assistant name, for example `Arry 助手`.
-   - `ASSISTANT_ROOT`: the assistant data-layer root.
+   - `ASSISTANT_ROOT`: the assistant global asset root, for example the folder that contains `skills/`, `memory/`, `workflows/`, and `knowledge/`.
    - `OBSIDIAN_VAULT`: the user's Obsidian vault path.
    - `PROJECT_LIBRARY`: the Obsidian project cockpit folder.
    - `WORK_ROOT`: the default project workspace root.
@@ -25,6 +25,17 @@ mkdir -p "{{CODEX_HOME}}/skills/<skill-name>"
 rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/<skill-name>/" "{{CODEX_HOME}}/skills/<skill-name>/"
 test -f "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md" && echo "<skill-name> installed"
 ```
+
+## Path Boundaries
+
+| Scope | Path | Rule |
+|---|---|---|
+| Global Codex skills | `$CODEX_HOME/skills` or `~/.codex/skills` | Skills that should trigger in any Codex project. This path may be symlinked to cloud storage such as `codex_symlink/skills`. |
+| LazyPack portable copies | `{{SETUP_REPO}}/lazy-pack/skills` | Versioned source copies used to install global skills. |
+| Personal assistant memory and workflows | `{{ASSISTANT_ROOT}}/memory`, `{{ASSISTANT_ROOT}}/workflows` | Cross-project memory, preferences, and workflow drafts. |
+| Project-local assistant skills | `<project-root>/000_Agent/skills` | Skills or workflows that serve only one project. |
+
+Do not symlink `000_Agent/skills` to `$CODEX_HOME/skills`. Promote a local skill to global only when it should be available across projects, then copy it into `$CODEX_HOME/skills`, LazyPack, and the Obsidian global skills index.
 
 ## Architecture
 

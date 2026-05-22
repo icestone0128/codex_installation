@@ -53,15 +53,22 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 Arry 助手 AI 分身資料層：
 
 - AI 分身名稱：Arry 助手。
-- Arry 助手資料層放在本專案：
-  - `000_Agent/`
-  - `100_Todo/`
-  - `200_Reference/`
+- Arry 助手全域資料層放在 Google Drive `codex_symlink`，不放在 public repo：
+  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`
+  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/memory`
+  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/workflows`
+  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/knowledge`
+- 本 repo 的 `000_Agent/` 只保留指向說明，不存放真實個人記憶或偏好。
 - Arry 助手是 Codex App 版設定，不使用 Claude Code 專用的 `CLAUDE.md` 或 `~/.claude/skills` symlink。
 - 可被所有專案呼叫的部分放在全域 skill：`/Users/arrywu/.codex/skills/arry-assistant/SKILL.md`。
+- Arry 助手本身是全域入口 skill；每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷新 skill 歸屬。
+- 只有全域 Codex skills 才使用 `/Users/arrywu/.codex/skills`，此路徑目前指向 Google Drive `codex_symlink/skills`。
+- Arry 助手跨專案記憶與個人偏好放在 `codex_symlink/memory/MEMORY.md`。
+- Arry 助手跨專案 workflow 草稿放在 `codex_symlink/workflows/`。
+- 任何 skill 不論全域或專案本地，都要做成可攜式版本：全域 skill 同步到 `lazy-pack/skills/` 與 Obsidian 全域 Skills 索引；專案 skill 保留完整 package 在該專案 `000_Agent/skills/` 並記錄到專案駕駛艙。
 - 若來源文件含 AI 分身預設名稱，不使用來源預設名，改用「Arry 助手」。
 - 若 Arry 助手資料層與新專案初始化規則衝突，先詢問使用者再決定。
-- `project-init-sync`、`startup-sync`、`shutdown-sync` 已整合 Arry 助手雙層資料層：未來新專案預設建立本地 `100_Todo/`、`200_Reference/`，並引用全域 Arry 助手核心層；現有專案開工/收工時可同步跨專案記憶。
+- `project-init-sync`、`startup-sync`、`shutdown-sync` 已整合 Arry 助手雙層資料層：未來新專案預設建立本地 `100_Todo/`、`200_Reference/`；若該專案需要本地 assistant skill 或本地記憶，再建立該專案自己的 `000_Agent/skills/`、`000_Agent/memory/`，並引用 `codex_symlink` 全域 Arry 助手資料層。現有專案開工/收工時可同步跨專案記憶。
 
 新專案初始化時：
 
@@ -82,7 +89,7 @@ Arry 助手 AI 分身資料層：
 - GitHub repo 為 Public；GitHub Pages 目前未啟用。
 - Firebase 使用既有 project `codex-4e80b`；本 repo 目前只有 Firestore rules，沒有 Hosting 設定。
 - Obsidian 駕駛艙位於 `專案庫/codex_installation/專案工作流程.md`。
-- Arry 助手雙層資料層已存在：本專案包含 `000_Agent/`、`100_Todo/`、`200_Reference/`。
+- Arry 助手全域資料層已移至 `codex_symlink/`；本專案 `000_Agent/` 只保留指向說明。
 - 既有專案重新初始化時，只依架構補缺與更新狀態，不覆蓋既有設定或 Git 歷史。
 
 ## 不要做

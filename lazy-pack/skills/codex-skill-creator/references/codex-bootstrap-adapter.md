@@ -24,8 +24,9 @@ This reference adapts `source skill-creator guide` for Codex App. The source is 
 
 | Source assumption | Codex-compatible version |
 |---|---|
-| 來源工具的 skills 路徑 | `{{CODEX_HOME}}/skills` |
-| `000_Agent/skills` as 來源工具 symlink target | Arry assistant core may live in `codex_installation/000_Agent`, but Codex skills still live in `{{CODEX_HOME}}/skills` |
+| 來源工具的全域 skills 路徑 | `{{CODEX_HOME}}/skills` for skills that must trigger across projects |
+| 來源工具的專案級 skills 路徑 | `<project-root>/000_Agent/skills` for skills that serve only one project |
+| `000_Agent/skills` as symlink target | Do not symlink it into `{{CODEX_HOME}}/skills`; it is the assistant or project-local portable skill package |
 | slash command `/skill-name` | Skill metadata triggers; the user can name the skill, but do not depend on a slash-command menu |
 | 來源工具 `AskUserQuestion` | Ask concise questions in Codex; use available UI tools only when present |
 | 來源工具 subagents in `agents/*.md` | Use Codex subagents only when explicitly authorized by the user; otherwise use local validation checklists |
@@ -73,11 +74,21 @@ Rules:
 - Keep body instructions procedural and compact.
 - Put long examples or source adaptations in `references/`.
 
-## Global Skill Sync Requirement
+## Portable Skill Sync Requirement
 
 After any custom global skill change, update:
 
 `{{OBSIDIAN_VAULT}}/專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
+
+and sync the portable copy:
+
+`{{SETUP_REPO}}/lazy-pack/skills/<skill-name>`
+
+After any project-local skill change, keep the complete portable package under:
+
+`<project-root>/000_Agent/skills/<skill-name>`
+
+and record the skill in that project's cockpit.
 
 Update three areas when applicable:
 
