@@ -1,6 +1,6 @@
 ---
 name: project-init-sync
-description: Use when the user says 新專案初始化, 開始新專案, 初始化專案工作模式, or asks to create or standardize a project. Follow lazy pack #07 as the default standard for all future new projects: inspect first, ask for missing project facts, create AGENTS.md, README, .gitignore, Git repo, optional GitHub repo, optional Firebase link, and an Obsidian project cockpit without overwriting existing work.
+description: Use when the user says 新專案初始化, 開始新專案, 初始化專案工作模式, or asks to create or standardize a project. Follow lazy pack #10 as the default standard for all future new projects: inspect first, ask for missing project facts, create AGENTS.md, README, .gitignore, Git repo, optional GitHub repo, optional Firebase link, and an Obsidian project cockpit without overwriting existing work.
 metadata:
   short-description: Initialize new projects
 ---
@@ -11,15 +11,17 @@ Use this workflow for every new project unless the user explicitly says not to.
 
 ## Default Paths
 
-- Main Obsidian vault: `{{OBSIDIAN_VAULT}}`
-- Default work root: `{{WORK_ROOT}}`
+- Main Obsidian vault: `OBSIDIAN_VAULT`; for this user, `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain`
+- Default work root: `WORK_ROOT`; for this user, `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟`
 - Project cockpit root: `專案庫` inside the Obsidian vault
 - Project cockpit note: `專案庫/<project-name>/專案工作流程.md` inside the Obsidian vault
-- Optional personal assistant global layer: `{{ASSISTANT_ROOT}}`
+- Optional personal assistant global layer: `ASSISTANT_ROOT`; for this user, `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink`
 - Optional personal assistant global entry skill: `$CODEX_HOME/skills/arry-assistant/SKILL.md`, or `~/.codex/skills/arry-assistant/SKILL.md` when `$CODEX_HOME` is not set
 - Optional personal assistant setup document: ask the user for the path if no local setup document exists
-- Global assistant skills: `{{ASSISTANT_ROOT}}/skills`
+- Global assistant skills: `ASSISTANT_ROOT/skills`
 - Project-local assistant folders: `100_Todo/`, `200_Reference/`, and optional `000_Agent/skills/`, `000_Agent/memory/`
+- Standard task folders: `100_Todo/drafts/emails/`, `100_Todo/drafts/articles/`, `100_Todo/drafts/scripts/`, `100_Todo/drafts/social-posts/`, `100_Todo/projects/`, `100_Todo/archive/`
+- Standard reference folders: `200_Reference/writing-samples/emails/`, `200_Reference/writing-samples/articles/`, `200_Reference/writing-samples/social/`, `200_Reference/writing-samples/scripts/`, `200_Reference/templates/email-templates/`, `200_Reference/past-work/`
 
 When adapting this skill for another user, replace `OBSIDIAN_VAULT`, `WORK_ROOT`, `ASSISTANT_ROOT`, and `ASSISTANT_NAME` before creating files. If the user does not want a personal assistant layer, skip assistant-specific folders and sections.
 
@@ -50,11 +52,20 @@ When adapting this skill for another user, replace `OBSIDIAN_VAULT`, `WORK_ROOT`
 5. Create or fill `README.md`, `.gitignore`, and Git repo if missing.
 6. Create the project-local data layer if missing:
    - `100_Todo/drafts/`
+   - `100_Todo/drafts/emails/`
+   - `100_Todo/drafts/articles/`
+   - `100_Todo/drafts/scripts/`
+   - `100_Todo/drafts/social-posts/`
    - `100_Todo/projects/`
    - `100_Todo/archive/`
    - `200_Reference/writing-samples/`
+   - `200_Reference/writing-samples/emails/`
+   - `200_Reference/writing-samples/articles/`
+   - `200_Reference/writing-samples/social/`
+   - `200_Reference/writing-samples/scripts/`
    - `200_Reference/past-work/`
    - `200_Reference/templates/`
+   - `200_Reference/templates/email-templates/`
    - `000_Agent/skills/` only when the project needs project-specific assistant skills or local workflows
    - `000_Agent/memory/` only when the project needs project-specific assistant memory separate from the global Arry core
 7. Create the Obsidian cockpit note at `專案庫/<project-name>/專案工作流程.md` in the vault, not inside the project repo.
@@ -71,11 +82,11 @@ When adapting this skill for another user, replace `OBSIDIAN_VAULT`, `WORK_ROOT`
 
 ## Safety Rules
 
-- Do not commit local assistant config folders, `.env`, API keys, tokens, passwords, admin credentials, personal data, or sensitive data.
+- Do not commit `.codex/`, `.claude/`, `.env`, API keys, tokens, passwords, admin credentials, personal data, or sensitive data.
 - Do not store unnecessary personal or sensitive data in the repo.
 - AGENTS.md stores fixed rules. Obsidian cockpit stores progress and next steps.
 - A personal assistant layer, if used, has a two-layer model. Do not duplicate or move the shared assistant core layer.
 - Every new project should get project-local `100_Todo/` and `200_Reference/` folders unless the user explicitly opts out.
 - If the user asks for project-local assistant skills, create them under `000_Agent/skills/` and do not symlink that folder to `$CODEX_HOME/skills`.
-- Any new skill must be portable: global skills sync to LazyPack and Obsidian global skill index; project skills stay as complete packages under project `000_Agent/skills/` and are recorded in the project cockpit.
 - If the user asks for project-local assistant memory, create it under `000_Agent/memory/` and document how it syncs to the project cockpit.
+- Any new skill must be portable: global skills sync to LazyPack and Obsidian global skill index; project skills stay as complete packages under project `000_Agent/skills/` and are recorded in the project cockpit.
