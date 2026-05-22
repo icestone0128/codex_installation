@@ -6,17 +6,13 @@
 
 請把 5-10 份代表性作品放入：
 
-- Facebook 貼文：`200_Reference/writing-samples/social/`
-- Email、合作邀約、客戶溝通：`200_Reference/writing-samples/emails/`
-- 書籍讀後心得：`200_Reference/writing-samples/articles/`
-- Podcast 讀後心得或口語稿：`200_Reference/writing-samples/scripts/`
+- 寫作與語氣樣本：`200_Reference/writing-samples/`
 
 ## 作業 2：整理常用模板
 
 請把常用格式放入：
 
-- 一般模板：`200_Reference/templates/`
-- Email 模板：`200_Reference/templates/email-templates/`
+- 常用模板：`200_Reference/templates/`
 
 ## 作業 3：挑 3 個最重複的流程
 

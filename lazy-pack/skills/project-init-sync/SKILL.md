@@ -20,8 +20,8 @@ Use this workflow for every new project unless the user explicitly says not to.
 - Optional personal assistant setup document: ask the user for the path if no local setup document exists
 - Global assistant skills: `ASSISTANT_ROOT/skills`
 - Project-local assistant folders: `100_Todo/`, `200_Reference/`, and optional `000_Agent/skills/`, `000_Agent/memory/`
-- Standard task folders: `100_Todo/drafts/emails/`, `100_Todo/drafts/articles/`, `100_Todo/drafts/scripts/`, `100_Todo/drafts/social-posts/`, `100_Todo/projects/`, `100_Todo/archive/`
-- Standard reference folders: `200_Reference/writing-samples/emails/`, `200_Reference/writing-samples/articles/`, `200_Reference/writing-samples/social/`, `200_Reference/writing-samples/scripts/`, `200_Reference/templates/email-templates/`, `200_Reference/past-work/`
+- Standard task folders: `100_Todo/drafts/`, `100_Todo/projects/`, `100_Todo/archive/`
+- Standard reference folders: `200_Reference/writing-samples/`, `200_Reference/templates/`, `200_Reference/past-work/`
 
 When adapting this skill for another user, replace `OBSIDIAN_VAULT`, `WORK_ROOT`, `ASSISTANT_ROOT`, and `ASSISTANT_NAME` before creating files. If the user does not want a personal assistant layer, skip assistant-specific folders and sections.
 
@@ -52,20 +52,11 @@ When adapting this skill for another user, replace `OBSIDIAN_VAULT`, `WORK_ROOT`
 5. Create or fill `README.md`, `.gitignore`, and Git repo if missing.
 6. Create the project-local data layer if missing:
    - `100_Todo/drafts/`
-   - `100_Todo/drafts/emails/`
-   - `100_Todo/drafts/articles/`
-   - `100_Todo/drafts/scripts/`
-   - `100_Todo/drafts/social-posts/`
    - `100_Todo/projects/`
    - `100_Todo/archive/`
    - `200_Reference/writing-samples/`
-   - `200_Reference/writing-samples/emails/`
-   - `200_Reference/writing-samples/articles/`
-   - `200_Reference/writing-samples/social/`
-   - `200_Reference/writing-samples/scripts/`
    - `200_Reference/past-work/`
    - `200_Reference/templates/`
-   - `200_Reference/templates/email-templates/`
    - `000_Agent/skills/` only when the project needs project-specific assistant skills or local workflows
    - `000_Agent/memory/` only when the project needs project-specific assistant memory separate from the global Arry core
 7. Create the Obsidian cockpit note at `專案庫/<project-name>/專案工作流程.md` in the vault, not inside the project repo.

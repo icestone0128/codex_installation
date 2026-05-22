@@ -36,10 +36,8 @@ Project workspace initialized on 2026-05-07.
 
 Standard project-local data layer:
 
-- `100_Todo/drafts/emails/`, `100_Todo/drafts/articles/`, `100_Todo/drafts/scripts/`, `100_Todo/drafts/social-posts/`
-- `100_Todo/projects/`, `100_Todo/archive/`
-- `200_Reference/writing-samples/emails/`, `200_Reference/writing-samples/articles/`, `200_Reference/writing-samples/social/`, `200_Reference/writing-samples/scripts/`
-- `200_Reference/templates/email-templates/`, `200_Reference/past-work/`
+- `100_Todo/drafts/`, `100_Todo/projects/`, `100_Todo/archive/`
+- `200_Reference/writing-samples/`, `200_Reference/templates/`, `200_Reference/past-work/`
 
 ## Getting Started
 
