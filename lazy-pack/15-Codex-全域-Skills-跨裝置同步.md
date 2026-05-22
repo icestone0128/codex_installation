@@ -6,7 +6,7 @@
 
 ## 這份文件會做什麼
 
-這份懶人包只處理 **Codex 全域 skills** 的跨裝置同步。
+這份懶人包只處理 **Codex 全域 skills** 的跨裝置同步，不處理個人助手或專案本地的 `000_Agent/skills`。
 
 它會把：
 
@@ -22,6 +22,12 @@
 
 這樣新裝置只要登入同一個雲端帳號，再重建 symlink，就能讀到同一份全域 skills。
 
+路徑邊界：
+
+- `{{CODEX_HOME}}/skills`：Codex App 全域觸發的 skills；可 symlink 到 `{{SYNC_ROOT}}/skills`。
+- `{{SYNC_ROOT}}/memory`、`{{SYNC_ROOT}}/workflows`、`{{SYNC_ROOT}}/knowledge`：個人助手全域資料層；不 symlink 到 `{{CODEX_HOME}}/skills`。
+- `<project-root>/000_Agent/skills`：單一專案本地 skill；不 symlink 到 `{{CODEX_HOME}}/skills`。
+
 ## 不會同步的東西
 
 不要把整個 `{{CODEX_HOME}}` 丟進雲端同步。`{{CODEX_HOME}}` 裡通常會有：
@@ -32,7 +38,7 @@
 - shell snapshots
 - 本機狀態與登入資訊
 
-這些跨裝置同步容易壞，也有隱私風險。本文件只同步 `skills/`。
+這些跨裝置同步容易壞，也有隱私風險。本文件只同步 Codex 全域 `skills/`。個人助手全域記憶與 workflow 放在 `{{SYNC_ROOT}}/memory` 與 `{{SYNC_ROOT}}/workflows`，不要和 Codex 全域 skills 混成同一個 symlink。
 
 ## 先填變數
 

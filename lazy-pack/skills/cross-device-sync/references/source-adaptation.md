@@ -24,7 +24,7 @@ This Codex version keeps the useful operating model but changes the target surfa
 | 來源工具規則檔 is the rule file | `AGENTS.md` is the project rule file |
 | 來源工具 slash commands are user-facing entry points | Codex skills trigger by metadata and user intent |
 | 來源工具 subagents are part of the workflow | Codex subagents are only used when explicitly requested or clearly useful |
-| `000_Agent/` is created by pro-kit 01 | This user already has Arry Assistant data under `codex_installation/000_Agent` |
+| `000_Agent/` is created by pro-kit 01 | This user's global Arry Assistant data lives under `codex_symlink/`; project-local data may use each project's `000_Agent/` |
 | Source examples refer to Raymond/Raymond-Agent | Use Arry Assistant and the user's existing Google Drive/Obsidian paths |
 
 ## Codex-Specific Safety Changes
@@ -32,7 +32,7 @@ This Codex version keeps the useful operating model but changes the target surfa
 - The skill must not automatically move or symlink `{{CODEX_HOME}}` assets during installation.
 - Any future sync setup must be plan-first and approval-gated because it can affect all Codex sessions.
 - The default sync approach should align with the user's chosen cloud project folders and Obsidian project cockpits.
-- The existing Arry Assistant architecture uses `codex_installation` as the data-layer root with `000_Agent/`, `100_Todo/`, and `200_Reference/` as sibling layers; do not treat `000_Agent/` as the whole mother folder for every use case.
+- The existing Arry Assistant architecture uses Google Drive `codex_symlink/` as the global layer for `skills/`, `memory/`, `workflows/`, and `knowledge/`; project-local data may still use each project's `000_Agent/`.
 - `{{GITHUB_USER}}/{{SETUP_PROJECT_NAME}}` is public, so private backups and personal memory must not be staged or tracked there.
 - System skills under `{{CODEX_HOME}}/skills/.system` are Codex-managed and should not be edited or moved manually.
 - Global skill changes must update the Obsidian mirror note at `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`.

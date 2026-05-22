@@ -12,7 +12,7 @@ Use this workflow at the end of a work session.
 1. Review what changed during this session.
 2. Read project `AGENTS.md` and the Obsidian cockpit note.
 3. If the project uses a personal assistant layer such as Arry 助手, decide whether the session produced reusable cross-project memory:
-   - reusable preference or repeated lesson -> append to `ASSISTANT_ROOT/000_Agent/memory/MEMORY.md` when that durable memory path is documented and approved
+   - reusable preference or repeated lesson -> append to `ASSISTANT_ROOT/memory/MEMORY.md` when that durable memory path is documented and approved
    - project-only progress -> keep in the project cockpit
 4. Update the Obsidian cockpit with:
    - what was completed

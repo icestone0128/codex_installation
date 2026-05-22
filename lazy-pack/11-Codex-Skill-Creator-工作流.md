@@ -2,14 +2,15 @@
 
 ## 目標
 
-把 外部 / Anthropic 取向的 Skill Creator 啟動包，轉成 Codex App 可用的全域 skill 建立流程。
+把 外部 / Anthropic 取向的 Skill Creator 啟動包，轉成 Codex App 可用的 skill 建立流程，並判斷新 skill 應該放在全域還是專案本地。
 
 這份文件是之後建立、優化、驗證 Codex skills 的正式懶人包。若來源文件提到 來源工具、來源工具的 skills 路徑、slash command、來源工具 subagent 或 來源工具專用 frontmatter，一律先依本文件轉換，不直接照做。
 
 ## 前置條件
 
 - 已完成 `README.md` 的設定表。
-- 已知道 Codex skills 位置：`{{CODEX_HOME}}/skills`。
+- 已知道 Codex 全域 skills 位置：`{{CODEX_HOME}}/skills`。
+- 已知道專案本地 skills 位置：`<project-root>/000_Agent/skills`。
 - 已確認系統內建 skills 位置：`{{CODEX_HOME}}/skills/.system`。
 - 已知道 Obsidian 全域 skill 索引位置；若沒有，可先建立：
 
@@ -22,8 +23,28 @@
 - 使用環境：Codex App。
 - 自訂全域 skills 固定放在 `{{CODEX_HOME}}/skills`。
 - Codex 內建系統 skills 在 `{{CODEX_HOME}}/skills/.system`，平常只讀取，不覆蓋。
+- 個人助手或單一專案的本地 skills 固定放在對應的 `000_Agent/skills`，不要 symlink 到 `{{CODEX_HOME}}/skills`。
 - 內建 `skill-creator` 保持系統版本；自訂優化放在 companion skill。
 - 全域 skills 有新增、修改或刪除時，要同步更新 Obsidian 的全域 Skills 索引。
+- 任何 skill 不論全域或專案本地，都要做成可攜式版本。
+
+## 歸屬判斷
+
+建立或修改 skill 前，先判斷：
+
+| 問題 | 判斷 |
+| --- | --- |
+| 會跨多個專案重複使用嗎？ | 是，放全域 `{{CODEX_HOME}}/skills/<skill-name>` |
+| 需要在任何 Codex 對話都能觸發嗎？ | 是，放全域 |
+| 只服務目前專案的資料、流程、工具或客戶脈絡嗎？ | 是，放 `<project-root>/000_Agent/skills/<skill-name>` |
+| 含有不適合公開或跨專案複用的專案脈絡嗎？ | 放專案本地 |
+| 目前只是流程草稿，尚未穩定複用嗎？ | 先放 `000_Agent/skills`，成熟後再升級全域 |
+
+可攜化規則：
+
+- 全域 skill：實作在 `{{CODEX_HOME}}/skills/<skill-name>`，同步可攜副本到 `{{SETUP_REPO}}/lazy-pack/skills/<skill-name>`，並更新 Obsidian 全域 Skills 索引。
+- 專案 skill：實作在 `<project-root>/000_Agent/skills/<skill-name>`，該資料夾必須包含完整 `SKILL.md` 與必要資源；若專案使用 Git，跟著專案提交。
+- 不把 `000_Agent/skills` symlink 到 `{{CODEX_HOME}}/skills`。
 
 ## 建立 Codex 版 Skill Creator Companion
 
@@ -43,8 +64,8 @@ codex-skill-creator
 用途：
 
 - 把 外部 / Anthropic skill 教學轉成 Codex App 相容流程。
-- 建立、優化、驗證自訂全域 skills。
-- 記得同步 Obsidian 全域 skill 索引。
+- 建立、優化、驗證自訂全域或專案本地 skills。
+- 記得同步可攜式版本；全域 skill 同步 Obsidian 全域 skill 索引，專案 skill 同步專案駕駛艙。
 
 ## 直接安裝本懶人包版本
 
@@ -62,9 +83,9 @@ test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skil
 
 | 外部 / Anthropic 啟動包項目 | Codex App 相容做法 |
 | --- | --- |
-| 來源工具的 skills 路徑 | 改用 `{{CODEX_HOME}}/skills` |
-| 來源工具的專案級 skills 路徑 專案 skill | 預設不要用；除非另有 Codex 專案級 skill 機制 |
-| `000_Agent/skills` symlink | 不建立；個人助手核心可在 `{{SETUP_REPO}}/000_Agent`，但正式 Codex skill 放 `{{CODEX_HOME}}/skills` |
+| 來源工具的全域 skills 路徑 | 需要全域觸發時改用 `{{CODEX_HOME}}/skills` |
+| 來源工具的專案級 skills 路徑 專案 skill | 改放該專案 `000_Agent/skills`，只服務該專案 |
+| `000_Agent/skills` symlink | 不建立；`000_Agent/skills` 是本地 skill 區，不等於 Codex 全域 skills |
 | 來源工具 slash command `/skill-name` | 不依賴；Codex 以 skill metadata 與任務語意觸發 |
 | `allowed-tools` | 不寫入；Codex 工具權限由當前 session、plugin、connector 與沙箱控制 |
 | `disable-model-invocation` / `user-invocable` | 不寫入；觸發邊界寫在 `description` 與本文規則 |
@@ -145,13 +166,17 @@ metadata:
 
 ```text
 {{CODEX_HOME}}/skills/<skill-name>/SKILL.md
+<project-root>/000_Agent/skills/<skill-name>/SKILL.md
 ```
 
 視需要加：
 
 ```text
 {{CODEX_HOME}}/skills/<skill-name>/references/<reference>.md
+<project-root>/000_Agent/skills/<skill-name>/references/<reference>.md
 ```
+
+二選一建立，不要同時建立兩份正式來源；除非是把專案 skill 升級成全域 skill，才複製到全域 skills 並同步 LazyPack。
 
 ### 4. 驗證
 
@@ -186,6 +211,15 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 - 最近同步紀錄。
 
 若下載者沒有使用 Obsidian，也至少在 `{{SETUP_REPO}}/README.md` 或專案駕駛艙記錄 skill 清單。
+
+每次專案 skill 變更後，更新該專案：
+
+```text
+<project-root>/000_Agent/skills/<skill-name>/
+{{OBSIDIAN_PROJECTS}}/<project-name>/專案工作流程.md
+```
+
+至少記錄 skill 名稱、用途、實際路徑、可攜式資源是否完整。
 
 ## 本懶人包內含範例
 
@@ -222,14 +256,15 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
    - 引用的 `references/` 檔案存在。
    - 沒有 來源工具的 skills 路徑、`allowed-tools`、`disable-model-invocation`、`user-invocable` 等 來源工具專用 正式設定。
 4. 開新 Codex 對話，使用自然語言觸發該 skill 的任務。
-5. 同步 Obsidian 全域 Skills 索引或專案 README。
+5. 確認可攜式版本完整：全域 skill 同步 `{{SETUP_REPO}}/lazy-pack/skills/<skill-name>`；專案 skill 保留在 `<project-root>/000_Agent/skills/<skill-name>`。
+6. 同步 Obsidian 全域 Skills 索引、專案駕駛艙或專案 README。
 
 ## 踩坑修正
 
 - 原始 `02-skill-creator-bootstrap.md` 是 來源工具 啟動包，不能原樣執行。
 - 不要把官方 Anthropic `skill-creator` sparse checkout 到 Codex 系統 skill 位置；Codex 已有內建 `.system/skill-creator`。
 - 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`，因為它由 Codex 管理。
-- Codex skills 不放在 來源工具的 skills 路徑，也不建立 來源工具的專案級 skills 路徑 或 symlink。
+- Codex 全域 skills 不放在 來源工具的 skills 路徑；專案級 skills 放 `<project-root>/000_Agent/skills`，但不建立 symlink。
 - Codex 不應依賴 `/skill-name` slash command；要靠 `description` 寫清楚觸發語意。
 - 來源工具專用 frontmatter 欄位要轉成 Codex 可理解的文字規則，不要照抄。
 - 新增 skill 後不代表本對話立即可見；通常要開新對話或重啟 Codex App。
@@ -244,7 +279,7 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 1. 先套用本文件的 Codex 相容規則。
 2. 使用 `codex-skill-creator` companion skill。
 3. 若是第一個真實工作 skill，先做簡短訪談。
-4. 建立或更新 `{{CODEX_HOME}}/skills/<skill-name>`。
+4. 判斷 skill 歸屬，建立或更新 `{{CODEX_HOME}}/skills/<skill-name>` 或 `<project-root>/000_Agent/skills/<skill-name>`。
 5. 驗證 frontmatter、路徑與 reference。
-6. 同步 Obsidian 全域 Skills 筆記或專案 README。
+6. 同步可攜式版本：全域同步 LazyPack 與 Obsidian 全域 Skills；專案同步專案 `000_Agent/skills` 與專案駕駛艙。
 7. 回報是否需要開新對話或重啟 Codex App。

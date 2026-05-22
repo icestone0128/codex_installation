@@ -22,6 +22,12 @@ secrets.*
 .env.*
 !.env.example
 
+# Arry assistant private data lives in Google Drive codex_symlink, not this public repo
+000_Agent/memory/
+000_Agent/workflows/
+000_Agent/knowledge/
+000_Agent/skills/
+
 # Dependencies and build outputs
 .cache/
 node_modules/

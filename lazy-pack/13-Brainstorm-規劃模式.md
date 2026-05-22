@@ -173,8 +173,9 @@ YYYY-MM-DD-[主題關鍵字].md
 | 來源工具 原流程 | Codex App 相容做法 |
 | --- | --- |
 | `/brainstorm` slash command | 可保留為觸發語，但不依賴 slash command 機制 |
-| 來源工具的 skills 路徑 | 改用 `{{CODEX_HOME}}/skills` |
-| `000_Agent/skills` symlink | 不建立；正式 Codex skill 放在 `{{CODEX_HOME}}/skills` |
+| 來源工具的全域 skills 路徑 | 需要全域觸發時改用 `{{CODEX_HOME}}/skills` |
+| 來源工具的專案級 skills | 改放該專案 `000_Agent/skills`，只服務該專案 |
+| `000_Agent/skills` symlink | 不建立；`000_Agent/skills` 是本地 skill 區，不等於 Codex 全域 skills |
 | `AskUserQuestion` | 改成 Codex 對話中的單題引導 |
 | 安裝時固定 `PLANS_DIR` | 使用 skill 時依專案決定 |
 | 來源工具 Plan Mode 比較 | 改成 Codex 的「確認計劃前不實作」硬性閘門 |
@@ -182,7 +183,7 @@ YYYY-MM-DD-[主題關鍵字].md
 ## 踩坑修正
 
 - 不要把原始 來源工具 安裝段落直接照貼到 Codex。
-- 不要建立 來源工具的 skills 路徑、來源工具的專案級 skills 路徑 或 來源工具 command shim。
+- 不要建立 來源工具的 skills 路徑或 command shim；專案級 skill 只放該專案 `000_Agent/skills`。
 - Codex 不保證 `/brainstorm` 會像 來源工具 slash command 一樣被 UI 特別處理；要在 `description` 寫清楚自然語意觸發。
 - 安裝後通常要開新 Codex 對話或重啟 Codex App。
 - 這個 skill 是規劃閘門，不是自動執行工具；使用者確認前不要動檔案。

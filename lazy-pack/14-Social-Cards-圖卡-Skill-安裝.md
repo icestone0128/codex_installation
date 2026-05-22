@@ -18,7 +18,8 @@
 
 | 原始文件 | Codex 版 |
 |---|---|
-| 安裝到 `000_Agent/skills` 或 來源工具的 skills 路徑 | 安裝到 `{{CODEX_HOME}}/skills/social-cards` |
+| 安裝到 來源工具的全域 skills 路徑 | 安裝到 `{{CODEX_HOME}}/skills/social-cards` |
+| 安裝到 `000_Agent/skills` | 只在它是單一專案或個人助手本地卡片流程時使用，不作為全域安裝 |
 | skill 名稱為 `cards` | skill id 為 `social-cards`，顯示名稱為 Social Cards |
 | `/cards` 是 slash command | `/cards` 只是觸發語；Codex 依 `SKILL.md` metadata 觸發 |
 | `blue-dark` / `orange-light` | 已改為 `brand-dark` / `brand-light` |
@@ -111,6 +112,8 @@ Codex 會依 Skill 流程：收集內容、確認尺寸、確認 handle、拆卡
 ```text
 /Users/<你的使用者名稱>/.codex/skills
 ```
+
+如果這套卡片流程只服務某一個專案或個人助手資料層，不需要全域觸發，才放在該專案或助手的 `000_Agent/skills/social-cards`。不要把 `000_Agent/skills` symlink 到 `{{CODEX_HOME}}/skills`。
 
 ### 2. `cards` 和 Social Cards 的命名要分清楚
 
