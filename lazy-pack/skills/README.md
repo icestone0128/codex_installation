@@ -46,7 +46,7 @@ The skills are organized into five layers:
 | Governance and maintenance | `codex-skill-creator`, `cross-device-sync` | Create, validate, sync, migrate, and document skills |
 | Project lifecycle | `project-init-sync`, `startup-sync`, `shutdown-sync` | Standardize project setup, opening checks, and close-out |
 | Personal knowledge layer | `arry-assistant`, `secondbrain-research-digest` | Personal assistant memory, Obsidian research, and durable notes |
-| Content and teaching workflows | `notebooklm-architecture`, `presentation-workflow`, `visual-note-generator`, `social-cards`, `doc-to-md`, `pdf` | NotebookLM control, slides, visual notes, cards, document conversion, and PDF work |
+| Content and teaching workflows | `notebooklm-architecture`, `presentation-workflow`, `visual-note-generator`, `social-cards`, `landing-page`, `doc-to-md`, `pdf` | NotebookLM control, slides, visual notes, cards, landing pages, document conversion, and PDF work |
 | Tools and thinking workflows | `tool-integration-workflow`, `heptabase-cli`, `playwright`, `brainstorm`, `rightproblem-coach` | External tool routing, Heptabase CLI, browser automation, planning, and problem framing |
 
 ## Portability Status
@@ -60,6 +60,7 @@ The skills are organized into five layers:
 | `rightproblem-coach` | Portable | Writes HTML to a local output path chosen by the session. |
 | `visual-note-generator` | Portable | Bundled prompt reference is included. |
 | `social-cards` | Portable with dependency | Requires Node dependencies before PNG export. Templates and script are bundled. |
+| `landing-page` | Portable | Generates guided landing page HTML with bundled question bank, fallback design rules, and templates. Optional UUPM integration is not required. |
 | `doc-to-md` | Portable with dependency | Requires Python dependencies from bundled `scripts/requirements.txt`. |
 | `pdf` | Portable with dependency | Requires Python PDF packages and Poppler for visual rendering checks. |
 | `playwright` | Portable with dependency | Requires Node/npm and uses the bundled `scripts/playwright_cli.sh` wrapper. |
@@ -86,6 +87,7 @@ The skills are organized into five layers:
 - Use `pdf` when PDF layout, rendering, generation, or visual QA matters.
 - Use `playwright` for terminal-based browser automation, screenshots, snapshots, and UI-flow debugging.
 - Use `social-cards` after a draft article, note, or digest exists and the user asks for social-media image cards.
+- Use `landing-page` when the user wants a guided sales page, course page, event signup page, product page, or lead-capture page generated as HTML.
 
 ## Completeness Checklist
 
@@ -97,6 +99,6 @@ Before sharing the package with another user:
 - Bundled scripts referenced in `SKILL.md` exist.
 - Bundled references referenced in `SKILL.md` exist.
 - Node dependencies such as `social-cards/node_modules/` are either present locally or rebuilt with `npm install`.
-- 來源工具專用 frontmatter fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, and `when_to_use` are absent from active `SKILL.md` files.
+- Source-tool-specific frontmatter fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, and `when_to_use` are absent from active `SKILL.md` files.
 - Personal paths are either documented as local defaults or replaced by placeholders before sharing.
 - No API keys, tokens, passwords, OAuth files, or private memory are included.
