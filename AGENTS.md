@@ -46,8 +46,8 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 - 目前 `/Users/arrywu/.codex/skills` 是 symlink，實體位置在 `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`
 - Obsidian 同步索引：`專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
-- 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `lazy-pack/skills/` 與 `lazy-pack/skills/README.md`，讓 LazyPack 可攜化版本和實際全域 skills 保持一致。
-- 同步後要實際比對 `/Users/arrywu/.codex/skills`、`lazy-pack/skills/` 與 Obsidian `全域 Skills 同步.md` 的 skill 名稱；不可只更新其中一處。
+- 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容和實際全域 skills 保持一致。
+- 同步後要實際比對 `/Users/arrywu/.codex/skills`、`lazy-pack/` 對應序號文件內嵌的 skill 名稱與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
 - 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
 
 Arry 助手 AI 分身資料層：
@@ -65,7 +65,7 @@ Arry 助手 AI 分身資料層：
 - 只有全域 Codex skills 才使用 `/Users/arrywu/.codex/skills`，此路徑目前指向 Google Drive `codex_symlink/skills`。
 - Arry 助手跨專案記憶與個人偏好放在 `codex_symlink/memory/MEMORY.md`。
 - Arry 助手跨專案 workflow 草稿放在 `codex_symlink/workflows/`。
-- 任何 skill 不論全域或專案本地，都要做成可攜式版本：全域 skill 同步到 `lazy-pack/skills/` 與 Obsidian 全域 Skills 索引；專案 skill 保留完整 package 在該專案 `000_Agent/skills/` 並記錄到專案駕駛艙。
+- 任何 skill 不論全域或專案本地，都要做成可攜式版本：全域 skill 內容內嵌到 `lazy-pack/` 對應序號文件與 Obsidian 全域 Skills 索引；專案 skill 保留完整 package 在該專案 `000_Agent/skills/` 並記錄到專案駕駛艙。
 - 若來源文件含 AI 分身預設名稱，不使用來源預設名，改用「Arry 助手」。
 - 若 Arry 助手資料層與新專案初始化規則衝突，先詢問使用者再決定。
 - `project-init-sync`、`startup-sync`、`shutdown-sync` 已整合 Arry 助手雙層資料層：未來新專案預設建立本地 `100_Todo/`、`200_Reference/`；若該專案需要本地 assistant skill 或本地記憶，再建立該專案自己的 `000_Agent/skills/`、`000_Agent/memory/`，並引用 `codex_symlink` 全域 Arry 助手資料層。現有專案開工/收工時可同步跨專案記憶。

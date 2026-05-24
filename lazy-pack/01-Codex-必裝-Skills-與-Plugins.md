@@ -1,5 +1,8 @@
 # 01-Codex-必裝-Skills-與-Plugins
 
+> 2026-05-24 更新：本文件只保留 Codex 基礎 plugins / connectors 與內建能力檢查。自訂全域 Skill 已拆到各自的有序號文件，不再依賴舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。
+
+
 ## 目標
 
 確認 Codex 基礎工作能力：GitHub、Gmail、Google Calendar、Google Drive、文件、試算表、簡報、瀏覽器、技能建立與技能安裝。
@@ -19,7 +22,7 @@
 - Gmail：信件搜尋、摘要、草稿。
 - Google Calendar：行程、會議準備、空檔查詢。
 - Google Drive：Drive、Docs、Sheets、Slides。
-- Notion：workspace 搜尋、頁面讀取、database 讀取與明確確認後的頁面建立/更新。
+- Notion：workspace 搜尋、頁面讀取、database 讀取與明確確認後的頁面建立/更新。此項歸在 01 必裝 plugins/connectors 檢查，不需要建立自訂全域 skill。
 - Browser：本機或遠端網頁測試。
 - Documents：Word / docx 文件處理。
 - Spreadsheets：xlsx / csv / Sheets 類任務。
@@ -45,19 +48,19 @@ Codex 通常已內建：
 {{CODEX_HOME}}/skills
 ```
 
-本懶人包附的自訂 skill 已放在 `lazy-pack/skills/`。先安裝基礎工作流：
+本懶人包的自訂 skill 內容已內嵌在對應序號文件中。01 只做基礎 plugins / connectors 與內建能力檢查；自訂 skill 請依 05、07、09 到 18 的文末內建腳本安裝。
 
 ```bash
 mkdir -p "{{CODEX_HOME}}/skills"
 
 for skill in codex-skill-creator project-init-sync startup-sync shutdown-sync tool-integration-workflow brainstorm; do
-  rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/$skill/" "{{CODEX_HOME}}/skills/$skill/"
+  # 舊版 對應序號文件的內嵌 Skill 區塊 複製指令已取消；請使用文末「內建 Skill 完整安裝內容」。
 done
 
 find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print
 ```
 
-再依需求安裝個人與內容製作類 skill：
+再依需求安裝個人、內容製作與工具類 skill：
 
 | Skill | 用途 | 安裝時機 |
 | --- | --- | --- |
@@ -65,10 +68,7 @@ find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print
 | `secondbrain-research-digest` | Obsidian 研究整理 | 完成 `05-第二大腦設定指南` 後 |
 | `cross-device-sync` | 全域 skills 跨裝置同步 | 完成主線後，需要同步多台裝置時 |
 | `social-cards` | 圖卡輸出 | 需要社群圖卡時，並安裝 Node 依賴 |
-| `doc-to-md` | PDF / EPUB / TXT 轉 Markdown | 需要文件轉換時，並安裝 Python 依賴 |
 | `notebooklm-architecture`、`presentation-workflow`、`visual-note-generator` | NotebookLM / 簡報 / 視覺筆記 | 需要教學內容製作時 |
-| `heptabase-cli` | Heptabase CLI 工作流 | 已安裝並啟動 Heptabase CLI 後 |
-| `rightproblem-coach` | 問題結構化 | 需要問題規格書或教練流程時 |
 
 下載者可照 `11-Codex-Skill-Creator-工作流.md` 建立自己的版本，不需要沿用 `Arry` 命名。
 

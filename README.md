@@ -26,8 +26,7 @@ Project workspace initialized on 2026-05-07.
 - `README.md` - repo overview and initialization facts.
 - `.gitignore` - local, secret, dependency, and build-output exclusions.
 - `docs/` - local documentation entry files. Not currently deployed.
-- `lazy-pack/` - verified Codex setup notes and troubleshooting records.
-- `lazy-pack/skills/` - installable custom Codex skill packages used by the lazy pack.
+- `lazy-pack/` - verified Codex setup notes, troubleshooting records, and self-contained skill installers embedded in the numbered files.
 - `000_Agent/` - pointer only; Arry assistant global data now lives in Google Drive `codex_symlink/`.
 - `100_Todo/` - project-local task, draft, and work-in-progress area.
 - `200_Reference/` - project-local reference, template, and past-work area.
