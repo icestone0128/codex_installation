@@ -1,6 +1,6 @@
 # 13-Brainstorm-規劃模式
 
-> 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不要再依賴舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。
+> 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不需要額外的舊版獨立 skills 子目錄。
 
 
 ## 目標
@@ -48,14 +48,14 @@
 
 ```bash
 mkdir -p "{{CODEX_HOME}}/skills/brainstorm"
-# 舊版 對應序號文件的內嵌 Skill 區塊 複製指令已取消；請使用文末「內建 Skill 完整安裝內容」。
+# 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
 ```
 
 如果你已經有同名 skill，先備份再覆蓋：
 
 ```bash
 cp -R "{{CODEX_HOME}}/skills/brainstorm" "{{CODEX_HOME}}/skills/brainstorm.backup.$(date +%Y%m%d-%H%M%S)"
-# 舊版 對應序號文件的內嵌 Skill 區塊 複製指令已取消；請使用文末「內建 Skill 完整安裝內容」。
+# 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
 ```
 
 ## 驗證安裝
@@ -206,9 +206,9 @@ YYYY-MM-DD-[主題關鍵字].md
 
 ## 內建 Skill 完整安裝內容
 
-本節取代舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。這個序號項目會安裝：`brainstorm`。
+本節是自含式安裝區塊。這個序號項目會安裝：`brainstorm`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `/Users/alex/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
 ```bash
 set -e
@@ -436,13 +436,13 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptati
 cat > "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md" <<'CODEX_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD'
 # Brainstorm 來源轉換說明
 
-來源檔：`/Users/arrywu/Downloads/04-brainstorm.md`
+來源檔：`04-brainstorm.md`
 
-原始來源是 Claude Code 的 `/brainstorm` 安裝劇本，包含 `~/.claude/skills`、`AskUserQuestion`、slash command 與 Claude Code Plan Mode 比較。安裝到 Codex App 時已做以下轉換：
+原始來源是 Claude Code 的 `/brainstorm` 安裝劇本，包含 `來源工具的舊 skills 路徑`、`AskUserQuestion`、slash command 與 Claude Code Plan Mode 比較。安裝到 Codex App 時已做以下轉換：
 
-- 安裝位置改為 `/Users/arrywu/.codex/skills/brainstorm/`。
+- 安裝位置改為 `{{CODEX_HOME}}/skills/brainstorm/`。
 - 觸發方式改為 Codex skill metadata 與自然語意，例如「brainstorm」、「/brainstorm」、「先想清楚再動手」。
-- 移除 Claude 專用路徑：`~/.claude/skills`、專案 `000_Agent/skills` symlink、Claude command shim。
+- 移除 Claude 專用路徑：`來源工具的舊 skills 路徑`、專案 `000_Agent/skills` symlink、Claude command shim。
 - 移除 Claude 專用工具名稱 `AskUserQuestion`，改為 Codex 對話中的單題引導；若未來 Codex App 提供可用選項 UI，可用該 UI 呈現選項。
 - 保留硬性閘門：使用者確認計劃前不實作、不 scaffold、不修改檔案。
 - 保留四種溝通模式：小白、半技術、工程師、AI 判斷。

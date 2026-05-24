@@ -65,7 +65,7 @@ tool_timeout_sec = 120
 範例：
 
 ```text
-/Users/alex/Documents
+{{FILESYSTEM_ALLOWED_DIR}}
 ```
 
 在 `{{CODEX_CONFIG}}` 加入：
@@ -183,7 +183,7 @@ args = ["NPM_CONFIG_CACHE=/private/tmp/npm-cache", "npx", ...]
 
 本節會安裝：`heptabase-cli`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `/Users/alex/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
 ```bash
 set -e

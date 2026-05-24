@@ -1,6 +1,6 @@
 # 01-Codex-必裝-Skills-與-Plugins
 
-> 2026-05-24 更新：本文件只保留 Codex 基礎 plugins / connectors 與內建能力檢查。自訂全域 Skill 已拆到各自的有序號文件，不再依賴舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。
+> 2026-05-24 更新：本文件只保留 Codex 基礎 plugins / connectors 與內建能力檢查。自訂全域 Skill 已拆到各自的有序號文件，不需要額外的舊版獨立 skills 子目錄。
 
 
 ## 目標
@@ -54,7 +54,7 @@ Codex 通常已內建：
 mkdir -p "{{CODEX_HOME}}/skills"
 
 for skill in codex-skill-creator project-init-sync startup-sync shutdown-sync tool-integration-workflow brainstorm; do
-  # 舊版 對應序號文件的內嵌 Skill 區塊 複製指令已取消；請使用文末「內建 Skill 完整安裝內容」。
+  # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
 done
 
 find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print
