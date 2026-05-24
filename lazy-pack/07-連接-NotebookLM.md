@@ -1,6 +1,6 @@
 # 07-連接-NotebookLM
 
-> 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不要再依賴舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。
+> 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不需要額外的舊版獨立 skills 子目錄。
 
 
 ## 目標
@@ -11,7 +11,7 @@
 
 - 已安裝 Codex App。
 - 已有 Google 帳號並可使用 NotebookLM。
-- 已決定 `{{NOTEBOOKLM_OUTPUT}}`，例如 `/Users/alex/Documents/NotebookLM`。
+- 已決定 `{{NOTEBOOKLM_OUTPUT}}`，例如 `{{NOTEBOOKLM_OUTPUT}}`。
 - 若使用 NotebookLM MCP，需已安裝對應 CLI，並確認可登入 Google 帳號。
 
 ## 建立輸出資料夾
@@ -57,7 +57,7 @@ tool_timeout_sec = 120
 
 ```toml
 [mcp_servers.notebooklm]
-command = "/Users/alex/.local/bin/notebooklm-mcp"
+command = "{{NOTEBOOKLM_MCP_COMMAND}}"
 args = []
 startup_timeout_sec = 30
 tool_timeout_sec = 120
@@ -70,7 +70,7 @@ tool_timeout_sec = 120
 ```bash
 for skill in notebooklm-architecture presentation-workflow visual-note-generator; do
   mkdir -p "{{CODEX_HOME}}/skills/$skill"
-  # 舊版 對應序號文件的內嵌 Skill 區塊 複製指令已取消；請使用文末「內建 Skill 完整安裝內容」。
+  # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
   test -f "{{CODEX_HOME}}/skills/$skill/SKILL.md" && echo "$skill installed"
 done
 ```
@@ -107,9 +107,9 @@ tool_timeout_sec = 120
 
 ## 內建 Skill 完整安裝內容
 
-本節取代舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。這個序號項目會安裝：`notebooklm-architecture`, `presentation-workflow`, `visual-note-generator`。
+本節是自含式安裝區塊。這個序號項目會安裝：`notebooklm-architecture`, `presentation-workflow`, `visual-note-generator`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `/Users/alex/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
 ```bash
 set -e
@@ -219,7 +219,7 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/notebooklm-architecture/references/fr
 cat > "{{CODEX_HOME}}/skills/notebooklm-architecture/references/framework-spec.md" <<'CODEX_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_REFERENCES_FRAMEWORK_SPEC_MD'
 # NotebookLM Framework Spec
 
-Source: `/Users/arrywu/Downloads/NotebookLM 系統架構大師.docx`
+Source: `NotebookLM 系統架構大師.docx`
 
 ## Role
 
