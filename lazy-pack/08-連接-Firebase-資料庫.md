@@ -51,6 +51,56 @@ service cloud.firestore {
 
 ## Firebase CLI
 
+### 安裝全域 Firebase CLI
+
+官方建議用 npm 安裝 Firebase CLI，讓電腦上可直接使用 `firebase` 指令：
+
+```bash
+npm install -g firebase-tools
+```
+
+安裝前先確認 Node.js 與 npm 可用：
+
+```bash
+node --version
+npm --version
+```
+
+安裝後驗證：
+
+```bash
+command -v firebase
+firebase --version
+firebase login:list
+firebase projects:list
+```
+
+若尚未登入，使用官方登入流程：
+
+```bash
+firebase login
+```
+
+### 安裝時常見權限問題
+
+若 npm 回報 cache 權限問題，例如 `~/.npm` 內有舊的 root-owned 檔案，可先改用臨時 cache 路徑安裝：
+
+```bash
+npm install -g firebase-tools --cache /private/tmp/npm-cache
+```
+
+若錯誤發生在全域 npm 目錄，例如 `/opt/homebrew/lib/node_modules/firebase-tools` 無法建立，代表目前使用者沒有該全域目錄寫入權限。這時需要用系統授權方式執行全域安裝，或改用不需要全域安裝的 `npx` 方式。
+
+若 `firebase --version` 或 `firebase login:list` 已能輸出結果，但同時出現：
+
+```text
+firebase-tools update check failed
+```
+
+通常不是 Firebase project 設定錯，而是 Firebase CLI 想寫入本機 config store 時被權限或沙盒限制擋住。先在正常使用者 shell 中重跑驗證；若只有 Codex 沙盒內出現，使用 Codex 授權的外部執行環境驗證即可。
+
+### 不安裝全域 CLI 的臨時用法
+
 列出專案：
 
 ```bash
@@ -92,6 +142,9 @@ tool_timeout_sec = 120
 ## 驗證
 
 ```bash
+firebase --version
+firebase login:list
+firebase projects:list
 npx -y firebase-tools@latest projects:list
 npx -y firebase-tools@latest firestore:databases:list --project "{{FIREBASE_PROJECT_ID}}"
 ```
@@ -110,6 +163,10 @@ npx -y firebase-tools@latest firestore:databases:list --project "{{FIREBASE_PROJ
 
 ## 踩坑修正
 
+- 全域安裝可用 `npm install -g firebase-tools`；若只想臨時使用，可改用 `npx -y firebase-tools@latest ...`。
+- npm cache 權限錯誤可用 `--cache /private/tmp/npm-cache` 暫時避開。
+- Homebrew npm 的全域目錄可能需要系統授權才能寫入，不要把這類權限錯誤誤判成 Firebase 帳號或 project 問題。
+- 如果 Node.js 版本太新，安裝時可能出現 package engine warning；只要安裝與 `firebase --version` 驗證成功，先記錄警告即可。若後續 emulator 或 hosting 功能異常，再切到 Firebase CLI 支援的 Node LTS 版本。
 - Firebase Project ID 不能改名；若只是顯示名稱要改，通常要到 Firebase / Google Cloud Console。
 - 本地資料夾改名後，要同步檢查 `.firebaserc`、Codex MCP 工作目錄與部署文件。
 - `gcloud` 不一定已安裝，不能假設可用它改 Firebase display name。
