@@ -1,5 +1,8 @@
 # 11-Codex-Skill-Creator-工作流
 
+> 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不要再依賴舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。
+
+
 ## 目標
 
 把 外部 / Anthropic 取向的 Skill Creator 啟動包，轉成 Codex App 可用的 skill 建立流程，並判斷新 skill 應該放在全域還是專案本地。
@@ -42,7 +45,7 @@
 
 可攜化規則：
 
-- 全域 skill：實作在 `{{CODEX_HOME}}/skills/<skill-name>`，同步可攜副本到 `{{SETUP_REPO}}/lazy-pack/skills/<skill-name>`，並更新 Obsidian 全域 Skills 索引。
+- 全域 skill：實作在 `{{CODEX_HOME}}/skills/<skill-name>`，同步可攜副本到 `本文件文末內嵌內容：<skill-name>`，並更新 Obsidian 全域 Skills 索引。
 - 專案 skill：實作在 `<project-root>/000_Agent/skills/<skill-name>`，該資料夾必須包含完整 `SKILL.md` 與必要資源；若專案使用 Git，跟著專案提交。
 - 不把 `000_Agent/skills` symlink 到 `{{CODEX_HOME}}/skills`。
 
@@ -69,11 +72,11 @@ codex-skill-creator
 
 ## 直接安裝本懶人包版本
 
-下載本 repo 後，可直接複製已整理好的 companion skill：
+下載本 repo 後，直接使用本文文末的內建安裝腳本建立 companion skill：
 
 ```bash
 mkdir -p "{{CODEX_HOME}}/skills/codex-skill-creator"
-rsync -a --delete "{{SETUP_REPO}}/lazy-pack/skills/codex-skill-creator/" "{{CODEX_HOME}}/skills/codex-skill-creator/"
+# 舊版 對應序號文件的內嵌 Skill 區塊 複製指令已取消；請使用文末「內建 Skill 完整安裝內容」。
 test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill-creator installed"
 ```
 
@@ -256,7 +259,7 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
    - 引用的 `references/` 檔案存在。
    - 沒有 來源工具的 skills 路徑、`allowed-tools`、`disable-model-invocation`、`user-invocable` 等 來源工具專用 正式設定。
 4. 開新 Codex 對話，使用自然語言觸發該 skill 的任務。
-5. 確認可攜式版本完整：全域 skill 同步 `{{SETUP_REPO}}/lazy-pack/skills/<skill-name>`；專案 skill 保留在 `<project-root>/000_Agent/skills/<skill-name>`。
+5. 確認可攜式版本完整：全域 skill 同步 `本文件文末內嵌內容：<skill-name>`；專案 skill 保留在 `<project-root>/000_Agent/skills/<skill-name>`。
 6. 同步 Obsidian 全域 Skills 索引、專案駕駛艙或專案 README。
 
 ## 踩坑修正
@@ -283,3 +286,256 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 5. 驗證 frontmatter、路徑與 reference。
 6. 同步可攜式版本：全域同步 LazyPack 與 Obsidian 全域 Skills；專案同步專案 `000_Agent/skills` 與專案駕駛艙。
 7. 回報是否需要開新對話或重啟 Codex App。
+
+<!-- BEGIN EMBEDDED_SKILLS -->
+
+## 內建 Skill 完整安裝內容
+
+本節取代舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。這個序號項目會安裝：`codex-skill-creator`。
+
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `/Users/alex/.codex`。
+
+```bash
+set -e
+
+decode_base64() {
+  if base64 --help 2>/dev/null | grep -q -- '-d'; then
+    base64 -d
+  else
+    base64 -D
+  fi
+}
+
+# ---- codex-skill-creator ----
+mkdir -p "{{CODEX_HOME}}/skills/codex-skill-creator"
+# codex-skill-creator/SKILL.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md")"
+cat > "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD'
+---
+name: codex-skill-creator
+description: Use when adapting Claude or Anthropic skill-creation guides into Codex App-compatible skills, deciding whether a new skill belongs globally or inside a project, improving an existing custom Codex skill, creating a first practical skill through interview, validating SKILL.md frontmatter and bundled resources, or syncing portable skill copies. Avoid Claude-only paths and fields; use global Codex skills under /Users/arrywu/.codex/skills and project skills under 000_Agent/skills.
+metadata:
+  short-description: Build Codex-compatible skills
+---
+
+# Codex Skill Creator
+
+Use this skill as the user-maintained companion to Codex's built-in `skill-creator`. It converts external skill-building guides into Codex App-compatible workflows and keeps Arry's global skill inventory synchronized.
+
+## Default Paths
+
+- Custom global skills: `$CODEX_HOME/skills`, or `~/.codex/skills` when `$CODEX_HOME` is not set.
+- This user's global skills symlink: `/Users/arrywu/.codex/skills`, pointing to Google Drive `codex_symlink/skills`.
+- Project-local skills: `<project-root>/000_Agent/skills`.
+- Global portable copy root: `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/lazy-pack/<對應序號文件>`.
+- Built-in system skills: `$CODEX_HOME/skills/.system` (read-only for normal work).
+- Optional skill mirror note: ask the user for their Obsidian or project inventory path when no local mirror is already documented.
+- This user's current mirror note: `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`.
+- This user's current project root: `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation`.
+- This user's current Obsidian vault: `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain`.
+
+## Portability Rules
+
+1. Treat absolute personal paths as local defaults, not universal requirements.
+2. When adapting this skill package for another user, replace `ASSISTANT_NAME`, `ASSISTANT_ROOT`, `OBSIDIAN_VAULT`, `PROJECT_LIBRARY`, and `WORK_ROOT` before depending on personal-workflow skills.
+3. Keep general-purpose skills independent from personal memory or vault paths unless the user explicitly wants them connected.
+4. If a mirror note does not exist, create one only after the user confirms where their durable skill inventory should live.
+5. Every skill must have a portable package: global skills mirror to `codex_installation/lazy-pack/<對應序號文件的內嵌 Skill 區塊>`; project skills live as complete packages under `<project-root>/000_Agent/skills/<skill-name>`.
+
+## Compatibility Rules
+
+1. Do not install or edit skills under `~/.claude/skills`, `.claude/skills`, or Claude command folders.
+2. Do not overwrite `/Users/arrywu/.codex/skills/.system/skill-creator`; create or update custom skills instead.
+3. Use Codex frontmatter with `name`, `description`, and optional `metadata.short-description`.
+4. Do not copy Claude-only fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, `when_to_use`, or Claude subagent config unless converting them into plain Codex instructions.
+5. Do not assume slash-command behavior. In Codex, skills are triggered by the skill metadata and current task context.
+6. Keep `SKILL.md` concise. Move detailed examples, source adaptations, schemas, and checklists into `references/`.
+7. After adding, changing, or deleting a custom global skill, update the LazyPack portable copy and Obsidian global skill mirror note.
+8. After adding, changing, or deleting a project-local skill, keep the complete portable package under the project `000_Agent/skills` and update the project cockpit.
+
+## Ownership Decision
+
+Before creating or modifying a skill, decide where it belongs:
+
+- Global: reusable across projects, should trigger from any Codex project, or is part of Arry's standard workflow. Store in `/Users/arrywu/.codex/skills/<skill-name>` and sync `codex_installation/lazy-pack/<對應序號文件的內嵌 Skill 區塊>`.
+- Project-local: only useful for the current project, depends on project-specific context, or is still a local draft. Store in `<project-root>/000_Agent/skills/<skill-name>`.
+- Arry assistant remains a global entry skill. Use it during project initialization to read the assistant data layer and help decide whether future skills are global or project-local.
+
+Do not symlink `000_Agent/skills` into `/Users/arrywu/.codex/skills`.
+
+For field-by-field conversion details, read `references/codex-bootstrap-adapter.md` when the source material is Claude-oriented or Anthropic-specific.
+
+## Workflow
+
+1. Identify the target:
+   - New global skill: create `/Users/arrywu/.codex/skills/<skill-name>/SKILL.md`.
+   - New project skill: create `<project-root>/000_Agent/skills/<skill-name>/SKILL.md`.
+   - Existing custom skill: read the current skill first, then patch only the needed sections.
+   - Built-in system skill: do not patch; create a companion custom skill or a reference note.
+2. Extract the useful workflow from the source material:
+   - trigger scenarios
+   - repeatable steps
+   - validation checks
+   - resource layout
+   - user-facing interview questions
+   - failure handling
+3. Convert to Codex App conventions:
+   - replace Claude paths with Codex paths
+   - replace slash-command assumptions with metadata-trigger guidance
+   - replace Claude agents with optional validation passes or plain instructions
+   - replace CLI-only user instructions with Codex App language
+4. Write the skill package:
+   - `SKILL.md` for compact operating instructions
+   - `references/` for detailed adapted source notes
+   - `scripts/` only when deterministic checks are genuinely useful
+   - `assets/` only when files are used in final outputs
+5. Validate:
+   - `SKILL.md` exists
+   - frontmatter starts and ends with `---`
+   - `name` matches the folder name
+   - `description` clearly names the triggering tasks
+   - referenced files actually exist
+   - no Claude-only path or field remains unless it is explicitly labeled as source-only context
+   - personal paths are either replaced with portable placeholders or clearly labeled as this user's local defaults
+6. Sync portable copies and indexes:
+   - Global skill: sync `codex_installation/lazy-pack/<對應序號文件的內嵌 Skill 區塊>` and the Obsidian global skill mirror note.
+   - Project skill: keep the complete portable package under `<project-root>/000_Agent/skills/<skill-name>` and update the project cockpit.
+7. Sync the Obsidian mirror note when the skill is global:
+   - add or update the custom skill table row
+   - add or update the skill summary section
+   - append a dated sync record
+8. Report the result with exact paths, ownership level, portable-copy status, and any restart requirement. New or changed global skills may require a new Codex conversation before the trigger list reflects them.
+
+## Interview Pattern For A First Skill
+
+When the user wants help choosing the first skill, ask only enough to pick one practical target:
+
+1. What repeated AI request do you make most often?
+2. How often does it happen?
+3. What should the skill deliver: Markdown note, reusable text, structured data, analysis, or an action checklist?
+4. What source folder or examples should the skill read, if any?
+5. What should the skill never do?
+
+Then propose one recommended skill and two alternatives. Once the user chooses, create the skill rather than leaving them with a plan.
+
+## Validation Checklist
+
+- Global skill lives under `/Users/arrywu/.codex/skills/<skill-name>/`; project skill lives under `<project-root>/000_Agent/skills/<skill-name>/`.
+- Portable package exists in the correct place: `codex_installation/lazy-pack/<對應序號文件的內嵌 Skill 區塊>` for global, project `000_Agent/skills/<skill-name>` for project-local.
+- `SKILL.md` frontmatter includes `name` and `description`.
+- `description` includes concrete trigger phrases and use cases.
+- Detailed material is in `references/`, not bloating `SKILL.md`.
+- The skill avoids secrets, tokens, and personal data.
+- Obsidian mirror note is updated for global skill changes; project cockpit is updated for project-local skill changes.
+CODEX_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD
+
+# codex-skill-creator/references/codex-bootstrap-adapter.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md")"
+cat > "{{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CODEX_BOOTSTRAP_ADAPTER_MD'
+---
+title: Codex Skill Creator Bootstrap Adapter
+date: 2026-05-20
+type: reference
+tags:
+  - codex
+  - skills
+  - compatibility
+---
+
+# Codex Skill Creator Bootstrap Adapter
+
+This reference adapts `/Users/arrywu/Downloads/02-skill-creator-bootstrap.md` for Codex App. The source is useful as a workflow pattern, but it is Claude Code-oriented and must not be copied verbatim.
+
+## Keep From The Source
+
+- Start by detecting the user's actual skill environment before writing files.
+- Install or create a complete skill folder, not only `SKILL.md`, when supporting resources are required.
+- Use an interview to choose a first high-value skill instead of creating abstract examples.
+- Validate that the skill exists, has correct frontmatter, and references real support files.
+- Treat skill creation as iterative: create one useful skill, test it, then revise after real use.
+
+## Convert For Codex
+
+| Source assumption | Codex-compatible version |
+|---|---|
+| Claude global skills path | `/Users/arrywu/.codex/skills` for skills that must trigger across projects |
+| Claude project-level skills path | `<project-root>/000_Agent/skills` for skills that serve only one project |
+| `000_Agent/skills` as symlink target | Do not symlink it into `/Users/arrywu/.codex/skills`; it is the assistant or project-local portable skill package |
+| slash command `/skill-name` | Skill metadata triggers; the user can name the skill, but do not depend on a slash-command menu |
+| Claude `AskUserQuestion` | Ask concise questions in Codex; use available UI tools only when present |
+| Claude subagents in `agents/*.md` | Use Codex subagents only when explicitly authorized by the user; otherwise use local validation checklists |
+| `allowed-tools` | Omit; Codex tool access is controlled by the session and plugin permissions |
+| `disable-model-invocation` / `user-invocable` | Omit; express trigger boundaries in `description` and body instructions |
+| Anthropic sparse checkout install | Use only when the user explicitly wants a third-party skill package; otherwise create a Codex-native custom skill |
+| Tell user to restart Claude Code | Say a new Codex conversation or app restart may be needed for new skill metadata to appear |
+
+## Codex Skill Package Standard
+
+Minimum:
+
+```text
+<skill-name>/
+└── SKILL.md
+```
+
+Optional:
+
+```text
+<skill-name>/
+├── SKILL.md
+├── references/   # detailed docs loaded only when needed
+├── scripts/      # deterministic utilities
+└── assets/       # templates or output resources
+```
+
+Avoid extra `README.md`, installation guides, or changelogs inside a skill unless the user explicitly asks for them.
+
+## Frontmatter Template
+
+```markdown
+---
+name: skill-name
+description: Use when the user asks for [specific task], [trigger phrase], or [workflow]. Include the domain, action, and output expectation.
+metadata:
+  short-description: Short user-facing phrase
+---
+```
+
+Rules:
+
+- `name` must match the folder name.
+- `description` should front-load the most likely trigger phrases.
+- Keep body instructions procedural and compact.
+- Put long examples or source adaptations in `references/`.
+
+## Portable Skill Sync Requirement
+
+After any custom global skill change, update:
+
+`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
+
+and sync the portable copy:
+
+`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation/lazy-pack/<對應序號文件的內嵌 Skill 區塊>`
+
+After any project-local skill change, keep the complete portable package under:
+
+`<project-root>/000_Agent/skills/<skill-name>`
+
+and record the skill in that project's cockpit.
+
+Update three areas when applicable:
+
+1. Custom skills table row
+2. Skill summary section
+3. Recent sync record with the date and exact change
+
+Do not edit the system skill contents under `.system`; the mirror note may list them as read-only built-ins.
+CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CODEX_BOOTSTRAP_ADAPTER_MD
+
+test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill-creator installed"
+
+echo "embedded skills installed: codex-skill-creator"
+```
+
+<!-- END EMBEDDED_SKILLS -->

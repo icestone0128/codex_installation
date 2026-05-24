@@ -1,4 +1,0 @@
-interface:
-  display_name: "NotebookLM Architecture"
-  short_description: "Create reusable NotebookLM Soul and Body framework source files."
-  default_prompt: "Create a NotebookLM framework source file for the requested role, thinking logic, teaching method, structure, or output format."

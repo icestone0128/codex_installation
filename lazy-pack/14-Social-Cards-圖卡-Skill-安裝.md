@@ -1,8 +1,11 @@
 # 14-Social-Cards-圖卡-Skill-安裝
 
+> 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不要再依賴舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。
+
+
 > 版本：2026-05-21 Codex App 版
 > 用途：把 Raymond Hou / 雷蒙的 `skills/social-cards` 來源工具 安裝劇本，轉成可直接安裝到 Codex App 的全域 Skill。
-> 成品：下載者可把本懶人包內的 `lazy-pack/skills/social-cards/` 複製到自己的 `{{CODEX_HOME}}/skills/social-cards/`，再安裝 Playwright 依賴後使用。
+> 成品：下載者可把本懶人包內的 `對應序號文件的內嵌 Skill 區塊：social-cards/` 複製到自己的 `{{CODEX_HOME}}/skills/social-cards/`，再安裝 Playwright 依賴後使用。
 
 ## 來源與授權
 
@@ -32,7 +35,7 @@
 
 ```bash
 mkdir -p "{{CODEX_HOME}}/skills/social-cards"
-rsync -a --delete --exclude node_modules "{{SETUP_REPO}}/lazy-pack/skills/social-cards/" "{{CODEX_HOME}}/skills/social-cards/"
+# 舊版 對應序號文件的內嵌 Skill 區塊 複製指令已取消；請使用文末「內建 Skill 完整安裝內容」。
 cd "{{CODEX_HOME}}/skills/social-cards"
 NPM_CONFIG_CACHE=/private/tmp/npm-cache npm install
 NPM_CONFIG_CACHE=/private/tmp/npm-cache PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
@@ -184,3 +187,1138 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 - [ ] `node_modules/playwright` 存在。
 - [ ] 實測匯出 PNG 成功。
 - [ ] 開新 Codex 對話後，用「Social Cards」或「做圖卡」可觸發。
+
+<!-- BEGIN EMBEDDED_SKILLS -->
+
+## 內建 Skill 完整安裝內容
+
+本節取代舊版 `對應序號文件的內嵌 Skill 區塊：` 子目錄。這個序號項目會安裝：`social-cards`。
+
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `/Users/alex/.codex`。
+
+```bash
+set -e
+
+decode_base64() {
+  if base64 --help 2>/dev/null | grep -q -- '-d'; then
+    base64 -d
+  else
+    base64 -D
+  fi
+}
+
+# ---- social-cards ----
+mkdir -p "{{CODEX_HOME}}/skills/social-cards"
+# social-cards/SKILL.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/SKILL.md")"
+cat > "{{CODEX_HOME}}/skills/social-cards/SKILL.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD'
+---
+name: social-cards
+description: Use when the user asks to use Social Cards, make IG cards, social cards, carousel posts, "/cards", "做圖卡", "幫我做 IG 圖", or turn an article, note, URL, Markdown file, or pasted text into branded social-media PNG cards using the Pantone 285C brand templates.
+metadata:
+  short-description: Social Cards
+---
+
+# Social Cards
+
+把文章、筆記、網址或貼上的文字轉成品牌一致的社群圖卡。預設品牌色為 Pantone 285C，數位色使用 `#0072CE`。
+
+## Trigger Phrases
+
+- 「做圖卡」
+- 「/cards」
+- 「Social Cards」
+- 「幫我做 IG 圖」
+- 「社群圖卡」
+- 「把這篇做成圖卡」
+- 使用者提供文章、Markdown、網址或段落，並要求轉成 IG / Threads / X 可用圖卡
+
+## Assets
+
+模板 HTML 在本 skill 的 `assets/` 子資料夾：
+
+- `assets/brand-dark/cover.html`
+- `assets/brand-dark/content-text.html`
+- `assets/brand-dark/content-image.html`
+- `assets/brand-dark/cta.html`
+- `assets/brand-light/cover.html`
+- `assets/brand-light/content-text.html`
+- `assets/brand-light/content-image.html`
+- `assets/brand-light/cta.html`
+
+截圖腳本：`scripts/screenshot.mjs`
+
+來源與授權摘要：`references/source-adaptation.md`
+
+## Workflow
+
+1. 收集內容來源：貼文、網址、Markdown 檔案路徑或使用者直接貼上的文字。
+2. 若來源是網址，優先使用可用的網頁讀取工具擷取主要內容；若來源是本機檔案，先讀檔再整理。
+3. 詢問或合理推定輸出比例：預設 `4:5`（1080 x 1350）；若使用者要求正方形，改為 `1:1`（1080 x 1080）。
+4. 詢問風格：預設 `brand-light`，也可選 `brand-dark`。兩者都必須維持 Pantone 285C / `#0072CE` 作為品牌主色。
+5. 確認社群 handle。若當前輸出根目錄已有 `output/.handle`，可讀取後向使用者確認；沒有就詢問一次。
+6. 拆卡並先展示規劃，等使用者確認後才產生預覽：
+   - 第 1 張：`cover`
+   - 中間：`content-text` 或 `content-image`
+   - 最後：`cta`
+7. 產生輸出資料夾：`output/YYYY-MM-DD-{topic-slug}/`。
+8. 讀取對應模板，替換標題、內文、條列、handle、頁碼與圖片路徑。圖片一律用絕對路徑，並維持等比顯示。
+9. 建立 `preview.html` 總覽頁並打開預覽。預覽階段只產生 HTML，不產生 PNG。
+10. 依使用者回饋修改單張或整組圖卡。
+11. 使用者明確確認「匯出」後，執行 `node {SKILL_DIR}/scripts/screenshot.mjs output/YYYY-MM-DD-{topic-slug}/` 匯出 2x PNG。
+12. 完成後回報 PNG 資料夾位置與檔名。
+
+## Card Planning Rules
+
+- 標題最多 10 個中文字左右；超過時拆行或拆卡。
+- 每張只放一個主張或重點。
+- 內文最多 3-4 行。
+- 條列最多 4 個，每項不超過 25 字。
+- 提到流程、介面、設定檔、程式碼、前後對照或使用者提供圖片時，優先使用 `content-image`。
+- 寧可多拆卡，不要把單張塞滿。
+
+## Codex Notes
+
+- 不依賴 Claude Code slash-command 系統；`/cards` 只是使用者可能輸入的觸發語。
+- 不使用 Claude 專用 frontmatter 或工具欄位。
+- 若 Playwright、Chromium 或 `node_modules/` 尚未安裝，先告知需要安裝本 skill 的截圖依賴，再於本 skill 資料夾執行 `npm install` 並驗證。
+- 複製給其他使用者或其他電腦時，不必複製 `node_modules/`；保留 `package.json` 與 `package-lock.json`，在新環境重新安裝依賴。
+- 匯出後可刪除中間 HTML，保留 PNG；除非使用者要求保留可編輯 HTML。
+CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD
+
+# social-cards/assets/brand-dark/content-image.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Content Image — Brand Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background:
+      radial-gradient(ellipse 900px 900px at 100% 0%, #003A70 0%, transparent 70%),
+      radial-gradient(circle 1200px at -10% 105%, #0072CE 0%, rgba(0,114,206,0.5) 25%, rgba(0,114,206,0.15) 50%, transparent 75%),
+      #001F3F;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    padding: 80px 90px;
+    display: flex;
+    flex-direction: column;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 72px;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 28px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .description {
+    font-weight: 500;
+    font-size: 44px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
+  .image-area {
+    flex: 1;
+    background: #D9D9D9;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .image-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">標題標題標題標題標題</h2>
+  <p class="description">內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+  <div class="image-area">
+    <!-- 替換為 <img src="your-screenshot.png"> -->
+  </div>
+  <span class="handle">@yourhandle</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML
+
+# social-cards/assets/brand-dark/content-text.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Content Text — Brand Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background:
+      radial-gradient(ellipse 900px 900px at 100% 0%, #003A70 0%, transparent 70%),
+      radial-gradient(circle 1200px at -10% 105%, #0072CE 0%, rgba(0,114,206,0.5) 25%, rgba(0,114,206,0.15) 50%, transparent 75%),
+      #001F3F;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    padding: 100px 90px;
+    display: flex;
+    flex-direction: column;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 72px;
+    color: #fff;
+    line-height: 1.4;
+    margin-bottom: 56px;
+  }
+  .bullet-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    flex: 1;
+  }
+  .bullet-item {
+    display: flex;
+    gap: 36px;
+    align-items: flex-start;
+  }
+  .bullet-dot {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border-radius: 50%;
+    margin-top: 30px;
+  }
+  .bullet-text {
+    font-size: 44px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">標題標題<br>標題標題標題標題？</h2>
+
+  <div class="bullet-list">
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+  </div>
+
+  <span class="handle">@yourhandle</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML
+
+# social-cards/assets/brand-dark/cover.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cover.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Cover — Brand Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background:
+      radial-gradient(ellipse 900px 900px at 100% 0%, #003A70 0%, transparent 70%),
+      radial-gradient(circle 1200px at -10% 105%, #0072CE 0%, rgba(0,114,206,0.5) 25%, rgba(0,114,206,0.15) 50%, transparent 75%),
+      #001F3F;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+  }
+  .content {
+    position: absolute;
+    bottom: 200px;
+    left: 90px;
+    right: 90px;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 88px;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 32px;
+  }
+  .subtitle {
+    font-weight: 500;
+    font-size: 44px;
+    color: #7DB9E8;
+    line-height: 1.5;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="content">
+    <h1 class="title">標題標題<br>標題標題標題標題</h1>
+    <p class="subtitle">副標題副標題副標題</p>
+  </div>
+  <span class="handle">@yourhandle</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML
+
+# social-cards/assets/brand-dark/cta.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cta.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>CTA — Brand Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background:
+      radial-gradient(ellipse 900px 900px at 100% 0%, #003A70 0%, transparent 70%),
+      radial-gradient(circle 1200px at -10% 105%, #0072CE 0%, rgba(0,114,206,0.5) 25%, rgba(0,114,206,0.15) 50%, transparent 75%),
+      #001F3F;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 88px;
+    color: #fff;
+    text-align: center;
+    line-height: 1.35;
+    margin-bottom: 44px;
+  }
+  .subtitle {
+    font-weight: 500;
+    font-size: 40px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 52px;
+  }
+  .handle-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    padding: 20px 48px;
+    border-radius: 60px;
+  }
+  /* 底部互動提示 */
+  .bottom-actions {
+    position: absolute;
+    bottom: 64px;
+    left: 90px;
+    right: 90px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+  }
+  .action-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .action-icon svg {
+    width: 44px;
+    height: 44px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+  }
+  .action-text {
+    font-size: 26px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">有幫助的話<br>記得按讚分享</h2>
+  <p class="subtitle">更多教學與實戰分享<br>追蹤我的帳號，不錯過最新內容</p>
+  <span class="handle-badge">@yourhandle</span>
+
+  <div class="bottom-actions">
+    <div class="action">
+      <span class="action-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+      <span class="action-text">喜歡點愛心</span>
+    </div>
+    <div class="action">
+      <span class="action-icon"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="action-text">實用請收藏</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML
+
+# social-cards/assets/brand-light/content-image.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-image.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Content Image — Brand Light</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background: #F6F7F8;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+  }
+  /* 頂部橘色色塊（居中） */
+  .deco-bar {
+    position: absolute;
+    top: 0;
+    left: 227px;
+    width: 636px;
+    height: 18px;
+    background: #0072CE;
+  }
+  .title {
+    position: absolute;
+    top: 107px;
+    left: 83px;
+    right: 83px;
+    font-size: 72px;
+    font-weight: 900;
+    color: #0072CE;
+    line-height: 1.4;
+    text-align: center;
+  }
+  .description {
+    position: absolute;
+    top: 253px;
+    left: 103px;
+    right: 103px;
+    font-size: 44px;
+    font-weight: 500;
+    color: #40444D;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .image-area {
+    position: absolute;
+    top: 590px;
+    left: 83px;
+    right: 83px;
+    height: 519px;
+    background: #D9D9D9;
+    border-radius: 17px;
+    overflow: hidden;
+    box-shadow: 0px 22px 22px 12px rgba(200, 200, 200, 0.25);
+  }
+  .image-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="deco-bar"></div>
+  <h2 class="title">標題標題標題標題標題</h2>
+  <p class="description">內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+  <div class="image-area">
+    <!-- 替換為 <img src="your-screenshot.png"> -->
+  </div>
+  <span class="handle">@yourhandle</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML
+
+# social-cards/assets/brand-light/content-text.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-text.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Content Text — Brand Light</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background: #F6F7F8;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    padding: 100px 90px;
+    display: flex;
+    flex-direction: column;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 72px;
+    color: #0072CE;
+    line-height: 1.4;
+    margin-bottom: 56px;
+  }
+  .bullet-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    flex: 1;
+  }
+  .bullet-item {
+    display: flex;
+    gap: 36px;
+    align-items: flex-start;
+    padding-left: 24px;
+  }
+  .bullet-dot {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    background: #0072CE;
+    border-radius: 50%;
+    margin-top: 30px;
+  }
+  .bullet-text {
+    font-size: 44px;
+    font-weight: 500;
+    color: #40444D;
+    line-height: 1.6;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">標題標題<br>標題標題標題標題？</h2>
+
+  <div class="bullet-list">
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+  </div>
+
+  <span class="handle">@yourhandle</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML
+
+# social-cards/assets/brand-light/cover.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Cover — Brand Light</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  /* 頂部品牌藍薄紗 */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 600px;
+    background: linear-gradient(180deg, rgba(0,114,206,0.22) 0%, rgba(0,114,206,0.06) 65%, transparent 100%);
+    pointer-events: none;
+  }
+  /* 格紋紋理 */
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 88px;
+    color: #0072CE;
+    text-align: center;
+    line-height: 1.35;
+    margin-bottom: 36px;
+  }
+  .divider {
+    width: 80px;
+    height: 5px;
+    background: #0072CE;
+    border-radius: 3px;
+    margin-bottom: 40px;
+  }
+  .subtitle {
+    font-weight: 500;
+    font-size: 44px;
+    color: #40444D;
+    text-align: center;
+    line-height: 1.6;
+    padding: 0 100px;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1 class="title">標題標題<br>標題標題標題標題</h1>
+  <div class="divider"></div>
+  <p class="subtitle">副標題副標題副標題副標題<br>副標題副標題副標題</p>
+  <span class="handle">@yourhandle</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML
+
+# social-cards/assets/brand-light/cta.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>CTA — Brand Light</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 88px;
+    color: #0072CE;
+    text-align: center;
+    line-height: 1.35;
+    margin-bottom: 44px;
+  }
+  .subtitle {
+    font-weight: 500;
+    font-size: 40px;
+    color: #666;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 52px;
+  }
+  .handle-badge {
+    display: inline-block;
+    background: #0072CE;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    padding: 20px 48px;
+    border-radius: 60px;
+  }
+  .bottom-actions {
+    position: absolute;
+    bottom: 64px;
+    left: 90px;
+    right: 90px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #40444D;
+  }
+  .action-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .action-icon svg {
+    width: 44px;
+    height: 44px;
+    fill: none;
+    stroke: #40444D;
+    stroke-width: 2;
+  }
+  .action-text {
+    font-size: 26px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">有幫助的話<br>記得按讚分享</h2>
+  <p class="subtitle">更多教學與實戰分享<br>追蹤我的帳號，不錯過最新內容</p>
+  <span class="handle-badge">@yourhandle</span>
+
+  <div class="bottom-actions">
+    <div class="action">
+      <span class="action-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+      <span class="action-text">喜歡點愛心</span>
+    </div>
+    <div class="action">
+      <span class="action-icon"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="action-text">實用請收藏</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML
+
+# social-cards/package-lock.json
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/package-lock.json")"
+cat > "{{CODEX_HOME}}/skills/social-cards/package-lock.json" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON'
+{
+  "name": "social-cards",
+  "version": "1.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "social-cards",
+      "version": "1.0.0",
+      "license": "CC-BY-NC-SA-4.0",
+      "dependencies": {
+        "playwright": "^1.60.0"
+      }
+    },
+    "node_modules/fsevents": {
+      "version": "2.3.2",
+      "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz",
+      "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==",
+      "hasInstallScript": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "darwin"
+      ],
+      "engines": {
+        "node": "^8.16.0 || ^10.6.0 || >=11.0.0"
+      }
+    },
+    "node_modules/playwright": {
+      "version": "1.60.0",
+      "resolved": "https://registry.npmjs.org/playwright/-/playwright-1.60.0.tgz",
+      "integrity": "sha512-hheHdokM8cdqCb0lcE3s+zT4t4W+vvjpGxsZlDnikarzx8tSzMebh3UiFtgqwFwnTnjYQcsyMF8ei2mCO/tpeA==",
+      "license": "Apache-2.0",
+      "dependencies": {
+        "playwright-core": "1.60.0"
+      },
+      "bin": {
+        "playwright": "cli.js"
+      },
+      "engines": {
+        "node": ">=18"
+      },
+      "optionalDependencies": {
+        "fsevents": "2.3.2"
+      }
+    },
+    "node_modules/playwright-core": {
+      "version": "1.60.0",
+      "resolved": "https://registry.npmjs.org/playwright-core/-/playwright-core-1.60.0.tgz",
+      "integrity": "sha512-9bW6zvX/m0lEbgTKJ6YppOKx8H3VOPBMOCFh2irXFOT4BbHgrx5hPjwJYLT40Lu+4qtD36qKc/Hn56StUW57IA==",
+      "license": "Apache-2.0",
+      "bin": {
+        "playwright-core": "cli.js"
+      },
+      "engines": {
+        "node": ">=18"
+      }
+    }
+  }
+}
+CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON
+
+# social-cards/package.json
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/package.json")"
+cat > "{{CODEX_HOME}}/skills/social-cards/package.json" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON'
+{
+  "name": "social-cards",
+  "version": "1.0.0",
+  "description": "Codex skill for generating Pantone 285C branded social cards.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "CC-BY-NC-SA-4.0",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
+CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON
+
+# social-cards/preview-all.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/preview-all.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/preview-all.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Social Cards — 全版型預覽</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0f0f0; font-family: 'Inter', -apple-system, sans-serif; padding: 40px; }
+  .row { margin-bottom: 60px; }
+  .row-label {
+    font-size: 14px; font-weight: 600; color: #999;
+    letter-spacing: 2px; margin-bottom: 16px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  .cell { display: flex; flex-direction: column; gap: 8px; }
+  .cell-label {
+    font-size: 12px; font-weight: 600; color: #aaa;
+    letter-spacing: 1px;
+  }
+  .frame-wrap {
+    width: 100%;
+    aspect-ratio: 1080 / 1350;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  }
+  .frame-wrap iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1080px;
+    height: 1350px;
+    transform-origin: top left;
+    border: none;
+  }
+</style>
+<script>
+  function scaleFrames() {
+    document.querySelectorAll('.frame-wrap').forEach(wrap => {
+      const scale = wrap.offsetWidth / 1080;
+      wrap.querySelector('iframe').style.transform = `scale(${scale})`;
+    });
+  }
+  window.addEventListener('load', scaleFrames);
+  window.addEventListener('resize', scaleFrames);
+</script>
+</head>
+<body>
+
+<div class="row">
+  <div class="row-label">BRAND LIGHT</div>
+  <div class="grid">
+    <div class="cell">
+      <div class="cell-label">brand-light-cover</div>
+      <div class="frame-wrap"><iframe src="assets/brand-light/cover.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">brand-light-img</div>
+      <div class="frame-wrap"><iframe src="assets/brand-light/content-image.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">brand-light-text</div>
+      <div class="frame-wrap"><iframe src="assets/brand-light/content-text.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">brand-light-cta</div>
+      <div class="frame-wrap"><iframe src="assets/brand-light/cta.html"></iframe></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="row-label">BRAND DARK</div>
+  <div class="grid">
+    <div class="cell">
+      <div class="cell-label">brand-dark-cover</div>
+      <div class="frame-wrap"><iframe src="assets/brand-dark/cover.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">brand-dark-img</div>
+      <div class="frame-wrap"><iframe src="assets/brand-dark/content-image.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">brand-dark-text</div>
+      <div class="frame-wrap"><iframe src="assets/brand-dark/content-text.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">brand-dark-cta</div>
+      <div class="frame-wrap"><iframe src="assets/brand-dark/cta.html"></iframe></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML
+
+# social-cards/references/source-adaptation.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/references/source-adaptation.md")"
+cat > "{{CODEX_HOME}}/skills/social-cards/references/source-adaptation.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD'
+---
+title: Social Cards Source Adaptation
+date: 2026-05-20
+type: reference
+tags:
+  - codex
+  - skills
+  - social-cards
+---
+
+# Source Adaptation
+
+This skill adapts the third-party `skills/social-cards` package from:
+
+- Source page in document: `https://cc.lifehacker.tw`
+- Source repo: `<å¤é¨ææ repo>`
+- Source folder: `skills/social-cards/`
+- Original author attribution in source: Raymond Hou / 雷蒙
+- Blog listed in source: `https://raymondhouch.com`
+- Threads listed in source: `@raymond0917`
+- Course listed in source: `https://lifehacker.tw/courses/24hr-claude-code-tutorial`
+- Newsletter listed in source: `https://raymondhouch.com/subscribe`
+- License stated by source: CC BY-NC-SA 4.0, personal learning and sharing allowed, commercial use prohibited
+
+## Codex Conversion
+
+- Target Codex global skill path: `/Users/arrywu/.codex/skills/social-cards`.
+- Project-local option: if this card workflow is only for one project, use `<project-root>/000_Agent/skills/social-cards` instead and keep it as that project's portable skill package.
+- Display name requested by user: Social Cards.
+- Previous temporary package path: `codex_installation/converted-skills/cards`（已清理）。
+- Removed source-only Claude-specific metadata fields.
+- Replaced Claude command assumptions with Codex trigger metadata and procedural instructions.
+- Renamed template sets from `blue-dark` / `orange-light` to `brand-dark` / `brand-light`.
+- Updated the default brand color to Pantone 285C, using digital HEX `#0072CE` for templates.
+- Replaced the original sample handle with `@yourhandle` so generated cards do not inherit the source author's handle by default.
+
+## Original Install Script Conversion Checklist
+
+| Source instruction | Codex-compatible result |
+|---|---|
+| Install into Claude global skills path | Installed into `/Users/arrywu/.codex/skills/social-cards` |
+| Install into `000_Agent/skills` | Valid only for a project-local or assistant-local workflow; do not symlink it into global skills |
+| Rename install folder to `cards` | Renamed to `social-cards`; display name is Social Cards |
+| Use `/cards` as a slash command | Kept `/cards` as a trigger phrase only; Codex uses skill metadata |
+| Keep `blue-dark` and `orange-light` template sets | Converted to `brand-dark` and `brand-light` for Pantone 285C branding |
+| Install Playwright and Chromium | Installed locally in the skill folder |
+| Verify by checking core files | Verified `SKILL.md`, 8 templates, screenshot script, Playwright, and Chromium |
+| Export 2x PNG through Playwright | Verified with two generated PNG files in `/private/tmp/social-cards-rename-test/` |
+
+## Brand Color
+
+- Pantone: Pantone 285C
+- Digital HEX: `#0072CE`
+- RGB: `0, 114, 206`
+
+Use `#0072CE` as the main accent in all generated social-card templates unless the user explicitly gives a different campaign palette.
+CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD
+
+# social-cards/scripts/screenshot.mjs
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs")"
+cat > "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs" <<'CODEX_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS'
+// 社群圖卡截圖腳本（by 雷小蒙）
+// 用法：node scripts/screenshot.mjs <output-folder>
+// 會把資料夾內所有 .html（除了 preview.html）截成 2x PNG，最後刪除 HTML 只留 PNG
+
+import { chromium } from 'playwright';
+import { readdirSync, unlinkSync } from 'fs';
+import { resolve } from 'path';
+
+const dir = process.argv[2];
+if (!dir) { console.error('Usage: node screenshot.mjs <folder>'); process.exit(1); }
+
+const files = readdirSync(dir).filter(f => f.endsWith('.html') && f !== 'preview.html').sort();
+console.log(`Found ${files.length} HTML files in ${dir}`);
+
+const browser = await chromium.launch();
+const context = await browser.newContext({ deviceScaleFactor: 2 });
+
+for (const file of files) {
+  const page = await context.newPage();
+  await page.goto('file://' + resolve(dir, file));
+  await page.waitForTimeout(2500);
+  const card = await page.$('.card');
+  const pngName = file.replace('.html', '.png');
+  await card.screenshot({ path: resolve(dir, pngName) });
+  await page.close();
+  console.log(`✅ ${pngName}`);
+}
+
+await browser.close();
+
+for (const file of [...files, 'preview.html']) {
+  try { unlinkSync(resolve(dir, file)); } catch {}
+}
+
+console.log(`\n全部匯出完成！${files.length} 張 2x PNG 在 ${dir}/`);
+CODEX_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS
+
+test -f "{{CODEX_HOME}}/skills/social-cards/SKILL.md" && echo "social-cards installed"
+
+echo "embedded skills installed: social-cards"
+```
+
+<!-- END EMBEDDED_SKILLS -->
