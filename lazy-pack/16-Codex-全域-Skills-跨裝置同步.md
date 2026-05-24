@@ -1,4 +1,4 @@
-# 15-Codex-全域-Skills-跨裝置同步
+# 16-Codex-全域-Skills-跨裝置同步
 
 > 版本：2026-05-21 Codex App 版
 > 用途：把 Codex 全域 skills 搬到雲端同步資料夾，並讓 `{{CODEX_HOME}}/skills` 用 symlink 指回雲端實體資料夾。
