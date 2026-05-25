@@ -3,7 +3,7 @@
 > 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不需要額外的舊版獨立 skills 子目錄。
 
 
-> 版本：2026-05-24 Codex App 版
+> 版本：2026-05-25 Codex App 版
 > 用途：把引導式 Landing Page 生成流程安裝成 Codex App 全域 Skill，用來產生課程頁、銷售頁、活動報名頁、產品頁或名單收集頁。
 > 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/landing-page/`，再用自然語句觸發。
 
@@ -12,6 +12,7 @@
 - 原始來源頁：`https://cc.lifehacker.tw`
 - 原始 repo：`<å¤é¨ææ repo>`
 - 原始 skill folder：`skills/landing-page/`
+- 本次同步來源 snapshot：`b2cd801`
 - 原作者：Raymond Hou / 雷蒙
 - 原始授權：CC BY-NC-SA 4.0，個人使用、學習、分享自由，禁止商業用途。
 
@@ -120,18 +121,10 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 
 本節是自含式安裝區塊。這個序號項目會安裝：`landing-page`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾。
 
-```bash
+````bash
 set -e
-
-decode_base64() {
-  if base64 --help 2>/dev/null | grep -q -- '-d'; then
-    base64 -d
-  else
-    base64 -D
-  fi
-}
 
 # ---- landing-page ----
 mkdir -p "{{CODEX_HOME}}/skills/landing-page"
@@ -193,7 +186,6 @@ Start a new Codex conversation or restart Codex App if the skill metadata does n
 Source attribution: 雷蒙三十 Starter Kit / Raymond Hou.
 
 License: CC BY-NC-SA 4.0. Personal use, learning, and sharing are allowed; commercial use is not allowed under this license.
-
 CODEX_LAZYPACK_LANDING_PAGE_README_MD
 
 # landing-page/SKILL.md
@@ -367,7 +359,7 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/references/fallback-desi
 cat > "{{CODEX_HOME}}/skills/landing-page/references/fallback-design-rules.md" <<'CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_FALLBACK_DESIGN_RULES_MD'
 # Fallback Design Rules — Codex fallback design mode
 
-When UUPM or another external design system is unavailable, Codex should generate the visual direction directly from the user's answers. There is no industry design database in this mode, so follow these rules to keep the page polished and usable.
+UUPM 未安裝或失敗時，Codex 直接依使用者答案產生視覺方向。沒有產業資料庫、沒有 anti-pattern 清單，但遵守以下三條鐵律不會難看。
 
 ---
 
@@ -839,9 +831,9 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/references/uupm-integrat
 cat > "{{CODEX_HOME}}/skills/landing-page/references/uupm-integration.md" <<'CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_UUPM_INTEGRATION_MD'
 # UUPM Integration — Codex-compatible optional path
 
-UUPM is optional. The `landing-page` skill must work without it by using `fallback-design-rules.md`.
+This reference adapts the upstream UUPM workflow for Codex App. UUPM is optional; the `landing-page` skill must still work by using `fallback-design-rules.md` when UUPM is unavailable, unwanted, or failing.
 
-Do not auto-install UUPM. If the user wants to add UUPM later, route that as a separate tool-integration task and verify the Codex-compatible install path before using it.
+Source snapshot checked: `å¤é¨ææ repo` commit `b2cd801`.
 
 ## 1. Detection
 
@@ -857,15 +849,17 @@ else
 fi
 ```
 
-If unavailable, continue with fallback mode.
+Do not check or create Claude-only paths such as `~/.claude/skills` in normal Codex App use.
 
-## 2. User Message When Unavailable
+## 2. When UUPM Is Unavailable
 
 Use a concise note, not an installation prompt:
 
 ```text
 我目前沒有偵測到可直接使用的 UUPM 設計系統工具。這不影響生成頁面；我會先用內建 fallback 設計規則產生 2-3 個風格方向。之後若你想整合 UUPM，可以另外開一個工具整合任務處理。
 ```
+
+If the user asks to install UUPM, route that as a separate tool-integration task and verify the current Codex-compatible install path before making changes.
 
 ## 3. Building A Query
 
@@ -878,11 +872,17 @@ slug = "<user slug>"
 
 If the answer is in Chinese, translate internally into 3-5 English search keywords and show the user the search phrase before using it.
 
+Example:
+
+```text
+productivity notion online course education calm professional
+```
+
 ## 4. Calling An Available UUPM Tool
 
 Prefer a documented `uipro` command if present. If the only available integration is a Codex-compatible `ui-ux-pro-max` skill folder, inspect that skill's current instructions before calling any script.
 
-The expected output is a Markdown design-system document. Save or copy the chosen design summary into:
+The upstream Claude-oriented flow expects a design-system Markdown output similar to `design-system/MASTER.md`. In Codex, save or copy the chosen design summary into:
 
 ```text
 generated-pages/<slug>/design-system.md
@@ -901,6 +901,27 @@ Look for these sections:
 
 If parsing fails or the result lacks colors and typography, switch to fallback mode.
 
+Expected shape:
+
+```markdown
+## Pattern
+Hero-Centric + Social Proof
+
+## Colors
+Primary: #21A4B1
+Secondary: #A8D5BA
+CTA: #D4AF37
+Background: #FFF5F5
+Text: #2D3436
+
+## Typography
+Headline: Cormorant Garamond
+Body: Montserrat
+
+## Effects
+Soft shadows, transitions 200-300ms
+```
+
 ## 6. Convert To CSS Variables
 
 Inject the selected design tokens into the generated page:
@@ -916,6 +937,7 @@ Inject the selected design tokens into the generated page:
   --font-body: "Montserrat", sans-serif;
   --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.10);
 }
 ```
 
@@ -1402,9 +1424,7 @@ cat > "{{CODEX_HOME}}/skills/landing-page/templates/countdown.js" <<'CODEX_LAZYP
 })();
 CODEX_LAZYPACK_LANDING_PAGE_TEMPLATES_COUNTDOWN_JS
 
-test -f "{{CODEX_HOME}}/skills/landing-page/SKILL.md" && echo "landing-page installed"
-
-echo "embedded skills installed: landing-page"
-```
+echo "Installed landing-page to {{CODEX_HOME}}/skills/landing-page"
+````
 
 <!-- END EMBEDDED_SKILLS -->

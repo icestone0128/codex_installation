@@ -3,7 +3,7 @@
 > 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不需要額外的舊版獨立 skills 子目錄。
 
 
-> 版本：2026-05-21 Codex App 版
+> 版本：2026-05-25 Codex App 版
 > 用途：把 Raymond Hou / 雷蒙的 `skills/social-cards` 來源工具 安裝劇本，轉成可直接安裝到 Codex App 的全域 Skill。
 > 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/social-cards/`，再安裝 Playwright 依賴後使用。
 
@@ -25,9 +25,9 @@
 | 安裝到 `000_Agent/skills` | 只在它是單一專案或個人助手本地卡片流程時使用，不作為全域安裝 |
 | skill 名稱為 `cards` | skill id 為 `social-cards`，顯示名稱為 Social Cards |
 | `/cards` 是 slash command | `/cards` 只是觸發語；Codex 依 `SKILL.md` metadata 觸發 |
-| `blue-dark` / `orange-light` | 已改為 `brand-dark` / `brand-light` |
-| 原始 sample handle 是 `@raymond0917` | 模板預設改為 `@yourhandle` |
-| 原始配色 | 本懶人包預設 Pantone 285C，數位色 `#0072CE` |
+| `blue-dark` / `orange-light` | 已同步保留為上游模板 |
+| Pantone 285C 本機品牌版 | 保留 `brand-dark` / `brand-light` 作為相容模板 |
+| 原始 sample handle 是 `@raymond0917` | 依模板來源保留或在生成時要求使用者確認 handle |
 
 ## 安裝方式 A：直接使用懶人包內的 skill
 
@@ -69,6 +69,8 @@ git -C "$TMPDIR_CARDS" pull --depth 1 origin master
 
 ```bash
 test -f "{{CODEX_HOME}}/skills/social-cards/SKILL.md" && echo "SKILL.md ok"
+test -d "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark" && echo "blue-dark ok"
+test -d "{{CODEX_HOME}}/skills/social-cards/assets/orange-light" && echo "orange-light ok"
 test -d "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark" && echo "brand-dark ok"
 test -d "{{CODEX_HOME}}/skills/social-cards/assets/brand-light" && echo "brand-light ok"
 test -f "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs" && echo "screenshot script ok"
@@ -79,8 +81,8 @@ test -d "{{CODEX_HOME}}/skills/social-cards/node_modules/playwright" && echo "Pl
 
 ```bash
 mkdir -p /tmp/social-cards-test
-cp "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html" /tmp/social-cards-test/01-cover.html
-cp "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html" /tmp/social-cards-test/02-content.html
+cp "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html" /tmp/social-cards-test/01-cover.html
+cp "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html" /tmp/social-cards-test/02-content.html
 cd "{{CODEX_HOME}}/skills/social-cards"
 PLAYWRIGHT_BROWSERS_PATH=0 node scripts/screenshot.mjs /tmp/social-cards-test
 find /tmp/social-cards-test -maxdepth 1 -name "*.png" -print
@@ -179,10 +181,10 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 - [ ] `{{CODEX_HOME}}/skills/social-cards/SKILL.md` 存在。
 - [ ] `SKILL.md` 的 `name` 是 `social-cards`。
 - [ ] `metadata.short-description` 是 `Social Cards`。
-- [ ] `assets/brand-dark/` 有 4 個 HTML 模板。
-- [ ] `assets/brand-light/` 有 4 個 HTML 模板。
-- [ ] 模板主色使用 `#0072CE`。
-- [ ] 模板 sample handle 是 `@yourhandle`。
+- [ ] `assets/blue-dark/` 有 4 個 HTML 模板。
+- [ ] `assets/orange-light/` 有 4 個 HTML 模板。
+- [ ] `assets/brand-dark/` 有 4 個 HTML 模板，作為 Pantone 285C 相容模板。
+- [ ] `assets/brand-light/` 有 4 個 HTML 模板，作為 Pantone 285C 相容模板。
 - [ ] `scripts/screenshot.mjs` 存在。
 - [ ] `node_modules/playwright` 存在。
 - [ ] 實測匯出 PNG 成功。
@@ -194,18 +196,10 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 
 本節是自含式安裝區塊。這個序號項目會安裝：`social-cards`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾。
 
-```bash
+````bash
 set -e
-
-decode_base64() {
-  if base64 --help 2>/dev/null | grep -q -- '-d'; then
-    base64 -d
-  else
-    base64 -D
-  fi
-}
 
 # ---- social-cards ----
 mkdir -p "{{CODEX_HOME}}/skills/social-cards"
@@ -214,14 +208,14 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/SKILL.md")"
 cat > "{{CODEX_HOME}}/skills/social-cards/SKILL.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD'
 ---
 name: social-cards
-description: Use when the user asks to use Social Cards, make IG cards, social cards, carousel posts, "/cards", "做圖卡", "幫我做 IG 圖", or turn an article, note, URL, Markdown file, or pasted text into branded social-media PNG cards using the Pantone 285C brand templates.
+description: Use when the user asks to use Social Cards, make IG cards, social cards, carousel posts, "/cards", "做圖卡", "幫我做 IG 圖", or turn an article, note, URL, Markdown file, or pasted text into branded social-media PNG cards using bundled blue-dark, orange-light, or Pantone 285C brand templates.
 metadata:
   short-description: Social Cards
 ---
 
 # Social Cards
 
-把文章、筆記、網址或貼上的文字轉成品牌一致的社群圖卡。預設品牌色為 Pantone 285C，數位色使用 `#0072CE`。
+把文章、筆記、網址或貼上的文字轉成品牌一致的社群圖卡。預設使用上游 `orange-light` / `blue-dark` 兩套模板；本機仍保留 Pantone 285C 版 `brand-light` / `brand-dark` 作為相容模板。
 
 ## Trigger Phrases
 
@@ -237,6 +231,17 @@ metadata:
 
 模板 HTML 在本 skill 的 `assets/` 子資料夾：
 
+- `assets/blue-dark/cover.html`
+- `assets/blue-dark/content-text.html`
+- `assets/blue-dark/content-image.html`
+- `assets/blue-dark/cta.html`
+- `assets/orange-light/cover.html`
+- `assets/orange-light/content-text.html`
+- `assets/orange-light/content-image.html`
+- `assets/orange-light/cta.html`
+
+相容模板：
+
 - `assets/brand-dark/cover.html`
 - `assets/brand-dark/content-text.html`
 - `assets/brand-dark/content-image.html`
@@ -250,12 +255,14 @@ metadata:
 
 來源與授權摘要：`references/source-adaptation.md`
 
+上游 README 快照：`references/upstream-readme.md`
+
 ## Workflow
 
 1. 收集內容來源：貼文、網址、Markdown 檔案路徑或使用者直接貼上的文字。
 2. 若來源是網址，優先使用可用的網頁讀取工具擷取主要內容；若來源是本機檔案，先讀檔再整理。
 3. 詢問或合理推定輸出比例：預設 `4:5`（1080 x 1350）；若使用者要求正方形，改為 `1:1`（1080 x 1080）。
-4. 詢問風格：預設 `brand-light`，也可選 `brand-dark`。兩者都必須維持 Pantone 285C / `#0072CE` 作為品牌主色。
+4. 詢問風格：預設 `orange-light`，也可選 `blue-dark`；若使用者指定 Pantone 285C 品牌版，使用 `brand-light` 或 `brand-dark`。
 5. 確認社群 handle。若當前輸出根目錄已有 `output/.handle`，可讀取後向使用者確認；沒有就詢問一次。
 6. 拆卡並先展示規劃，等使用者確認後才產生預覽：
    - 第 1 張：`cover`
@@ -285,6 +292,357 @@ metadata:
 - 複製給其他使用者或其他電腦時，不必複製 `node_modules/`；保留 `package.json` 與 `package-lock.json`，在新環境重新安裝依賴。
 - 匯出後可刪除中間 HTML，保留 PNG；除非使用者要求保留可編輯 HTML。
 CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD
+
+# social-cards/assets/blue-dark/content-image.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-image.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Content Image — Blue Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background:
+      radial-gradient(ellipse 900px 900px at 100% 0%, #0A2A35 0%, transparent 70%),
+      radial-gradient(circle 1200px at -10% 105%, #4AB897 0%, rgba(74,184,151,0.5) 25%, rgba(74,184,151,0.15) 50%, transparent 75%),
+      #01101A;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    padding: 80px 90px;
+    display: flex;
+    flex-direction: column;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 72px;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 28px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .description {
+    font-weight: 500;
+    font-size: 44px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
+  .image-area {
+    flex: 1;
+    background: #D9D9D9;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .image-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">標題標題標題標題標題</h2>
+  <p class="description">內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+  <div class="image-area">
+    <!-- 替換為 <img src="your-screenshot.png"> -->
+  </div>
+  <span class="handle">@raymond0917</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML
+
+# social-cards/assets/blue-dark/content-text.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Content Text — Blue Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background:
+      radial-gradient(ellipse 900px 900px at 100% 0%, #0A2A35 0%, transparent 70%),
+      radial-gradient(circle 1200px at -10% 105%, #4AB897 0%, rgba(74,184,151,0.5) 25%, rgba(74,184,151,0.15) 50%, transparent 75%),
+      #01101A;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    padding: 100px 90px;
+    display: flex;
+    flex-direction: column;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 72px;
+    color: #fff;
+    line-height: 1.4;
+    margin-bottom: 56px;
+  }
+  .bullet-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    flex: 1;
+  }
+  .bullet-item {
+    display: flex;
+    gap: 36px;
+    align-items: flex-start;
+  }
+  .bullet-dot {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border-radius: 50%;
+    margin-top: 30px;
+  }
+  .bullet-text {
+    font-size: 44px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">標題標題<br>標題標題標題標題？</h2>
+
+  <div class="bullet-list">
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+  </div>
+
+  <span class="handle">@raymond0917</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML
+
+# social-cards/assets/blue-dark/cover.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cover.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Cover — Blue Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background:
+      radial-gradient(ellipse 900px 900px at 100% 0%, #0A2A35 0%, transparent 70%),
+      radial-gradient(circle 1200px at -10% 105%, #4AB897 0%, rgba(74,184,151,0.5) 25%, rgba(74,184,151,0.15) 50%, transparent 75%),
+      #01101A;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+  }
+  .content {
+    position: absolute;
+    bottom: 200px;
+    left: 90px;
+    right: 90px;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 88px;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 32px;
+  }
+  .subtitle {
+    font-weight: 500;
+    font-size: 44px;
+    color: #6DE3EA;
+    line-height: 1.5;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="content">
+    <h1 class="title">標題標題<br>標題標題標題標題</h1>
+    <p class="subtitle">副標題副標題副標題</p>
+  </div>
+  <span class="handle">@raymond0917</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML
+
+# social-cards/assets/blue-dark/cta.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cta.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>CTA — Blue Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background:
+      radial-gradient(ellipse 900px 900px at 100% 0%, #0A2A35 0%, transparent 70%),
+      radial-gradient(circle 1200px at -10% 105%, #4AB897 0%, rgba(74,184,151,0.5) 25%, rgba(74,184,151,0.15) 50%, transparent 75%),
+      #01101A;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 88px;
+    color: #fff;
+    text-align: center;
+    line-height: 1.35;
+    margin-bottom: 44px;
+  }
+  .subtitle {
+    font-weight: 500;
+    font-size: 40px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 52px;
+  }
+  .handle-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    padding: 20px 48px;
+    border-radius: 60px;
+  }
+  /* 底部互動提示 */
+  .bottom-actions {
+    position: absolute;
+    bottom: 64px;
+    left: 90px;
+    right: 90px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+  }
+  .action-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .action-icon svg {
+    width: 44px;
+    height: 44px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+  }
+  .action-text {
+    font-size: 26px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">有幫助的話<br>記得按讚分享</h2>
+  <p class="subtitle">更多教學與實戰分享<br>追蹤我的帳號，不錯過最新內容</p>
+  <span class="handle-badge">@raymond0917</span>
+
+  <div class="bottom-actions">
+    <div class="action">
+      <span class="action-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+      <span class="action-text">喜歡點愛心</span>
+    </div>
+    <div class="action">
+      <span class="action-icon"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="action-text">實用請收藏</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML
 
 # social-cards/assets/brand-dark/content-image.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html")"
@@ -1025,6 +1383,394 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html" <<'CODEX_
 </html>
 CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML
 
+# social-cards/assets/orange-light/content-image.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-image.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Content Image — Orange Light</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background: #F6F7F8;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+  }
+  /* 頂部橘色色塊（居中） */
+  .deco-bar {
+    position: absolute;
+    top: 0;
+    left: 227px;
+    width: 636px;
+    height: 18px;
+    background: #E27F2E;
+  }
+  .title {
+    position: absolute;
+    top: 107px;
+    left: 83px;
+    right: 83px;
+    font-size: 72px;
+    font-weight: 900;
+    color: #E27F2E;
+    line-height: 1.4;
+    text-align: center;
+  }
+  .description {
+    position: absolute;
+    top: 253px;
+    left: 103px;
+    right: 103px;
+    font-size: 44px;
+    font-weight: 500;
+    color: #40444D;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .image-area {
+    position: absolute;
+    top: 590px;
+    left: 83px;
+    right: 83px;
+    height: 519px;
+    background: #D9D9D9;
+    border-radius: 17px;
+    overflow: hidden;
+    box-shadow: 0px 22px 22px 12px rgba(200, 200, 200, 0.25);
+  }
+  .image-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="deco-bar"></div>
+  <h2 class="title">標題標題標題標題標題</h2>
+  <p class="description">內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+  <div class="image-area">
+    <!-- 替換為 <img src="your-screenshot.png"> -->
+  </div>
+  <span class="handle">@raymond0917</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML
+
+# social-cards/assets/orange-light/content-text.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-text.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Content Text — Orange Light</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background: #F6F7F8;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    padding: 100px 90px;
+    display: flex;
+    flex-direction: column;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 72px;
+    color: #E27F2E;
+    line-height: 1.4;
+    margin-bottom: 56px;
+  }
+  .bullet-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    flex: 1;
+  }
+  .bullet-item {
+    display: flex;
+    gap: 36px;
+    align-items: flex-start;
+    padding-left: 24px;
+  }
+  .bullet-dot {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    background: #E27F2E;
+    border-radius: 50%;
+    margin-top: 30px;
+  }
+  .bullet-text {
+    font-size: 44px;
+    font-weight: 500;
+    color: #40444D;
+    line-height: 1.6;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">標題標題<br>標題標題標題標題？</h2>
+
+  <div class="bullet-list">
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+    <div class="bullet-item">
+      <div class="bullet-dot"></div>
+      <p class="bullet-text">內文內文內文內文內文內文內文內文內文內文內文內文內文</p>
+    </div>
+  </div>
+
+  <span class="handle">@raymond0917</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML
+
+# social-cards/assets/orange-light/cover.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Cover — Orange Light</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  /* 頂部淡橘色薄紗 */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 600px;
+    background: linear-gradient(180deg, rgba(231,155,80,0.22) 0%, rgba(231,155,80,0.06) 65%, transparent 100%);
+    pointer-events: none;
+  }
+  /* 格紋紋理 */
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 88px;
+    color: #E27F2E;
+    text-align: center;
+    line-height: 1.35;
+    margin-bottom: 36px;
+  }
+  .divider {
+    width: 80px;
+    height: 5px;
+    background: #E27F2E;
+    border-radius: 3px;
+    margin-bottom: 40px;
+  }
+  .subtitle {
+    font-weight: 500;
+    font-size: 44px;
+    color: #40444D;
+    text-align: center;
+    line-height: 1.6;
+    padding: 0 100px;
+  }
+  .handle {
+    position: absolute;
+    bottom: 72px;
+    left: 90px;
+    font-family: 'Inter', sans-serif;
+    font-size: 33px;
+    font-weight: 600;
+    color: rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1 class="title">標題標題<br>標題標題標題標題</h1>
+  <div class="divider"></div>
+  <p class="subtitle">副標題副標題副標題副標題<br>副標題副標題副標題</p>
+  <span class="handle">@raymond0917</span>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML
+
+# social-cards/assets/orange-light/cta.html
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cta.html")"
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>CTA — Orange Light</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .title {
+    font-weight: 900;
+    font-size: 88px;
+    color: #E27F2E;
+    text-align: center;
+    line-height: 1.35;
+    margin-bottom: 44px;
+  }
+  .subtitle {
+    font-weight: 500;
+    font-size: 40px;
+    color: #666;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 52px;
+  }
+  .handle-badge {
+    display: inline-block;
+    background: #E27F2E;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    padding: 20px 48px;
+    border-radius: 60px;
+  }
+  .bottom-actions {
+    position: absolute;
+    bottom: 64px;
+    left: 90px;
+    right: 90px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #40444D;
+  }
+  .action-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .action-icon svg {
+    width: 44px;
+    height: 44px;
+    fill: none;
+    stroke: #40444D;
+    stroke-width: 2;
+  }
+  .action-text {
+    font-size: 26px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2 class="title">有幫助的話<br>記得按讚分享</h2>
+  <p class="subtitle">更多教學與實戰分享<br>追蹤我的帳號，不錯過最新內容</p>
+  <span class="handle-badge">@raymond0917</span>
+
+  <div class="bottom-actions">
+    <div class="action">
+      <span class="action-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+      <span class="action-text">喜歡點愛心</span>
+    </div>
+    <div class="action">
+      <span class="action-icon"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="action-text">實用請收藏</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML
+
 # social-cards/package-lock.json
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/package-lock.json")"
 cat > "{{CODEX_HOME}}/skills/social-cards/package-lock.json" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON'
@@ -1168,45 +1914,45 @@ cat > "{{CODEX_HOME}}/skills/social-cards/preview-all.html" <<'CODEX_LAZYPACK_SO
 <body>
 
 <div class="row">
-  <div class="row-label">BRAND LIGHT</div>
+  <div class="row-label">ORANGE LIGHT</div>
   <div class="grid">
     <div class="cell">
-      <div class="cell-label">brand-light-cover</div>
-      <div class="frame-wrap"><iframe src="assets/brand-light/cover.html"></iframe></div>
+      <div class="cell-label">orange-cover</div>
+      <div class="frame-wrap"><iframe src="assets/orange-light/cover.html"></iframe></div>
     </div>
     <div class="cell">
-      <div class="cell-label">brand-light-img</div>
-      <div class="frame-wrap"><iframe src="assets/brand-light/content-image.html"></iframe></div>
+      <div class="cell-label">orange-img</div>
+      <div class="frame-wrap"><iframe src="assets/orange-light/content-image.html"></iframe></div>
     </div>
     <div class="cell">
-      <div class="cell-label">brand-light-text</div>
-      <div class="frame-wrap"><iframe src="assets/brand-light/content-text.html"></iframe></div>
+      <div class="cell-label">orange-text</div>
+      <div class="frame-wrap"><iframe src="assets/orange-light/content-text.html"></iframe></div>
     </div>
     <div class="cell">
-      <div class="cell-label">brand-light-cta</div>
-      <div class="frame-wrap"><iframe src="assets/brand-light/cta.html"></iframe></div>
+      <div class="cell-label">orange-cta</div>
+      <div class="frame-wrap"><iframe src="assets/orange-light/cta.html"></iframe></div>
     </div>
   </div>
 </div>
 
 <div class="row">
-  <div class="row-label">BRAND DARK</div>
+  <div class="row-label">BLUE DARK</div>
   <div class="grid">
     <div class="cell">
-      <div class="cell-label">brand-dark-cover</div>
-      <div class="frame-wrap"><iframe src="assets/brand-dark/cover.html"></iframe></div>
+      <div class="cell-label">dark-cover</div>
+      <div class="frame-wrap"><iframe src="assets/blue-dark/cover.html"></iframe></div>
     </div>
     <div class="cell">
-      <div class="cell-label">brand-dark-img</div>
-      <div class="frame-wrap"><iframe src="assets/brand-dark/content-image.html"></iframe></div>
+      <div class="cell-label">dark-img</div>
+      <div class="frame-wrap"><iframe src="assets/blue-dark/content-image.html"></iframe></div>
     </div>
     <div class="cell">
-      <div class="cell-label">brand-dark-text</div>
-      <div class="frame-wrap"><iframe src="assets/brand-dark/content-text.html"></iframe></div>
+      <div class="cell-label">dark-text</div>
+      <div class="frame-wrap"><iframe src="assets/blue-dark/content-text.html"></iframe></div>
     </div>
     <div class="cell">
-      <div class="cell-label">brand-dark-cta</div>
-      <div class="frame-wrap"><iframe src="assets/brand-dark/cta.html"></iframe></div>
+      <div class="cell-label">dark-cta</div>
+      <div class="frame-wrap"><iframe src="assets/blue-dark/cta.html"></iframe></div>
     </div>
   </div>
 </div>
@@ -1220,7 +1966,7 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/references/source-adapta
 cat > "{{CODEX_HOME}}/skills/social-cards/references/source-adaptation.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD'
 ---
 title: Social Cards Source Adaptation
-date: 2026-05-20
+date: 2026-05-25
 type: reference
 tags:
   - codex
@@ -1235,6 +1981,7 @@ This skill adapts the third-party `skills/social-cards` package from:
 - Source page in document: `https://cc.lifehacker.tw`
 - Source repo: `<å¤é¨ææ repo>`
 - Source folder: `skills/social-cards/`
+- Source snapshot checked: `b2cd801`
 - Original author attribution in source: Raymond Hou / 雷蒙
 - Blog listed in source: `https://raymondhouch.com`
 - Threads listed in source: `@raymond0917`
@@ -1250,9 +1997,9 @@ This skill adapts the third-party `skills/social-cards` package from:
 - Previous temporary package path: `codex_installation/converted-skills/cards`（已清理）。
 - Removed source-only Claude-specific metadata fields.
 - Replaced Claude command assumptions with Codex trigger metadata and procedural instructions.
-- Renamed template sets from `blue-dark` / `orange-light` to `brand-dark` / `brand-light`.
-- Updated the default brand color to Pantone 285C, using digital HEX `#0072CE` for templates.
-- Replaced the original sample handle with `@yourhandle` so generated cards do not inherit the source author's handle by default.
+- Synced upstream template sets `blue-dark` / `orange-light` from the source repo.
+- Kept the existing Pantone 285C template sets `brand-dark` / `brand-light` as Codex-local compatibility templates.
+- Updated the default flow to use upstream `orange-light` / `blue-dark`, while allowing Pantone 285C output when requested.
 
 ## Original Install Script Conversion Checklist
 
@@ -1262,7 +2009,7 @@ This skill adapts the third-party `skills/social-cards` package from:
 | Install into `000_Agent/skills` | Valid only for a project-local or assistant-local workflow; do not symlink it into global skills |
 | Rename install folder to `cards` | Renamed to `social-cards`; display name is Social Cards |
 | Use `/cards` as a slash command | Kept `/cards` as a trigger phrase only; Codex uses skill metadata |
-| Keep `blue-dark` and `orange-light` template sets | Converted to `brand-dark` and `brand-light` for Pantone 285C branding |
+| Keep `blue-dark` and `orange-light` template sets | Synced from upstream; existing `brand-dark` and `brand-light` remain available for Pantone 285C branding |
 | Install Playwright and Chromium | Installed locally in the skill folder |
 | Verify by checking core files | Verified `SKILL.md`, 8 templates, screenshot script, Playwright, and Chromium |
 | Export 2x PNG through Playwright | Verified with two generated PNG files in `/private/tmp/social-cards-rename-test/` |
@@ -1273,8 +2020,153 @@ This skill adapts the third-party `skills/social-cards` package from:
 - Digital HEX: `#0072CE`
 - RGB: `0, 114, 206`
 
-Use `#0072CE` as the main accent in all generated social-card templates unless the user explicitly gives a different campaign palette.
+Use `#0072CE` as the main accent when the user selects the Pantone 285C brand templates. Use the upstream colors when the user selects `blue-dark` or `orange-light`.
 CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD
+
+# social-cards/references/upstream-readme.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/references/upstream-readme.md")"
+cat > "{{CODEX_HOME}}/skills/social-cards/references/upstream-readme.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD'
+# 社群圖卡產生器 by 雷小蒙：不會設計也能一句話出 IG 圖卡
+
+> **ver. 1.0** ｜ **Last edited: 2026-04-18**
+> ⭐ 初學者友善｜10 分鐘安裝｜跨平台（macOS / Linux / Windows WSL）
+> 丟一篇文章給 AI，它自動拆成一組品牌風格統一的 IG 圖卡，預覽確認後一鍵匯出 2x PNG。
+
+```text
+═══════════════════════════════════════════════════════════════
+ 社群圖卡產生器 by 雷小蒙 · by 雷蒙（Raymond Hou）
+───────────────────────────────────────────────────────────────
+ Source:      https://cc.lifehacker.tw
+ Blog:        https://raymondhouch.com
+ Threads:     @raymond0917
+ License:     CC BY-NC-SA 4.0 · 個人使用自由；禁止商業用途
+═══════════════════════════════════════════════════════════════
+```
+
+## 你可能遇過這個問題
+
+你寫了一篇文章、做了一份教學筆記，想分享到 IG。
+
+打開 Canva，光選模板就花了 20 分鐘。調字體、換顏色、對齊圖片，弄了一個多小時，出來的東西還是不滿意——配色不統一、每次做出來都長不一樣。
+
+或者你根本不想碰設計軟體，覺得「我只是想把這段文字變成好看的圖而已，為什麼這麼麻煩」。
+
+**社群圖卡產生器**專治這個問題。你跟 AI 說「幫我把這篇做成圖卡」，它會自動幫你：拆成適合 IG 的一張張圖、套上統一的品牌配色、讓你預覽修改、最後一鍵匯出可以直接發的 PNG。
+
+## 裝完之後你會得到什麼
+
+- **一個 `/cards` 指令** — 說「做圖卡」或 `/cards` 就會觸發
+- **2 套品牌配色可選**：
+  - 🔵 **藍黑系** — 深色科技感，適合教學、工具介紹
+  - 🟠 **橘白系** — 明亮溫暖，適合觀點分享、心得
+- **4 種卡片版型**：封面（cover）、純文字（content-text）、文字+圖片（content-image）、結尾呼籲（cta）
+- **2 種尺寸**：4:5（1080×1350，IG 最常用）、1:1（1080×1080，IG / X 通用）
+- **AI 自動拆卡** — 你只要給內容，AI 判斷要拆幾張、每張放什麼
+- **預覽 → 修改 → 匯出** — 先在瀏覽器看完整效果，改到滿意再匯出 2x PNG
+- **@handle 記憶** — 第一次設定你的帳號，之後自動帶入
+
+## 資料夾結構
+
+```
+social-cards/
+├── SKILL.md              ← Skill 主劇本（給 Claude 讀）
+├── README.md             ← 你正在看的這份（給人讀）
+├── assets/
+│   ├── blue-dark/        ← 4 個藍黑系 HTML 模板
+│   └── orange-light/     ← 4 個橘白系 HTML 模板
+└── scripts/
+    └── screenshot.mjs    ← Playwright 截圖腳本
+```
+
+## 怎麼安裝？
+
+### 方式 1：直接複製資料夾（推薦）
+
+```bash
+# 如果你跑過 å¤é¨ææ 01「AI 分身起始助手」
+cp -r social-cards/ 000_Agent/skills/cards/
+
+# 或者用 Claude Code 預設位置
+cp -r social-cards/ ~/.claude/skills/cards/
+```
+
+> [!IMPORTANT]
+> 資料夾名稱要改成 `cards`（對應 SKILL.md 裡的 `name: cards`）。
+
+安裝 Playwright（截圖用）：
+
+```bash
+cd ~/.claude/skills/cards/
+npm init -y
+npm install playwright
+npx playwright install chromium
+```
+
+### 方式 2：貼給 Claude Code 代裝
+
+把整個資料夾 + 本 README 貼給 Claude Code，跟它說：
+
+> 幫我把這個社群圖卡 Skill 裝好
+
+AI 會自動建立資料夾、複製模板、安裝 Playwright、驗證。
+
+### 驗證
+
+重開 Claude Code，打 `/cards` 或跟它說「做圖卡」，應該會啟動引導流程。
+
+## 需要安裝什麼？
+
+| 工具 | 用途 | 怎麼裝 |
+|:--|:--|:--|
+| **Node.js** | 執行截圖腳本 | 裝 Claude Code 終端機版時已經有了。桌面版用戶如果沒有，跟 AI 說「幫我裝 Node.js」 |
+| **Playwright** | 把 HTML 圖卡截圖成 PNG | 見上方「方式 1」的 npm install 指令 |
+
+## 怎麼用？
+
+三種使用方式：
+
+**方式一：給網址**
+```
+/cards https://你的文章網址.com
+```
+
+**方式二：給檔案**
+```
+/cards 200 Notes/我的讀書筆記.md
+```
+
+**方式三：直接打字**
+```
+做圖卡
+
+（然後貼上你的文字內容）
+```
+
+AI 會帶你走完整個流程：選配色 → 選尺寸 → 確認帳號 → 自動拆卡 → 預覽 → 修改 → 匯出 PNG。
+
+## 一次圖卡製作流程大約長這樣
+
+1. 你丟一篇文章給 AI
+2. AI 問你：藍黑還是橘白？4:5 還是 1:1？
+3. AI 把文章拆成 5-8 張圖卡，列出規劃讓你確認
+4. 你說 OK（或調整）
+5. AI 生成預覽，在瀏覽器打開給你看
+6. 你看完覺得第 3 張文字太長 → 跟 AI 說 → AI 改好 → 重新整理
+7. 你說「匯出」→ AI 截圖，幾秒後 PNG 就在資料夾裡了
+
+全程大約 3-5 分鐘，取決於你修改幾次。
+
+## 搭配推薦
+
+> [!TIP]
+> 搭配迷你課 **3-2「品牌社群圖卡 & 簡報自動生成」** 一起看，先理解品牌配色與內容密度規則，做出來的圖卡會更專業。
+
+## 授權
+
+- **License**：CC BY-NC-SA 4.0 · 個人使用、學習、分享自由；禁止商業用途
+- 出自 雷蒙三十 Starter Kit — cc.lifehacker.tw | CC BY-NC-SA 4.0
+- [迷你課](https://lifehacker.tw/courses/24hr-claude-code-tutorial) · [週報](https://raymondhouch.com/subscribe) · [Threads @raymond0917](https://www.threads.com/@raymond0917)
+CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD
 
 # social-cards/scripts/screenshot.mjs
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs")"
@@ -1316,9 +2208,11 @@ for (const file of [...files, 'preview.html']) {
 console.log(`\n全部匯出完成！${files.length} 張 2x PNG 在 ${dir}/`);
 CODEX_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS
 
-test -f "{{CODEX_HOME}}/skills/social-cards/SKILL.md" && echo "social-cards installed"
+cd "{{CODEX_HOME}}/skills/social-cards"
+npm install
+npx playwright install chromium
 
-echo "embedded skills installed: social-cards"
-```
+echo "Installed social-cards to {{CODEX_HOME}}/skills/social-cards"
+````
 
 <!-- END EMBEDDED_SKILLS -->
