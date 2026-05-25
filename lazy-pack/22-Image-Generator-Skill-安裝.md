@@ -108,7 +108,7 @@ CLI automation package.
 
 ## Core Rule
 
-- For ordinary image creation, image creation, style exploration, or image editing,
+- For ordinary image creation, style exploration, or image editing,
   use Codex's built-in image generation capability.
 - Do not ask the user to set `OPENAI_API_KEY` for normal image work.
 - Do not create API scripts, billing setup, batch-generation workflows, or CLI

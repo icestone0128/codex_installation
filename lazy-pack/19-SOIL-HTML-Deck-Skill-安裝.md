@@ -7,7 +7,7 @@
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-05-25。
-- 原始來源包：`/Users/arrywu/Downloads/六大簡報skills分享/skills_codex/soil-html-deck`。
+- 原始來源包：使用者提供的 SOIL Deck skills package；本版已整理為 `soil-html-deck`。
 - 追加參考來源：`https://github.com/mathruffian-dot/claude-html-slide-builder`，僅整合 Reveal.js、功能標記、互動元件與圖標去背等可攜式概念。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md`。
 - Obsidian 全域索引已記錄用途：SOIL HTML 互動簡報；輸出單一可開啟 HTML，包含 inline CSS/JS、base64 圖像、進度列、互動卡片、排序表格、圖表、決策樹、Reveal.js 可選模式、文字雲/投票參考與對比滑桿。
