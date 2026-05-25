@@ -1,15 +1,15 @@
-# 21-SOIL-Teaching-Deck-Skill-安裝
+# 21-SOIL-General-Deck-Skill-安裝
 
 > 版本：2026-05-25 Codex App 版
-> 用途：建立、分析或改善 SOIL 風格教學 PowerPoint，輸出可編輯 .pptx，強調教學清楚度、認知負荷與可驗證版面。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/soil-teaching-deck/`，不需要取得原作者本機資料夾。
+> 用途：建立、分析或改善 SOIL 風格通用 PowerPoint，輸出可編輯 .pptx，強調資訊清楚度、敘事結構與可驗證版面。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/soil-general-deck/`，不需要取得原作者本機資料夾。
 
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-05-25。
-- 原始來源包：`/Users/arrywu/Downloads/六大簡報skills分享/skills_codex/soil-teaching-deck`。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-teaching-deck/SKILL.md`。
-- Obsidian 全域索引已記錄用途：SOIL 可編輯教學 PPTX；用 SOIL engines 規劃教學流，建立可編輯文字、AI 視覺、幾何圖與認知負荷驗證。
+- 原始來源包：使用者提供的 SOIL Deck skills package；本版已改名為 `soil-general-deck`。
+- Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md`。
+- Obsidian 全域索引已記錄用途：SOIL 通用可編輯 PPTX；用 SOIL engines 規劃簡報流，建立可編輯文字、AI 視覺、幾何圖與版面驗證。
 
 ## 這版和來源工具文件的差異
 
@@ -17,7 +17,7 @@
 |---|---|
 | 1 | 移除來源工具專用路徑與非 Codex skill 位置；正式版只保留 Codex 相容限制。 |
 | 2 | 將 reference 內的來源工具品質描述改為 `Codex-quality`。 |
-| 3 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/soil-teaching-deck/`。 |
+| 3 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/soil-general-deck/`。 |
 
 ## 安裝方式
 
@@ -29,9 +29,9 @@
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/soil-teaching-deck/SKILL.md" && echo "soil-teaching-deck SKILL.md ok"
-test -d "{{CODEX_HOME}}/skills/soil-teaching-deck/references" && echo "references ok"
-test -d "{{CODEX_HOME}}/skills/soil-teaching-deck/scripts" && echo "scripts ok"
+test -f "{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md" && echo "soil-general-deck SKILL.md ok"
+test -d "{{CODEX_HOME}}/skills/soil-general-deck/references" && echo "references ok"
+test -d "{{CODEX_HOME}}/skills/soil-general-deck/scripts" && echo "scripts ok"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -40,16 +40,16 @@ test -d "{{CODEX_HOME}}/skills/soil-teaching-deck/scripts" && echo "scripts ok"
 
 安裝後可用下列語句觸發：
 
-- 「使用 soil-teaching-deck 幫我做簡報」
-- 「用 SOIL 架構做一份教學簡報」
+- 「使用 soil-general-deck 幫我做簡報」
+- 「用 SOIL 架構做一份通用簡報」
 - 「幫我把這份教材轉成 SOIL 風格 slides」
-- 「幫我檢查這份 SOIL deck 的教學流與認知負荷」
+- 「幫我檢查這份 SOIL deck 的簡報流與資訊清楚度」
 
-觸發語意包含：teaching slides, classroom slides, lesson-material-to-slides, SOIL slides, instructional presentation design, 教學簡報診斷與改善。
+觸發語意包含：general slides, presentation decks, material-to-slides, SOIL slides, presentation design, 通用簡報診斷與改善。
 
 ## 預設工作流程
 
-1. 讀取使用者提供的主題、素材、教學目標、受眾與輸出格式。
+1. 讀取使用者提供的主題、素材、簡報目標、受眾與輸出格式。
 2. 先決定 SOIL 節奏：引起動機 -> 維持注意 -> 喚起行動。
 3. 依 skill 內 `SKILL.md` 與 references 規劃頁面、視覺、互動或 PowerPoint 結構。
 4. 若需要 bitmap 視覺，使用 Codex 內建 image generation 生成，不用本機假圖替代。
@@ -59,7 +59,7 @@ test -d "{{CODEX_HOME}}/skills/soil-teaching-deck/scripts" && echo "scripts ok"
 
 ### 1. 不要把來源工具專用路徑帶進正式安裝
 
-正式版只使用 Codex 全域 skill 路徑 `{{CODEX_HOME}}/skills/soil-teaching-deck/`。不要建立非 Codex skill 位置、來源工具專用命令或來源作者的本機路徑。
+正式版只使用 Codex 全域 skill 路徑 `{{CODEX_HOME}}/skills/soil-general-deck/`。不要建立非 Codex skill 位置、來源工具專用命令或來源作者的本機路徑。
 
 ### 2. AI 圖像規則不能用本機假圖替代
 
@@ -71,43 +71,43 @@ test -d "{{CODEX_HOME}}/skills/soil-teaching-deck/scripts" && echo "scripts ok"
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/soil-teaching-deck/SKILL.md` 存在。
+- [ ] `{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md` 存在。
 - [ ] references / scripts / examples 依本 skill package 實際內容存在。
 - [ ] 搜尋 package 內沒有非 Codex 安裝路徑或非 Codex frontmatter 欄位。
-- [ ] 開新 Codex 對話後，可用 `soil-teaching-deck` 或 SOIL 簡報相關語句觸發。
+- [ ] 開新 Codex 對話後，可用 `soil-general-deck` 或 SOIL 簡報相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`soil-teaching-deck`。
+本節會安裝：`soil-general-deck`。
 
 使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
 
 ```bash
 set -e
 
-# ---- soil-teaching-deck ----
-mkdir -p "{{CODEX_HOME}}/skills/soil-teaching-deck"
-# soil-teaching-deck/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-teaching-deck/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/soil-teaching-deck/SKILL.md" <<'CODEX_LAZYPACK_SOIL_TEACHING_DECK_SKILL_MD'
+# ---- soil-general-deck ----
+mkdir -p "{{CODEX_HOME}}/skills/soil-general-deck"
+# soil-general-deck/SKILL.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md")"
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_SKILL_MD'
 ---
-name: soil-teaching-deck
+name: soil-general-deck
 description: >
-  Create, analyze, or improve SOIL-style teaching PowerPoint decks. Use when the
-  user asks for teaching slides, classroom slides, lesson-material-to-slides,
-  SOIL slides, instructional presentation design, or a review of an existing
-  teaching deck's cognitive load and teaching flow. Produces editable .pptx
+  Create, analyze, or improve SOIL-style general PowerPoint decks. Use when the
+  user asks for general slides, presentation decks, material-to-slides,
+  SOIL slides, presentation design, or a review of an existing
+  general deck's information clarity and narrative flow. Produces editable .pptx
   slides with PowerPoint text objects, optional AI illustrations, optional
-  geometry diagrams, and a SOIL teaching structure.
+  geometry diagrams, and a SOIL presentation structure.
 metadata:
-  short-description: SOIL editable teaching PPTX deck
+  short-description: SOIL editable general PPTX deck
 ---
 
-# SOIL Teaching Deck
+# SOIL General Deck
 
-Use this skill for editable instructional PowerPoint decks. The goal is teaching
+Use this skill for editable general PowerPoint decks. The goal is information
 clarity first, visual design second, and file correctness last.
 
 ## Output Contract
@@ -128,8 +128,8 @@ clarity first, visual design second, and file correctness last.
 Choose the path from the user's request:
 
 - Material to deck: run SOIL engines 1-6.
-- Topic only: first expand a minimal teaching outline, then run engines 1-6.
-- Existing deck review: inspect the deck, run cognitive diagnosis, then propose
+- Topic only: first expand a minimal presentation outline, then run engines 1-6.
+- Existing deck review: inspect the deck, run clarity diagnosis, then propose
   or implement fixes.
 - Style definition: run only the style engine and output a reusable style spec.
 
@@ -177,21 +177,21 @@ lesson duration.
 
 ## Codex Compatibility Notes
 
-- Use Codex App-compatible paths such as `{{CODEX_HOME}}/skills/soil-teaching-deck/`; any command examples should be cross-platform where possible.
+- Use Codex App-compatible paths such as `{{CODEX_HOME}}/skills/soil-general-deck/`; any command examples should be cross-platform where possible.
 - Do not add source-tool command folders, source-tool slash commands, or non-Codex skill locations to this package.
 - Use Codex built-in image generation for every bitmap visual image. Only precise
   math/geometry diagrams are exempt; those should be deterministic SVG/Python
   drawings for correctness.
-- Keep AGENTS.md clean; progress and teaching notes belong in Obsidian if the
+- Keep AGENTS.md clean; progress and presentation notes belong in Obsidian if the
   user asks for project synchronization.
-CODEX_LAZYPACK_SOIL_TEACHING_DECK_SKILL_MD
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_SKILL_MD
 
-# soil-teaching-deck/references/geometry.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-teaching-deck/references/geometry.md")"
-cat > "{{CODEX_HOME}}/skills/soil-teaching-deck/references/geometry.md" <<'CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_GEOMETRY_MD'
+# soil-general-deck/references/geometry.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/geometry.md")"
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/geometry.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_GEOMETRY_MD'
 # Geometry Diagrams
 
-Use this reference when a teaching deck needs math diagrams.
+Use this reference when a general deck needs math diagrams.
 
 ## Planning Fields
 
@@ -232,11 +232,11 @@ geometry:
 
 For unsupported shapes, create a custom SVG/Python drawing with explicit
 coordinates. Do not rely on image generation for precise geometric correctness.
-CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_GEOMETRY_MD
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_GEOMETRY_MD
 
-# soil-teaching-deck/references/layout-recipes.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-teaching-deck/references/layout-recipes.md")"
-cat > "{{CODEX_HOME}}/skills/soil-teaching-deck/references/layout-recipes.md" <<'CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_LAYOUT-RECIPES_MD'
+# soil-general-deck/references/layout-recipes.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/layout-recipes.md")"
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/layout-recipes.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT-RECIPES_MD'
 # Layout Recipes
 
 Use a 16:9 canvas. Keep margins at least 0.5 inches unless a full-bleed slide is
@@ -306,11 +306,11 @@ PowerPoint editable text is not the same as Word OMML. For formulas:
   place it beside editable labels.
 - Avoid a single mixed text box containing long Chinese text and fragile formula
   notation.
-CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_LAYOUT-RECIPES_MD
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT-RECIPES_MD
 
-# soil-teaching-deck/references/soil-engines.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-teaching-deck/references/soil-engines.md")"
-cat > "{{CODEX_HOME}}/skills/soil-teaching-deck/references/soil-engines.md" <<'CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_SOIL-ENGINES_MD'
+# soil-general-deck/references/soil-engines.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-engines.md")"
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-engines.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL-ENGINES_MD'
 # SOIL Engines
 
 ## Engine 1: Concept Positioning
@@ -393,11 +393,11 @@ Define:
 Build the PowerPoint only after visual/geometry requirements are clear. Do not
 make a complete deck and then retrofit diagrams; reserve layout space before
 production.
-CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_SOIL-ENGINES_MD
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL-ENGINES_MD
 
-# soil-teaching-deck/references/validation.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-teaching-deck/references/validation.md")"
-cat > "{{CODEX_HOME}}/skills/soil-teaching-deck/references/validation.md" <<'CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_VALIDATION_MD'
+# soil-general-deck/references/validation.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/validation.md")"
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/validation.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VALIDATION_MD'
 # Validation
 
 Before final delivery:
@@ -419,11 +419,11 @@ If a slide overflows:
 3. Shorten body text and move details to speaker notes.
 4. Reduce local padding or image size.
 5. Only then adjust local font size. Do not shrink the whole deck's type scale.
-CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_VALIDATION_MD
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VALIDATION_MD
 
-# soil-teaching-deck/references/visual-assets.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-teaching-deck/references/visual-assets.md")"
-cat > "{{CODEX_HOME}}/skills/soil-teaching-deck/references/visual-assets.md" <<'CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_VISUAL-ASSETS_MD'
+# soil-general-deck/references/visual-assets.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/visual-assets.md")"
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/visual-assets.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL-ASSETS_MD'
 # Visual Assets
 
 Use visuals only when they teach, orient, or create attention.
@@ -476,7 +476,7 @@ Use these rules when the output is "AI image + editable PowerPoint text":
 
 Do not embed relative paths that will break after moving the deck folder. Insert
 images into the PPTX file itself.
-CODEX_LAZYPACK_SOIL_TEACHING_DECK_REFERENCES_VISUAL-ASSETS_MD
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL-ASSETS_MD
 ```
 
 <!-- END EMBEDDED_SKILLS -->

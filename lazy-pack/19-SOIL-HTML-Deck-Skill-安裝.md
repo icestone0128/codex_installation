@@ -18,7 +18,7 @@
 |---|---|
 | 1 | 移除來源 `SKILL.md` 中的原作者本機 reference deck 路徑，改成 Codex App 可攜式品質標準。 |
 | 2 | 保留範例 HTML 作為本地 reference example，但不要求下載者擁有原作者 Windows / Google Drive 路徑。 |
-| 3 | 整合 `claude-html-slide-builder` 的 Reveal.js、功能標記、文字雲/投票、對比滑桿與圖標去背概念，但移除 Claude Code 安裝路徑、draw skill 假設與自動部署預設。 |
+| 3 | 整合 `claude-html-slide-builder` 的 Reveal.js、功能標記、文字雲/投票、對比滑桿與圖標去背概念，但移除 Claude Code 安裝路徑、來源工具生圖 skill 假設與自動部署預設。 |
 | 4 | Firebase 只作為明確要求時才啟用的可選互動能力；安裝包不內建示範專案金鑰作為預設設定。 |
 | 5 | GitHub Pages 發佈改為獨立確認步驟，不在一般簡報生成流程中自動建立 repo 或 push。 |
 | 6 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/soil-html-deck/`。 |
@@ -53,13 +53,13 @@ test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-lice
 - 「幫我把這份教材轉成 SOIL 風格 slides」
 - 「做一份 Reveal.js 互動簡報」
 - 「加上文字雲、投票或前後對比滑桿」
-- 「幫我檢查這份 SOIL deck 的教學流與認知負荷」
+- 「幫我檢查這份 SOIL deck 的簡報流與認知負荷」
 
 觸發語意包含：HTML slides, web slides, interactive slides, Reveal.js slides, online/shareable slides, livestream slides, Chart.js, clickable-table slides, word cloud, poll, clip-path slider, 不受 PowerPoint 限制的簡報。
 
 ## 預設工作流程
 
-1. 讀取使用者提供的主題、素材、教學目標、受眾與輸出格式。
+1. 讀取使用者提供的主題、素材、簡報目標、受眾與輸出格式。
 2. 先決定 SOIL 節奏：引起動機 -> 維持注意 -> 喚起行動。
 3. 依 skill 內 `SKILL.md` 與 references 規劃頁面、視覺、互動或 Reveal.js 結構。
 4. 若需要 bitmap 視覺，使用 Codex 內建 image generation 生成，不用本機假圖替代。
@@ -375,7 +375,7 @@ table.compare{width:100%;border-collapse:collapse;margin-top:var(--s3);font-size
         <svg class="tree-lines" viewBox="0 0 1200 420" preserveAspectRatio="none"><path d="M600 92 L190 230 M600 92 L600 230 M600 92 L1010 230" stroke="rgba(0,212,255,.55)" stroke-width="3" fill="none"/></svg>
         <div class="question-node"><h2>之後還會改嗎？</h2><div id="treeResult" class="tree-result">請選一個情境</div></div>
         <article class="choice-card a" onclick="choose('不會改：選 01 純圖片，最快拿到視覺衝擊。')"><h3>場景 A · 不會</h3><p>01 純圖片<br>soil-image-deck</p></article>
-        <article class="choice-card b" onclick="choose('會改且要協作：選 02 可編輯，文字保留在 PowerPoint。')"><h3>場景 B · 會 + 協作</h3><p>02 可編輯<br>soil-teaching-deck</p></article>
+        <article class="choice-card b" onclick="choose('會改且要協作：選 02 可編輯，文字保留在 PowerPoint。')"><h3>場景 B · 會 + 協作</h3><p>02 可編輯<br>soil-general-deck</p></article>
         <article class="choice-card c" onclick="choose('會改且要互動：選 03 HTML，讓簡報變成網頁體驗。')"><h3>場景 C · 會 + 互動</h3><p>03 HTML<br>soil-html-deck</p></article>
       </div>
     </div>
@@ -1339,7 +1339,7 @@ goto(1);
         <svg class="tree-lines" viewBox="0 0 1200 420" preserveAspectRatio="none"><path d="M600 92 L190 230 M600 92 L600 230 M600 92 L1010 230" stroke="rgba(0,212,255,.55)" stroke-width="3" fill="none"/></svg>
         <div class="question-node"><h2>之後還會改嗎？</h2><div id="treeResult" class="tree-result">請選一個情境</div></div>
         <article class="choice-card a" onclick="choose('不會改：選 01 純圖片，最快拿到視覺衝擊。')"><h3>場景 A · 不會</h3><p>01 純圖片<br>soil-image-deck</p></article>
-        <article class="choice-card b" onclick="choose('會改且要協作：選 02 可編輯，文字保留在 PowerPoint。')"><h3>場景 B · 會 + 協作</h3><p>02 可編輯<br>soil-teaching-deck</p></article>
+        <article class="choice-card b" onclick="choose('會改且要協作：選 02 可編輯，文字保留在 PowerPoint。')"><h3>場景 B · 會 + 協作</h3><p>02 可編輯<br>soil-general-deck</p></article>
         <article class="choice-card c" onclick="choose('會改且要互動：選 03 HTML，讓簡報變成網頁體驗。')"><h3>場景 C · 會 + 互動</h3><p>03 HTML<br>soil-html-deck</p></article>
       </div>
     </div>
