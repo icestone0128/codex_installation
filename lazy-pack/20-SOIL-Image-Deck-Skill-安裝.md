@@ -7,7 +7,7 @@
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-05-25。
-- 原始來源包：`/Users/arrywu/Downloads/六大簡報skills分享/skills_codex/soil-image-deck`。
+- 原始來源包：使用者提供的 SOIL Deck skills package；本版已整理為 `soil-image-deck`。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-image-deck/SKILL.md`。
 - Obsidian 全域索引已記錄用途：SOIL 全圖像 PPTX；以 Codex 影像生成建立每頁全版圖，再用打包腳本輸出 baked 或可疊 editable text 的 plate 模式。
 

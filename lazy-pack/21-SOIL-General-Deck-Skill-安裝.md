@@ -31,7 +31,6 @@
 ```bash
 test -f "{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md" && echo "soil-general-deck SKILL.md ok"
 test -d "{{CODEX_HOME}}/skills/soil-general-deck/references" && echo "references ok"
-test -d "{{CODEX_HOME}}/skills/soil-general-deck/scripts" && echo "scripts ok"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -65,14 +64,14 @@ test -d "{{CODEX_HOME}}/skills/soil-general-deck/scripts" && echo "scripts ok"
 
 這三組 SOIL skills 的品質前提是視覺素材由 Codex 影像生成能力產生。只有精準幾何、數學圖或明確 prototype 需求可使用 deterministic SVG / Python 圖形。
 
-### 3. 可攜式 package 要包含 references / scripts / examples
+### 3. 可攜式 package 要包含實際需要的 references
 
-只複製 `SKILL.md` 不夠。本文內嵌完整 package，包含來源 package 中必要的 references、scripts 與 examples。
+只複製 `SKILL.md` 不夠。本文內嵌完整 package，包含本 skill 需要的 references。
 
 ## 最終檢查清單
 
 - [ ] `{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md` 存在。
-- [ ] references / scripts / examples 依本 skill package 實際內容存在。
+- [ ] references 依本 skill package 實際內容存在。
 - [ ] 搜尋 package 內沒有非 Codex 安裝路徑或非 Codex frontmatter 欄位。
 - [ ] 開新 Codex 對話後，可用 `soil-general-deck` 或 SOIL 簡報相關語句觸發。
 
