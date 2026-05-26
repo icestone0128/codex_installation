@@ -195,6 +195,16 @@ Body Frameworks must include the relevant subset of:
 
 Keep framework text operational and source-friendly. Write instructions that NotebookLM can follow after the source is checked, not commentary about the process.
 
+## Presentation Architecture Pattern
+
+When creating NotebookLM framework sources for presentation analysis or presentation generation, prefer a paired framework set:
+
+- Soul Framework: define the AI as a Presentation Architect that can reverse-engineer visual sources and generate narrative slide structures.
+- Body Framework: require YAML output with `global_design_specification` and `slide_planning`.
+- Keep visual extraction and slide planning explicit: atmosphere, color scheme, typography, layout rules, page type, layout style, visual description, content, and generation prompt.
+- Require valid YAML: two-space indentation, quoted string values, and no blank fields when a professional inference can be made.
+- If the user asks for generated slide content, remove source item numbering and avoid naming specific fonts unless the user explicitly asks for font names.
+
 ## NotebookLM Conversion Steps
 
 After producing framework content, include these steps unless the user explicitly asks for content only:
@@ -251,6 +261,69 @@ Create a Body Framework when the user asks to set:
 - numbering rules
 
 If the request mixes both kinds of control, produce separate Soul and Body framework contents.
+
+## Presentation Architecture Example Pattern
+
+Source examples imported from Google Docs:
+
+- `[靈魂框架]簡報架構分析師_行為指令`
+- `[格式框架]簡報架構分析師`
+
+Use this pattern when the user wants NotebookLM to analyze existing decks, reverse-engineer a visual style, or generate a slide architecture from source text.
+
+### Soul Framework Emphasis
+
+The Soul Framework should position NotebookLM as a Presentation Architect with two abilities:
+
+- Reverse Engineering: analyze PDFs, decks, visual references, or images and extract design DNA such as atmosphere, color logic, typography behavior, and layout structure.
+- Structure Generation: turn text sources into narrative slide plans with clear visual tension and page-by-page intent.
+
+Behavior rules:
+
+- Output only YAML when the selected framework asks for YAML.
+- For analysis tasks, extract `global_design_specification` and translate content logic into `slide_planning`.
+- For generation tasks, infer a suitable `global_design_specification` from the source theme, then produce page-level `slide_planning`.
+- Remove source item numbering from generated slide content.
+- Avoid naming specific fonts in generated slide content unless the user explicitly asks for font names.
+
+### Body Framework Emphasis
+
+The Body Framework should require this YAML shape:
+
+```yaml
+global_design_specification:
+  atmosphere: ["形容詞1", "形容詞2", "形容詞3"]
+  color_scheme:
+    background: "Hex Code"
+    text: "Hex Code"
+    accent: "Hex Code"
+    secondary: "Hex Code"
+  typography:
+    heading: "style description"
+    body: "style description"
+  layout_rules:
+    navigation: "頁碼或導航形式"
+    image_style: "圖片處理風格"
+    layout_design: "格線、留白與對齊規則"
+    decorative_elements: "視覺點綴元素"
+
+slide_planning:
+  - page: 1
+    type: "頁面功能"
+    layout_style: "佈局風格"
+    visual_description: "畫面元素配置與構圖"
+    content:
+      title: "頁面大標題"
+      subtitle: "頁面副標題"
+      generation_prompt: "給 AI 的具體生成指令"
+```
+
+Writing rules:
+
+- Use two-space indentation.
+- Put string values in double quotes.
+- Use `#` only for helpful YAML comments.
+- If source information is incomplete, make a professional inference instead of leaving fields blank.
 
 ## Mandatory Wrapper
 
