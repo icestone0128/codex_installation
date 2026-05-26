@@ -68,7 +68,8 @@ find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print
 | `secondbrain-research-digest` | Obsidian 研究整理 | 完成 `05-第二大腦設定指南` 後 |
 | `cross-device-sync` | 全域 skills 跨裝置同步 | 完成主線後，需要同步多台裝置時 |
 | `social-cards` | 圖卡輸出 | 需要社群圖卡時，並安裝 Node 依賴 |
-| `notebooklm-architecture`、`presentation-workflow`、`visual-note-generator` | NotebookLM / 簡報 / 視覺筆記 | 需要教學內容製作時 |
+| `notebooklm-architecture`、`presentation-workflow` | NotebookLM / 簡報 | 需要 NotebookLM 架構或簡報工作流時 |
+| `visual-note-generator` | 圖解筆記 / 視覺筆記 | 需要手繪圖解、生圖提示、Q 版角色、資訊圖表或簡報結構時 |
 
 下載者可照 `11-Codex-Skill-Creator-工作流.md` 建立自己的版本，不需要沿用 `Arry` 命名。
 
