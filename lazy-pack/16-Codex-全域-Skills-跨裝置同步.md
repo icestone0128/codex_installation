@@ -28,7 +28,7 @@
 路徑邊界：
 
 - `{{CODEX_HOME}}/skills`：Codex App 全域觸發的 skills；可 symlink 到 `{{SYNC_ROOT}}/skills`。
-- `{{SYNC_ROOT}}/memory`、`{{SYNC_ROOT}}/workflows`、`{{SYNC_ROOT}}/knowledge`：個人助手全域資料層；不 symlink 到 `{{CODEX_HOME}}/skills`。
+- `{{SYNC_ROOT}}/memories`、`{{SYNC_ROOT}}/workflows`、`{{SYNC_ROOT}}/knowledge`：個人助手全域資料層；不 symlink 到 `{{CODEX_HOME}}/skills`。
 - `<project-root>/000_Agent/skills`：單一專案本地 skill；不 symlink 到 `{{CODEX_HOME}}/skills`。
 
 ## 不會同步的東西
@@ -41,7 +41,7 @@
 - shell snapshots
 - 本機狀態與登入資訊
 
-這些跨裝置同步容易壞，也有隱私風險。本文件只同步 Codex 全域 `skills/`。個人助手全域記憶與 workflow 放在 `{{SYNC_ROOT}}/memory` 與 `{{SYNC_ROOT}}/workflows`，不要和 Codex 全域 skills 混成同一個 symlink。
+這些跨裝置同步容易壞，也有隱私風險。本文件只同步 Codex 全域 `skills/`。個人助手全域記憶與 workflow 放在 `{{SYNC_ROOT}}/memories` 與 `{{SYNC_ROOT}}/workflows`，不要和 Codex 全域 skills 混成同一個 symlink。
 
 ## 先填變數
 
@@ -274,7 +274,7 @@ This is a Codex App conversion of a Claude Code-oriented cross-device sync guide
 - Custom global skills: `$CODEX_HOME/skills`, or `~/.codex/skills` when `$CODEX_HOME` is not set
 - Project rules: `AGENTS.md`
 - Optional assistant data-layer root: `ASSISTANT_ROOT`
-- Optional assistant global layer: `ASSISTANT_ROOT`, containing `skills/`, `memory/`, `workflows/`, and `knowledge/`
+- Optional assistant global layer: `ASSISTANT_ROOT`, containing `skills/`, `memories/`, `workflows/`, and `knowledge/`
 - Optional assistant local work/reference layers: `100_Todo/` and `200_Reference/` under the selected assistant or project root
 - Optional Obsidian vault: `OBSIDIAN_VAULT`
 - Optional project cockpit: `PROJECT_LIBRARY/<project-name>/專案工作流程.md`
@@ -335,7 +335,7 @@ Use this mapping when converting Claude-oriented instructions:
 | Claude slash commands | Codex skill metadata and normal user prompts |
 | Claude subagents | Codex subagents only when explicitly requested; otherwise use validation passes |
 | Claude memory | `$CODEX_HOME/memories` plus optional personal assistant durable data when relevant |
-| `000_Agent` from source kit | Project-local assistant layer only; this user's global assistant layer is `ASSISTANT_ROOT` with `memory/`, `workflows/`, `knowledge/`, and `skills/` |
+| `000_Agent` from source kit | Project-local assistant layer only; this user's global assistant layer is `ASSISTANT_ROOT` with `memories/`, `workflows/`, `knowledge/`, and `skills/` |
 | Claude credentials/local state | Do not sync; each device logs in independently |
 
 ## Sync Route Guidance
@@ -352,7 +352,7 @@ Usually portable:
 
 - custom global skills under `$CODEX_HOME/skills` or `~/.codex/skills`, excluding `.system`
 - reusable project rules and templates
-- personal assistant durable references and reusable memory under `ASSISTANT_ROOT/memory` and `ASSISTANT_ROOT/workflows`, when the user explicitly wants that layer synced
+- personal assistant durable references and reusable memory under `ASSISTANT_ROOT/memories` and `ASSISTANT_ROOT/workflows`, when the user explicitly wants that layer synced
 - migration docs, health-check scripts, and setup notes
 
 Usually not portable:
@@ -421,7 +421,7 @@ Default Codex surfaces on this machine:
 | Project rules | `AGENTS.md` |
 | Main project | `{{SETUP_REPO}}` |
 | Arry Assistant global data-layer root | `{{SYNC_ROOT}}` |
-| Arry Assistant memory/workflow layer | `{{SYNC_ROOT}}/memory`, `{{SYNC_ROOT}}/workflows` |
+| Arry Assistant memory/workflow layer | `{{SYNC_ROOT}}/memories`, `{{SYNC_ROOT}}/workflows` |
 | Arry Assistant local work/reference layers | `100_Todo/` and `200_Reference/` under `codex_installation` |
 | Obsidian vault | `{{OBSIDIAN_VAULT}}` |
 | Global skill mirror note | `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md` |
@@ -452,7 +452,7 @@ Check whether the user's existing Codex App assistant base is present:
 test -d "{{CODEX_HOME}}" && echo "Codex home exists"
 test -d "{{CODEX_HOME}}/skills" && echo "Codex skills folder exists"
 test -d "{{SYNC_ROOT}}" && echo "Arry Assistant global root exists"
-test -d "{{SYNC_ROOT}}/memory" && echo "Arry Assistant memory exists"
+test -d "{{SYNC_ROOT}}/memories" && echo "Arry Assistant memory exists"
 test -d "{{SYNC_ROOT}}/workflows" && echo "Arry Assistant workflows exists"
 test -d "{{PROJECT_ROOT}}/100_Todo" && echo "Arry Assistant work layer exists"
 test -d "{{PROJECT_ROOT}}/200_Reference" && echo "Arry Assistant reference layer exists"
@@ -469,7 +469,7 @@ Gather only metadata unless the user asks for deeper inspection:
 ls -la "{{CODEX_HOME}}" 2>/dev/null | head -40
 find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print 2>/dev/null | sort
 find "{{SETUP_REPO}}" -maxdepth 1 -type d -print 2>/dev/null | sort
-find "{{SYNC_ROOT}}/memory" -maxdepth 2 -type f -print 2>/dev/null | sort | head -80
+find "{{SYNC_ROOT}}/memories" -maxdepth 2 -type f -print 2>/dev/null | sort | head -80
 ```
 
 Record:
@@ -535,7 +535,7 @@ cp -a "$HOME/.codex/skills" "$BACKUP_DIR/skills" 2>/dev/null || true
 If Arry Assistant data will be changed:
 
 ```bash
-cp -a "{{SYNC_ROOT}}/memory" "$BACKUP_DIR/memory" 2>/dev/null || true
+cp -a "{{SYNC_ROOT}}/memories" "$BACKUP_DIR/memories" 2>/dev/null || true
 cp -a "{{SYNC_ROOT}}/workflows" "$BACKUP_DIR/workflows" 2>/dev/null || true
 cp -a "{{SYNC_ROOT}}/knowledge" "$BACKUP_DIR/knowledge" 2>/dev/null || true
 cp -a "{{PROJECT_ROOT}}/100_Todo" "$BACKUP_DIR/100_Todo" 2>/dev/null || true
@@ -566,7 +566,7 @@ Possible mother folders:
 | Route | Example mother folder |
 |---|---|
 | Existing Google Drive workflow | `{{SETUP_REPO}}` as the data-layer root |
-| Arry Assistant global memory/workflows | `{{SYNC_ROOT}}/memory` and `{{SYNC_ROOT}}/workflows` |
+| Arry Assistant global memory/workflows | `{{SYNC_ROOT}}/memories` and `{{SYNC_ROOT}}/workflows` |
 | iCloud | `$HOME/Library/Mobile Documents/com~apple~CloudDocs/Arry-Agent` |
 | Dropbox | `$HOME/Dropbox/Arry-Agent` |
 | OneDrive | `$HOME/Library/CloudStorage/OneDrive-Personal/Arry-Agent` |
@@ -699,7 +699,7 @@ Add stricter exclusions:
 
 ```gitignore
 # Personal or private memory
-000_Agent/memory/
+000_Agent/memories/
 000_Agent/**/private/
 100_Todo/drafts/
 100_Todo/archive/
@@ -945,7 +945,7 @@ This Codex version keeps the useful operating model but changes the target surfa
 - The skill must not automatically move or symlink `{{CODEX_HOME}}` assets during installation.
 - Any future sync setup must be plan-first and approval-gated because it can affect all Codex sessions.
 - The default sync approach for this user should align with Google Drive project folders and Obsidian project cockpits.
-- The existing Arry Assistant architecture uses Google Drive `codex_symlink/` as the global layer for `skills/`, `memory/`, `workflows/`, and `knowledge/`; project-local data may still use each project's `000_Agent/`.
+- The existing Arry Assistant architecture uses Google Drive `codex_symlink/` as the global layer for `skills/`, `memories/`, `workflows/`, and `knowledge/`; project-local data may still use each project's `000_Agent/`.
 - `icestone0128/codex_installation` is public, so private backups and personal memory must not be staged or tracked there.
 - System skills under `{{CODEX_HOME}}/skills/.system` are Codex-managed and should not be edited or moved manually.
 - Global skill changes must update the Obsidian mirror note at `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`.
@@ -1002,7 +1002,7 @@ For public backups, add:
 
 ```gitignore
 # Personal or private memory
-000_Agent/memory/
+000_Agent/memories/
 100_Todo/drafts/
 100_Todo/archive/
 300_Journal/
