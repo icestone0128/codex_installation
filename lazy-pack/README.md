@@ -71,6 +71,7 @@
 20. [[20-SOIL-Image-Deck-Skill-安裝]]
 21. [[21-SOIL-General-Deck-Skill-安裝]]
 22. [[22-Image-Generator-Skill-安裝]]
+23. [[23-Visual-Note-Generator-Skill-安裝]]
 
 ## 全域 Skills 安裝總表
 
@@ -80,7 +81,7 @@
 01：基礎 plugins / connectors 檢查，例如 Notion plugin；PDF / Playwright 只做系統或 plugin 能力確認，不重複安裝全域 skill
 02：MCP / 外部工具 / CLI 連線，例如 Firecrawl、Filesystem、Playwright MCP、heptabase-cli
 05：secondbrain-research-digest
-07：notebooklm-architecture、presentation-workflow、visual-note-generator
+07：notebooklm-architecture、presentation-workflow
 09：arry-assistant
 10：project-init-sync、startup-sync、shutdown-sync
 11：codex-skill-creator
@@ -95,6 +96,7 @@
 20：soil-image-deck
 21：soil-general-deck
 22：image-generator
+23：visual-note-generator
 ```
 
 路徑邊界固定如下：
@@ -102,7 +104,7 @@
 | 類型 | 正式位置 | 用途 |
 | --- | --- | --- |
 | Codex 全域 skills | `{{CODEX_HOME}}/skills`；若跨裝置同步，才 symlink 到 `{{SYNC_ROOT}}/skills` | 需要被 Codex App 全域觸發的 skills |
-| LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/lazy-pack/01...22.md` | 每個序號文件內嵌對應全域 skill 的完整安裝內容 |
+| LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/lazy-pack/01...23.md` | 每個序號文件內嵌對應全域 skill 的完整安裝內容 |
 | Arry/個人助手全域入口 | `{{CODEX_HOME}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
 | 個人助手跨專案記憶 | `{{ASSISTANT_ROOT}}/memory` | 個人偏好、踩坑、跨專案可重用決策 |
 | 個人助手跨專案 workflow | `{{ASSISTANT_ROOT}}/workflows` | 尚未升級成全域 skill 的 workflow 草稿 |
@@ -140,7 +142,8 @@
 | 17 | `soil-image-deck` | [[20-SOIL-Image-Deck-Skill-安裝]] | 可直接安裝；SOIL 全圖像 PPTX |
 | 18 | `soil-general-deck` | [[21-SOIL-General-Deck-Skill-安裝]] | 可直接安裝；SOIL 通用可編輯 PPTX |
 | 19 | `image-generator` | [[22-Image-Generator-Skill-安裝]] | 可直接安裝；Codex 內建生圖與修圖入口 |
-| 20 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 20 | `visual-note-generator` | [[23-Visual-Note-Generator-Skill-安裝]] | 可直接安裝；圖解筆記、生圖提示、Q 版角色與資訊圖表結構 |
+| 21 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
