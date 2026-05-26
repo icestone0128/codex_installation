@@ -1,4 +1,4 @@
-# 14-Social-Cards-圖卡-Skill-安裝
+# 14-Social-Cards-Skill-安裝
 
 > 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不需要額外的舊版獨立 skills 子目錄。
 
