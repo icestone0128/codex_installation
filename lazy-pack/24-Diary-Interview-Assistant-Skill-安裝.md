@@ -1,4 +1,4 @@
-# 24-日記訪談助手-Skill-安裝
+# 24-Diary-Interview-Assistant-Skill-安裝
 
 > 版本：2026-05-26 Codex App 版
 > 用途：建立 `diary-interview-assistant` 全域 skill，將使用者每天的間歇式日記轉成採訪式追問、深層洞察與可發表的寫作素材。
