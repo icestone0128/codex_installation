@@ -98,6 +98,7 @@ find /tmp/social-cards-test -maxdepth 1 -name "*.png" -print
 - 「做圖卡」
 - 「幫我做 IG 圖」
 - 「把這篇做成圖卡」
+- 「使用手寫混搭數位風格，把這篇做成圖卡」
 - `/cards` 加上一段文字、網址或 Markdown 檔案路徑
 
 Codex 會依 Skill 流程：收集內容、確認尺寸、確認 handle、拆卡、產生預覽、等待修改、確認後匯出 PNG。
@@ -225,6 +226,7 @@ metadata:
 - 「幫我做 IG 圖」
 - 「社群圖卡」
 - 「把這篇做成圖卡」
+- 「手寫混搭數位風格」
 - 使用者提供文章、Markdown、網址或段落，並要求轉成 IG / Threads / X 可用圖卡
 
 ## Assets
@@ -257,12 +259,25 @@ metadata:
 
 上游 README 快照：`references/upstream-readme.md`
 
+## Optional Style Presets
+
+### 手寫混搭數位風格
+
+Only apply this preset when the user explicitly says `手寫混搭數位風格`. Do not make it the default for ordinary Social Cards requests.
+
+- 主標題使用精確、清楚、偏粗黑體的中文，優先確保可讀性與資訊層級。
+- 在主標題旁邊或下方加入短英文手寫感裝飾語，例如 1-4 個單字的 mood phrase；它是氛圍元素，不承載主要資訊。
+- 手寫英文可以稍微傾斜、錯位或不規則排列，但不得干擾中文標題、內文、頁碼或 CTA。
+- 背景維持簡潔，可用深色或淺色；讓「工整黑體中文 x 手寫英文」成為視覺焦點。
+- 版面可以有數位感的留白、細線、框線、格線或輕微 UI 感元素，但避免過度裝飾。
+- 若使用者沒有指定英文短語，依內容產生簡短氛圍詞，例如 `learn better`, `make it clear`, `tiny steps`, `focus mode`。
+
 ## Workflow
 
 1. 收集內容來源：貼文、網址、Markdown 檔案路徑或使用者直接貼上的文字。
 2. 若來源是網址，優先使用可用的網頁讀取工具擷取主要內容；若來源是本機檔案，先讀檔再整理。
 3. 詢問或合理推定輸出比例：預設 `4:5`（1080 x 1350）；若使用者要求正方形，改為 `1:1`（1080 x 1080）。
-4. 詢問風格：預設 `orange-light`，也可選 `blue-dark`；若使用者指定 Pantone 285C 品牌版，使用 `brand-light` 或 `brand-dark`。
+4. 詢問風格：預設 `orange-light`，也可選 `blue-dark`；若使用者指定 Pantone 285C 品牌版，使用 `brand-light` 或 `brand-dark`；若使用者明確說 `手寫混搭數位風格`，才套用該 optional style preset。
 5. 確認社群 handle。若當前輸出根目錄已有 `output/.handle`，可讀取後向使用者確認；沒有就詢問一次。
 6. 拆卡並先展示規劃，等使用者確認後才產生預覽：
    - 第 1 張：`cover`
@@ -281,6 +296,7 @@ metadata:
 - 每張只放一個主張或重點。
 - 內文最多 3-4 行。
 - 條列最多 4 個，每項不超過 25 字。
+- 使用 `手寫混搭數位風格` 時，手寫英文只作為裝飾層，不能取代中文主標題或降低資訊可讀性。
 - 提到流程、介面、設定檔、程式碼、前後對照或使用者提供圖片時，優先使用 `content-image`。
 - 寧可多拆卡，不要把單張塞滿。
 
