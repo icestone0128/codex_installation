@@ -13,7 +13,6 @@ Thumbs.db
 # Logs
 *.log
 logs/
-.playwright-mcp/
 
 # Environment files
 *.key

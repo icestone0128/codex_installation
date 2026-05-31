@@ -99,20 +99,18 @@ adapted_for: Codex App
   - [ ] 如需寫入，先確認 Codex App 當次授權範圍。
 - 備註：Obsidian 主要走本機 Markdown 檔，不優先新增額外 MCP。
 
-### [已知已整合] Playwright / Browser
+### [已知已整合] Browser plugin
 
 - 用途：本機網頁測試、前端截圖、互動驗證。
-- 建議路線：Codex Browser plugin / Playwright MCP。
-- 目前狀態：既有環境曾安裝 Playwright MCP；Codex App 也有 Browser plugin。
+- 建議路線：Codex Browser plugin。
+- 目前狀態：Codex App 使用 Browser plugin。
 - 執行時要查的事情：
   - [ ] 目前 Browser plugin 是否可開本機 target。
-  - [ ] Playwright MCP 是否仍可啟動。
   - [ ] 前端專案是否需要固定截圖驗證流程。
 - 安裝 checklist：
   - [x] 使用 Codex Browser plugin 作為優先方案。
-  - [ ] 需要時複驗 Playwright MCP。
   - [ ] 對具體前端專案建立測試步驟。
-- 備註：Playwright 是本機瀏覽器自動化，不是帳號型整合。
+- 備註：Browser plugin 是 Codex App 內建瀏覽器自動化能力，不是帳號型整合。
 
 ### [已知已整合] Firecrawl
 

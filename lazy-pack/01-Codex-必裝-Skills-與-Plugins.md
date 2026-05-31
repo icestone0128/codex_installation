@@ -23,7 +23,7 @@
 - Google Calendar：行程、會議準備、空檔查詢。
 - Google Drive：Drive、Docs、Sheets、Slides。
 - Notion：workspace 搜尋、頁面讀取、database 讀取與明確確認後的頁面建立/更新。此項歸在 01 必裝 plugins/connectors 檢查，不需要建立自訂全域 skill。
-- Browser：本機或遠端網頁測試、互動操作、截圖與基本前端檢查。Codex App 使用者優先使用這個 plugin，不需要另外設定 Playwright MCP。
+- Browser：本機或遠端網頁測試、互動操作、截圖與基本前端檢查。Codex App 使用者優先使用這個 plugin。
 - PDF：讀取、摘要、檢查與引用 PDF 內容。此項歸在 01 必裝 plugins/connectors 檢查，不需要建立自訂全域 `pdf` skill。
 - Documents：Word / docx 文件處理。
 - Spreadsheets：xlsx / csv / Sheets 類任務。
@@ -143,7 +143,7 @@ description: Use when...
 - Plugin 顯示安裝完成，不代表授權成功；要實際查詢資料驗證。
 - 新增或修改 skills 後，通常要重開 Codex 對話或重啟 Codex App。
 - 工具不在目前可呼叫清單時，先用 tool search 或 Codex plugin 清單檢查，不要假設已載入。
-- 瀏覽器自動化優先使用 Codex App 內建 Browser plugin；只有在非 Codex App 或明確需要 MCP 標準協定時，才另行評估 Playwright MCP。
+- 瀏覽器自動化優先使用 Codex App 內建 Browser plugin。
 - 全域規則放 `{{CODEX_HOME}}/AGENTS.md`，專案規則放專案根目錄 `AGENTS.md`。
 - 外部 / Anthropic skill 教學不能直接照搬；Codex 自訂 skills 放 `{{CODEX_HOME}}/skills`，不要放 來源工具的 skills 路徑。
 - 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`；需要優化時建立 companion skill。
