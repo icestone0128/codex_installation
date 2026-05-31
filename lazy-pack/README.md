@@ -140,7 +140,7 @@
 | 11 | Notion plugin | [[01-Codex-必裝-Skills-與-Plugins]] | 使用 Codex plugin / connector；不要建立自訂全域 skill |
 | 12 | `pdf` / `playwright` skills 與 PDF / Browser plugin | [[01-Codex-必裝-Skills-與-Plugins]] | `pdf` 與 `playwright` 列為必裝 Codex skills；PDF 與 Browser plugin 也列為必裝檢查；不設定外部瀏覽器 MCP server |
 | 13 | `rightproblem-coach` | [[17-RightProblem-Coach-Skill-安裝]] | 可直接安裝；包含問題規格書模板、HC 指南與分析框架 |
-| 14 | `doc-to-md` | [[18-Document-to-Markdown-Skill-安裝]] | 可直接安裝；包含轉檔腳本、相依套件清單與使用說明 |
+| 14 | `doc-to-md` | [[18-Document-to-Markdown-Skill-安裝]] | 可直接安裝；合併文字轉檔與 VLM 視覺解讀，自動分流 PDF/EPUB/TXT/掃描 PDF/圖片與圖表 |
 | 15 | `landing-page` | [[15-Landing-Page-Skill-安裝]] | 可直接安裝；fallback 設計規則內建，UUPM 為選用 |
 | 16 | `soil-html-deck` | [[19-SOIL-HTML-Deck-Skill-安裝]] | 可直接安裝；SOIL 互動 HTML 簡報 |
 | 17 | `soil-image-deck` | [[20-SOIL-Image-Deck-Skill-安裝]] | 可直接安裝；SOIL 全圖像 PPTX |
