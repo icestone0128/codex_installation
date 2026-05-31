@@ -5,7 +5,7 @@
 
 ## 目標
 
-確認 Codex 基礎工作能力：GitHub、Gmail、Google Calendar、Google Drive、文件、試算表、簡報、瀏覽器、技能建立與技能安裝。
+確認 Codex 基礎工作能力：GitHub、Gmail、Google Calendar、Google Drive、PDF、文件、試算表、簡報、瀏覽器、技能建立與技能安裝。
 
 ## 前置條件
 
@@ -23,7 +23,8 @@
 - Google Calendar：行程、會議準備、空檔查詢。
 - Google Drive：Drive、Docs、Sheets、Slides。
 - Notion：workspace 搜尋、頁面讀取、database 讀取與明確確認後的頁面建立/更新。此項歸在 01 必裝 plugins/connectors 檢查，不需要建立自訂全域 skill。
-- Browser：本機或遠端網頁測試。
+- Browser：本機或遠端網頁測試、互動操作、截圖與基本前端檢查。Codex App 使用者優先使用這個 plugin，不需要另外設定 Playwright MCP。
+- PDF：讀取、摘要、檢查與引用 PDF 內容。此項歸在 01 必裝 plugins/connectors 檢查，不需要建立自訂全域 `pdf` skill。
 - Documents：Word / docx 文件處理。
 - Spreadsheets：xlsx / csv / Sheets 類任務。
 - Presentations：PowerPoint / Slides 類任務。
@@ -105,6 +106,13 @@ find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print
 
 不要把 Notion token、workspace ID、page ID 或 database ID 寫進 repo、README、AGENTS.md、skills 或公開筆記。若 Codex plugin 已可用，優先用 plugin，不要先手動建立 API token。
 
+## PDF 驗證流程
+
+1. 確認 Codex App 已可使用 PDF plugin 或內建 PDF 讀取能力。
+2. 用一份不敏感 PDF 測試讀取、摘要與頁面定位。
+3. 若要引用 PDF 內容，要求 Codex 標明檔名與頁碼或可確認的位置。
+4. 不要另外建立全域 `pdf` skill；PDF 是 Codex App plugin / 內建能力，不屬於 LazyPack 自訂 skill。
+
 ## 驗證全域 Skills
 
 檢查：
@@ -135,6 +143,7 @@ description: Use when...
 - Plugin 顯示安裝完成，不代表授權成功；要實際查詢資料驗證。
 - 新增或修改 skills 後，通常要重開 Codex 對話或重啟 Codex App。
 - 工具不在目前可呼叫清單時，先用 tool search 或 Codex plugin 清單檢查，不要假設已載入。
+- 瀏覽器自動化優先使用 Codex App 內建 Browser plugin；只有在非 Codex App 或明確需要 MCP 標準協定時，才另行評估 Playwright MCP。
 - 全域規則放 `{{CODEX_HOME}}/AGENTS.md`，專案規則放專案根目錄 `AGENTS.md`。
 - 外部 / Anthropic skill 教學不能直接照搬；Codex 自訂 skills 放 `{{CODEX_HOME}}/skills`，不要放 來源工具的 skills 路徑。
 - 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`；需要優化時建立 companion skill。
