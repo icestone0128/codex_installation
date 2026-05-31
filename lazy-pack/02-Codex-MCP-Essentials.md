@@ -1,6 +1,6 @@
 # 02-Codex-MCP-Essentials
 
-> 2026-05-27 更新：Heptabase CLI Skill 已更新為 `0.3.x` 相容，支援 tag database schema 與 card property 讀寫。
+> 2026-05-31 更新：Heptabase CLI Skill 已更新為 `0.4.x` 相容，支援 tag/card properties、PDF parsed content、audio/video transcript 與 local file export 讀取流程。
 
 
 ## 目標
@@ -91,7 +91,7 @@ tool_timeout_sec = 120
 這一項歸在 02，因為它是外部工具 / CLI 連線能力，不放在 01 的基礎 plugin 檢查裡。使用前請確認：
 
 - 已安裝 Heptabase desktop app。
-- Heptabase CLI 可用，並符合 skill 相容版本 `0.3.x`。
+- Heptabase CLI 可用，並符合 skill 相容版本 `0.4.x`。
 - 實際操作前先用 read-only 指令確認連線，不直接寫入。
 
 安裝方式請使用本文文末「內建 Skill 完整安裝內容」。
@@ -174,18 +174,18 @@ cat > "{{CODEX_HOME}}/skills/heptabase-cli/SKILL.md" <<'CODEX_LAZYPACK_HEPTABASE
 name: heptabase-cli
 description: Interact with Heptabase using the CLI to create, read, and edit notes, journals, tags, cards, list whiteboards and manage cards on whiteboards, and browse AI Tutor goals, courses, and lessons. Use when the user asks to manage their Heptabase knowledge base, search cards, work with journals, tags, or whiteboards, or read AI Tutor content.
 metadata:
-  heptabase-cli-version-range: "0.3.x"
+  heptabase-cli-version-range: "0.4.x"
 ---
 
 ## Prerequisites
 
 - CLI installed from the desktop app. The command is `heptabase` on macOS/Linux; Windows installs `heptabase.cmd` for cmd/PowerShell and a `heptabase` shim for POSIX shells.
-- Check version compatibility before use with `heptabase --version`. If the installed CLI version is outside this skill's compatibility range (`0.3.x`), you MUST stop and ask the user to update either the Heptabase desktop app or this skill package before continuing.
+- Check version compatibility before use with `heptabase --version`. If the installed CLI version is outside this skill's compatibility range (`0.4.x`), you MUST stop and ask the user to update either the Heptabase desktop app or this skill package before continuing.
 
 ## 使用流程
 
 1. Confirm the task type: read/search, create/update, journal work, tag work, whiteboard card management, or AI Tutor browsing.
-2. Check CLI availability and version with `heptabase --version`. Continue only when the installed version is compatible with `0.3.x`.
+2. Check CLI availability and version with `heptabase --version`. Continue only when the installed version is compatible with `0.4.x`.
 3. Make sure the Heptabase desktop app and local CLI server are running. If commands fail because the app is closed, run `heptabase start` and retry the low-risk read command.
 4. For unfamiliar commands or flags, run `heptabase help` or `<command> --help` before guessing syntax.
 5. Execute the smallest command that satisfies the request. Prefer read-only commands before mutations when identifying cards, notes, tags, or whiteboards.
@@ -216,10 +216,18 @@ Use these as quick recipes for frequent requests. For less common flags or if a 
 - **List cards under a tag with property values:** `heptabase tag cards <tagId> --include-properties`
 - **Read all structured properties on a card:** `heptabase card properties <cardIdOrDate>`
 - **Set one card property:** `heptabase card set-property <cardIdOrDate> --property-id <propertyId> --value "<value>"`
+- **Read PDF card metadata:** `heptabase pdf metadata <pdfCardId>`
+- **Read PDF pages:** `heptabase pdf read --start-page 1 --end-page 3 <pdfCardId>`
+- **Read audio transcript metadata:** `heptabase audio metadata <audioCardId>`
+- **Read audio transcript range:** `heptabase audio read --start-seconds 0 --end-seconds 120 <audioCardId>`
+- **Read video transcript metadata:** `heptabase video metadata <videoCardId>`
+- **Read video transcript range:** `heptabase video read --start-seconds 0 --end-seconds 120 <videoCardId>`
+- **List exportable files on a card:** `heptabase file list <cardId>`
+- **Export a local Heptabase file:** `heptabase file export --output-dir <outputDir> <fileId>`
 
 ## Tag Database Properties
 
-Heptabase CLI v0.3.0 adds read access to tag database schemas and read/write access to per-card property values.
+Heptabase CLI v0.3.0+ adds read access to tag database schemas and read/write access to per-card property values.
 
 Use this flow for structured data tasks:
 
@@ -232,6 +240,18 @@ Use this flow for structured data tasks:
 5. For arrays, objects, booleans, numbers, or null, use the command's `--json-value` option after checking `heptabase card set-property --help`.
 
 Do not create, rename, or delete tag database columns through the CLI unless the command help explicitly supports it. If a select or multi-select option does not exist, ask the user to create it in the Heptabase desktop app before setting that value.
+
+## PDF, Audio, Video, And Files
+
+Heptabase CLI v0.4.0 adds read access for parsed PDF card content, audio transcripts, video transcripts, and exportable local files referenced by supported cards.
+
+Use this flow for PDF/media tasks:
+
+1. Identify the target card or file ID from the user's request, search results, or `heptabase file list <cardId>`.
+2. Read metadata first with `heptabase pdf metadata`, `heptabase audio metadata`, or `heptabase video metadata`.
+3. Read small page or time ranges first before expanding the range.
+4. Export files only with `heptabase file export`; do not inspect Heptabase app storage directly.
+5. If parsed content or export is unavailable for a card type, report the CLI limitation instead of trying non-CLI access paths.
 
 ## All output is JSON
 
@@ -247,11 +267,10 @@ Every command prints JSON to stdout. You can parse it with `jq` or pipe it to ot
 ## Known limitations
 
 - **Auto-enabling local server/CLI install not supported.** If the local CLI server is disabled or CLI wiring is missing, the skill cannot repair it by itself; ask the user to enable Local CLI Server and CLI install from desktop settings first.
-- **Binary/media upload workflows not supported.** This skill is for JSON/text operations on notes/journals/tags/cards and AI Tutor reads, not file upload or media-processing APIs.
+- **Binary/media upload workflows not supported.** This skill can read supported PDF/media parsed content and export supported local files, but it does not upload files or run media-processing APIs.
 - **Tag database schema editing is not supported through this workflow.** You can read property columns and set card values, but schema design such as creating columns, renaming columns, deleting columns, or adding select options should be done in the Heptabase desktop app unless current CLI help explicitly says otherwise.
 - **Whiteboard creation/edit/delete not supported yet.** You can list whiteboards and add, list, or remove cards on them, but you can't create, rename, move, or delete whiteboards.
-- **File reading not supported yet.** You can't read files (e.g., image, video) with `fileId`.
-- **PDF card reading not supported yet.** You can't read pdf card or its parsed content.
+- **Unsupported card files may return empty file lists.** `heptabase file list` currently returns exportable files for PDF/media cards and an empty files array for unsupported card types.
 
 ## Warnings
 

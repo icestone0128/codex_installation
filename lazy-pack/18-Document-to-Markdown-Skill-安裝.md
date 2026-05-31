@@ -1985,7 +1985,7 @@ test -f "{{CODEX_HOME}}/skills/doc-to-md/SKILL.md" && echo "doc-to-md installed"
 
 # pdf / playwright 系統能力檢查
 echo "pdf capability: use Codex system/plugin document tooling when available; do not install duplicate global skill"
-echo "playwright capability: use installed MCP/browser tooling when available; do not install duplicate global skill"
+echo "playwright capability: use Codex Browser plugin or installed playwright skill when available; do not install duplicate custom skill"
 
 echo "embedded skills installed: doc-to-md"
 ```
