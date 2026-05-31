@@ -1,11 +1,11 @@
 # 01-Codex-必裝-Skills-與-Plugins
 
-> 2026-05-24 更新：本文件只保留 Codex 基礎 plugins / connectors 與內建能力檢查。自訂全域 Skill 已拆到各自的有序號文件，不需要額外的舊版獨立 skills 子目錄。
+> 2026-05-31 更新：本文件列為 Codex App 起手式必裝清單。下載者必須加裝 Codex 的 PDF 與 Playwright skills，並啟用常用 plugins / connectors；自訂全域 Skill 已拆到各自的有序號文件，不需要額外的舊版獨立 skills 子目錄。
 
 
 ## 目標
 
-確認 Codex 基礎工作能力：GitHub、Gmail、Google Calendar、Google Drive、PDF、文件、試算表、簡報、瀏覽器、技能建立與技能安裝。
+確認 Codex 基礎工作能力：GitHub、Gmail、Google Calendar、Google Drive、PDF、文件、試算表、簡報、瀏覽器、Playwright CLI、技能建立與技能安裝。
 
 ## 前置條件
 
@@ -13,6 +13,26 @@
 - 已登入 OpenAI / Codex 使用帳號。
 - 若要使用 Google 類工具，準備自己的 Google 帳號。
 - 若要使用 GitHub，準備自己的 GitHub 帳號。
+
+## 必裝 Codex Skills
+
+下載者完成 Codex App 基礎安裝後，必須先加裝這兩個 Codex skills：
+
+| Skill | 用途 | 安裝後應看到 |
+| --- | --- | --- |
+| `pdf` | PDF 讀取、摘要、版面檢查、PDF 產生與渲染驗證 | `{{CODEX_HOME}}/skills/pdf/SKILL.md` |
+| `playwright` | 透過 Playwright CLI 操作真實瀏覽器、截圖、表單互動與 UI flow debug | `{{CODEX_HOME}}/skills/playwright/SKILL.md` |
+
+安裝完成後，開新 Codex 對話或重啟 Codex App，讓 skill 清單重新載入。
+
+驗證：
+
+```bash
+test -f "{{CODEX_HOME}}/skills/pdf/SKILL.md" && echo "pdf skill ok"
+test -f "{{CODEX_HOME}}/skills/playwright/SKILL.md" && echo "playwright skill ok"
+```
+
+注意：這裡的 `playwright` 是 Codex skill / CLI 工作流，不是外部 MCP server 設定。
 
 ## 建議啟用的 Plugins / Connectors
 
@@ -23,13 +43,13 @@
 - Google Calendar：行程、會議準備、空檔查詢。
 - Google Drive：Drive、Docs、Sheets、Slides。
 - Notion：workspace 搜尋、頁面讀取、database 讀取與明確確認後的頁面建立/更新。此項歸在 01 必裝 plugins/connectors 檢查，不需要建立自訂全域 skill。
-- Browser：本機或遠端網頁測試、互動操作、截圖與基本前端檢查。Codex App 使用者優先使用這個 plugin。
-- PDF：讀取、摘要、檢查與引用 PDF 內容。此項歸在 01 必裝 plugins/connectors 檢查，不需要建立自訂全域 `pdf` skill。
+- Browser：本機或遠端網頁測試、互動操作、截圖與基本前端檢查。Codex App 使用者優先使用這個 plugin；需要 CLI 型真實瀏覽器自動化時，再使用上方必裝的 `playwright` skill。
+- PDF：讀取、摘要、檢查與引用 PDF 內容。此項搭配上方必裝的 `pdf` skill 使用。
 - Documents：Word / docx 文件處理。
 - Spreadsheets：xlsx / csv / Sheets 類任務。
 - Presentations：PowerPoint / Slides 類任務。
 
-## 建議確認的內建 Skills
+## 建議確認的系統 Skills
 
 Codex 通常已內建：
 
@@ -49,7 +69,7 @@ Codex 通常已內建：
 {{CODEX_HOME}}/skills
 ```
 
-本懶人包的自訂 skill 內容已內嵌在對應序號文件中。01 只做基礎 plugins / connectors 與內建能力檢查；自訂 skill 請依 05、07、09 到 18 的文末內建腳本安裝。
+本懶人包的自訂 skill 內容已內嵌在對應序號文件中。01 只做必裝 Codex skills、基礎 plugins / connectors 與內建能力檢查；自訂 skill 請依 05、07、09 到 18 的文末內建腳本安裝。
 
 ```bash
 mkdir -p "{{CODEX_HOME}}/skills"
@@ -106,12 +126,19 @@ find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print
 
 不要把 Notion token、workspace ID、page ID 或 database ID 寫進 repo、README、AGENTS.md、skills 或公開筆記。若 Codex plugin 已可用，優先用 plugin，不要先手動建立 API token。
 
-## PDF 驗證流程
+## PDF Skill 驗證流程
 
-1. 確認 Codex App 已可使用 PDF plugin 或內建 PDF 讀取能力。
+1. 確認已安裝 `{{CODEX_HOME}}/skills/pdf/SKILL.md`。
 2. 用一份不敏感 PDF 測試讀取、摘要與頁面定位。
 3. 若要引用 PDF 內容，要求 Codex 標明檔名與頁碼或可確認的位置。
-4. 不要另外建立全域 `pdf` skill；PDF 是 Codex App plugin / 內建能力，不屬於 LazyPack 自訂 skill。
+4. 若要產出或修改 PDF，依 `pdf` skill 流程做渲染檢查。
+
+## Playwright Skill 驗證流程
+
+1. 確認已安裝 `{{CODEX_HOME}}/skills/playwright/SKILL.md`。
+2. 確認本機有 `npx`，因為 `playwright` skill 的 wrapper script 需要它。
+3. 用不敏感測試頁驗證瀏覽器操作，例如開啟 `https://example.com`、snapshot、screenshot。
+4. Codex App 工作流只使用 Browser plugin 與 `playwright` skill，不另外設定外部瀏覽器 MCP server。
 
 ## 驗證全域 Skills
 
@@ -143,7 +170,7 @@ description: Use when...
 - Plugin 顯示安裝完成，不代表授權成功；要實際查詢資料驗證。
 - 新增或修改 skills 後，通常要重開 Codex 對話或重啟 Codex App。
 - 工具不在目前可呼叫清單時，先用 tool search 或 Codex plugin 清單檢查，不要假設已載入。
-- 瀏覽器自動化優先使用 Codex App 內建 Browser plugin。
+- 瀏覽器自動化優先使用 Codex App 內建 Browser plugin；需要 terminal / CLI 型真實瀏覽器操作時，使用必裝的 `playwright` skill。
 - 全域規則放 `{{CODEX_HOME}}/AGENTS.md`，專案規則放專案根目錄 `AGENTS.md`。
 - 外部 / Anthropic skill 教學不能直接照搬；Codex 自訂 skills 放 `{{CODEX_HOME}}/skills`，不要放 來源工具的 skills 路徑。
 - 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`；需要優化時建立 companion skill。

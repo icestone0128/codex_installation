@@ -80,7 +80,7 @@
 全域 skill 的完整內容已內嵌在對應的有序號懶人包文件中，不再另外提供獨立的 `skills/` 子目錄。安裝時請打開對應編號文件，使用文末「內建 Skill 完整安裝內容」。
 
 ```text
-01：基礎 plugins / connectors 檢查，例如 Notion、PDF、Browser plugin；不重複安裝全域 `pdf` 或 `browser` skill
+01：必裝 Codex skills 與基礎 plugins / connectors 檢查，例如 `pdf`、`playwright`、Notion、PDF、Browser plugin；不設定外部瀏覽器 MCP server
 02：MCP / 外部工具 / CLI 連線，例如 Firecrawl、Filesystem、heptabase-cli
 05：secondbrain-research-digest
 07：notebooklm-architecture、presentation-workflow
@@ -138,7 +138,7 @@
 | 9 | `cross-device-sync` | [[16-Codex-全域-Skills-跨裝置同步]] | 需設定 `{{SYNC_ROOT}}` |
 | 10 | `heptabase-cli` | [[02-Codex-MCP-Essentials]] | 外部 CLI 連線類，需 Heptabase desktop app 與 CLI |
 | 11 | Notion plugin | [[01-Codex-必裝-Skills-與-Plugins]] | 使用 Codex plugin / connector；不要建立自訂全域 skill |
-| 12 | PDF / Browser plugin | [[01-Codex-必裝-Skills-與-Plugins]] | 使用 Codex App 內建 plugin 能力；PDF 與 Browser 列為必裝檢查，不要重複安裝全域 `pdf` 或 `browser` skill |
+| 12 | `pdf` / `playwright` skills 與 PDF / Browser plugin | [[01-Codex-必裝-Skills-與-Plugins]] | `pdf` 與 `playwright` 列為必裝 Codex skills；PDF 與 Browser plugin 也列為必裝檢查；不設定外部瀏覽器 MCP server |
 | 13 | `rightproblem-coach` | [[17-RightProblem-Coach-Skill-安裝]] | 可直接安裝；包含問題規格書模板、HC 指南與分析框架 |
 | 14 | `doc-to-md` | [[18-Document-to-Markdown-Skill-安裝]] | 可直接安裝；包含轉檔腳本、相依套件清單與使用說明 |
 | 15 | `landing-page` | [[15-Landing-Page-Skill-安裝]] | 可直接安裝；fallback 設計規則內建，UUPM 為選用 |
