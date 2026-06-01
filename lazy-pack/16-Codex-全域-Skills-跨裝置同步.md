@@ -41,6 +41,21 @@
 - `{{SYNC_ROOT}}/memories`、`{{SYNC_ROOT}}/workflows`、`{{SYNC_ROOT}}/knowledge`：個人助手全域資料層；不 symlink 到 `{{CODEX_HOME}}/skills`。
 - `<project-root>/000_Agent/skills`：單一專案本地 skill；不 symlink 到 `{{CODEX_HOME}}/skills`。
 
+## 多 Agent 相容性健檢
+
+如果你未來可能使用其他 AI agent，本項也提供「多 Agent 相容性健檢」流程。這不是要建立另一套 agent 專用設定，而是檢查哪些資產可以被其他 agent 安全讀取、哪些必須轉換、哪些不應同步。
+
+健檢重點：
+
+- `{{SYNC_ROOT}}/core-rules.md` 是否仍是唯一全域核心規則主檔。
+- `{{CODEX_HOME}}/AGENTS.md` 是否只是 Codex App 的 symlink 入口。
+- 其他 AI agent 若要接入，是否透過自己的規則入口讀同一份 `core-rules.md`。
+- `{{SYNC_ROOT}}/skills`、`memories`、`workflows`、`knowledge` 是否保持可攜式 Markdown / package 結構。
+- MCP、plugin、hooks、commands、subtask / delegation 設定是否只做格式轉換，不直接共用不相容設定檔。
+- session、logs、auth、cache、token、shell snapshot 是否明確排除。
+
+這個流程預設只輸出健檢報告，不會直接改檔。詳細檢查表已內嵌在 `cross-device-sync/references/multi-agent-compatibility.md`。
+
 ## 不會同步的東西
 
 不要把整個 `{{CODEX_HOME}}` 丟進雲端同步。`{{CODEX_HOME}}` 裡通常會有：
@@ -250,16 +265,16 @@ RESULT=<可讀到的自訂 skill 數量與抽測結果>
 
 本節是自含式安裝區塊。這個序號項目會安裝：`cross-device-sync`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `~/.codex`。
 
 ```bash
 set -e
 
 decode_base64() {
-  if base64 --help 2>/dev/null | grep -q -- '-d'; then
-    base64 -d
+  if command -v base64 >/dev/null 2>&1; then
+    base64 --decode 2>/dev/null || base64 -D
   else
-    base64 -D
+    python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.buffer.read()))'
   fi
 }
 
@@ -267,19 +282,19 @@ decode_base64() {
 mkdir -p "{{CODEX_HOME}}/skills/cross-device-sync"
 # cross-device-sync/SKILL.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD'
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" <<'CODEX_LAZYPACK_55B84175E734BB08CCCDB1E958F82FD90EE89E0F'
 ---
 name: cross-device-sync
-description: Use when the user asks to set up, audit, repair, or document cross-device synchronization and portability for Codex App configuration, global skills, AGENTS.md rules, Arry Assistant data, Obsidian project cockpits, or AI assistant memory across Macs, Windows/Linux, Google Drive, iCloud, Dropbox, OneDrive, or GitHub backups.
+description: Use when the user asks to set up, audit, repair, or document cross-device synchronization and portability for Codex App configuration, global skills, AGENTS.md rules, shared core-rules.md, Arry Assistant data, Obsidian project cockpits, AI assistant memory, or multi-agent compatibility across Macs, Windows/Linux, Google Drive, iCloud, Dropbox, OneDrive, GitHub backups, or other AI agents.
 metadata:
   short-description: Plan and verify Codex cross-device portability
 ---
 
 # Cross-Device Sync
 
-Use this skill to help the user make their Codex App setup portable across devices without binding their assistant memory, skills, or rules to one local machine.
+Use this skill to help the user make their Codex App setup portable across devices and compatible with other AI agents without binding assistant memory, skills, or rules to one local machine or one vendor-specific app folder.
 
-This is a Codex App conversion of a Claude Code-oriented cross-device sync guide. Do not apply the source guide literally. In this environment, the default surfaces are:
+This is a Codex App portability workflow. If source material comes from another AI agent ecosystem, do not apply that source literally. In this environment, the default surfaces are:
 
 - Codex config and skills: `$CODEX_HOME`, or `~/.codex` when `$CODEX_HOME` is not set
 - Portable global rules: `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`; `$CODEX_HOME/AGENTS.md` may be a symlink entrypoint to that file
@@ -295,12 +310,13 @@ This user's current defaults are documented in the root `README.md`; treat them 
 
 ## Non-Negotiables
 
-- Do not create, depend on, or repair Claude-only paths such as `~/.claude`, `CLAUDE.md`, `.claude/skills`, Claude slash commands, or Claude subagents unless the user explicitly asks to migrate from Claude.
+- Do not create, depend on, or repair another tool's app-specific config paths, rule files, command shims, or delegation formats unless the user explicitly asks to migrate from that tool.
 - Do not move, symlink, delete, or overwrite the user's existing Codex config, skills, memories, or Obsidian notes without first showing the concrete plan and getting explicit confirmation.
 - Always make a timestamped backup before any operation that moves files, rewrites symlinks, changes Git remotes, or edits shared assistant memory.
 - Never sync secrets, OAuth tokens, API keys, local credentials, app caches, shell snapshots, or machine-specific state across devices.
 - Treat public repos as public. Do not put private backups, credentials, private memory, drafts, or personal logs into tracked project files.
 - Prefer the user's established project folder and knowledge cockpit pattern unless they choose another sync route.
+- For other AI agents, share durable Markdown assets such as `core-rules.md`, documented workflows, and portable skill packages; do not symlink incompatible app config files together.
 
 ## Workflow
 
@@ -337,20 +353,35 @@ This user's current defaults are documented in the root `README.md`; treat them 
    - Codex skill frontmatter still validates if skills were moved or created
 7. Report exact paths changed, backup path, verification result, and whether Codex needs a restart or new conversation.
 
+## Multi-Agent Compatibility Audit
+
+Use this route when the user asks whether their setup can be used by other AI agents, whether another agent should read the same memory/rules, or whether a non-Codex guide should be merged into this portability workflow.
+
+Default behavior:
+
+1. Audit first; do not modify files.
+2. Treat `SYNC_ROOT/core-rules.md` as the cross-agent global rules source of truth.
+3. Treat `$CODEX_HOME/AGENTS.md` as Codex's symlink entrypoint to that file.
+4. Keep app-specific config files separate; convert settings formats instead of sharing them directly.
+5. Classify each asset as portable, convertible, local-only, or unsafe-to-sync.
+6. Produce a report with risks, recommended changes, and confirmation gates.
+
+Read `references/multi-agent-compatibility.md` for the detailed checklist and report template.
+
 ## Codex Portability Map
 
-Use this mapping when converting Claude-oriented instructions:
+Use this mapping when converting non-Codex assistant instructions:
 
 | Source guide concept | Codex App version |
 |---|---|
 | `來源工具的舊 skills 路徑` | `$CODEX_HOME/skills` or `~/.codex/skills` |
-| `CLAUDE.md` | `AGENTS.md` |
+| Source-specific global or project rule file | `AGENTS.md` for project rules, plus `core-rules.md` for portable global rules |
 | Global agent rules shared across tools | `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`, with `$CODEX_HOME/AGENTS.md` as a symlink entrypoint when supported |
-| Claude slash commands | Codex skill metadata and normal user prompts |
-| Claude subagents | Codex subagents only when explicitly requested; otherwise use validation passes |
-| Claude memory | `$CODEX_HOME/memories` plus optional personal assistant durable data when relevant |
+| Source-specific command shortcuts | Codex skill metadata and normal user prompts |
+| Source-specific delegation format | Codex validation passes or supported delegation tools only when explicitly requested |
+| Source-specific memory folder | `$CODEX_HOME/memories` plus optional personal assistant durable data when relevant |
 | `000_Agent` from source kit | Project-local assistant layer only; this user's global assistant layer is `ASSISTANT_ROOT` with `memories/`, `workflows/`, `knowledge/`, and `skills/` |
-| Claude credentials/local state | Do not sync; each device logs in independently |
+| Source-specific credentials/local state | Do not sync; each device logs in independently |
 
 ## Sync Route Guidance
 
@@ -382,25 +413,26 @@ Usually not portable:
 When more detail is needed:
 
 - Read `references/codex-playbook.md` before executing a real cross-device setup, audit, repair, GitHub backup, health-check script, or migration-manual task. It contains the full Codex-converted Section A-G workflow, routes, templates, checks, pitfalls, and FAQ.
-- Read `references/source-adaptation.md` when you need to understand how the original `07-cross-device-sync.md` was converted from Claude Code assumptions into Codex App-safe behavior.
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD
+- Read `references/multi-agent-compatibility.md` before checking whether Codex settings, global rules, skills, memory, MCP, prompts, hooks, or project rules can be used by other AI agents.
+- Read `references/source-adaptation.md` when you need to understand how external assistant setup material was converted into Codex App-safe behavior.
+CODEX_LAZYPACK_55B84175E734BB08CCCDB1E958F82FD90EE89E0F
 
 # cross-device-sync/agents/openai.yaml
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML'
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml" <<'CODEX_LAZYPACK_8FFA99F5690F2F878E77D5EA84B1A981B6023AEE'
 display_name: Cross-Device Sync
 short_description: Plan, install, and verify portable Codex setup across devices.
 default_prompt: Help me plan a safe Codex App cross-device sync setup.
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML
+CODEX_LAZYPACK_8FFA99F5690F2F878E77D5EA84B1A981B6023AEE
 
 # cross-device-sync/references/codex-playbook.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/codex-playbook.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/codex-playbook.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_CODEX_PLAYBOOK_MD'
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/codex-playbook.md" <<'CODEX_LAZYPACK_244B6B6094451DECC11683740063DB593740D1B6'
 # Codex Cross-Device Sync Playbook
 
-This is the Codex App-compatible execution version of `07-cross-device-sync.md`.
+This is the Codex App-compatible execution version of an external cross-device assistant setup guide.
 
-The original file targets Claude Code. This playbook keeps the full intent and operational coverage, but replaces Claude-specific assumptions with Codex App, Arry Assistant, Google Drive, Obsidian, and `AGENTS.md` conventions.
+The original source targeted a different assistant app. This playbook keeps the useful operating coverage, but replaces app-specific assumptions with Codex App, Arry Assistant, Google Drive, Obsidian, and `AGENTS.md` conventions.
 
 ## Purpose
 
@@ -748,7 +780,7 @@ If using GitHub CLI or connector, prefer private repositories for assistant memo
 
 ## Section E: Health Check Script
 
-Generate a health check only after the target architecture is known. A Codex version should check Codex assets, not Claude assets.
+Generate a health check only after the target architecture is known. A Codex version should check Codex assets, not another assistant app's assets.
 
 Suggested `sync-health.sh` shape:
 
@@ -874,6 +906,35 @@ Before reporting done, verify:
 - Obsidian mirror note is updated if global skills changed
 - Codex restart/new conversation requirement is reported when applicable
 
+## Section H: Multi-Agent Compatibility Audit
+
+Use this section when the user does not want to use another specific vendor's app, but wants Codex assets to remain readable by future or parallel AI agents.
+
+This is an audit-first flow. Do not change files until the user approves the report.
+
+Check these surfaces:
+
+| Surface | Portable approach |
+|---|---|
+| Global rules | `{{SYNC_ROOT}}/core-rules.md` remains the source of truth |
+| Codex global rules entrypoint | `{{CODEX_HOME}}/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md` |
+| Other AI agent rules | use that agent's supported entrypoint to read or reference `core-rules.md` |
+| Global skills | keep Codex-compatible packages under `{{SYNC_ROOT}}/skills` |
+| Project skills | keep project-only packages under each project's `000_Agent/skills` |
+| MCP/tools | convert by intent into the target app's config format; never share incompatible config files directly |
+| Memory | store durable preferences and decisions in Markdown under `{{SYNC_ROOT}}/memories` |
+| Sessions/logs/auth/cache | keep local; do not sync |
+| Project state | use project `AGENTS.md` plus Obsidian cockpit notes |
+
+Report each item as one of:
+
+- portable as-is
+- convertible with a target-specific adapter
+- local-only
+- unsafe to sync
+
+For the full checklist and report template, read `references/multi-agent-compatibility.md`.
+
 ## Pitfalls Converted From Source
 
 - Backup is mandatory because move plus symlink operations can break the user's assistant setup quickly.
@@ -922,16 +983,206 @@ Yes. Use separate repos or a strict `.gitignore`. Public repos should exclude pe
 ## Attribution Note
 
 The source file credits Raymond Hou / 雷蒙 and is licensed CC BY-NC-SA 4.0 for personal use. Keep attribution in derived notes when quoting or redistributing source-derived material. This Codex skill is an operational adaptation for the user's local Codex App workflow.
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_CODEX_PLAYBOOK_MD
+CODEX_LAZYPACK_244B6B6094451DECC11683740063DB593740D1B6
+
+# cross-device-sync/references/multi-agent-compatibility.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/multi-agent-compatibility.md")"
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/multi-agent-compatibility.md" <<'CODEX_LAZYPACK_D92F8EF1D5DC5FD8C9B05219E1E310F3ED9B4B7F'
+# Multi-Agent Compatibility Audit
+
+Use this checklist when the user wants Codex, future AI agents, or another local agent runtime to share the same durable assistant setup.
+
+The goal is not to make every app read the same config folder. The goal is to keep the user's rules, skills, workflows, memory, and migration notes in portable Markdown/packages, then expose each AI agent to those assets through that agent's own supported entrypoints.
+
+## Core Principle
+
+Share durable assets. Convert app-specific settings. Never sync secrets or local runtime state.
+
+Durable assets:
+
+- `SYNC_ROOT/core-rules.md`
+- portable skill packages under `SYNC_ROOT/skills`
+- reusable memory and preference notes under `SYNC_ROOT/memories`
+- workflow notes under `SYNC_ROOT/workflows`
+- knowledge indexes under `SYNC_ROOT/knowledge`
+- project `AGENTS.md` files and Obsidian project cockpits
+
+App-specific assets:
+
+- Codex `config.toml`
+- agent-specific settings files
+- plugin manifests and caches
+- session databases and logs
+- auth files and OAuth tokens
+- shell snapshots and temp files
+
+## Audit Steps
+
+### 1. Confirm The Rules Source Of Truth
+
+Check:
+
+```bash
+test -f "{{SYNC_ROOT}}/core-rules.md" && echo "core-rules exists"
+test -L "{{CODEX_HOME}}/AGENTS.md" && readlink "{{CODEX_HOME}}/AGENTS.md"
+```
+
+Expected:
+
+- `{{SYNC_ROOT}}/core-rules.md` exists.
+- `{{CODEX_HOME}}/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md`.
+- There is no separate legacy global rules file competing with `core-rules.md`.
+
+For another AI agent, add that agent's own supported rules entrypoint and point or copy it to the same `core-rules.md` only if the agent supports that safely.
+
+### 2. Classify Skills And Workflows
+
+Check:
+
+```bash
+find "{{SYNC_ROOT}}/skills" -maxdepth 2 -name SKILL.md -print | sort
+find "{{SYNC_ROOT}}/workflows" -maxdepth 2 -type f -print 2>/dev/null | sort
+```
+
+Classification:
+
+| Asset | Default decision |
+|---|---|
+| Codex-compatible `SKILL.md` package | Portable, keep under `SYNC_ROOT/skills` |
+| Project-only skill | Keep in project `000_Agent/skills` |
+| Draft workflow | Keep in `SYNC_ROOT/workflows` until promoted |
+| Runtime plugin cache | Local-only, do not sync |
+| Agent marketplace install metadata | Local-only or reinstall per app |
+
+Do not symlink project `000_Agent/skills` into global Codex skills.
+
+### 3. Check MCP And External Tools
+
+MCP settings are usually not directly portable because each app has its own config format and permission model.
+
+Audit:
+
+```bash
+test -f "{{CODEX_CONFIG}}" && sed -n '1,220p' "{{CODEX_CONFIG}}"
+```
+
+Classify each integration:
+
+- connector/plugin available in Codex App
+- local CLI route
+- API route with secret stored outside repo
+- MCP server route requiring config conversion
+- browser/manual route
+
+Rule: convert settings by intent. Do not symlink one agent's config file into another agent's config location.
+
+### 4. Check Memory And Durable Preferences
+
+Portable memory should be human-readable Markdown or structured notes, not raw session history.
+
+Check:
+
+```bash
+find "{{SYNC_ROOT}}/memories" -maxdepth 2 -type f -print 2>/dev/null | sort
+```
+
+Good candidates:
+
+- durable preferences
+- reusable decisions
+- project naming conventions
+- path rules
+- repeated troubleshooting knowledge
+
+Do not sync:
+
+- raw session databases
+- private logs
+- app telemetry
+- generated summaries containing secrets
+- OAuth or token caches
+
+### 5. Check Project Rules And Cockpits
+
+For each active project:
+
+- project root has `AGENTS.md`
+- Obsidian cockpit exists under the expected project library path
+- `AGENTS.md` points to stable project rules, not daily progress
+- cockpit carries progress, next actions, and sync notes
+
+For other AI agents, prefer reading the same project `AGENTS.md` if supported. If the agent expects another file name, generate a thin adapter that points back to `AGENTS.md` or `core-rules.md`, rather than forking the rules.
+
+### 6. Check Commands, Hooks, And Agent Delegation
+
+Do not copy commands or hooks across tools literally.
+
+Classify:
+
+| Source item | Multi-agent route |
+|---|---|
+| repeated workflow prompt | convert to skill or workflow note |
+| one-off prompt | convert to prompt template |
+| hook | rewrite only after checking target event model and permissions |
+| agent delegation pattern | convert to checklist, validation pass, or explicit subtask only when the target supports it |
+| app plugin | reinstall or rebuild for the target app |
+
+### 7. Produce The Report
+
+Use this format:
+
+```text
+## 現況摘要
+- 專案位置：
+- 同步方式：
+- Codex 已有：
+- 其他 AI agent 可共用：
+
+## 可攜資產
+-
+
+## 需要轉換的資產
+-
+
+## 不應同步的資產
+-
+
+## 風險清單
+1.
+2.
+3.
+
+## 建議修改清單
+高優先：
+-
+
+中優先：
+-
+
+低優先：
+-
+
+## 下一步執行計畫
+1. 先改哪些檔案：
+2. 需要備份哪些檔案：
+3. 哪些步驟要等使用者確認：
+```
+
+Do not edit files during the audit unless the user explicitly approves the proposed plan.
+
+## Fit With LazyPack Item 16
+
+This audit belongs inside LazyPack Item 16 because it is a portability and synchronization health check. It should not become a standalone global skill unless it grows into a broader migration system with its own scripts, templates, and repeated execution path.
+CODEX_LAZYPACK_D92F8EF1D5DC5FD8C9B05219E1E310F3ED9B4B7F
 
 # cross-device-sync/references/source-adaptation.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD'
-# Source Adaptation: 07-cross-device-sync.md
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md" <<'CODEX_LAZYPACK_FDD90718FB7D696B0C6E7269869C4ACC0D1E2053'
+# Source Adaptation: Cross-Device Assistant Setup
 
-Source file: `07-cross-device-sync.md`
+Source type: external assistant portability guide
 
-The source document is a Claude Code pro-kit for moving Claude configuration into a portable "AI brain" folder, backing it up, symlinking it back into `~/.claude`, adding optional GitHub backup, generating a health-check script, and writing a migration manual.
+The source document described moving an assistant app configuration into a portable user-owned folder, backing it up, linking it back into the app, adding optional GitHub backup, generating a health-check script, and writing a migration manual.
 
 This Codex version keeps the useful operating model but changes the target surfaces and safety rules.
 
@@ -946,13 +1197,13 @@ This Codex version keeps the useful operating model but changes the target surfa
 
 ## Converted Assumptions
 
-| Original Claude guide | Codex-compatible conversion |
+| Original source-guide idea | Codex-compatible conversion |
 |---|---|
-| `~/.claude/` is the main config root | `{{CODEX_HOME}}` is the Codex root |
+| Source app config root is the main config root | `{{CODEX_HOME}}` is the Codex root |
 | `來源工具的舊 skills 路徑` stores skills | `{{CODEX_HOME}}/skills` stores global Codex skills |
-| `CLAUDE.md` is the rule file | `AGENTS.md` is the project rule file; cross-tool global rules belong in `{{SYNC_ROOT}}/core-rules.md` |
-| Claude slash commands are user-facing entry points | Codex skills trigger by metadata and user intent |
-| Claude subagents are part of the workflow | Codex subagents are only used when explicitly requested or clearly useful |
+| Source app rule file is the rule file | `AGENTS.md` is the project rule file; cross-tool global rules belong in `{{SYNC_ROOT}}/core-rules.md` |
+| Source app command shortcuts are user-facing entry points | Codex skills trigger by metadata and user intent |
+| Source app delegation format is part of the workflow | Codex validation passes or supported delegation tools are used only when explicitly requested or clearly useful |
 | `000_Agent/` is created by pro-kit 01 | This user's global Arry Assistant data lives under `codex_symlink/`; project-local data may use each project's `000_Agent/` |
 | Source examples refer to Raymond/Raymond-Agent | Use Arry Assistant and the user's existing Google Drive/Obsidian paths |
 
@@ -1053,8 +1304,29 @@ The first installed version summarized the source at a high level. The complete 
 - Section E Codex health-check script shape
 - Section F migration manual template
 - Section G completion checklist
-- pitfalls and FAQ converted from Claude Code to Codex App
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD
+- Section H multi-agent compatibility audit, adapted from a later cross-tool health-check guide
+- pitfalls and FAQ converted from the source app to Codex App
+
+## 2026-06-01 Multi-Agent Compatibility Addition
+
+The later source was reviewed as a portability health-check pattern. The user does not plan to use that source app, so the useful parts were converted into a generic multi-agent audit instead of a new standalone skill.
+
+Preserved ideas:
+
+- audit before modifying files
+- distinguish durable Markdown assets from app-specific settings
+- map rules, skills, tools, memory, commands, hooks, and agent delegation separately
+- convert settings formats instead of symlinking incompatible app config files
+- output risks and suggested next steps before execution
+
+Codex-only conversion:
+
+- source-specific names are not used as operating surfaces
+- `{{SYNC_ROOT}}/core-rules.md` is the cross-agent global rules source of truth
+- `{{CODEX_HOME}}/AGENTS.md` remains Codex's symlink entrypoint
+- `{{SYNC_ROOT}}/skills`, `memories`, `workflows`, and `knowledge` remain the portable assistant data layer
+- other AI agents should read or adapt those durable assets through their own supported entrypoints
+CODEX_LAZYPACK_FDD90718FB7D696B0C6E7269869C4ACC0D1E2053
 
 test -f "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" && echo "cross-device-sync installed"
 
