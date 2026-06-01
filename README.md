@@ -27,6 +27,7 @@ Project workspace initialized on 2026-05-07.
 - `.gitignore` - local, secret, dependency, and build-output exclusions.
 - `docs/` - local documentation entry files. Not currently deployed.
 - `lazy-pack/` - verified Codex setup notes, troubleshooting records, and self-contained skill installers embedded in the numbered files.
+- `scripts/sync-health.sh` - read-only cross-device sync health check for symlinks, LazyPack mirror drift, Git state, and obvious secret patterns.
 - `000_Agent/` - pointer only; Arry assistant global data now lives in Google Drive `codex_symlink/`.
 - `100_Todo/` - project-local task, draft, and work-in-progress area.
 - `200_Reference/` - project-local reference, template, and past-work area.
@@ -37,6 +38,11 @@ Standard project-local data layer:
 
 - `100_Todo/drafts/`, `100_Todo/projects/`, `100_Todo/archive/`
 - `200_Reference/writing-samples/`, `200_Reference/templates/`, `200_Reference/past-work/`
+
+Portable setup helpers:
+
+- `200_Reference/templates/codex-config.template.toml` - safe Codex config template for a new device. It uses placeholders for secrets and machine paths; do not sync the real `~/.codex/config.toml`.
+- `scripts/sync-health.sh` - run after cross-device setup or skill sync work to verify the shared surfaces still line up.
 
 ## Getting Started
 
