@@ -1,0 +1,140 @@
+# Codex config portability template
+#
+# Purpose:
+# - Keep repeatable Codex preferences visible for a new device.
+# - Avoid syncing the real ~/.codex/config.toml directly.
+# - Keep secrets, auth files, cache paths, sqlite files, logs, sessions, and
+#   machine-specific plugin cache state local to each device.
+#
+# Install pattern:
+# 1. Copy this template to ~/.codex/config.toml on the target device.
+# 2. Replace all {{PLACEHOLDER}} values with paths that exist on that device.
+# 3. Add secrets through local secret files, environment variables, or managed
+#    connector login flows. Do not commit real secret values.
+# 4. Run scripts/sync-health.sh from this repo after setup.
+
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+sandbox_mode = "workspace-write"
+personality = "pragmatic"
+
+# Device-local. Use the notifier path installed on this device, or remove it.
+notify = ["{{CODEX_NOTIFY_APP_PATH}}", "turn-ended"]
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[plugins."gmail@openai-curated"]
+enabled = true
+
+[plugins."google-calendar@openai-curated"]
+enabled = true
+
+[plugins."google-drive@openai-curated"]
+enabled = true
+
+[plugins."notion@openai-curated"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[sandbox_workspace_write]
+network_access = true
+writable_roots = [
+  "{{SETUP_REPO}}",
+  "{{SYNC_ROOT}}",
+  "{{OBSIDIAN_VAULT}}",
+  "{{PROJECT_ROOT_1}}",
+  "{{PROJECT_ROOT_2}}",
+]
+
+# Add only paths that exist and that you intend Codex to trust on this device.
+[projects."{{SETUP_REPO}}"]
+trust_level = "trusted"
+
+[projects."{{SYNC_ROOT}}"]
+trust_level = "trusted"
+
+[projects."{{OBSIDIAN_VAULT}}"]
+trust_level = "trusted"
+
+[features]
+memories = true
+js_repl = false
+
+[memories]
+generate_memories = true
+use_memories = true
+
+[mcp_servers.obsidian]
+command = "{{MCPVAULT_BIN}}"
+args = ["{{OBSIDIAN_VAULT}}"]
+startup_timeout_sec = 20
+tool_timeout_sec = 60
+
+[mcp_servers.notebooklm]
+command = "{{NOTEBOOKLM_MCP_BIN}}"
+args = []
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+[mcp_servers.firebase]
+command = "npx"
+args = ["-y", "firebase-tools@latest", "mcp"]
+startup_timeout_sec = 60
+tool_timeout_sec = 120
+
+[mcp_servers.filesystem]
+command = "env"
+args = [
+  "NPM_CONFIG_CACHE={{NPM_CACHE_DIR}}",
+  "npx",
+  "-y",
+  "@modelcontextprotocol/server-filesystem",
+  "{{FILESYSTEM_ROOT}}",
+]
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+# Keep FIRECRAWL_API_KEY local. Do not replace this placeholder in a tracked file.
+[mcp_servers.firecrawl]
+command = "env"
+args = [
+  "NPM_CONFIG_CACHE={{NPM_CACHE_DIR}}",
+  "FIRECRAWL_API_KEY={{FIRECRAWL_API_KEY}}",
+  "npx",
+  "-y",
+  "firecrawl-mcp",
+]
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+[mcp_servers.node_repl]
+command = "{{CODEX_APP_NODE_REPL_BIN}}"
+args = []
+startup_timeout_sec = 120
+
+[desktop]
+ambient-suggestions-enabled = true
+composerEnterBehavior = "cmdIfMultiline"
+reviewDelivery = "detached"
+preventSleepWhileRunning = true
+keepRemoteControlAwakeWhilePluggedIn = true
+conversationDetailMode = "STEPS_PROSE"
+
