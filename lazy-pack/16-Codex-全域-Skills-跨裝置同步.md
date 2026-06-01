@@ -25,9 +25,19 @@
 
 這樣新裝置只要登入同一個雲端帳號，再重建 symlink，就能讀到同一份全域 skills。
 
+若你也要讓 Codex 與其他 AI agent 共用同一份全域規則，主檔固定放：
+
+```text
+{{SYNC_ROOT}}/core-rules.md
+```
+
+`{{CODEX_HOME}}/AGENTS.md` 只作為 Codex App 的 symlink 入口，指向 `{{SYNC_ROOT}}/core-rules.md`。不要再建立或維護 `{{SYNC_ROOT}}/agents/AGENTS.md`。
+
 路徑邊界：
 
 - `{{CODEX_HOME}}/skills`：Codex App 全域觸發的 skills；可 symlink 到 `{{SYNC_ROOT}}/skills`。
+- `{{SYNC_ROOT}}/core-rules.md`：可攜式全域核心規則主檔；其他 AI agent 也應讀這一份。
+- `{{CODEX_HOME}}/AGENTS.md`：Codex App 的全域規則入口；可 symlink 到 `{{SYNC_ROOT}}/core-rules.md`。
 - `{{SYNC_ROOT}}/memories`、`{{SYNC_ROOT}}/workflows`、`{{SYNC_ROOT}}/knowledge`：個人助手全域資料層；不 symlink 到 `{{CODEX_HOME}}/skills`。
 - `<project-root>/000_Agent/skills`：單一專案本地 skill；不 symlink 到 `{{CODEX_HOME}}/skills`。
 
@@ -52,6 +62,7 @@
 | `{{CODEX_HOME}}` | Codex 設定資料夾 | `{{CODEX_HOME}}` |
 | `{{SETUP_REPO}}` | 這份懶人包所在專案 | `{{SETUP_REPO}}` |
 | `{{SYNC_ROOT}}` | 雲端同步母資料夾 | `{{HOME}}/Library/CloudStorage/GoogleDrive-alex@example.com/My Drive/codex_symlink` |
+| `{{GLOBAL_RULES}}` | 可攜式全域核心規則主檔 | `{{SYNC_ROOT}}/core-rules.md` |
 | `{{BACKUP_ROOT}}` | 本機備份位置 | `{{HOME}}` |
 
 請先把上表變數替換成自己的實際路徑；不要直接複製其他人的本機路徑。
@@ -271,6 +282,7 @@ Use this skill to help the user make their Codex App setup portable across devic
 This is a Codex App conversion of a Claude Code-oriented cross-device sync guide. Do not apply the source guide literally. In this environment, the default surfaces are:
 
 - Codex config and skills: `$CODEX_HOME`, or `~/.codex` when `$CODEX_HOME` is not set
+- Portable global rules: `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`; `$CODEX_HOME/AGENTS.md` may be a symlink entrypoint to that file
 - Custom global skills: `$CODEX_HOME/skills`, or `~/.codex/skills` when `$CODEX_HOME` is not set
 - Project rules: `AGENTS.md`
 - Optional assistant data-layer root: `ASSISTANT_ROOT`
@@ -298,6 +310,7 @@ This user's current defaults are documented in the root `README.md`; treat them 
    - `arry-assistant` skill if Arry Assistant data is involved
 2. Inventory current state before proposing changes:
    - `$CODEX_HOME/config.toml` or `~/.codex/config.toml`
+   - `$CODEX_HOME/AGENTS.md` and its symlink target; if portability is intended, the target should be `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`
    - `$CODEX_HOME/skills` or `~/.codex/skills`
    - `$CODEX_HOME/memories` or `~/.codex/memories` if memory portability is in scope
    - project `AGENTS.md` files that should travel with each project
@@ -332,6 +345,7 @@ Use this mapping when converting Claude-oriented instructions:
 |---|---|
 | `來源工具的舊 skills 路徑` | `$CODEX_HOME/skills` or `~/.codex/skills` |
 | `CLAUDE.md` | `AGENTS.md` |
+| Global agent rules shared across tools | `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`, with `$CODEX_HOME/AGENTS.md` as a symlink entrypoint when supported |
 | Claude slash commands | Codex skill metadata and normal user prompts |
 | Claude subagents | Codex subagents only when explicitly requested; otherwise use validation passes |
 | Claude memory | `$CODEX_HOME/memories` plus optional personal assistant durable data when relevant |
@@ -351,6 +365,7 @@ Use this mapping when converting Claude-oriented instructions:
 Usually portable:
 
 - custom global skills under `$CODEX_HOME/skills` or `~/.codex/skills`, excluding `.system`
+- portable global operating rules in `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`, so other AI agents can read the same rule file
 - reusable project rules and templates
 - personal assistant durable references and reusable memory under `ASSISTANT_ROOT/memories` and `ASSISTANT_ROOT/workflows`, when the user explicitly wants that layer synced
 - migration docs, health-check scripts, and setup notes
@@ -416,6 +431,7 @@ Default Codex surfaces on this machine:
 | Purpose | Path or rule |
 |---|---|
 | Codex home | `{{CODEX_HOME}}` |
+| Portable global rules | `{{SYNC_ROOT}}/core-rules.md`; `{{CODEX_HOME}}/AGENTS.md` may symlink to it |
 | Custom global skills | `{{CODEX_HOME}}/skills` symlinked to `{{SYNC_ROOT}}/skills` |
 | System skills | `{{CODEX_HOME}}/skills/.system` |
 | Project rules | `AGENTS.md` |
@@ -512,7 +528,7 @@ Before changing anything, show:
 - GitHub backup decision
 - health-check cadence
 - exact target mother folder
-- whether the target is the data-layer root, the global core layer, or a separate backup/export folder
+- whether the target is the data-layer root, the portable global rules file `core-rules.md`, the global core layer, or a separate backup/export folder
 - exact files or folders to touch
 - exact exclusions
 - rollback plan
@@ -579,7 +595,7 @@ For this user, prefer the existing Google Drive `codex_symlink` root when the ta
 Portable candidates:
 
 - custom skill source or exported copies
-- stable assistant rules and preferences
+- stable assistant rules and preferences, with cross-tool global operating rules in `core-rules.md`
 - reusable workflow docs
 - migration docs
 - health-check scripts
@@ -830,7 +846,7 @@ Suggested sections:
 ## Future AI Tool
 
 1. Identify that tool's rule-file convention.
-2. Convert `AGENTS.md` rules instead of copying blindly.
+2. Convert project `AGENTS.md` rules instead of copying blindly; put cross-tool global rules in `{{SYNC_ROOT}}/core-rules.md`.
 3. Reuse Markdown knowledge and workflows where compatible.
 4. Rebuild tool-specific skills in the target format.
 
@@ -866,7 +882,7 @@ Before reporting done, verify:
 - Single-computer users still benefit from portability and versioned backup.
 - Private and public GitHub backups need different privacy defaults.
 - Health checks should not be cron by default; scheduled checks are local machine configuration and should be opt-in.
-- Sync rules/skills/memory; do not sync app state/cache/credentials.
+- Sync `core-rules.md`, skills, and memory; do not sync app state/cache/credentials.
 - A migration manual is part of portability because future setup context is otherwise lost.
 
 ## FAQ Converted To Codex
@@ -924,7 +940,7 @@ This Codex version keeps the useful operating model but changes the target surfa
 - Treat assistant setup as a user-owned portable asset, not a vendor-owned hidden folder.
 - Pick the sync route based on device mix, not trendiness.
 - Back up before moving files or creating symlinks.
-- Keep portable rules, skills, and durable memory separate from machine-local state.
+- Keep portable `core-rules.md`, skills, and durable memory separate from machine-local state.
 - Use GitHub as optional versioned offsite backup, preferably private.
 - Generate health checks and migration notes so future device changes are repeatable.
 
@@ -934,7 +950,7 @@ This Codex version keeps the useful operating model but changes the target surfa
 |---|---|
 | `~/.claude/` is the main config root | `{{CODEX_HOME}}` is the Codex root |
 | `來源工具的舊 skills 路徑` stores skills | `{{CODEX_HOME}}/skills` stores global Codex skills |
-| `CLAUDE.md` is the rule file | `AGENTS.md` is the project rule file |
+| `CLAUDE.md` is the rule file | `AGENTS.md` is the project rule file; cross-tool global rules belong in `{{SYNC_ROOT}}/core-rules.md` |
 | Claude slash commands are user-facing entry points | Codex skills trigger by metadata and user intent |
 | Claude subagents are part of the workflow | Codex subagents are only used when explicitly requested or clearly useful |
 | `000_Agent/` is created by pro-kit 01 | This user's global Arry Assistant data lives under `codex_symlink/`; project-local data may use each project's `000_Agent/` |
