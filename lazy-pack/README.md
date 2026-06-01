@@ -18,6 +18,7 @@
 | `{{PROJECT_ROOT}}` | 目前要操作的單一專案資料夾 | `{{WORK_ROOT}}/my-project` |
 | `{{SETUP_REPO}}` | 這份懶人包所在專案 | `{{WORK_ROOT}}/codex_installation` |
 | `{{SYNC_ROOT}}` | Codex symlink 雲端同步母資料夾 | Google Drive / iCloud / Dropbox 內的 `codex_symlink` |
+| `{{GLOBAL_RULES}}` | 可攜式全域核心規則主檔 | `{{SYNC_ROOT}}/core-rules.md` |
 | `{{BACKUP_ROOT}}` | 本機備份位置 | `{{HOME}}` |
 | `{{OBSIDIAN_VAULT}}` | Obsidian vault 絕對路徑 | `{{HOME}}/Obsidian/secondbrain` |
 | `{{OBSIDIAN_PROJECTS}}` | Obsidian 專案庫資料夾 | `{{OBSIDIAN_VAULT}}/專案庫` |
@@ -107,6 +108,7 @@
 
 | 類型 | 正式位置 | 用途 |
 | --- | --- | --- |
+| 可攜式全域核心規則 | `{{GLOBAL_RULES}}`；`{{CODEX_HOME}}/AGENTS.md` 只作為 symlink 入口 | Codex 與其他 AI agent 共用的長期工作規則、路徑、同步規則與操作邊界 |
 | Codex 全域 skills | `{{CODEX_HOME}}/skills`；若跨裝置同步，才 symlink 到 `{{SYNC_ROOT}}/skills` | 需要被 Codex App 全域觸發的 skills |
 | LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/lazy-pack/01...25.md` | 每個序號文件內嵌對應全域 skill 的完整安裝內容 |
 | Arry/個人助手全域入口 | `{{CODEX_HOME}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
@@ -166,7 +168,8 @@
 - 不把 `.env`、API key、token、密碼、Admin 憑證、個資或敏感資料寫入 repo 或 Obsidian 筆記。
 - 需要 API key 的 MCP 只能記錄遮蔽範例，例如 `fc-***`。
 - 專案固定規則寫在專案根目錄 `AGENTS.md`。
-- Codex 全域規則寫在 `{{CODEX_HOME}}/AGENTS.md`。
+- 可攜式全域核心規則寫在 `{{GLOBAL_RULES}}`；`{{CODEX_HOME}}/AGENTS.md` 只作為 Codex App 的 symlink 入口。
+- 不要另外維護 `{{SYNC_ROOT}}/agents/AGENTS.md`；其他 AI agent 要讀同一份規則時，直接讀 `{{GLOBAL_RULES}}`。
 - 實際進度、踩坑與下一步寫在 Obsidian 專案駕駛艙，不寫進專案 `AGENTS.md`。
 - Obsidian 專案駕駛艙一律放在 `{{OBSIDIAN_PROJECTS}}/<專案名稱>/專案工作流程.md`。
 - MCP 或 skills 設定改完後，通常要開新 Codex 對話或重啟 Codex App 才會載入。

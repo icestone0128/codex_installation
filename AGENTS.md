@@ -54,11 +54,13 @@ Arry 助手 AI 分身資料層：
 
 - AI 分身名稱：Arry 助手。
 - Arry 助手全域資料層放在 Google Drive `codex_symlink`，不放在 public repo：
+  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/core-rules.md`
   - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`
   - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/memories`
   - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/workflows`
   - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/knowledge`
 - 本 repo 的 `000_Agent/` 只保留指向說明，不存放真實個人記憶或偏好。
+- Codex 全域規則唯一實體主版本為 `codex_symlink/core-rules.md`；`/Users/arrywu/.codex/AGENTS.md` 只是指向它的 symlink，不再使用或重建 `codex_symlink/agents/AGENTS.md`。
 - Arry 助手是 Codex App 版設定，不使用 Claude Code 專用的 `CLAUDE.md` 或 `~/.claude/skills` symlink。
 - 可被所有專案呼叫的部分放在全域 skill：`/Users/arrywu/.codex/skills/arry-assistant/SKILL.md`。
 - Arry 助手本身是全域入口 skill；每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷新 skill 歸屬。
