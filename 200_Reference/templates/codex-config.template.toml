@@ -125,6 +125,17 @@ args = [
 startup_timeout_sec = 30
 tool_timeout_sec = 120
 
+[mcp_servers.netlify]
+command = "env"
+args = [
+  "NPM_CONFIG_CACHE={{NPM_CACHE_DIR}}",
+  "npx",
+  "-y",
+  "@netlify/mcp",
+]
+startup_timeout_sec = 60
+tool_timeout_sec = 180
+
 [mcp_servers.node_repl]
 command = "{{CODEX_APP_NODE_REPL_BIN}}"
 args = []
@@ -137,4 +148,3 @@ reviewDelivery = "detached"
 preventSleepWhileRunning = true
 keepRemoteControlAwakeWhilePluggedIn = true
 conversationDetailMode = "STEPS_PROSE"
-
