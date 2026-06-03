@@ -1319,7 +1319,7 @@ Preserved ideas:
 - convert settings formats instead of symlinking incompatible app config files
 - output risks and suggested next steps before execution
 
-Codex-only conversion:
+Codex App-compatible conversion:
 
 - source-specific names are not used as operating surfaces
 - `{{SYNC_ROOT}}/core-rules.md` is the cross-agent global rules source of truth

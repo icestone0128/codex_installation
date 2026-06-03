@@ -201,7 +201,7 @@ cat > "{{CODEX_HOME}}/skills/image-generator/references/imagegen-codex-workflow.
 # Image Generator Reference: Codex Image Generation Workflow
 
 This reference adapts the user-provided guide
-`08-用Image Gen Skill在Codex生圖.md` into a Codex-only skill workflow.
+`08-用Image Gen Skill在Codex生圖.md` into a Codex App-compatible skill workflow.
 
 ## Positioning
 
