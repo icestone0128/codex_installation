@@ -27,7 +27,8 @@
 - `auto-editor`：`python3 -m pip install --user auto-editor`。
 - Groq Python SDK：`python3 -m pip install --user groq`。
 - Groq STT 路線需要 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key`。
-- 若使用本地 Whisper fallback，需自行安裝 local Whisper。
+- Local Whisper 保留為可選 fallback；Groq STT 可用且使用者同意雲端轉錄時，預設不檢查、安裝或下載 Local Whisper。
+- 若 Groq 方案或模型可用性改變、Groq 不可用，或使用者明確要求本地處理，再考慮 Local Whisper fallback。
 
 ## Groq 帳號與 API key
 
@@ -81,6 +82,7 @@ test -d "{{CODEX_HOME}}/skills/movie-automation/scripts" && echo "scripts ok"
 - Groq 會上傳音訊到第三方服務；敏感素材要先確認使用者同意或改本地路線。
 - Groq API key 只顯示一次；建立後讓使用者自行複製保存，或只按 Copy 不讀取內容。
 - 若 Groq API key 曾外洩到對話或文件，必須 revoke 後重建。
+- Local Whisper 保留為 option；Groq cloud route 可用且已被接受時，預設不處理 Local Whisper 模型選擇或下載。
 - `resegment.py` 需要 word-level JSON；本地 Whisper segment-only SRT 不適合重切。
 - 清理 SRT 時只能改文字，不能改段號、時間碼或段落數。
 - 影片素材與輸出成品通常不進 git。
@@ -186,7 +188,10 @@ selection instead of guessing silently.
    - read `references/audio-subtitle.md`;
    - use Groq Whisper when `GROQ_API_KEY` or `~/.codex/secrets/groq_api_key` is available and
      the user accepts cloud transcription;
-   - otherwise use a local Whisper route if available.
+   - keep Local Whisper as an option, but do not install or download a model by
+     default;
+   - consider Local Whisper when Groq pricing/model availability changes, Groq
+     is unavailable, or the user explicitly requires local-only processing.
 4. Clean transcript:
    - preserve every SRT timecode and block boundary;
    - apply project vocabulary mechanically first, then edit only subtitle text;
@@ -372,10 +377,15 @@ Keep vocabulary mechanical. Do not change meaning.
 
 ## Local Route
 
-If the user requires local-only processing, use a local Whisper installation if
-available. Local segment-level timestamps may be less precise than Groq
-word-level timestamps, so do not run `resegment.py` unless the JSON includes word
-timestamps.
+Local Whisper is a retained option, not the default route. Do not install,
+download, or choose a Local Whisper model by default when the Groq cloud route is
+available and the user accepts cloud transcription.
+
+Consider Local Whisper when Groq pricing or model availability changes, Groq is
+unavailable, or the user explicitly requires local-only processing. If Local
+Whisper is used, local segment-level timestamps may be less precise than Groq
+word-level timestamps, so do not run `resegment.py` unless the JSON includes
+word timestamps.
 CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD
 
 # movie-automation/references/cover-style.md
@@ -520,7 +530,7 @@ cat > "{{CODEX_HOME}}/skills/movie-automation/references/setup.md" <<'CODEX_LAZY
 | ffmpeg / ffprobe | Audio/video processing | `ffmpeg -version` |
 | auto-editor | Silence removal | `python3 -m auto_editor --version` |
 | Groq Python SDK or API access | Cloud Whisper STT | `python3 -c "import groq"` |
-| Optional local Whisper | Local STT fallback | `python3 -m whisper --help` |
+| Optional local Whisper | Retained STT option for Groq plan/model changes, outages, or local-only requests | `python3 -m whisper --help` |
 
 Install common dependencies:
 
@@ -536,6 +546,10 @@ Cloud transcription uses Groq Whisper. Accept either:
 - local key file: `~/.codex/secrets/groq_api_key`
 
 Do not commit either value.
+
+When Groq is available and the user accepts cloud transcription, do not check,
+install, or download Local Whisper models by default. Keep Local Whisper as an
+option for Groq plan/model changes, outages, or local-only requests.
 
 ### Create A Groq Key With Google Login
 
