@@ -13,6 +13,7 @@
 - 本次查得 npm 版本：`@netlify/mcp` 1.15.1。
 - 本機已安裝 Netlify CLI：`netlify-cli/26.1.0 darwin-arm64 node-v25.9.0`。
 - 本機 CLI 路徑：`/opt/homebrew/bin/netlify`。
+- 2026-06-03 已完成 Clasp browser OAuth 登入實測；`clasp list` 可執行並回覆 `No script files found.`，代表 Clasp 憑證存在但目前無可列出的 Apps Script 專案。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/netlify-deploy/SKILL.md`。
 
 ## Codex 相容化調整
@@ -110,6 +111,8 @@ netlify --version
 netlify status
 netlify api getCurrentUser
 env NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp --version
+env NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp login
+env NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp list
 test -f "{{CODEX_HOME}}/skills/netlify-deploy/SKILL.md" && echo "netlify-deploy SKILL.md ok"
 test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/source-adaptation.md" && echo "source adaptation ok"
 test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/source-original-readme.md" && echo "source original record ok"
@@ -128,7 +131,8 @@ test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/clasp-netlify-pattern.m
 | Netlify CLI | 已安裝，且可在 Codex sandbox 外讀取版本與登入狀態 |
 | Netlify API through CLI | `netlify api getCurrentUser` read-only 呼叫成功 |
 | Clasp CLI | `npx -y @google/clasp --version` 可正常執行；不要求全域安裝 |
-| Google Apps Script API | 未為複查建立或部署測試專案；等實際 Apps Script 專案動作時再確認 API enablement 與 OAuth |
+| Clasp OAuth | 已用 browser OAuth 完成登入實測；`clasp list` 不再回覆 `No credentials found` |
+| Google Apps Script API | 未為複查建立或部署測試專案；等實際 Apps Script 專案動作時再確認 API enablement |
 | `netlify-deploy` skill | 全域 skill、LazyPack 內嵌版與 Obsidian 鏡像已比對同步 |
 | Codex 相容性 | 第 28 項與 `netlify-deploy` package 使用 Codex App 路徑與 placeholder，不保留其他 MCP client 的安裝命令 |
 
@@ -138,6 +142,9 @@ test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/clasp-netlify-pattern.m
 - 如果 npm cache 顯示 root-owned file，先使用 `NPM_CONFIG_CACHE=/private/tmp/npm-cache`，不要為單次任務改 `~/.npm` 權限。
 - 如果 `netlify` 在 Codex sandbox 內因 `~/Library/Preferences/netlify/` 回報 `EPERM`，改用外部執行權限或一般 Terminal 驗證；不代表 CLI 未安裝。
 - 若 Netlify auth 不穩，優先用 Netlify CLI 登入；PAT 只作為本機暫時 workaround，不寫進 repo 或筆記。
+- 若 `npx -y @google/clasp` 因 npm cache 權限失敗，使用 `NPM_CONFIG_CACHE=/private/tmp/npm-cache`。
+- Clasp 登入要跑 `npx -y @google/clasp login`，依 CLI 輸出的網址完成 Google OAuth，再用 `npx -y @google/clasp list` 做 read-only 驗證。
+- `clasp list` 登入後若回覆 `No script files found.`，代表帳號可讀但目前沒有可列出的 Apps Script 專案；不要誤判為登入失敗。
 - Apps Script 專案若還沒啟用 Apps Script API，`clasp create` 會失敗，需要使用者到 Google Apps Script user settings 手動開啟。
 - `.claspignore` 必須阻止前端 browser files 被推送到 Apps Script server。
 
@@ -145,6 +152,7 @@ test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/clasp-netlify-pattern.m
 
 - [ ] `{{CODEX_CONFIG}}` 有 `[mcp_servers.netlify]`。
 - [ ] `netlify --version` 可顯示 CLI 版本。
+- [ ] `NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp list` 不再顯示 `No credentials found`。
 - [ ] 第一次 production deploy 前已確認 team、site、output folder 與 `--prod` 意圖。
 - [ ] `{{CODEX_HOME}}/skills/netlify-deploy/SKILL.md` 存在。
 - [ ] references 三個檔案存在。
@@ -218,6 +226,8 @@ tool_timeout_sec = 180
 - Netlify account.
 - Codex App restarted, or a new Codex conversation opened, after editing MCP config.
 - Netlify CLI is optional but recommended for login troubleshooting: `npm install -g netlify-cli`, then `netlify login` and `netlify status`.
+- Clasp can run on demand with `npx -y @google/clasp`; global Clasp install is
+  optional.
 
 ## Netlify CLI
 
@@ -270,7 +280,8 @@ When auditing this skill, verify these surfaces without creating or deploying a 
 | Netlify CLI | `netlify --version` and `netlify status` | CLI is installed; login status is readable outside the Codex sandbox |
 | Netlify API through CLI | `netlify api getCurrentUser` | Read-only API call returns current user metadata |
 | Clasp CLI | `npx -y @google/clasp --version` | Clasp can run on demand; global install is optional |
-| Apps Script API | Confirm only when a real Apps Script project action is needed | Enablement and OAuth are project/account gated; do not create/deploy just for audit |
+| Clasp OAuth | `NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp login`, then `... clasp list` | Browser OAuth completes and `clasp list` no longer says `No credentials found` |
+| Apps Script API | Confirm only when a real Apps Script project action is needed | Enablement is project/account gated; do not create/deploy just for audit |
 
 If the Netlify MCP server is configured but no Netlify MCP tools are exposed in the current Codex session, open a new Codex conversation or restart Codex App before declaring MCP unavailable.
 
@@ -285,10 +296,53 @@ Use this pattern when the user wants a zero-copy loop: frontend on Netlify, Goog
 5. Inject the final Apps Script Web App URL into frontend config before the Netlify deploy.
 6. Deploy frontend through Netlify MCP, not through Apps Script.
 
+## Clasp Login And OAuth Check
+
+Use this check before any Apps Script create, push, deploy, or Google Sheets API
+backend workflow. It is especially relevant because Netlify frontend deploys and
+Apps Script Web App APIs are often paired.
+
+1. Check Clasp can run on demand:
+
+```bash
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp --version
+```
+
+2. Start browser OAuth:
+
+```bash
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp login
+```
+
+3. If the CLI prints an authorization URL, open it in the browser and let the
+   user complete Google authorization. Do not paste OAuth codes, refresh tokens,
+   or generated credentials into repo files, skills, LazyPack, Obsidian, or chat
+   summaries.
+4. Verify the login with a read-only list command:
+
+```bash
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp list
+```
+
+Expected interpretation:
+
+- `You are logged in as <email>` during login means OAuth completed.
+- `No credentials found` means Clasp is not logged in; rerun `clasp login`.
+- `No script files found.` after login is acceptable for a fresh account or an
+  account with no visible Apps Script projects; it means credentials are present
+  and the command reached the account.
+- `Project settings not found` from `clasp apis` only means the current folder
+  is not a Clasp project; do not treat it as Apps Script API failure.
+- Use `clasp create`, `clasp push`, `clasp deploy`, or `clasp apis` only when a
+  real Apps Script project action has been requested and the user has confirmed
+  project scope.
+
 ## Troubleshooting
 
 - If npm cache errors mention root-owned files, use `NPM_CONFIG_CACHE=/private/tmp/npm-cache` rather than changing `~/.npm` ownership during the task.
 - If `netlify` fails inside Codex with `EPERM` under `~/Library/Preferences/netlify/`, rerun the CLI check outside the sandbox; the install can still be valid.
+- If `npx -y @google/clasp` fails with npm cache `EPERM`, rerun with
+  `NPM_CONFIG_CACHE=/private/tmp/npm-cache`.
 - If Netlify auth is unstable, verify with `netlify status` or `netlify login`; use PAT only as a temporary local workaround.
 - If using a PAT temporarily, store it only in local MCP config or local secret storage, restart the MCP client, and remove it after browser / CLI auth works again.
 - If Netlify MCP deploy says state data is missing, create or identify the target site first, then deploy with the site ID.
@@ -443,6 +497,29 @@ Use a different frontend folder if the project already has one. Do not move file
 
 If the backend uses multiple `.gs` or `.js` files, allow only those backend files explicitly.
 
+## Clasp Login
+
+Run Clasp through `npx` unless the user explicitly wants a global install:
+
+```bash
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp --version
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp login
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp list
+```
+
+Login requires browser OAuth. If the CLI prints an authorization URL, open it
+for the user and wait for the terminal to report the logged-in email.
+
+Interpretation:
+
+- `You are logged in as <email>` means OAuth completed.
+- `No credentials found` means the account is not logged in through Clasp.
+- `No script files found.` after login is acceptable for a fresh account or an
+  account with no visible Apps Script projects.
+- `Project settings not found` from `clasp apis` means the current folder is not
+  a Clasp project; check API enablement only when a real Apps Script project
+  action is required.
+
 ## Frontend Side
 
 Keep the Apps Script endpoint as a placeholder until deployment produces the final URL:
@@ -455,6 +532,8 @@ After `clasp deploy`, inject the real Web App URL into frontend config, then dep
 
 ## Verification
 
+- `npx -y @google/clasp list` runs after browser OAuth and does not report
+  `No credentials found`.
 - `npx clasp push -f` succeeds and does not upload frontend browser files.
 - `npx clasp deploy --description "Production Web App"` returns a deployment ID.
 - The Apps Script Web App URL responds to a low-risk `GET` or health-check request.
