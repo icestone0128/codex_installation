@@ -9,6 +9,7 @@
 - 初次同步日期：2026-05-25。
 - 原始來源包：使用者提供的 SOIL Deck skills package；本版已整理為 `soil-html-deck`。
 - 追加參考來源：`https://github.com/mathruffian-dot/claude-html-slide-builder`，僅整合 Reveal.js、功能標記、互動元件與圖標去背等可攜式概念。
+- 2026-06-03 再次檢查來源 repo `a8fd35b`，補入功能標記建議張數、背景透明度、Firestore session 命名隔離與 Reveal.js 驗收規則。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md`。
 - Obsidian 全域索引已記錄用途：SOIL HTML 互動簡報；輸出單一可開啟 HTML，包含 inline CSS/JS、base64 圖像、進度列、互動卡片、排序表格、圖表、決策樹、Reveal.js 可選模式、文字雲/投票參考與對比滑桿。
 
@@ -485,6 +486,17 @@ Collection naming:
 - Word cloud: `<deck_slug>_wordcloud`
 - Poll: `<deck_slug>_poll`
 
+Session rules:
+
+- Use a stable `<deck_slug>` based on the deck name, date, or workshop code.
+- For repeated classes, add a session suffix such as
+  `<deck_slug>_20260603_wordcloud` instead of reusing old live data.
+- Keep test collections separate from live classroom collections.
+- Do not collect names, emails, student IDs, or sensitive responses unless the
+  user has explicitly designed a consent workflow.
+- Add a visible `LIVE` or `TEST` label in the slide when the widget connects to
+  Firestore so the presenter can tell which state is active.
+
 ## Word Cloud
 
 Add this CDN when using a word cloud:
@@ -503,6 +515,7 @@ Section:
       <input id="wc-input" type="text" maxlength="20" placeholder="輸入關鍵詞">
       <button id="wc-btn">送出</button>
       <div>總提交：<span id="wc-total">0</span></div>
+      <div>不同關鍵詞：<span id="wc-unique">0</span></div>
       <div id="wc-list"></div>
     </div>
     <canvas id="wc-canvas"></canvas>
@@ -542,6 +555,7 @@ onSnapshot(query(wordsRef, orderBy("created_at", "asc")), snap => {
   words.forEach(w => counts[w] = (counts[w] || 0) + 1);
   wcData = Object.entries(counts).sort((a,b) => b[1] - a[1]);
   document.getElementById("wc-total").textContent = String(words.length);
+  document.getElementById("wc-unique").textContent = String(wcData.length);
   document.getElementById("wc-list").innerHTML = wcData.slice(0, 12).map(([w,c]) => `<div><span>${w}</span><b>${c}</b></div>`).join("");
   drawWordCloud();
 });
@@ -635,9 +649,11 @@ onSnapshot(pollRef, snap => {
 ## Safety Notes
 
 - Firestore rules must match the classroom use case.
-- Avoid collecting names, emails, student IDs, or sensitive responses unless the
-  user has explicitly designed a consent workflow.
-- For public decks, separate test collections from live classroom collections.
+- For public decks, assume the browser config is visible to viewers. Protect the
+  project with Firestore rules and collection-level boundaries, not by hiding
+  client-side config.
+- Do not copy demo Firebase configs from examples or upstream source repos into
+  a real deck. Use placeholders until the user provides their own project.
 CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_FIREBASE_INTERACTIONS_MD
 
 # soil-html-deck/references/html-patterns.md
@@ -905,11 +921,24 @@ When the user asks for an interactive HTML lesson deck, plan with a compact tabl
 
 Tag decision rules:
 
-- `[BG]`: cover, closing, chapter break, or high-emotion summary.
-- `[ICON]`: 3-6 parallel ideas, steps, benefits, pitfalls, or tools.
-- `[INTERACT:wordcloud]`: opening hook, prior knowledge check, reflection.
-- `[INTERACT:poll]`: concept check, opinion split, pre/post assessment.
-- `[VIZ]`: before/after, source/result, old/new workflow, format conversion.
+- `[BG]`: cover, closing, chapter break, or high-emotion summary. Use on about
+  3-5 slides in a 10-12 slide deck, including cover and closing.
+- `[ICON]`: 3-6 parallel ideas, steps, benefits, pitfalls, or tools. Use on
+  about 1-3 slides where quick scanning matters more than dense explanation.
+- `[INTERACT:wordcloud]`: opening hook, prior knowledge check, reflection. Use
+  at most one near the beginning unless the user asks for a workshop format.
+- `[INTERACT:poll]`: concept check, opinion split, pre/post assessment. Use 0-1
+  per short deck and keep options to 3-4 choices.
+- `[VIZ]`: before/after, source/result, old/new workflow, format conversion. Use
+  0-1 per short deck unless the material is mainly process comparison.
+
+Feature balance:
+
+- Do not tag every slide. Leave plain explanation slides for pacing.
+- Put interaction before or after a concept that needs diagnosis, not inside a
+  slide that already has a dense chart or table.
+- If `[BG]` and long body text compete, keep the text in real HTML and reduce
+  background opacity instead of baking text into the image.
 
 ## Reveal.js Mode
 
@@ -927,6 +956,26 @@ polished standalone artifact with base64 images and custom interactions.
 
 For `[BG]`, generate text-free 16:9 or 3:2 dark images with clear subject mood.
 Use lower opacity behind real text.
+
+Recommended background opacity:
+
+- Cover, closing, or chapter-break images: `data-background-opacity="0.30"` to
+  `0.40`.
+- Normal teaching slides with body text: `data-background-opacity="0.12"` to
+  `0.18`.
+- If readability drops, darken the overlay or lower opacity before increasing
+  text size.
+
+Recommended accent tokens for Reveal.js mode:
+
+```css
+:root{
+  --accent:#e8643a;
+  --accent2:#4fc3f7;
+  --success:#81c784;
+  --warn:#ffb74d;
+}
+```
 
 For `[ICON]`, generate a single icon sheet with exactly N icons in a horizontal
 row on a dark background. Crop each icon, then run:
@@ -1116,7 +1165,14 @@ document.getElementById("viz-slider")?.addEventListener("input", function(){
 - Do not place large body text in a background image.
 - Use base64 image sources for portable one-file delivery.
 - If leaving CDN dependencies, mention that the file needs internet access.
-- Test keyboard navigation, hash navigation, and any custom input widgets.
+- Test keyboard navigation, hash navigation, controls, progress, and slide
+  number display.
+- Revisit slides with background images and verify opacity is low enough for
+  real HTML text to remain readable.
+- Trigger any word cloud, poll, or comparison slider after Reveal finishes
+  initialization; for widgets in hidden slides, redraw on `slidechanged`.
+- Confirm mobile/narrow preview keeps grids, stats, and comparison sections in a
+  readable single-column layout without text overflow.
 CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_REVEAL_COMPONENTS_MD
 
 # soil-html-deck/scripts/build_type3_html_v3_soil_skill.py
