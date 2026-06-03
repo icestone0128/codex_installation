@@ -29073,7 +29073,7 @@ PeepdW1UMxqLJRL5qmKLOBBsnhz7wxM5Al4jomy8XmKhE9OYQR8sRxZrfzPRLQi633RzfCk5ps1t
 iDbM12TB1QEAhJpzGNLEcEAxmxAjSRMmuOiSP8FMIUMIREIM0gwMHJbGCAIWLhZmuVQGMOceDuAK
 TLI2DcSjVALw8LC9cir7A2gJ6SBszfTFov0WldSWTkSjhqxpQkjfdW2JL7SqqGekI6KjhedK6w7V
 kwoks5MoykcLaITrmwv3Ob37ncXWq7e9VirX2+t+v5RCx9lbD1uibvMVHMYv6Gtve+Oe/16THbV/
-W9Bodrdfu1Exd6F07fqsnWmgAAAVAoupxez5t+bZjqlxkIRph6OBhgMRjiAIzaKKoAXlkUJoUDkQ
+W9Bodrdfu1Exd6F07fqsnWmgAAAVAoupxez5t+bZjqlxkIRph6OBhgMRjiAI_REDACTED_KEYLIKE_FRAGMENT
 svWw4SJkoJWp4WvpPPW0hj6Qq8VqrnbBpc7sv/seC1IQicRDEczAqhGtfDkjLSqrWpTGh7CeMHN2
 xlAgG7xX4SzlYu6F0proykVaGFDBdhVfUMPYnlpFQ2+qLvR3+NmPMgRXgS9TlDORXb3l7VLr8d7o
 OmGBpxEwt5ZV7YumCKky9Z95Ktxs4irahyYXa7e59+k5ACpuQ6QQQQW3Ttfg3swBT2SChpdAD00w
@@ -40358,7 +40358,7 @@ The capture pipeline downloads the site and extracts structured data for the res
 
 No API keys required for the base capture. However, before running, ask the user:
 
-> "For the best results, it is recommended to set a Gemini API key — it gives me AI-powered descriptions of every captured image, which helps me choose the right assets for each scene. It costs about $0.001 per image. You can skip this if you want, but the video quality will be better with it. To set it up: add `GEMINI_API_KEY=your-key` to a `.env` file in the project root. You can get a free key at ai.google.dev."
+> "For the best results, it is recommended to set a Gemini API key — it gives me AI-powered descriptions of every captured image, which helps me choose the right assets for each scene. It costs about $0.001 per image. You can skip this if you want, but the video quality will be better with it. To set it up safely: store the key locally at `~/.codex/secrets/gemini_api_key` with file mode `600`, then export `GEMINI_API_KEY` from that file only for the capture command. You can get a free key at ai.google.dev."
 
 If the user provides the key or already has one set, proceed. If they skip it, proceed anyway — the capture works without it, but `asset-descriptions.md` will have DOM-context descriptions only (position, size, alt text) instead of AI vision descriptions.
 

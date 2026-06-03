@@ -278,7 +278,7 @@ For frontend apps:
 
 For public templates:
 
-- Include `.env.example` with `GEMINI_API_KEY=your-key-here`.
+- Include `.env.example` with `GEMINI_API_KEY=<load-from-local-secret>`.
 - Add `.env`, `.env.local`, and local secret files to `.gitignore`.
 - Include setup instructions, not a real key.
 
@@ -446,7 +446,7 @@ if (!apiKey) {
 `.env.example`:
 
 ```text
-GEMINI_API_KEY=your-key-here
+GEMINI_API_KEY=<load-from-local-secret>
 ```
 
 `.gitignore`:
