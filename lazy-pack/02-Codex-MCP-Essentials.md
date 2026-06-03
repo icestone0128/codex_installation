@@ -12,7 +12,7 @@
 - 已安裝 Codex App。
 - 已決定 `{{CODEX_CONFIG}}`。
 - 已安裝 Node.js / npm。
-- 需要 Firecrawl 時，準備 `{{FIRECRAWL_API_KEY}}`。
+- 需要 Firecrawl 時，準備 `{{CODEX_HOME}}/secrets/firecrawl_api_key`，權限設為 `600`。
 - 需要 Filesystem MCP 時，先決定最小授權資料夾。
 
 ## Codex App 與 來源工具 CLI 差異
@@ -35,15 +35,15 @@ Codex App 使用：
 
 ```toml
 [mcp_servers.firecrawl]
-command = "env"
-args = ["NPM_CONFIG_CACHE=/private/tmp/npm-cache", "FIRECRAWL_API_KEY={{FIRECRAWL_API_KEY}}", "npx", "-y", "firecrawl-mcp"]
+command = "sh"
+args = ["-lc", "NPM_CONFIG_CACHE=/private/tmp/npm-cache FIRECRAWL_API_KEY=$(cat {{CODEX_HOME}}/secrets/firecrawl_api_key) npx -y firecrawl-mcp"]
 startup_timeout_sec = 30
 tool_timeout_sec = 120
 ```
 
 安全規則：
 
-- API key 不可寫入 repo。
+- API key 只放在 `{{CODEX_HOME}}/secrets/firecrawl_api_key` 或等效本機 secret manager，不可寫入 repo。
 - 文件只能寫遮蔽範例，例如 `fc-***`。
 - 若 key 外洩，到 Firecrawl dashboard 旋轉或重建。
 

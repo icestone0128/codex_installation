@@ -13,6 +13,7 @@
 - 本次查得 npm 版本：`@netlify/mcp` 1.15.1。
 - 本機已安裝 Netlify CLI：`netlify-cli/26.1.0 darwin-arm64 node-v25.9.0`。
 - 本機 CLI 路徑：`/opt/homebrew/bin/netlify`。
+- 2026-06-04 已補入 Codex sandbox npm / Netlify CLI / Clasp OAuth 可寫路徑修正：`~/.npm`、`~/Library/Preferences/netlify` 與 `~/.clasprc.json`。
 - 2026-06-03 已完成 Clasp browser OAuth 登入實測；`clasp list` 可執行並回覆 `No script files found.`，代表 Clasp 憑證存在但目前無可列出的 Apps Script 專案。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/netlify-deploy/SKILL.md`。
 
@@ -22,7 +23,7 @@
 - 將來源中的非 Codex agent / tool 名稱轉成 Codex App MCP 設定。
 - 正式 MCP route 改用 Netlify 官方 `@netlify/mcp`。
 - 不內嵌 Netlify PAT、Google OAuth token、GitHub token 或任何 private key。
-- 使用 `NPM_CONFIG_CACHE=/private/tmp/npm-cache` 避免 npm cache 權限問題。
+- 記錄兩種 npm / CLI 權限路線：短期可用 `NPM_CONFIG_CACHE=/private/tmp/npm-cache` 或外部執行確認，長期則在 Codex sandbox writable roots 補入 `~/.npm`、`~/Library/Preferences/netlify` 與 `~/.clasprc.json` 後開新 Codex 對話。
 
 ## 官方建議的 MCP / CLI 取用原則
 
@@ -77,6 +78,29 @@ netlify env:list
 
 注意：在 Codex sandbox 內直接執行 `netlify --version` 或 `netlify status`，可能因 CLI 需要寫入 `~/Library/Preferences/netlify/` 而出現 `EPERM`。這不是安裝失敗；需要時用外部執行權限或一般 Terminal 驗證。
 
+## Codex sandbox 權限修正
+
+若 npm / npx、Netlify CLI 或 Clasp OAuth refresh 經常被 Codex sandbox 擋住，優先做窄範圍修正，不要把整個 home 目錄加入可寫範圍。
+
+在 `{{CODEX_CONFIG}}` 的 `[sandbox_workspace_write].writable_roots` 補入：
+
+```toml
+"{{HOME}}/.npm",
+"{{HOME}}/Library/Preferences/netlify",
+"{{HOME}}/.clasprc.json",
+```
+
+修改後開新 Codex 對話或重啟 Codex App，再測：
+
+```bash
+npm view @netlify/mcp version
+npx -y @google/clasp --version
+npx -y @google/clasp list
+netlify --version
+```
+
+`npm install -g` 仍可能寫入 Homebrew prefix 或系統全域路徑，這種全域安裝需要另外確認，不應為了方便把整個 `/opt/homebrew` 放進沙盒可寫範圍。
+
 ## 前置條件
 
 - Node.js 22 或更新版本。
@@ -130,6 +154,7 @@ test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/clasp-netlify-pattern.m
 | Netlify MCP package | npm 可解析 `@netlify/mcp` |
 | Netlify CLI | 已安裝，且可在 Codex sandbox 外讀取版本與登入狀態 |
 | Netlify API through CLI | `netlify api getCurrentUser` read-only 呼叫成功 |
+| Codex sandbox npm / Netlify CLI / Clasp writes | 已將 `~/.npm`、`~/Library/Preferences/netlify` 與 `~/.clasprc.json` 記錄為窄範圍 writable roots；新 Codex session 載入後可減少暫存 cache / 外部執行 workaround |
 | Clasp CLI | `npx -y @google/clasp --version` 可正常執行；不要求全域安裝 |
 | Clasp OAuth | 已用 browser OAuth 完成登入實測；`clasp list` 不再回覆 `No credentials found` |
 | Google Apps Script API | 未為複查建立或部署測試專案；等實際 Apps Script 專案動作時再確認 API enablement |
@@ -141,6 +166,8 @@ test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/clasp-netlify-pattern.m
 - `npx @netlify/mcp` 是 MCP stdio server，直接在 terminal 執行可能會等待 MCP client，不一定會印出 help。
 - 如果 npm cache 顯示 root-owned file，先使用 `NPM_CONFIG_CACHE=/private/tmp/npm-cache`，不要為單次任務改 `~/.npm` 權限。
 - 如果 `netlify` 在 Codex sandbox 內因 `~/Library/Preferences/netlify/` 回報 `EPERM`，改用外部執行權限或一般 Terminal 驗證；不代表 CLI 未安裝。
+- 若要長期避免上述繞路，將 `~/.npm`、`~/Library/Preferences/netlify` 與 `~/.clasprc.json` 加入 Codex sandbox writable roots，然後開新 Codex 對話或重啟。
+- 若 `npx -y @google/clasp list` 在沙盒內因 `~/.clasprc.json` 回報 `EPERM`，但外部執行成功，代表 Clasp OAuth 健康，問題是 sandbox 未允許 Clasp auth file 寫回。
 - 若 Netlify auth 不穩，優先用 Netlify CLI 登入；PAT 只作為本機暫時 workaround，不寫進 repo 或筆記。
 - 若 `npx -y @google/clasp` 因 npm cache 權限失敗，使用 `NPM_CONFIG_CACHE=/private/tmp/npm-cache`。
 - Clasp 登入要跑 `npx -y @google/clasp login`，依 CLI 輸出的網址完成 Google OAuth，再用 `npx -y @google/clasp list` 做 read-only 驗證。
@@ -228,6 +255,9 @@ tool_timeout_sec = 180
 - Netlify CLI is optional but recommended for login troubleshooting: `npm install -g netlify-cli`, then `netlify login` and `netlify status`.
 - Clasp can run on demand with `npx -y @google/clasp`; global Clasp install is
   optional.
+- For smoother Codex sandboxed npm / Netlify CLI checks, add these local
+  writable roots to the Codex sandbox config when the user's environment allows
+  it: `~/.npm`, `~/Library/Preferences/netlify`, and `~/.clasprc.json`.
 
 ## Netlify CLI
 
@@ -240,7 +270,35 @@ netlify --version
 netlify status
 ```
 
-Use `NPM_CONFIG_CACHE=/private/tmp/npm-cache` if npm cache permissions are broken. In Codex sandboxed runs, `netlify --version` and `netlify status` may fail when the CLI tries to write `~/Library/Preferences/netlify/`; rerun those verification commands outside the sandbox when needed.
+Use `NPM_CONFIG_CACHE=/private/tmp/npm-cache` if npm cache permissions are
+broken or the current Codex sandbox has not been granted `~/.npm` write access.
+In Codex sandboxed runs, `netlify --version` and `netlify status` may fail when
+the CLI tries to write `~/Library/Preferences/netlify/`; either add that path to
+the sandbox writable roots and restart/open a new Codex conversation, or rerun
+those verification commands outside the sandbox when needed.
+
+## Codex Sandbox Writable Roots
+
+When npm / npx, Netlify CLI, or Clasp OAuth refreshes are repeatedly blocked by
+the Codex sandbox, keep the permission change narrow. Add only the
+tool-specific cache/preferences/auth file to `{{CODEX_CONFIG}}` under
+`[sandbox_workspace_write].writable_roots`:
+
+```toml
+[sandbox_workspace_write]
+network_access = true
+writable_roots = [
+  "{{HOME}}/.npm",
+  "{{HOME}}/Library/Preferences/netlify",
+  "{{HOME}}/.clasprc.json",
+  "<existing project roots>"
+]
+```
+
+After editing this config, open a new Codex conversation or restart Codex App
+before testing again. Do not add the whole home directory or Homebrew prefix just
+to make npm easier; `npm install -g` can still require a separate approval
+because it writes outside these narrow tool folders.
 
 Common CLI fallback commands:
 
@@ -278,6 +336,7 @@ When auditing this skill, verify these surfaces without creating or deploying a 
 | Netlify MCP config | `{{CODEX_CONFIG}}` contains `[mcp_servers.netlify]` with `npx -y @netlify/mcp` | Codex can load the MCP server after restart/new conversation |
 | Netlify MCP package | `npm view @netlify/mcp version` | Package resolves from npm |
 | Netlify CLI | `netlify --version` and `netlify status` | CLI is installed; login status is readable outside the Codex sandbox |
+| Codex sandbox npm / Netlify CLI / Clasp writes | `{{CODEX_CONFIG}}` writable roots include `~/.npm`, `~/Library/Preferences/netlify`, and `~/.clasprc.json` when sandboxed checks should run directly | npm / npx, Netlify CLI, and Clasp OAuth refreshes can avoid temporary or external workarounds after a new Codex session |
 | Netlify API through CLI | `netlify api getCurrentUser` | Read-only API call returns current user metadata |
 | Clasp CLI | `npx -y @google/clasp --version` | Clasp can run on demand; global install is optional |
 | Clasp OAuth | `NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp login`, then `... clasp list` | Browser OAuth completes and `clasp list` no longer says `No credentials found` |
@@ -339,10 +398,20 @@ Expected interpretation:
 
 ## Troubleshooting
 
-- If npm cache errors mention root-owned files, use `NPM_CONFIG_CACHE=/private/tmp/npm-cache` rather than changing `~/.npm` ownership during the task.
-- If `netlify` fails inside Codex with `EPERM` under `~/Library/Preferences/netlify/`, rerun the CLI check outside the sandbox; the install can still be valid.
+- If npm cache errors mention root-owned files, first check whether the current
+  Codex session has reloaded `~/.npm` as a writable root. If not, restart/open a
+  new Codex conversation after the config edit. Use
+  `NPM_CONFIG_CACHE=/private/tmp/npm-cache` only as a temporary workaround.
+- If `netlify` fails inside Codex with `EPERM` under
+  `~/Library/Preferences/netlify/`, add that preferences folder to the sandbox
+  writable roots and restart/open a new Codex conversation; rerun outside the
+  sandbox only when the config change is not available.
 - If `npx -y @google/clasp` fails with npm cache `EPERM`, rerun with
   `NPM_CONFIG_CACHE=/private/tmp/npm-cache`.
+- If `npx -y @google/clasp list` fails with `EPERM` while opening
+  `~/.clasprc.json`, add that file to Codex sandbox writable roots and
+  restart/open a new Codex conversation. The same command succeeding outside
+  the sandbox means Clasp OAuth itself is healthy.
 - If Netlify auth is unstable, verify with `netlify status` or `netlify login`; use PAT only as a temporary local workaround.
 - If using a PAT temporarily, store it only in local MCP config or local secret storage, restart the MCP client, and remove it after browser / CLI auth works again.
 - If Netlify MCP deploy says state data is missing, create or identify the target site first, then deploy with the site ID.
