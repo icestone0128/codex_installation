@@ -327,7 +327,7 @@ Inspected date: 2026-06-03.
 - Replaced older tool names such as `netlify-project-services-updater` and `netlify-deploy-services-updater` with the current official Netlify MCP package, `@netlify/mcp`.
 - Removed MCP-client-specific command assumptions and kept only Codex App configuration.
 - Added npm cache isolation with `NPM_CONFIG_CACHE=/private/tmp/npm-cache`, matching this LazyPack's MCP pattern.
-- Added explicit restart/new-conversation guidance because Codex only loads new MCP servers after config reload.
+- Added explicit restart/new-conversation guidance because new MCP servers load after config reload.
 - Kept Netlify PAT as a local-only fallback, not an installer requirement.
 
 ## Current Official Netlify MCP Route
@@ -364,7 +364,7 @@ Audited surfaces:
 | Netlify API through CLI | Read-only current-user API call succeeds after browser login |
 | Clasp CLI | `npx -y @google/clasp --version` succeeds; global install is optional |
 | Apps Script API | Not probed by creating/deploying a project during audit; enablement is checked when a real Apps Script project action is requested |
-| Codex portability | `SKILL.md`, LazyPack Item 28, and Obsidian mirror use Codex-only paths and placeholders |
+| Codex portability | `SKILL.md`, LazyPack Item 28, and Obsidian mirror use Codex App paths and portable placeholders |
 CODEX_LAZYPACK_NETLIFY_DEPLOY_SOURCE_ADAPTATION_MD
 
 # netlify-deploy/references/source-original-readme.md
