@@ -49,6 +49,49 @@ service cloud.firestore {
 
 先用拒絕全部的規則起步，再針對需求打開。
 
+## 前後端整合開發與部署標準流程
+
+當您需要建立一個連接 Firebase Firestore 資料庫的前端網頁（不論是否需要靜態託管），其完整的標準執行流程如下：
+
+### 1. 本機專案目錄與 Firebase 初始化
+1. **建立專案結構**：在您預計要部署的網頁目錄下（例如 `docs/` 或專屬資料夾），建立您的前端資源檔案（`index.html`、`style.css`、`app.js`）。
+2. **建立 Firebase 設定檔**：在該目錄下建立 `.firebaserc`、`firebase.json` 及 `firestore.rules` 檔案，明確綁定專案 ID，並指定 Firestore 規則檔案的所在路徑（參考「建立本機 Firebase 設定」一節）。
+   * *注意：若需使用 Firebase Hosting，在 `firebase.json` 的 `"hosting"` 區塊中將 `"public"` 屬性設定為 `.`，以避免目錄穿越與跨域讀取問題。*
+
+### 2. 前往 Firebase Console 啟用資料庫 (必做手動步驟)
+1. **建立 Firestore 實例**：由於雲端安全性與計費安全限制，新專案必須由開發者前往 [Firebase 主控台](https://console.firebase.google.com/) 手動啟用資料庫。
+2. **選擇 Native 模式**：啟用資料庫時，請選擇 **Firestore Native mode (原生模式)** 建立資料庫執行個體（建議地區選擇靠近使用者之亞太地區如 `asia-east1`）。
+3. **以測試模式啟動**：選擇 **Start in test mode (以測試模式啟動)**。這能確保稍後我們使用 CLI 發布本地編寫的安全規則時，認證與發布通道為暢通狀態。
+
+### 3. 前端網頁引入 Firebase SDK 與配置初始化
+1. **引入 SDK 函式庫**：在前端 HTML（`index.html`）中引入 Firebase 相容版 SDK（例如 `firebase-app-compat.js` 與 `firebase-firestore-compat.js`），或者使用 modern JS module 方式 import。
+2. **填寫 Web Config**：前往 Firebase Console 註冊 Web 應用程式，並將複製的 `firebaseConfig` SDK 金鑰填入您的 JS 初始化邏輯中：
+   ```javascript
+   firebase.initializeApp(firebaseConfig);
+   const db = firebase.firestore();
+   ```
+
+### 4. 開發本地讀寫與前端更新邏輯
+1. **資料監聽與即時更新**：利用 `onSnapshot` 進行即時資料串流的實時監聽與前端渲染。
+2. **資料安全寫入**：利用 `db.collection(...).add()` 進行新增，並使用伺服器端時間戳記 `firebase.firestore.FieldValue.serverTimestamp()` 作為排序依據。
+3. **優化前端體驗 (樂觀更新)**：若涉及刪除或清空等批次作業，建議實作樂觀更新 (Optimistic UI Update)，即在點擊瞬間先行將前端畫面與計數數值歸零，再非同步於背景向資料庫發送批次（batch）刪除請求，以提供無延遲的流暢體驗。
+
+### 5. 編寫與部署 Firestore 安全規則
+1. **限制欄位與防止惡意注入**：編輯本地 `firestore.rules`。請勿長期使用 allow read, write，應對寫入資料進行限制：
+   * 例如限制字串長度：`request.resource.data.text is string && request.resource.data.text.size() <= 20`。
+   * 例如限制資料庫欄位類型或時間戳記以防止偽造。
+2. **部署規則至雲端**：在 terminal 中執行：
+   ```bash
+   npx firebase-tools deploy --only firestore
+   ```
+
+### 6. 前端網頁資源部署與防快取處理
+1. **防快取參數設定**：為了防止靜態資源部署後，因為 CDN 與瀏覽器的強烈快取導致使用者讀取到舊版代碼，您必須在 HTML（`index.html`）引入 `style.css` 與 `app.js` 的 URL 後方追加版本查詢參數（例如 `href="style.css?v=1.0.8"`）。每次修改程式碼並重新部署前，將版本號升級。
+2. **執行部署命令**：
+   ```bash
+   npx firebase-tools deploy --only hosting
+   ```
+
 ## Firebase CLI
 
 ### 安裝全域 Firebase CLI
