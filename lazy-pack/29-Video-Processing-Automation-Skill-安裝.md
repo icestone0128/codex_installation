@@ -1,8 +1,8 @@
-# 29-Movie-Automation-Skill-安裝
+# 29-Video-Processing-Automation-Skill-安裝
 
 > 版本：2026-06-03 Codex App 版
-> 用途：安裝 `movie-automation` 全域 skill，把原始影片處理成 YouTube / 社群影片上架包，包含智能剪口播、字幕、文字稿、標題、封面、metadata 與短片亮點流程。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/movie-automation/`。
+> 用途：安裝 `video-processing-automation` 全域 skill，把原始影片處理成 YouTube / 社群影片上架包，包含智能剪口播、字幕、文字稿、標題、封面、metadata 與短片亮點流程。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/video-processing-automation/`。
 
 ## 來源與歷史紀錄
 
@@ -10,7 +10,7 @@
 - 來源 repo：https://github.com/mathruffian-dot/2026-YouTube
 - 來源 commit：`a0171ce`。
 - 2026-06-04 已補入 Groq Python SDK 安裝、Groq Google 登入建立 API key、安全複製與 `~/.codex/secrets/groq_api_key` 保存流程。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/movie-automation/SKILL.md`。
+- Codex 全域 skill：`{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md`。
 
 ## Codex 相容化調整
 
@@ -29,6 +29,7 @@
 - Groq STT 路線需要 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key`。
 - Local Whisper 保留為可選 fallback；Groq STT 可用且使用者同意雲端轉錄時，預設不檢查、安裝或下載 Local Whisper。
 - 若 Groq 方案或模型可用性改變、Groq 不可用，或使用者明確要求本地處理，再考慮 Local Whisper fallback。
+- Codex sandbox 若在 Python 語法檢查時擋住 `~/Library/Caches/com.apple.python`，將該路徑加入 writable roots；本機已補入 `/Users/arrywu/Library/Caches/com.apple.python`。
 
 ## Groq 帳號與 API key
 
@@ -40,7 +41,7 @@ Groq Whisper STT 會把音訊送到 Groq。只有在使用者同意雲端 STT �
 2. 使用 `Continue with Google` 登入或註冊 Groq。
 3. Google 帳號選擇、授權、密碼或一次性驗證碼都由使用者本人在瀏覽器完成。
 4. 在 API Keys 頁點 `Create API Key`。
-5. Display Name 建議使用用途名稱，例如 `codex-movie-automation`。
+5. Display Name 建議使用用途名稱，例如 `codex-video-processing-automation`。
 6. 送出後停在一次性 key 顯示畫面；不要把 key 貼進對話、repo、LazyPack、Obsidian 或截圖。
 7. 可按頁面 `Copy` 讓 key 進入使用者剪貼簿，但不要讀取或輸出 key。
 8. 由使用者保存到本機秘密檔：
@@ -63,14 +64,14 @@ ffprobe -version
 python3 -m auto_editor --version
 python3 -c "import groq; print('groq ok')"
 python3 -c "import os, pathlib; p=pathlib.Path('~/.codex/secrets/groq_api_key').expanduser(); print('Groq key:', 'ok' if os.getenv('GROQ_API_KEY') or p.exists() else 'missing')"
-test -f "{{CODEX_HOME}}/skills/movie-automation/SKILL.md" && echo "movie-automation SKILL.md ok"
-test -d "{{CODEX_HOME}}/skills/movie-automation/references" && echo "references ok"
-test -d "{{CODEX_HOME}}/skills/movie-automation/scripts" && echo "scripts ok"
+test -f "{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md" && echo "video-processing-automation SKILL.md ok"
+test -d "{{CODEX_HOME}}/skills/video-processing-automation/references" && echo "references ok"
+test -d "{{CODEX_HOME}}/skills/video-processing-automation/scripts" && echo "scripts ok"
 ```
 
 ## 使用方式
 
-- 「使用 movie-automation 處理這支影片」
+- 「使用 video-processing-automation 處理這支影片」
 - 「幫我把 raw 裡的新影片做成 YouTube 上架包」
 - 「幫我自動剪口播、轉字幕、寫 metadata」
 - 「從這支長片剪 3 個 short 候選」
@@ -89,31 +90,31 @@ test -d "{{CODEX_HOME}}/skills/movie-automation/scripts" && echo "scripts ok"
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/movie-automation/SKILL.md` 存在。
+- [ ] `{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md` 存在。
 - [ ] references / scripts 依本文內嵌 package 完整安裝。
 - [ ] 若使用 Groq STT，`python3 -c "import groq"` 可執行，且 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key` 存在。
 - [ ] 沒有把 API key、OAuth token、影片素材、個人照片或成品影片寫進 repo。
-- [ ] 開新 Codex 對話後可用 `movie-automation` 或影片自動化相關語句觸發。
+- [ ] 開新 Codex 對話後可用 `video-processing-automation` 或影片自動化相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`movie-automation`。
+本節會安裝：`video-processing-automation`。
 
 使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
 
 ```bash
 set -e
 
-# ---- movie-automation ----
-mkdir -p "{{CODEX_HOME}}/skills/movie-automation"
+# ---- video-processing-automation ----
+mkdir -p "{{CODEX_HOME}}/skills/video-processing-automation"
 
-# movie-automation/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/SKILL.md" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_SKILL_MD'
+# video-processing-automation/SKILL.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD'
 ---
-name: movie-automation
+name: video-processing-automation
 description: >
   Use when the user asks Codex to process raw video into a YouTube-ready or
   social-video-ready package: smart cut, silence removal, speech-to-subtitle,
@@ -121,10 +122,10 @@ description: >
   metadata, short highlight clips, and final output packaging. Adapted into a
   portable Codex App-compatible workflow from mathruffian-dot/2026-YouTube.
 metadata:
-  short-description: YouTube/movie automation workflow
+  short-description: YouTube/video processing automation workflow
 ---
 
-# Movie Automation
+# Video Processing Automation
 
 Use this skill to turn raw talking-head or tutorial video into a packaged video
 deliverable with edited video, subtitles, transcript, cover image, metadata, SEO
@@ -256,26 +257,26 @@ selection instead of guessing silently.
 ```bash
 python3 -m pip install --user auto-editor groq
 
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/smart_cut.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py" \
   "raw/<video-id>/input.mp4" \
   --out "working/<video-id>/<video-id>.cut.mp4"
 
 ffmpeg -y -i "working/<video-id>/<video-id>.cut.mp4" \
   -vn -ac 1 -ar 16000 "working/<video-id>/<video-id>.wav"
 
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/transcribe_groq.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py" \
   "working/<video-id>/<video-id>.wav" \
   --out "working/<video-id>/_subtitles/<video-id>.groq.json"
 
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/resegment.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py" \
   "working/<video-id>/_subtitles/<video-id>.groq.json" \
   --out "working/<video-id>/_subtitles/<video-id>.raw.srt"
 
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/apply_vocab.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" \
   "working/<video-id>/_subtitles/<video-id>.raw.srt" \
   --out "working/<video-id>/_subtitles/<video-id>.vocab.srt"
 
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/validate_srt.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py" \
   --raw "working/<video-id>/_subtitles/<video-id>.vocab.srt" \
   --clean "working/<video-id>/_subtitles/<video-id>.clean.srt"
 ```
@@ -289,11 +290,11 @@ python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/validate_srt.py" \
 - `GROQ_API_KEY` or `~/.codex/secrets/groq_api_key` exists before cloud STT.
 - Scan the package for excluded source-tool terms before packaging or syncing;
   the scan should have no hits.
-CODEX_LAZYPACK_MOVIE_AUTOMATION_SKILL_MD
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD
 
-# movie-automation/references/audio-subtitle.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/references/audio-subtitle.md")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/references/audio-subtitle.md" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD'
+# video-processing-automation/references/audio-subtitle.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/audio-subtitle.md")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/audio-subtitle.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD'
 # Audio To Subtitle
 
 Use this reference to create clean SRT and TXT transcripts.
@@ -322,7 +323,7 @@ ffmpeg -y -i "working/<video-id>/<video-id>.cut.mp4" \
 
 ```bash
 mkdir -p "working/<video-id>/_subtitles"
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/transcribe_groq.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py" \
   "working/<video-id>/<video-id>.wav" \
   --out "working/<video-id>/_subtitles/<video-id>.groq.json"
 ```
@@ -330,7 +331,7 @@ python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/transcribe_groq.py" \
 3. Resegment:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/resegment.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py" \
   "working/<video-id>/_subtitles/<video-id>.groq.json" \
   --out "working/<video-id>/_subtitles/<video-id>.raw.srt"
 ```
@@ -338,7 +339,7 @@ python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/resegment.py" \
 4. Apply vocabulary:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/apply_vocab.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" \
   "working/<video-id>/_subtitles/<video-id>.raw.srt" \
   --out "working/<video-id>/_subtitles/<video-id>.vocab.srt"
 ```
@@ -347,7 +348,7 @@ python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/apply_vocab.py" \
 6. Validate:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/validate_srt.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py" \
   --raw "working/<video-id>/_subtitles/<video-id>.vocab.srt" \
   --clean "working/<video-id>/_subtitles/<video-id>.clean.srt"
 ```
@@ -355,7 +356,7 @@ python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/validate_srt.py" \
 7. Convert to TXT:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/srt_to_txt.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/srt_to_txt.py" \
   "working/<video-id>/_subtitles/<video-id>.clean.srt" \
   --out "working/<video-id>/<video-id>.txt"
 ```
@@ -386,11 +387,11 @@ unavailable, or the user explicitly requires local-only processing. If Local
 Whisper is used, local segment-level timestamps may be less precise than Groq
 word-level timestamps, so do not run `resegment.py` unless the JSON includes
 word timestamps.
-CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD
 
-# movie-automation/references/cover-style.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/references/cover-style.md")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/references/cover-style.md" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_COVER_STYLE_MD'
+# video-processing-automation/references/cover-style.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/cover-style.md")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/cover-style.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_COVER_STYLE_MD'
 # Cover Style
 
 This is a portable cover-prompt checklist. Replace project-specific brand,
@@ -431,11 +432,11 @@ unrelated background objects.
   reference image when a persona must remain consistent.
 - If Codex image generation cannot accept a reference image in the current
   session, say so and provide the prompt plus a fallback plan.
-CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_COVER_STYLE_MD
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_COVER_STYLE_MD
 
-# movie-automation/references/metadata-template.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/references/metadata-template.md")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/references/metadata-template.md" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_METADATA_TEMPLATE_MD'
+# video-processing-automation/references/metadata-template.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/metadata-template.md")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/metadata-template.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_METADATA_TEMPLATE_MD'
 # Metadata Template
 
 Use this structure for `metadata.md`.
@@ -515,11 +516,11 @@ Generate candidates in several styles:
 
 For long-form videos, provide 10 candidates and pause. For short videos, provide
 3 tighter candidates and pause.
-CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_METADATA_TEMPLATE_MD
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_METADATA_TEMPLATE_MD
 
-# movie-automation/references/setup.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/references/setup.md")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/references/setup.md" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_SETUP_MD'
+# video-processing-automation/references/setup.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/setup.md")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/setup.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SETUP_MD'
 # Setup And Environment
 
 ## Required Tools
@@ -537,6 +538,21 @@ Install common dependencies:
 ```bash
 python3 -m pip install --user auto-editor groq
 ```
+
+## Codex Sandbox Notes
+
+macOS Python may write bytecode caches under
+`~/Library/Caches/com.apple.python` during syntax checks such as
+`python3 -m py_compile`. If Codex reports `Operation not permitted` for that
+path, add this narrow writable root to the Codex sandbox config and open a new
+Codex conversation:
+
+```toml
+"/Users/arrywu/Library/Caches/com.apple.python",
+```
+
+For one-off verification before the new sandbox config is loaded, use a temp
+cache path such as `PYTHONPYCACHEPREFIX=/private/tmp/python-pycache`.
 
 ## Groq API Key
 
@@ -560,7 +576,7 @@ Use this route only when the user has asked to set up Groq cloud STT.
 3. Let the user select the Google account and complete any consent, password, or
    verification challenge. Do not type passwords or one-time codes for them.
 4. On the API Keys page, click `Create API Key`.
-5. Use a purpose-specific display name such as `codex-movie-automation`.
+5. Use a purpose-specific display name such as `codex-video-processing-automation`.
 6. Submit the form and stop at the one-time key display.
 7. Do not read or print the key. Either leave the page open for the user to
    copy, or click the page's `Copy` button without reading clipboard contents.
@@ -610,11 +626,11 @@ python3 -c "import os, pathlib; p=pathlib.Path('~/.codex/secrets/groq_api_key').
 
 `python3 -m auto_editor --version` can return a non-zero code in some versions
 after printing the version. Treat printed version output as the useful signal.
-CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_SETUP_MD
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SETUP_MD
 
-# movie-automation/references/short-video.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/references/short-video.md")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/references/short-video.md" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_SHORT_VIDEO_MD'
+# video-processing-automation/references/short-video.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/short-video.md")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/short-video.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SHORT_VIDEO_MD'
 # Short Highlight Video
 
 Use this reference after a long video already has:
@@ -646,7 +662,7 @@ A/B/C, ask for new candidates, or provide direct timecodes.
 ## Cutting
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/clip_cut.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/clip_cut.py" \
   --input-mp4 "working/<video-id>/<video-id>.cut.mp4" \
   --input-srt "working/<video-id>/<video-id>.srt" \
   --segments "00:00:08.500-00:00:13.200,00:00:45.100-00:01:30.800" \
@@ -672,11 +688,11 @@ Short metadata differs from long-form metadata:
 - Avoid cutting in the middle of a sentence.
 - Keep 3-6 segments; too many fragments feel incoherent.
 - Verify output duration with `ffprobe`.
-CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_SHORT_VIDEO_MD
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SHORT_VIDEO_MD
 
-# movie-automation/references/smart-cut.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/references/smart-cut.md")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/references/smart-cut.md" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_SMART_CUT_MD'
+# video-processing-automation/references/smart-cut.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/smart-cut.md")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/smart-cut.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SMART_CUT_MD'
 # Smart Cut
 
 Use smart cut when the user wants silence removal, talking-head cleanup, or a
@@ -690,7 +706,7 @@ from the raw video before cutting, timestamps will no longer align.
 ## Default Command
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/movie-automation/scripts/smart_cut.py" \
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py" \
   "raw/<video-id>/input.mp4" \
   --out "working/<video-id>/<video-id>.cut.mp4"
 ```
@@ -714,11 +730,11 @@ Tuning:
 - Confirm the output duration is shorter but still natural.
 - Listen to the first 20-30 seconds before continuing to transcription when the
   source is noisy or has music.
-CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_SMART_CUT_MD
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SMART_CUT_MD
 
-# movie-automation/references/source-adaptation.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/references/source-adaptation.md")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/references/source-adaptation.md" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD'
+# video-processing-automation/references/source-adaptation.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/source-adaptation.md")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/source-adaptation.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD'
 # Source Adaptation
 
 Source repo: `https://github.com/mathruffian-dot/2026-YouTube`
@@ -747,17 +763,17 @@ Inspected source commit: `a0171ce`
 
 ## Codex Adaptation
 
-- The global skill name is `movie-automation`.
+- The global skill name is `video-processing-automation`.
 - The skill uses Codex App global skill paths through `{{CODEX_HOME}}`.
 - Cover images default to Codex image generation or user-supplied assets.
 - Project-specific vocabulary, persona references, and brand guides are treated
   as project inputs instead of global defaults.
 - Cloud transcription must be confirmed when privacy matters.
-CODEX_LAZYPACK_MOVIE_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD
 
-# movie-automation/scripts/apply_vocab.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/scripts/apply_vocab.py")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/scripts/apply_vocab.py" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_APPLY_VOCAB_PY'
+# video-processing-automation/scripts/apply_vocab.py
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_APPLY_VOCAB_PY'
 #!/usr/bin/env python3
 """對 SRT 做機械式詞彙替換（只動文字行，時間碼與段號原封不動）。
 
@@ -850,11 +866,11 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_APPLY_VOCAB_PY
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_APPLY_VOCAB_PY
 
-# movie-automation/scripts/clip_cut.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/scripts/clip_cut.py")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/scripts/clip_cut.py" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_CLIP_CUT_PY'
+# video-processing-automation/scripts/clip_cut.py
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/clip_cut.py")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/clip_cut.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_CLIP_CUT_PY'
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -1100,11 +1116,11 @@ def main():
 
 if __name__ == '__main__':
     main()
-CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_CLIP_CUT_PY
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_CLIP_CUT_PY
 
-# movie-automation/scripts/resegment.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/scripts/resegment.py")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/scripts/resegment.py" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_RESEGMENT_PY'
+# video-processing-automation/scripts/resegment.py
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_RESEGMENT_PY'
 #!/usr/bin/env python3
 """依 Groq JSON 重新切段，輸出 SRT。
 
@@ -1311,11 +1327,11 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_RESEGMENT_PY
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_RESEGMENT_PY
 
-# movie-automation/scripts/smart_cut.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/scripts/smart_cut.py")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/scripts/smart_cut.py" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_SMART_CUT_PY'
+# video-processing-automation/scripts/smart_cut.py
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SMART_CUT_PY'
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -1401,11 +1417,11 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_SMART_CUT_PY
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SMART_CUT_PY
 
-# movie-automation/scripts/srt_to_txt.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/scripts/srt_to_txt.py")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/scripts/srt_to_txt.py" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_SRT_TO_TXT_PY'
+# video-processing-automation/scripts/srt_to_txt.py
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/srt_to_txt.py")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/srt_to_txt.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SRT_TO_TXT_PY'
 #!/usr/bin/env python3
 """把清字後的 SRT 轉成可閱讀的純文字檔。
 
@@ -1478,11 +1494,11 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_SRT_TO_TXT_PY
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SRT_TO_TXT_PY
 
-# movie-automation/scripts/transcribe_groq.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/scripts/transcribe_groq.py")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/scripts/transcribe_groq.py" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_TRANSCRIBE_GROQ_PY'
+# video-processing-automation/scripts/transcribe_groq.py
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_TRANSCRIBE_GROQ_PY'
 #!/usr/bin/env python3
 """透過 Groq API 做 STT，產出 word-level 時間碼 JSON。
 
@@ -1666,11 +1682,11 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_TRANSCRIBE_GROQ_PY
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_TRANSCRIBE_GROQ_PY
 
-# movie-automation/scripts/validate_srt.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/movie-automation/scripts/validate_srt.py")"
-cat > "{{CODEX_HOME}}/skills/movie-automation/scripts/validate_srt.py" <<'CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_VALIDATE_SRT_PY'
+# video-processing-automation/scripts/validate_srt.py
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_VALIDATE_SRT_PY'
 #!/usr/bin/env python3
 """驗證清洗後的 SRT 與原始 SRT 時間碼完全一致、段落結構不變。
 
@@ -1768,7 +1784,7 @@ if __name__ == "__main__":
     ap.add_argument("--clean", required=True, type=Path)
     args = ap.parse_args()
     sys.exit(validate(args.raw, args.clean))
-CODEX_LAZYPACK_MOVIE_AUTOMATION_SCRIPTS_VALIDATE_SRT_PY
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_VALIDATE_SRT_PY
 
 ```
 

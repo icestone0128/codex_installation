@@ -8,7 +8,7 @@
 
 - 初次同步日期：2026-05-25。
 - 原始來源包：使用者提供的 SOIL Deck skills package；本版已整理為 `soil-html-deck`。
-- 追加參考來源：`https://github.com/mathruffian-dot/claude-html-slide-builder`，僅整合 Reveal.js、功能標記、互動元件與圖標去背等可攜式概念。
+- 追加參考來源：`external-html-slide-builder`，僅整合 Reveal.js、功能標記、互動元件與圖標去背等可攜式概念。
 - 2026-06-03 再次檢查來源 repo `a8fd35b`，補入功能標記建議張數、背景透明度、Firestore session 命名隔離與 Reveal.js 驗收規則。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md`。
 - Obsidian 全域索引已記錄用途：SOIL HTML 互動簡報；輸出單一可開啟 HTML，包含 inline CSS/JS、base64 圖像、進度列、互動卡片、排序表格、圖表、決策樹、Reveal.js 可選模式、文字雲/投票參考與對比滑桿。
@@ -19,7 +19,7 @@
 |---|---|
 | 1 | 移除來源 `SKILL.md` 中的原作者本機 reference deck 路徑，改成 Codex App 可攜式品質標準。 |
 | 2 | 保留範例 HTML 作為本地 reference example，但不要求下載者擁有原作者 Windows / Google Drive 路徑。 |
-| 3 | 整合 `claude-html-slide-builder` 的 Reveal.js、功能標記、文字雲/投票、對比滑桿與圖標去背概念，但移除 Claude Code 安裝路徑、來源工具生圖 skill 假設與自動部署預設。 |
+| 3 | 整合 `external-html-slide-builder` 的 Reveal.js、功能標記、文字雲/投票、對比滑桿與圖標去背概念，但移除 來源工具 安裝路徑、來源工具生圖 skill 假設與自動部署預設。 |
 | 4 | Firebase 只作為明確要求時才啟用的可選互動能力；安裝包不內建示範專案金鑰作為預設設定。 |
 | 5 | GitHub Pages 發佈改為獨立確認步驟，不在一般簡報生成流程中自動建立 repo 或 push。 |
 | 6 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/soil-html-deck/`。 |
@@ -129,7 +129,7 @@ responsive full-screen slides, AI-generated bitmap visuals used as page assets,
 and real HTML/CSS/JS content and interactions.
 
 This skill now also includes a Codex-compatible adaptation of the Reveal.js
-patterns from `mathruffian-dot/claude-html-slide-builder`: feature tags,
+patterns from `external-html-slide-builder`: feature tags,
 Reveal.js component templates, optional Firebase word cloud / poll snippets, and
 an icon background-removal helper. Do not copy source-tool install paths,
 commands, or auto-deployment assumptions from that project.
@@ -881,7 +881,7 @@ cat > "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-adapte
 # HTML Slide Builder Adapter
 
 This reference adapts useful ideas from
-`https://github.com/mathruffian-dot/claude-html-slide-builder` into the portable
+`external-html-slide-builder` into the portable
 Codex `soil-html-deck` skill.
 
 ## Compatibility Boundary
@@ -1000,7 +1000,7 @@ If the user asks to publish:
 
 ## Source Attribution
 
-The compatible design ideas and `scripts/remove_bg.py` helper are adapted from `mathruffian-dot/claude-html-slide-builder`, MIT License. Keep `references/html-slide-builder-license.md` in portable distributions.
+The compatible design ideas and `scripts/remove_bg.py` helper are adapted from `external-html-slide-builder`, MIT License. Keep `references/html-slide-builder-license.md` in portable distributions.
 CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_SLIDE_BUILDER_ADAPTER_MD
 
 # soil-html-deck/references/html-slide-builder-license.md
@@ -1010,7 +1010,7 @@ cat > "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-licens
 
 This skill includes a Codex-compatible adaptation of ideas and a helper script from:
 
-- Repository: https://github.com/mathruffian-dot/claude-html-slide-builder
+- Repository: external-html-slide-builder
 - Author: mathruffian-dot
 - License: MIT
 

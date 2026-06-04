@@ -99,6 +99,14 @@ firebase-tools update check failed
 
 通常不是 Firebase project 設定錯，而是 Firebase CLI 想寫入本機 config store 時被權限或沙盒限制擋住。先在正常使用者 shell 中重跑驗證；若只有 Codex 沙盒內出現，使用 Codex 授權的外部執行環境驗證即可。
 
+若要讓 Codex sandbox 內的 Firebase CLI 驗證不再出現這個 update check 權限警告，將 Firebase CLI 使用的本機 config store 加入 `{{CODEX_CONFIG}}` 的 `[sandbox_workspace_write].writable_roots`，修改後開新 Codex 對話或重啟：
+
+```toml
+"{{HOME}}/.config/configstore",
+```
+
+不要為了 Firebase CLI update check 放寬整個 home 目錄。
+
 ### 不安裝全域 CLI 的臨時用法
 
 列出專案：

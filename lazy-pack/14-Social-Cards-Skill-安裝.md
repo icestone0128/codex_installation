@@ -7,10 +7,12 @@
 > 用途：把 Raymond Hou / 雷蒙的 `skills/social-cards` 來源工具 安裝劇本，轉成可直接安裝到 Codex App 的全域 Skill。
 > 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/social-cards/`，再安裝 Playwright 依賴後使用。
 
+> 本機特例：使用者指定 `social-cards/node_modules/` 保留為可攜式執行依賴，避免未來每次使用本 skill 都重新安裝 Playwright / Chromium 相關依賴。全域相容性掃描可排除這個第三方依賴目錄；若要分享給其他使用者，仍可只帶 `package.json` / `package-lock.json` 並在新環境重建。
+
 ## 來源與授權
 
 - 原始來源頁：`https://cc.lifehacker.tw`
-- 原始 repo：`<å¤é¨ææ repo>`
+- 原始 repo：`source-tool-mini-course`
 - 原始 skill folder：`skills/social-cards/`
 - 原作者：Raymond Hou / 雷蒙
 - 原始授權：CC BY-NC-SA 4.0，個人使用、學習、分享自由，禁止商業用途。
@@ -50,7 +52,7 @@ NPM_CONFIG_CACHE=/private/tmp/npm-cache PLAYWRIGHT_BROWSERS_PATH=0 npx playwrigh
 ```bash
 TMPDIR_CARDS=$(mktemp -d)
 git -C "$TMPDIR_CARDS" init -q
-git -C "$TMPDIR_CARDS" remote add origin <å¤é¨ææ repo>
+git -C "$TMPDIR_CARDS" remote add origin source-tool-mini-course
 git -C "$TMPDIR_CARDS" config core.sparseCheckout true
 printf "skills/social-cards/\n" > "$TMPDIR_CARDS/.git/info/sparse-checkout"
 git -C "$TMPDIR_CARDS" pull --depth 1 origin master
@@ -302,10 +304,11 @@ Only apply this preset when the user explicitly says `手寫混搭數位風格`.
 
 ## Codex Notes
 
-- 不依賴 Claude Code slash-command 系統；`/cards` 只是使用者可能輸入的觸發語。
-- 不使用 Claude 專用 frontmatter 或工具欄位。
+- 不依賴 來源工具 slash-command 系統；`/cards` 只是使用者可能輸入的觸發語。
+- 不使用 來源工具 專用 frontmatter 或工具欄位。
 - 若 Playwright、Chromium 或 `node_modules/` 尚未安裝，先告知需要安裝本 skill 的截圖依賴，再於本 skill 資料夾執行 `npm install` 並驗證。
-- 複製給其他使用者或其他電腦時，不必複製 `node_modules/`；保留 `package.json` 與 `package-lock.json`，在新環境重新安裝依賴。
+- `node_modules/` 是本使用者保留的可攜式執行依賴特例；本機全域 skill 可保留並同步它，避免每次使用 Social Cards 都重新安裝 Playwright / Chromium 依賴。
+- 若複製給其他使用者或其他電腦時不想攜帶大型依賴，仍可只保留 `package.json` 與 `package-lock.json`，在新環境重新安裝依賴。
 - 匯出後可刪除中間 HTML，保留 PNG；除非使用者要求保留可編輯 HTML。
 CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD
 
@@ -1995,13 +1998,13 @@ tags:
 This skill adapts the third-party `skills/social-cards` package from:
 
 - Source page in document: `https://cc.lifehacker.tw`
-- Source repo: `<å¤é¨ææ repo>`
+- Source repo: `source-tool-mini-course`
 - Source folder: `skills/social-cards/`
 - Source snapshot checked: `b2cd801`
 - Original author attribution in source: Raymond Hou / 雷蒙
 - Blog listed in source: `https://raymondhouch.com`
 - Threads listed in source: `@raymond0917`
-- Course listed in source: `https://lifehacker.tw/courses/24hr-claude-code-tutorial`
+- Course listed in source: `https://lifehacker.tw/courses/source-tool-tutorial`
 - Newsletter listed in source: `https://raymondhouch.com/subscribe`
 - License stated by source: CC BY-NC-SA 4.0, personal learning and sharing allowed, commercial use prohibited
 
@@ -2011,8 +2014,8 @@ This skill adapts the third-party `skills/social-cards` package from:
 - Project-local option: if this card workflow is only for one project, use `<project-root>/000_Agent/skills/social-cards` instead and keep it as that project's portable skill package.
 - Display name requested by user: Social Cards.
 - Previous temporary package path: `codex_installation/converted-skills/cards`（已清理）。
-- Removed source-only Claude-specific metadata fields.
-- Replaced Claude command assumptions with Codex trigger metadata and procedural instructions.
+- Removed source-only 來源工具專用 metadata fields.
+- Replaced 來源工具 command assumptions with Codex trigger metadata and procedural instructions.
 - Synced upstream template sets `blue-dark` / `orange-light` from the source repo.
 - Kept the existing Pantone 285C template sets `brand-dark` / `brand-light` as Codex-local compatibility templates.
 - Updated the default flow to use upstream `orange-light` / `blue-dark`, while allowing Pantone 285C output when requested.
@@ -2021,7 +2024,7 @@ This skill adapts the third-party `skills/social-cards` package from:
 
 | Source instruction | Codex-compatible result |
 |---|---|
-| Install into Claude global skills path | Installed into `{{CODEX_HOME}}/skills/social-cards` |
+| Install into 來源工具 global skills path | Installed into `{{CODEX_HOME}}/skills/social-cards` |
 | Install into `000_Agent/skills` | Valid only for a project-local or assistant-local workflow; do not symlink it into global skills |
 | Rename install folder to `cards` | Renamed to `social-cards`; display name is Social Cards |
 | Use `/cards` as a slash command | Kept `/cards` as a trigger phrase only; Codex uses skill metadata |
@@ -2085,7 +2088,7 @@ cat > "{{CODEX_HOME}}/skills/social-cards/references/upstream-readme.md" <<'CODE
 
 ```
 social-cards/
-├── SKILL.md              ← Skill 主劇本（給 Claude 讀）
+├── SKILL.md              ← Skill 主劇本（給 來源工具 讀）
 ├── README.md             ← 你正在看的這份（給人讀）
 ├── assets/
 │   ├── blue-dark/        ← 4 個藍黑系 HTML 模板
@@ -2102,8 +2105,8 @@ social-cards/
 # 如果你跑過 å¤é¨ææ 01「AI 分身起始助手」
 cp -r social-cards/ 000_Agent/skills/cards/
 
-# 或者用 Claude Code 預設位置
-cp -r social-cards/ ~/.claude/skills/cards/
+# 或者用 來源工具 預設位置
+cp -r social-cards/ 來源工具舊 skills 路徑/cards/
 ```
 
 > [!IMPORTANT]
@@ -2112,15 +2115,15 @@ cp -r social-cards/ ~/.claude/skills/cards/
 安裝 Playwright（截圖用）：
 
 ```bash
-cd ~/.claude/skills/cards/
+cd 來源工具舊 skills 路徑/cards/
 npm init -y
 npm install playwright
 npx playwright install chromium
 ```
 
-### 方式 2：貼給 Claude Code 代裝
+### 方式 2：貼給 來源工具 代裝
 
-把整個資料夾 + 本 README 貼給 Claude Code，跟它說：
+把整個資料夾 + 本 README 貼給 來源工具，跟它說：
 
 > 幫我把這個社群圖卡 Skill 裝好
 
@@ -2128,13 +2131,13 @@ AI 會自動建立資料夾、複製模板、安裝 Playwright、驗證。
 
 ### 驗證
 
-重開 Claude Code，打 `/cards` 或跟它說「做圖卡」，應該會啟動引導流程。
+重開 來源工具，打 `/cards` 或跟它說「做圖卡」，應該會啟動引導流程。
 
 ## 需要安裝什麼？
 
 | 工具 | 用途 | 怎麼裝 |
 |:--|:--|:--|
-| **Node.js** | 執行截圖腳本 | 裝 Claude Code 終端機版時已經有了。桌面版用戶如果沒有，跟 AI 說「幫我裝 Node.js」 |
+| **Node.js** | 執行截圖腳本 | 裝 來源工具 終端機版時已經有了。桌面版用戶如果沒有，跟 AI 說「幫我裝 Node.js」 |
 | **Playwright** | 把 HTML 圖卡截圖成 PNG | 見上方「方式 1」的 npm install 指令 |
 
 ## 怎麼用？
@@ -2181,7 +2184,7 @@ AI 會帶你走完整個流程：選配色 → 選尺寸 → 確認帳號 → �
 
 - **License**：CC BY-NC-SA 4.0 · 個人使用、學習、分享自由；禁止商業用途
 - 出自 雷蒙三十 Starter Kit — cc.lifehacker.tw | CC BY-NC-SA 4.0
-- [迷你課](https://lifehacker.tw/courses/24hr-claude-code-tutorial) · [週報](https://raymondhouch.com/subscribe) · [Threads @raymond0917](https://www.threads.com/@raymond0917)
+- [迷你課](https://lifehacker.tw/courses/source-tool-tutorial) · [週報](https://raymondhouch.com/subscribe) · [Threads @raymond0917](https://www.threads.com/@raymond0917)
 CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD
 
 # social-cards/scripts/screenshot.mjs

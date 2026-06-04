@@ -235,9 +235,9 @@ metadata:
 
 # Brainstorm 規劃模式
 
-把模糊想法變成可執行計劃。這是 Codex App 版的規劃流程：不依賴 Claude Code slash command 或 Claude 專用互動工具；使用者可以用「brainstorm」、「/brainstorm」、「先幫我規劃」等語意觸發。
+把模糊想法變成可執行計劃。這是 Codex App 版的規劃流程：不依賴 來源工具 slash command 或 來源工具 專用互動工具；使用者可以用「brainstorm」、「/brainstorm」、「先幫我規劃」等語意觸發。
 
-> 來源改編：核心理念來自「AI 規劃模式 by 雷小蒙」與 obra/superpowers brainstorming skill。Claude Code 專用安裝、路徑、slash command 與工具名稱已轉成 Codex App 可用規則。
+> 來源改編：核心理念來自「AI 規劃模式 by 雷小蒙」與 obra/superpowers brainstorming skill。來源工具 專用安裝、路徑、slash command 與工具名稱已轉成 Codex App 可用規則。
 
 ## 硬性閘門
 
@@ -438,12 +438,12 @@ cat > "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md" <<'CODE
 
 來源檔：`04-brainstorm.md`
 
-原始來源是 Claude Code 的 `/brainstorm` 安裝劇本，包含 `來源工具的舊 skills 路徑`、`AskUserQuestion`、slash command 與 Claude Code Plan Mode 比較。安裝到 Codex App 時已做以下轉換：
+原始來源是 來源工具 的 `/brainstorm` 安裝劇本，包含 `來源工具的舊 skills 路徑`、`AskUserQuestion`、slash command 與 來源工具 Plan Mode 比較。安裝到 Codex App 時已做以下轉換：
 
 - 安裝位置改為 `{{CODEX_HOME}}/skills/brainstorm/`。
 - 觸發方式改為 Codex skill metadata 與自然語意，例如「brainstorm」、「/brainstorm」、「先想清楚再動手」。
-- 移除 Claude 專用路徑：`來源工具的舊 skills 路徑`、專案 `000_Agent/skills` symlink、Claude command shim。
-- 移除 Claude 專用工具名稱 `AskUserQuestion`，改為 Codex 對話中的單題引導；若未來 Codex App 提供可用選項 UI，可用該 UI 呈現選項。
+- 移除 來源工具 專用路徑：`來源工具的舊 skills 路徑`、專案 `000_Agent/skills` symlink、來源工具 command shim。
+- 移除 來源工具 專用工具名稱 `AskUserQuestion`，改為 Codex 對話中的單題引導；若未來 Codex App 提供可用選項 UI，可用該 UI 呈現選項。
 - 保留硬性閘門：使用者確認計劃前不實作、不 scaffold、不修改檔案。
 - 保留四種溝通模式：小白、半技術、工程師、AI 判斷。
 - 保留核心階段：確認主題、掃描上下文、列假設、深度釐清、方案比較、計劃書、下一步確認。
