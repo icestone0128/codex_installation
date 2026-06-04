@@ -313,7 +313,7 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md")"
 cat > "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD'
 ---
 name: codex-skill-creator
-description: Use when adapting Claude or Anthropic skill-creation guides into Codex App-compatible skills, deciding whether a new skill belongs globally or inside a project, improving an existing custom Codex skill, creating a first practical skill through interview, validating SKILL.md frontmatter and bundled resources, or syncing portable skill copies. Avoid Claude-only paths and fields; use global Codex skills under {{CODEX_HOME}}/skills and project skills under 000_Agent/skills.
+description: Use when adapting 來源工具 or Anthropic skill-creation guides into Codex App-compatible skills, deciding whether a new skill belongs globally or inside a project, improving an existing custom Codex skill, creating a first practical skill through interview, validating SKILL.md frontmatter and bundled resources, or syncing portable skill copies. Avoid 來源工具專用 paths and fields; use global Codex skills under {{CODEX_HOME}}/skills and project skills under 000_Agent/skills.
 metadata:
   short-description: Build Codex-compatible skills
 ---
@@ -344,10 +344,10 @@ Use this skill as the user-maintained companion to Codex's built-in `skill-creat
 
 ## Compatibility Rules
 
-1. Do not install or edit skills under Claude-only skills paths, `.claude/skills`, or Claude command folders.
+1. Do not install or edit skills under 來源工具專用 skills paths, `來源工具舊 skills 路徑`, or 來源工具 command folders.
 2. Do not overwrite `{{CODEX_HOME}}/skills/.system/skill-creator`; create or update custom skills instead.
 3. Use Codex frontmatter with `name`, `description`, and optional `metadata.short-description`.
-4. Do not copy Claude-only fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, `when_to_use`, or Claude subagent config unless converting them into plain Codex instructions.
+4. Do not copy 來源工具專用 fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, `when_to_use`, or 來源工具 subagent config unless converting them into plain Codex instructions.
 5. Do not assume slash-command behavior. In Codex, skills are triggered by the skill metadata and current task context.
 6. Keep `SKILL.md` concise. Move detailed examples, source adaptations, schemas, and checklists into `references/`.
 7. After adding, changing, or deleting a custom global skill, update the LazyPack portable copy and Obsidian global skill mirror note.
@@ -363,7 +363,7 @@ Before creating or modifying a skill, decide where it belongs:
 
 Do not symlink `000_Agent/skills` into `{{CODEX_HOME}}/skills`.
 
-For field-by-field conversion details, read `references/codex-bootstrap-adapter.md` when the source material is Claude-oriented or Anthropic-specific.
+For field-by-field conversion details, read `references/codex-bootstrap-adapter.md` when the source material is 來源工具導向 or Anthropic-specific.
 
 ## Workflow
 
@@ -380,9 +380,9 @@ For field-by-field conversion details, read `references/codex-bootstrap-adapter.
    - user-facing interview questions
    - failure handling
 3. Convert to Codex App conventions:
-   - replace Claude paths with Codex paths
+   - replace 來源工具 paths with Codex paths
    - replace slash-command assumptions with metadata-trigger guidance
-   - replace Claude agents with optional validation passes or plain instructions
+   - replace 來源工具 agents with optional validation passes or plain instructions
    - replace CLI-only user instructions with Codex App language
 4. Write the skill package:
    - `SKILL.md` for compact operating instructions
@@ -395,7 +395,7 @@ For field-by-field conversion details, read `references/codex-bootstrap-adapter.
    - `name` matches the folder name
    - `description` clearly names the triggering tasks
    - referenced files actually exist
-   - no Claude-only path or field remains unless it is explicitly labeled as source-only context
+   - no 來源工具專用 path or field remains unless it is explicitly labeled as source-only context
    - personal paths are either replaced with portable placeholders or clearly labeled as this user's local defaults
 6. Sync portable copies and indexes:
    - Global skill: sync `{{SETUP_REPO}}/lazy-pack/<對應序號文件>` and the Obsidian global skill mirror note.
@@ -445,7 +445,7 @@ tags:
 
 # Codex Skill Creator Bootstrap Adapter
 
-This reference adapts `02-skill-creator-bootstrap.md` for Codex App. The source is useful as a workflow pattern, but it is Claude Code-oriented and must not be copied verbatim.
+This reference adapts `02-skill-creator-bootstrap.md` for Codex App. The source is useful as a workflow pattern, but it is 來源工具-oriented and must not be copied verbatim.
 
 ## Keep From The Source
 
@@ -459,16 +459,16 @@ This reference adapts `02-skill-creator-bootstrap.md` for Codex App. The source 
 
 | Source assumption | Codex-compatible version |
 |---|---|
-| Claude global skills path | `{{CODEX_HOME}}/skills` for skills that must trigger across projects |
-| Claude project-level skills path | `<project-root>/000_Agent/skills` for skills that serve only one project |
+| 來源工具 global skills path | `{{CODEX_HOME}}/skills` for skills that must trigger across projects |
+| 來源工具 project-level skills path | `<project-root>/000_Agent/skills` for skills that serve only one project |
 | `000_Agent/skills` as symlink target | Do not symlink it into `{{CODEX_HOME}}/skills`; it is the assistant or project-local portable skill package |
 | slash command `/skill-name` | Skill metadata triggers; the user can name the skill, but do not depend on a slash-command menu |
-| Claude `AskUserQuestion` | Ask concise questions in Codex; use available UI tools only when present |
-| Claude subagents in `agents/*.md` | Use Codex subagents only when explicitly authorized by the user; otherwise use local validation checklists |
+| 來源工具 `AskUserQuestion` | Ask concise questions in Codex; use available UI tools only when present |
+| 來源工具 subagents in `agents/*.md` | Use Codex subagents only when explicitly authorized by the user; otherwise use local validation checklists |
 | `allowed-tools` | Omit; Codex tool access is controlled by the session and plugin permissions |
 | `disable-model-invocation` / `user-invocable` | Omit; express trigger boundaries in `description` and body instructions |
 | Anthropic sparse checkout install | Use only when the user explicitly wants a third-party skill package; otherwise create a Codex-native custom skill |
-| Tell user to restart Claude Code | Say a new Codex conversation or app restart may be needed for new skill metadata to appear |
+| Tell user to restart 來源工具 | Say a new Codex conversation or app restart may be needed for new skill metadata to appear |
 
 ## Codex Skill Package Standard
 

@@ -31,13 +31,13 @@
 {{SYNC_ROOT}}/core-rules.md
 ```
 
-`{{CODEX_HOME}}/AGENTS.md` (或 AntiGravity 的 `~/.gemini/config/AGENTS.md`) 只作為全域入口 symlink，指向 `{{SYNC_ROOT}}/core-rules.md`。不要再建立或維護 `{{SYNC_ROOT}}/agents/AGENTS.md`。
+`{{CODEX_HOME}}/AGENTS.md` (或 其他代理工具 的 `~/.gemini/config/AGENTS.md`) 只作為全域入口 symlink，指向 `{{SYNC_ROOT}}/core-rules.md`。不要再建立或維護 `{{SYNC_ROOT}}/agents/AGENTS.md`。
 
 路徑邊界：
 
-- `{{CODEX_HOME}}/skills`：Codex 全域 skills (在 AntiGravity 為 `~/.gemini/config/plugins/codex/skills`)；可 symlink 到 `{{SYNC_ROOT}}/skills`。
+- `{{CODEX_HOME}}/skills`：Codex 全域 skills (在 其他代理工具 為 `~/.gemini/config/plugins/codex/skills`)；可 symlink 到 `{{SYNC_ROOT}}/skills`。
 - `{{SYNC_ROOT}}/core-rules.md`：可攜式全域核心規則主檔；其他 AI agent 也應讀這一份。
-- `{{CODEX_HOME}}/AGENTS.md`：Codex 全域規則入口 (在 AntiGravity 為 `~/.gemini/config/AGENTS.md`)；可 symlink 到 `{{SYNC_ROOT}}/core-rules.md`。
+- `{{CODEX_HOME}}/AGENTS.md`：Codex 全域規則入口 (在 其他代理工具 為 `~/.gemini/config/AGENTS.md`)；可 symlink 到 `{{SYNC_ROOT}}/core-rules.md`。
 - `{{SYNC_ROOT}}/memories`、`{{SYNC_ROOT}}/workflows`、`{{SYNC_ROOT}}/knowledge`：個人助手全域資料層；不 symlink 到 `{{CODEX_HOME}}/skills`。
 - `<project-root>/000_Agent/skills`：單一專案本地 skill；不 symlink 到 `{{CODEX_HOME}}/skills`。
 

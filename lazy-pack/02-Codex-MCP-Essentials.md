@@ -17,7 +17,7 @@
 
 ## Codex App 與 來源工具 CLI 差異
 
-來源工具 CLI 常用 `claude mcp add ...` 或 來源工具 MCP 設定檔。
+來源工具 CLI 常用 `來源工具 mcp add ...` 或 來源工具 MCP 設定檔。
 
 Codex App 使用：
 

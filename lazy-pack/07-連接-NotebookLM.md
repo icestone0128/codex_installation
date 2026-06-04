@@ -748,7 +748,7 @@ global_design:
 - Add size constraints when NotebookLM makes titles or body text too large.
 - If layout ideas are unclear, let NotebookLM generate one draft from source material first, then revise YAML from the actual pages.
 - Build a reusable inspiration library with tags and folders so style vocabulary accumulates over time.
-- Use a project template in Claude Project or a similar AI workspace to turn long style discussions into YAML automatically.
+- Use a project template in AI workspace project or a similar AI workspace to turn long style discussions into YAML automatically.
 CODEX_LAZYPACK_PRESENTATION_WORKFLOW_REFERENCES_STYLE_EXTRACTION_WORKFLOW_MD
 
 test -f "{{CODEX_HOME}}/skills/presentation-workflow/SKILL.md" && echo "presentation-workflow installed"

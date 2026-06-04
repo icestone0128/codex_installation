@@ -20,7 +20,7 @@
 | 1 | 轉成 Codex App 全域 skill 結構，使用 `{{CODEX_HOME}}/skills/visual-note-generator/`。 |
 | 2 | 保留來源邊界規則：只根據使用者提供的手繪、逐字稿、文章或想法，不自行新增概念。 |
 | 3 | 將 Google Drive `圖解筆記生圖指令` 的 8 類提示整理到 `references/prompt-library.md`，讓下載者可直接重複使用。 |
-| 4 | 加入 `agents/openai.yaml` 作為可攜式介面摘要；不依賴 Claude Code 專用設定。 |
+| 4 | 加入 `agents/openai.yaml` 作為可攜式介面摘要；不依賴 來源工具 專用設定。 |
 
 ## 安裝方式
 
@@ -79,7 +79,7 @@ test -f "{{CODEX_HOME}}/skills/visual-note-generator/agents/openai.yaml" && echo
 - [ ] `{{CODEX_HOME}}/skills/visual-note-generator/SKILL.md` 存在。
 - [ ] `{{CODEX_HOME}}/skills/visual-note-generator/references/prompt-library.md` 存在。
 - [ ] `{{CODEX_HOME}}/skills/visual-note-generator/agents/openai.yaml` 存在。
-- [ ] 搜尋 package 內沒有 Claude Code 專用路徑或本機個人絕對路徑。
+- [ ] 搜尋 package 內沒有 來源工具 專用路徑或本機個人絕對路徑。
 - [ ] 開新 Codex 對話後，可用 `visual-note-generator`、圖解筆記或手繪圖解相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->

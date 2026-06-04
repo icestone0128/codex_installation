@@ -10,7 +10,7 @@
 ## 來源與授權
 
 - 原始來源頁：`https://cc.lifehacker.tw`
-- 原始 repo：`https://github.com/lifehacker-tw/claude-code-mini-course.git`
+- 原始 repo：`source-tool-mini-course`
 - 原始 skill folder：`skills/landing-page/`
 - 本次同步來源 snapshot：`b2cd801`
 - 原作者：Raymond Hou / 雷蒙
@@ -833,7 +833,7 @@ cat > "{{CODEX_HOME}}/skills/landing-page/references/uupm-integration.md" <<'COD
 
 This reference adapts the upstream UUPM workflow for Codex App. UUPM is optional; the `landing-page` skill must still work by using `fallback-design-rules.md` when UUPM is unavailable, unwanted, or failing.
 
-Source snapshot checked: `lifehacker-tw/claude-code-mini-course` commit `b2cd801`.
+Source snapshot checked: `source-tool-mini-course` commit `b2cd801`.
 
 ## 1. Detection
 
@@ -849,7 +849,7 @@ else
 fi
 ```
 
-Do not check or create Claude-only paths such as `~/.claude/skills` in normal Codex App use.
+Do not check or create 來源工具專用 paths such as `來源工具舊 skills 路徑` in normal Codex App use.
 
 ## 2. When UUPM Is Unavailable
 
@@ -882,7 +882,7 @@ productivity notion online course education calm professional
 
 Prefer a documented `uipro` command if present. If the only available integration is a Codex-compatible `ui-ux-pro-max` skill folder, inspect that skill's current instructions before calling any script.
 
-The upstream Claude-oriented flow expects a design-system Markdown output similar to `design-system/MASTER.md`. In Codex, save or copy the chosen design summary into:
+The upstream 來源工具導向 flow expects a design-system Markdown output similar to `design-system/MASTER.md`. In Codex, save or copy the chosen design summary into:
 
 ```text
 generated-pages/<slug>/design-system.md
