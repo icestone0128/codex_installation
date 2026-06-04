@@ -8,7 +8,7 @@ adapted_for: Codex App
 # 外部工具整合計畫（2026-05-20）
 
 > 這份計畫是從 `/Users/arrywu/Downloads/03-tool-integration.md` 轉成 Codex App 可執行版本後產出的。
-> 原文件是 Claude Code 劇本；本版改用 Codex App、全域 skills、專案 `000_Agent/` 資料層與已安裝 connectors 的工作方式。
+> 原文件是其他 AI 編輯器的設定腳本；本版改用 Codex App 與 AntiGravity、全域 skills、專案 `000_Agent/` 資料層與已安裝 connectors 的工作方式。
 
 ## 決策原則速查
 
@@ -196,7 +196,7 @@ adapted_for: Codex App
 - CLI 路線：依官方推薦安裝，完成 auth，跑一個驗證指令。
 - API 路線：引導使用者取得 API key；只存安全 `.env`，不要寫入 repo 或公開筆記；必要時新增 `000_Agent/skills/` 下的使用 SOP。
 - Codex connector / plugin 路線：優先使用 Codex App 既有工具；安裝或授權前先確認。
-- MCP 路線：以 Codex App 的 `~/.codex/config.toml` 或當前 MCP 設定方式為準；不要套用 Claude Code 的 `~/.claude.json`。
+- MCP 路線：以 Codex App 的 `~/.codex/config.toml` 或當前 MCP 設定方式為準；不要套用其他 AI 編輯器的設定檔。
 - 瀏覽器控制：只在沒有更穩方案時使用。
 
 ### 4. 驗證
