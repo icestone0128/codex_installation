@@ -157,7 +157,9 @@ test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/clasp-netlify-pattern.m
 | Codex sandbox npm / Netlify CLI / Clasp writes | 已將 `~/.npm`、`~/Library/Preferences/netlify` 與 `~/.clasprc.json` 記錄為窄範圍 writable roots；新 Codex session 載入後可減少暫存 cache / 外部執行 workaround |
 | Clasp CLI | `npx -y @google/clasp --version` 可正常執行；不要求全域安裝 |
 | Clasp OAuth | 已用 browser OAuth 完成登入實測；`clasp list` 不再回覆 `No credentials found` |
-| Google Apps Script API | 未為複查建立或部署測試專案；等實際 Apps Script 專案動作時再確認 API enablement |
+| Google Apps Script API | 2026-06-05 已在實際 BOS Report Analysis 專案流程中確認：未啟用時 `clasp create` 會失敗，需到 `https://script.google.com/home/usersettings` 手動開啟後重試 |
+| Apps Script Web App | 2026-06-05 已實測 standalone script 可部署成 Web App，並以 health / upsert / list / delete 流程驗證 |
+| Netlify production deploy | 2026-06-05 已實測 `netlify sites:create --name <site-name>` 後 `netlify deploy --dir <frontend-folder> --prod` 可建立新站並上線 |
 | `netlify-deploy` skill | 全域 skill、LazyPack 內嵌版與 Obsidian 鏡像已比對同步 |
 | Codex 相容性 | 第 28 項與 `netlify-deploy` package 使用 Codex App 路徑與 placeholder，不保留其他 MCP client 的安裝命令 |
 
@@ -173,6 +175,10 @@ test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/clasp-netlify-pattern.m
 - Clasp 登入要跑 `npx -y @google/clasp login`，依 CLI 輸出的網址完成 Google OAuth，再用 `npx -y @google/clasp list` 做 read-only 驗證。
 - `clasp list` 登入後若回覆 `No script files found.`，代表帳號可讀但目前沒有可列出的 Apps Script 專案；不要誤判為登入失敗。
 - Apps Script 專案若還沒啟用 Apps Script API，`clasp create` 會失敗，需要使用者到 Google Apps Script user settings 手動開啟。
+- `clasp create --type webapp` 若回覆 `Invalid container file type`，改用 `--type standalone`；standalone script 仍可部署成 Web App。
+- `clasp create` 可能重寫 `appsscript.json` 的預設值，例如時區或 `webapp` 區塊；建立後要重新檢查 manifest 再 `clasp push -f`。
+- Apps Script Web App 的 `POST` 可能經 Google redirect 後變成 Drive「無法開啟這個檔案」HTML 頁；Netlify 靜態前端的小型公開 API 可改用 `GET` + JSONP 寫入、讀取與刪除。
+- `netlify deploy --site <site-name>` 若回覆 `Project not found`，先跑 `netlify sites:create --name <site-name>` 或 `netlify link`，再 production deploy。
 - `.claspignore` 必須阻止前端 browser files 被推送到 Apps Script server。
 
 ## 最終檢查清單
@@ -180,6 +186,8 @@ test -f "{{CODEX_HOME}}/skills/netlify-deploy/references/clasp-netlify-pattern.m
 - [ ] `{{CODEX_CONFIG}}` 有 `[mcp_servers.netlify]`。
 - [ ] `netlify --version` 可顯示 CLI 版本。
 - [ ] `NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp list` 不再顯示 `No credentials found`。
+- [ ] 若要建立 Apps Script 後端，Google Apps Script API 已在 `https://script.google.com/home/usersettings` 開啟。
+- [ ] Apps Script Web App 已通過 health / upsert / list / delete 最小流程驗證。
 - [ ] 第一次 production deploy 前已確認 team、site、output folder 與 `--prod` 意圖。
 - [ ] `{{CODEX_HOME}}/skills/netlify-deploy/SKILL.md` 存在。
 - [ ] references 三個檔案存在。
@@ -355,6 +363,166 @@ Use this pattern when the user wants a zero-copy loop: frontend on Netlify, Goog
 5. Inject the final Apps Script Web App URL into frontend config before the Netlify deploy.
 6. Deploy frontend through Netlify MCP, not through Apps Script.
 
+## Apps Script API + Netlify Web App Implementation Workflow
+
+Use this concrete workflow when building a new static frontend backed by Google
+Apps Script, such as a form/report dashboard that stores records in Script
+Properties or Google Sheets and deploys the frontend to Netlify.
+
+1. Confirm the desired data contract before writing code:
+   - frontend fields and pasted ranges, if any;
+   - backend storage target: Script Properties for lightweight records, or
+     Google Sheets for spreadsheet-backed data;
+   - upsert rule, delete rule, and whether duplicate names overwrite records;
+   - chart/table rules from the source template.
+2. Create separate folders, for example:
+
+```text
+project/
+├── frontend/
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+└── apps-script/
+    ├── appsscript.json
+    ├── Code.js
+    └── .claspignore
+```
+
+3. Use this minimal `appsscript.json` shape for a Web App backend:
+
+```json
+{
+  "timeZone": "Asia/Taipei",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "webapp": {
+    "executeAs": "USER_DEPLOYING",
+    "access": "ANYONE_ANONYMOUS"
+  }
+}
+```
+
+4. Ensure `.claspignore` uploads only backend files:
+
+```text
+**
+!Code.js
+!appsscript.json
+```
+
+5. Check Clasp credentials:
+
+```bash
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp --version
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp list
+```
+
+6. If `clasp create` returns `User has not enabled the Apps Script API`, ask the
+   user to enable it at:
+
+```text
+https://script.google.com/home/usersettings
+```
+
+Then retry after a short propagation wait.
+
+7. Create and push the backend from the `apps-script/` folder:
+
+```bash
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp create --type standalone --title "<API title>"
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp push -f
+```
+
+If `clasp create --type webapp` returns `Invalid container file type`, use
+`--type standalone`; a standalone script can still be deployed as a Web App.
+After creation, re-check `appsscript.json` because Clasp may rewrite the
+manifest defaults such as `timeZone` or omit the `webapp` block.
+
+8. Deploy the backend:
+
+```bash
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp deploy --description "Initial web app deployment"
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp deployments
+```
+
+Build the Web App URL from the deployment id:
+
+```text
+https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec
+```
+
+9. Verify a low-risk endpoint before wiring the frontend:
+
+```bash
+curl -L "https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec?action=health"
+```
+
+10. For browser-to-Apps-Script calls from Netlify, prefer `GET` + JSONP for
+    simple public web apps unless you have already solved CORS and redirect
+    behavior. Apps Script Web App `POST` requests can redirect through Google and
+    may return a Drive-style "file cannot be opened" HTML page after `curl -L`.
+    A JSONP pattern is stable for lightweight actions:
+
+```js
+// Frontend
+const API_URL = "https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec";
+const params = new URLSearchParams({
+  action: "upsert",
+  payload: JSON.stringify({ project: data }),
+  callback: "callbackName"
+});
+```
+
+```js
+// Apps Script
+function doGet(e) {
+  const params = e && e.parameter ? e.parameter : {};
+  const result = routeAction_(params.action, params.payload);
+  return jsonResponse_(result, params.callback || "");
+}
+
+function jsonResponse_(result, callback) {
+  const body = callback ? callback + "(" + JSON.stringify(result) + ");" : JSON.stringify(result);
+  const output = ContentService.createTextOutput(body);
+  output.setMimeType(callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON);
+  return output;
+}
+```
+
+11. Verify the full backend flow before Netlify deploy:
+    - health check returns `{ ok: true }`;
+    - create/update action writes one test record;
+    - list action returns the test record;
+    - delete action removes the test record;
+    - final list is clean if test data should not remain.
+12. Inject the Apps Script Web App URL into the frontend config only after the
+    backend is verified.
+13. Run a local frontend preview and check desktop/mobile layout. If Playwright
+    cannot launch Chromium inside the Codex sandbox due macOS process
+    permissions, rerun the same browser verification command with explicit
+    sandbox escalation rather than skipping visual verification.
+14. Create and deploy the Netlify site:
+
+```bash
+netlify sites:create --name <site-name>
+netlify deploy --dir <frontend-folder> --prod
+```
+
+If `netlify deploy --site <name>` says `Project not found`, create or link the
+site first; `--site` expects an existing site id/name, not a new-site request.
+
+15. Verify the live Netlify page:
+
+```bash
+curl -I -L https://<site-name>.netlify.app
+curl -L https://<site-name>.netlify.app/app.js | rg "script.google.com/macros"
+```
+
+Report the production URL, unique deploy URL if useful, backend verification
+result, and any local files that changed such as `.gitignore` receiving
+`.netlify`.
+
 ## Clasp Login And OAuth Check
 
 Use this check before any Apps Script create, push, deploy, or Google Sheets API
@@ -416,6 +584,15 @@ Expected interpretation:
 - If using a PAT temporarily, store it only in local MCP config or local secret storage, restart the MCP client, and remove it after browser / CLI auth works again.
 - If Netlify MCP deploy says state data is missing, create or identify the target site first, then deploy with the site ID.
 - If Apps Script API is disabled, ask the user to enable it in Google Apps Script user settings before retrying Clasp create/deploy.
+- If `clasp create --type webapp` returns `Invalid container file type`, create
+  a `standalone` script and deploy it as a Web App.
+- If Apps Script Web App `POST` requests redirect into a Google Drive "cannot
+  open this file" HTML page, switch lightweight frontend writes to `GET` +
+  JSONP or implement a server-side proxy. For public static Netlify frontends,
+  JSONP is often the smallest working path for simple upsert/list/delete APIs.
+- If `netlify deploy --site <site-name>` returns `Project not found`, run
+  `netlify sites:create --name <site-name>` or `netlify link` first, then deploy
+  with the generated local `.netlify/state.json`.
 - If frontend requests to Apps Script fail in a browser with multiple Google accounts, test in an incognito or clean browser session.
 
 ## References
@@ -556,6 +733,20 @@ Use a different frontend folder if the project already has one. Do not move file
 
 `appsscript.json` must describe the Apps Script Web App deployment. Use the least broad scopes that work for the project.
 
+For a lightweight public Web App backend, this manifest is a practical default:
+
+```json
+{
+  "timeZone": "Asia/Taipei",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "webapp": {
+    "executeAs": "USER_DEPLOYING",
+    "access": "ANYONE_ANONYMOUS"
+  }
+}
+```
+
 `.claspignore` should exclude frontend files and allow only backend Apps Script files:
 
 ```text
@@ -589,6 +780,45 @@ Interpretation:
   a Clasp project; check API enablement only when a real Apps Script project
   action is required.
 
+## Apps Script API Enablement
+
+If a real create/deploy action returns:
+
+```text
+User has not enabled the Apps Script API.
+```
+
+Ask the user to enable Apps Script API at:
+
+```text
+https://script.google.com/home/usersettings
+```
+
+Then retry after a short propagation wait. Do not keep retrying `clasp create`
+until this account setting is enabled.
+
+## Create, Push, Deploy
+
+Create the backend from the Apps Script folder:
+
+```bash
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp create --type standalone --title "<API title>"
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp push -f
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp deploy --description "Initial web app deployment"
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx -y @google/clasp deployments
+```
+
+If `clasp create --type webapp` returns `Invalid container file type`, use
+`--type standalone`; the standalone script can still be deployed as a Web App.
+After creation, inspect `appsscript.json` because Clasp may rewrite manifest
+defaults such as `timeZone` or remove the `webapp` block.
+
+Build the Web App URL from the deployment id:
+
+```text
+https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec
+```
+
 ## Frontend Side
 
 Keep the Apps Script endpoint as a placeholder until deployment produces the final URL:
@@ -599,6 +829,46 @@ const GAS_API_URL = "YOUR_GAS_API_URL_HERE";
 
 After `clasp deploy`, inject the real Web App URL into frontend config, then deploy the frontend folder to Netlify.
 
+For browser-to-Apps-Script calls from a static Netlify frontend, prefer a
+`GET` + JSONP pattern for small public APIs unless CORS and redirect behavior
+has already been solved. Apps Script Web App `POST` calls can redirect through
+Google and may return a Drive-style "file cannot be opened" HTML page after
+`curl -L`.
+
+Minimum JSONP shape:
+
+```js
+// Frontend
+const params = new URLSearchParams({
+  action: "upsert",
+  payload: JSON.stringify(payload),
+  callback: "callbackName"
+});
+```
+
+```js
+// Apps Script
+function jsonResponse_(result, callback) {
+  const body = callback ? callback + "(" + JSON.stringify(result) + ");" : JSON.stringify(result);
+  const output = ContentService.createTextOutput(body);
+  output.setMimeType(callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON);
+  return output;
+}
+```
+
+## Netlify Deployment
+
+Create or link the site before production deploy:
+
+```bash
+netlify sites:create --name <site-name>
+netlify deploy --dir <frontend-folder> --prod
+```
+
+If `netlify deploy --site <name>` returns `Project not found`, create or link
+the site first. `--site` expects an existing site id/name, not a request to
+create a new site.
+
 ## Verification
 
 - `npx -y @google/clasp list` runs after browser OAuth and does not report
@@ -606,7 +876,11 @@ After `clasp deploy`, inject the real Web App URL into frontend config, then dep
 - `npx clasp push -f` succeeds and does not upload frontend browser files.
 - `npx clasp deploy --description "Production Web App"` returns a deployment ID.
 - The Apps Script Web App URL responds to a low-risk `GET` or health-check request.
-- Netlify MCP deploy returns a public URL.
+- The backend flow works end to end: upsert one test record, list it, delete it, then confirm the test data is gone.
+- The frontend uses the final Apps Script Web App URL, not a placeholder.
+- Local desktop/mobile layout is checked before deploy; if Chromium is blocked by the Codex sandbox, rerun the same verification with explicit sandbox escalation.
+- Netlify deploy returns a public production URL.
+- The live Netlify HTML returns HTTP 200 and deployed JS contains the Apps Script Web App URL.
 - The Netlify page can call the Apps Script API from an incognito or clean browser session.
 
 ## Safety
