@@ -5,7 +5,7 @@
 
 ## 目標
 
-把 外部 / Anthropic 取向的 Skill Creator 啟動包，轉成 Codex App 可用的 skill 建立流程，並判斷新 skill 應該放在全域還是專案本地。
+把 外部 / 第三方 取向的 Skill Creator 啟動包，轉成 Codex App 可用的 skill 建立流程，並判斷新 skill 應該放在全域還是專案本地。
 
 這份文件是之後建立、優化、驗證 Codex skills 的正式懶人包。若來源文件提到 來源工具、來源工具的 skills 路徑、slash command、來源工具 subagent 或 來源工具專用 frontmatter，一律先依本文件轉換，不直接照做。
 
@@ -66,7 +66,7 @@ codex-skill-creator
 
 用途：
 
-- 把 外部 / Anthropic skill 教學轉成 Codex App 相容流程。
+- 把 外部 / 第三方 skill 教學轉成 Codex App 相容流程。
 - 建立、優化、驗證自訂全域或專案本地 skills。
 - 記得同步可攜式版本；全域 skill 同步 Obsidian 全域 skill 索引，專案 skill 同步專案駕駛艙。
 
@@ -84,7 +84,7 @@ test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skil
 
 ## 來源啟動包轉換規則
 
-| 外部 / Anthropic 啟動包項目 | Codex App 相容做法 |
+| 外部 / 第三方 啟動包項目 | Codex App 相容做法 |
 | --- | --- |
 | 來源工具的全域 skills 路徑 | 需要全域觸發時改用 `{{CODEX_HOME}}/skills` |
 | 來源工具的專案級 skills 路徑 專案 skill | 改放該專案 `000_Agent/skills`，只服務該專案 |
@@ -94,7 +94,7 @@ test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skil
 | `disable-model-invocation` / `user-invocable` | 不寫入；觸發邊界寫在 `description` 與本文規則 |
 | `when_to_use` | 轉成 `description` 的觸發語意與本文工作流程 |
 | 來源工具 subagent 設定 | 不照搬；Codex 只有在使用者明確要求副代理時才使用 subagent |
-| 安裝官方 Anthropic skill-creator | Codex 已有內建 `.system/skill-creator`；通常不安裝、不覆蓋 |
+| 安裝第三方 skill-creator | Codex 已有內建 `.system/skill-creator`；通常不安裝、不覆蓋 |
 | 告知重啟 來源工具 | 改成開新 Codex 對話或重啟 Codex App |
 
 ## Codex Skill 標準結構
@@ -265,7 +265,7 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 ## 踩坑修正
 
 - 原始 `02-skill-creator-bootstrap.md` 是 來源工具 啟動包，不能原樣執行。
-- 不要把官方 Anthropic `skill-creator` sparse checkout 到 Codex 系統 skill 位置；Codex 已有內建 `.system/skill-creator`。
+- 不要把第三方 `skill-creator` sparse checkout 到 Codex 系統 skill 位置；Codex 已有內建 `.system/skill-creator`。
 - 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`，因為它由 Codex 管理。
 - Codex 全域 skills 不放在 來源工具的 skills 路徑；專案級 skills 放 `<project-root>/000_Agent/skills`，但不建立 symlink。
 - Codex 不應依賴 `/skill-name` slash command；要靠 `description` 寫清楚觸發語意。
@@ -313,7 +313,7 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md")"
 cat > "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD'
 ---
 name: codex-skill-creator
-description: Use when adapting 來源工具 or Anthropic skill-creation guides into Codex App-compatible skills, deciding whether a new skill belongs globally or inside a project, improving an existing custom Codex skill, creating a first practical skill through interview, validating SKILL.md frontmatter and bundled resources, or syncing portable skill copies. Avoid 來源工具專用 paths and fields; use global Codex skills under {{CODEX_HOME}}/skills and project skills under 000_Agent/skills.
+description: Use when adapting 來源工具 or third-party skill-creation guides into Codex App-compatible skills, deciding whether a new skill belongs globally or inside a project, improving an existing custom Codex skill, creating a first practical skill through interview, validating SKILL.md frontmatter and bundled resources, or syncing portable skill copies. Avoid 來源工具專用 paths and fields; use global Codex skills under {{CODEX_HOME}}/skills and project skills under 000_Agent/skills.
 metadata:
   short-description: Build Codex-compatible skills
 ---
@@ -363,7 +363,7 @@ Before creating or modifying a skill, decide where it belongs:
 
 Do not symlink `000_Agent/skills` into `{{CODEX_HOME}}/skills`.
 
-For field-by-field conversion details, read `references/codex-bootstrap-adapter.md` when the source material is 來源工具導向 or Anthropic-specific.
+For field-by-field conversion details, read `references/codex-bootstrap-adapter.md` when the source material is 來源工具導向 or third-party-specific.
 
 ## Workflow
 
@@ -467,7 +467,7 @@ This reference adapts `02-skill-creator-bootstrap.md` for Codex App. The source 
 | 來源工具 subagents in `agents/*.md` | Use Codex subagents only when explicitly authorized by the user; otherwise use local validation checklists |
 | `allowed-tools` | Omit; Codex tool access is controlled by the session and plugin permissions |
 | `disable-model-invocation` / `user-invocable` | Omit; express trigger boundaries in `description` and body instructions |
-| Anthropic sparse checkout install | Use only when the user explicitly wants a third-party skill package; otherwise create a Codex-native custom skill |
+| Third-party sparse checkout install | Use only when the user explicitly wants a third-party skill package; otherwise create a Codex-native custom skill |
 | Tell user to restart 來源工具 | Say a new Codex conversation or app restart may be needed for new skill metadata to appear |
 
 ## Codex Skill Package Standard
