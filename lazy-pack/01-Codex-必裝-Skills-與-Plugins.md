@@ -133,6 +133,22 @@ find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print
 3. 若要引用 PDF 內容，要求 Codex 標明檔名與頁碼或可確認的位置。
 4. 若要產出或修改 PDF，依 `pdf` skill 流程做渲染檢查。
 
+若 PDF 產出或解析需要本機 Python 套件，Codex sandbox 應只補入窄範圍可寫路徑：
+
+```toml
+[sandbox_workspace_write]
+writable_roots = [
+  "/Users/{{USER}}/Library/Caches/pip",
+  "/Users/{{USER}}/Library/Python",
+]
+```
+
+驗證套件可用：
+
+```bash
+python3 -c "import reportlab, pdfplumber, pypdf; print('pdf libs ok')"
+```
+
 ## Playwright Skill 驗證流程
 
 1. 確認已安裝 `{{CODEX_HOME}}/skills/playwright/SKILL.md`。
@@ -172,5 +188,5 @@ description: Use when...
 - 工具不在目前可呼叫清單時，先用 tool search 或 Codex plugin 清單檢查，不要假設已載入。
 - 瀏覽器自動化優先使用 Codex App 內建 Browser plugin；需要 terminal / CLI 型真實瀏覽器操作時，使用必裝的 `playwright` skill。
 - 全域規則放 `{{CODEX_HOME}}/AGENTS.md`，專案規則放專案根目錄 `AGENTS.md`。
-- 外部 / Anthropic skill 教學不能直接照搬；Codex 自訂 skills 放 `{{CODEX_HOME}}/skills`，不要放 來源工具的 skills 路徑。
+- 外部 / 第三方 skill 教學不能直接照搬；Codex 自訂 skills 放 `{{CODEX_HOME}}/skills`，不要放 來源工具的 skills 路徑。
 - 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`；需要優化時建立 companion skill。
