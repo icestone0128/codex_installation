@@ -5,7 +5,7 @@
 
 ## 目標
 
-把 外部 / 第三方 取向的 Skill Creator 啟動包，轉成 Codex App 可用的 skill 建立流程，並判斷新 skill 應該放在全域還是專案本地。
+把 外部 / 第三方 取向的 Skill Creator 啟動包，轉成 Codex App 可用的 skill 建立流程，並判斷新 skill 應該放在全域還是專案本地。也支援把一段滿意對話、prompt、輸出格式或工作流萃取成可重用的 Codex skill。
 
 這份文件是之後建立、優化、驗證 Codex skills 的正式懶人包。若來源文件提到 來源工具、來源工具的 skills 路徑、slash command、來源工具 subagent 或 來源工具專用 frontmatter，一律先依本文件轉換，不直接照做。
 
@@ -62,11 +62,13 @@ codex-skill-creator
 ```text
 {{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md
 {{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
+{{CODEX_HOME}}/skills/codex-skill-creator/references/conversation-to-skill.md
 ```
 
 用途：
 
 - 把 外部 / 第三方 skill 教學轉成 Codex App 相容流程。
+- 把成功對話、prompt、輸出格式或重複工作流萃取成 Codex skill。
 - 建立、優化、驗證自訂全域或專案本地 skills。
 - 記得同步可攜式版本；全域 skill 同步 Obsidian 全域 skill 索引，專案 skill 同步專案駕駛艙。
 
@@ -231,6 +233,7 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 ```text
 {{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md
 {{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
+{{CODEX_HOME}}/skills/codex-skill-creator/references/conversation-to-skill.md
 {{CODEX_HOME}}/skills/secondbrain-research-digest/SKILL.md
 {{CODEX_HOME}}/skills/secondbrain-research-digest/references/research-note-template.md
 ```
@@ -277,15 +280,16 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 
 ## 之後怎麼用
 
-當使用者要求「建立 skill」、「優化 skill」、「把 來源 skill 教學轉成 Codex」、「跑 Skill Creator 啟動包」時：
+當使用者要求「建立 skill」、「優化 skill」、「把 來源 skill 教學轉成 Codex」、「把剛剛這段對話變成 skill」、「從對話萃取 Skill」、「跑 Skill Creator 啟動包」時：
 
 1. 先套用本文件的 Codex 相容規則。
 2. 使用 `codex-skill-creator` companion skill。
-3. 若是第一個真實工作 skill，先做簡短訪談。
-4. 判斷 skill 歸屬，建立或更新 `{{CODEX_HOME}}/skills/<skill-name>` 或 `<project-root>/000_Agent/skills/<skill-name>`。
-5. 驗證 frontmatter、路徑與 reference。
-6. 同步可攜式版本：全域同步 LazyPack 與 Obsidian 全域 Skills；專案同步專案 `000_Agent/skills` 與專案駕駛艙。
-7. 回報是否需要開新對話或重啟 Codex App。
+3. 若是從對話萃取 skill，先確認要固化的片段、skill 名稱、是否保留優化過程與觸發/輸出格式。
+4. 若是第一個真實工作 skill，先做簡短訪談。
+5. 判斷 skill 歸屬，建立或更新 `{{CODEX_HOME}}/skills/<skill-name>` 或 `<project-root>/000_Agent/skills/<skill-name>`。
+6. 驗證 frontmatter、路徑與 reference。
+7. 同步可攜式版本：全域同步 LazyPack 與 Obsidian 全域 Skills；專案同步專案 `000_Agent/skills` 與專案駕駛艙。
+8. 回報是否需要開新對話或重啟 Codex App。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
@@ -313,7 +317,7 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md")"
 cat > "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD'
 ---
 name: codex-skill-creator
-description: Use when adapting 來源工具 or third-party skill-creation guides into Codex App-compatible skills, deciding whether a new skill belongs globally or inside a project, improving an existing custom Codex skill, creating a first practical skill through interview, validating SKILL.md frontmatter and bundled resources, or syncing portable skill copies. Avoid 來源工具專用 paths and fields; use global Codex skills under {{CODEX_HOME}}/skills and project skills under 000_Agent/skills.
+description: Use when adapting 來源工具 or third-party skill-creation guides into Codex App-compatible skills, extracting a reusable skill from a successful conversation or workflow, deciding whether a new skill belongs globally or inside a project, improving an existing custom Codex skill, creating a first practical skill through interview, validating SKILL.md frontmatter and bundled resources, or syncing portable skill copies. Avoid 來源工具專用 paths and fields; use global Codex skills under {{CODEX_HOME}}/skills and project skills under 000_Agent/skills.
 metadata:
   short-description: Build Codex-compatible skills
 ---
@@ -363,6 +367,15 @@ Before creating or modifying a skill, decide where it belongs:
 
 Do not symlink `000_Agent/skills` into `{{CODEX_HOME}}/skills`.
 
+## Mode Selection
+
+Choose the branch before writing files:
+
+- Source-adapter mode: external or third-party skill material needs conversion into Codex conventions. Read `references/codex-bootstrap-adapter.md`.
+- Conversation-extraction mode: the user wants to turn a successful conversation, prompt, output style, debugging pattern, or repeated workflow into a reusable skill. Read `references/conversation-to-skill.md`.
+- Direct-maintenance mode: an existing Codex skill needs a small improvement, validation, or sync repair. Read the target skill and patch only the needed sections.
+- First-skill interview mode: the user wants help finding a practical first skill. Use the short interview below.
+
 For field-by-field conversion details, read `references/codex-bootstrap-adapter.md` when the source material is 來源工具導向 or third-party-specific.
 
 ## Workflow
@@ -379,6 +392,7 @@ For field-by-field conversion details, read `references/codex-bootstrap-adapter.
    - resource layout
    - user-facing interview questions
    - failure handling
+   - privacy or project-context boundaries
 3. Convert to Codex App conventions:
    - replace 來源工具 paths with Codex paths
    - replace slash-command assumptions with metadata-trigger guidance
@@ -427,7 +441,6 @@ Then propose one recommended skill and two alternatives. Once the user chooses, 
 - Detailed material is in `references/`, not bloating `SKILL.md`.
 - The skill avoids secrets, tokens, and personal data.
 - Obsidian mirror note is updated for global skill changes; project cockpit is updated for project-local skill changes.
-
 CODEX_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD
 
 # codex-skill-creator/references/codex-bootstrap-adapter.md
@@ -532,8 +545,100 @@ Update three areas when applicable:
 3. Recent sync record with the date and exact change
 
 Do not edit the system skill contents under `.system`; the mirror note may list them as read-only built-ins.
-
 CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CODEX_BOOTSTRAP_ADAPTER_MD
+
+# codex-skill-creator/references/conversation-to-skill.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/references/conversation-to-skill.md")"
+cat > "{{CODEX_HOME}}/skills/codex-skill-creator/references/conversation-to-skill.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CONVERSATION_TO_SKILL_MD'
+---
+title: Conversation To Skill Extraction
+date: 2026-06-14
+type: reference
+tags:
+  - codex
+  - skills
+  - workflow
+---
+
+# Conversation To Skill Extraction
+
+Use this branch when the user says a previous conversation, prompt, result, or workflow should become a reusable Codex skill.
+
+## Goal
+
+Turn the satisfying part of a conversation into a portable skill that another Codex session can use without needing the full original chat.
+
+The output should preserve the reusable method, not the entire conversation history.
+
+## Confirm Before Packaging
+
+Ask only what is missing. If the current conversation already answers a question, state the assumption and continue.
+
+1. Which part should be solidified: the whole workflow, one output format, a prompt style, a tool sequence, or a validation checklist?
+2. What should the skill be called? Normalize the folder name to lowercase hyphen-case, but keep a user-facing title if useful.
+3. Should the optimization process be preserved as a reference, or only the final operating method?
+4. What should trigger the skill, and what should it deliver?
+
+If the conversation contains private data, secrets, personal stories, client details, or project-only context, ask before placing any of it in a global skill. Prefer abstract examples and placeholders.
+
+## Extraction Steps
+
+1. Identify the repeated job:
+   - user trigger phrases
+   - desired output
+   - required inputs
+   - decisions Codex must make
+   - things Codex must avoid
+2. Separate reusable method from incidental context:
+   - keep stable steps, heuristics, formats, and checks
+   - remove one-off names, temporary paths, credentials, and private details
+   - replace local-only assumptions with documented defaults or placeholders
+3. Decide ownership:
+   - global when it will help across projects or should trigger anywhere
+   - project-local when it depends on one repo, client, vault area, or unpublished context
+   - reference note only when the method is useful but not yet stable enough for a skill
+4. Design the package:
+   - keep `SKILL.md` focused on trigger routing and core workflow
+   - move detailed prompt patterns, examples, schemas, and long checklists into `references/`
+   - add `scripts/` only for deterministic repeated operations
+   - add `assets/` only for files used in final outputs
+5. Write validation criteria:
+   - frontmatter name matches the folder
+   - description includes the conversation-derived triggers
+   - referenced files exist
+   - the skill can work without the original conversation
+   - sensitive context has been removed or intentionally scoped to a project-local skill
+
+## Recommended Output Shape
+
+For a new global skill:
+
+```text
+{{CODEX_HOME}}/skills/<skill-name>/
+├── SKILL.md
+└── references/
+    └── <method-or-pattern>.md
+```
+
+For a project-local skill:
+
+```text
+<project-root>/000_Agent/skills/<skill-name>/
+├── SKILL.md
+└── references/
+    └── <method-or-pattern>.md
+```
+
+If examples are needed, include short synthetic examples. Do not paste the full original conversation unless the user explicitly asks and the content is safe for the chosen skill scope.
+
+## Skill Draft Checklist
+
+- The description names the real user phrase that should trigger the skill.
+- The body tells Codex when to read each reference file.
+- The workflow explains what to do first, what to ask, what to produce, and how to verify.
+- The skill contains no secrets, raw private chat, or one-off project state unless it is project-local and intentionally scoped.
+- The final report states whether the skill is global or project-local, where it was written, what portable copy was updated, and whether a new Codex conversation may be needed.
+CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CONVERSATION_TO_SKILL_MD
 
 test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill-creator installed"
 
@@ -541,3 +646,5 @@ echo "embedded skills installed: codex-skill-creator"
 ```
 
 <!-- END EMBEDDED_SKILLS -->
+
+
