@@ -9,6 +9,7 @@
 - 初次同步日期：2026-05-09。
 - 拆分成獨立 LazyPack Item 日期：2026-05-26。
 - 依 Google Drive `圖解筆記生圖指令` 更新提示庫日期：2026-05-26。
+- 2026-06-14：加入 Arry Q 版角色設定與既有圖解筆記風格資產路徑，供未來自畫像與圖解風格生成直接取用。
 - 來源文件：Google Docs `圖解筆記生圖指令`（已匯入 Obsidian：`知識庫/圖解筆記生圖指令.md`）。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/visual-note-generator/SKILL.md`。
 - 這版定位：獨立的內容製作 skill，不附屬於 NotebookLM 連線項目；可單獨安裝與使用。
@@ -119,6 +120,7 @@ Prefer Traditional Chinese output unless the user asks for another language.
 4. Preserve the user's identity perspective, such as teacher, engineer, creator, parent, or another stated role.
 5. Keep visual outputs educational, warm, clean, and readable. Avoid photorealism, 3D, excessive technology style, corporate-slide stiffness, and clutter.
 6. For image prompts, explicitly state the aspect ratio, style, content boundary, text limits, and negative constraints.
+7. When the task mentions Arry, 自畫像, Q 版講者, Q 版角色, 作者識別, or matching the user's existing 圖解筆記風格, read the reusable style spec at `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/knowledge/arry-visual-identity.yaml` and use the reference assets under `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/assets/arry-visual-identity`.
 
 ## Task Patterns
 
@@ -129,6 +131,8 @@ Create a 16:9 horizontal, high-resolution visual diagram prompt. Preserve the or
 ### Add Educator Avatar
 
 Add a small Q-version educator character only as a supporting identity marker. Keep the diagram as the main subject. Place the character to one side, smiling or pointing toward a key point, without blocking content.
+
+If the user wants Arry or the user's own recurring avatar, use the saved Arry character sheets and keep the consistent traits: short black hair, warm dark eyes, white shirt, light beige-orange striped overshirt, khaki pants, white sneakers, friendly professional educator mood.
 
 ### Photo To Reusable Avatar
 
@@ -214,6 +218,46 @@ Use after a 16:9 visual note exists and the user wants an author/teacher identit
 請注意：
 - 圖解內容仍然是主角
 - Q 版角色只是陪襯與識別用
+```
+
+## 2A. 使用 Arry 固定 Q 版角色與既有圖解風格
+
+Use when the user asks for Arry, 自畫像, Q 版講者, 作者識別, or matching the user's existing 圖解筆記風格.
+
+Reference first:
+
+- Style spec: `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/knowledge/arry-visual-identity.yaml`
+- Character sheets: `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/assets/arry-visual-identity/character-sheets/`
+- Visual-note references: `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/assets/arry-visual-identity/visual-note-references/`
+
+```text
+請根據我提供的內容，生成一張 16:9 橫式教育型圖解筆記。
+
+內容邊界：
+- 只使用我提供的來源內容
+- 不新增來源沒有的概念、案例、物件或書籍內容
+- 圖中文字以短標題、短關鍵詞與簡短 bullet 為主
+
+視覺風格：
+- 參考 Arry 既有圖解筆記風格
+- 暖白背景、手繪黑線、橘紅標題橫幅
+- 使用藍、紫、綠、黃橘、淡粉等柔和色塊
+- 中央核心概念搭配 3 到 5 個周邊區塊
+- 線條清楚、留白充足、適合簡報或社群貼文閱讀
+
+Arry 角色：
+- 加入小型 Q 版 Arry 作為作者識別與輔助講解者
+- 角色外觀依照 Arry 角色設定、手勢集與表情集
+- 短黑髮、深色大眼、白色內搭、淺米橘條紋襯衫、卡其褲、白鞋
+- 放在側邊或角落，微笑、思考或指向重點
+- 不遮擋圖解內容，圖解仍是主角
+
+負面限制：
+- 不要寫實照片
+- 不要 3D
+- 不要企業簡報模板感
+- 不要過度科技感
+- 不要雜亂或塞滿文字
 ```
 
 ## 3. 如果沒有個人圖像怎麼辦
