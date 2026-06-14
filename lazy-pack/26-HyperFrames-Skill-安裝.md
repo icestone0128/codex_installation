@@ -20,6 +20,18 @@
 - 已移除 slash-command、非 Codex agent delegation、non-Codex path / file name / frontmatter 相關敘述。
 - 所有可攜路徑一律使用 `{{CODEX_HOME}}/skills/<skill-name>`。
 
+## 本機補充：相片紀念影片與音訊驗證
+
+2026-06-14 依實際畢業紀念影片製作流程，已在全域 `hyperframes/SKILL.md` 補入：
+
+- 相片紀念影片正式渲染前，若使用者要求，需先提供完整預覽圖，包含取景、文字框、順序與代表性轉場狀態。
+- 最終輸出使用高畫質原始素材；縮圖只可用於挑選、contact sheet 或快速檢查。
+- 滿版取景仍需優先保留人臉、頭頂空間與上半身，並替推近、平移、轉場預留安全範圍。
+- 文字框不得遮臉；同類照片群組應維持一致樣式與語氣，不直接沿用資料夾名稱當文案。
+- 只改音訊時，保留已確認畫面並重混音軌，不重算整部影片畫面。
+- 音量調整需以實測 dB 驗證；FFmpeg 動態 `volume` 表達式需使用 `eval=frame`；預先降音的音樂檔在 HTML 中避免再被 `data-volume` 雙重降音。
+- 完成最終輸出並驗證後，需詢問使用者是否要清理專案資料夾；清理時保留來源素材、VideoSpec、設計文件、必要 MD 與最終輸出，移除預覽圖、非最終 render、音軌檢查與暫存解析檔，並將來源與最終輸出整理到清楚資料夾。
+
 ## 這版安裝的 Skills
 
 | Skill | 用途 |
@@ -2061,6 +2073,42 @@ Video must be `muted playsinline`. Audio is always a separate `<audio>` element:
   data-volume="1"
 ></audio>
 ```
+
+### Photo Montage and Personal Event Videos
+
+For family, graduation, ceremony, travel, or other photo-led memory videos:
+
+- Use high-resolution original assets for final render. Thumbnails or preview proxies are only for contact sheets, selection, and fast layout checks.
+- Before final render, produce a complete preview contact sheet with the actual crop, text box position, scene order, and representative transition frame. Wait for user confirmation when they explicitly ask to approve previews first.
+- Treat full-bleed as a composition goal, not permission to crop faces. Prioritize face, headroom, and upper body first; keep bouquets, certificates, trophies, and scene context when possible, but do not sacrifice the person.
+- Account for motion crop. If a Ken Burns push-in, zoom, pan, or transition will enlarge the photo later, the starting crop needs enough safe area so faces and heads do not leave the frame mid-shot.
+- Text boxes must not cover faces. For repeated scene groups (friends, parents, teacher, principal, objects), keep lower-third style, position, and wording pattern consistent unless the user asks for contrast.
+- Do not use folder names as visible copy. Rewrite labels and subtitles from what the image shows and the emotional/narrative role of the scene.
+- When only audio changes after the visual cut is approved, keep the video stream and remux/re-mix audio instead of re-rendering the whole composition.
+
+### Post-Render Project Cleanup
+
+After the final video has been rendered and verified, ask the user whether they want the project folder cleaned up before ending the task. Do not delete process files automatically without confirmation.
+
+When the user confirms cleanup:
+
+- Keep the final rendered video, source media, `video-spec.md`, `design.md`, `README.md`, project `AGENTS.md`, and production notes or other meaningful `.md` files.
+- Move source assets into a clear folder such as `00_Source_Media/`, with subfolders for raw originals, final high-resolution photos, processed audio, and processed video clips.
+- Move final deliverables into a clear folder such as `01_Final_Output/`.
+- Remove preview contact sheets, thumbnails, non-final renders, render work folders, extracted audio checks, transient analysis JSON/log files, and intermediate test clips that are not needed to reproduce the final output.
+- Update project documentation and composition references after moving files, then verify that the composition still resolves every local `src`/`href` asset.
+- Keep media files ignored by Git unless the project explicitly requires versioning small generated assets.
+- Treat `.git` cleanup or history rewriting as a separate, explicit user decision.
+
+### Audio Mixing Checks
+
+When the user gives volume targets, verify with measured numbers rather than only by listening:
+
+- State the measurement basis. For FFmpeg quick checks, use `volumedetect mean_volume`; use LUFS only when explicitly mixing for broadcast/streaming loudness.
+- Measure the source segment, the processed bed/music segment, and the final mixed segment at the relevant timestamps.
+- For background music ducking under speech, record the duck start, hold window, return point, fade durations, and target dB in the project/spec.
+- FFmpeg time-varying `volume` expressions must include `:eval=frame`; otherwise the expression may be evaluated once and ducking/fades will appear ineffective.
+- If the music file is pre-scaled or pre-ducked before being used in HyperFrames, set the corresponding HTML `data-volume` to `1` unless an additional intentional gain stage is desired.
 
 ## Timeline Contract
 
