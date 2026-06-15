@@ -14,6 +14,11 @@ Thumbs.db
 *.log
 logs/
 
+# YouTube transcript collector probe outputs
+**/sample_info.json
+**/*cookie*_probe.json
+**/cookie_info_probe.json
+
 # Environment files
 *.key
 credentials.*
