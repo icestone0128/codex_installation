@@ -1,7 +1,7 @@
 # 31-YouTube-Transcript-Collector-Skill-安裝
 
-> 版本：2026-06-15 Codex App 版
-> 用途：安裝 `youtube-transcript-collector` 全域 skill，固定「先產生 YouTube 影片總表 MD，再逐支抓繁體中文字幕 MD」的工作流程。
+> 版本：2026-06-16 Codex App 版
+> 用途：安裝 `youtube-transcript-collector` 全域 skill，固定「先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，再逐支抓繁體中文字幕 MD」的工作流程。
 > 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/youtube-transcript-collector/`。
 
 ## 來源與歷史紀錄
@@ -9,7 +9,7 @@
 - 初次同步日期：2026-06-15。
 - 來源：本次 Sense Bar YouTube 字幕整理工作流。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/youtube-transcript-collector/SKILL.md`。
-- 本機驗證：`quick_validate.py` 通過；`fetch_zh_tw_subtitles.py` 語法檢查通過；已用既有 `總表.md` 與 `zh-TW` VTT 離線重建字幕 MD 成功。
+- 本機驗證：`fetch_zh_tw_subtitles.py` 語法檢查通過；已用 6 欄 `總表.md` 驗證解析成功。
 - 驗證依賴：若 `quick_validate.py` 缺 `yaml` module，先安裝 `python3 -m pip install --user PyYAML`；本機已驗證 PyYAML 6.0.3 可 import。
 
 ## 這個 Skill 解決什麼
@@ -17,11 +17,14 @@
 使用者未來提出 YouTube 字幕整理需求時，預設流程固定為：
 
 1. 先搜尋或整理影片清單。
-2. 先輸出 `總表.md`。
-3. 依 `總表.md` 的影片順序逐支抓取字幕。
-4. 只抓繁體中文字幕 `zh-TW`。
-5. 每支字幕 MD 的檔名使用總表的「影片標題」。
-6. 遇到 YouTube `429 Too Many Requests` 時停止，標記 `限流待重試`，避免連續請求。
+2. 先輸出或更新 `總表.md`，並讓總表成為唯一處理順序。
+3. 先用 metadata 判斷直播與直播回放；直播影片只在總表標註，不下載字幕。
+4. 先探測中文字幕語言代碼；優先不使用 browser cookie，只有使用者同意且必要時才用 cookies。
+5. 依 `總表.md` 的影片順序逐支抓取字幕。
+6. 只抓繁體中文字幕候選：優先 `zh-TW`，必要時處理 `zh-Hant`。
+7. 每支字幕 MD 的檔名使用總表的「影片標題」。
+8. `字幕 MD` 欄只放實際 MD 連結；狀態文字放 `字幕狀態` 欄。
+9. 遇到 YouTube `429 Too Many Requests` 時停止，標記 `有 <lang> 字幕／限流待下載`，避免連續請求。
 
 ## yt-dlp 安裝
 
@@ -64,8 +67,8 @@ macOS 使用者 site install 常見路徑：
 建立任務資料夾後，先手動或半自動產生 `總表.md`。表格欄位固定如下：
 
 ```markdown
-| # | 分類 | 影片標題 | YouTube URL | 字幕 MD |
-|---:|---|---|---|---|
+| # | 分類 | 影片標題 | YouTube URL | 字幕 MD | 字幕狀態 |
+|---:|---|---|---|---|---|
 ```
 
 逐支抓字幕：
@@ -78,6 +81,12 @@ python3 "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_
 
 ```bash
 python3 "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 1 --cookies
+```
+
+下載 `zh-Hant` 字幕：
+
+```bash
+python3 "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 34 --lang zh-Hant --cookies
 ```
 
 只用既有 VTT 重新產生 MD，不連 YouTube：
@@ -99,9 +108,11 @@ python3 -c 'import yaml; print(yaml.__version__)'
 ## 踩坑
 
 - 不要一開始就抓字幕；先產生 `總表.md`，再讓總表成為唯一處理順序與檔名來源。
+- 不要把狀態文字寫進 `字幕 MD` 欄；該欄只放現有 MD 檔的 Markdown 連結，沒有檔案就留空。
+- 直播或直播回放影片標註為 `直播影片`，不下載字幕；若已經有字幕 MD，要刪除 MD 與 raw subtitle，再清空 `字幕 MD`。
 - 不要一次抓多部。YouTube 字幕端點容易限流。
-- 不要抓所有語言。預設只抓 `zh-TW`，否則一支影片可能展開成上百個自動翻譯字幕請求。
-- 使用 Chrome cookie 前要取得使用者同意。
+- 不要抓所有語言。預設只探測/抓 `zh-TW` 與 `zh-Hant`，否則一支影片可能展開成上百個自動翻譯字幕請求。
+- 使用 Chrome cookie 前要取得使用者同意；搜尋與字幕可用性探測盡量先用非 cookie 路徑。
 - 不要把 Google 帳號、cookie、token 或瀏覽器 profile 的敏感資訊寫進總表或輸出檔。
 - 字幕 MD 檔名要跟總表影片標題一致；只有 `/` 需改成 `／`。
 
@@ -124,7 +135,7 @@ mkdir -p "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts"
 cat > "{{CODEX_HOME}}/skills/youtube-transcript-collector/SKILL.md" <<'CODEX_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SKILL_MD'
 ---
 name: youtube-transcript-collector
-description: Build YouTube video URL inventory tables and fetch Traditional Chinese subtitle Markdown files with yt-dlp. Use when the user asks to find videos from a YouTube channel or URL set, create a 總表.md / summary table first, then download or regenerate zh-TW / 繁體中文 subtitles one video at a time while avoiding YouTube rate limits.
+description: Build YouTube video URL inventory tables and fetch Traditional Chinese subtitle Markdown files with yt-dlp. Use when the user asks to find videos from a YouTube channel or URL set, create a 總表.md / summary table first, identify livestream replays and Chinese subtitle availability, then download or regenerate zh-TW / zh-Hant subtitle Markdown files one video at a time while avoiding YouTube rate limits.
 ---
 
 # YouTube Transcript Collector
@@ -136,11 +147,14 @@ Use this skill when a task involves YouTube videos, `yt-dlp`, subtitle downloads
 Default sequence:
 
 1. Verify or install `yt-dlp`.
-2. Build a `總表.md` before downloading subtitles.
-3. Fetch only Traditional Chinese subtitles (`zh-TW`) unless the user explicitly asks otherwise.
-4. Process videos one by one; do not run subtitle downloads in parallel.
-5. Name each subtitle Markdown file from the exact video title in `總表.md`; only replace `/` with `／` if needed for file paths.
-6. Update `總表.md` after each success or rate-limit failure.
+2. Search or collect the requested YouTube videos, then import the complete result set into `總表.md` before downloading subtitles.
+3. Use `總表.md` as the source of truth for processing order, video titles, filenames, and row status.
+4. Identify livestreams or livestream replays before subtitle downloads. If `yt-dlp --dump-single-json` reports `live_status=was_live`, `is_live=true`, or `was_live=true`, mark the row as `直播影片` and do not download subtitles.
+5. Probe Chinese subtitle availability before downloading. Prefer non-cookie metadata/subtitle probes first; use browser cookies only when the user agrees and the non-cookie route cannot determine availability or access the needed subtitles.
+6. Fetch only Chinese subtitles (`zh-TW` first, `zh-Hant` when available) unless the user explicitly asks otherwise.
+7. Process videos one by one; do not run subtitle downloads in parallel.
+8. Name each subtitle Markdown file from the exact video title in `總表.md`; only replace `/` with `／` if needed for file paths.
+9. Update `總表.md` after each success, livestream finding, missing-subtitle finding, or rate-limit failure.
 
 ## yt-dlp Setup
 
@@ -187,8 +201,8 @@ Create a new task folder, then produce `總表.md` before fetching subtitles.
 Recommended columns:
 
 ```markdown
-| # | 分類 | 影片標題 | YouTube URL | 字幕 MD |
-|---:|---|---|---|---|
+| # | 分類 | 影片標題 | YouTube URL | 字幕 MD | 字幕狀態 |
+|---:|---|---|---|---|---|
 ```
 
 For channel research:
@@ -197,6 +211,9 @@ For channel research:
 - Cross-check with YouTube search or browser inspection when a channel mixes videos, streams, and Shorts.
 - Filter by the user's keywords, such as Claude AI, Claude Code, Codex, AntiGravity, OpenCode, AI Agent.
 - Keep the list stable in `總表.md`; use it as the source of truth for titles and processing order.
+- Keep `字幕 MD` empty until an actual Markdown subtitle file exists.
+- Put status text only in `字幕狀態`, never in `字幕 MD`.
+- When a subtitle MD exists, `字幕 MD` must be a Markdown link to the file under `md/`, and `字幕狀態` should be `已下載`.
 
 When building file outputs, use this folder shape:
 
@@ -205,12 +222,61 @@ When building file outputs, use this folder shape:
 ├── 總表.md
 ├── md/
 ├── raw_subtitles/
+├── live_status_report.json
 └── status.json
 ```
 
+## Detect Livestream Videos
+
+Before subtitle downloads, check video metadata:
+
+```bash
+yt-dlp --skip-download --dump-single-json "<youtube-url>"
+```
+
+Use cookies only if the user agrees and public metadata access fails:
+
+```bash
+yt-dlp --cookies-from-browser "chrome:Profile 1" --skip-download --dump-single-json "<youtube-url>"
+```
+
+Rules:
+
+- Treat `live_status=was_live`, `was_live=true`, or `is_live=true` as a livestream/livestream replay.
+- Mark `字幕狀態` as `直播影片`.
+- Do not download subtitles for livestream rows.
+- If a livestream row already has a subtitle MD, remove that MD and matching raw subtitle files, clear `字幕 MD`, and keep only `直播影片` in `字幕狀態`.
+- Store the metadata audit in `live_status_report.json` when processing many videos.
+
+## Probe Chinese Subtitle Availability
+
+Probe before downloading, so rows without usable Chinese subtitles are documented instead of producing avoidable failed downloads.
+
+Preferred non-cookie probe:
+
+```bash
+yt-dlp --skip-download --write-auto-subs --write-subs --sub-langs "zh-TW,zh-Hant" --sub-format vtt --print "%(requested_subtitles)j" "<youtube-url>"
+```
+
+Cookie fallback, only with user agreement:
+
+```bash
+yt-dlp --cookies-from-browser "chrome:Profile 1" --skip-download --write-auto-subs --write-subs --sub-langs "zh-TW,zh-Hant" --sub-format vtt --print "%(requested_subtitles)j" "<youtube-url>"
+```
+
+Status mapping:
+
+- `zh-TW` exists: `有 zh-TW 字幕／待下載` or `有 zh-TW 字幕／限流待下載` after a 429.
+- `zh-Hant` exists: `有 zh-Hant 中文字幕／待下載`.
+- Other subtitles exist but no Chinese subtitle exists: `有其他語言字幕／無中文字幕`.
+- No automatic captions and no subtitles: `影片本身無字幕`.
+- Probe inconclusive: `字幕探測失敗`.
+
+Avoid broad `--sub-langs all` probes by default because they can return huge translated subtitle maps. Use it only when distinguishing "no Chinese subtitles" from "no subtitles at all" matters for the task.
+
 ## Fetch Traditional Chinese Subtitles
 
-Use the bundled helper when the task already has a `總表.md` in the expected table format:
+Use the bundled helper when the task already has a `總表.md` in the expected table format. The helper supports both the legacy 5-column table and the preferred 6-column table with `字幕狀態`.
 
 ```bash
 python3 <skill-dir>/scripts/fetch_zh_tw_subtitles.py --table <task-folder>/總表.md --next --cookies
@@ -222,19 +288,28 @@ Useful options:
 python3 <skill-dir>/scripts/fetch_zh_tw_subtitles.py --table <task-folder>/總表.md --index 1 --cookies
 python3 <skill-dir>/scripts/fetch_zh_tw_subtitles.py --table <task-folder>/總表.md --next --cookies --sleep-after 180
 python3 <skill-dir>/scripts/fetch_zh_tw_subtitles.py --table <task-folder>/總表.md --index 1 --from-existing --sleep-after 0
+python3 <skill-dir>/scripts/fetch_zh_tw_subtitles.py --table <task-folder>/總表.md --index 34 --lang zh-Hant --cookies
 ```
 
 Cookie rule:
 
-- Use `--cookies-from-browser` only with user agreement.
+- Avoid browser cookies for search and subtitle availability probing when public metadata is enough.
+- Use `--cookies-from-browser` only with user agreement, usually for actual subtitle download attempts or when public probing fails.
 - If the user says their YouTube is logged in with their Google account, use the relevant browser profile, commonly `chrome:Profile 1` in this user's environment.
 - Do not reveal private account identifiers from cookie extraction logs.
 
 Rate-limit rule:
 
 - Process a single video per command.
-- If one video returns `429`, mark it as `限流待重試`, stop, and retry later.
+- If one video returns `429`, mark `字幕狀態` as `有 <lang> 字幕／限流待下載`, stop, and retry later.
 - Do not skip ahead unless the user explicitly says to continue with later videos.
+
+## Table Update Rules
+
+- `字幕 MD` contains only a Markdown link to an existing subtitle MD, or is blank.
+- `字幕狀態` contains status text such as `已下載`, `直播影片`, `有 zh-TW 字幕／限流待下載`, `有 zh-Hant 中文字幕／待下載`, `有其他語言字幕／無中文字幕`, or `影片本身無字幕`.
+- Do not put status text in `字幕 MD`.
+- When a subtitle MD is deleted, clear `字幕 MD` and update `字幕狀態`.
 
 ## Markdown Naming Rule
 
@@ -260,10 +335,12 @@ python3 -c 'import yaml; print(yaml.__version__)'
 Before finishing:
 
 - `總表.md` exists and includes all requested videos.
-- Each successful row links to an MD file under `md/`.
+- Each successful row links to an MD file under `md/` from `字幕 MD`.
+- `字幕 MD` cells are either blank or Markdown links; all descriptive text is in `字幕狀態`.
 - Each subtitle MD title matches the `影片標題` from `總表.md`.
-- Raw subtitle files under `raw_subtitles/` are `zh-TW` only.
-- `status.json` records successes and failures.
+- Raw subtitle files under `raw_subtitles/` are only for non-livestream rows and selected Chinese languages.
+- Livestream rows are marked `直播影片` and have no subtitle MD/raw subtitle residue.
+- `status.json` records successes, failures, subtitle probe results, and livestream findings when available.
 - No parallel subtitle download processes are still running.
 CODEX_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SKILL_MD
 
@@ -292,7 +369,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 
-LANG = "zh-TW"
+DEFAULT_LANG = "zh-TW"
 
 
 def video_id_from_url(url: str) -> str:
@@ -314,18 +391,21 @@ def safe_filename_from_title(title: str) -> str:
 
 def parse_table(table_path: Path) -> list[dict]:
     rows: list[dict] = []
-    row_re = re.compile(r"^\| (\d+) \| ([^|]+) \| ([^|]+) \| (https?://[^|]+) \| ([^|]+) \|$")
     for line in table_path.read_text(encoding="utf-8").splitlines():
-        match = row_re.match(line)
-        if not match:
+        if not line.startswith("|") or "YouTube URL" in line or "---" in line:
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) not in {5, 6} or not cells[0].isdigit() or not cells[3].startswith(("http://", "https://")):
             continue
         rows.append(
             {
-                "index": int(match.group(1)),
-                "category": match.group(2).strip(),
-                "title": match.group(3).strip(),
-                "url": match.group(4).strip(),
-                "subtitle": match.group(5).strip(),
+                "index": int(cells[0]),
+                "category": cells[1],
+                "title": cells[2],
+                "url": cells[3],
+                "subtitle": cells[4],
+                "status": cells[5] if len(cells) == 6 else "",
+                "column_count": len(cells),
             }
         )
     return rows
@@ -393,7 +473,7 @@ def strip_vtt(path: Path) -> list[tuple[str, str]]:
     return rows
 
 
-def run_yt_dlp(row: dict, raw_dir: Path, cookies: str | None, timeout: int) -> subprocess.CompletedProcess[str]:
+def run_yt_dlp(row: dict, raw_dir: Path, cookies: str | None, timeout: int, lang: str) -> subprocess.CompletedProcess[str]:
     video_id = video_id_from_url(row["url"])
     base = f"{row['index']:02d}-{video_id}"
     output = str(raw_dir / f"{base}.%(ext)s")
@@ -404,7 +484,7 @@ def run_yt_dlp(row: dict, raw_dir: Path, cookies: str | None, timeout: int) -> s
         "--write-subs",
         "--write-auto-subs",
         "--sub-langs",
-        LANG,
+        lang,
         "--sub-format",
         "vtt",
         "--sleep-requests",
@@ -448,16 +528,25 @@ def write_markdown(row: dict, vtts: list[Path], out_dir: Path) -> Path:
     return md
 
 
-def update_table(table_path: Path, index: int, value: str) -> None:
-    text = table_path.read_text(encoding="utf-8")
-    escaped = re.escape(str(index))
-    text = re.sub(
-        rf"(^\| {escaped} \| [^|]+ \| [^|]+ \| https?://[^|]+ \| )[^|]+( \|$)",
-        rf"\1{value}\2",
-        text,
-        flags=re.MULTILINE,
-    )
-    table_path.write_text(text, encoding="utf-8")
+def update_table(table_path: Path, index: int, md_value: str | None = None, status_value: str | None = None) -> None:
+    lines = table_path.read_text(encoding="utf-8").splitlines()
+    out: list[str] = []
+    for line in lines:
+        if not line.startswith("|"):
+            out.append(line)
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) not in {5, 6} or not cells[0].isdigit() or int(cells[0]) != index:
+            out.append(line)
+            continue
+        if md_value is not None:
+            cells[4] = md_value
+        if len(cells) == 6 and status_value is not None:
+            cells[5] = status_value
+        elif len(cells) == 5 and status_value is not None and md_value is None:
+            cells[4] = status_value
+        out.append("| " + " | ".join(cells) + " |")
+    table_path.write_text("\n".join(out) + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -467,6 +556,7 @@ def main() -> int:
     parser.add_argument("--next", action="store_true", help="Process the first unfinished table row")
     parser.add_argument("--cookies", nargs="?", const="chrome:Profile 1", help="Use browser cookies, default chrome:Profile 1")
     parser.add_argument("--from-existing", action="store_true", help="Use existing VTT files without contacting YouTube")
+    parser.add_argument("--lang", default=DEFAULT_LANG, help="Subtitle language to fetch, default zh-TW; use zh-Hant when the table probe found that code")
     parser.add_argument("--sleep-after", type=int, default=120, help="Seconds to sleep after one attempt")
     parser.add_argument("--timeout", type=int, default=180, help="yt-dlp timeout in seconds")
     args = parser.parse_args()
@@ -496,11 +586,11 @@ def main() -> int:
         returncode = 0
         output = "Used existing subtitle files.\n"
     else:
-        proc = run_yt_dlp(row, raw_dir, args.cookies, args.timeout)
+        proc = run_yt_dlp(row, raw_dir, args.cookies, args.timeout, args.lang)
         returncode = proc.returncode
         output = proc.stdout + "\n" + proc.stderr
 
-    candidates = sorted(raw_dir.glob(f"{base}.{LANG}.vtt"))
+    candidates = sorted(raw_dir.glob(f"{base}.{args.lang}.vtt"))
     if returncode == 0 and candidates:
         old_md = status.get("successes", {}).get(str(index), {}).get("md")
         if old_md and (root / old_md).exists():
@@ -517,7 +607,7 @@ def main() -> int:
             "finished": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
         status.get("failures", {}).pop(str(index), None)
-        update_table(table_path, index, f"[{md.name}]({rel_md})")
+        update_table(table_path, index, f"[{md.name}]({rel_md})", "已下載")
         print(f"OK: {md}")
     else:
         log_path = raw_dir / f"{base}.error.log"
@@ -531,7 +621,8 @@ def main() -> int:
             "started": started,
             "finished": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
-        update_table(table_path, index, "限流待重試")
+        failure_status = f"有 {args.lang} 字幕／限流待下載" if "429" in output or "Too Many Requests" in output else "字幕下載失敗"
+        update_table(table_path, index, None, failure_status)
         print(f"FAILED: see {log_path}")
 
     status["last_run"] = time.strftime("%Y-%m-%d %H:%M:%S")
