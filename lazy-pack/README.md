@@ -168,7 +168,7 @@
 | 25 | `netlify-deploy` | [[28-Netlify-Deploy-Skill-安裝]] | 可直接安裝；官方 Netlify MCP 設定、Netlify 前端部署與 Clasp + Apps Script API 閉環部署流程 |
 | 26 | `video-processing-automation` | [[29-Video-Processing-Automation-Skill-安裝]] | 可直接安裝；原始影片到 YouTube / 社群影片上架包，含智能剪口播、字幕、文字稿、封面、metadata 與短片亮點 |
 | 27 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時，先確認入口後生成腳本、設計、素材、旁白、composition 與渲染包；若已有影片則轉用 `video-processing-automation` |
-| 28 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD，並讓 `字幕 MD` 欄只放實際檔案連結 |
+| 28 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
 | 29 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
