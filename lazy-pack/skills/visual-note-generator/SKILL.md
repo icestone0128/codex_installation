@@ -1,113 +1,56 @@
 ---
 name: visual-note-generator
-description: Turn a photographed or scanned hand-drawn note into an upright, source-faithful, 16:9 visual note in Arry's established style. Use when the user provides 手繪筆記、圖解筆記、白紙草圖、拍照筆記 or asks for Visual Note Generator, Arry 圖解風格, Q 版角色 replacement, exact Traditional Chinese text preservation, or a finished 2K visual-note image. This skill is only for hand-drawn-note-to-image creation, not article rewriting, transcripts, social posts, infographics from prose, or slide outlines.
+description: Turn a photographed or scanned hand-drawn note into an upright, source-faithful 16:9 visual note using a replaceable personal Style Profile. Use when the user provides 手繪筆記、圖解筆記、白紙草圖、拍照筆記 or asks for Visual Note Generator, exact Traditional Chinese text preservation, Q-version character handling, a personalized hand-drawn style, or a finished 2K visual-note image. This skill is only for hand-drawn-note-to-image creation, not article rewriting, transcripts, social posts, prose-to-infographic work, or slide outlines.
 ---
 
 # Visual Note Generator
 
-Create one finished visual-note image from one hand-drawn source. Treat the source as the authority for wording, structure, direction, gesture, and visual logic.
+Create one finished raster visual note from one hand-drawn source. Keep the workflow portable and keep personal rendering style in a replaceable YAML Style Profile.
 
-Read `references/arry-visual-note-style.md` completely before analyzing or generating the image. Use the built-in image-generation/editing capability for the raster result.
+## File Responsibilities
 
-## Local Defaults
+- `SKILL.md`: trigger, routing, loading order, and ownership boundaries.
+- `references/workflow-contract.md`: process steps, required questions, output contract, and portfolio handoff.
+- `references/generation-guardrails.md`: content/layout locks, prompt construction, validation, failure recovery, and learned pitfalls.
+- `references/style-profile-guide.md`: Style Profile schema, precedence, customization, and portability rules.
+- `references/default-style-profile.yaml`: bundled default personal style. It currently contains Arry's established style so every LazyPack installation can reproduce that look without local image assets.
+- `references/style-profile-template.yaml`: blank portable starting point for another user's style.
+- `agents/openai.yaml`: Codex UI metadata only. Never treat it as workflow instructions, output rules, or style data.
 
-- Arry assistant root: `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink`
-- Arry visual identity assets: `{{ASSISTANT_ROOT}}/assets/arry-visual-identity/`
-- Codex visual-note references: `{{ASSISTANT_ROOT}}/assets/visual-note-references/`
-- Obsidian portfolio and preferred finished-work reference source: `{{OBSIDIAN_VAULT}}/創作庫/Visual-Note-References/`
+## Mandatory Loading Order
 
-For this user, replace `{{ASSISTANT_ROOT}}` with the Arry assistant root above and `{{OBSIDIAN_VAULT}}` with `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain`.
+Before analyzing or generating:
 
-## Required Workflow
+1. Read `references/workflow-contract.md` completely.
+2. Read `references/generation-guardrails.md` completely.
+3. Read `references/style-profile-guide.md` completely.
+4. Resolve and read exactly one Style Profile:
+   - explicit profile supplied or selected by the user;
+   - otherwise `references/default-style-profile.yaml`.
 
-### 0. Normalize Orientation
+Do not merge Style Profile fields into the generic workflow files. Do not infer generic workflow rules from a personal profile.
 
-Inspect the source before reading text or planning composition.
+## Style Profile Precedence
 
-- If it is sideways or upside down, create a non-destructive upright working copy first.
-- Apply the required clockwise/counterclockwise rotation exactly; do not rely on EXIF display behavior.
-- View the rotated working copy and verify that all writing reads naturally before continuing.
-- Never overwrite the user's original photo.
+Use this order:
 
-### 1. Extract Source Invariants
+1. the user's explicit instructions for the current image;
+2. a user-selected or attached Style Profile;
+3. the bundled `default-style-profile.yaml`;
+4. generic clean hand-drawn rendering only if no profile can be read.
 
-Create an internal source specification before generating:
+User instructions may override style choices, but never override source-text fidelity or safety constraints unless the user explicitly corrects the source content.
 
-- exact Traditional Chinese/English text, punctuation, numbering, and labels;
-- title, blocks, arrows, diagrams, icons, speech bubbles, and visual metaphor;
-- relative positions and reading order;
-- character count, placement, direction, visible angle, pose, gesture, clothing, and props.
+## Execution
 
-Do not silently guess ambiguous handwriting. Ask the user only about uncertain strings, conflicting placement instructions, or unclear character identity. Once corrected, treat the user's wording as canonical.
+- Use the built-in image-generation/editing capability for the raster result.
+- Treat the upright source image as the sole content and composition authority.
+- Treat the selected Style Profile as rendering data only.
+- Apply the workflow and guardrails independently of which Style Profile is selected.
+- Deliver exactly 16:9 and at least 2560 × 1440 pixels; upscale with high-quality Lanczos resampling when native generation is smaller.
 
-### 2. Run the Character Checkpoint
+## Portability
 
-If any person appears in the source, pause before generation and ask whether to:
+The bundled Arry profile is textual and must work without Arry's local asset folders. Local character sheets and portfolio images are optional fidelity references, not installation requirements.
 
-1. keep the original drawn character;
-2. replace it with Arry;
-3. create another Q-version character, such as Jensen or a 主管.
-
-For another character, use the user's supplied identity reference or the closest explicitly selected portfolio reference. Do not turn every person into Arry.
-
-Character invariants:
-
-- Preserve the source character's side, direction, body angle, gesture, visible face angle, backpack/prop, and relationship to nearby content.
-- Allow only small adjustments needed to avoid covering text.
-- Do not invent pointing, thumbs-up, open-hand, or other gestures absent from the source.
-- Every Arry character must include a legible handwritten signature exactly `Arry` beside the character without covering content.
-
-If no person appears, do not add one unless the user explicitly requests it.
-
-### 3. Select References Deliberately
-
-Choose two to four references from the portfolio based on structural similarity: matching diagram type, road/mountain metaphor, character angle, density, or title treatment.
-
-Label each image role in the generation prompt:
-
-- source image: sole authority for content and composition;
-- portfolio images: style or one named visual motif only;
-- character sheet/reference: identity only.
-
-Explicitly prohibit copying unrelated text, objects, gestures, props, tunnels, flags, or layout from reference works.
-
-### 4. Generate the First Version
-
-Generate an upright 16:9 image using the style specification. Preserve all source text verbatim and keep the composition substantially unchanged. Small spacing adjustments are allowed only for readability and 16:9 fitting.
-
-Target the highest native resolution available. The final deliverable must be at least 2560 × 1440 pixels. If the generation output is smaller, create a high-quality Lanczos-upscaled final at 2560 × 1440 without changing content or aspect ratio.
-
-### 5. Validate Before Calling It Done
-
-Inspect the output against the upright source, not from memory. Verify:
-
-- orientation is correct;
-- aspect ratio is exactly 16:9;
-- dimensions are at least 2560 × 1440;
-- every string, number, punctuation mark, and label matches the canonical text inventory;
-- title and blocks retain their original relative placement and reading order;
-- characters retain the source direction, pose, gesture, props, and visible face angle;
-- every Arry instance has the `Arry` signature;
-- background and fills use the pale portfolio palette;
-- decorative elements are sparse and do not introduce new meaning.
-
-If anything fails, make one targeted correction at a time and state that all other elements must remain unchanged. Re-check the entire image after every edit because image edits can regress previously correct text or layout.
-
-### 6. Portfolio Handoff
-
-Show the result and iterate until the user explicitly confirms it is the desired image.
-
-Only after confirmation, ask whether to place it in `{{OBSIDIAN_VAULT}}/創作庫/Visual-Note-References/` as a future reference. If yes:
-
-- confirm the filename;
-- use PNG unless the user requests another format;
-- do not overwrite an existing work without explicit approval;
-- verify the saved file exists and meets the 16:9/2K requirement.
-
-## Hard Boundaries
-
-- Do not add concepts, examples, claims, characters, labels, or metaphors absent from the source or explicit user instructions.
-- Do not summarize, shorten, rewrite, or modernize source wording.
-- Do not force a standard infographic layout over the user's hand-drawn composition.
-- Do not produce photorealism, 3D rendering, corporate-slide styling, neon technology styling, dark beige backgrounds, dense decoration, or vector-perfect geometry.
-- Do not save into the portfolio before user confirmation.
+Another user should keep the same Skill workflow and replace only `default-style-profile.yaml` with a profile based on `style-profile-template.yaml`. They must not rewrite `workflow-contract.md` merely to change colors, handwriting, characters, decorations, or visual mood.
