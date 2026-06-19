@@ -1,0 +1,7 @@
+interface:
+  display_name: "圖解筆記生成"
+  short_description: "把手繪筆記轉成來源忠實的 Arry 風格 16:9 圖解"
+  default_prompt: "Use $visual-note-generator to turn this hand-drawn note into an upright, source-faithful 16:9 visual note in my established style."
+
+policy:
+  allow_implicit_invocation: true
