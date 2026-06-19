@@ -1,0 +1,66 @@
+profile_version: "1.0"
+profile_id: "replace-with-unique-id"
+display_name: "Replace with personal style name"
+classification: "personal-rendering-style-only"
+
+visual_style:
+  canvas_mood:
+    background: "Describe background color and brightness"
+    white_space_ratio: "Describe desired whitespace"
+    texture: "Describe paper, marker, watercolor, or other texture"
+  line_language:
+    primary: "Describe line color and medium"
+    geometry: "Describe line regularity"
+    fills: "Describe fill technique"
+    arrows: "Describe arrow and connector style"
+  palette:
+    primary_accent: "Primary accent"
+    secondary_accents:
+      - "Accent 1"
+      - "Accent 2"
+    fill_behavior: "Describe saturation and opacity"
+    avoid:
+      - "Unwanted palette behavior"
+  typography:
+    traditional_chinese: "Describe Chinese lettering"
+    english: "Describe Latin lettering"
+    body_color: "Body text color"
+    emphasis_colors:
+      - "Emphasis color"
+    hierarchy: "Describe title, section, and body hierarchy"
+  composition_preferences:
+    atmosphere: "Describe overall visual atmosphere"
+    title_treatments:
+      - "Preferred title treatment"
+    common_shapes:
+      - "Preferred shape vocabulary"
+    decoration: "Describe allowed decoration and density"
+    density: "Describe whitespace and information density"
+
+character_profiles:
+  default_character:
+    role: "Describe recurring character role"
+    appearance:
+      hair: "Describe"
+      eyes: "Describe"
+      face: "Describe"
+      outfit: "Describe"
+      mood: "Describe"
+    rendering: "Describe character illustration style"
+    pose_policy: "Describe only style-specific pose tendencies; source pose remains authoritative"
+    signature:
+      required: false
+      exact_text: ""
+      placement: ""
+
+reference_guidance:
+  use_by_property: {}
+  selection_rule: "select references by one named property and do not copy unrelated content"
+
+optional_asset_routes:
+  character_assets: ""
+  visual_note_references: ""
+  obsidian_portfolio: ""
+  missing_asset_behavior: "use_text_profile"
+
+rendering_snippet: "Write one concise paragraph that describes only the personal rendering style."
