@@ -106,7 +106,6 @@ Arry 助手 AI 分身資料層：
 ### 專案目錄結構
 
 - `AGENTS.md` - 固定專案規則與工作流邊界。
-- `README.md` - 已使用 symlink 指向 `AGENTS.md`。未來有任何需要新增的專案說明或規則內容，請直接修改本檔。
 - `.gitignore` - 排除本機設定、憑證、相依套件與建置輸出。
 - `docs/` - 本地文件進入點（docs/index.html），目前不部署。
 - `lazy-pack/` - 經驗證的 Codex 安裝說明、除錯紀錄與內嵌全域技能安裝檔。
