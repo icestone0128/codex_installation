@@ -100,3 +100,25 @@ Arry 助手 AI 分身資料層：
 - 不要自動納入無關 git 變更。
 - 不要把 API key、token、密碼寫進 repo。
 - 不要把不必要的個資或敏感資料寫進 repo。
+
+## 專案結構與安全說明
+
+### 專案目錄結構
+
+- `AGENTS.md` - 固定專案規則與工作流邊界。
+- `README.md` - 已使用 symlink 指向 `AGENTS.md`。未來有任何需要新增的專案說明或規則內容，請直接修改本檔。
+- `.gitignore` - 排除本機設定、憑證、相依套件與建置輸出。
+- `docs/` - 本地文件進入點（docs/index.html），目前不部署。
+- `lazy-pack/` - 經驗證的 Codex 安裝說明、除錯紀錄與內嵌全域技能安裝檔。
+- `scripts/sync-health.sh` - 唯讀的跨裝置同步健康檢查腳本。
+- `000_Agent/` - 僅保留指向說明，不存放真實個人記憶或偏好。
+- `100_Todo/` - 專案本地待辦、草稿與工作中素材。
+- `200_Reference/` - 專案本地參考資料、範本與過往作品。
+
+### 可攜化與安全指南
+
+- **設定檔範本**：`200_Reference/templates/codex-config.template.toml` 作為安全設定檔範本，使用佔位符遮蔽金鑰，不直接同步真實的 `~/.codex/config.toml`。
+- **安全邊界**：
+  - 不提交 `.env`、API 金鑰、Token、密碼或 Admin 憑證。
+  - 不在 Repo 或 Obsidian 中寫入學員真實姓名或敏感個資。
+  - 日常進度與詳細待辦記錄於 Obsidian 駕駛艙中，不要寫入 `AGENTS.md`。
