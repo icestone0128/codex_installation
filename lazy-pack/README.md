@@ -1,8 +1,10 @@
 # Codex 懶人包總目錄
 
-> 版本：2026-05-27 可自行安裝版
+> 版本：2026-06-21 可自行安裝版
 > 用途：讓下載者從零開始設定 Codex App、全域 skills、plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；`{{...}}` 佔位符必須替換成下載者自己的路徑、帳號與 project ID。
+
+2026-06-21 更新：Item 09–16 已納入新版引導詞的 Codex-only 轉換；全域 skill 固定使用 `{{CODEX_HOME}}/skills`，專案 skill 固定使用 `<project-root>/000_Agent/skills`，並以 `codex-skill-creator` 作為所有自訂 skill 建立與維護的必要入口。
 
 ## 先填這張設定表
 

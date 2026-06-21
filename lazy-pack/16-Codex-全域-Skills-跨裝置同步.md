@@ -61,7 +61,7 @@
 不要把整個 `{{CODEX_HOME}}` 丟進雲端同步。`{{CODEX_HOME}}` 裡通常會有：
 
 - `auth.json`
-- logs / sqlite / sessions
+- `sessions/` / `log/` / `*.sqlite*` / `config.local.toml`
 - cache / tmp
 - shell snapshots
 - 本機狀態與登入資訊
@@ -231,6 +231,7 @@ mv "{{CODEX_HOME}}/skills.before-symlink-YYYYMMDD-HHMMSS" "{{CODEX_HOME}}/skills
 
 - 不要同步整個 `{{CODEX_HOME}}`。
 - 不要同步 `auth.json`、token、`.env`、sqlite、logs、sessions、cache。
+- 全域 skill 入口固定是 `{{CODEX_HOME}}/skills`；專案 skill 固定放 `<project-root>/000_Agent/skills`，不建立其他 skill root。
 - 不要把私密 skills、個人記憶或草稿放進 public repo。
 - 先備份，再 symlink。
 - 改完後重開 Codex 新對話或重啟 Codex App。
@@ -257,6 +258,7 @@ RESULT=<可讀到的自訂 skill 數量與抽測結果>
 - [ ] 本機備份資料夾存在。
 - [ ] 未同步整個 `{{CODEX_HOME}}`。
 - [ ] 未同步任何 token、憑證、`.env`、sqlite、logs、sessions。
+- [ ] 沒有建立 `{{CODEX_HOME}}/skills` 與 `<project-root>/000_Agent/skills` 以外的 skill root。
 - [ ] 開新 Codex 對話後，全域 skills 可觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
@@ -267,14 +269,14 @@ RESULT=<可讀到的自訂 skill 數量與抽測結果>
 
 使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `~/.codex`。
 
-```bash
+````bash
 set -e
 
 decode_base64() {
-  if command -v base64 >/dev/null 2>&1; then
-    base64 --decode 2>/dev/null || base64 -D
+  if base64 --help 2>/dev/null | grep -q -- '-d'; then
+    base64 -d
   else
-    python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.buffer.read()))'
+    base64 -D
   fi
 }
 
@@ -282,7 +284,7 @@ decode_base64() {
 mkdir -p "{{CODEX_HOME}}/skills/cross-device-sync"
 # cross-device-sync/SKILL.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" <<'CODEX_LAZYPACK_55B84175E734BB08CCCDB1E958F82FD90EE89E0F'
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_42E4C9A28C'
 ---
 name: cross-device-sync
 description: Use when the user asks to set up, audit, repair, or document cross-device synchronization and portability for Codex App configuration, global skills, AGENTS.md rules, shared core-rules.md, Arry Assistant data, Obsidian project cockpits, AI assistant memory, or multi-agent compatibility across Macs, Windows/Linux, Google Drive, iCloud, Dropbox, OneDrive, GitHub backups, or other AI agents.
@@ -314,6 +316,7 @@ This user's current defaults are documented in the root `README.md`; treat them 
 - Do not move, symlink, delete, or overwrite the user's existing Codex config, skills, memories, or Obsidian notes without first showing the concrete plan and getting explicit confirmation.
 - Always make a timestamped backup before any operation that moves files, rewrites symlinks, changes Git remotes, or edits shared assistant memory.
 - Never sync secrets, OAuth tokens, API keys, local credentials, app caches, shell snapshots, or machine-specific state across devices.
+- Treat `~/.codex/auth.json`, `~/.codex/sessions/`, `~/.codex/log/`, SQLite state, caches, and local override config as machine-local; never sync or commit them.
 - Treat public repos as public. Do not put private backups, credentials, private memory, drafts, or personal logs into tracked project files.
 - Prefer the user's established project folder and knowledge cockpit pattern unless they choose another sync route.
 - For other AI agents, share durable Markdown assets such as `core-rules.md`, documented workflows, and portable skill packages; do not symlink incompatible app config files together.
@@ -351,6 +354,7 @@ This user's current defaults are documented in the root `README.md`; treat them 
    - ignored files are actually ignored
    - no secrets or machine-local state are staged
    - Codex skill frontmatter still validates if skills were moved or created
+   - `$CODEX_HOME/skills` or `~/.codex/skills` remains the only global skill entry path, and project-local skills remain under `<project-root>/000_Agent/skills`
 7. Report exact paths changed, backup path, verification result, and whether Codex needs a restart or new conversation.
 
 ## Multi-Agent Compatibility Audit
@@ -404,6 +408,7 @@ Usually portable:
 Usually not portable:
 
 - tokens, OAuth files, credentials, API keys, `.env`
+- `$CODEX_HOME/auth.json`, `$CODEX_HOME/sessions/`, `$CODEX_HOME/log/`, `$CODEX_HOME/*.sqlite*`, and `$CODEX_HOME/config.local.toml`
 - per-device local settings
 - caches, telemetry, shell snapshots, conversation state
 - generated temp files and logs unless the user explicitly wants archival logs
@@ -415,19 +420,19 @@ When more detail is needed:
 - Read `references/codex-playbook.md` before executing a real cross-device setup, audit, repair, GitHub backup, health-check script, or migration-manual task. It contains the full Codex-converted Section A-G workflow, routes, templates, checks, pitfalls, and FAQ.
 - Read `references/multi-agent-compatibility.md` before checking whether Codex settings, global rules, skills, memory, MCP, prompts, hooks, or project rules can be used by other AI agents.
 - Read `references/source-adaptation.md` when you need to understand how external assistant setup material was converted into Codex App-safe behavior.
-CODEX_LAZYPACK_55B84175E734BB08CCCDB1E958F82FD90EE89E0F
+CODEX_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_42E4C9A28C
 
 # cross-device-sync/agents/openai.yaml
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml" <<'CODEX_LAZYPACK_8FFA99F5690F2F878E77D5EA84B1A981B6023AEE'
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML_24E59C1216'
 display_name: Cross-Device Sync
 short_description: Plan, install, and verify portable Codex setup across devices.
 default_prompt: Help me plan a safe Codex App cross-device sync setup.
-CODEX_LAZYPACK_8FFA99F5690F2F878E77D5EA84B1A981B6023AEE
+CODEX_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML_24E59C1216
 
 # cross-device-sync/references/codex-playbook.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/codex-playbook.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/codex-playbook.md" <<'CODEX_LAZYPACK_244B6B6094451DECC11683740063DB593740D1B6'
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/codex-playbook.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_CODEX_PLAYBOOK_MD_514C6287CE'
 # Codex Cross-Device Sync Playbook
 
 This is the Codex App-compatible execution version of an external cross-device assistant setup guide.
@@ -462,10 +467,10 @@ Default Codex surfaces on this machine:
 
 | Purpose | Path or rule |
 |---|---|
-| Codex home | `{{CODEX_HOME}}` |
-| Portable global rules | `{{SYNC_ROOT}}/core-rules.md`; `{{CODEX_HOME}}/AGENTS.md` may symlink to it |
-| Custom global skills | `{{CODEX_HOME}}/skills` symlinked to `{{SYNC_ROOT}}/skills` |
-| System skills | `{{CODEX_HOME}}/skills/.system` |
+| Codex home | `/Users/arrywu/.codex` |
+| Portable global rules | `{{SYNC_ROOT}}/core-rules.md`; `/Users/arrywu/.codex/AGENTS.md` may symlink to it |
+| Custom global skills | `/Users/arrywu/.codex/skills` symlinked to `{{SYNC_ROOT}}/skills` |
+| System skills | `/Users/arrywu/.codex/skills/.system` |
 | Project rules | `AGENTS.md` |
 | Main project | `{{SETUP_REPO}}` |
 | Arry Assistant global data-layer root | `{{SYNC_ROOT}}` |
@@ -478,7 +483,7 @@ Default Codex surfaces on this machine:
 ## Absolute Safety Rules
 
 1. Do not perform real sync setup during skill installation.
-2. Do not move, delete, symlink, or overwrite `{{CODEX_HOME}}`, `AGENTS.md`, Obsidian notes, Arry Assistant data, or Git history without explicit user approval after showing a concrete plan.
+2. Do not move, delete, symlink, or overwrite `/Users/arrywu/.codex`, `AGENTS.md`, Obsidian notes, Arry Assistant data, or Git history without explicit user approval after showing a concrete plan.
 3. Make a timestamped backup before moving files, replacing files with symlinks, changing remotes, or editing shared memory.
 4. Do not sync secrets or machine state:
    - `.env`, API keys, tokens, passwords
@@ -487,7 +492,7 @@ Default Codex surfaces on this machine:
    - cache, telemetry, shell snapshots, session state
    - generated logs unless the user explicitly wants archival logs
 5. Treat `codex_installation` as a public repo. Do not place private backups, credentials, private memory, drafts, or personal logs in tracked project paths.
-6. Do not edit system skills under `{{CODEX_HOME}}/skills/.system`.
+6. Do not edit system skills under `/Users/arrywu/.codex/skills/.system`.
 7. If Obsidian notes are involved, read the vault `AGENTS.md` and update additively.
 
 ## Section A: Preflight And Interview
@@ -497,8 +502,8 @@ Default Codex surfaces on this machine:
 Check whether the user's existing Codex App assistant base is present:
 
 ```bash
-test -d "{{CODEX_HOME}}" && echo "Codex home exists"
-test -d "{{CODEX_HOME}}/skills" && echo "Codex skills folder exists"
+test -d "/Users/arrywu/.codex" && echo "Codex home exists"
+test -d "/Users/arrywu/.codex/skills" && echo "Codex skills folder exists"
 test -d "{{SYNC_ROOT}}" && echo "Arry Assistant global root exists"
 test -d "{{SYNC_ROOT}}/memories" && echo "Arry Assistant memory exists"
 test -d "{{SYNC_ROOT}}/workflows" && echo "Arry Assistant workflows exists"
@@ -514,8 +519,8 @@ If core pieces are missing, stop and explain the missing prerequisite. Do not in
 Gather only metadata unless the user asks for deeper inspection:
 
 ```bash
-ls -la "{{CODEX_HOME}}" 2>/dev/null | head -40
-find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print 2>/dev/null | sort
+ls -la "/Users/arrywu/.codex" 2>/dev/null | head -40
+find "/Users/arrywu/.codex/skills" -maxdepth 2 -name SKILL.md -print 2>/dev/null | sort
 find "{{SETUP_REPO}}" -maxdepth 1 -type d -print 2>/dev/null | sort
 find "{{SYNC_ROOT}}/memories" -maxdepth 2 -type f -print 2>/dev/null | sort | head -80
 ```
@@ -636,7 +641,7 @@ Portable candidates:
 
 Avoid syncing:
 
-- `{{CODEX_HOME}}/skills/.system`
+- `/Users/arrywu/.codex/skills/.system`
 - credentials, OAuth state, secrets, `.env`
 - session state, temporary caches, logs
 - per-device config unless confirmed safe
@@ -648,15 +653,15 @@ Use symlinks only when they solve a real duplication problem and the user unders
 
 Safer default:
 
-- keep the Codex-facing path as `{{CODEX_HOME}}/skills`; it may be symlinked to `{{SYNC_ROOT}}/skills` after cross-device sync is configured
+- keep the Codex-facing path as `/Users/arrywu/.codex/skills`; it may be symlinked to `{{SYNC_ROOT}}/skills` after cross-device sync is configured
 - mirror documentation, install instructions, and inventory into Obsidian and the existing project notes
 - back up and version controlled exports as needed
-- on a second device, recreate the symlink only after confirming the Google Drive folder has synced and the local `{{CODEX_HOME}}/skills` target has been backed up
+- on a second device, recreate the symlink only after confirming the Google Drive folder has synced and the local `/Users/arrywu/.codex/skills` target has been backed up
 
 Riskier route:
 
 - move selected custom skills into the mother folder
-- symlink them back into `{{CODEX_HOME}}/skills/<skill-name>`
+- symlink them back into `/Users/arrywu/.codex/skills/<skill-name>`
 
 Before symlinking, verify:
 
@@ -917,7 +922,7 @@ Check these surfaces:
 | Surface | Portable approach |
 |---|---|
 | Global rules | `{{SYNC_ROOT}}/core-rules.md` remains the source of truth |
-| Codex global rules entrypoint | `{{CODEX_HOME}}/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md` |
+| Codex global rules entrypoint | `/Users/arrywu/.codex/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md` |
 | Other AI agent rules | use that agent's supported entrypoint to read or reference `core-rules.md` |
 | Global skills | keep Codex-compatible packages under `{{SYNC_ROOT}}/skills` |
 | Project skills | keep project-only packages under each project's `000_Agent/skills` |
@@ -983,11 +988,11 @@ Yes. Use separate repos or a strict `.gitignore`. Public repos should exclude pe
 ## Attribution Note
 
 The source file credits Raymond Hou / 雷蒙 and is licensed CC BY-NC-SA 4.0 for personal use. Keep attribution in derived notes when quoting or redistributing source-derived material. This Codex skill is an operational adaptation for the user's local Codex App workflow.
-CODEX_LAZYPACK_244B6B6094451DECC11683740063DB593740D1B6
+CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_CODEX_PLAYBOOK_MD_514C6287CE
 
 # cross-device-sync/references/multi-agent-compatibility.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/multi-agent-compatibility.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/multi-agent-compatibility.md" <<'CODEX_LAZYPACK_D92F8EF1D5DC5FD8C9B05219E1E310F3ED9B4B7F'
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/multi-agent-compatibility.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_MULTI_AGENT_COMPATIBILITY_MD_36192E36DD'
 # Multi-Agent Compatibility Audit
 
 Use this checklist when the user wants Codex, future AI agents, or another local agent runtime to share the same durable assistant setup.
@@ -1024,13 +1029,13 @@ Check:
 
 ```bash
 test -f "{{SYNC_ROOT}}/core-rules.md" && echo "core-rules exists"
-test -L "{{CODEX_HOME}}/AGENTS.md" && readlink "{{CODEX_HOME}}/AGENTS.md"
+test -L "/Users/arrywu/.codex/AGENTS.md" && readlink "/Users/arrywu/.codex/AGENTS.md"
 ```
 
 Expected:
 
 - `{{SYNC_ROOT}}/core-rules.md` exists.
-- `{{CODEX_HOME}}/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md`.
+- `/Users/arrywu/.codex/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md`.
 - There is no separate legacy global rules file competing with `core-rules.md`.
 
 AntiGravity supported entrypoints:
@@ -1179,11 +1184,11 @@ Do not edit files during the audit unless the user explicitly approves the propo
 ## Fit With LazyPack Item 16
 
 This audit belongs inside LazyPack Item 16 because it is a portability and synchronization health check. It should not become a standalone global skill unless it grows into a broader migration system with its own scripts, templates, and repeated execution path.
-CODEX_LAZYPACK_D92F8EF1D5DC5FD8C9B05219E1E310F3ED9B4B7F
+CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_MULTI_AGENT_COMPATIBILITY_MD_36192E36DD
 
 # cross-device-sync/references/source-adaptation.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md" <<'CODEX_LAZYPACK_FDD90718FB7D696B0C6E7269869C4ACC0D1E2053'
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD_F46F63E917'
 # Source Adaptation: Cross-Device Assistant Setup
 
 Source type: external assistant portability guide
@@ -1205,8 +1210,8 @@ This Codex version keeps the useful operating model but changes the target surfa
 
 | Original source-guide idea | Codex-compatible conversion |
 |---|---|
-| Source app config root is the main config root | `{{CODEX_HOME}}` is the Codex root |
-| `來源工具的舊 skills 路徑` stores skills | `{{CODEX_HOME}}/skills` stores global Codex skills |
+| Source app config root is the main config root | `/Users/arrywu/.codex` is the Codex root |
+| `來源工具的舊 skills 路徑` stores skills | `/Users/arrywu/.codex/skills` stores global Codex skills |
 | Source app rule file is the rule file | `AGENTS.md` is the project rule file; cross-tool global rules belong in `{{SYNC_ROOT}}/core-rules.md` |
 | Source app command shortcuts are user-facing entry points | Codex skills trigger by metadata and user intent |
 | Source app delegation format is part of the workflow | Codex validation passes or supported delegation tools are used only when explicitly requested or clearly useful |
@@ -1215,12 +1220,12 @@ This Codex version keeps the useful operating model but changes the target surfa
 
 ## Codex-Specific Safety Changes
 
-- The skill must not automatically move or symlink `{{CODEX_HOME}}` assets during installation.
+- The skill must not automatically move or symlink `/Users/arrywu/.codex` assets during installation.
 - Any future sync setup must be plan-first and approval-gated because it can affect all Codex sessions.
 - The default sync approach for this user should align with Google Drive project folders and Obsidian project cockpits.
 - The existing Arry Assistant architecture uses Google Drive `codex_symlink/` as the global layer for `skills/`, `memories/`, `workflows/`, and `knowledge/`; project-local data may still use each project's `000_Agent/`.
 - `icestone0128/codex_installation` is public, so private backups and personal memory must not be staged or tracked there.
-- System skills under `{{CODEX_HOME}}/skills/.system` are Codex-managed and should not be edited or moved manually.
+- System skills under `/Users/arrywu/.codex/skills/.system` are Codex-managed and should not be edited or moved manually.
 - Global skill changes must update the Obsidian mirror note at `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`.
 
 ## Interview Questions
@@ -1261,6 +1266,9 @@ For private backups:
 .codex/cache/
 .codex/sessions/
 .codex/auth*
+.codex/log/
+.codex/*.sqlite*
+.codex/config.local.toml
 
 # System and build noise
 .DS_Store
@@ -1299,6 +1307,8 @@ A Codex health check should verify:
 
 The check should not print secrets, token contents, or private memory contents.
 
+This user's fixed skill paths are `/Users/arrywu/.codex/skills` for global skills and `<project-root>/000_Agent/skills` for project-local skills. Do not add alternate global or project discovery roots while adapting newer source guides.
+
 ## Completeness Update
 
 The first installed version summarized the source at a high level. The complete Codex conversion now lives in `codex-playbook.md` and covers:
@@ -1329,14 +1339,14 @@ Codex App-compatible conversion:
 
 - source-specific names are not used as operating surfaces
 - `{{SYNC_ROOT}}/core-rules.md` is the cross-agent global rules source of truth
-- `{{CODEX_HOME}}/AGENTS.md` remains Codex's symlink entrypoint
+- `/Users/arrywu/.codex/AGENTS.md` remains Codex's symlink entrypoint
 - `{{SYNC_ROOT}}/skills`, `memories`, `workflows`, and `knowledge` remain the portable assistant data layer
 - other AI agents should read or adapt those durable assets through their own supported entrypoints
-CODEX_LAZYPACK_FDD90718FB7D696B0C6E7269869C4ACC0D1E2053
+CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD_F46F63E917
 
 test -f "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" && echo "cross-device-sync installed"
 
 echo "embedded skills installed: cross-device-sync"
-```
+````
 
 <!-- END EMBEDDED_SKILLS -->
