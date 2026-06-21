@@ -44,6 +44,8 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 
 - 全域 skills 預設位置：`/Users/arrywu/.codex/skills`
 - 目前 `/Users/arrywu/.codex/skills` 是 symlink，實體位置在 `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`
+- Skill 路徑採白名單：全域只使用 `/Users/arrywu/.codex/skills`，專案本地只使用 `<project-root>/000_Agent/skills`；不建立或使用其他工具的 skill 路徑。
+- 建立、擷取、轉換、更新、改名或驗證自訂 skill 時，一律先使用 `/Users/arrywu/.codex/skills/codex-skill-creator`；內建 `skill-creator` 只作為唯讀輔助參考。
 - Obsidian 同步索引：`專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
 - 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容和實際全域 skills 保持一致。
@@ -64,6 +66,7 @@ Arry 助手 AI 分身資料層：
 - Arry 助手是 Codex App 與 AntiGravity 設定，不使用其他 AI 編輯器專用的規則檔（例如舊版 `CLAUDE.md` 等）或其專屬路徑。
 - 可被所有專案呼叫的部分放在全域 skill：`/Users/arrywu/.codex/skills/arry-assistant/SKILL.md`。
 - Arry 助手本身是全域入口 skill；每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷新 skill 歸屬。
+- 任何自訂 skill 的建立與維護都必須由全域 `codex-skill-creator` 工作流處理。
 - 只有全域 Codex skills 才使用 `/Users/arrywu/.codex/skills`，此路徑目前指向 Google Drive `codex_symlink/skills`。
 - Arry 助手跨專案記憶與個人偏好放在 `codex_symlink/memories/MEMORY.md`。
 - Arry 助手跨專案 workflow 草稿放在 `codex_symlink/workflows/`。

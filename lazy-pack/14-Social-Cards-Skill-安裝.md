@@ -96,6 +96,7 @@ find /tmp/social-cards-test -maxdepth 1 -name "*.png" -print
 
 安裝後開新 Codex 對話或重啟 Codex App，然後用下列任一方式觸發：
 
+- `$social-cards`
 - 「Social Cards」
 - 「做圖卡」
 - 「幫我做 IG 圖」
@@ -140,6 +141,8 @@ Social Cards
 ### 3. `/cards` 不是 Codex slash command
 
 在 Codex 裡，`/cards` 只能當作使用者可能輸入的觸發文字。不要期待它出現在 來源工具 的 `/` 選單。
+
+需要顯式呼叫時，使用實際安裝名稱 `$social-cards`；不使用未安裝的 `$cards` 別名。
 
 ### 4. npm cache 可能遇到權限錯誤
 
@@ -191,7 +194,7 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 - [ ] `scripts/screenshot.mjs` 存在。
 - [ ] `node_modules/playwright` 存在。
 - [ ] 實測匯出 PNG 成功。
-- [ ] 開新 Codex 對話後，用「Social Cards」或「做圖卡」可觸發。
+- [ ] 開新 Codex 對話後，用 `$social-cards`、「Social Cards」或「做圖卡」可觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
@@ -199,19 +202,27 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 
 本節是自含式安裝區塊。這個序號項目會安裝：`social-cards`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `~/.codex`。
 
 ````bash
 set -e
+
+decode_base64() {
+  if base64 --help 2>/dev/null | grep -q -- '-d'; then
+    base64 -d
+  else
+    base64 -D
+  fi
+}
 
 # ---- social-cards ----
 mkdir -p "{{CODEX_HOME}}/skills/social-cards"
 # social-cards/SKILL.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/social-cards/SKILL.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD'
+cat > "{{CODEX_HOME}}/skills/social-cards/SKILL.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD_9F368C966F'
 ---
 name: social-cards
-description: Use when the user asks to use Social Cards, make IG cards, social cards, carousel posts, "/cards", "做圖卡", "幫我做 IG 圖", or turn an article, note, URL, Markdown file, or pasted text into branded social-media PNG cards using bundled blue-dark, orange-light, or Pantone 285C brand templates.
+description: Use when the user asks to use Social Cards, $social-cards, make IG cards, social cards, carousel posts, "/cards", "做圖卡", "幫我做 IG 圖", or turn an article, note, URL, Markdown file, or pasted text into branded social-media PNG cards using bundled blue-dark, orange-light, or Pantone 285C brand templates.
 metadata:
   short-description: Social Cards
 ---
@@ -223,6 +234,7 @@ metadata:
 ## Trigger Phrases
 
 - 「做圖卡」
+- `$social-cards`
 - 「/cards」
 - 「Social Cards」
 - 「幫我做 IG 圖」
@@ -304,17 +316,18 @@ Only apply this preset when the user explicitly says `手寫混搭數位風格`.
 
 ## Codex Notes
 
+- 顯式呼叫使用實際 skill 名稱 `$social-cards`；不使用未安裝的 `$cards` 別名。
 - 不依賴 來源工具 slash-command 系統；`/cards` 只是使用者可能輸入的觸發語。
 - 不使用 來源工具 專用 frontmatter 或工具欄位。
 - 若 Playwright、Chromium 或 `node_modules/` 尚未安裝，先告知需要安裝本 skill 的截圖依賴，再於本 skill 資料夾執行 `npm install` 並驗證。
 - `node_modules/` 是本使用者保留的可攜式執行依賴特例；本機全域 skill 可保留並同步它，避免每次使用 Social Cards 都重新安裝 Playwright / Chromium 依賴。
 - 若複製給其他使用者或其他電腦時不想攜帶大型依賴，仍可只保留 `package.json` 與 `package-lock.json`，在新環境重新安裝依賴。
 - 匯出後可刪除中間 HTML，保留 PNG；除非使用者要求保留可編輯 HTML。
-CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD
+CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD_9F368C966F
 
 # social-cards/assets/blue-dark/content-image.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-image.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML_2ACC86ED36'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -387,11 +400,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-image.html" <
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML_2ACC86ED36
 
 # social-cards/assets/blue-dark/content-text.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML_7B091A348C'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -487,11 +500,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html" <<
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML_7B091A348C
 
 # social-cards/assets/blue-dark/cover.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cover.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML_26E67BC8C5'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -552,11 +565,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cover.html" <<'CODEX_
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML_26E67BC8C5
 
 # social-cards/assets/blue-dark/cta.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cta.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML_8E7C505029'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -661,11 +674,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cta.html" <<'CODEX_LA
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML_8E7C505029
 
 # social-cards/assets/brand-dark/content-image.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML_40C705E7C3'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -738,11 +751,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html" 
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML_40C705E7C3
 
 # social-cards/assets/brand-dark/content-text.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML_57DE1CECF1'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -838,11 +851,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html" <
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML_57DE1CECF1
 
 # social-cards/assets/brand-dark/cover.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cover.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML_03834D2DBA'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -903,11 +916,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cover.html" <<'CODEX
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML_03834D2DBA
 
 # social-cards/assets/brand-dark/cta.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cta.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML_BAA74CACE1'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1012,11 +1025,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cta.html" <<'CODEX_L
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML_BAA74CACE1
 
 # social-cards/assets/brand-light/content-image.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-image.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML_D563E7B43B'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1104,11 +1117,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-image.html"
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML_D563E7B43B
 
 # social-cards/assets/brand-light/content-text.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-text.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML_B3C5BCF773'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1202,11 +1215,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-text.html" 
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML_B3C5BCF773
 
 # social-cards/assets/brand-light/cover.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML_47ECBFCE81'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1296,11 +1309,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html" <<'CODE
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML_47ECBFCE81
 
 # social-cards/assets/brand-light/cta.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML_1CC1A77B52'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1400,11 +1413,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html" <<'CODEX_
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML_1CC1A77B52
 
 # social-cards/assets/orange-light/content-image.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-image.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML_0F3D82214C'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1492,11 +1505,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-image.html
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML_0F3D82214C
 
 # social-cards/assets/orange-light/content-text.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-text.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML_7E895985BD'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1590,11 +1603,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-text.html"
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML_7E895985BD
 
 # social-cards/assets/orange-light/cover.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML_DA49C1F09F'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1684,11 +1697,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html" <<'COD
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML_DA49C1F09F
 
 # social-cards/assets/orange-light/cta.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cta.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML_09CC812819'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1788,11 +1801,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cta.html" <<'CODEX
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML_09CC812819
 
 # social-cards/package-lock.json
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/package-lock.json")"
-cat > "{{CODEX_HOME}}/skills/social-cards/package-lock.json" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON'
+cat > "{{CODEX_HOME}}/skills/social-cards/package-lock.json" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON_1C2F5418D2'
 {
   "name": "social-cards",
   "version": "1.0.0",
@@ -1853,11 +1866,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/package-lock.json" <<'CODEX_LAZYPACK_S
     }
   }
 }
-CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON
+CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON_1C2F5418D2
 
 # social-cards/package.json
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/package.json")"
-cat > "{{CODEX_HOME}}/skills/social-cards/package.json" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON'
+cat > "{{CODEX_HOME}}/skills/social-cards/package.json" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON_43EBCF39E2'
 {
   "name": "social-cards",
   "version": "1.0.0",
@@ -1874,11 +1887,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/package.json" <<'CODEX_LAZYPACK_SOCIAL
     "playwright": "^1.60.0"
   }
 }
-CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON
+CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON_43EBCF39E2
 
 # social-cards/preview-all.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/preview-all.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/preview-all.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML'
+cat > "{{CODEX_HOME}}/skills/social-cards/preview-all.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML_B663405130'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1978,11 +1991,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/preview-all.html" <<'CODEX_LAZYPACK_SO
 
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML
+CODEX_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML_B663405130
 
 # social-cards/references/source-adaptation.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/references/source-adaptation.md")"
-cat > "{{CODEX_HOME}}/skills/social-cards/references/source-adaptation.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD'
+cat > "{{CODEX_HOME}}/skills/social-cards/references/source-adaptation.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD_C6BB17ACE0'
 ---
 title: Social Cards Source Adaptation
 date: 2026-05-25
@@ -2016,6 +2029,7 @@ This skill adapts the third-party `skills/social-cards` package from:
 - Previous temporary package path: `codex_installation/converted-skills/cards`（已清理）。
 - Removed source-only 來源工具專用 metadata fields.
 - Replaced 來源工具 command assumptions with Codex trigger metadata and procedural instructions.
+- Explicit invocation uses the installed name `$social-cards`; the source shorthand `$cards` is not imported as an alias.
 - Synced upstream template sets `blue-dark` / `orange-light` from the source repo.
 - Kept the existing Pantone 285C template sets `brand-dark` / `brand-light` as Codex-local compatibility templates.
 - Updated the default flow to use upstream `orange-light` / `blue-dark`, while allowing Pantone 285C output when requested.
@@ -2040,11 +2054,11 @@ This skill adapts the third-party `skills/social-cards` package from:
 - RGB: `0, 114, 206`
 
 Use `#0072CE` as the main accent when the user selects the Pantone 285C brand templates. Use the upstream colors when the user selects `blue-dark` or `orange-light`.
-CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD
+CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD_C6BB17ACE0
 
 # social-cards/references/upstream-readme.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/references/upstream-readme.md")"
-cat > "{{CODEX_HOME}}/skills/social-cards/references/upstream-readme.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD'
+cat > "{{CODEX_HOME}}/skills/social-cards/references/upstream-readme.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD_6135338F7B'
 # 社群圖卡產生器 by 雷小蒙：不會設計也能一句話出 IG 圖卡
 
 > **ver. 1.0** ｜ **Last edited: 2026-04-18**
@@ -2185,11 +2199,11 @@ AI 會帶你走完整個流程：選配色 → 選尺寸 → 確認帳號 → �
 - **License**：CC BY-NC-SA 4.0 · 個人使用、學習、分享自由；禁止商業用途
 - 出自 雷蒙三十 Starter Kit — cc.lifehacker.tw | CC BY-NC-SA 4.0
 - [迷你課](https://lifehacker.tw/courses/source-tool-tutorial) · [週報](https://raymondhouch.com/subscribe) · [Threads @raymond0917](https://www.threads.com/@raymond0917)
-CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD
+CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD_6135338F7B
 
 # social-cards/scripts/screenshot.mjs
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs")"
-cat > "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs" <<'CODEX_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS'
+cat > "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs" <<'CODEX_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS_DADCEF1A47'
 // 社群圖卡截圖腳本（by 雷小蒙）
 // 用法：node scripts/screenshot.mjs <output-folder>
 // 會把資料夾內所有 .html（除了 preview.html）截成 2x PNG，最後刪除 HTML 只留 PNG
@@ -2225,13 +2239,11 @@ for (const file of [...files, 'preview.html']) {
 }
 
 console.log(`\n全部匯出完成！${files.length} 張 2x PNG 在 ${dir}/`);
-CODEX_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS
+CODEX_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS_DADCEF1A47
 
-cd "{{CODEX_HOME}}/skills/social-cards"
-npm install
-npx playwright install chromium
+test -f "{{CODEX_HOME}}/skills/social-cards/SKILL.md" && echo "social-cards installed"
 
-echo "Installed social-cards to {{CODEX_HOME}}/skills/social-cards"
+echo "embedded skills installed: social-cards"
 ````
 
 <!-- END EMBEDDED_SKILLS -->

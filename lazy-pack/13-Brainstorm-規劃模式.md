@@ -37,6 +37,7 @@
 ```
 
 - Codex 版觸發方式不是 來源工具 slash command，而是靠 skill metadata 與自然語意觸發，例如：
+  - `$brainstorm`
   - `brainstorm 我想做一個記帳 App`
   - `/brainstorm 我想改善目前的工作流程`
   - `先幫我規劃，不要直接執行`
@@ -84,7 +85,7 @@ sed -n '1,12p' "{{CODEX_HOME}}/skills/brainstorm/SKILL.md"
 ```markdown
 ---
 name: brainstorm
-description: Use when the user says brainstorm, /brainstorm, 規劃模式, 先想清楚再動手...
+description: Use when the user says brainstorm, $brainstorm, /brainstorm, 規劃模式, 先想清楚再動手...
 metadata:
   short-description: 先規劃再執行的引導式需求釐清
 ---
@@ -97,6 +98,7 @@ metadata:
 使用者提出以下需求時應使用：
 
 - 「brainstorm 我想做一個新工具」
+- `$brainstorm`
 - 「/brainstorm 我想改善這個專案」
 - 「先幫我規劃，不要執行」
 - 「我有一個模糊想法，幫我釐清」
@@ -175,7 +177,7 @@ YYYY-MM-DD-[主題關鍵字].md
 
 | 來源工具 原流程 | Codex App 相容做法 |
 | --- | --- |
-| `/brainstorm` slash command | 可保留為觸發語，但不依賴 slash command 機制 |
+| `/brainstorm` slash command | 可保留為觸發語；顯式呼叫使用實際名稱 `$brainstorm` |
 | 來源工具的全域 skills 路徑 | 需要全域觸發時改用 `{{CODEX_HOME}}/skills` |
 | 來源工具的專案級 skills | 改放該專案 `000_Agent/skills`，只服務該專案 |
 | `000_Agent/skills` symlink | 不建立；`000_Agent/skills` 是本地 skill 區，不等於 Codex 全域 skills |
@@ -208,9 +210,9 @@ YYYY-MM-DD-[主題關鍵字].md
 
 本節是自含式安裝區塊。這個序號項目會安裝：`brainstorm`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `~/.codex`。
 
-```bash
+````bash
 set -e
 
 decode_base64() {
@@ -225,17 +227,17 @@ decode_base64() {
 mkdir -p "{{CODEX_HOME}}/skills/brainstorm"
 # brainstorm/SKILL.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/brainstorm/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/brainstorm/SKILL.md" <<'CODEX_LAZYPACK_BRAINSTORM_SKILL_MD'
+cat > "{{CODEX_HOME}}/skills/brainstorm/SKILL.md" <<'CODEX_LAZYPACK_BRAINSTORM_SKILL_MD_7372A3995C'
 ---
 name: brainstorm
-description: Use when the user says brainstorm, /brainstorm, 規劃模式, 先想清楚再動手, or asks to turn a vague idea into a concrete plan before implementation. Guides the user through concise Traditional Chinese planning questions, compares options, writes a plan, and does not implement until the user confirms.
+description: Use when the user says brainstorm, $brainstorm, /brainstorm, 規劃模式, 先想清楚再動手, or asks to turn a vague idea into a concrete plan before implementation. Guides the user through concise Traditional Chinese planning questions, compares options, writes a plan, and does not implement until the user confirms.
 metadata:
   short-description: 先規劃再執行的引導式需求釐清
 ---
 
 # Brainstorm 規劃模式
 
-把模糊想法變成可執行計劃。這是 Codex App 版的規劃流程：不依賴 來源工具 slash command 或 來源工具 專用互動工具；使用者可以用「brainstorm」、「/brainstorm」、「先幫我規劃」等語意觸發。
+把模糊想法變成可執行計劃。這是 Codex App 版的規劃流程：不依賴其他工具的 command 或專用互動機制；使用者可以用 `$brainstorm`、「brainstorm」、「/brainstorm」或「先幫我規劃」觸發。
 
 > 來源改編：核心理念來自「AI 規劃模式 by 雷小蒙」與 obra/superpowers brainstorming skill。來源工具 專用安裝、路徑、slash command 與工具名稱已轉成 Codex App 可用規則。
 
@@ -429,11 +431,11 @@ metadata:
 - 每一步都具體到下一位 Codex 看了也知道要做什麼。
 - 有清楚列出不包含範圍。
 - 回覆語氣符合 Phase 0 的溝通深度。
-CODEX_LAZYPACK_BRAINSTORM_SKILL_MD
+CODEX_LAZYPACK_BRAINSTORM_SKILL_MD_7372A3995C
 
 # brainstorm/references/source-adaptation.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md")"
-cat > "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md" <<'CODEX_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD'
+cat > "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md" <<'CODEX_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD_97DFD86D17'
 # Brainstorm 來源轉換說明
 
 來源檔：`04-brainstorm.md`
@@ -441,7 +443,7 @@ cat > "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md" <<'CODE
 原始來源是 來源工具 的 `/brainstorm` 安裝劇本，包含 `來源工具的舊 skills 路徑`、`AskUserQuestion`、slash command 與 來源工具 Plan Mode 比較。安裝到 Codex App 時已做以下轉換：
 
 - 安裝位置改為 `{{CODEX_HOME}}/skills/brainstorm/`。
-- 觸發方式改為 Codex skill metadata 與自然語意，例如「brainstorm」、「/brainstorm」、「先想清楚再動手」。
+- 觸發方式改為 `$brainstorm`、Codex skill metadata 與自然語意，例如「brainstorm」、「/brainstorm」、「先想清楚再動手」。
 - 移除 來源工具 專用路徑：`來源工具的舊 skills 路徑`、專案 `000_Agent/skills` symlink、來源工具 command shim。
 - 移除 來源工具 專用工具名稱 `AskUserQuestion`，改為 Codex 對話中的單題引導；若未來 Codex App 提供可用選項 UI，可用該 UI 呈現選項。
 - 保留硬性閘門：使用者確認計劃前不實作、不 scaffold、不修改檔案。
@@ -450,11 +452,11 @@ cat > "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md" <<'CODE
 - 保存計劃書的預設位置改成 Codex 專案慣例：目前專案 `plans/`，或既有 `100_Todo/plans/`，或使用者指定路徑。
 
 授權與致謝：原文標示「AI 規劃模式 by 雷小蒙」採 CC BY-NC-SA 4.0 個人使用自由、禁止商業用途；核心理念參考 obra/superpowers brainstorming skill（MIT License）。本檔只保存 Codex 相容改編摘要，不複製原始全文。
-CODEX_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD
+CODEX_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD_97DFD86D17
 
 test -f "{{CODEX_HOME}}/skills/brainstorm/SKILL.md" && echo "brainstorm installed"
 
 echo "embedded skills installed: brainstorm"
-```
+````
 
 <!-- END EMBEDDED_SKILLS -->
