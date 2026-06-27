@@ -49,3 +49,11 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
+
+# Arry 助手 backups containing private memories/rules should not be in Git
+Arry 助手/memories/
+Arry 助手/knowledge/
+Arry 助手/rules/
+Arry 助手/workflows/
+Arry 助手/core-rules.md
+Arry 助手/automations/
