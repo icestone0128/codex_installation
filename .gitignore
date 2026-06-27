@@ -33,6 +33,9 @@ secrets.*
 000_Agent/knowledge/
 000_Agent/skills/
 
+# Local/private VoxCPM2 artifacts; keep generated audio in the project folder but out of this public repo
+100_Todo/projects/voxcpm2-voice-cloner/
+
 # Dependencies and build outputs
 .cache/
 node_modules/
