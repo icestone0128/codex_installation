@@ -9802,6 +9802,32 @@ For more than a few paragraphs, write to a `.txt` file and pass the path. Inputs
 
 Python 3.8+ with `kokoro-onnx` and `soundfile` (`pip install kokoro-onnx soundfile`). Model downloads on first use (~311 MB + ~27 MB voices, cached in `~/.cachehyperframes/tts/`).
 
+#### 💡 安裝避坑指南 (macOS & Python 環境)
+* **Mac 全域 Python 安裝限制**: 在 macOS (由 Homebrew 管理的 Python 3.11+) 上，直接執行 `pip` 會因 `PEP 668` 外部管理環境限制而報錯。必須執行以下指令進行強制安裝：
+  ```bash
+  pip3 install --break-system-packages kokoro-onnx soundfile
+  ```
+  或者如果您有安裝 `uv`：
+  ```bash
+  uv pip install --system kokoro-onnx soundfile
+  ```
+* **非英語發音（例如中文 zh）依賴**:
+  Kokoro 音訊合成在非英語下需要 `espeak-ng` 音素器。在 macOS 上請先安裝系統級依賴：
+  ```bash
+  brew install espeak-ng
+  ```
+  若在沙盒中無權限調用 `brew`，可使用 Python 補丁套件：`pip3 install --break-system-packages espeakng-loader`。
+
+#### ⚠️ Codex 與 AntiGravity 執行環境差異
+* **Codex App**: 運行於獨立的 Sandbox 工作區，其內建 Terminal 執行的 Python 與系統全域 Python 可能隔離。在 Codex 中如遇到 Python 庫缺失，請直接在沙盒終端執行 `pip install`，並確保 Codex 專案設定中的 Python 解譯器路徑與 MCP 執行環境一致。
+* **AntiGravity**: 直接在 macOS 使用者的 Shell（本機環境）中執行，會繼承您本機的 `zsh` 環境、Homebrew 路徑與系統配置。
+  - 您可以直接在本機執行 `pip3 install --break-system-packages` 或 `brew` 安裝依賴。
+  - **macOS Say 離線替代方案**: 在網絡不佳、無法順利從 Hugging Face 下載 Kokoro 模型時，在 AntiGravity 本機環境下可完美調用 Mac 內建的語音引擎：
+    ```bash
+    say -v Meijia -f narration.txt -o narration.aiff && ffmpeg -y -i narration.aiff -ar 44100 narration.wav && rm narration.aiff
+    ```
+    （`Meijia` 為台灣中文女聲，此方法 100% 離線、秒級生成，非常適合作為備用方案）。
+
 ## Transcription (`transcribe`)
 
 Produce a normalized `transcript.json` with word-level timestamps.
