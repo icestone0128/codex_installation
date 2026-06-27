@@ -138,10 +138,25 @@ find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print
 ```toml
 [sandbox_workspace_write]
 writable_roots = [
+  "/Users/{{USER}}/.gitconfig",
+  "{{PROJECT_ROOT}}/.git",
+  "/Users/{{USER}}/.npm",
+  "/Users/{{USER}}/.config/configstore",
+  "/Users/{{USER}}/.clasprc.json",
   "/Users/{{USER}}/Library/Caches/pip",
+  "/Users/{{USER}}/Library/Caches/com.apple.python",
   "/Users/{{USER}}/Library/Python",
+  "/Users/{{USER}}/Library/Preferences/netlify",
 ]
 ```
+
+這些路徑用途：
+
+- `{{PROJECT_ROOT}}/.git`：允許 trusted repo 的 Git refs、FETCH_HEAD 與 lock files 正常寫入。
+- `/Users/{{USER}}/.gitconfig`：允許 `gh auth setup-git` 設定 Git credential helper。
+- `/Users/{{USER}}/.npm`、`.config/configstore`：允許 npm / npx 與 Node CLI 工具使用快取與設定。
+- `Library/Caches/pip`、`Library/Caches/com.apple.python`、`Library/Python`：允許 pip / Python 安裝與快取。
+- `Library/Preferences/netlify`、`.clasprc.json`：允許 Netlify CLI 與 Clasp OAuth 設定。
 
 驗證套件可用：
 
