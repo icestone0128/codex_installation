@@ -504,6 +504,22 @@ cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py" <<'CO
 
 from __future__ import annotations
 
+# Monkeypatch linecache.getlines to bypass PyTorch/UV virtual environment file loading errors
+import linecache
+_old_getlines = linecache.getlines
+def _patched_getlines(filename, module_globals=None):
+    lines = _old_getlines(filename, module_globals)
+    if not lines and filename and not filename.startswith('<') and not filename.endswith('>'):
+        try:
+            with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+                lines = content.splitlines(keepends=True)
+                linecache.cache[filename] = (len(lines), None, lines, filename)
+        except Exception:
+            pass
+    return lines
+linecache.getlines = _patched_getlines
+
 import argparse
 import json
 import os

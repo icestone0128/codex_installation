@@ -58,10 +58,21 @@ enabled = true
 network_access = true
 writable_roots = [
   "{{SETUP_REPO}}",
+  "{{SETUP_REPO}}/.git",
   "{{SYNC_ROOT}}",
   "{{OBSIDIAN_VAULT}}",
   "{{PROJECT_ROOT_1}}",
+  "{{PROJECT_ROOT_1}}/.git",
   "{{PROJECT_ROOT_2}}",
+  "{{PROJECT_ROOT_2}}/.git",
+  "{{HOME}}/.gitconfig",
+  "{{HOME}}/.npm",
+  "{{HOME}}/.config/configstore",
+  "{{HOME}}/.clasprc.json",
+  "{{HOME}}/Library/Caches/pip",
+  "{{HOME}}/Library/Caches/com.apple.python",
+  "{{HOME}}/Library/Python",
+  "{{HOME}}/Library/Preferences/netlify",
 ]
 
 # Add only paths that exist and that you intend Codex to trust on this device.
