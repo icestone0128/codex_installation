@@ -84,6 +84,7 @@
 30. [[30-Video-Creation-Automation-Skill-安裝]]
 31. [[31-YouTube-Transcript-Collector-Skill-安裝]]
 32. [[32-VoxCPM2-Voice-Cloner-Skill-安裝]]
+33. [[33-Audio-to-Markdown-Skill-安裝]]
 
 ## 全域 Skills 安裝總表
 
@@ -118,6 +119,7 @@
 30：video-creation-automation
 31：youtube-transcript-collector
 32：voxcpm2-voice-cloner
+33：audio-to-md
 ```
 
 路徑邊界固定如下：
@@ -174,7 +176,8 @@
 | 27 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時，先確認入口後生成腳本、設計、素材、旁白、composition 與渲染包；若已有影片則轉用 `video-processing-automation` |
 | 28 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
 | 29 | `voxcpm2-voice-cloner` | [[32-VoxCPM2-Voice-Cloner-Skill-安裝]] | 可直接安裝；授權聲音克隆、合成聲音設計、Apple Silicon MPS／CUDA／CPU、全域共享 runtime／模型快取路由與 consent gate |
-| 30 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 30 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；產出文字後 Phase 2 流程相同，由 Codex 做逐段校稿、摘要與重點整理；內嵌完整 Python 腳本、實測紀錄與踩坑 |
+| 31 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
