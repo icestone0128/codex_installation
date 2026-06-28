@@ -1447,6 +1447,557 @@ if __name__ == "__main__":
     main()
 CODEX_LAZYPACK_AUDIO_TO_MD_GROQ_PY
 
+# audio-to-md/scripts/install.sh
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/install.sh")"
+cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/install.sh" <<'CODEX_LAZYPACK_AUDIO_TO_MD_INSTALL_SH'
+#!/bin/bash
+# ╔════════════════════════════════════════════════╗
+# ║   audio-to-md 一鍵安裝器（Mac / Linux）          ║
+# ║   本地 Whisper：把影音的聲音轉成 Markdown 逐字稿 ║
+# ╚════════════════════════════════════════════════╝
+#
+# 使用方式：打開 Terminal → 輸入 bash 加空格 → 拖入此檔案 → 按 Enter
+
+set -e
+trap 'if [ -n "${EXTRACT_DIR:-}" ]; then rm -rf "$EXTRACT_DIR"; fi' EXIT
+
+INSTALL_DIR="$HOME/.audio-to-md"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+EXTRACT_DIR=""
+WHISPER_MODEL="large-v3-turbo"
+
+# 支援自足安裝：偵測是否在技能資料夾中執行
+if [ -f "$(dirname "$SCRIPT_DIR")/SKILL.md" ]; then
+    SKILL_SRC="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+    # Fallback 舊安裝包或解壓縮模式
+    if [ ! -f "$SCRIPT_DIR/skill.zip" ] && [ -f "$SCRIPT_DIR/audio_to_md.py" ]; then
+        SKILL_SRC="$SCRIPT_DIR"
+    else
+        if [ ! -f "$SCRIPT_DIR/skill.zip" ]; then
+            echo "找不到 skill.zip，請確認安裝包已完整解壓縮。"; exit 1
+        fi
+        EXTRACT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/audio-to-md-skill.XXXXXX")"
+        echo "📦 解壓縮技能檔..."
+        unzip -q "$SCRIPT_DIR/skill.zip" -d "$EXTRACT_DIR"
+        SKILL_SRC="$EXTRACT_DIR/skill"
+    fi
+fi
+
+if [ ! -f "$SKILL_SRC/scripts/requirements.txt" ]; then
+    echo "找不到 $SKILL_SRC/scripts/requirements.txt，請確認安裝包完整。"; exit 1
+fi
+
+echo ""
+echo "╔════════════════════════════════════════════╗"
+echo "║   audio-to-md 安裝程式 v1.2.0              ║"
+echo "║   影音 → 逐字稿知識庫（本地 Whisper turbo）  ║"
+echo "╚════════════════════════════════════════════╝"
+echo ""
+
+# ── Step 1/4：Python ───────────────────────────────────────────────────────
+echo "🔍 Step 1/4：檢查 Python 版本..."
+PY=""
+
+OS_NAME="$(uname -s 2>/dev/null || echo unknown)"
+MAC_MAJOR=0
+if [ "$OS_NAME" = "Darwin" ] && command -v sw_vers >/dev/null 2>&1; then
+    MAC_MAJOR="$(sw_vers -productVersion 2>/dev/null | cut -d. -f1)"
+fi
+MAX_PY_MINOR=14
+if [ "$OS_NAME" = "Darwin" ] && [ "${MAC_MAJOR:-0}" -lt 14 ] 2>/dev/null; then
+    # onnxruntime/faster-whisper wheels are most reliable on older macOS with Python 3.9-3.12.
+    MAX_PY_MINOR=12
+fi
+
+supports_python_version() {
+    major="$1"
+    minor="$2"
+    [ "$major" -eq 3 ] 2>/dev/null && [ "$minor" -ge 9 ] 2>/dev/null && [ "$minor" -le "$MAX_PY_MINOR" ] 2>/dev/null
+}
+
+for cmd in python3.12 python3.11 python3.10 python3.9 python3.14 python3.13 python3; do
+    if command -v "$cmd" &>/dev/null; then
+        ver=$("$cmd" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
+        major=$(echo "$ver" | cut -d. -f1); minor=$(echo "$ver" | cut -d. -f2)
+        if supports_python_version "$major" "$minor"; then
+            PY="$cmd"; echo "   ✅ 找到 $cmd (Python $ver)"; break
+        else
+            echo "   ⏭️  $cmd 版本 $ver 不在本工具支援範圍，跳過"
+        fi
+    fi
+done
+if [ -z "$PY" ]; then
+    echo "   ❌ 找不到相容的 Python"
+    echo "   👉 前往 https://www.python.org/downloads/ 下載 Python 3.12，裝完重開 Terminal 再執行"
+    if [ "$OS_NAME" = "Darwin" ] && [ "${MAC_MAJOR:-0}" -lt 14 ] 2>/dev/null; then
+        echo "   ℹ️  你的 macOS 較舊，請使用 Python 3.12，避免 3.13+ 的 onnxruntime 相容性問題。"
+    fi
+    open "https://www.python.org/downloads/" 2>/dev/null || true; exit 1
+fi
+
+# ── Step 2/4：venv ─────────────────────────────────────────────────────────
+echo ""
+echo "📦 Step 2/4：建立虛擬環境..."
+mkdir -p "$INSTALL_DIR"
+if [ -x "$INSTALL_DIR/venv/bin/python3" ]; then
+    venv_ver=$("$INSTALL_DIR/venv/bin/python3" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null || echo "0.0")
+    venv_major=$(echo "$venv_ver" | cut -d. -f1); venv_minor=$(echo "$venv_ver" | cut -d. -f2)
+    if supports_python_version "$venv_major" "$venv_minor"; then
+        echo "   ⏭️  虛擬環境已存在，跳過"
+    else
+        echo "   ⚠ 舊虛擬環境 Python $venv_ver 不相容，重新建立..."
+        rm -rf "$INSTALL_DIR/venv"
+    fi
+elif [ -d "$INSTALL_DIR/venv" ]; then
+    echo "   ⚠ 舊虛擬環境不完整，重新建立..."
+    rm -rf "$INSTALL_DIR/venv"
+fi
+if [ ! -x "$INSTALL_DIR/venv/bin/python3" ]; then
+    "$PY" -m venv "$INSTALL_DIR/venv"
+    echo "   ✅ $INSTALL_DIR/venv"
+fi
+
+# ── Step 3/4：套件（faster-whisper，內含 PyAV 可直接解影音）──────────────────
+echo ""
+echo "📥 Step 3/4：安裝 faster-whisper（含影音解碼，可能 1-3 分鐘）..."
+"$INSTALL_DIR/venv/bin/pip" install --upgrade pip --quiet 2>/dev/null
+if ! "$INSTALL_DIR/venv/bin/pip" install -r "$SKILL_SRC/scripts/requirements.txt" --quiet; then
+    echo "   ❌ 套件安裝失敗。請確認 Python 版本為 3.12，或截圖回報老師。"
+    exit 1
+fi
+echo "   ✅ 套件安裝完成"
+
+cp "$SKILL_SRC/scripts/audio_to_md.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/requirements.txt" "$INSTALL_DIR/"
+cat > "$INSTALL_DIR/audio-to-md" << 'LAUNCHER'
+#!/bin/bash
+DIR="$HOME/.audio-to-md"
+"$DIR/venv/bin/python3" "$DIR/audio_to_md.py" "$@"
+LAUNCHER
+chmod +x "$INSTALL_DIR/audio-to-md"
+
+# 拖檔啟動器放置：自適應專案 reference 目錄，不再強制放桌面
+DESKTOP_CMD_SRC="$SKILL_SRC/scripts/transcribe.command"
+if [ -f "$DESKTOP_CMD_SRC" ]; then
+    if [ -d "$PWD/200_Reference" ]; then
+        TARGET_DIR="$PWD/200_Reference/scripts"
+        mkdir -p "$TARGET_DIR"
+        cp "$DESKTOP_CMD_SRC" "$TARGET_DIR/轉逐字稿.command"
+        chmod +x "$TARGET_DIR/轉逐字稿.command"
+        echo "   ✅ 偵測到專案目錄，已建立啟動器：200_Reference/scripts/轉逐字稿.command"
+    else
+        if [ -d "$HOME/Desktop" ]; then
+            cp "$DESKTOP_CMD_SRC" "$HOME/Desktop/轉逐字稿.command"
+            chmod +x "$HOME/Desktop/轉逐字稿.command"
+            echo "   ✅ 偵測非專案目錄，已在桌面建立啟動器：轉逐字稿.command"
+        fi
+    fi
+fi
+
+SHELL_RC=""
+if [ -f "$HOME/.zshrc" ]; then SHELL_RC="$HOME/.zshrc"
+elif [ -f "$HOME/.bash_profile" ]; then SHELL_RC="$HOME/.bash_profile"
+elif [ -f "$HOME/.bashrc" ]; then SHELL_RC="$HOME/.bashrc"; fi
+if [ -n "$SHELL_RC" ] && ! grep -q "audio-to-md" "$SHELL_RC" 2>/dev/null; then
+    { echo ""; echo '# audio-to-md'; echo 'export PATH="$HOME/.audio-to-md:$PATH"'; } >> "$SHELL_RC"
+fi
+
+# ── Step 4/4：預先下載 Whisper turbo 模型（約 1.5GB）─────────────────────────
+echo ""
+echo "🧠 Step 4/4：下載 Whisper turbo 模型（large-v3-turbo，約 1.5GB）..."
+echo "   ⏳ 這是 audio-to-md 比文字工具多的一步，第一次需要幾分鐘，請耐心等。"
+echo "      （中文一律用 turbo＝品質底線，不降級成小模型）"
+set +e   # 模型下載失敗（網路中斷）不應中止整個安裝；第一次使用時會自動補下載
+"$INSTALL_DIR/venv/bin/python3" - "$WHISPER_MODEL" << 'PYDL'
+import sys
+from faster_whisper import WhisperModel
+WhisperModel(sys.argv[1], device="cpu", compute_type="int8")
+print("   ✅ 模型已就緒：" + sys.argv[1])
+PYDL
+DL_RC=$?
+set -e
+if [ "$DL_RC" -ne 0 ]; then
+    echo "   ⚠ 模型這次沒下載完（多半是網路）——不影響安裝，第一次轉檔時會自動補下載，或重跑本安裝程式。"
+fi
+
+# ── 驗證 ────────────────────────────────────────────────────────────────────
+echo ""
+echo "🧪 驗證安裝..."
+"$INSTALL_DIR/venv/bin/python3" -c "import faster_whisper, av, ctranslate2; print('   核心套件 OK')"
+"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/audio_to_md.py" --help >/dev/null 2>&1 && echo "   ✅ 驗證通過！"
+
+echo ""
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║                      🎉 安裝完成！                          ║"
+echo "╠══════════════════════════════════════════════════════════════╣"
+echo "║  在 Claude Desktop 加入技能：                                ║"
+echo "║  1. Customize → Skills → + 號 → Create Skill → Upload       ║"
+echo "║  2. 上傳此技能目錄即可使用                                   ║"
+echo "║                                                            ║"
+echo "║  最簡單用法：                                               ║"
+echo "║  雙擊 200_Reference/scripts/轉逐字稿.command 啟動器         ║"
+echo "║  把影音拖進去按 Enter。輸出的 md 會在原始檔旁邊。            ║"
+╚══════════════════════════════════════════════════════════════╝
+echo ""
+echo "  拿到 .md 後拖回 Claude，說「幫我校稿並完成這份逐字稿知識庫」。"
+echo "  🔧 也可手動：$INSTALL_DIR/audio-to-md ~/Desktop/錄音.m4a"
+echo ""
+CODEX_LAZYPACK_AUDIO_TO_MD_INSTALL_SH
+
+# audio-to-md/scripts/install.bat
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/install.bat")"
+cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/install.bat" <<'CODEX_LAZYPACK_AUDIO_TO_MD_INSTALL_BAT'
+@echo off
+chcp 65001 >nul 2>nul
+setlocal EnableExtensions EnableDelayedExpansion
+rem ASCII-ONLY: a .bat with Chinese bytes mis-parses on Big5/zh-TW (DBCS) consoles.
+rem PYTHONUTF8 so embedded python -c Chinese output won't UnicodeEncodeError on cp1252.
+set "PYTHONUTF8=1"
+set "PYTHONIOENCODING=utf-8"
+title audio-to-md installer v1.2.0
+
+echo.
+echo ============================================================
+echo   audio-to-md installer v1.2.0
+echo   audio/video -^> transcript knowledge base (local Whisper)
+echo ============================================================
+echo.
+
+set "INSTALL_DIR=%USERPROFILE%\.audio-to-md"
+set "SCRIPT_DIR=%~dp0"
+set "EXTRACT_DIR="
+set "VENV_PY=%INSTALL_DIR%\venv\Scripts\python.exe"
+set "WHISPER_MODEL=large-v3-turbo"
+
+rem 支援自足安裝：偵測是否在技能資料夾中執行
+set "SKILL_SRC=%SCRIPT_DIR%.."
+if not exist "%SKILL_SRC%\SKILL.md" (
+    if exist "%SCRIPT_DIR%audio_to_md.py" (
+        set "SKILL_SRC=%SCRIPT_DIR%"
+    ) else (
+        if not exist "%SCRIPT_DIR%skill.zip" (
+            echo skill.zip not found. Please extract the whole installer package first.
+            pause & exit /b 1
+        )
+        set "EXTRACT_DIR=%TEMP%\audio-to-md-skill-%RANDOM%%RANDOM%"
+        set "ATM_ZIP=%SCRIPT_DIR%skill.zip"
+        set "ATM_EXTRACT=!EXTRACT_DIR!"
+        echo [prep] extracting skill files...
+        powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath $env:ATM_ZIP -DestinationPath $env:ATM_EXTRACT -Force" >nul
+        if errorlevel 1 ( echo Failed to extract skill.zip. Extract the whole package first. & pause & exit /b 1 )
+        set "SKILL_SRC=!EXTRACT_DIR!\skill"
+    )
+)
+if not exist "%SKILL_SRC%\scripts\requirements.txt" (
+    echo Not found: %SKILL_SRC%\scripts\requirements.txt . Package incomplete.
+    pause & exit /b 1
+)
+
+echo [Step 1/4] Checking Python...
+set "PY_CMD="
+set "PY_VER="
+call :try_python py -3.12
+call :try_python py -3.11
+call :try_python py -3.10
+call :try_python py -3.9
+call :try_python py -3.14
+call :try_python py -3.13
+call :try_python py -3
+call :try_python python
+call :try_python python3
+if "%PY_CMD%"=="" (
+    echo No compatible Python found. Install Python 3.12 from https://www.python.org/downloads/
+    echo Tick "Add Python to PATH", reopen this window, then run again.
+    start https://www.python.org/downloads/
+    pause & exit /b 1
+)
+echo    Found Python %PY_VER%: %PY_CMD%
+
+echo.
+echo [Step 2/4] Creating virtual environment...
+if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+if exist "%VENV_PY%" (
+    "%VENV_PY%" -c "import sys; raise SystemExit(0 if (3,9) <= sys.version_info[:2] <= (3,14) else 1)" >nul 2>nul
+    if errorlevel 1 ( echo    old env invalid, rebuilding... & rmdir /S /Q "%INSTALL_DIR%\venv" >nul 2>nul ) else ( echo    exists, skip )
+)
+if not exist "%VENV_PY%" (
+    %PY_CMD% -m venv "%INSTALL_DIR%\venv"
+    if errorlevel 1 ( echo    venv creation failed, screenshot for teacher. & pause & exit /b 1 )
+)
+
+echo.
+echo [Step 3/4] Installing faster-whisper (may take 1-3 min)...
+"%VENV_PY%" -m pip install --upgrade pip --quiet
+"%VENV_PY%" -m pip install -r "%SKILL_SRC%\scripts\requirements.txt" --quiet
+if errorlevel 1 ( echo    install failed, screenshot for teacher. & pause & exit /b 1 )
+echo    packages installed
+
+copy /Y "%SKILL_SRC%\scripts\audio_to_md.py" "%INSTALL_DIR%\" >nul
+if errorlevel 1 ( echo    copy audio_to_md.py failed, screenshot for teacher. & pause & exit /b 1 )
+copy /Y "%SKILL_SRC%\scripts\requirements.txt" "%INSTALL_DIR%\" >nul
+if errorlevel 1 ( echo    copy requirements.txt failed, screenshot for teacher. & pause & exit /b 1 )
+if not exist "%INSTALL_DIR%\audio_to_md.py" ( echo    installed audio_to_md.py missing, screenshot for teacher. & pause & exit /b 1 )
+(
+echo @echo off
+echo "%VENV_PY%" "%INSTALL_DIR%\audio_to_md.py" %%*
+) > "%INSTALL_DIR%\audio-to-md.bat"
+
+rem -- drag-and-drop launcher + reference scripts copy --
+set "DND_OK="
+set "CP_RC=2"
+if exist "%SKILL_SRC%\scripts\transcribe.bat" (
+    set "CP_RC=0"
+    copy /Y "%SKILL_SRC%\scripts\transcribe.bat" "%INSTALL_DIR%\" >nul
+    if errorlevel 1 set "CP_RC=1"
+)
+if "%CP_RC%"=="2" echo    scripts\transcribe.bat missing - skipping drag launcher; audio-to-md.bat still works
+if "%CP_RC%"=="1" echo    WARN: copy drag launcher failed - antivirus or permission or sync; audio-to-md.bat still works.
+if "%CP_RC%"=="0" if exist "%INSTALL_DIR%\transcribe.bat" set "DND_OK=1"
+
+if defined DND_OK (
+    if exist "%CD%\200_Reference" (
+        if not exist "%CD%\200_Reference\scripts" mkdir "%CD%\200_Reference\scripts"
+        copy /Y "%INSTALL_DIR%\transcribe.bat" "%CD%\200_Reference\scripts\轉逐字稿.bat" >nul
+        echo    Found project workspace. Placed drag launcher at: 200_Reference\scripts\轉逐字稿.bat
+    ) else (
+        if exist "%SKILL_SRC%\scripts\place_desktop_launcher.ps1" (
+            echo    placing desktop drag launcher...
+            powershell -NoProfile -ExecutionPolicy Bypass -File "%SKILL_SRC%\scripts\place_desktop_launcher.ps1"
+        )
+    )
+)
+
+echo.
+echo [Step 4/4] Downloading Whisper turbo model (large-v3-turbo, ~1.5GB)...
+echo    First time takes a few minutes, please wait.
+"%VENV_PY%" -c "from faster_whisper import WhisperModel; WhisperModel('%WHISPER_MODEL%', device='cpu', compute_type='int8'); print('   model ready: %WHISPER_MODEL%')"
+if errorlevel 1 ( echo    model download failed - network issue? will auto-download on first use. )
+
+echo.
+echo Verifying...
+"%VENV_PY%" -c "import faster_whisper, av, ctranslate2; print('   core packages OK')"
+if errorlevel 1 ( echo    package import failed, screenshot for teacher. & pause & exit /b 1 )
+"%VENV_PY%" "%INSTALL_DIR%\audio_to_md.py" --help >nul
+if errorlevel 1 ( echo    audio_to_md.py verify failed, screenshot for teacher. & pause & exit /b 1 )
+if defined EXTRACT_DIR rmdir /S /Q "%EXTRACT_DIR%" >nul 2>nul
+
+echo    Verified!
+echo.
+echo ============================================================
+echo   Installation complete!
+echo ============================================================
+echo.
+echo This install has TWO parts (both needed):
+echo.
+echo [Part 1 - local engine] Done (this is what install.bat did).
+echo    Easiest use: drag a video/audio file onto the launcher.
+echo    If installed inside a project, it's at: 200_Reference\scripts\轉逐字稿.bat
+echo    Otherwise, check Desktop for the bat launcher.
+echo.
+echo [Part 2 - Claude skill] Add it in Claude Desktop:
+echo    1. Customize - Skills - + - Create Skill - Upload a skill
+echo    2. upload this skill directory
+echo    3. confirm "audio-to-md" appears in Skills
+echo.
+pause
+exit /b 0
+
+:try_python
+if defined PY_CMD exit /b 0
+for /f "usebackq tokens=1,2 delims=|" %%v in (`%* -c "import sys; exe=sys.executable; ok=(3,9) <= sys.version_info[:2] <= (3,14) and 'WindowsApps' not in exe; print(f'{sys.version_info.major}.{sys.version_info.minor}|{exe}' if ok else '')" 2^>nul`) do (
+    set "PY_CMD=%*"
+    set "PY_VER=%%v"
+)
+exit /b 0
+CODEX_LAZYPACK_AUDIO_TO_MD_INSTALL_BAT
+
+# audio-to-md/scripts/transcribe.command
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.command")"
+cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.command" <<'CODEX_LAZYPACK_AUDIO_TO_MD_TRANSCRIBE_COMMAND'
+#!/bin/bash
+# audio-to-md｜雙擊我，把影片/錄音檔拖進視窗按 Enter，就會轉成逐字稿知識庫。
+DIR="$HOME/.audio-to-md"
+
+if [ ! -x "$DIR/venv/bin/python3" ] || [ ! -f "$DIR/audio_to_md.py" ]; then
+    echo "找不到本機引擎（$DIR）。"
+    echo "請先跑安裝包的 install.sh 安裝一次，再用這個檔。"
+    read -r -p "按 Enter 關閉..." _
+    exit 1
+fi
+
+echo "============================================================"
+echo " audio-to-md 拖檔轉逐字稿"
+echo "============================================================"
+echo "把影片或錄音檔『拖進這個視窗』，然後按 Enter："
+read -r -e f
+
+# 去掉拖檔可能帶上的外層引號；否則把反斜線跳脫（空格/括號/&/'…）還原
+f="${f# }"; f="${f% }"
+if [ "${f#\"}" != "$f" ] && [ "${f%\"}" != "$f" ]; then
+    f="${f#\"}"; f="${f%\"}"
+elif [ "${f#\'}" != "$f" ] && [ "${f%\'}" != "$f" ]; then
+    f="${f#\'}"; f="${f%\'}"
+else
+    # Terminal 拖檔會把空格、括號、&、單引號等用反斜線跳脫 → 一律還原
+    f="$(printf '%s' "$f" | sed -E 's/\\(.)/\1/g')"
+fi
+
+if [ -z "$f" ] || [ ! -f "$f" ]; then
+    echo "沒有收到有效的檔案路徑。"
+    read -r -p "按 Enter 關閉..." _
+    exit 1
+fi
+
+outdir="$(dirname "$f")"
+echo ""
+echo "轉錄中：$(basename "$f")"
+echo "（第一次會下載語音模型約 1.5GB，需幾分鐘，請耐心等；之後就快）"
+"$DIR/venv/bin/python3" "$DIR/audio_to_md.py" "$f" -o "$outdir"
+rc=$?
+echo ""
+if [ "$rc" -eq 0 ]; then
+    open "$outdir" 2>/dev/null
+    echo "✅ 完成。輸出的『*_逐字稿知識庫.md』就在原始檔旁邊。"
+    echo "下一步：把那個 .md 拖回 Claude，說"
+    echo "「幫我校稿並完成這份逐字稿知識庫（簡繁/錯字/斷句＋段落摘要＋重點）」"
+else
+    echo "⚠ 轉檔沒成功，請截圖這個視窗回報老師。"
+fi
+echo ""
+read -r -p "按 Enter 關閉..." _
+CODEX_LAZYPACK_AUDIO_TO_MD_TRANSCRIBE_COMMAND
+
+# audio-to-md/scripts/transcribe.bat
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.bat")"
+cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.bat" <<'CODEX_LAZYPACK_AUDIO_TO_MD_TRANSCRIBE_BAT'
+@echo off
+chcp 65001 >nul 2>nul
+setlocal EnableExtensions
+title Drag-to-Transcribe (audio-to-md)
+
+rem ASCII-ONLY on purpose. A .bat that contains Chinese bytes mis-parses on Big5/zh-TW
+rem (DBCS codepage) consoles: cmd reads the file under the system codepage and the
+rem multibyte sequences desync line parsing (setlocal -> "tlocal", echo -> "ho", etc).
+rem Rich Chinese guidance is printed by audio_to_md.py (UTF-8 safe). chcp 65001 here is
+rem only so Python's Chinese OUTPUT displays correctly; this .bat itself stays ASCII.
+
+set "DIR=%USERPROFILE%\.audio-to-md"
+set "PY=%DIR%\venv\Scripts\python.exe"
+set "LOG=%DIR%\last_run.log"
+set "FAIL=0"
+set "DONE=0"
+>"%LOG%" echo [start] %DATE% %TIME% first="%~1" 2>nul
+
+if not exist "%PY%" (
+    call :logf "[error] engine-missing" "%PY%"
+    echo.
+    echo Engine not found at: %DIR%
+    echo Please run install.bat once first, then use this launcher.
+    echo.
+    pause
+    exit /b 1
+)
+
+if "%~1"=="" (
+    >>"%LOG%" echo [info] no file dropped 2>nul
+    echo.
+    echo HOW TO USE: drag a video/audio file ONTO this file and release.
+    echo Use drag-and-drop. Double-click does NOT pass a file.
+    echo.
+    pause
+    exit /b 0
+)
+
+:loop
+if "%~1"=="" goto done
+call :logf "[file]" "%~nx1"
+echo.
+echo ============================================================
+call :show "Transcribing" "%~nx1"
+echo (First run downloads the speech model ~1.5GB; please wait.)
+echo ============================================================
+rem Strip trailing backslash from %~dp1: otherwise -o "C:\folder\" makes \" an escaped
+rem quote and Python gets an invalid path (Windows C-runtime quoting trap).
+set "ODIR=%~dp1"
+if "%ODIR:~-1%"=="\" set "ODIR=%ODIR:~0,-1%"
+"%PY%" "%DIR%\audio_to_md.py" "%~1" -o "%ODIR%"
+if errorlevel 1 (
+    call :logf "[fail]" "%~nx1"
+    call :show "[X] FAILED" "%~nx1"
+    set /a FAIL+=1
+) else (
+    call :logf "[ok]" "%~nx1"
+    call :show "[OK] done" "%~nx1"
+    set /a DONE+=1
+    start "" "%ODIR%"
+)
+shift
+goto loop
+
+:done
+>>"%LOG%" echo [done] DONE=%DONE% FAIL=%FAIL% 2>nul
+echo.
+echo ------------------------------------------------------------
+if %FAIL% gtr 0 (
+    echo Done %DONE%, failed %FAIL%. Please screenshot this window for your teacher.
+    echo Details: %LOG%
+) else (
+    echo All done ^(%DONE% file^(s^)^).
+)
+echo The transcript .md is saved NEXT TO your original file.
+echo Next step: drag that .md back into Claude to proofread/summarize.
+echo ------------------------------------------------------------
+echo.
+pause
+exit /b 0
+
+rem -- safe display of "label: name" (name may contain & ^| ^< ^>) --
+:show
+setlocal EnableDelayedExpansion
+set "label=%~1"
+set "name=%~2"
+echo !label!: !name!
+endlocal
+goto :eof
+
+rem -- safe log append (caller quotes the name; safe even inside () blocks / names with ) ) --
+:logf
+>>"%LOG%" echo %~1 %~2 2>nul
+goto :eof
+CODEX_LAZYPACK_AUDIO_TO_MD_TRANSCRIBE_BAT
+
+# audio-to-md/scripts/place_desktop_launcher.ps1
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/place_desktop_launcher.ps1")"
+cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/place_desktop_launcher.ps1" <<'CODEX_LAZYPACK_AUDIO_TO_MD_PLACE_DESKTOP_LAUNCHER_PS1'
+# 把拖檔啟動器「直接放到桌面」成一個可拖放的 .bat（不用捷徑 .lnk）。
+# 為什麼不用捷徑：把檔案拖到「.bat 本體」上，Windows 才會可靠地把它當 %1 參數傳入；
+# 拖到「指向 .bat 的捷徑」在實機上不一定會傳參數（學員回報：視窗一閃就關、沒輸出）。
+# 本檔以 UTF-8 (含 BOM) 儲存，讓 Windows PowerShell 5.1 也能正確讀中文/emoji。
+# 用 GetFolderPath('Desktop') 取正確桌面（含 OneDrive 重新導向）；Copy-Item 為 Unicode-safe。
+$ErrorActionPreference = 'Stop'
+$installDir = Join-Path $env:USERPROFILE '.audio-to-md'
+$src        = Join-Path $installDir 'transcribe.bat'
+try {
+    if (-not (Test-Path $src)) {
+        Write-Host "   找不到 $src，略過放桌面啟動器。"
+        exit 0
+    }
+    $desktop = [Environment]::GetFolderPath('Desktop')
+    if ([string]::IsNullOrEmpty($desktop)) { $desktop = Join-Path $env:USERPROFILE 'Desktop' }
+    # 清掉舊版留下的壞捷徑(.lnk)：否則桌面會同時有 .lnk 和 .bat，隱藏副檔名時看起來一樣、學員會點到壞的那個。
+    $oldLnk = Join-Path $desktop '🎤 拖檔轉逐字稿.lnk'
+    if (Test-Path -LiteralPath $oldLnk) { Remove-Item -LiteralPath $oldLnk -Force -ErrorAction SilentlyContinue; Write-Host "   （已移除舊版桌面捷徑 .lnk）" }
+    $dest = Join-Path $desktop '🎤 拖檔轉逐字稿.bat'
+    Copy-Item -LiteralPath $src -Destination $dest -Force
+    Write-Host "   ✅ 桌面已放可拖放啟動器：🎤 拖檔轉逐字稿.bat"
+} catch {
+    Write-Host "   （桌面啟動器沒放成功，不影響使用：$($_.Exception.Message)）"
+    Write-Host "   你仍可用：$src（把檔案拖上去）"
+    exit 0
+}
+CODEX_LAZYPACK_AUDIO_TO_MD_PLACE_DESKTOP_LAUNCHER_PS1
+
 echo "audio-to-md skill installed at {{CODEX_HOME}}/skills/audio-to-md"
 ````
 
