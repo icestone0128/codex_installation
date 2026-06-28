@@ -412,6 +412,7 @@ Codex workspace sandboxing can hide Metal and make `torch.backends.mps.is_availa
 - In-app Browser has no WebRTC microphone: use **開始本機錄音** in the UI. It records through the local Python backend and returns the result to the browser for preview and profile storage. `scripts/record_cli.py` remains the terminal fallback.
 - Port 7860 occupied: choose another loopback port with `--port`.
 - PyTorch or VoxCPM update: refresh in the isolated environment, then run `doctor` and one authorized short synthesis before updating the pinned version.
+- Dependency conflicts: `librosa` depends on `numba` which strictly requires `numpy<=2.4`. If packages automatically upgrade to `numpy>=2.5` (e.g., during `soundfile` or other updates), it raises `ImportError: Numba needs NumPy 2.4 or less`. Pin `numpy<2.5.0` to resolve. Also ensure `six` and `brotli` are installed if Gradio or other dependencies raise `ModuleNotFoundError`.
 
 ## Validated Apple Silicon Result
 
@@ -485,6 +486,9 @@ if [ ! -x "$VENV/bin/python" ]; then
 fi
 
 uv pip install --python "$VENV/bin/python" \
+  "numpy<2.5.0" \
+  "six" \
+  "brotli" \
   "voxcpm==2.0.3" \
   "gradio>=5,<7" \
   "sounddevice>=0.5,<1" \
