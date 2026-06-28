@@ -61,6 +61,8 @@ codex-skill-creator
 
 ```text
 {{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md
+{{CODEX_HOME}}/skills/codex-skill-creator/agents/openai.yaml
+{{CODEX_HOME}}/skills/codex-skill-creator/references/built-in-quality-practices.md
 {{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
 {{CODEX_HOME}}/skills/codex-skill-creator/references/conversation-to-skill.md
 ```
@@ -75,6 +77,9 @@ codex-skill-creator
 - 沒有結構化選項 UI 時，改用簡短編號選項或一次一題的純文字訪談，不中斷工作流。
 - 目標 skill 已存在時，先讀取並判斷是局部修正、完整更新、改名或無需修改；完整替換與改名前先建 timestamped backup 或確認版本控制可回復。
 - 建立檔案不算完成；必須用一組代表性輸入實際觸發並驗證輸出。
+- 新建 skill 時，優先使用系統內建 `init_skill.py` 建立標準骨架；更新後使用 `quick_validate.py`，並維護 `agents/openai.yaml`。
+- 依任務脆弱度選擇高／中／低自由度；`SKILL.md` 採漸進揭露，詳細內容移入直接連結的 `references/`。
+- 複雜或高影響 skill 在能力可用時進行無答案洩漏的 forward-test；若測試耗時、需額外核准或會碰觸 live system，先取得使用者同意。
 
 ## Skill 養成節奏
 
@@ -124,6 +129,8 @@ test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skil
 ```text
 <skill-name>/
 ├── SKILL.md
+├── agents/
+│   └── openai.yaml  # 建議的 Codex UI metadata
 ├── references/
 ├── scripts/
 └── assets/
@@ -134,6 +141,10 @@ test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skil
 - `SKILL.md` 保持精簡，放觸發、路徑、流程與安全規則。
 - 長範例、來源轉換表、模板放 `references/`。
 - 只有需要穩定重複執行的檢查或轉換，才放 `scripts/`。
+- 新建 skill 優先用 `.system/skill-creator/scripts/init_skill.py`；驗證優先用 `quick_validate.py`。
+- 執行 validator 前先確認該 Python 可 `import yaml`；預設 Python 缺 PyYAML 時，改用已有依賴的 interpreter 並回報 fallback，不靜默略過驗證。
+- `agents/openai.yaml` 的 `default_prompt` 必須使用真實 `$skill-name`，且重大修改後要重新核對。
+- `SKILL.md` 實務上維持在 500 行內，references 直接由 `SKILL.md` 連結，避免多層追索。
 - 不額外建立 README、安裝指南、變更紀錄，除非使用者明確要求。
 
 ## Frontmatter 範本
@@ -272,6 +283,8 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
    - `description` 有明確觸發情境。
    - 引用的 `references/` 檔案存在。
    - 沒有 來源工具的 skills 路徑、`allowed-tools`、`disable-model-invocation`、`user-invocable` 等 來源工具專用 正式設定。
+   - `agents/openai.yaml` 與 `SKILL.md` 一致，且已執行系統內建 `quick_validate.py`（若可用）。
+   - 新增 scripts 已實際執行；複雜 skill 已做獨立 forward-test，或記錄無法執行的原因與 fallback。
 4. 開新 Codex 對話，使用自然語言觸發該 skill 的任務。
 5. 確認可攜式版本完整：全域 skill 同步 `本文件文末內嵌內容：<skill-name>`；專案 skill 保留在 `<project-root>/000_Agent/skills/<skill-name>`。
 6. 同步 Obsidian 全域 Skills 索引、專案駕駛艙或專案 README。
@@ -299,8 +312,9 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 4. 若是第一個真實工作 skill，先做簡短訪談。
 5. 判斷 skill 歸屬，建立或更新 `{{CODEX_HOME}}/skills/<skill-name>` 或 `<project-root>/000_Agent/skills/<skill-name>`。
 6. 驗證 frontmatter、路徑與 reference。
-7. 同步可攜式版本：全域同步 LazyPack 與 Obsidian 全域 Skills；專案同步專案 `000_Agent/skills` 與專案駕駛艙。
-8. 回報是否需要開新對話或重啟 Codex App。
+7. 若系統 helper 可用，執行 `init_skill.py`／`generate_openai_yaml.py`／`quick_validate.py` 對應步驟，並視複雜度做 forward-test。
+8. 同步可攜式版本：全域同步 LazyPack 與 Obsidian 全域 Skills；專案同步專案 `000_Agent/skills` 與專案駕駛艙。
+9. 回報是否需要開新對話或重啟 Codex App。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
@@ -391,6 +405,21 @@ Choose the branch before writing files:
 
 For field-by-field conversion details, read `references/codex-bootstrap-adapter.md` when the source material is 來源工具導向 or third-party-specific.
 
+Before creating or substantially redesigning a skill, read `references/built-in-quality-practices.md`. It integrates the quality controls from Codex's built-in `skill-creator` while keeping this skill as the single user-facing entry workflow.
+
+## Design Quality Rules
+
+- Start from concrete trigger examples and expected outputs. Skip discovery only when existing usage already makes them unambiguous.
+- Choose the appropriate degree of freedom:
+  - high freedom for judgment-heavy guidance with several valid approaches
+  - medium freedom for preferred patterns with controlled variation
+  - low freedom for fragile, repetitive, or safety-critical operations that need deterministic scripts
+- Use progressive disclosure: metadata is always visible, `SKILL.md` is loaded on trigger, and detailed references are loaded only when needed.
+- Keep `SKILL.md` under 500 lines when practical. Move schemas, long examples, provider variants, and deep checklists into directly linked `references/` files; avoid reference chains deeper than one level.
+- Do not add auxiliary `README.md`, installation guides, changelogs, or placeholder resource files unless they are required by the skill's actual operation or explicitly requested.
+- Create only the resource directories the skill needs. Repeated deterministic work belongs in `scripts/`; domain guidance belongs in `references/`; output templates and media belong in `assets/`.
+- Treat `agents/openai.yaml` as recommended UI metadata. Keep it aligned with `SKILL.md`, quote string values, and make `default_prompt` explicitly mention `$<skill-name>`.
+
 ## Workflow
 
 1. Identify the target:
@@ -399,6 +428,9 @@ For field-by-field conversion details, read `references/codex-bootstrap-adapter.
    - Existing custom skill: read the current skill first, then patch only the needed sections.
    - Built-in system skill: do not patch; create a companion custom skill or a reference note.
    - Confirm that this request is being handled through `codex-skill-creator`; do not hand custom-skill ownership to the built-in creator.
+   - For a new skill, normalize the name to lowercase hyphen-case, keep it at 64 characters or fewer, and use the built-in initializer when available:
+     `python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/init_skill.py" <skill-name> --path <parent> [--resources ...] --interface ...`.
+   - If the built-in initializer is unavailable, create the same minimal structure manually and record that fallback in the result.
 2. Extract the useful workflow from the source material:
    - trigger scenarios
    - repeatable steps
@@ -417,6 +449,7 @@ For field-by-field conversion details, read `references/codex-bootstrap-adapter.
    - `references/` for detailed adapted source notes
    - `scripts/` only when deterministic checks are genuinely useful
    - `assets/` only when files are used in final outputs
+   - `agents/openai.yaml` for UI metadata unless the current environment does not support it; generate it with the built-in helper when available and verify it after substantial `SKILL.md` changes
    - if replacing an existing package, preserve or back up the previous package before the replacement
 5. Validate:
    - `SKILL.md` exists
@@ -427,6 +460,11 @@ For field-by-field conversion details, read `references/codex-bootstrap-adapter.
    - no 來源工具專用 path or field remains unless it is explicitly labeled as source-only context
    - personal paths are either replaced with portable placeholders or clearly labeled as this user's local defaults
    - no unresolved placeholders remain in active instructions unless they are intentionally part of a portable template
+   - run the built-in validator when available:
+     `python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>`
+   - before running it, confirm the selected interpreter can `import yaml`; if the default `python3` cannot, use another available interpreter with PyYAML and report the fallback rather than silently skipping validation
+   - test every added script directly; for several similar scripts, test a representative sample
+   - verify `agents/openai.yaml` still matches the skill name, purpose, and real invocation
 6. Sync portable copies and indexes:
    - Global skill: sync `{{SETUP_REPO}}/lazy-pack/<對應序號文件>` and the Obsidian global skill mirror note.
    - Project skill: keep the complete portable package under `<project-root>/000_Agent/skills/<skill-name>` and update the project cockpit.
@@ -437,6 +475,7 @@ For field-by-field conversion details, read `references/codex-bootstrap-adapter.
 8. Report the result with exact paths, ownership level, portable-copy status, and any restart requirement. New or changed global skills may require a new Codex conversation before the trigger list reflects them.
 9. Test discoverability with the real skill name: use `$<skill-name>` when explicit invocation is useful, or a natural-language trigger covered by the skill description.
 10. Complete one realistic trial with representative input. Creating files without a real trigger-and-output check is not a finished skill workflow.
+11. Forward-test complex or high-impact skills with a fresh independent agent when that capability is available. Give it the raw skill and a realistic user request, not the intended answer or suspected defect. Ask the user first if the test may take substantial time, require extra approvals, or touch live systems. If independent agents are unavailable, document the local realistic trial as the fallback.
 
 ## Interview Pattern For A First Skill
 
@@ -465,13 +504,137 @@ After the first skill is built:
 - `SKILL.md` frontmatter includes `name` and `description`.
 - `description` includes concrete trigger phrases and use cases.
 - Detailed material is in `references/`, not bloating `SKILL.md`.
+- The chosen instruction freedom matches task fragility; deterministic operations use scripts when appropriate.
+- New skills were initialized with the built-in helper when available, or the fallback was reported.
+- `agents/openai.yaml` exists when supported and remains aligned with `SKILL.md`.
+- The built-in `quick_validate.py` passed when available.
 - The skill avoids secrets, tokens, and personal data.
 - The user-facing creation or maintenance route is `codex-skill-creator`, not the built-in creator.
 - Explicit invocation uses the actual folder/frontmatter name, for example `$social-cards` or `$landing-page`; do not invent aliases that are not installed.
 - Existing skill replacement has a backup or version-control recovery path; narrow updates preserve unrelated files.
 - At least one realistic trigger-and-output trial was completed or the unperformed trial is explicitly reported.
+- Complex skills received an uncontaminated forward-test when available, or the fallback and reason were reported.
 - Obsidian mirror note is updated for global skill changes; project cockpit is updated for project-local skill changes.
 CODEX_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD
+
+# codex-skill-creator/agents/openai.yaml
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/agents/openai.yaml")"
+cat > "{{CODEX_HOME}}/skills/codex-skill-creator/agents/openai.yaml" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_AGENTS_OPENAI_YAML'
+interface:
+  display_name: "Codex Skill Creator"
+  short_description: "Create and maintain portable Codex skills"
+  default_prompt: "Use $codex-skill-creator to create or improve a portable Codex skill."
+CODEX_LAZYPACK_CODEX_SKILL_CREATOR_AGENTS_OPENAI_YAML
+
+# codex-skill-creator/references/built-in-quality-practices.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/references/built-in-quality-practices.md")"
+cat > "{{CODEX_HOME}}/skills/codex-skill-creator/references/built-in-quality-practices.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_BUILT_IN_QUALITY_PRACTICES_MD'
+# Built-in Skill Creator Quality Practices
+
+Use this reference when creating a new skill or substantially redesigning an existing one. It integrates the durable quality practices from Codex's built-in `skill-creator`; `codex-skill-creator` remains the single entry workflow and owns placement, portability, and synchronization.
+
+## 1. Start From Real Usage
+
+Collect or infer concrete examples of:
+
+- what the user says to trigger the skill
+- required inputs and source material
+- the expected output or action
+- decisions the skill must make
+- prohibited behavior and safety boundaries
+
+Do not prolong discovery when existing usage already answers these questions.
+
+## 2. Select The Degree Of Freedom
+
+- High freedom: use concise prose and heuristics when several approaches are valid.
+- Medium freedom: use preferred patterns, pseudocode, or parameterized helpers when some variation is acceptable.
+- Low freedom: use deterministic scripts and strict sequencing when the operation is fragile, repetitive, or costly to get wrong.
+
+The narrower the safe path, the more explicit the guardrails should be.
+
+## 3. Plan The Package
+
+For each example, identify reusable resources:
+
+- `scripts/`: repeated deterministic operations
+- `references/`: domain knowledge, schemas, detailed workflows, provider-specific guidance
+- `assets/`: templates, icons, fonts, media, or boilerplate copied into final outputs
+- `agents/openai.yaml`: recommended UI-facing metadata for skill lists and invocation chips
+
+Create only necessary directories. Avoid placeholder resources and auxiliary files such as `README.md`, installation guides, quick references, and changelogs unless the skill directly needs them.
+
+## 4. Initialize New Skills
+
+When the built-in helper exists, initialize a new skill with:
+
+```bash
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/init_skill.py" \
+  <skill-name> --path <parent-directory> \
+  [--resources scripts,references,assets] \
+  --interface display_name="<Display Name>" \
+  --interface short_description="<25-64 character UI description>" \
+  --interface default_prompt="Use $<skill-name> to <representative task>."
+```
+
+Rules:
+
+- normalize names to lowercase hyphen-case
+- keep names at 64 characters or fewer
+- make the folder name match frontmatter `name`
+- do not use `--examples` unless placeholder examples will be replaced or removed immediately
+- if the helper is unavailable, create the equivalent minimal package manually and report the fallback
+
+## 5. Write For Progressive Disclosure
+
+Use three levels:
+
+1. metadata: compact trigger routing that is always visible
+2. `SKILL.md`: essential procedure loaded when triggered
+3. resources: detailed material loaded or executed only when needed
+
+Keep `SKILL.md` under 500 lines when practical. Link required references directly from `SKILL.md`; avoid deep reference chains. For references longer than roughly 100 lines, add a short table of contents.
+
+## 6. Maintain UI Metadata
+
+When supported, generate or refresh `agents/openai.yaml` with:
+
+```bash
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/generate_openai_yaml.py" \
+  <skill-folder> \
+  --interface display_name="<Display Name>" \
+  --interface short_description="<25-64 character UI description>" \
+  --interface default_prompt="Use $<skill-name> to <representative task>."
+```
+
+Quote all string values. Include optional icons, brand colors, dependencies, or invocation policy only when they are real requirements. After substantial `SKILL.md` changes, verify that display name, description, and prompt still match the skill.
+
+## 7. Validate And Test
+
+Run the built-in validator when available:
+
+```bash
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>
+```
+
+First verify that the selected interpreter can `import yaml`. If the default `python3` lacks PyYAML, use another available interpreter that has it and report the fallback. Do not silently skip validation or install packages globally without considering the environment's package-management policy.
+
+Also verify:
+
+- every referenced file exists
+- scripts execute successfully; test a representative sample when several scripts share one pattern
+- placeholder files and TODO text are gone
+- no secret, token, private data, or unintended absolute personal path remains
+- one realistic trigger produces the expected output without relying on hidden conversation context
+
+## 8. Forward-Test Without Leaking The Answer
+
+For complex or high-impact skills, use a fresh independent agent when available. Pass the skill and a realistic user request, but do not provide the intended answer, suspected bug, or planned fix. Prefer raw prompts, artifacts, diffs, logs, or traces.
+
+Ask the user before forward-testing only when it may take substantial time, require additional approvals, or modify live systems. If independent agents are unavailable, perform and report a realistic local trial instead.
+
+Iterate from observed failures, then revalidate metadata, scripts, portable copies, and indexes.
+CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_BUILT_IN_QUALITY_PRACTICES_MD
 
 # codex-skill-creator/references/codex-bootstrap-adapter.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md")"
@@ -514,7 +677,7 @@ This reference adapts `02-skill-creator-bootstrap.md` for Codex App. The source 
 | alternate project discovery paths | Do not create them; this setup uses `<project-root>/000_Agent/skills` only |
 | slash command `/skill-name` | Use `$skill-name` with the actual installed name, or natural-language triggers; do not depend on aliases |
 | 來源工具 `AskUserQuestion` | Use an available structured question UI; otherwise continue with numbered choices or concise plain-text questions |
-| 來源工具 subagents in `agents/*.md` | Use Codex subagents only when explicitly authorized by the user; otherwise use local validation checklists |
+| 來源工具 subagents in `agents/*.md` | Do not copy the source configuration. For forward-testing, use a fresh Codex agent when available; ask first only when the test may be slow, require extra approvals, or touch live systems |
 | `allowed-tools` | Omit; Codex tool access is controlled by the session and plugin permissions |
 | `disable-model-invocation` / `user-invocable` | Omit; express trigger boundaries in `description` and body instructions |
 | Third-party or built-in creator install | Use `codex-skill-creator` as the required custom-skill workflow; consult other creator material only as supporting guidance |

@@ -387,6 +387,30 @@ unavailable, or the user explicitly requires local-only processing. If Local
 Whisper is used, local segment-level timestamps may be less precise than Groq
 word-level timestamps, so do not run `resegment.py` unless the JSON includes
 word timestamps.
+
+---
+
+## 🎬 Subtitle Burning (硬燒錄中文字幕)
+
+當使用者的系統環境中，`ffmpeg` 由於缺少編譯依賴而沒有內建 `subtitles` 濾鏡或 `drawtext` 濾鏡時，可以使用 OpenCV + Pillow 的跨平台 Python 方案將 SRT 字幕硬燒錄至影片中。
+
+### 依賴安裝
+```bash
+python3 -m pip install opencv-python pillow --break-system-packages
+```
+
+### 執行燒錄
+```bash
+python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/burn_subtitles.py" \
+  "working/<video-id>/<video-id>.cut.mp4" \
+  "working/<video-id>/<video-id>.srt" \
+  "output/<chosen-title>/<chosen-title>.mp4"
+```
+
+### 設計細節與自訂
+- **字型**：預設會優先讀取 macOS 系統的蘋方字型 (`PingFang.ttc`)，若在 Windows 或 Linux 上會自動 fallback 到 Arial 或是 Pillow 的預設字型。
+- **樣式**：在影片底部 12% 高度處，以 75% 不透明度的深灰色背景圓角卡片包覆暖白色文字，以確保不論背景明暗皆具備極高的可讀性。
+- **音軌保留**：腳本會自動將原影片的音軌以 `copy` 模式無損打包回最終輸出檔，畫質與音軌均保持一致。
 CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD
 
 # video-processing-automation/references/cover-style.md
@@ -703,11 +727,27 @@ first-pass edit before subtitle generation.
 Cut the raw video first, then transcribe the cut video. If subtitles are made
 from the raw video before cutting, timestamps will no longer align.
 
+## ⚠️ 重要踩坑與技術修正 (VFR / Stream Order Caveats)
+
+1. **影格率閃爍與綠屏問題 (VFR vs CFR)**：
+   iOS 螢幕錄影或某些直播存檔預設為**變動影格率 (VFR, Variable Frame Rate)**。直接使用 `auto-editor` 裁剪拼接會導致影格時間戳錯亂、播放時畫面嚴重閃爍。
+   **解決方法**：在剪輯前，必須先使用 `ffmpeg` 將影片轉檔為**固定影格率 (CFR, Constant Frame Rate)**：
+   ```bash
+   ffmpeg -y -i "raw/input.mov" -map 0:v -map 0:a -r 30 -vsync cfr "working/input_cfr.mp4"
+   ```
+2. **串流順序問題 (Stream Ordering)**：
+   `auto-editor` 預設要求影片的 **Stream 0 為 Video，Stream 1 為 Audio**。若影片為音訊在前的非標準格式，裁剪後會輸出沒有影像的損壞檔案。
+   上述 CFR 轉檔指令中的 `-map 0:v -map 0:a` 會自動將 Video 映射至 Stream 0、Audio 映射至 Stream 1，可一併解決此問題。
+
 ## Default Command
 
 ```bash
+# 1. 轉 CFR 固定影格率 (30fps)
+ffmpeg -y -i "raw/<video-id>/input.mp4" -map 0:v -map 0:a -r 30 -vsync cfr "working/<video-id>/input_cfr.mp4"
+
+# 2. 進行智慧裁剪 (--no-open 避免伺服器環境自動彈出播放器)
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py" \
-  "raw/<video-id>/input.mp4" \
+  "working/<video-id>/input_cfr.mp4" \
   --out "working/<video-id>/<video-id>.cut.mp4"
 ```
 
@@ -1398,6 +1438,7 @@ def main() -> None:
         str(args.input),
         "--margin", args.margin,
         "--edit", f"audio:threshold={args.threshold}",
+        "--no-open",
         "-o", str(args.out),
     ]
     print(f"[CMD] {' '.join(cmd)}")
@@ -1786,6 +1827,205 @@ if __name__ == "__main__":
     sys.exit(validate(args.raw, args.clean))
 CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_VALIDATE_SRT_PY
 
+# video-processing-automation/scripts/burn_subtitles.py
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/burn_subtitles.py")"
+cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/burn_subtitles.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_BURN_SUBTITLES_PY'
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+burn_subtitles.py — 使用 OpenCV & Pillow 將 SRT 字幕燒錄進影片中。
+解決 ffmpeg 沒有 subtitles 濾鏡的問題。
+"""
+import sys
+import re
+import cv2
+import numpy as np
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont
+
+
+def parse_time(tc_str: str) -> float:
+    # 格式: 00:00:03,820
+    h, m, rest = tc_str.split(":")
+    s, ms = rest.split(",")
+    return int(h) * 3600 + int(m) * 60 + float(s) + float(ms) / 1000.0
+
+
+def parse_srt(srt_path: Path):
+    content = srt_path.read_text(encoding="utf-8-sig")
+    # 相容 Windows \r\n 與 \n\n 分隔
+    blocks = re.split(r"\r?\n\r?\n", content.strip())
+    subs = []
+    for b in blocks:
+        lines = b.strip().splitlines()
+        if len(lines) >= 3:
+            time_line = lines[1].strip()
+            time_match = re.match(
+                r"(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})",
+                time_line,
+            )
+            if time_match:
+                start = parse_time(time_match.group(1))
+                end = parse_time(time_match.group(2))
+                text = "\n".join(lines[2:]).strip()
+                # 去除任何 HTML 標記，如 <span> 等
+                text = re.sub(r"<[^>]+>", "", text)
+                subs.append((start, end, text))
+    return subs
+
+
+def get_system_font() -> str:
+    # 優先使用 macOS 蘋方字體，其次是黑體、Arial 等
+    candidates = [
+        "/System/Library/Fonts/PingFang.ttc",
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        "/System/Library/Fonts/STHeiti Light.ttc",
+        "/Library/Fonts/Microsoft/Arial.ttf",
+    ]
+    for c in candidates:
+        if Path(c).exists():
+            return c
+    return ""  # 找不到則使用 Pillow 預設字體
+
+
+def main():
+    if len(sys.argv) < 4:
+        print("Usage: python3 burn_subtitles.py <input_video> <input_srt> <output_video>")
+        sys.exit(1)
+
+    in_video = Path(sys.argv[1])
+    in_srt = Path(sys.argv[2])
+    out_video = Path(sys.argv[3])
+
+    if not in_video.exists():
+        sys.exit(f"Input video not found: {in_video}")
+    if not in_srt.exists():
+        sys.exit(f"SRT not found: {in_srt}")
+
+    # 解析字幕
+    subs = parse_srt(in_srt)
+    print(f"[INFO] 載入 {len(subs)} 段字幕。")
+
+    # 開啟視訊
+    cap = cv2.VideoCapture(str(in_video))
+    if not cap.isOpened():
+        sys.exit("Error opening video capture")
+
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    print(f"[INFO] 影片屬性: {width}x{height}, FPS: {fps}, 總幀數: {total_frames}")
+
+    # 設定寫入器 (使用 mp4v 編碼，暫時寫入無聲檔案)
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out_dir = out_video.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+    
+    tmp_output = out_dir / f"tmp_silent_{out_video.name}"
+    writer = cv2.VideoWriter(str(tmp_output), fourcc, fps, (width, height))
+    if not writer.isOpened():
+        sys.exit("Error opening video writer")
+
+    font_path = get_system_font()
+    print(f"[INFO] 使用字體: {font_path or 'Pillow Default'}")
+
+    frame_idx = 0
+    font_size = int(height * 0.038) # 根據高度動態計算合適的字體大小 (例如 1080p 下約 41px)
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        timestamp = frame_idx / fps
+        
+        # 尋找當前時間點的字幕
+        current_text = ""
+        for start, end, text in subs:
+            if start <= timestamp <= end:
+                current_text = text
+                break
+
+        if current_text:
+            # 轉換影像格式 (BGR to RGB)
+            img_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            draw = ImageDraw.Draw(img_pil)
+            
+            # 載入字體
+            if font_path:
+                font = ImageFont.truetype(font_path, font_size)
+            else:
+                font = ImageFont.load_default()
+
+            lines = current_text.splitlines()
+            
+            # 定位距離底部 12% 高度
+            bottom_margin = int(height * 0.12)
+            y_start = height - bottom_margin - (len(lines) * (font_size + 10))
+
+            for j, line in enumerate(lines):
+                # 測量文字大小
+                bbox = draw.textbbox((0, 0), line, font=font)
+                text_w = bbox[2] - bbox[0]
+                text_h = bbox[3] - bbox[1]
+
+                x = (width - text_w) // 2
+                y = y_start + j * (font_size + 15)
+
+                # 繪製半透明圓角背景底色卡片
+                pad_x = 24
+                pad_y = 10
+                draw.rounded_rectangle(
+                    [x - pad_x, y - pad_y, x + text_w + pad_x, y + text_h + pad_y],
+                    radius=12,
+                    fill=(42, 42, 42, 192) # 75% 不透明度
+                )
+
+                # 繪製暖白文字
+                draw.text((x, y - 2), line, font=font, fill=(253, 251, 247))
+
+            frame = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
+
+        writer.write(frame)
+        frame_idx += 1
+        if frame_idx % 100 == 0:
+            print(f"[INFO] 處理進度: {frame_idx}/{total_frames} 幀...")
+
+    cap.release()
+    writer.release()
+    print("[INFO] 影像渲染完成，開始合併音軌...")
+
+    # 使用 ffmpeg 將原始影片的音軌與剛才處理的無聲影片進行無損合併
+    import subprocess
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", str(tmp_output),
+        "-i", str(in_video),
+        "-map", "0:v",
+        "-map", "1:a",
+        "-c:v", "copy",
+        "-c:a", "copy",
+        str(out_video)
+    ]
+    
+    print(f"[CMD] {' '.join(cmd)}")
+    rc = subprocess.call(cmd)
+    
+    # 刪除暫存無聲影片
+    if tmp_output.exists():
+        try:
+            tmp_output.unlink()
+        except OSError:
+            pass
+
+    if rc == 0:
+        print(f"[OK] 字幕影片製作完成：{out_video}")
+    else:
+        sys.exit(f"[ERR] ffmpeg 合併音軌失敗，退出碼 {rc}")
+CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_BURN_SUBTITLES_PY
+
 ```
 
 <!-- END EMBEDDED_SKILLS -->
+

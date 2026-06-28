@@ -7,10 +7,9 @@
 - `100_Todo/`：進行中事項、任務草稿與封存。
 - `200_Reference/`：參考資料、模板與過去成果。
 - `000_Agent/`：Arry 助手專案本地層，只放本專案專屬 skill 或 memories。
-- `lazy-pack/`：Codex 懶人包存放目錄。
+- `200_Reference/lazy-pack/`：Codex 懶人包存放目錄。
   - `skills/`：全域可攜式 skills 備份。
   - `workflows/`：跨專案 workflow 草稿與模板。
-- `workflows/`：本地測試的 workflow 腳本。
 - `src/` & `tests/`：測試用代碼與單元測試。
 - `AGENTS.md`：Codex 專案規則。
 

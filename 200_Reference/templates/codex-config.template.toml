@@ -11,7 +11,7 @@
 # 2. Replace all {{PLACEHOLDER}} values with paths that exist on that device.
 # 3. Add secrets through local secret files, environment variables, or managed
 #    connector login flows. Do not commit real secret values.
-# 4. Run scripts/sync-health.sh from this repo after setup.
+# 4. Run 200_Reference/scripts/sync-health.sh from this repo after setup.
 
 model = "gpt-5.5"
 model_reasoning_effort = "medium"
