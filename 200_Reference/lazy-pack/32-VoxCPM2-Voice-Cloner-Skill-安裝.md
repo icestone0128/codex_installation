@@ -171,7 +171,7 @@ The wrapper requires `--consent` for real-voice profile creation and cloning. Do
 - Optional reusable profile root: `$VOXCPM2_VOICES_DIR/<voice-name>/`
 - Optional project output root: `$VOXCPM2_OUTPUT_DIR/`
 
-Never copy model weights, generated audio, or the runtime virtual environment into LazyPack, Obsidian, Git, the global skill package, or Google Drive sync folders. For Arry, the canonical runtime is the local real folder `$HOME/.codex/voxcpm2-voice-cloner`; do not point it at `codex_symlink/runtimes`. Reusable personal voice profiles may live in the user's private assistant asset layer; for Arry, the canonical profile folder is `codex_symlink/assets/arry-voice-profiles/Arry/`. Generated outputs default to the local runtime `output/` unless `$VOXCPM2_OUTPUT_DIR` is explicitly set for a project.
+Never copy model weights, generated audio, or the runtime virtual environment into LazyPack, Obsidian, Git, the global skill package, or Google Drive sync folders. For Arry, the canonical runtime is the local real folder `$HOME/.codex/voxcpm2-voice-cloner`; do not point it at `codex_symlink/runtimes`. Reusable personal voice profiles may live in the user's private assistant asset layer; for Arry, the canonical profile folder is `codex_symlink/knowledge/arry-voice-profiles/Arry/`. Generated outputs default to the local runtime `output/` unless `$VOXCPM2_OUTPUT_DIR` is explicitly set for a project.
 
 ## Setup
 
@@ -359,7 +359,7 @@ export VOXCPM2_VOICES_DIR="/path/to/private-assistant/assets/voice-profiles"
 For Arry, the canonical reusable profile is:
 
 ```text
-codex_symlink/assets/arry-voice-profiles/Arry/
+codex_symlink/knowledge/arry-voice-profiles/Arry/
 ├── ref_voice.wav
 ├── prompt.txt
 └── profile.md

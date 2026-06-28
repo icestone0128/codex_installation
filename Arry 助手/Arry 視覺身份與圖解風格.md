@@ -31,8 +31,8 @@ tags:
 
 ## 資產位置
 
-- Codex Arry 角色設定：`codex_symlink/assets/arry-visual-identity/`
-- Codex 圖解參考資產：`codex_symlink/assets/visual-note-references/`
+- Codex Arry 角色設定：`codex_symlink/knowledge/arry-visual-identity/`
+- Codex 圖解參考資產：`codex_symlink/knowledge/visual-note-references/`
 - Obsidian Arry 角色設定：`專案庫/codex_installation/Arry 助手/Arry-Visual-Identity/`
 - Obsidian 創作庫作品集：`創作庫/Visual-Note-References/`
 

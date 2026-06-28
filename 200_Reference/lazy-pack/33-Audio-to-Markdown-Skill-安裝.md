@@ -522,14 +522,14 @@ bash /private/tmp/audio-to-md-installer-check/audio-to-md-installer/install.sh
 測試音檔：
 
 ```text
-codex_symlink/assets/arry-voice-profiles/Arry/ref_voice.wav
+codex_symlink/knowledge/arry-voice-profiles/Arry/ref_voice.wav
 ```
 
 執行指令：
 
 ```bash
 ~/.audio-to-md/audio-to-md \
-  "{{SYNC_ROOT}}/assets/arry-voice-profiles/Arry/ref_voice.wav" \
+  "{{SYNC_ROOT}}/knowledge/arry-voice-profiles/Arry/ref_voice.wav" \
   -o "{{SETUP_REPO}}/100_Todo/projects/audio-to-md-test" \
   --language zh \
   --beam-size 1
