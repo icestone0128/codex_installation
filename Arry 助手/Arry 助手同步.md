@@ -75,7 +75,7 @@ tags:
 - 2026-05-20：重新比對 `01-agent-folder-setup.md` 後，補齊平台客製資料夾與行動清單。
 - 2026-05-20：完成 Session A 角色訪談：科技業一線主管；AI 優先支援資料研究與知識管理；主要產出為 Facebook、Email/客戶溝通、書籍或 Podcast 讀後心得。
 - 2026-05-22：全域資料層改以 `codex_symlink/` 為主；專案本地記憶統一為 `000_Agent/memory/`，專案本地 skills 統一為 `000_Agent/skills/`；專案初始化一階目錄已納入 `project-init-sync` 與 `arry-assistant`。
-- 2026-06-14：新增 Arry Q 版角色設定與知識圖解筆記風格資產。現行扁平結構為：Codex 角色資產放 `codex_symlink/assets/arry-visual-identity/`，Codex 圖解作品參考放 `codex_symlink/assets/visual-note-references/`，Obsidian 角色資產放本資料夾 `Arry-Visual-Identity/`，Obsidian 作品集放 `創作庫/Visual-Note-References/`，風格規格放 `codex_symlink/knowledge/arry-visual-identity.yaml`。
+- 2026-06-14：新增 Arry Q 版角色設定與知識圖解筆記風格資產。現行扁平結構為：Codex 角色資產放 `codex_symlink/knowledge/arry-visual-identity/`，Codex 圖解作品參考放 `codex_symlink/knowledge/visual-note-references/`，Obsidian 角色資產放本資料夾 `Arry-Visual-Identity/`，Obsidian 作品集放 `創作庫/Visual-Note-References/`，風格規格放 `codex_symlink/knowledge/arry-visual-identity.yaml`。
 - 2026-06-19：完成 Arry 視覺資產路徑扁平化；舊的多層角色與作品集目錄已移除，相關 Skill、YAML、LazyPack 與索引均已改用現行路徑。
 - 2026-06-19：完成 Visual Note Workflow／Style Profile 分層；Arry 個人風格集中在 Skill 的 `default-style-profile.yaml`，Knowledge 檔只保留資產位置與 canonical pointers。
 - 2026-06-23：已部署 `sync_backup.py` 同步腳本，將全域 `core-rules.md` 及四大核心目錄 (`knowledge/`, `memories/`, `rules/`, `workflows/`) 備份至本資料夾，並完成首次備份，以利定期整理。
