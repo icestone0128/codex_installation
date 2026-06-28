@@ -370,6 +370,7 @@ Groq 輸出：
 | 機器很慢/記憶體小 | 用 `--beam-size 1` 加速；`--compute-type int8` 已是預設。**仍維持 turbo 模型** |
 | 影片轉不出聲音 | 確認影片有音軌；faster-whisper 內含 PyAV 可直接抽，不需系統 ffmpeg |
 | 多人對話分不出講者 | Whisper 不做語者分離；Phase 2 由 Claude 依語氣/內容標講者 |
+| 轉錄出的 MD 檔太短、只有十幾分鐘（或少於實際長度） | **檢查音訊下載的完整性**。這通常不是 Groq/Whisper 限制，而是下載腳本（如使用 `curl`）在下載大檔案時遇到網路中斷。但轉碼工具（如 `ffmpeg`）仍會成功將截斷後的檔案轉成 MP3 且不報錯。解法：在下載腳本中比對 `Content-Length` Headers 以確保檔案大小完全一致，或使用自動重試機制。 |
 
 CODEX_LAZYPACK_AUDIO_TO_MD_SKILL_MD
 
