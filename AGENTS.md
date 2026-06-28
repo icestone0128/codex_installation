@@ -48,8 +48,8 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 - 建立、擷取、轉換、更新、改名或驗證自訂 skill 時，一律先使用 `/Users/arrywu/.codex/skills/codex-skill-creator`；內建 `skill-creator` 只作為唯讀輔助參考。
 - Obsidian 同步索引：`專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
-- 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容和實際全域 skills 保持一致。
-- 同步後要實際比對 `/Users/arrywu/.codex/skills`、`lazy-pack/` 對應序號文件內嵌的 skill 名稱與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
+- 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `200_Reference/lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容和實際全域 skills 保持一致。
+- 同步後要實際比對 `/Users/arrywu/.codex/skills`、`200_Reference/lazy-pack/` 對應序號文件內嵌的 skill 名稱與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
 - 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
 
 Arry 助手 AI 分身資料層：
@@ -70,7 +70,7 @@ Arry 助手 AI 分身資料層：
 - 只有全域 Codex skills 才使用 `/Users/arrywu/.codex/skills`，此路徑目前指向 Google Drive `codex_symlink/skills`。
 - Arry 助手跨專案記憶與個人偏好放在 `codex_symlink/memories/MEMORY.md`。
 - Arry 助手跨專案 workflow 草稿放在 `codex_symlink/workflows/`。
-- 任何 skill 不論全域或專案本地，都要做成可攜式版本：全域 skill 內容內嵌到 `lazy-pack/` 對應序號文件與 Obsidian 全域 Skills 索引；專案 skill 保留完整 package 在該專案 `000_Agent/skills/` 並記錄到專案駕駛艙。
+- 任何 skill 不論全域或專案本地，都要做成可攜式版本：全域 skill 內容內嵌到 `200_Reference/lazy-pack/` 對應序號文件與 Obsidian 全域 Skills 索引；專案 skill 保留完整 package 在該專案 `000_Agent/skills/` 並記錄到專案駕駛艙。
 - 若來源文件含 AI 分身預設名稱，不使用來源預設名，改用「Arry 助手」。
 - 若 Arry 助手資料層與新專案初始化規則衝突，先詢問使用者再決定。
 - `project-init-sync`、`startup-sync`、`shutdown-sync` 已整合 Arry 助手雙層資料層：未來新專案預設建立本地 `100_Todo/`、`200_Reference/`；若該專案需要本地 assistant skill 或本地記憶，再建立該專案自己的 `000_Agent/skills/`、`000_Agent/memories/`，並引用 `codex_symlink` 全域 Arry 助手資料層。現有專案開工/收工時可同步跨專案記憶。
@@ -78,13 +78,13 @@ Arry 助手 AI 分身資料層：
 新專案初始化時：
 
 - 使用 `project-init-sync` 流程。
-- 以 `lazy-pack/10-專案初始化工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `/Users/arrywu/.codex/AGENTS.md`。
+- 以 `200_Reference/lazy-pack/10-專案初始化工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `/Users/arrywu/.codex/AGENTS.md`。
 
 ## 主要檔案
 
-入口檔：`docs/index.html`
+入口檔：`200_Reference/docs/index.html`
 設定檔：`.firebaserc`、`firebase.json`、`firestore.rules`
-部署位置：未啟用。GitHub Pages 已關閉；`docs/index.html` 只保留為本地入口檔。
+部署位置：未啟用。GitHub Pages 已關閉；`200_Reference/docs/index.html` 只保留為本地入口檔。
 部署網址：未啟用
 
 ## 初始化架構狀態
@@ -110,9 +110,9 @@ Arry 助手 AI 分身資料層：
 
 - `AGENTS.md` - 固定專案規則與工作流邊界。
 - `.gitignore` - 排除本機設定、憑證、相依套件與建置輸出。
-- `docs/` - 本地文件進入點（docs/index.html），目前不部署。
-- `lazy-pack/` - 經驗證的 Codex 安裝說明、除錯紀錄與內嵌全域技能安裝檔。
-- `scripts/sync-health.sh` - 唯讀的跨裝置同步健康檢查腳本。
+- `200_Reference/docs/` - 本地文件進入點（200_Reference/docs/index.html），目前不部署。
+- `200_Reference/lazy-pack/` - 經驗證的 Codex 安裝說明、除錯紀錄與內嵌全域技能安裝檔。
+- `200_Reference/scripts/sync-health.sh` - 唯讀的跨裝置同步健康檢查腳本。
 - `000_Agent/` - 僅保留指向說明，不存放真實個人記憶或偏好。
 - `100_Todo/` - 專案本地待辦、草稿與工作中素材。
 - `200_Reference/` - 專案本地參考資料、範本與過往作品。

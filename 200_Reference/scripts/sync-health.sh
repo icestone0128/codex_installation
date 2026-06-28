@@ -106,7 +106,7 @@ else
   warn "config.toml not found"
 fi
 
-if git -C "$SETUP_REPO" grep -nE '(fc-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,})' -- . ':!lazy-pack/26-HyperFrames-Skill-安裝.md' >/tmp/codex-sync-health-secret-scan.txt 2>/dev/null; then
+if git -C "$SETUP_REPO" grep -nE '(fc-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,})' -- . ':!200_Reference/lazy-pack/26-HyperFrames-Skill-安裝.md' >/tmp/codex-sync-health-secret-scan.txt 2>/dev/null; then
   warn "repo tracked files may contain secret-like values"
   sed -n '1,20p' /tmp/codex-sync-health-secret-scan.txt
 else
