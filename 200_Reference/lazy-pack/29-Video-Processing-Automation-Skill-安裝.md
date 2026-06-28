@@ -167,6 +167,10 @@ For a short highlight version, produce:
 When user choice is needed, pause at title selection and short-candidate
 selection instead of guessing silently.
 
+- **自適應專案收納 (Adaptive Project Path Routing)**: 當在標準四盒專案（含有 `100_Todo/`）下執行時，以「相對專案路徑」代替 `working/` 與 `output/`：
+  - **過程與臨時素材** (原 `working/<video-id>/`)：應置於相對路徑 `100_Todo/drafts/<video-id>/`。
+  - **成品包** (原 `output/<chosen-title>/`)：應直接置於 `100_Todo/projects/<video-id>/`，並且**不使用 `output` 中間層資料夾**。
+
 ## Workflow
 
 0. Check environment and Groq readiness:
@@ -290,6 +294,7 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.
 - `GROQ_API_KEY` or `~/.codex/secrets/groq_api_key` exists before cloud STT.
 - Scan the package for excluded source-tool terms before packaging or syncing;
   the scan should have no hits.
+
 CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD
 
 # video-processing-automation/references/audio-subtitle.md

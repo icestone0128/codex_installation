@@ -121,6 +121,10 @@ Produce or prepare:
 - `renders/` or `output/` - final preview and video package when rendering is
   requested.
 
+- **自適應專案收納 (Adaptive Project Path Routing)**: 當在標準四盒專案（含有 `100_Todo/`）下執行時，以「相對專案路徑」進行收納：
+  - **工程原始碼與過程素材** (原 `index.html`、`assets/`)：應置於相對路徑 `100_Todo/drafts/<video-project-name>/` 底下。
+  - **影片成品包** (原 `renders/`、`output/`)：應直接置於 `100_Todo/projects/<video-project-name>/` 下，**不得在專案中建立額外的 `output/` 中間目錄**。
+
 ## Workflow
 
 0. Route first:
@@ -197,6 +201,7 @@ Produce or prepare:
   accidental click overlay in frame 0.
 - Scan the package for old tool names or old agent-specific paths before
   syncing.
+
 CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_SKILL_MD
 
 # video-creation-automation/references/source-adaptation.md

@@ -173,6 +173,11 @@ The wrapper requires `--consent` for real-voice profile creation and cloning. Do
 
 Never copy model weights, generated audio, or the runtime virtual environment into LazyPack, Obsidian, Git, the global skill package, or Google Drive sync folders. For Arry, the canonical runtime is the local real folder `$HOME/.codex/voxcpm2-voice-cloner`; do not point it at `codex_symlink/runtimes`. Reusable personal voice profiles may live in the user's private assistant asset layer; for Arry, the canonical profile folder is `codex_symlink/knowledge/arry-voice-profiles/Arry/`. Generated outputs default to the local runtime `output/` unless `$VOXCPM2_OUTPUT_DIR` is explicitly set for a project.
 
+- **自適應專案收納 (Adaptive Project Path Routing)**: 當在標準四盒專案（含有 `100_Todo/`）下執行時：
+  - **過程素材與工程** 應置於相對路徑 `100_Todo/drafts/voxcpm2-voice-cloner/`。
+  - **產出音檔成品** 應直接置於 `100_Todo/projects/voxcpm2-voice-cloner/` 底下，**不得建立額外的 `output/` 中間層**。
+  - 執行指令前應自動將輸出變數設定為相對路徑：`export VOXCPM2_OUTPUT_DIR="100_Todo/projects/voxcpm2-voice-cloner"`。
+
 ## Setup
 
 Read `references/runtime.md` before installing or repairing the runtime.

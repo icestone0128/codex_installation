@@ -339,6 +339,11 @@ Groq 輸出：
 
 校稿輸出到**新檔** `{主題}_逐字稿知識庫_校稿.md`，**不要覆寫 Phase 1 原檔**。原檔（含全部原始時間戳與字數）是自檢的唯一可信對照源——一旦覆寫，「逐字有沒有變少」就永遠驗不出來。完工自檢（時間戳行數 ≥ manifest segments＋每段字數達標）全部通過後，才可由使用者決定是否刪除原檔。
 
+- **自適應專案收納 (Adaptive Project Path Routing)**: 當在標準四盒專案（含有 `100_Todo/`）下執行時：
+  - **過程素材與臨時檔** 應置於相對路徑 `100_Todo/drafts/audio-to-md-test/`（或對應任務名稱子目錄）。
+  - **產出逐字稿與校稿成品** 應直接置於 `100_Todo/projects/audio-to-md-test/` 底下，**不得建立額外的 `output/` 中間層**。
+  - 執行 Phase 1 轉錄時，應指定輸出路徑旗標為 `-o 100_Todo/projects/audio-to-md-test/`。
+
 ---
 
 ## 和家族串接（完整 RAG 進料）
@@ -365,6 +370,7 @@ Groq 輸出：
 | 機器很慢/記憶體小 | 用 `--beam-size 1` 加速；`--compute-type int8` 已是預設。**仍維持 turbo 模型** |
 | 影片轉不出聲音 | 確認影片有音軌；faster-whisper 內含 PyAV 可直接抽，不需系統 ffmpeg |
 | 多人對話分不出講者 | Whisper 不做語者分離；Phase 2 由 Claude 依語氣/內容標講者 |
+
 CODEX_LAZYPACK_AUDIO_TO_MD_SKILL_MD
 
 # audio-to-md/references/usage-guide.md
