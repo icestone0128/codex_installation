@@ -229,7 +229,7 @@ Copy this folder to the Codex global skills folder:
 
 ```bash
 mkdir -p "{{CODEX_HOME}}/skills/landing-page"
-Use `{{SETUP_REPO}}/lazy-pack/15-Landing-Page-Skill-安裝.md` and run the "內建 Skill 完整安裝內容" block to create `{{CODEX_HOME}}/skills/landing-page/`.
+Use `{{SETUP_REPO}}/200_Reference/lazy-pack/15-Landing-Page-Skill-安裝.md` and run the "內建 Skill 完整安裝內容" block to create `{{CODEX_HOME}}/skills/landing-page/`.
 ```
 
 Start a new Codex conversation or restart Codex App if the skill metadata does not refresh immediately.

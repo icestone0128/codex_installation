@@ -109,7 +109,17 @@ The only required entry difference is the first routing question:
 
 ## Output Contract
 
-Produce or prepare:
+In a standard four-box project that has `100_Todo/`, use the project structure
+as the source of truth:
+
+- Draft composition and process files go in
+  `100_Todo/drafts/<video-project-name>/`.
+- Final video packages go directly in
+  `100_Todo/projects/<video-project-name>/`.
+- Do not create project-root `assets/`, `renders/`, or `output/` folders when
+  those `100_Todo/` routes exist.
+
+Inside the draft folder, produce or prepare:
 
 - `SCRIPT.md` - narration, captions, beat list, scene purpose, and asset needs.
 - `DESIGN.md` - type, aspect ratio, visual system, fonts, colors, layout,
@@ -117,13 +127,8 @@ Produce or prepare:
 - `STORYBOARD.md` - optional for short videos, required for longer or complex
   videos.
 - `index.html` or a HyperFrames composition entrypoint.
-- `assets/` - images, audio, fonts, generated or downloaded materials.
-- `renders/` or `output/` - final preview and video package when rendering is
-  requested.
-
-- **自適應專案收納 (Adaptive Project Path Routing)**: 當在標準四盒專案（含有 `100_Todo/`）下執行時，以「相對專案路徑」進行收納：
-  - **工程原始碼與過程素材** (原 `index.html`、`assets/`)：應置於相對路徑 `100_Todo/drafts/<video-project-name>/` 底下。
-  - **影片成品包** (原 `renders/`、`output/`)：應直接置於 `100_Todo/projects/<video-project-name>/` 下，**不得在專案中建立額外的 `output/` 中間目錄**。
+- `_assets/` or another local subfolder under the draft folder for images,
+  audio, fonts, generated files, and downloaded materials.
 
 ## Workflow
 
@@ -160,7 +165,7 @@ Produce or prepare:
    - do not start implementation until the user approves the design.
 6. Build the composition:
    - create or adapt `index.html` / HyperFrames composition;
-   - keep media local under `assets/`;
+   - keep media local under the draft folder, usually `_assets/`;
    - if using generated images, use Codex image generation or a user-approved
      image workflow;
    - if using external photos, download local copies and record attribution
@@ -176,7 +181,9 @@ Produce or prepare:
      last frames.
 9. Package final output:
    - place video, captions, transcript, cover prompt/image, metadata, and notes
-     in `output/<chosen-title>/`;
+     in `100_Todo/projects/<video-project-name>/` when the project has
+     `100_Todo/`, otherwise in the smallest project-appropriate final package
+     folder;
    - if the user wants upload packaging after the render, then hand off to
      `video-processing-automation` for subtitle cleanup, metadata, cover, and upload
      package refinement.
@@ -201,7 +208,6 @@ Produce or prepare:
   accidental click overlay in frame 0.
 - Scan the package for old tool names or old agent-specific paths before
   syncing.
-
 CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_SKILL_MD
 
 # video-creation-automation/references/source-adaptation.md

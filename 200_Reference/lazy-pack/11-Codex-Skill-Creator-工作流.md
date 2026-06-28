@@ -357,7 +357,7 @@ Use this skill as Arry's required entry workflow for creating and maintaining cu
 - Custom global skills: `$CODEX_HOME/skills`, or `~/.codex/skills` when `$CODEX_HOME` is not set.
 - This user's global skills symlink: `{{CODEX_HOME}}/skills`, pointing to Google Drive `codex_symlink/skills`.
 - Project-local skills: `<project-root>/000_Agent/skills`.
-- Global portable copy root: `{{SETUP_REPO}}/lazy-pack/<對應序號文件>`.
+- Global portable copy root: `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>`.
 - Built-in system skills: `$CODEX_HOME/skills/.system` (read-only for normal work).
 - Optional skill mirror note: ask the user for their Obsidian or project inventory path when no local mirror is already documented.
 - This user's current mirror note: `{{OBSIDIAN_PROJECTS}}/{{SETUP_PROJECT_NAME}}/全域 Skills/全域 Skills 同步.md`.
@@ -370,7 +370,7 @@ Use this skill as Arry's required entry workflow for creating and maintaining cu
 2. When adapting this skill package for another user, replace `ASSISTANT_NAME`, `ASSISTANT_ROOT`, `OBSIDIAN_VAULT`, `PROJECT_LIBRARY`, and `WORK_ROOT` before depending on personal-workflow skills.
 3. Keep general-purpose skills independent from personal memory or vault paths unless the user explicitly wants them connected.
 4. If a mirror note does not exist, create one only after the user confirms where their durable skill inventory should live.
-5. Every skill must have a portable package: global skills mirror to `{{SETUP_REPO}}/lazy-pack/<對應序號文件>`; project skills live as complete packages under `<project-root>/000_Agent/skills/<skill-name>`.
+5. Every skill must have a portable package: global skills mirror to `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>`; project skills live as complete packages under `<project-root>/000_Agent/skills/<skill-name>`.
 
 ## Compatibility Rules
 
@@ -388,7 +388,7 @@ Use this skill as Arry's required entry workflow for creating and maintaining cu
 
 Before creating or modifying a skill, decide where it belongs:
 
-- Global: reusable across projects, should trigger from any Codex project, or is part of Arry's standard workflow. Store in `{{CODEX_HOME}}/skills/<skill-name>` and sync `{{SETUP_REPO}}/lazy-pack/<對應序號文件>`.
+- Global: reusable across projects, should trigger from any Codex project, or is part of Arry's standard workflow. Store in `{{CODEX_HOME}}/skills/<skill-name>` and sync `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>`.
 - Project-local: only useful for the current project, depends on project-specific context, or is still a local draft. Store in `<project-root>/000_Agent/skills/<skill-name>`.
 - Arry assistant remains a global entry skill. Use it during project initialization to read the assistant data layer and help decide whether future skills are global or project-local.
 
@@ -466,7 +466,7 @@ Before creating or substantially redesigning a skill, read `references/built-in-
    - test every added script directly; for several similar scripts, test a representative sample
    - verify `agents/openai.yaml` still matches the skill name, purpose, and real invocation
 6. Sync portable copies and indexes:
-   - Global skill: sync `{{SETUP_REPO}}/lazy-pack/<對應序號文件>` and the Obsidian global skill mirror note.
+   - Global skill: sync `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>` and the Obsidian global skill mirror note.
    - Project skill: keep the complete portable package under `<project-root>/000_Agent/skills/<skill-name>` and update the project cockpit.
 7. Sync the Obsidian mirror note when the skill is global:
    - add or update the custom skill table row
@@ -500,7 +500,7 @@ After the first skill is built:
 ## Validation Checklist
 
 - Global skill lives under `{{CODEX_HOME}}/skills/<skill-name>/`; project skill lives under `<project-root>/000_Agent/skills/<skill-name>/`.
-- Portable package exists in the correct place: `{{SETUP_REPO}}/lazy-pack/<對應序號文件>` for global, project `000_Agent/skills/<skill-name>` for project-local.
+- Portable package exists in the correct place: `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>` for global, project `000_Agent/skills/<skill-name>` for project-local.
 - `SKILL.md` frontmatter includes `name` and `description`.
 - `description` includes concrete trigger phrases and use cases.
 - Detailed material is in `references/`, not bloating `SKILL.md`.
@@ -730,7 +730,7 @@ After any custom global skill change, update:
 
 and sync the portable copy:
 
-`{{SETUP_REPO}}/lazy-pack/<對應序號文件>`
+`{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>`
 
 After any project-local skill change, keep the complete portable package under:
 

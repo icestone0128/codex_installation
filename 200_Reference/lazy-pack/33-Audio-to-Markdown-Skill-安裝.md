@@ -371,7 +371,6 @@ Groq 輸出：
 | 影片轉不出聲音 | 確認影片有音軌；faster-whisper 內含 PyAV 可直接抽，不需系統 ffmpeg |
 | 多人對話分不出講者 | Whisper 不做語者分離；Phase 2 由 Claude 依語氣/內容標講者 |
 | 轉錄出的 MD 檔太短、只有十幾分鐘（或少於實際長度） | **檢查音訊下載的完整性**。這通常不是 Groq/Whisper 限制，而是下載腳本（如使用 `curl`）在下載大檔案時遇到網路中斷。但轉碼工具（如 `ffmpeg`）仍會成功將截斷後的檔案轉成 MP3 且不報錯。解法：在下載腳本中比對 `Content-Length` Headers 以確保檔案大小完全一致，或使用自動重試機制。 |
-
 CODEX_LAZYPACK_AUDIO_TO_MD_SKILL_MD
 
 # audio-to-md/references/usage-guide.md
@@ -456,7 +455,7 @@ scripts/requirements.txt
 LazyPack 可攜化文件：
 
 ```text
-{{SETUP_REPO}}/lazy-pack/33-Audio-to-Markdown-Skill-安裝.md
+{{SETUP_REPO}}/200_Reference/lazy-pack/33-Audio-to-Markdown-Skill-安裝.md
 ```
 
 ## Phase 1 平行選項
@@ -537,7 +536,7 @@ codex_symlink/knowledge/arry-voice-profiles/Arry/ref_voice.wav
 ```bash
 ~/.audio-to-md/audio-to-md \
   "{{SYNC_ROOT}}/knowledge/arry-voice-profiles/Arry/ref_voice.wav" \
-  -o "{{SETUP_REPO}}/100_Todo/projects/audio-to-md-test" \
+  -o "{{PROJECT_ROOT}}/100_Todo/projects/audio-to-md-test" \
   --language zh \
   --beam-size 1
 ```
@@ -606,8 +605,8 @@ Groq 執行指令：
 
 ```bash
 python3 "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" \
-  "{{SYNC_ROOT}}/assets/arry-voice-profiles/Arry/ref_voice.wav" \
-  -o "{{SETUP_REPO}}/100_Todo/projects/audio-to-md-test" \
+  "{{SYNC_ROOT}}/knowledge/arry-voice-profiles/Arry/ref_voice.wav" \
+  -o "{{PROJECT_ROOT}}/100_Todo/projects/audio-to-md-test" \
   --language zh
 ```
 
@@ -710,7 +709,325 @@ scripts/audio_to_md_groq.py
 ```bash
 mkdir -p "{{CODEX_HOME}}/skills/audio-to-md/scripts"
 cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" <<'CODEX_LAZYPACK_AUDIO_TO_MD_GROQ_PY'
-# Python source here
+#!/usr/bin/env python3
+"""
+audio_to_md_groq.py -- Groq cloud STT route for audio-to-md.
+
+This script uploads an audio/video file to Groq's OpenAI-compatible
+transcription endpoint and writes the same Markdown knowledge-base scaffold as
+the local Whisper route. Use it only when the user accepts cloud transcription.
+"""
+import argparse
+import datetime
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+GROQ_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
+DEFAULT_MODEL = "whisper-large-v3-turbo"
+DEFAULT_CHUNK_MIN = 6
+SIZE_LIMIT_MB = 24.0
+
+AUDIO_EXTS = {".mp3", ".m4a", ".wav", ".flac", ".aac", ".ogg", ".opus", ".wma", ".aiff"}
+VIDEO_EXTS = {".mp4", ".mov", ".mts", ".m2ts", ".mkv", ".webm", ".avi", ".flv", ".wmv", ".m4v"}
+
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+
+def log(msg: str) -> None:
+    print(msg, flush=True)
+
+
+def safe_stem(path: str) -> str:
+    stem = os.path.splitext(os.path.basename(path))[0]
+    stem = re.sub(r"[^\w一-鿿\-]+", "_", stem).strip("_")
+    return stem or "audio"
+
+
+def fmt_ts(sec: float, with_hour: bool) -> str:
+    sec = int(sec)
+    h, m, s = sec // 3600, (sec % 3600) // 60, sec % 60
+    return f"{h:02d}:{m:02d}:{s:02d}" if with_hour else f"{m:02d}:{s:02d}"
+
+
+def load_api_key() -> str:
+    env_key = os.environ.get("GROQ_API_KEY")
+    if env_key:
+        return env_key.strip()
+    key_file = Path.home() / ".codex" / "secrets" / "groq_api_key"
+    if key_file.exists():
+        return key_file.read_text(encoding="utf-8").strip()
+    sys.exit(
+        "[ERR] 找不到 Groq API key：請設定 GROQ_API_KEY，或把 key 存到 "
+        "~/.codex/secrets/groq_api_key 並設為 600 權限。"
+    )
+
+
+def compress_audio(src: Path) -> Path:
+    if not shutil.which("ffmpeg"):
+        sys.exit("[ERR] 檔案超過 Groq 上傳大小，需要 ffmpeg 壓縮，但找不到 ffmpeg。")
+    tmp = Path(tempfile.gettempdir()) / f"audio-to-md-groq-{os.getpid()}.mp3"
+    cmd = [
+        "ffmpeg", "-i", str(src),
+        "-vn", "-ac", "1", "-ar", "16000", "-b:a", "32k",
+        "-y", str(tmp),
+    ]
+    log("[INFO] 檔案較大，先壓成 16kHz mono 32kbps...")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        sys.exit(f"[ERR] ffmpeg 壓縮失敗：\n{result.stderr[-800:]}")
+    size_mb = tmp.stat().st_size / 1024 / 1024
+    log(f"[INFO] 壓縮完成：{size_mb:.1f} MB")
+    return tmp
+
+
+def build_multipart(audio_path: Path, model: str, language: str, prompt: str) -> tuple[bytes, str]:
+    boundary = "----AudioToMdGroqBoundary7MA4YWxkTrZu0gW"
+    crlf = b"\r\n"
+    parts: list[bytes] = []
+
+    def add_field(name: str, value: str) -> None:
+        parts.append(f"--{boundary}".encode())
+        parts.append(f'Content-Disposition: form-data; name="{name}"'.encode())
+        parts.append(b"")
+        parts.append(value.encode("utf-8"))
+
+    add_field("model", model)
+    add_field("response_format", "verbose_json")
+    add_field("timestamp_granularities[]", "segment")
+    add_field("timestamp_granularities[]", "word")
+    if language and language != "auto":
+        add_field("language", language)
+    if prompt:
+        add_field("prompt", prompt)
+
+    safe_name = "audio" + audio_path.suffix.lower()
+    parts.append(f"--{boundary}".encode())
+    parts.append(
+        (
+            f'Content-Disposition: form-data; name="file"; '
+            f'filename="{safe_name}"'
+        ).encode("utf-8")
+    )
+    parts.append(b"Content-Type: application/octet-stream")
+    parts.append(b"")
+    parts.append(audio_path.read_bytes())
+    parts.append(f"--{boundary}--".encode())
+    parts.append(b"")
+
+    return crlf.join(parts), f"multipart/form-data; boundary={boundary}"
+
+
+def transcribe_groq(input_path: Path, model: str, language: str, prompt: str) -> tuple[dict, Path | None]:
+    api_key = load_api_key()
+    size_mb = input_path.stat().st_size / 1024 / 1024
+    upload_path = input_path
+    tmp_path = None
+    log(f"[INFO] Groq STT：{input_path.name}，{size_mb:.1f} MB，模型 {model}")
+    if size_mb > SIZE_LIMIT_MB:
+        tmp_path = compress_audio(input_path)
+        upload_path = tmp_path
+        if tmp_path.stat().st_size / 1024 / 1024 > SIZE_LIMIT_MB:
+            sys.exit("[ERR] 壓縮後仍超過上傳上限，請先手動切段。")
+
+    body, content_type = build_multipart(upload_path, model, language, prompt)
+    req = urllib.request.Request(
+        GROQ_URL,
+        data=body,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": content_type,
+            "User-Agent": "audio-to-md-groq/1.0",
+            "Accept": "application/json",
+        },
+        method="POST",
+    )
+    log("[INFO] 上傳到 Groq 轉錄中...")
+    try:
+        with urllib.request.urlopen(req, timeout=600) as resp:
+            return json.loads(resp.read().decode("utf-8")), tmp_path
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace")
+        sys.exit(f"[ERR] Groq API 錯誤 {e.code}：{err_body}")
+    except urllib.error.URLError as e:
+        sys.exit(f"[ERR] 網路錯誤：{e}")
+
+
+def normalize_segments(data: dict) -> list[dict]:
+    segments = data.get("segments") or []
+    if segments:
+        return [
+            {
+                "start": float(s.get("start", 0)),
+                "end": float(s.get("end", 0)),
+                "text": str(s.get("text", "")).strip(),
+            }
+            for s in segments
+            if str(s.get("text", "")).strip()
+        ]
+    text = str(data.get("text", "")).strip()
+    duration = float(data.get("duration") or 0)
+    return [{"start": 0.0, "end": duration, "text": text}] if text else []
+
+
+def build_scaffold(
+    stem: str,
+    source: str,
+    model: str,
+    language: str,
+    duration: float,
+    segments: list[dict],
+    chunk_min: int,
+) -> str:
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    with_hour = duration >= 3600
+    dur_str = fmt_ts(duration, with_hour)
+    yaml = (
+        "---\n"
+        f'title: "{stem.replace("_", " ")}"\n'
+        f'source: "{source}"\n'
+        "type: AV-transcript-pending\n"
+        f"model: groq / {model}\n"
+        f"language: {language}\n"
+        f"duration: \"{dur_str}\"\n"
+        f"segments: {len(segments)}\n"
+        f'generated_at: "{now}"\n'
+        "lang_out: zh-TW\n"
+        "---\n\n"
+    )
+    head = (
+        f"# {stem.replace('_', ' ')}｜影音逐字稿知識庫\n\n"
+        "> [!danger] 校稿鐵律：逐字主體零刪改、禁摘要（最重要，先讀）\n"
+        "> Groq 已完成 Phase 1 雲端 STT。從這一刻開始，後續流程與本機 Whisper 產出的骨架完全相同：Phase 2 只做校稿、摘要欄與重點欄；不得用摘要取代時間戳逐字主體。\n"
+        "> 1. **逐字主體 100% 保留**：每一個 `**[時間戳]**` 行都必須留著，內容一字不刪、不合併、不改寫、不潤飾成書面語。校稿能動的只有：簡繁、確證錯字、標點、合理斷句、（多人時）句首標講者。\n"
+        "> 2. **禁止用摘要代替逐字**：摘要只能額外寫進每段的「段落摘要」欄，原始逐字照樣全留。\n"
+        "> 3. **分段處理**：一次只處理一個 `## ⏱ 時間段`，禁止一次重寫長稿全文。\n"
+        "> 4. **完工自檢**：校稿後 `**[` 行數必須 >= 原稿、且 >= YAML `segments`；校稿後中文字元數應 >= 原稿 ×0.95。\n"
+        "> 5. **不覆寫原檔**：校稿存到新檔 `_校稿.md`，保留原始骨架供自檢對拍。\n\n"
+        "> [!warning] 雲端 STT 邊界\n"
+        "> 這一路線會把音訊/影片上傳到 Groq。只有在使用者接受雲端轉錄時使用；"
+        "敏感、不可外傳、或不想使用 API key 的內容改用本機 Whisper 路線。\n\n"
+        "> [!info] 這份還沒完成——Groq 已把「聲音」轉成字，等 Codex 來「理解」\n"
+        "> 1) **校稿**：簡繁、修錯字、加標點、合理斷句（不要改變語意）。\n"
+        "> 2) 把每段的 `段落摘要` 空格填好。3) 最後補「全篇重點 / 待辦 / 金句」。\n\n"
+        "> [!tip] 兩層校稿（語感層 + 專名查證層）\n"
+        "> **Layer 1 語感校稿**：簡繁轉換、錯字、標點、斷句、（多人時）標講者。**禁止**憑空改寫或新增講者沒說的內容；聽不清標「（聽不清）」。\n"
+        "> **Layer 2 專名查證**：人名、地名、品牌、書名、機構、技術名詞等，若不確定就查證；查到更可信版本才修正並留痕，查不到就標 `⚠️ 專名待查證`。\n\n"
+    )
+    body = ""
+    chunk_sec = chunk_min * 60
+    cur_chunk = -1
+    placeholder = (
+        "> [!note] 段落摘要\n"
+        "> **摘要**：（Codex 將填入這段的 2-3 句重點）\n"
+        "> **關鍵字**：（Codex 將填入 4-8 個檢索關鍵字）"
+    )
+    for s in segments:
+        idx = int(s["start"] // chunk_sec)
+        if idx != cur_chunk:
+            cur_chunk = idx
+            cstart = fmt_ts(idx * chunk_sec, with_hour)
+            cend = fmt_ts(min((idx + 1) * chunk_sec, duration), with_hour)
+            body += f"\n## ⏱ {cstart}–{cend}\n\n{placeholder}\n\n"
+            body += "<!-- 原始逐字：逐行校稿，禁止刪句或跨時間戳搬移文字 -->\n\n"
+        body += f"**[{fmt_ts(s['start'], with_hour)}]** {s['text']}\n\n"
+    tail = (
+        "\n---\n\n"
+        "## 📌 全篇重點（Codex 填）\n\n"
+        "> [!note] 重點 / 待辦 / 金句\n"
+        "> **3-5 個重點**：（Codex 將填入）\n"
+        "> **待辦或行動項**：（若有）\n"
+        "> **可摘金句**：（1-3 句）\n"
+    )
+    return yaml + head + body + tail
+
+
+def process(args: argparse.Namespace) -> int:
+    input_path = Path(args.input).expanduser()
+    if not input_path.exists():
+        sys.exit(f"[ERR] 找不到輸入檔：{input_path}")
+    ext = input_path.suffix.lower()
+    if ext not in AUDIO_EXTS and ext not in VIDEO_EXTS:
+        sys.exit(f"[ERR] 不支援的格式：{ext}")
+    out_dir = Path(args.output).expanduser() if args.output else input_path.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    data, tmp_path = transcribe_groq(input_path, args.model, args.language, args.prompt)
+    try:
+        stem = safe_stem(str(input_path))
+        segments = normalize_segments(data)
+        if not segments:
+            sys.exit("[ERR] Groq 沒有回傳可用轉錄內容。")
+        duration = float(data.get("duration") or max(s["end"] for s in segments))
+        lang = args.language if args.language != "auto" else data.get("language", "auto")
+        md = build_scaffold(stem, input_path.name, args.model, lang, duration, segments, args.chunk_min)
+
+        md_path = out_dir / f"{stem}_groq_逐字稿知識庫.md"
+        json_path = out_dir / f"{stem}_groq.json"
+        manifest_path = out_dir / f"{stem}_groq_manifest.json"
+        md_path.write_text(md, encoding="utf-8")
+        json_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        manifest = {
+            "source": str(input_path),
+            "kind": "影片" if ext in VIDEO_EXTS else "音訊",
+            "engine": "groq",
+            "model": args.model,
+            "language": lang,
+            "duration_sec": round(duration, 1),
+            "segments": len(segments),
+            "words": len(data.get("words") or []),
+            "generated_at": datetime.datetime.now().isoformat(),
+            "outputs": [md_path.name, json_path.name],
+        }
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+        log("")
+        log("✅ Phase 1 完成（Groq 雲端 STT）")
+        log(f"   • 時長：{fmt_ts(duration, duration >= 3600)}　語言：{lang}　段落：{len(segments)}")
+        log(f"   • 逐字稿骨架：{md_path}")
+        log(f"   • Groq JSON：{json_path}")
+        return 0
+    finally:
+        if tmp_path is not None and tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except OSError:
+                pass
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(
+        description="audio-to-md Phase 1：Groq 雲端 STT 把影音轉成 Markdown 逐字稿骨架。"
+    )
+    ap.add_argument("input", help="音訊或影片檔")
+    ap.add_argument("-o", "--output", default=None, help="輸出資料夾（預設：輸入檔所在目錄）")
+    ap.add_argument("--model", default=DEFAULT_MODEL, help=f"Groq STT 模型（預設 {DEFAULT_MODEL}）")
+    ap.add_argument("--language", default="zh", help="語言代碼（中文建議 zh；也可 auto）")
+    ap.add_argument("--chunk-min", type=int, default=DEFAULT_CHUNK_MIN, help="每段約 N 分鐘")
+    ap.add_argument(
+        "--prompt",
+        default=(
+            "以下為繁體中文口語內容。專有名詞：Codex、ChatGPT、OpenAI、"
+            "NotebookLM、Gemini、Groq、Whisper、GitHub、Obsidian、"
+            "Firebase、Netlify、Python、JavaScript。"
+        ),
+        help="傳給 Groq Whisper 的詞彙提示。",
+    )
+    sys.exit(process(ap.parse_args()))
+
+
+if __name__ == "__main__":
+    main()
 CODEX_LAZYPACK_AUDIO_TO_MD_GROQ_PY
 ```
 
