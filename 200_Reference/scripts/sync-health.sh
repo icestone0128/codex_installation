@@ -4,6 +4,7 @@ set -u
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 SYNC_ROOT="${SYNC_ROOT:-/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink}"
 SETUP_REPO="${SETUP_REPO:-/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation}"
+LAZYPACK_ROOT="${LAZYPACK_ROOT:-$SETUP_REPO/200_Reference/lazy-pack}"
 OBSIDIAN_LAZYPACK="${OBSIDIAN_LAZYPACK:-/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/懶人包}"
 
 failures=0
@@ -54,6 +55,7 @@ printf 'Codex sync health check\n'
 printf 'CODEX_HOME=%s\n' "$CODEX_HOME"
 printf 'SYNC_ROOT=%s\n' "$SYNC_ROOT"
 printf 'SETUP_REPO=%s\n' "$SETUP_REPO"
+printf 'LAZYPACK_ROOT=%s\n' "$LAZYPACK_ROOT"
 printf 'OBSIDIAN_LAZYPACK=%s\n\n' "$OBSIDIAN_LAZYPACK"
 
 check_path "$SYNC_ROOT/core-rules.md" "portable core-rules exists"
@@ -84,8 +86,8 @@ else
   fail "codex_installation git repo exists"
 fi
 
-if [ -d "$SETUP_REPO/lazy-pack" ] && [ -d "$OBSIDIAN_LAZYPACK" ]; then
-  diff_output="$(diff -qr "$SETUP_REPO/lazy-pack" "$OBSIDIAN_LAZYPACK" 2>&1)"
+if [ -d "$LAZYPACK_ROOT" ] && [ -d "$OBSIDIAN_LAZYPACK" ]; then
+  diff_output="$(diff -qr "$LAZYPACK_ROOT" "$OBSIDIAN_LAZYPACK" 2>&1)"
   if [ -z "$diff_output" ]; then
     pass "repo lazy-pack matches Obsidian mirror"
   else
@@ -119,4 +121,3 @@ printf '\nSummary: %s failure(s), %s warning(s)\n' "$failures" "$warnings"
 if [ "$failures" -gt 0 ]; then
   exit 1
 fi
-

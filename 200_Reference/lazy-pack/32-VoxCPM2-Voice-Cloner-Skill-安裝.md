@@ -47,7 +47,7 @@
 {{CODEX_HOME}}/skills/voxcpm2-voice-cloner/
 {{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/
 {{CODEX_HOME}}/voxcpm2-voice-cloner/model-cache/
-{{SYNC_ROOT}}/assets/arry-voice-profiles/Arry/
+{{SYNC_ROOT}}/knowledge/arry-voice-profiles/Arry/
 {{CODEX_HOME}}/voxcpm2-voice-cloner/output/
 ```
 
@@ -211,8 +211,8 @@ test ! -L "$HOME/.codex/voxcpm2-voice-cloner"
 Route reusable profiles and project outputs when needed:
 
 ```bash
-export VOXCPM2_VOICES_DIR="/path/to/private-assistant/assets/voice-profiles"
-export VOXCPM2_OUTPUT_DIR="/path/to/project-local/output"
+export VOXCPM2_VOICES_DIR="/path/to/private-assistant/knowledge/voice-profiles"
+export VOXCPM2_OUTPUT_DIR="/path/to/project/100_Todo/projects/voxcpm2-voice-cloner"
 ```
 
 List profiles:
@@ -288,7 +288,6 @@ After setup:
 ## Source And Maintenance
 
 Read `references/upstream.md` before refreshing this skill from upstream. Preserve the consent gate, private local-data boundary, MPS support, current official API compatibility, LazyPack package, and Obsidian index during upgrades.
-
 CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SKILL_MD
 
 # voxcpm2-voice-cloner/agents/openai.yaml
@@ -358,7 +357,7 @@ Do not symlink `~/.codex/voxcpm2-voice-cloner` to `codex_symlink/runtimes` or an
 By default, profiles and outputs live under the private local runtime. For reusable personal profiles, route the voice profile folder to the user's private assistant asset layer:
 
 ```bash
-export VOXCPM2_VOICES_DIR="/path/to/private-assistant/assets/voice-profiles"
+export VOXCPM2_VOICES_DIR="/path/to/private-assistant/knowledge/voice-profiles"
 ```
 
 For Arry, the canonical reusable profile is:
@@ -373,7 +372,7 @@ codex_symlink/knowledge/arry-voice-profiles/Arry/
 Generated audio belongs to the project where generation was requested:
 
 ```bash
-export VOXCPM2_OUTPUT_DIR="/path/to/project-local/output"
+export VOXCPM2_OUTPUT_DIR="$PWD/100_Todo/projects/voxcpm2-voice-cloner"
 ```
 
 Keep generated audio and biometric voice material out of public Git repos, LazyPack, and Obsidian. Use `.gitignore` for project output folders unless the user explicitly wants to publish a generated audio artifact.
@@ -427,7 +426,6 @@ The initial CPU smoke test with `--steps 1 --max-len 8` produced a 48 kHz, 1.28 
 - Do not use public Gradio shares.
 - Do not clone celebrities, coworkers, clients, family, or any third party without explicit permission.
 - Label externally distributed synthetic audio when listeners could reasonably mistake it for authentic speech.
-
 CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_REFERENCES_RUNTIME_MD
 
 # voxcpm2-voice-cloner/references/upstream.md
@@ -976,7 +974,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
 CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_RECORD_UI_PY
 
 # voxcpm2-voice-cloner/scripts/record_cli.py

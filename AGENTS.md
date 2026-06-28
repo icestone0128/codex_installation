@@ -82,9 +82,9 @@ Arry 助手 AI 分身資料層：
 
 ## 主要檔案
 
-入口檔：`200_Reference/docs/index.html`
+入口檔：`200_Reference/past-work/docs/index.html`
 設定檔：`.firebaserc`、`firebase.json`、`firestore.rules`
-部署位置：未啟用。GitHub Pages 已關閉；`200_Reference/docs/index.html` 只保留為本地入口檔。
+部署位置：未啟用。GitHub Pages 已關閉；`200_Reference/past-work/docs/index.html` 只保留為本地過往入口檔。
 部署網址：未啟用
 
 ## 初始化架構狀態
@@ -110,8 +110,8 @@ Arry 助手 AI 分身資料層：
 
 - `AGENTS.md` - 固定專案規則與工作流邊界。
 - `.gitignore` - 排除本機設定、憑證、相依套件與建置輸出。
-- `200_Reference/docs/` - 本地文件進入點（200_Reference/docs/index.html），目前不部署。
 - `200_Reference/lazy-pack/` - 經驗證的 Codex 安裝說明、除錯紀錄與內嵌全域技能安裝檔。
+- `200_Reference/past-work/docs/` - 過往本地文件入口備份，目前不部署。
 - `200_Reference/scripts/sync-health.sh` - 唯讀的跨裝置同步健康檢查腳本。
 - `000_Agent/` - 僅保留指向說明，不存放真實個人記憶或偏好。
 - `100_Todo/` - 專案本地待辦、草稿與工作中素材。

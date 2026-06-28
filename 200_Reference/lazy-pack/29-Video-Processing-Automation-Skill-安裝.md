@@ -138,13 +138,22 @@ example outputs, personal channel identity, and non-Codex routing.
 
 ## Output Contract
 
-For a long-form video, produce or prepare:
+In a standard four-box project that has `100_Todo/`, use the project structure
+as the source of truth:
 
-- `working/<video-id>/<video-id>.cut.mp4`
-- `working/<video-id>/<video-id>.srt`
-- `working/<video-id>/<video-id>.txt`
-- `working/<video-id>/titles.md`
-- `output/<chosen-title>/`
+- Process files and temporary subtitles go in `100_Todo/drafts/<video-id>/`.
+- Final packages go directly in `100_Todo/projects/<video-id>/`.
+- Do not create project-root `working/` or `output/` folders when those
+  `100_Todo/` routes exist.
+
+For a long-form video, produce or prepare these files under the routed draft and
+project folders:
+
+- `100_Todo/drafts/<video-id>/<video-id>.cut.mp4`
+- `100_Todo/drafts/<video-id>/<video-id>.srt`
+- `100_Todo/drafts/<video-id>/<video-id>.txt`
+- `100_Todo/drafts/<video-id>/titles.md`
+- `100_Todo/projects/<video-id>/`
   - `<chosen-title>.mp4`
   - `<chosen-title>.srt`
   - `<chosen-title>.txt`
@@ -153,11 +162,11 @@ For a long-form video, produce or prepare:
 
 For a short highlight version, produce:
 
-- `working/<video-id>/shorts-candidates.md`
-- `working/<video-id>/short-tmp/short.mp4`
-- `working/<video-id>/short-tmp/short.srt`
-- `working/<video-id>/short-tmp/short.txt`
-- `output/<short-title> (Short)/`
+- `100_Todo/drafts/<video-id>/shorts-candidates.md`
+- `100_Todo/drafts/<video-id>/short-tmp/short.mp4`
+- `100_Todo/drafts/<video-id>/short-tmp/short.srt`
+- `100_Todo/drafts/<video-id>/short-tmp/short.txt`
+- `100_Todo/projects/<video-id>/short/`
   - `<short-title>.mp4`
   - `<short-title>.srt`
   - `<short-title>.txt`
@@ -167,9 +176,8 @@ For a short highlight version, produce:
 When user choice is needed, pause at title selection and short-candidate
 selection instead of guessing silently.
 
-- **自適應專案收納 (Adaptive Project Path Routing)**: 當在標準四盒專案（含有 `100_Todo/`）下執行時，以「相對專案路徑」代替 `working/` 與 `output/`：
-  - **過程與臨時素材** (原 `working/<video-id>/`)：應置於相對路徑 `100_Todo/drafts/<video-id>/`。
-  - **成品包** (原 `output/<chosen-title>/`)：應直接置於 `100_Todo/projects/<video-id>/`，並且**不使用 `output` 中間層資料夾**。
+For projects without `100_Todo/`, choose the closest existing project-local
+draft and final folders and document the route before writing files.
 
 ## Workflow
 
@@ -182,7 +190,7 @@ selection instead of guessing silently.
      repo, notes, screenshots, or chat.
 1. Inspect input:
    - locate `raw/<video-id>/` or the user-provided video path;
-   - create `working/<video-id>/`;
+   - create `100_Todo/drafts/<video-id>/` when `100_Todo/` exists;
    - confirm whether the project may use cloud STT through Groq.
 2. Smart cut:
    - read `references/smart-cut.md`;
@@ -205,11 +213,13 @@ selection instead of guessing silently.
 5. Title selection:
    - generate 10 long-form title candidates in Traditional Chinese unless the
      user requests another language;
-   - write them to `working/<video-id>/titles.md`;
+   - write them to `100_Todo/drafts/<video-id>/titles.md` when `100_Todo/`
+     exists;
    - stop and ask the user to pick one.
 6. Package final output:
    - sanitize the chosen title for filenames;
-   - copy/rename the cut video, clean SRT, and TXT into `output/<chosen-title>/`.
+   - copy/rename the cut video, clean SRT, and TXT into
+     `100_Todo/projects/<video-id>/` when `100_Todo/` exists.
 7. Cover:
    - read `references/cover-style.md`;
    - use Codex image generation or the user-provided image workflow;
@@ -294,7 +304,6 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.
 - `GROQ_API_KEY` or `~/.codex/secrets/groq_api_key` exists before cloud STT.
 - Scan the package for excluded source-tool terms before packaging or syncing;
   the scan should have no hits.
-
 CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD
 
 # video-processing-automation/references/audio-subtitle.md
@@ -382,10 +391,6 @@ extend replacements with:
 Keep vocabulary mechanical. Do not change meaning.
 
 ## Local Route
-
-Local Whisper is a retained option, not the default route. Do not install,
-download, or choose a Local Whisper model by default when the Groq cloud route is
-available and the user accepts cloud transcription.
 
 Consider Local Whisper when Groq pricing or model availability changes, Groq is
 unavailable, or the user explicitly requires local-only processing. If Local
@@ -2028,6 +2033,10 @@ def main():
         print(f"[OK] 字幕影片製作完成：{out_video}")
     else:
         sys.exit(f"[ERR] ffmpeg 合併音軌失敗，退出碼 {rc}")
+
+
+if __name__ == "__main__":
+    main()
 CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_BURN_SUBTITLES_PY
 
 ```
