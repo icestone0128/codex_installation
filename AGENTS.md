@@ -38,6 +38,7 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 - 使用 `shutdown-sync` 流程。
 - 更新 Obsidian 駕駛艙。
 - 如規則、路徑、專案邊界改變才更新本檔。
+- 若本次有新增、修改、刪除或重新編號 LazyPack 內容，必須確認 `200_Reference/lazy-pack/` 已同步到 Obsidian `專案庫/codex_installation/懶人包/`，並把 repo 內 LazyPack 變更納入本專案 GitHub commit/push 範圍。
 - 需要時才 commit + push GitHub。
 
 全域 Skill 同步：
@@ -48,8 +49,10 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 - 建立、擷取、轉換、更新、改名或驗證自訂 skill 時，一律先使用 `/Users/arrywu/.codex/skills/codex-skill-creator`；內建 `skill-creator` 只作為唯讀輔助參考。
 - Obsidian 同步索引：`專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
-- 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `200_Reference/lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容和實際全域 skills 保持一致。
-- 同步後要實際比對 `/Users/arrywu/.codex/skills`、`200_Reference/lazy-pack/` 對應序號文件內嵌的 skill 名稱與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
+- 全域 skill 的主版本是 symlink 實體目錄 `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`；LazyPack 不是主版本，而是 repo 內可公開 push、可讓使用者下載安裝的自含式可攜化版本。
+- 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `200_Reference/lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容覆蓋所有應公開安裝的全域 skills、必要 references/scripts/assets 與安裝說明。
+- LazyPack 允許和全域 skills 目錄結構不同：可用一份序號文件包多個 skills，也可包含 MCP、plugin、Obsidian、GitHub、Firebase、NotebookLM 等非 skill 安裝項目；但 README 的安裝總表必須清楚標出哪些是完整內嵌安裝、哪些只是外部依賴或必裝檢查。
+- 同步後要實際比對 `/Users/arrywu/.codex/skills`、`200_Reference/lazy-pack/` 對應序號文件內嵌的 skill 名稱、LazyPack README 安裝總表與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
 - 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
 
 Arry 助手 AI 分身資料層：
@@ -70,7 +73,7 @@ Arry 助手 AI 分身資料層：
 - 只有全域 Codex skills 才使用 `/Users/arrywu/.codex/skills`，此路徑目前指向 Google Drive `codex_symlink/skills`。
 - Arry 助手跨專案記憶與個人偏好放在 `codex_symlink/memories/MEMORY.md`。
 - Arry 助手跨專案 workflow 草稿放在 `codex_symlink/workflows/`。
-- 任何 skill 不論全域或專案本地，都要做成可攜式版本：全域 skill 內容內嵌到 `200_Reference/lazy-pack/` 對應序號文件與 Obsidian 全域 Skills 索引；專案 skill 保留完整 package 在該專案 `000_Agent/skills/` 並記錄到專案駕駛艙。
+- 任何 skill 不論全域或專案本地，都要做成可攜式版本：全域 skill 以 `codex_symlink/skills` 為主版本，並將可公開安裝內容內嵌到 repo `200_Reference/lazy-pack/` 對應序號文件、同步 Obsidian 全域 Skills 索引與 Obsidian 懶人包鏡像；專案 skill 保留完整 package 在該專案 `000_Agent/skills/` 並記錄到專案駕駛艙。
 - 若來源文件含 AI 分身預設名稱，不使用來源預設名，改用「Arry 助手」。
 - 若 Arry 助手資料層與新專案初始化規則衝突，先詢問使用者再決定。
 - `project-init-sync`、`startup-sync`、`shutdown-sync` 已整合 Arry 助手雙層資料層：未來新專案預設建立本地 `100_Todo/`、`200_Reference/`；若該專案需要本地 assistant skill 或本地記憶，再建立該專案自己的 `000_Agent/skills/`、`000_Agent/memories/`，並引用 `codex_symlink` 全域 Arry 助手資料層。現有專案開工/收工時可同步跨專案記憶。
@@ -110,7 +113,7 @@ Arry 助手 AI 分身資料層：
 
 - `AGENTS.md` - 固定專案規則與工作流邊界。
 - `.gitignore` - 排除本機設定、憑證、相依套件與建置輸出。
-- `200_Reference/lazy-pack/` - 經驗證的 Codex 安裝說明、除錯紀錄與內嵌全域技能安裝檔。
+- `200_Reference/lazy-pack/` - 經驗證的 Codex 安裝說明、除錯紀錄與內嵌全域技能安裝檔；這是必須跟著本 repo commit/push 到 GitHub 的公開 LazyPack 發布資料夾。
 - `200_Reference/past-work/docs/` - 過往本地文件入口備份，目前不部署。
 - `200_Reference/scripts/sync-health.sh` - 唯讀的跨裝置同步健康檢查腳本。
 - `000_Agent/` - 僅保留指向說明，不存放真實個人記憶或偏好。
