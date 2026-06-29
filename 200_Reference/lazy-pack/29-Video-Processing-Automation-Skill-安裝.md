@@ -282,27 +282,27 @@ python3 -m pip install --user auto-editor groq
 
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py" \
   "raw/<video-id>/input.mp4" \
-  --out "working/<video-id>/<video-id>.cut.mp4"
+  --out "100_Todo/drafts/<video-id>/<video-id>.cut.mp4"
 
-ffmpeg -y -i "working/<video-id>/<video-id>.cut.mp4" \
-  -vn -ac 1 -ar 16000 "working/<video-id>/<video-id>.wav"
+ffmpeg -y -i "100_Todo/drafts/<video-id>/<video-id>.cut.mp4" \
+  -vn -ac 1 -ar 16000 "100_Todo/drafts/<video-id>/<video-id>.wav"
 
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py" \
-  "working/<video-id>/<video-id>.wav" \
-  --out "working/<video-id>/_subtitles/<video-id>.groq.json"
+  "100_Todo/drafts/<video-id>/<video-id>.wav" \
+  --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.groq.json"
 
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py" \
-  "working/<video-id>/_subtitles/<video-id>.groq.json" \
-  --out "working/<video-id>/_subtitles/<video-id>.raw.srt"
+  "100_Todo/drafts/<video-id>/_subtitles/<video-id>.groq.json" \
+  --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.raw.srt"
 
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" \
-  "working/<video-id>/_subtitles/<video-id>.raw.srt" \
-  --out "working/<video-id>/_subtitles/<video-id>.vocab.srt" \
+  "100_Todo/drafts/<video-id>/_subtitles/<video-id>.raw.srt" \
+  --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.vocab.srt" \
   --vocab "200_Reference/vocabulary.md"
 
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py" \
-  --raw "working/<video-id>/_subtitles/<video-id>.vocab.srt" \
-  --clean "working/<video-id>/_subtitles/<video-id>.clean.srt"
+  --raw "100_Todo/drafts/<video-id>/_subtitles/<video-id>.vocab.srt" \
+  --clean "100_Todo/drafts/<video-id>/_subtitles/<video-id>.clean.srt"
 ```
 
 ## Verification
@@ -339,33 +339,33 @@ Only subtitle text may be edited.
 1. Extract audio from the cut video:
 
 ```bash
-ffmpeg -y -i "working/<video-id>/<video-id>.cut.mp4" \
-  -vn -ac 1 -ar 16000 "working/<video-id>/<video-id>.wav"
+ffmpeg -y -i "100_Todo/drafts/<video-id>/<video-id>.cut.mp4" \
+  -vn -ac 1 -ar 16000 "100_Todo/drafts/<video-id>/<video-id>.wav"
 ```
 
 2. Transcribe:
 
 ```bash
-mkdir -p "working/<video-id>/_subtitles"
+mkdir -p "100_Todo/drafts/<video-id>/_subtitles"
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py" \
-  "working/<video-id>/<video-id>.wav" \
-  --out "working/<video-id>/_subtitles/<video-id>.groq.json"
+  "100_Todo/drafts/<video-id>/<video-id>.wav" \
+  --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.groq.json"
 ```
 
 3. Resegment:
 
 ```bash
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py" \
-  "working/<video-id>/_subtitles/<video-id>.groq.json" \
-  --out "working/<video-id>/_subtitles/<video-id>.raw.srt"
+  "100_Todo/drafts/<video-id>/_subtitles/<video-id>.groq.json" \
+  --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.raw.srt"
 ```
 
 4. Apply vocabulary:
 
 ```bash
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" \
-  "working/<video-id>/_subtitles/<video-id>.raw.srt" \
-  --out "working/<video-id>/_subtitles/<video-id>.vocab.srt" \
+  "100_Todo/drafts/<video-id>/_subtitles/<video-id>.raw.srt" \
+  --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.vocab.srt" \
   --vocab "200_Reference/vocabulary.md"
 ```
 
@@ -379,19 +379,19 @@ the script will still apply portable built-in replacements.
 
 ```bash
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py" \
-  --raw "working/<video-id>/_subtitles/<video-id>.vocab.srt" \
-  --clean "working/<video-id>/_subtitles/<video-id>.clean.srt"
+  --raw "100_Todo/drafts/<video-id>/_subtitles/<video-id>.vocab.srt" \
+  --clean "100_Todo/drafts/<video-id>/_subtitles/<video-id>.clean.srt"
 ```
 
 7. Convert to TXT:
 
 ```bash
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/srt_to_txt.py" \
-  "working/<video-id>/_subtitles/<video-id>.clean.srt" \
-  --out "working/<video-id>/<video-id>.txt"
+  "100_Todo/drafts/<video-id>/_subtitles/<video-id>.clean.srt" \
+  --out "100_Todo/drafts/<video-id>/<video-id>.txt"
 ```
 
-Copy the clean SRT to `working/<video-id>/<video-id>.srt`.
+Copy the clean SRT to `100_Todo/drafts/<video-id>/<video-id>.srt`.
 
 ## Vocabulary
 
@@ -446,9 +446,9 @@ python3 -m pip install opencv-python pillow --break-system-packages
 ### 執行燒錄
 ```bash
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/burn_subtitles.py" \
-  "working/<video-id>/<video-id>.cut.mp4" \
-  "working/<video-id>/<video-id>.srt" \
-  "output/<chosen-title>/<chosen-title>.mp4"
+  "100_Todo/drafts/<video-id>/<video-id>.cut.mp4" \
+  "100_Todo/drafts/<video-id>/<video-id>.srt" \
+  "100_Todo/projects/<video-id>/<chosen-title>.mp4"
 ```
 
 ### 設計細節與自訂
@@ -722,8 +722,8 @@ cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/short-video.
 
 Use this reference after a long video already has:
 
-- `working/<video-id>/<video-id>.cut.mp4`
-- `working/<video-id>/<video-id>.srt`
+- `100_Todo/drafts/<video-id>/<video-id>.cut.mp4`
+- `100_Todo/drafts/<video-id>/<video-id>.srt`
 
 ## Candidate Discovery
 
@@ -743,17 +743,17 @@ Create 3 candidates:
 - B: curiosity hook
 - C: promise hook
 
-Write `working/<video-id>/shorts-candidates.md` and pause for the user to choose
+Write `100_Todo/drafts/<video-id>/shorts-candidates.md` and pause for the user to choose
 A/B/C, ask for new candidates, or provide direct timecodes.
 
 ## Cutting
 
 ```bash
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/clip_cut.py" \
-  --input-mp4 "working/<video-id>/<video-id>.cut.mp4" \
-  --input-srt "working/<video-id>/<video-id>.srt" \
+  --input-mp4 "100_Todo/drafts/<video-id>/<video-id>.cut.mp4" \
+  --input-srt "100_Todo/drafts/<video-id>/<video-id>.srt" \
   --segments "00:00:08.500-00:00:13.200,00:00:45.100-00:01:30.800" \
-  --out-dir "working/<video-id>/short-tmp/"
+  --out-dir "100_Todo/drafts/<video-id>/short-tmp/"
 ```
 
 Default max duration is 120 seconds. If the user specifically wants YouTube
@@ -796,7 +796,7 @@ from the raw video before cutting, timestamps will no longer align.
    iOS 螢幕錄影或某些直播存檔預設為**變動影格率 (VFR, Variable Frame Rate)**。直接使用 `auto-editor` 裁剪拼接會導致影格時間戳錯亂、播放時畫面嚴重閃爍。
    **解決方法**：在剪輯前，必須先使用 `ffmpeg` 將影片轉檔為**固定影格率 (CFR, Constant Frame Rate)**：
    ```bash
-   ffmpeg -y -i "raw/input.mov" -map 0:v -map 0:a -r 30 -vsync cfr "working/input_cfr.mp4"
+   ffmpeg -y -i "raw/input.mov" -map 0:v -map 0:a -r 30 -vsync cfr "100_Todo/drafts/<video-id>/input_cfr.mp4"
    ```
 2. **串流順序問題 (Stream Ordering)**：
    `auto-editor` 預設要求影片的 **Stream 0 為 Video，Stream 1 為 Audio**。若影片為音訊在前的非標準格式，裁剪後會輸出沒有影像的損壞檔案。
@@ -806,12 +806,12 @@ from the raw video before cutting, timestamps will no longer align.
 
 ```bash
 # 1. 轉 CFR 固定影格率 (30fps)
-ffmpeg -y -i "raw/<video-id>/input.mp4" -map 0:v -map 0:a -r 30 -vsync cfr "working/<video-id>/input_cfr.mp4"
+ffmpeg -y -i "raw/<video-id>/input.mp4" -map 0:v -map 0:a -r 30 -vsync cfr "100_Todo/drafts/<video-id>/input_cfr.mp4"
 
 # 2. 進行智慧裁剪 (--no-open 避免伺服器環境自動彈出播放器)
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py" \
-  "working/<video-id>/input_cfr.mp4" \
-  --out "working/<video-id>/<video-id>.cut.mp4"
+  "100_Todo/drafts/<video-id>/input_cfr.mp4" \
+  --out "100_Todo/drafts/<video-id>/<video-id>.cut.mp4"
 ```
 
 When the only retained source is already normalized CFR, for example

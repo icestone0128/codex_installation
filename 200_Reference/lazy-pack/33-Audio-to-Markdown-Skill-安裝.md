@@ -179,7 +179,7 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 
 ### 該回給使用者什麼（Windows，最重要）
 
-學員多半非技術背景，**首選「拖檔」、不要叫他打指令**。安裝包已在桌面放了一個「🎤 拖檔轉逐字稿」圖示。
+學員多半非技術背景，**首選「拖檔」、不要叫他打指令**。若正在標準四盒專案中工作，且專案已放置 `200_Reference/scripts/轉逐字稿.command` 或 `200_Reference/scripts/transcribe.command`，優先請使用者用專案內啟動器；否則才使用桌面「🎤 拖檔轉逐字稿」圖示或全域本機啟動器。
 
 例如使用者說：
 > 幫我把這段影片轉成逐字稿知識庫：C:\Users\USER\OneDrive\Desktop\meeting.mp4
@@ -190,7 +190,7 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 這段轉錄要在你自己的電腦上跑（免費、不花 token），我這邊的沙箱載不到語音模型。最簡單的做法：
 
 【方法一 · 拖檔（推薦，不用打字）】
-1. 在桌面找到「🎤 拖檔轉逐字稿」圖示。
+1. 如果這是專案素材，先到專案的 `200_Reference/scripts/` 找「轉逐字稿.command」或 `transcribe.command`；找不到時，再用桌面「🎤 拖檔轉逐字稿」圖示。
 2. 把你的影片（meeting.mp4）直接拖到這個圖示上放開。
 3. 等它跑完（第一次會久一點），它會自動打開輸出資料夾。
 4. 把資料夾裡的「*_逐字稿知識庫.md」拖回來給我，我接著做校稿、段落摘要、全篇重點。
@@ -206,7 +206,7 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 
 ```text
 這段轉錄要在你自己的 Mac 上跑（免費、不花 token）。
-最簡單：雙擊桌面的「轉逐字稿.command」，把影片拖進視窗按 Enter。
+最簡單：如果專案有 `200_Reference/scripts/轉逐字稿.command` 或 `200_Reference/scripts/transcribe.command`，先雙擊專案內啟動器，把影片拖進視窗按 Enter；否則雙擊桌面的「轉逐字稿.command」。
 或開 Terminal 貼：~/.audio-to-md/audio-to-md "/Users/你/Desktop/meeting.m4a"
 跑完把輸出的「*_逐字稿知識庫.md」傳回來給我做 Phase 2。
 桌面沒有那個檔 → 先跑安裝包的 install.sh 裝一次。
@@ -219,6 +219,7 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 ## Step 1 — 找到本機啟動器（Desktop／網頁的唯一正解）
 
 ### 本機啟動器（安裝包 install.bat / install.sh 已裝好）
+- **專案內 Mac 拖檔**：標準四盒專案可優先使用 `200_Reference/scripts/轉逐字稿.command` 或 `200_Reference/scripts/transcribe.command`
 - **Windows 拖檔圖示**：桌面「🎤 拖檔轉逐字稿.bat」（背後是 `%USERPROFILE%\.audio-to-md\轉逐字稿.bat`）
 - **Windows 指令啟動器**：`%USERPROFILE%\.audio-to-md\audio-to-md.bat`
 - **Mac 拖檔**：桌面「轉逐字稿.command」
@@ -237,7 +238,7 @@ python3 scripts/audio_to_md.py "<音訊或影片>" -o "<輸出資料夾>"
 
 ## Step 2 — 執行 Phase 1（本地轉錄）
 
-學員端最簡單就是**桌面拖檔圖示**（Windows「🎤 拖檔轉逐字稿」／Mac「轉逐字稿.command」）。
+學員端最簡單就是**拖檔啟動器**：標準四盒專案優先用 `200_Reference/scripts/` 內的專案啟動器；沒有專案啟動器時，才用桌面拖檔圖示（Windows「🎤 拖檔轉逐字稿」／Mac「轉逐字稿.command」）。
 要手動下指令時（本機啟動器，**不是沙箱**）：
 
 ```bat
@@ -358,8 +359,8 @@ Groq 輸出：
 
 | 問題 | 解法 |
 |------|------|
-| 沙箱裡 `pip install` / 下載模型失敗（HuggingFace 被封） | **預期內，別重試**。Desktop／網頁本來就轉不了。改請使用者在自己電腦用桌面拖檔圖示／本機啟動器跑 Phase 1 |
-| 使用者貼了 `C:\...` 或 `/Users/...` 本機路徑，或直接上傳了影音檔 | 兩種都一樣：請他用桌面「🎤 拖檔轉逐字稿.bat」圖示（或本機啟動器）先產生 `*_逐字稿知識庫.md`，再傳回來做 Phase 2。**不要在沙箱嘗試轉錄** |
+| 沙箱裡 `pip install` / 下載模型失敗（HuggingFace 被封） | **預期內，別重試**。Desktop／網頁本來就轉不了。改請使用者在自己電腦用專案 `200_Reference/scripts/` 啟動器、桌面拖檔圖示或本機啟動器跑 Phase 1 |
+| 使用者貼了 `C:\...` 或 `/Users/...` 本機路徑，或直接上傳了影音檔 | 兩種都一樣：請他優先用專案 `200_Reference/scripts/` 啟動器；沒有專案啟動器時，再用桌面「🎤 拖檔轉逐字稿.bat」圖示或本機啟動器產生 `*_逐字稿知識庫.md`，再傳回來做 Phase 2。**不要在沙箱嘗試轉錄** |
 | 桌面找不到「🎤 拖檔轉逐字稿」圖示 | 代表本機引擎還沒裝。請使用者到下載的安裝包資料夾雙擊 `install.bat`（Mac 跑 `install.sh`）裝一次 |
 | 安裝時提示 Python 不相容 | 請安裝 Python 3.12，關閉 Terminal/視窗後重跑 `install.sh` / `install.bat` |
 | 第一次很久 | 在下載 turbo 模型（~1.5GB）；之後就快。請耐心等，不要因此改用小模型 |
