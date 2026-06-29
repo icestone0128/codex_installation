@@ -2093,8 +2093,8 @@ After the final video has been rendered and verified, ask the user whether they 
 When the user confirms cleanup:
 
 - Keep the final rendered video, source media, `video-spec.md`, `design.md`, `README.md`, project `AGENTS.md`, and production notes or other meaningful `.md` files.
-- Move source assets into a clear folder such as `00_Source_Media/`, with subfolders for raw originals, final high-resolution photos, processed audio, and processed video clips.
-- Move final deliverables into a clear folder such as `01_Final_Output/`.
+- Keep source assets inside the current video package, for example `<video-project-folder>/00_Source_Media/`, with subfolders for raw originals, final high-resolution photos, processed audio, and processed video clips. In a standard four-box project, the video package should live under `100_Todo/projects/<video-project-name>/`, not the project root.
+- Keep final deliverables inside the same video package, for example `<video-project-folder>/01_Final_Output/`. Do not create project-root `00_Source_Media/` or `01_Final_Output/` folders when a `100_Todo/projects/<video-project-name>/` package exists.
 - Remove preview contact sheets, thumbnails, non-final renders, render work folders, extracted audio checks, transient analysis JSON/log files, and intermediate test clips that are not needed to reproduce the final output.
 - Update project documentation and composition references after moving files, then verify that the composition still resolves every local `src`/`href` asset.
 - Keep media files ignored by Git unless the project explicitly requires versioning small generated assets.
