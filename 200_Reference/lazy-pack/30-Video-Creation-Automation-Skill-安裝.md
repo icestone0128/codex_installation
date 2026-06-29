@@ -1,6 +1,6 @@
 # 30-Video-Creation-Automation-Skill-安裝
 
-> 版本：2026-06-04 Codex App 版
+> 版本：2026-06-29 Codex App 版
 > 用途：安裝 `video-creation-automation` 全域 skill，在「沒有現成影片」時，從題目、腳本、設計、素材、旁白與 HTML / HyperFrames composition 開始生成影片。
 > 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/video-creation-automation/`。
 
@@ -9,6 +9,7 @@
 - 初次同步日期：2026-06-04。
 - 來源：使用者提供的 video specs 來源 repo。
 - 來源 commit：`3bcb03f`。
+- 2026-06-29 依實際重跑 HyperFrames 生成影片流程，補入離線可重現資源規則、Google Fonts / 遠端 texture 禁用、HyperFrames lint / validate / inspect / render 驗證與 sandbox Chrome route。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/video-creation-automation/SKILL.md`。
 
 ## 與 Video Processing Automation 的關係
@@ -52,7 +53,10 @@
 - 不要跳過第一個 routing question；如果使用者已有影片，應改用 `video-processing-automation`。
 - 不要跳過 `SCRIPT.md` 和 `DESIGN.md` 的使用者確認。
 - 不要假設照片、logo、音樂或品牌素材存在；要先列出素材缺口。
-- 渲染時不要依賴遠端圖片 URL；需要用的素材應放進專案 `assets/`。
+- 渲染時不要依賴遠端圖片 URL、Google Fonts、favicon 或裝飾性 texture 服務；需要用的素材應放進專案既有素材路徑，或改成 CSS-only / local asset。
+- HyperFrames 成品至少跑 `lint`、`validate`、`inspect`；Google Drive / 慢速媒體可加 `--timeout 30000`。
+- 若 sandbox 內 Chrome 無法啟動，改用允許啟動本機瀏覽器的執行路線重跑 `validate` / `inspect`，並記錄這是環境限制，不是 composition 失敗。
+- 低記憶體 Mac 上 render 優先單 worker，完成後用 `ffprobe` 驗證 MP4 影音 stream。
 - 影片素材與輸出成品通常不進 git。
 
 ## 最終檢查清單
@@ -61,6 +65,8 @@
 - [ ] `references/source-adaptation.md`、`references/video-types.md`、`references/gotchas.md` 存在。
 - [ ] 啟動時會先詢問是否有現成影片。
 - [ ] 已有影片時會路由到 `video-processing-automation`，沒有影片時才繼續生成影片流程。
+- [ ] HTML / CSS / JS 已通過 HyperFrames lint / validate / inspect；最終 MP4 已用 `ffprobe` 驗證。
+- [ ] 沒有外部字型、遠端 texture、favicon 或不可重現 URL 依賴。
 - [ ] 沒有把 API key、OAuth token、影片素材、個人照片或成品影片寫進 repo。
 - [ ] 開新 Codex 對話後可用 `video-creation-automation` 或「沒有影片、從零做影片」相關語句觸發。
 
@@ -338,6 +344,10 @@ Read before implementing any generated video.
 - Do not assume photos, logo, music, or brand assets exist.
 - Download external images into `assets/`; do not rely on remote URLs at render
   time.
+- Do not rely on remote decorative textures, Google Fonts links, favicon
+  requests, or other external render-time URLs. Prefer local assets, built-in
+  HyperFrames font handling, or CSS-only textures so a downloaded repo renders
+  the same way offline.
 - Record attribution or source notes when needed.
 - Avoid private or sensitive media uploads unless the user explicitly approves.
 
@@ -355,6 +365,22 @@ Read before implementing any generated video.
   `-map 0:v:0 -map 1:a:0`.
 - Use `afade` with `st=<seconds>` for time-based fades, not sample-based `ss`.
 - Verify audio is present in the final MP4.
+
+## HyperFrames Rendering
+
+- Run `npx --yes hyperframes@<version> lint`, then `validate`, then `inspect`
+  before render. If media loads from Google Drive or a slow local folder, use
+  longer timeouts such as `--timeout 30000`.
+- If headless Chrome fails inside the Codex sandbox but `hyperframes browser
+  ensure` finds system Chrome, rerun validate/inspect/render with an execution
+  route that can launch the local browser. This is an environment issue, not a
+  composition syntax issue, when lint already passes.
+- On low-memory Macs, HyperFrames may activate low-memory profile and pin
+  rendering to one worker. Treat this as an expected slow path; do not force
+  extra workers unless the machine has enough free RAM.
+- After render, verify with `ffprobe` that the MP4 has both a video stream and
+  an audio stream, and that the duration matches the composition/narration
+  length.
 
 ## HTML Playback
 

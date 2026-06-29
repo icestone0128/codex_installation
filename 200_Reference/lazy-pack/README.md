@@ -172,8 +172,8 @@
 | 23 | HyperFrames skill suite | [[26-HyperFrames-Skill-安裝]] | 可直接安裝；HTML/CSS/media/seekable animation 到 MP4 的影片 composition 工作流，含相片紀念影片預覽、音訊驗證與完稿後資料夾清理詢問；實際 render 需 Node.js 22+ 與 FFmpeg |
 | 24 | Video Spec Builder | [[27-Video-Spec-Builder-Skill-安裝]] | 可直接安裝；追問影片需求、拆分鏡、產出可交給 HyperFrames 的 `video-spec.md` |
 | 25 | `netlify-deploy` | [[28-Netlify-Deploy-Skill-安裝]] | 可直接安裝；官方 Netlify MCP 設定、Netlify 前端部署與 Clasp + Apps Script API 閉環部署流程 |
-| 26 | `video-processing-automation` | [[29-Video-Processing-Automation-Skill-安裝]] | 可直接安裝；原始影片到 YouTube / 社群影片上架包，含智能剪口播、字幕、文字稿、封面、metadata 與短片亮點 |
-| 27 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時，先確認入口後生成腳本、設計、素材、旁白、composition 與渲染包；若已有影片則轉用 `video-processing-automation` |
+| 26 | `video-processing-automation` | [[29-Video-Processing-Automation-Skill-安裝]] | 可直接安裝；原始影片到 YouTube / 社群影片上架包，含智能剪口播、Groq STT、專案詞彙表字幕修正、文字稿、封面、metadata、短片亮點與 ffprobe 驗收 |
+| 27 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時，先確認入口後生成腳本、設計、素材、旁白、HyperFrames composition 與渲染包；補入離線可重現資源、lint / validate / inspect / ffprobe 驗收；若已有影片則轉用 `video-processing-automation` |
 | 28 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
 | 29 | `voxcpm2-voice-cloner` | [[32-VoxCPM2-Voice-Cloner-Skill-安裝]] | 可直接安裝；授權聲音克隆、合成聲音設計、Apple Silicon MPS／CUDA／CPU、本機 runtime／模型快取路由與 consent gate |
 | 30 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；產出文字後 Phase 2 流程相同，由 Codex 做逐段校稿、摘要與重點整理；內嵌完整 Python 腳本、實測紀錄與踩坑 |
