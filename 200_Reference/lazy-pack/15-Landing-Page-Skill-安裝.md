@@ -363,7 +363,7 @@ For guided generation mode, first check whether the active project has a design 
 
 - `DESIGN.md`
 - `design.md`
-- `docs/DESIGN.md`
+- `200_Reference/docs/DESIGN.md`
 - `brand/DESIGN.md`
 
 If found, summarize the brand colors, typography, and tone, then ask whether to use it. If the user confirms, use it and skip optional design-system discovery.

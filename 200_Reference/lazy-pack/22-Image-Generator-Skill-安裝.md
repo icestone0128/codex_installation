@@ -266,12 +266,15 @@ Use these fields when the user needs help writing a prompt:
 
 ## Project Placement
 
-When the user wants the generated image saved into a project, prefer stable
-asset paths such as:
+When the user wants the generated image saved into a standard four-box project,
+prefer a task package under `100_Todo/projects/<image-task>/assets/images/`.
+Use `200_Reference/docs/images/` only for deployable/static site assets and
+`200_Reference/templates/images/` only for reusable templates. Do not create
+project-root `assets/`, `public/`, or `src/` folders just for generated images.
 
-- `{{PROJECT_ROOT}}/assets/images/`
-- `{{PROJECT_ROOT}}/public/images/`
-- `{{PROJECT_ROOT}}/src/assets/`
+- `{{PROJECT_ROOT}}/100_Todo/projects/<image-task>/assets/images/`
+- `{{PROJECT_ROOT}}/200_Reference/docs/images/`
+- `{{PROJECT_ROOT}}/200_Reference/templates/images/`
 - `{{OBSIDIAN_VAULT}}/<note-folder>/attachments/`
 
 Report the final path only after the file has actually been copied or created.

@@ -201,7 +201,11 @@ the VLM-to-MD visual workflow.
 - `doc_md_router.py` is the default entrypoint. It inspects the input and calls
   the right script automatically.
 - `package_kb.py` packages a final visual knowledge base Markdown file together
-  with its `assets/` folder when VLM images are included.
+  with its sibling `assets/` folder when VLM images are included.
+- In standard four-box projects, place generated Markdown and assets under
+  `100_Todo/projects/doc-to-md/<document-slug>/` unless the user chooses an
+  Obsidian or project-specific destination; do not create a project-root
+  `output/` folder.
 
 **Works in Codex App and local CLI environments:**
 - Use bundled scripts in this skill folder when the skill is copied into
@@ -245,7 +249,7 @@ test -x ~/.vlm-to-md/vlm-to-md && echo "vlm converter ok"
 
 # 2. Run automatic routing. The router calls the fixed installed converters
 #    first, then falls back to bundled scripts.
-python3 scripts/doc_md_router.py "/mnt/user-data/uploads/<file>.pdf" -o "/mnt/user-data/outputs/"
+python3 scripts/doc_md_router.py "/mnt/user-data/uploads/<file>.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
 ```
 
 If the current system `python3` cannot import PyMuPDF for PDF routing, run the
@@ -328,6 +332,8 @@ what happened:
 | `--vlm-mode both` | Full pages plus figures |
 | `--dpi 200` | Increase visual render quality |
 | `--no-convert-chinese` | Skip Simplified→Traditional conversion |
+| `--ocr-classify` | Use macOS local Vision OCR & layout analysis to automatically classify and filter pure text pages and crop images (macOS only) |
+| `--no-ocr-classify` | Force disable OCR classification and layout checks |
 | `-o DIR` | Output directory (default: same folder as input) |
 
 **Supported formats:** `.pdf` `.epub` `.txt` plus images
@@ -891,7 +897,7 @@ one-off conversion.
 ```bash
 test -x ~/.doc-to-md/doc-to-md && echo "text converter ok"
 test -x ~/.vlm-to-md/vlm-to-md && echo "vlm converter ok"
-~/.doc-to-md/venv/bin/python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py "book.pdf" -o ./output/
+~/.doc-to-md/venv/bin/python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py "book.pdf" -o ./100_Todo/projects/doc-to-md/book/
 ```
 
 The router calls `~/.doc-to-md/doc-to-md` and `~/.vlm-to-md/vlm-to-md` first,
@@ -936,7 +942,7 @@ python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py book.pdf
 ```bash
 python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py \
   "report.pdf" \
-  -o ~/Documents/output/
+  -o ./100_Todo/projects/doc-to-md/book/
 ```
 
 The router decides whether to run text conversion, VLM visual preparation, or
@@ -946,7 +952,7 @@ both. Use this for ordinary `doc-to-md` requests.
 ```bash
 python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py \
   "consulting_report.pdf" \
-  -o ~/Documents/output/ \
+  -o ./100_Todo/projects/doc-to-md/book/ \
   --visual force \
   --vlm-mode figures
 ```
@@ -968,7 +974,7 @@ python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
 ```bash
 python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
   --auto "deep_work.epub" \
-  -o ~/Documents/output/
+  -o ./100_Todo/projects/doc-to-md/book/
 ```
 
 ### TXT transcript (no Chinese conversion)
@@ -976,7 +982,7 @@ python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
 python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
   --auto "lecture_transcript.txt" \
   --no-convert-chinese \
-  -o ~/Documents/output/
+  -o ./100_Todo/projects/doc-to-md/book/
 ```
 
 ---
@@ -1049,7 +1055,7 @@ The script detects sections matching these patterns (auto-detected):
 ```bash
 python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py \
   "scan.pdf" \
-  -o ~/Documents/output/
+  -o ./100_Todo/projects/doc-to-md/book/
 ```
 
 The router will choose `vlm_prep.py --mode pages` when the PDF has too little
@@ -1239,37 +1245,37 @@ If the current system `python3` lacks PyMuPDF for PDF routing, run the bundled
 router with the already installed text-converter Python:
 
 ```bash
-~/.doc-to-md/venv/bin/python3 scripts/doc_md_router.py "input.pdf" -o "output/"
+~/.doc-to-md/venv/bin/python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
 ```
 
 Automatic:
 
 ```bash
-python3 scripts/doc_md_router.py "input.pdf" -o "output/"
+python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
 ```
 
 Force VLM for a text PDF:
 
 ```bash
-python3 scripts/doc_md_router.py "input.pdf" -o "output/" --visual force
+python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/" --visual force
 ```
 
 Text only:
 
 ```bash
-python3 scripts/doc_md_router.py "input.pdf" -o "output/" --visual off
+python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/" --visual off
 ```
 
 Visual only:
 
 ```bash
-python3 scripts/vlm_prep.py --mode auto "input.pdf" -o "output/"
+python3 scripts/vlm_prep.py --mode auto "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
 ```
 
 Package final visual knowledge base:
 
 ```bash
-python3 scripts/package_kb.py "output/input_視覺知識庫.md"
+python3 scripts/package_kb.py "100_Todo/projects/doc-to-md/<document-slug>/input_視覺知識庫.md"
 ```
 
 ## VLM Accuracy Rules
@@ -2376,8 +2382,8 @@ def main():
         epilog="""
 Examples:
   python3 doc_to_md.py book.pdf
-  python3 doc_to_md.py --auto lecture.txt -o ~/Documents/output/
-  python3 doc_to_md.py --no-convert-chinese ebook.epub -o ./output/
+  python3 doc_to_md.py --auto lecture.txt -o ./100_Todo/projects/doc-to-md/lecture/
+  python3 doc_to_md.py --no-convert-chinese ebook.epub -o ./100_Todo/projects/doc-to-md/ebook/
         """
     )
     parser.add_argument('input', help='Input file (PDF, EPUB, or TXT)')

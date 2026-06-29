@@ -278,7 +278,7 @@ For frontend apps:
 
 For public templates:
 
-- Include `.env.example` with `GEMINI_API_KEY=<load-from-local-secret>`.
+- In standard four-box projects, put the public template at `200_Reference/templates/env.example` with `GEMINI_API_KEY=<load-from-local-secret>`; do not create a project-root `.env.example` unless the framework explicitly requires it.
 - Add `.env`, `.env.local`, and local secret files to `.gitignore`.
 - Include setup instructions, not a real key.
 
@@ -443,7 +443,7 @@ if (!apiKey) {
 }
 ```
 
-`.env.example`:
+`200_Reference/templates/env.example`:
 
 ```text
 GEMINI_API_KEY=<load-from-local-secret>

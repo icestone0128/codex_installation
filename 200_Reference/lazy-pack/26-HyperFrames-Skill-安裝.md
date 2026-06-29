@@ -9699,7 +9699,7 @@ npx hyperframes render --docker                       # byte-identical
 
 | Flag                 | Options               | Default                    | Notes                                                              |
 | -------------------- | --------------------- | -------------------------- | ------------------------------------------------------------------ |
-| `--output`           | path                  | renders/name_timestamp.mp4 | Output path                                                        |
+| `--output`           | path                  | renders/name_timestamp.mp4 | CLI native default; in four-box projects, explicitly set `100_Todo/projects/<video-project>/01_Final_Output/<name>.mp4` |
 | `--fps`              | 24, 30, 60            | 30                         | 60fps doubles render time                                          |
 | `--quality`          | draft, standard, high | standard                   | draft for iterating                                                |
 | `--format`           | mp4, webm             | mp4                        | WebM supports transparency                                         |
@@ -40442,11 +40442,11 @@ Create a project directory for your video if it doesn't exist yet, then capture 
 npx hyperframes capture <URL> -o <project-dir>/capture
 ```
 
-Example: `npx hyperframes capture https://stripe.com -o videos/stripe-launch/capture`
+Example in a standard four-box project: `npx hyperframes capture https://stripe.com -o 100_Todo/projects/stripe-launch/capture`
 
-Keeping capture artifacts (`screenshots/`, `assets/`, `extracted/`, `AGENTS.md`, `AGENTS.md`) in a dedicated `capture/` subfolder keeps them isolated from later build files (`SCRIPT.md`, `STORYBOARD.md`, `DESIGN.md`, `compositions/`, `index.html`, `narration.wav`, `transcript.json`, `renders/`, `snapshots/`), which all live at `<project-dir>/` root.
+Keeping capture artifacts (`screenshots/`, `assets/`, `extracted/`, `AGENTS.md`, `AGENTS.md`) in a dedicated `capture/` subfolder keeps them isolated from later build files (`SCRIPT.md`, `STORYBOARD.md`, `DESIGN.md`, `compositions/`, `index.html`, `narration.wav`, `transcript.json`, `snapshots/`, `01_Final_Output/`), which all live inside the same video package, normally `100_Todo/projects/<site-video-name>/` when the project has `100_Todo/`.
 
-For exploratory captures that aren't becoming a video yet, `-o captures/<name>` at the repo root is fine — the isolation convention only matters when you're building a video on top of the capture.
+For exploratory captures that are not becoming a video yet, use `100_Todo/drafts/website-captures/<name>/capture` when the project has `100_Todo/`; avoid repo-root `captures/`.
 
 ## Confirm it succeeded
 
@@ -42620,16 +42620,16 @@ When rendering, **always specify quality and resolution explicitly.** Don't use 
 
 ```bash
 # Standard quality, 1080p landscape (default for most videos)
-npx hyperframes render --output renders/<name>.mp4 --quality standard --fps 30
+npx hyperframes render --output 01_Final_Output/<name>.mp4 --quality standard --fps 30
 
 # High quality for final delivery
-npx hyperframes render --output renders/<name>.mp4 --quality high --fps 30
+npx hyperframes render --output 01_Final_Output/<name>.mp4 --quality high --fps 30
 
 # Portrait for Instagram Stories / TikTok
-npx hyperframes render --output renders/<name>.mp4 --quality standard --fps 30 --resolution portrait
+npx hyperframes render --output 01_Final_Output/<name>.mp4 --quality standard --fps 30 --resolution portrait
 
 # 4K for premium output
-npx hyperframes render --output renders/<name>.mp4 --quality high --fps 30 --resolution 4k
+npx hyperframes render --output 01_Final_Output/<name>.mp4 --quality high --fps 30 --resolution 4k
 ```
 
 **Available options:**
@@ -42640,7 +42640,7 @@ npx hyperframes render --output renders/<name>.mp4 --quality high --fps 30 --res
 | `--fps`           | `24`, `30`, `60`                                                                           | 30 is standard, 24 for cinematic feel, 60 for smooth motion                        |
 | `--resolution`    | `landscape` (1920×1080), `portrait` (1080×1920), `landscape-4k` (3840×2160), `portrait-4k` | Aliases: `1080p`, `4k`, `uhd`                                                      |
 | `--format`        | `mp4`, `webm`, `mov`, `png-sequence`                                                       | mp4 default. mov/webm for transparency. png-sequence for AE/Nuke                   |
-| `--output`        | path                                                                                       | Always set to `renders/<project-name>.mp4` for readable names                      |
+| `--output`        | path                                                                                       | In a standard video package, set to `01_Final_Output/<project-name>.mp4` for readable names |
 | `--gpu`           | flag                                                                                       | Use GPU encoding if available (faster)                                             |
 | `--crf`           | integer                                                                                    | Override encoder quality (lower = better, mutually exclusive with --video-bitrate) |
 | `--video-bitrate` | e.g. `10M`                                                                                 | Target bitrate (mutually exclusive with --crf)                                     |
