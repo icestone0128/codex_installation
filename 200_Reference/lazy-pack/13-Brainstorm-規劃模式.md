@@ -142,8 +142,8 @@ metadata:
 
 Codex 版不在安裝時固定 `PLANS_DIR`。使用 skill 時才依專案狀況決定：
 
-1. 若目前專案已有 `plans/`，優先放在 `plans/`。
-2. 若目前專案使用個人助手本地層且已有 `100_Todo/plans/`，可放在 `100_Todo/plans/`。
+1. 若目前專案有 `100_Todo/`，預設放在 `100_Todo/projects/brainstorm/`。
+2. 若目前專案已有明確規劃目錄且使用者要求沿用，可放在該既有目錄。
 3. 若使用者指定位置，以使用者指定為準。
 4. 若使用者只想在對話中看計劃，不需要建立檔案。
 
@@ -407,7 +407,7 @@ metadata:
 - [風險]：[處理方式]
 ```
 
-保存計劃書時，優先使用目前專案的 `plans/`；若專案已有 `100_Todo/plans/` 或使用者指定位置，改用該位置。檔名格式：`YYYY-MM-DD-[主題關鍵字].md`。
+保存計劃書時，若目前專案有 `100_Todo/`，預設使用 `100_Todo/projects/brainstorm/`；若專案已有其他明確規劃目錄或使用者指定位置，改用該位置。不要在專案根目錄建立 `plans/`。檔名格式：`YYYY-MM-DD-[主題關鍵字].md`。
 
 ## Phase 7：確認下一步
 
@@ -449,7 +449,7 @@ cat > "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md" <<'CODE
 - 保留硬性閘門：使用者確認計劃前不實作、不 scaffold、不修改檔案。
 - 保留四種溝通模式：小白、半技術、工程師、AI 判斷。
 - 保留核心階段：確認主題、掃描上下文、列假設、深度釐清、方案比較、計劃書、下一步確認。
-- 保存計劃書的預設位置改成 Codex 專案慣例：目前專案 `plans/`，或既有 `100_Todo/plans/`，或使用者指定路徑。
+- 保存計劃書的預設位置改成 Codex 四盒專案慣例：有 `100_Todo/` 時使用 `100_Todo/projects/brainstorm/`；若專案已有其他明確規劃目錄或使用者指定路徑，改用該位置；不要在專案根目錄建立 `plans/`。
 
 授權與致謝：原文標示「AI 規劃模式 by 雷小蒙」採 CC BY-NC-SA 4.0 個人使用自由、禁止商業用途；核心理念參考 obra/superpowers brainstorming skill（MIT License）。本檔只保存 Codex 相容改編摘要，不複製原始全文。
 CODEX_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD_97DFD86D17

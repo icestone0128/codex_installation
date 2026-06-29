@@ -292,16 +292,16 @@ Only apply this preset when the user explicitly says `手寫混搭數位風格`.
 2. 若來源是網址，優先使用可用的網頁讀取工具擷取主要內容；若來源是本機檔案，先讀檔再整理。
 3. 詢問或合理推定輸出比例：預設 `4:5`（1080 x 1350）；若使用者要求正方形，改為 `1:1`（1080 x 1080）。
 4. 詢問風格：預設 `orange-light`，也可選 `blue-dark`；若使用者指定 Pantone 285C 品牌版，使用 `brand-light` 或 `brand-dark`；若使用者明確說 `手寫混搭數位風格`，才套用該 optional style preset。
-5. 確認社群 handle。若當前輸出根目錄已有 `output/.handle`，可讀取後向使用者確認；沒有就詢問一次。
+5. 確認社群 handle。若當前專案已有 `100_Todo/projects/social-cards/.handle`，可讀取後向使用者確認；沒有就詢問一次。
 6. 拆卡並先展示規劃，等使用者確認後才產生預覽：
    - 第 1 張：`cover`
    - 中間：`content-text` 或 `content-image`
    - 最後：`cta`
-7. 產生輸出資料夾：`output/YYYY-MM-DD-{topic-slug}/`。
+7. 產生輸出資料夾：標準四盒專案使用 `100_Todo/projects/social-cards/YYYY-MM-DD-{topic-slug}/`；沒有 `100_Todo/` 時才使用最接近的專案本地輸出資料夾。
 8. 讀取對應模板，替換標題、內文、條列、handle、頁碼與圖片路徑。圖片一律用絕對路徑，並維持等比顯示。
 9. 建立 `preview.html` 總覽頁並打開預覽。預覽階段只產生 HTML，不產生 PNG。
 10. 依使用者回饋修改單張或整組圖卡。
-11. 使用者明確確認「匯出」後，執行 `node {SKILL_DIR}/scripts/screenshot.mjs output/YYYY-MM-DD-{topic-slug}/` 匯出 2x PNG。
+11. 使用者明確確認「匯出」後，執行 `node {SKILL_DIR}/scripts/screenshot.mjs 100_Todo/projects/social-cards/YYYY-MM-DD-{topic-slug}/` 匯出 2x PNG。
 12. 完成後回報 PNG 資料夾位置與檔名。
 
 ## Card Planning Rules

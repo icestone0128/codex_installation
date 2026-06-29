@@ -220,4 +220,4 @@ adapted_for: Codex App
 
 ### 6. 更新能力清單
 
-把新能力補到 `000_Agent/knowledge/我的 AI 能幹清單.md`，用使用者看得懂的動作描述，不只寫工具名稱。
+把新能力補到 `200_Reference/tool-capabilities.md`；若是跨專案可重用能力，再同步到 `codex_symlink/knowledge/` 的對應清單。不要在 public repo 內建立 `000_Agent/knowledge/`。

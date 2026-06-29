@@ -666,14 +666,9 @@ the real key into this skill, LazyPack, Obsidian, Git, or project documentation.
 
 ```text
 project/
-├── raw/
-│   └── <video-id>/
-│       └── input.mp4
-├── working/
-│   └── <video-id>/
 ├── 100_Todo/
-│   ├── drafts/<video-id>/
-│   └── projects/<video-id>/
+│   ├── drafts/<video-id>/     # raw copy, working files, subtitles, transcripts
+│   └── projects/<video-id>/   # final package and publishable exports
 └── 200_Reference/
     └── vocabulary.md
 ```
