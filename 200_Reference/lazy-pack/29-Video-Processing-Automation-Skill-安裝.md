@@ -1,6 +1,6 @@
 # 29-Video-Processing-Automation-Skill-安裝
 
-> 版本：2026-06-03 Codex App 版
+> 版本：2026-06-29 Codex App 版
 > 用途：安裝 `video-processing-automation` 全域 skill，把原始影片處理成 YouTube / 社群影片上架包，包含智能剪口播、字幕、文字稿、標題、封面、metadata 與短片亮點流程。
 > 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/video-processing-automation/`。
 
@@ -10,6 +10,7 @@
 - 來源 repo：https://github.com/mathruffian-dot/2026-YouTube
 - 來源 commit：`a0171ce`。
 - 2026-06-04 已補入 Groq Python SDK 安裝、Groq Google 登入建立 API key、安全複製與 `~/.codex/secrets/groq_api_key` 保存流程。
+- 2026-06-29 依實際重跑影片後製流程，補入 `espeakng-loader` 檢查、專案詞彙表 `200_Reference/vocabulary.md`、CFR source 保留、SRT 清理順序與 ffprobe 驗收。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md`。
 
 ## Codex 相容化調整
@@ -86,6 +87,10 @@ test -d "{{CODEX_HOME}}/skills/video-processing-automation/scripts" && echo "scr
 - Local Whisper 保留為 option；Groq cloud route 可用且已被接受時，預設不處理 Local Whisper 模型選擇或下載。
 - `resegment.py` 需要 word-level JSON；本地 Whisper segment-only SRT 不適合重切。
 - 清理 SRT 時只能改文字，不能改段號、時間碼或段落數。
+- `apply_vocab.py` 必須等 `resegment.py` 產出 raw SRT 後再跑；不要把兩步平行化。
+- 專有名詞誤辨不要只靠手動記憶，應寫入專案 `200_Reference/vocabulary.md`，格式為 `錯誤辨識=>正確詞彙`。
+- 若原始 `.mov` 不在 repo，但已有保留的 normalized CFR source，例如 `100_Todo/drafts/<name>/input_cfr.mp4`，可用它重跑並在駕駛艙註明來源。
+- 最終交付前用 `ffprobe` 檢查 MP4 影音 stream、解析度、duration 與 codec。
 - 影片素材與輸出成品通常不進 git。
 
 ## 最終檢查清單
@@ -93,6 +98,8 @@ test -d "{{CODEX_HOME}}/skills/video-processing-automation/scripts" && echo "scr
 - [ ] `{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md` 存在。
 - [ ] references / scripts 依本文內嵌 package 完整安裝。
 - [ ] 若使用 Groq STT，`python3 -c "import groq"` 可執行，且 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key` 存在。
+- [ ] 若專案有專有名詞，`200_Reference/vocabulary.md` 已建立並已用 `apply_vocab.py --vocab` 套用。
+- [ ] 最終 MP4 已用 `ffprobe` 驗證影音 stream；字幕已用 `validate_srt.py` 驗證。
 - [ ] 沒有把 API key、OAuth token、影片素材、個人照片或成品影片寫進 repo。
 - [ ] 開新 Codex 對話後可用 `video-processing-automation` 或影片自動化相關語句觸發。
 
@@ -207,7 +214,9 @@ draft and final folders and document the route before writing files.
      is unavailable, or the user explicitly requires local-only processing.
 4. Clean transcript:
    - preserve every SRT timecode and block boundary;
-   - apply project vocabulary mechanically first, then edit only subtitle text;
+   - apply project vocabulary mechanically first, using
+     `200_Reference/vocabulary.md` when the project has one, then edit only
+     subtitle text;
    - validate with `scripts/validate_srt.py`;
    - convert clean SRT to TXT with `scripts/srt_to_txt.py`.
 5. Title selection:
@@ -288,7 +297,8 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py"
 
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" \
   "working/<video-id>/_subtitles/<video-id>.raw.srt" \
-  --out "working/<video-id>/_subtitles/<video-id>.vocab.srt"
+  --out "working/<video-id>/_subtitles/<video-id>.vocab.srt" \
+  --vocab "200_Reference/vocabulary.md"
 
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py" \
   --raw "working/<video-id>/_subtitles/<video-id>.vocab.srt" \
@@ -355,10 +365,16 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py"
 ```bash
 python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" \
   "working/<video-id>/_subtitles/<video-id>.raw.srt" \
-  --out "working/<video-id>/_subtitles/<video-id>.vocab.srt"
+  --out "working/<video-id>/_subtitles/<video-id>.vocab.srt" \
+  --vocab "200_Reference/vocabulary.md"
 ```
 
-5. Clean text manually or with Codex, preserving all SRT structure.
+If the project does not have `200_Reference/vocabulary.md`, omit `--vocab`;
+the script will still apply portable built-in replacements.
+
+5. Clean text manually or with Codex, preserving all SRT structure. If Groq
+   repeatedly misrecognizes a project term, add the correction to
+   `200_Reference/vocabulary.md` before rerunning instead of relying on memory.
 6. Validate:
 
 ```bash
@@ -389,6 +405,24 @@ extend replacements with:
 - common ASR mistakes found in the first transcript
 
 Keep vocabulary mechanical. Do not change meaning.
+
+Project vocabulary file format:
+
+```text
+# 200_Reference/vocabulary.md
+wrong term=>correct term
+wrong term<TAB>correct term
+```
+
+Example:
+
+```text
+金石學習法=>精實學習法
+```
+
+Run `apply_vocab.py` only after `resegment.py` has produced the raw SRT. Do not
+start vocabulary replacement in parallel with resegmentation, because the raw
+SRT file may not exist yet.
 
 ## Local Route
 
@@ -566,6 +600,7 @@ cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/setup.md" <<
 | auto-editor | Silence removal | `python3 -m auto_editor --version` |
 | Groq Python SDK or API access | Cloud Whisper STT | `python3 -c "import groq"` |
 | Optional local Whisper | Retained STT option for Groq plan/model changes, outages, or local-only requests | `python3 -m whisper --help` |
+| Optional espeakng-loader | Local TTS environments that cannot install system `espeak-ng` | `python3 -c "import espeakng_loader"` |
 
 Install common dependencies:
 
@@ -655,11 +690,27 @@ ffmpeg -version
 ffprobe -version
 python3 -m auto_editor --version
 python3 -c "import groq; print('groq ok')"
+python3 -c "import espeakng_loader; print('espeakng_loader ok')"  # optional, only for local TTS paths
 python3 -c "import os, pathlib; p=pathlib.Path('~/.codex/secrets/groq_api_key').expanduser(); print('Groq key:', 'ok' if os.getenv('GROQ_API_KEY') or p.exists() else 'missing')"
 ```
 
 `python3 -m auto_editor --version` can return a non-zero code in some versions
 after printing the version. Treat printed version output as the useful signal.
+
+## Reproducible Repo Checklist
+
+For a project that should be downloadable and runnable by another person:
+
+- Keep reusable project vocabulary in `200_Reference/vocabulary.md`, one
+  replacement per line, formatted as `wrong=>right` or `wrong<TAB>right`.
+- Keep raw or normalized source video in the draft folder. If the original
+  `.mov` is not stored, document that the reproducible source starts from the
+  retained CFR file such as `input_cfr.mp4`.
+- Keep final media ignored by Git unless the repo intentionally versions small
+  media outputs. Text artifacts such as SRT/TXT/metadata can be committed when
+  they are useful for reproducibility.
+- Verify regenerated outputs with `ffprobe` for both video and audio streams
+  before considering the package complete.
 CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SETUP_MD
 
 # video-processing-automation/references/short-video.md
@@ -761,6 +812,11 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py"
   --out "working/<video-id>/<video-id>.cut.mp4"
 ```
 
+When the only retained source is already normalized CFR, for example
+`100_Todo/drafts/<video-id>/input_cfr.mp4`, reuse that file as the smart-cut
+input instead of looking for the original `.mov`. Record this in the project
+cockpit so future runs know the reproducible starting point.
+
 ## Parameters
 
 | Parameter | Default | Use |
@@ -778,6 +834,8 @@ Tuning:
 
 - Confirm `ffmpeg` and `ffprobe` are available.
 - Confirm the output duration is shorter but still natural.
+- Confirm the output still has both video and audio streams:
+  `ffprobe -v error -show_entries stream=codec_type,codec_name,width,height,duration <file>`.
 - Listen to the first 20-30 seconds before continuing to transcription when the
   source is noisy or has music.
 CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SMART_CUT_MD
@@ -827,9 +885,10 @@ cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py"
 #!/usr/bin/env python3
 """對 SRT 做機械式詞彙替換（只動文字行，時間碼與段號原封不動）。
 
-替換清單內建於此腳本（日後可外移成 JSON）。
+替換清單包含可攜式預設值，也可讀取專案詞彙表。
 用法：
   python3 apply_vocab.py <in.srt> --out <out.srt>
+  python3 apply_vocab.py <in.srt> --out <out.srt> --vocab 200_Reference/vocabulary.md
 """
 import argparse
 import re
@@ -838,7 +897,7 @@ from pathlib import Path
 
 # 順序重要：先替換長詞，避免短詞先吃掉。
 # 這份清單是可攜式預設值；專案若有頻道名、人名、產品名，請依該專案另行擴充。
-REPLACEMENTS = [
+DEFAULT_REPLACEMENTS = [
     # Codex / OpenAI 工具常見誤聽
     ("CloudX", "Codex"),
     ("Cloud X", "Codex"),
@@ -873,13 +932,43 @@ REPLACEMENTS = [
 ]
 
 
-def apply(text: str) -> str:
-    for old, new in REPLACEMENTS:
+def load_project_replacements(vocab_path: Path | None, src: Path) -> list[tuple[str, str]]:
+    candidates: list[Path] = []
+    if vocab_path is not None:
+        candidates.append(vocab_path)
+    else:
+        candidates.append(Path("200_Reference/vocabulary.md"))
+        candidates.append(src.parent / "vocabulary.md")
+
+    replacements: list[tuple[str, str]] = []
+    for candidate in candidates:
+        if not candidate.exists():
+            continue
+        for raw_line in candidate.read_text(encoding="utf-8-sig").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=>" in line:
+                old, new = line.split("=>", 1)
+            elif "\t" in line:
+                old, new = line.split("\t", 1)
+            else:
+                continue
+            old = old.strip()
+            new = new.strip()
+            if old and new:
+                replacements.append((old, new))
+    return replacements
+
+
+def apply(text: str, replacements: list[tuple[str, str]]) -> str:
+    for old, new in replacements:
         text = text.replace(old, new)
     return text
 
 
-def process_srt(src: Path, dst: Path) -> None:
+def process_srt(src: Path, dst: Path, vocab_path: Path | None = None) -> None:
+    replacements = load_project_replacements(vocab_path, src) + DEFAULT_REPLACEMENTS
     content = src.read_text(encoding="utf-8-sig")
     blocks = re.split(r"(\r?\n\r?\n)", content)  # 保留分隔符
     out = []
@@ -896,7 +985,7 @@ def process_srt(src: Path, dst: Path) -> None:
             continue
         header = "\n".join(lines[:2])
         body_before = "\n".join(lines[2:])
-        body_after = apply(body_before)
+        body_after = apply(body_before, replacements)
         if body_after != body_before:
             n_replaced += 1
         out.append(header + "\n" + body_after)
@@ -909,8 +998,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("src", type=Path)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--vocab", type=Path, default=None, help="專案詞彙表，格式為 old=>new 或 old<TAB>new")
     args = ap.parse_args()
-    process_srt(args.src, args.out)
+    process_srt(args.src, args.out, args.vocab)
     return 0
 
 
@@ -2042,4 +2132,3 @@ CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_BURN_SUBTITLES_PY
 ```
 
 <!-- END EMBEDDED_SKILLS -->
-
