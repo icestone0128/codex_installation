@@ -69,9 +69,9 @@ gh repo create "{{GITHUB_USER}}/{{REPO_NAME}}" --public --source=. --remote=orig
 ## GitHub Pages 注意
 
 - 如果要用 GitHub Pages，repo 通常要 public，或帳號方案需支援 private Pages。
-- Pages source 要明確決定，例如 `main` branch `/docs` 或 GitHub Actions。
+- Pages source 要明確決定。若遵守標準專案結構，靜態網站工作來源放 `200_Reference/docs/`，再同步發布到獨立 `gh-pages` 分支根目錄；不要在 main 根目錄保留 `docs/`。
 - 建立 Pages 後要實際打開網址確認內容，不只看設定。
-- 若網站入口在 `docs/index.html`，Pages source 可設為 `main` / `/docs`。
+- 若網站入口在 `200_Reference/docs/index.html`，可將該資料夾內容同步到 `gh-pages` 分支，Pages source 設為 `gh-pages` / `/`。
 
 ## 驗證
 
@@ -93,7 +93,8 @@ curl -I "https://{{GITHUB_USER}}.github.io/{{REPO_NAME}}/"
 曾在本機使用：
 
 - GitHub user：`{{GITHUB_USER}}`
-- GitHub Pages source：`main` branch `/docs`
+- GitHub Pages source：`gh-pages` branch `/`
+- 本地網站工作來源：`200_Reference/docs/`
 
 這只是實測值，下載者必須改成自己的 GitHub 帳號與 repo。
 
