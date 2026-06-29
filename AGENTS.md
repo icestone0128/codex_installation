@@ -52,18 +52,22 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 - 全域 skill 的主版本是 symlink 實體目錄 `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`；LazyPack 不是主版本，而是 repo 內可公開 push、可讓使用者下載安裝的自含式可攜化版本。
 - 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `200_Reference/lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容覆蓋所有應公開安裝的全域 skills、必要 references/scripts/assets 與安裝說明。
 - LazyPack 允許和全域 skills 目錄結構不同：可用一份序號文件包多個 skills，也可包含 MCP、plugin、Obsidian、GitHub、Firebase、NotebookLM 等非 skill 安裝項目；但 README 的安裝總表必須清楚標出哪些是完整內嵌安裝、哪些只是外部依賴或必裝檢查。
+- 個人專用或含個人記憶/身份設定的全域 skill 不放入公開 LazyPack；目前 `future-coach` 是 Arry 個人專用 skill，不公開安裝，也不算 LazyPack 缺口。
 - 同步後要實際比對 `/Users/arrywu/.codex/skills`、`200_Reference/lazy-pack/` 對應序號文件內嵌的 skill 名稱、LazyPack README 安裝總表與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
 - 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
 
 Arry 助手 AI 分身資料層：
 
 - AI 分身名稱：Arry 助手。
-- Arry 助手全域資料層放在 Google Drive `codex_symlink`，不放在 public repo：
-  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/core-rules.md`
-  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`
-  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/memories`
-  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/workflows`
+- Arry 助手 Obsidian 同步主版本只限 Google Drive `codex_symlink` 內的 `knowledge/` 與 `memories/`，不放在 public repo：
   - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/knowledge`
+  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/memories`
+- Arry 助手同步採用和 LazyPack 相同的「主版本 + Obsidian 實體鏡像 + 實際 diff 驗證」模型：
+  - 主版本：上述 `knowledge/` 與 `memories/`；不是整個 `codex_symlink`。
+  - Obsidian 實體鏡像：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/Arry 助手`
+  - 同步指令：`python3 "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/sync_backup.py" backup`
+  - 驗證指令：`python3 "/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/sync_backup.py" verify`
+  - 不使用 Obsidian symlink 當同步替代品；`sync_backup.py backup` 必須把 Obsidian `Arry 助手/` 維持為只包含 `knowledge/` 與 `memories/` 的實體鏡像資料夾。
 - 本 repo 的 `000_Agent/` 只保留指向說明，不存放真實個人記憶或偏好。
 - Codex 全域規則唯一實體主版本為 `codex_symlink/core-rules.md`；`/Users/arrywu/.codex/AGENTS.md` 只是指向它的 symlink，不再使用或重建 `codex_symlink/agents/AGENTS.md`。
 - Arry 助手是 Codex App 與 AntiGravity 設定，不使用其他 AI 編輯器專用的規則檔（例如舊版 `CLAUDE.md` 等）或其專屬路徑。
