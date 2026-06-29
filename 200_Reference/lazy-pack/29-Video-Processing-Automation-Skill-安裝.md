@@ -671,16 +671,18 @@ project/
 │       └── input.mp4
 ├── working/
 │   └── <video-id>/
-├── output/
-├── assets/
-│   ├── persona/
-│   └── style/
+├── 100_Todo/
+│   ├── drafts/<video-id>/
+│   └── projects/<video-id>/
 └── 200_Reference/
     └── vocabulary.md
 ```
 
 The layout is recommended, not mandatory. Work with the user's existing project
-structure when it already exists.
+structure when it already exists. In initialized four-box projects, do not
+create project-root `working/`, `output/`, or `assets/` folders; use
+`100_Todo/drafts/<video-id>/` for working files and
+`100_Todo/projects/<video-id>/` for final packages.
 
 ## Environment Checks
 

@@ -133,7 +133,7 @@ Inside the draft folder, produce or prepare:
 - `STORYBOARD.md` - optional for short videos, required for longer or complex
   videos.
 - `index.html` or a HyperFrames composition entrypoint.
-- `_assets/` or another local subfolder under the draft folder for images,
+- `assets/` or another local subfolder under the draft folder for images,
   audio, fonts, generated files, and downloaded materials.
 
 ## Workflow
@@ -171,7 +171,7 @@ Inside the draft folder, produce or prepare:
    - do not start implementation until the user approves the design.
 6. Build the composition:
    - create or adapt `index.html` / HyperFrames composition;
-   - keep media local under the draft folder, usually `_assets/`;
+   - keep media local under the draft folder, usually `assets/`;
    - if using generated images, use Codex image generation or a user-approved
      image workflow;
    - if using external photos, download local copies and record attribution
@@ -342,8 +342,10 @@ Read before implementing any generated video.
 ## Assets
 
 - Do not assume photos, logo, music, or brand assets exist.
-- Download external images into `assets/`; do not rely on remote URLs at render
-  time.
+- Download external images into `assets/` under the draft folder; do not rely
+  on remote URLs at render time. This is allowed inside
+  `100_Todo/drafts/<video-id>/`; do not create a project-root `assets/`
+  folder.
 - Do not rely on remote decorative textures, Google Fonts links, favicon
   requests, or other external render-time URLs. Prefer local assets, built-in
   HyperFrames font handling, or CSS-only textures so a downloaded repo renders
