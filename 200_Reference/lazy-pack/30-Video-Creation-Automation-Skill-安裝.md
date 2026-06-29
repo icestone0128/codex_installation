@@ -122,6 +122,9 @@ as the source of truth:
   `100_Todo/drafts/<video-project-name>/`.
 - Final video packages go directly in
   `100_Todo/projects/<video-project-name>/`.
+- Inside that final package, keep source media and final deliverables as
+  `00_Source_Media/` and `01_Final_Output/` when the project needs cleaned media
+  and rendered outputs. Do not put these folders at the project root.
 - Do not create project-root `assets/`, `renders/`, or `output/` folders when
   those `100_Todo/` routes exist.
 
