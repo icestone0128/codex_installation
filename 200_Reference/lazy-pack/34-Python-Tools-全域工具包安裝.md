@@ -117,6 +117,57 @@ Python 套件之外，部分功能需要系統工具：
 
 安裝完系統工具後，通常要重開終端機或重啟 Codex 對話，PATH 才會刷新。
 
+### Tesseract 安裝與 Homebrew 權限修復
+
+先安裝 OCR 主程式與語言包：
+
+```bash
+brew install tesseract tesseract-lang
+```
+
+如果安裝長時間停在 `Fetching downloads`、依賴安裝前無進展，或 `brew doctor` 顯示 Homebrew 目錄不可寫，先檢查：
+
+```bash
+brew doctor
+ls -ld /opt/homebrew "{{HOME}}/Library/Caches/Homebrew" "{{HOME}}/Library/Logs/Homebrew"
+```
+
+若 `brew doctor` 顯示下列路徑不可寫：
+
+```text
+/opt/homebrew
+{{HOME}}/Library/Caches/Homebrew
+{{HOME}}/Library/Logs/Homebrew
+```
+
+先嘗試不用 sudo 的寫入權限修復：
+
+```bash
+chmod -R u+w /opt/homebrew "{{HOME}}/Library/Caches/Homebrew" "{{HOME}}/Library/Logs/Homebrew"
+brew doctor
+```
+
+若 `brew doctor` 仍顯示 owner 不是目前使用者，才用 sudo 修擁有者：
+
+```bash
+sudo chown -R "$(whoami)" /opt/homebrew "{{HOME}}/Library/Caches/Homebrew" "{{HOME}}/Library/Logs/Homebrew"
+chmod -R u+w /opt/homebrew "{{HOME}}/Library/Caches/Homebrew" "{{HOME}}/Library/Logs/Homebrew"
+brew doctor
+```
+
+`brew doctor` 看到 `Your system is ready to brew.` 後，再重跑：
+
+```bash
+brew install tesseract tesseract-lang
+```
+
+驗證 OCR 與繁中語言包：
+
+```bash
+tesseract --version
+tesseract --list-langs | grep -E '^(chi_tra|chi_sim|eng|osd)$'
+```
+
 ## 本機實作紀錄
 
 本機已完成：
@@ -124,6 +175,7 @@ Python 套件之外，部分功能需要系統工具：
 - 建立 `{{CODEX_HOME}}/python-tools/teaching-file-tools/.venv`
 - 使用 `uv` 建立 Python 3.12.13 venv，避開系統 Python 3.14.6 的套件相容風險
 - 安裝來源工具包指定的核心 Python 套件與影音選用套件
+- 安裝 `tesseract 5.5.2` 與 `tesseract-lang 4.1.0`，確認語言包包含 `chi_tra`、`chi_sim`、`eng`、`osd`
 - 保留 `{{HOME}}/.cache/uv` 與 `{{HOME}}/.local/share/uv` 原位，不移入 `python-tools`
 - 將技能 runtime 整理為本機實體資料夾：`{{CODEX_HOME}}/audio-to-md`、`{{CODEX_HOME}}/voxcpm2-voice-cloner`、`{{CODEX_HOME}}/doc-to-md`、`{{CODEX_HOME}}/vlm-to-md`
 - 移除舊路徑 symlink，並把實際入口改成對應的 `{{CODEX_HOME}}/<skill-name>` 路徑
@@ -138,6 +190,7 @@ Python 套件之外，部分功能需要系統工具：
 
 ```text
 python-tools-python import 驗證：通過
+verify_python_tools.py 系統工具驗證：tesseract / pdftoppm / ffmpeg / soffice 全部 OK
 audio-to-md --help：通過
 doc-to-md --help：通過
 vlm-to-md --help：通過
@@ -155,7 +208,7 @@ VoxCPM2 doctor：通過，mps=True
 - `{{HOME}}/.local/share/uv` 不是和 `{{HOME}}/.cache/uv` 重複的快取；它可能包含 `notebooklm-mcp` 這類 uv tool 的可執行環境。若誤移，venv 內的 shebang 與 `bin/python` symlink 會斷，應還原到 `{{HOME}}/.local/share/uv` 或重裝該 uv tool。
 - Codex 沙盒不一定能寫 `{{CODEX_HOME}}/python-tools/matplotlib-cache`；wrapper 需在不可寫時 fallback 到 `TMPDIR`。
 - Codex sandbox writable roots 是持久安全設定。不要在 LazyPack 安裝腳本中自動改 `{{CODEX_CONFIG}}`；若使用者要讓 Codex 直接寫入 `{{CODEX_HOME}}/audio-to-md`、`{{CODEX_HOME}}/doc-to-md`、`{{CODEX_HOME}}/vlm-to-md` 或 `{{CODEX_HOME}}/python-tools`，應由使用者明確批准後再加入窄範圍 writable roots。
-- `brew install tesseract tesseract-lang` 可能長時間卡住；若中途卡住，先保留 Python runtime，之後再重跑系統相依安裝。
+- `brew install tesseract tesseract-lang` 可能長時間卡住；這次實際原因是 Homebrew 目錄權限不可寫。先跑 `brew doctor`，必要時修 `/opt/homebrew`、`{{HOME}}/Library/Caches/Homebrew`、`{{HOME}}/Library/Logs/Homebrew` 的 owner / user write 權限，再重跑安裝。
 - Tesseract 主程式與繁中語言包是 OCR 能力的關鍵；只安裝 `ocrmypdf` Python 套件不等於掃描 PDF OCR 可用。
 - 搬移 `.venv` 可能受絕對路徑影響，所以必須同步修改 wrapper、skill scripts 與文件入口，不用 symlink 做相容層。
 - 技能專屬 runtime 不應集中到 `python-tools`。`python-tools` 是通用 Python 工具包；`audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` 應保留在 `{{CODEX_HOME}}/<skill-name>`，再由 `{{CODEX_HOME}}/python-tools/bin` 提供跨專案 wrapper。
@@ -180,9 +233,10 @@ test -d "{{HOME}}/.local/share/uv"
 "{{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/bin/python" \
   "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py" doctor
 "{{HOME}}/.local/bin/notebooklm-mcp" --help
+tesseract --list-langs | grep -E '^(chi_tra|chi_sim|eng|osd)$'
 ```
 
-若 `verify_python_tools.py` 顯示 `MISSING tesseract`，代表 Python 套件已裝好，但掃描 PDF OCR 還缺系統工具；安裝 `tesseract` 與語言包後再重跑驗證。
+若 `verify_python_tools.py` 顯示 `MISSING tesseract`，代表 Python 套件已裝好，但掃描 PDF OCR 還缺系統工具；安裝 `tesseract` 與語言包後再重跑驗證。若已安裝但仍找不到，重開終端機或確認 `/opt/homebrew/bin` 在 PATH 內。
 
 ## 內建安裝腳本內容
 
