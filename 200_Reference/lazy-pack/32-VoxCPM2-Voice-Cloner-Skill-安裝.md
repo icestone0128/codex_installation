@@ -19,8 +19,8 @@
 - 禁止冒充、詐騙、偽造背書、散布不實資訊或繞過同意檢查。
 - 對外分享且可能造成誤認時，明確標示為 AI 生成音訊。
 - 聲音參考檔視為類生物辨識個資，不寫入 Git、LazyPack、Obsidian 或同步型 Skill 目錄；若是使用者自己的 reusable profile，放在私有全域助手資料層。
-- runtime、`.venv`、uv cache、Hugging Face 模型權重與預設 output 一律放在本機 `{{CODEX_HOME}}/voxcpm2-voice-cloner` 實體資料夾；不要 symlink 到 `{{SYNC_ROOT}}/runtimes/voxcpm2-voice-cloner` 或其他 Google Drive 同步資料夾。
-- `uv` 快取固定放在 runtime 內的 `uv-cache/`，不要求開放整個 `~/.cache`。
+- runtime、`.venv`、VoxCPM2 模型權重與預設 output 一律放在本機 `{{CODEX_HOME}}/voxcpm2-voice-cloner` 實體資料夾；不要 symlink 到 `{{SYNC_ROOT}}/runtimes/voxcpm2-voice-cloner` 或其他 Google Drive 同步資料夾。
+- `uv` 是通用套件快取，維持使用預設 `~/.cache/uv`；不要搬進 `python-tools` 或單一 skill runtime。
 
 ## 與來源版本的差異
 
@@ -163,7 +163,7 @@ The wrapper requires `--consent` for real-voice profile creation and cloning. Do
 ## Local Paths
 
 - Skill package: `{{CODEX_HOME}}/skills/voxcpm2-voice-cloner`
-- Runtime data: `${VOXCPM2_HOME:-$HOME/.codex/voxcpm2-voice-cloner}`. For Arry, keep this as a local real folder, not a symlink to Google Drive, so `.venv`, `model-cache`, `uv-cache`, `recordings`, and `output` stay fast on the current machine.
+- Runtime data: `${VOXCPM2_HOME:-$HOME/.codex/voxcpm2-voice-cloner}`. For Arry, keep this as a local real folder, not a symlink to Google Drive, so `.venv`, `model-cache`, `recordings`, and `output` stay fast on the current machine.
 - Python environment: `$VOXCPM2_HOME/.venv`
 - Voice profiles: `$VOXCPM2_HOME/voices/<voice-name>/`
 - Outputs: `$VOXCPM2_HOME/output/`
@@ -325,7 +325,6 @@ The source repo's PowerShell, BAT, Intel XPU patch, and hard-coded Windows paths
 ```text
 ~/.codex/voxcpm2-voice-cloner/
 ├── .venv/
-├── uv-cache/
 ├── model-cache/
 ├── voices/
 │   └── <voice-name>/
@@ -336,14 +335,13 @@ The source repo's PowerShell, BAT, Intel XPU patch, and hard-coded Windows paths
 
 Set `VOXCPM2_HOME` to move this local private state. Keep it outside synced repos and notes.
 
-The setup script pins `UV_CACHE_DIR` inside this runtime root, and the generation wrapper pins `HF_HOME` to `model-cache/`. This avoids sandbox writes to the default `~/.cache/uv` and `~/.cache/huggingface` locations while keeping runtime caches under the same narrow writable root.
+The setup script leaves `uv` on its default cache path, normally `~/.cache/uv`. The generation wrapper pins `HF_HOME` to this runtime's `model-cache/` so VoxCPM2 model weights stay beside the local skill runtime without moving generic package caches into `python-tools`.
 
 For Arry, the runtime root must stay on the current machine as a real local folder:
 
 ```text
 ~/.codex/voxcpm2-voice-cloner/
 ├── .venv/
-├── uv-cache/
 ├── model-cache/
 ├── recordings/
 ├── voices/ -> profile symlinks or local fallback
@@ -401,7 +399,7 @@ Codex workspace sandboxing can hide Metal and make `torch.backends.mps.is_availa
 ## Troubleshooting
 
 - Wrong Python: rerun `scripts/setup_runtime.sh`; do not use the system Python or Python 3.14 for this runtime.
-- `uv` cache permission error: use the setup script, which routes `UV_CACHE_DIR` into the runtime root; do not widen sandbox access to the whole `~/.cache` directory.
+- `uv` cache permission error: use the setup script, which uses uv default cache; do not widen sandbox access to the whole `~/.cache` directory.
 - Missing model: the first synthesis downloads `openbmb/VoxCPM2`; obtain approval before starting the multi-GB network operation.
 - MPS failure: retry one short request with `--device cpu` and report the performance tradeoff.
 - CPU smoke test: use a very short text plus `--steps 1 --max-len 8` to limit validation time; this only proves the pipeline can produce a non-silent WAV and may produce meaningless noise.
@@ -470,14 +468,13 @@ set -euo pipefail
 
 RUNTIME_HOME="${VOXCPM2_HOME:-$HOME/.codex/voxcpm2-voice-cloner}"
 VENV="$RUNTIME_HOME/.venv"
-export UV_CACHE_DIR="${UV_CACHE_DIR:-$RUNTIME_HOME/uv-cache}"
 
 if ! command -v uv >/dev/null 2>&1; then
   echo "uv is required. On macOS install it with: brew install uv" >&2
   exit 1
 fi
 
-mkdir -p "$RUNTIME_HOME/voices" "$RUNTIME_HOME/output" "$UV_CACHE_DIR"
+mkdir -p "$RUNTIME_HOME/voices" "$RUNTIME_HOME/output"
 
 if [ ! -x "$VENV/bin/python" ]; then
   uv venv --python 3.12 "$VENV"
