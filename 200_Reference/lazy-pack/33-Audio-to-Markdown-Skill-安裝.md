@@ -30,8 +30,8 @@
 本機引擎由安裝包內的 `install.sh` 安裝，固定路徑如下：
 
 ```text
-~/.audio-to-md/
-~/.audio-to-md/audio-to-md
+~/.codex/audio-to-md/
+~/.codex/audio-to-md/audio-to-md
 ~/Desktop/轉逐字稿.command
 ```
 
@@ -48,7 +48,7 @@ Groq 路線使用 Skill package 內的 `scripts/audio_to_md_groq.py`，不取代
 手動方式：
 
 ```bash
-~/.audio-to-md/audio-to-md "/path/to/audio-or-video.mp4"
+~/.codex/audio-to-md/audio-to-md "/path/to/audio-or-video.mp4"
 ```
 
 Groq 雲端 STT：
@@ -207,7 +207,7 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 ```text
 這段轉錄要在你自己的 Mac 上跑（免費、不花 token）。
 最簡單：如果專案有 `200_Reference/scripts/轉逐字稿.command` 或 `200_Reference/scripts/transcribe.command`，先雙擊專案內啟動器，把影片拖進視窗按 Enter；否則雙擊桌面的「轉逐字稿.command」。
-或開 Terminal 貼：~/.audio-to-md/audio-to-md "/Users/你/Desktop/meeting.m4a"
+或開 Terminal 貼：~/.codex/audio-to-md/audio-to-md "/Users/你/Desktop/meeting.m4a"
 跑完把輸出的「*_逐字稿知識庫.md」傳回來給我做 Phase 2。
 桌面沒有那個檔 → 先跑安裝包的 install.sh 裝一次。
 ```
@@ -223,7 +223,7 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 - **Windows 拖檔圖示**：桌面「🎤 拖檔轉逐字稿.bat」（背後是 `%USERPROFILE%\.audio-to-md\轉逐字稿.bat`）
 - **Windows 指令啟動器**：`%USERPROFILE%\.audio-to-md\audio-to-md.bat`
 - **Mac 拖檔**：桌面「轉逐字稿.command」
-- **Mac 指令啟動器**：`~/.audio-to-md/audio-to-md`
+- **Mac 指令啟動器**：`~/.codex/audio-to-md/audio-to-md`
 
 都不存在 → 請使用者先跑安裝包的 `install.bat` / `install.sh`（只需一次），**不要在沙箱重新產生腳本**。
 
@@ -247,7 +247,7 @@ python3 scripts/audio_to_md.py "<音訊或影片>" -o "<輸出資料夾>"
 ```
 ```bash
 # Mac
-~/.audio-to-md/audio-to-md "<音訊或影片>"
+~/.codex/audio-to-md/audio-to-md "<音訊或影片>"
 ```
 
 Groq 雲端路線（執行前必須先詢問並取得使用者同意）：
@@ -502,26 +502,26 @@ bash /private/tmp/audio-to-md-installer-check/audio-to-md-installer/install.sh
 安裝結果：
 
 ```text
-~/.audio-to-md/
-~/.audio-to-md/audio-to-md
+~/.codex/audio-to-md/
+~/.codex/audio-to-md/audio-to-md
 ~/Desktop/轉逐字稿.command
 ```
 
 安裝器完成事項：
 
 - 檢查 Python 版本。
-- 建立 `~/.audio-to-md/venv`。
+- 建立 `~/.codex/audio-to-md/venv`。
 - 安裝 `faster-whisper`、`av`、`ctranslate2` 等相依套件。
 - 複製 `audio_to_md.py` 與 launcher。
 - 建立桌面拖檔啟動器。
 - 預先下載 Whisper `large-v3-turbo` 模型。
 - 驗證 `faster_whisper`、`av`、`ctranslate2` 可 import。
-- 驗證 `~/.audio-to-md/audio-to-md --help` 可執行。
+- 驗證 `~/.codex/audio-to-md/audio-to-md --help` 可執行。
 
 本機驗證指令：
 
 ```bash
-~/.audio-to-md/audio-to-md --help
+~/.codex/audio-to-md/audio-to-md --help
 ```
 
 ## 本機 Whisper 實測
@@ -535,7 +535,7 @@ codex_symlink/knowledge/arry-voice-profiles/Arry/ref_voice.wav
 執行指令：
 
 ```bash
-~/.audio-to-md/audio-to-md \
+~/.codex/audio-to-md/audio-to-md \
   "{{SYNC_ROOT}}/knowledge/arry-voice-profiles/Arry/ref_voice.wav" \
   -o "{{PROJECT_ROOT}}/100_Todo/projects/audio-to-md-test" \
   --language zh \
@@ -1078,7 +1078,7 @@ test -f "{{CODEX_HOME}}/skills/audio-to-md/references/execution-notes.md"
 test -f "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md.py"
 test -f "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
 python3 -m py_compile "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
-~/.audio-to-md/audio-to-md --help
+~/.codex/audio-to-md/audio-to-md --help
 ```
 
 Groq route 驗證前先確認：
@@ -1780,7 +1780,7 @@ cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/install.sh" <<'CODEX_LAZYPACK_A
 set -e
 trap 'if [ -n "${EXTRACT_DIR:-}" ]; then rm -rf "$EXTRACT_DIR"; fi' EXIT
 
-INSTALL_DIR="$HOME/.audio-to-md"
+INSTALL_DIR="$HOME/.codex/audio-to-md"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 EXTRACT_DIR=""
 WHISPER_MODEL="large-v3-turbo"
@@ -1891,7 +1891,7 @@ cp "$SKILL_SRC/scripts/audio_to_md.py" "$INSTALL_DIR/"
 cp "$SKILL_SRC/scripts/requirements.txt" "$INSTALL_DIR/"
 cat > "$INSTALL_DIR/audio-to-md" << 'LAUNCHER'
 #!/bin/bash
-DIR="$HOME/.audio-to-md"
+DIR="$HOME/.codex/audio-to-md"
 "$DIR/venv/bin/python3" "$DIR/audio_to_md.py" "$@"
 LAUNCHER
 chmod +x "$INSTALL_DIR/audio-to-md"
@@ -1906,7 +1906,7 @@ if [ -f "$HOME/.zshrc" ]; then SHELL_RC="$HOME/.zshrc"
 elif [ -f "$HOME/.bash_profile" ]; then SHELL_RC="$HOME/.bash_profile"
 elif [ -f "$HOME/.bashrc" ]; then SHELL_RC="$HOME/.bashrc"; fi
 if [ -n "$SHELL_RC" ] && ! grep -q "audio-to-md" "$SHELL_RC" 2>/dev/null; then
-    { echo ""; echo '# audio-to-md'; echo 'export PATH="$HOME/.audio-to-md:$PATH"'; } >> "$SHELL_RC"
+    { echo ""; echo '# audio-to-md'; echo 'export PATH="$HOME/.codex/audio-to-md:$PATH"'; } >> "$SHELL_RC"
 fi
 
 # ── Step 4/4：預先下載 Whisper turbo 模型（約 1.5GB）─────────────────────────
@@ -2105,7 +2105,7 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.comman
 cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.command" <<'CODEX_LAZYPACK_AUDIO_TO_MD_TRANSCRIBE_COMMAND'
 #!/bin/bash
 # audio-to-md｜雙擊我，把影片/錄音檔拖進視窗按 Enter，就會轉成逐字稿知識庫。
-DIR="$HOME/.audio-to-md"
+DIR="$HOME/.codex/audio-to-md"
 
 if [ ! -x "$DIR/venv/bin/python3" ] || [ ! -f "$DIR/audio_to_md.py" ]; then
     echo "找不到本機引擎（$DIR）。"
@@ -2305,5 +2305,5 @@ python3 -m py_compile "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_gro
 本機引擎驗證：
 
 ```bash
-~/.audio-to-md/audio-to-md --help
+~/.codex/audio-to-md/audio-to-md --help
 ```
