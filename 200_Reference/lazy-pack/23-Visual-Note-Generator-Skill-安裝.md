@@ -230,6 +230,7 @@ These rules apply to every Style Profile.
 - Use the upright source as the sole authority for concepts, wording, hierarchy, and visual logic.
 - Preserve all text verbatim. Do not summarize, shorten, modernize, translate, or replace difficult words.
 - Preserve relative block placement, reading order, character side, direction, pose, gesture, and props.
+- Preserve small marks that carry meaning: dot anchors, slash direction, speech tails, thought marks, callout pointers, arrow direction, underlines, and emphasis strokes.
 - Do not force a standard infographic layout over the source.
 - Do not add unsupported concepts, labels, characters, metaphors, examples, or claims.
 - Small spacing, scale, and alignment adjustments are allowed only for legibility and 16:9 fitting.
@@ -255,6 +256,7 @@ Compare the generated image with the upright source and selected Style Profile:
 - orientation is correct;
 - aspect ratio is exactly 16:9;
 - dimensions are at least 2560 × 1440;
+- pixel dimensions were inspected after the latest generation, edit, upscale, and save operation;
 - every string, number, punctuation mark, Latin letter, and symbol is correct;
 - title and blocks preserve relative placement and reading order;
 - diagrams and arrows preserve their relationships;
@@ -268,6 +270,10 @@ Compare the generated image with the upright source and selected Style Profile:
 
 Make one targeted correction at a time. State the exact change and declare all other elements invariant. Re-run the full validation checklist after every edit.
 
+Before every targeted correction, re-open or re-view the upright source crop that contains the issue. Do not correct from the previous generated image alone.
+
+Treat the user's correction as evidence that the current source specification is wrong or incomplete. Update `EXACT TEXT` or `COMPOSITION INVARIANTS` first; do not convert the correction into a long negative-constraint list unless it prevents a repeated model error.
+
 If two targeted edit attempts keep corrupting correct text or layout:
 
 - stop repeating broad image edits;
@@ -275,19 +281,34 @@ If two targeted edit attempts keep corrupting correct text or layout:
 - use deterministic text overlay/compositing when appropriate, or ask the user which defect should be prioritized;
 - never claim exact text fidelity without re-reading the image.
 
+For background, paper tone, shadow, or warmth mismatches after content approval:
+
+- compare against two to four selected portfolio references before changing the image;
+- prefer deterministic pixel-level or compositing adjustment that affects only low-saturation paper/background areas;
+- preserve text, line art, characters, props, and layout;
+- re-check dimensions and aspect ratio after the adjustment.
+
 ## Learned Pitfalls
 
 ### Orientation Drift
 
-Raw pixels and displayed EXIF orientation may differ. Rotate a working copy and inspect it before deciding left/right placement.
+Raw pixels and displayed EXIF orientation may differ. Rotate a working copy and inspect it before deciding left/right placement. If an image tool only changes EXIF metadata or produces a blank/black working copy, it is not a valid normalization step; create a new pixel-rotated working copy and view it before transcription.
 
 ### Handwriting Misread
 
 Similar Chinese characters, abbreviations, or Latin letters are easily misread. Build a canonical text inventory and ask about uncertain strings before generation.
 
+Do not treat visible but small marks as optional decoration. In source-faithful notes, items like `XXX`, small circles, slashes, tails, and horizontal thought lines may encode relationships and must be transcribed into the source specification.
+
+### Correction Drift
+
+User corrections often describe what is already in the source. They should repair the source specification and guide a fresh comparison with the upright image. Do not frame source-reading fixes as arbitrary hard constraints, and do not keep editing from memory of a previous failed generation.
+
 ### Character Drift
 
 Style references can move a character to another side or invent a presenter gesture. Source pose and direction are hard invariants.
+
+When replacing a simple source figure with a profile character, map the source figure's position, facing direction, expression, gesture, and prop directly onto the profile identity. Do not default to the profile's common presenter pose.
 
 ### Missing Identity Mark
 
@@ -301,13 +322,23 @@ Do not copy workflow rules, output dimensions, or source text into a Style Profi
 
 A motif reference can introduce tunnels, flags, text, or props. Restrict every reference to one declared role.
 
+### Missing Portfolio Calibration
+
+When a Style Profile points to existing visual-note references, inspect representative portfolio images before generation. For Arry notes, same-series references and profile-named references are the best calibration source for background warmth, line density, character rendering, and accent restraint.
+
 ### Edit Regression
 
 An edit may silently damage previously correct areas. Re-check all text and layout after every edit.
 
+### Style-Only Regeneration Risk
+
+Regenerating the whole image to fix paper tone, shadow, or subtle palette can damage correct text and layout. Once content is approved, prefer local background adjustment or compositing and then verify dimensions.
+
 ### False 2K Assumption
 
 Do not treat “high resolution” as proof of 2K. Inspect pixel dimensions and upscale when required.
+
+The dimension check must run on the actual file being shown, saved, or handed off, not only on an earlier generated version.
 CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_GENERATION_GUARDRAILS_MD
 
 # visual-note-generator/references/style-profile-guide.md
@@ -482,9 +513,10 @@ Optional:
 ### 0. Normalize Orientation
 
 - Inspect the raw image before transcription.
-- If sideways or upside down, create a non-destructive upright working copy.
+- If sideways or upside down, create a non-destructive upright working copy with pixels actually rotated, not merely an EXIF orientation tag changed.
 - Apply the required clockwise or counterclockwise rotation exactly.
-- View the working copy and confirm that text reads naturally before continuing.
+- View the working copy and confirm that text reads naturally before continuing. If the working copy renders blank, black, or otherwise invalid, remake it with another image tool before transcription.
+- Use the upright working copy for all transcription, layout, and correction checks. Do not rely on the chat preview or memory of the original orientation.
 - Never overwrite the original source image.
 
 ### 1. Build a Source Specification
@@ -495,6 +527,8 @@ Record internally:
 - title, sections, diagrams, arrows, braces, icons, speech bubbles, and visual metaphor;
 - relative positions, reading order, hierarchy, and whitespace;
 - each character's location, direction, body angle, visible face angle, pose, gesture, clothing, and props.
+
+User corrections are source-spec corrections, not extra style restrictions. Fold them back into the canonical transcription and composition notes, then continue to use the upright source as the placement authority.
 
 Do not silently guess ambiguous handwriting. Ask only for the uncertain strings. User corrections become canonical.
 
@@ -517,7 +551,13 @@ Preserve the source direction, pose, gesture, props, and visible face angle. All
 
 ### 4. Select Reference Images
 
-Use two to four references only when available and useful. Select by a named property such as palette, title treatment, diagram density, character angle, or road/mountain rendering.
+Use two to four references only when available and useful. Select by a named property such as palette, title treatment, diagram density, character angle, road/mountain rendering, or background paper tone.
+
+For Arry visual notes, inspect the existing portfolio before generation when available:
+
+- the configured `visual_note_references` route from the selected Style Profile;
+- the configured `obsidian_portfolio` route when accessible;
+- same-series or nearby-numbered works first, then style matches named in `reference_guidance`.
 
 Assign each image exactly one role:
 
@@ -530,8 +570,10 @@ Assign each image exactly one role:
 
 - Generate an upright 16:9 image at the highest native resolution available.
 - Preserve source text and composition; allow only small spacing adjustments.
-- Inspect the first result against the upright source and the selected profile.
-- Correct one issue at a time. After every edit, re-check the entire image for regressions.
+- Inspect the first result against the upright source, not only against the user's latest text description or a previous generated version.
+- Correct one issue at a time. Each correction must restate the relevant source placement, symbol direction, arrow/tail relationship, or character prop from the upright source.
+- After every edit, re-check the entire image against the upright source and selected profile for regressions.
+- For style-only corrections such as background tone, paper warmth, shadow cleanup, or subtle palette matching, prefer local image adjustment/compositing on the approved image when it preserves text and layout better than regenerating the whole note.
 
 ### 6. Produce the Final Deliverable
 
@@ -542,6 +584,8 @@ The final image must be:
 - PNG unless the user requests another format;
 - free of watermarks and unintended borders;
 - visually checked after any required upscaling.
+
+Inspect pixel dimensions for every generated, edited, upscaled, and saved candidate that might be shown or handed off. Do not infer resolution from display size, filename, or "high quality" wording.
 
 If native generation is smaller, create a 2560 × 1440 Lanczos-upscaled version without changing composition or aspect ratio.
 
