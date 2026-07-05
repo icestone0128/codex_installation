@@ -100,7 +100,7 @@
 09：arry-assistant
 10：project-init-sync、startup-sync、shutdown-sync
 11：codex-skill-creator
-12：tool-integration-workflow
+12：tool-integration-workflow、cli-anything；包含「通道 x 鑰匙」判斷、Google Workspace 個人資料 OAuth 規則、常見服務路線、跨 Agent 設定入口，以及沒有現成工具時的 CLI-Anything 安裝與 fallback 指引
 13：brainstorm
 14：social-cards
 15：landing-page
@@ -158,7 +158,7 @@
 | 4 | `shutdown-sync` | [[10-專案初始化工作模式]] | 可直接安裝，依專案 `AGENTS.md` 工作 |
 | 5 | `arry-assistant` | [[09-個人助手設定]] | 個人助手模板，需改名與替換資料層路徑 |
 | 6 | `secondbrain-research-digest` | [[05-第二大腦設定指南]] | 需設定 `{{OBSIDIAN_VAULT}}` |
-| 7 | `tool-integration-workflow` | [[12-外部工具整合工作流]] | 可直接安裝 |
+| 7 | `tool-integration-workflow` / `cli-anything` | [[12-外部工具整合工作流]] | `tool-integration-workflow` 可直接安裝；`cli-anything` 透過 `200_Reference/scripts/cli-anything/install_cli_anything.sh` 安裝上游 Codex skill 與 CLI-Hub |
 | 8 | `brainstorm` | [[13-Brainstorm-規劃模式]] | 可直接安裝 |
 | 9 | `cross-device-sync` | [[16-Codex-全域-Skills-跨裝置同步]] | 需設定 `{{SYNC_ROOT}}`；包含跨裝置同步、`core-rules.md` 可攜化與多 Agent 相容性健檢 |
 | 10 | `heptabase-cli` | [[02-Codex-MCP-Essentials]] | 外部 CLI 連線類，需 Heptabase desktop app 與 CLI |
