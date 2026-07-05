@@ -86,6 +86,7 @@
 32. [[32-VoxCPM2-Voice-Cloner-Skill-安裝]]
 33. [[33-Audio-to-Markdown-Skill-安裝]]
 34. [[34-Python-Tools-全域工具包安裝]]
+35. [[35-Taigi-Teaching-Agent-安裝]]
 
 ## 全域 Skills 安裝總表
 
@@ -122,6 +123,7 @@
 32：voxcpm2-voice-cloner
 33：audio-to-md
 34：Python teaching file tools global runtime；不是 skill，安裝 Word / Excel / PPT / PDF / OCR / 圖表 / 影音輔助 Python 套件，並建立跨專案 wrapper；技能 runtime 仍各自放在 `{{CODEX_HOME}}/<skill-name>`
+35：Taigi Teaching Agent；不是 skill，安裝 `mathruffian-dot/taigi-teaching-agent` 臺語教材產生器、Python 3.12 專用 venv 與 `taigi-teaching-agent` wrapper
 ```
 
 路徑邊界固定如下：
@@ -130,7 +132,7 @@
 | --- | --- | --- |
 | 可攜式全域核心規則 | `{{GLOBAL_RULES}}`；`{{CODEX_HOME}}/AGENTS.md` 只作為 symlink 入口 | Codex 與其他 AI agent 共用的長期工作規則、路徑、同步規則與操作邊界 |
 | Codex 全域 skills | `{{CODEX_HOME}}/skills`；若跨裝置同步，才 symlink 到 `{{SYNC_ROOT}}/skills` | 需要被 Codex App 全域觸發的 skills |
-| LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...34.md` | 每個序號文件內嵌對應全域 skill、工具或 workflow 的完整安裝內容 |
+| LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...35.md` | 每個序號文件內嵌對應全域 skill、工具或 workflow 的完整安裝內容 |
 | 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每個專案共用的本機 Python 工具 venv 與 wrapper；不放模型、技能 runtime 或 symlink |
 | Arry/個人助手全域入口 | `{{CODEX_HOME}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
 | 個人助手跨專案記憶 | `{{ASSISTANT_ROOT}}/memories` | 個人偏好、踩坑、跨專案可重用決策 |
@@ -181,7 +183,8 @@
 | 29 | `voxcpm2-voice-cloner` | [[32-VoxCPM2-Voice-Cloner-Skill-安裝]] | 可直接安裝；授權聲音克隆、合成聲音設計、Apple Silicon MPS／CUDA／CPU、本機 runtime／模型快取路由與 consent gate |
 | 30 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；產出文字後 Phase 2 流程相同，由 Codex 做逐段校稿、摘要與重點整理；內嵌完整 Python 腳本、實測紀錄與踩坑 |
 | 31 | Python teaching file tools runtime | [[34-Python-Tools-全域工具包安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools`，供所有專案共用 Word／Excel／PPT／PDF／OCR／圖表／影音輔助 Python 套件與 wrapper；既有 `audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` runtime 維持在 `{{CODEX_HOME}}/<skill-name>` |
-| 32 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 32 | Taigi Teaching Agent | [[35-Taigi-Teaching-Agent-安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools/taigi-teaching-agent`、專用 Python 3.12 venv 與 `taigi-teaching-agent` wrapper，用於臺羅標音、臺語 TTS、教材檢核與範例教材生成 |
+| 33 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
