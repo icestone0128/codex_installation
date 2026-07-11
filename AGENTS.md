@@ -59,15 +59,15 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 Arry 助手 AI 分身資料層：
 
 - AI 分身名稱：Arry 助手。
-- Arry 助手 Obsidian 同步主版本只限 Google Drive `codex_symlink` 內的 `knowledge/` 與 `memories/`，不放在 public repo：
+- Arry 助手 Obsidian 同步主版本只限 Google Drive `codex_symlink` 內的 `knowledge/` 與 `memories/` 根目錄第一層檔案，不放在 public repo：
   - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/knowledge`
   - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/memories`
 - Arry 助手同步採用和 LazyPack 相同的「主版本 + Obsidian 實體鏡像 + 實際 diff 驗證」模型：
-  - 主版本：上述 `knowledge/` 與 `memories/`；不是整個 `codex_symlink`。
+  - 主版本：上述 `knowledge/` 完整目錄與 `memories/` 根目錄第一層檔案；不是整個 `codex_symlink`。
   - Obsidian 實體鏡像：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/Arry 助手`
   - 收工同步義務由本檔與全域 `core-rules.md` 記憶。
-  - 同步後只保留 `diff -qr` 作為一致性驗證方式。
-  - 不使用 Obsidian symlink 當同步替代品；同步完成後 Obsidian `Arry 助手/` 必須是只包含 `knowledge/` 與 `memories/` 的實體鏡像資料夾，且與主版本一致。
+  - 同步後只保留 `diff -qr` 作為一致性驗證方式；`knowledge/` 比對完整目錄，`memories/` 只比對第一層檔案清單與內容。
+  - 不使用 Obsidian symlink 當同步替代品；同步完成後 Obsidian `Arry 助手/` 必須是只包含完整 `knowledge/` 與只含第一層檔案的 `memories/` 的實體鏡像資料夾，且與主版本一致。
 - 本 repo 的 `000_Agent/` 只保留指向說明，不存放真實個人記憶或偏好。
 - Codex 全域規則唯一實體主版本為 `codex_symlink/core-rules.md`；`/Users/arrywu/.codex/AGENTS.md` 只是指向它的 symlink，不再使用或重建 `codex_symlink/agents/AGENTS.md`。
 - Arry 助手是 Codex App 與 AntiGravity 設定，不使用其他 AI 編輯器專用的規則檔（例如舊版 `CLAUDE.md` 等）或其專屬路徑。
