@@ -10,6 +10,8 @@
 - 原始來源包：使用者提供的 SOIL Deck skills package；本版已整理為 `soil-html-deck`。
 - 追加參考來源：`external-html-slide-builder`，僅整合 Reveal.js、功能標記、互動元件與圖標去背等可攜式概念。
 - 2026-06-03 再次檢查來源 repo `a8fd35b`，補入功能標記建議張數、背景透明度、Firestore session 命名隔離與 Reveal.js 驗收規則。
+- 2026-07-13 補入 `references/soil-deck-core.md`，讓 HTML deck 可從 renderer-neutral SOIL Core 接收與轉換教學規劃。
+- 2026-07-13 補入 `yaml-image-deck` 路由：非互動、非 SOIL 的 YAML-controlled image-first PPTX 改用 LazyPack Item 38。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md`。
 - Obsidian 全域索引已記錄用途：SOIL HTML 互動簡報；輸出單一可開啟 HTML，包含 inline CSS/JS、base64 圖像、進度列、互動卡片、排序表格、圖表、決策樹、Reveal.js 可選模式、文字雲/投票參考與對比滑桿。
 
@@ -23,6 +25,8 @@
 | 4 | Firebase 只作為明確要求時才啟用的可選互動能力；安裝包不內建示範專案金鑰作為預設設定。 |
 | 5 | GitHub Pages 發佈改為獨立確認步驟，不在一般簡報生成流程中自動建立 repo 或 push。 |
 | 6 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/soil-html-deck/`。 |
+| 7 | 補入 SOIL Deck Core：先完成 page、SOIL phase、role、learning task、semantic structure、visible text 與 visual brief，再映射成 HTML DOM、互動元件與 responsive components。 |
+| 8 | 補入分流規則：通用 YAML 圖片式 PPTX 使用 `yaml-image-deck`，SOIL 全圖片教學 PPTX 使用 `soil-image-deck`，本 skill 專注 HTML 互動簡報。 |
 
 ## 安裝方式
 
@@ -39,6 +43,7 @@ test -d "{{CODEX_HOME}}/skills/soil-html-deck/references" && echo "references ok
 test -d "{{CODEX_HOME}}/skills/soil-html-deck/scripts" && echo "scripts ok"
 test -d "{{CODEX_HOME}}/skills/soil-html-deck/examples" && echo "examples ok"
 test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-adapter.md" && echo "Reveal adapter ok"
+test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/soil-deck-core.md" && echo "soil deck core ok"
 test -f "{{CODEX_HOME}}/skills/soil-html-deck/scripts/remove_bg.py" && echo "icon helper ok"
 test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-license.md" && echo "source license ok"
 ```
@@ -62,10 +67,11 @@ test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-lice
 
 1. 讀取使用者提供的主題、素材、簡報目標、受眾與輸出格式。
 2. 先決定 SOIL 節奏：引起動機 -> 維持注意 -> 喚起行動。
-3. 依 skill 內 `SKILL.md` 與 references 規劃頁面、視覺、互動或 Reveal.js 結構。
-4. 若需要 bitmap 視覺，使用 Codex 內建 image generation 生成，不用本機假圖替代。
-5. 若需要 Firebase 或 GitHub Pages，先確認使用者真的要啟用，再處理外部服務設定。
-6. 交付前檢查檔案可開啟、文字可讀、版面不溢出、引用資源可攜。
+3. 先建立 renderer-neutral SOIL Core，保留每頁的 learning task、semantic structure、layout id、visible text 與 speaker-only content。
+4. 再依 skill 內 `SKILL.md` 與 references 把 Core 映射成 HTML sections、DOM text、互動元件、Chart.js、決策樹或 Reveal.js component。
+5. 若需要 bitmap 視覺，使用 Codex 內建 image generation 生成，不用本機假圖替代。
+6. 若需要 Firebase 或 GitHub Pages，先確認使用者真的要啟用，再處理外部服務設定。
+7. 交付前檢查檔案可開啟、文字可讀、版面不溢出、引用資源可攜。
 
 ## 踩坑紀錄
 
@@ -89,6 +95,7 @@ test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-lice
 
 - [ ] `{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md` 存在。
 - [ ] references / scripts / examples 依本 skill package 實際內容存在。
+- [ ] `references/soil-deck-core.md` 存在。
 - [ ] 搜尋 package 內沒有非 Codex 安裝路徑或非 Codex frontmatter 欄位。
 - [ ] 開新 Codex 對話後，可用 `soil-html-deck`、SOIL 簡報、Reveal.js 或互動 HTML 簡報相關語句觸發。
 
@@ -100,10 +107,11 @@ test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-lice
 
 使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
 
-```bash
+````bash
 set -e
 
 # ---- soil-html-deck ----
+rm -rf "{{CODEX_HOME}}/skills/soil-html-deck"
 mkdir -p "{{CODEX_HOME}}/skills/soil-html-deck"
 # soil-html-deck/SKILL.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md")"
@@ -140,6 +148,18 @@ sortable comparison tables, lazy Chart.js charts, an SVG decision tree, a SOIL
 workflow page, optional Reveal.js mode, optional live interaction pages, and a
 closing CTA.
 
+Plan with renderer-neutral SOIL Core before writing HTML. The same teaching
+plan can feed `soil-image-deck` or `soil-general-deck`; HTML-specific choices
+belong to the renderer layer. Keep `visible_text` as live DOM text, map
+`visual` to hero/supporting assets, and map `semantic_structure` to interaction
+routing or responsive components. Read `references/soil-deck-core.md` when
+converting from image/PPTX specs or when a shared SOIL plan is needed.
+
+Use `yaml-image-deck` instead when the user wants a non-interactive
+YAML-controlled image-first PPTX rather than an HTML deck. Use `soil-image-deck`
+instead when the output is SOIL teaching content but should remain a full-image
+PPTX.
+
 ## Output Contract
 
 - Produce one portable HTML file, usually `slides.html` or `index.html`.
@@ -169,7 +189,10 @@ closing CTA.
 ## Workflow
 
 1. Read the user's material and choose 10-12 slides unless a page count is given.
-2. Draft a concise slide plan using the reference sequence in
+2. Draft a concise renderer-neutral SOIL plan first: page, SOIL phase, role,
+   learning task, core point, semantic structure, layout id, visible text,
+   speaker-only content, and visual brief. Then map it to HTML sections using
+   the reference sequence in
    `references/html-patterns.md`: cover, question, thesis, overview cards,
    2-3 split detail pages, comparison table, chart, decision tree, workflow, CTA.
    If the user asks for Reveal.js or live classroom interaction, add feature
@@ -216,6 +239,8 @@ closing CTA.
 ## When To Read References
 
 - Read `references/html-patterns.md` before implementing a default SOIL deck.
+- Read `references/soil-deck-core.md` before converting a SOIL YAML/image/PPTX
+  plan into HTML, or before producing a shared plan for multiple renderers.
 - Read `references/html-slide-builder-adapter.md` when importing ideas from the
   bundled Reveal.js adaptation or planning feature tags.
 - Read `references/reveal-components.md` when the user asks for Reveal.js, a
@@ -244,7 +269,7 @@ CODEX_LAZYPACK_SOIL_HTML_DECK_SKILL_MD
 
 # soil-html-deck/examples/AI_Agent簡報_類型3_HTML_v3_SOIL互動範例.html
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/examples/AI_Agent簡報_類型3_HTML_v3_SOIL互動範例.html")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/examples/AI_Agent簡報_類型3_HTML_v3_SOIL互動範例.html" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_EXAMPLES_AI_AGENT_3_HTML_V3_SOIL_HTML'
+cat > "{{CODEX_HOME}}/skills/soil-html-deck/examples/AI_Agent簡報_類型3_HTML_v3_SOIL互動範例.html" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_EXAMPLES_AI_AGENT簡報_類型3_HTML_V3_SOIL互動範例_HTML'
 <!doctype html>
 <html lang="zh-Hant">
 <head>
@@ -452,7 +477,7 @@ goto(1);
 </script>
 </body>
 </html>
-CODEX_LAZYPACK_SOIL_HTML_DECK_EXAMPLES_AI_AGENT_3_HTML_V3_SOIL_HTML
+CODEX_LAZYPACK_SOIL_HTML_DECK_EXAMPLES_AI_AGENT簡報_類型3_HTML_V3_SOIL互動範例_HTML
 
 # soil-html-deck/references/firebase-interactions.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/references/firebase-interactions.md")"
@@ -1175,6 +1200,53 @@ document.getElementById("viz-slider")?.addEventListener("input", function(){
   readable single-column layout without text overflow.
 CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_REVEAL_COMPONENTS_MD
 
+# soil-html-deck/references/soil-deck-core.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/references/soil-deck-core.md")"
+cat > "{{CODEX_HOME}}/skills/soil-html-deck/references/soil-deck-core.md" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_SOIL_DECK_CORE_MD'
+# SOIL Deck Core
+
+Use one renderer-neutral planning model for Image, PowerPoint, and HTML outputs.
+Do not start by writing HTML. First make the teaching decisions clear, then map
+them to the renderer.
+
+```yaml
+- page: 1
+  soil_phase: hook
+  role: question
+  learning_task: "Care about the problem"
+  core_point: "The topic matters"
+  semantic_structure: focus
+  layout:
+    id: question_focus
+  visible_text:
+    title: "為什麼要學？"
+  speaker_only: "Connect the question to the audience"
+  visual: "One concrete tension or question"
+```
+
+## Renderer Mapping
+
+| Core field | Interactive HTML | Image/PPTX | Editable PPTX |
+|---|---|---|---|
+| `visible_text` | live DOM text | baked text or plate overlay | PowerPoint text boxes |
+| `visual` | hero/supporting asset | full slide image or plate | AI illustration, plate, chart, or geometry |
+| `layout.id` | responsive component | image composition | PowerPoint layout recipe |
+| `semantic_structure` | interaction routing | visual relationship | table, flow, comparison, hierarchy, or diagram |
+| `speaker_only` | optional speaker mode | notes or talk track | notes or talk track |
+
+## HTML Deck Use
+
+- Keep titles, cards, tables, chart labels, decision nodes, and controls as real
+  HTML text/elements unless the page is intentionally a full-bleed poster.
+- Map `semantic_structure` to components: comparison table, process flow,
+  hierarchy map, decision tree, card router, chart, or interaction.
+- Keep image prompts text-free for supporting assets; use baked text only for
+  intentional hero/poster slides.
+- If the same teaching plan may become a `soil-image-deck` or
+  `soil-general-deck`, preserve `learning_task`, `semantic_structure`, and
+  `layout.id` instead of collapsing them into one-off HTML copy.
+CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_SOIL_DECK_CORE_MD
+
 # soil-html-deck/scripts/build_type3_html_v3_soil_skill.py
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/scripts/build_type3_html_v3_soil_skill.py")"
 cat > "{{CODEX_HOME}}/skills/soil-html-deck/scripts/build_type3_html_v3_soil_skill.py" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_BUILD_TYPE3_HTML_V3_SOIL_SKILL_PY'
@@ -1427,6 +1499,7 @@ goto(1);
 if __name__ == "__main__":
     main()
 CODEX_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_BUILD_TYPE3_HTML_V3_SOIL_SKILL_PY
+chmod +x "{{CODEX_HOME}}/skills/soil-html-deck/scripts/build_type3_html_v3_soil_skill.py"
 
 # soil-html-deck/scripts/remove_bg.py
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/scripts/remove_bg.py")"
@@ -1500,5 +1573,8 @@ def main():
 if __name__ == "__main__":
     main()
 CODEX_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_REMOVE_BG_PY
+chmod +x "{{CODEX_HOME}}/skills/soil-html-deck/scripts/remove_bg.py"
 
-```
+````
+
+<!-- END EMBEDDED_SKILLS -->
