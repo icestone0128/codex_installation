@@ -156,7 +156,7 @@ cd "{{CODEX_HOME}}/python-tools/taigi-teaching-agent"
 #!/usr/bin/env bash
 set -euo pipefail
 
-CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+CODEX_HOME="${CODEX_HOME:-${CODEX_HOME}}"
 PYTHON_TOOLS_HOME="${PYTHON_TOOLS_HOME:-$CODEX_HOME/python-tools}"
 TAIGI_HOME="${TAIGI_HOME:-$PYTHON_TOOLS_HOME/taigi-teaching-agent}"
 BIN_DIR="${BIN_DIR:-$PYTHON_TOOLS_HOME/bin}"

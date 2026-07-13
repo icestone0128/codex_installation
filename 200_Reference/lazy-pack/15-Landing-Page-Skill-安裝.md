@@ -151,7 +151,7 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 
 本節是自含式安裝區塊。這個序號項目會安裝：`landing-page`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `~/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
 ````bash
 set -e
@@ -1167,7 +1167,7 @@ After the positioning questions, check only non-destructive signals:
 ```bash
 if command -v uipro >/dev/null 2>&1; then
   echo "UUPM_COMMAND_AVAILABLE"
-elif [ -d "$HOME/.codex/skills/ui-ux-pro-max" ]; then
+elif [ -d "${CODEX_HOME}/skills/ui-ux-pro-max" ]; then
   echo "UUPM_CODEX_SKILL_AVAILABLE"
 else
   echo "UUPM_NOT_AVAILABLE"

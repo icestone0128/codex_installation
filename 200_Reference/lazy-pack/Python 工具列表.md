@@ -12,7 +12,7 @@
 |------|------|------|------------------------|
 | 套印獎狀／通知單／成績單 🏆 | 30 個學生 30 張，手動換名換到崩潰 | `python-docx`＋`openpyxl`🆕 | 「讀這份班級名單 Excel，套進這個獎狀 Word 模板，每人產一份並存成 PDF」 |
 | 出考卷（學生卷／教師卷分開） | 出完題還要手動刪答案做另一版 | `python-docx` | 「把這些題目做成 Word，產出『學生卷（無答案）』和『教師卷（含詳解）』兩份」 |
-| 講義合併＋批次轉 PDF | 各課 Word 散落，要併本再轉 PDF | `docxcompose`＋`pywin32` | 「把這資料夾的 Word 講義依檔名順序合併成一份，再另存成 PDF」 |
+| 講義合併＋批次轉 PDF | 各課 Word 散落，要併本再轉 PDF | `docxcompose`＋`docx2pdf`；Windows Office COM 才加 `pywin32` | 「把這資料夾的 Word 講義依檔名順序合併成一份，再依本機 Office / LibreOffice 能力另存成 PDF」 |
 
 ## 📊 Excel 篇
 
@@ -37,7 +37,7 @@
 |------|------|------|------------------------|
 | 考卷合併／拆分／重排 | 考古題、作業散在幾十個 PDF | `pypdf`＋`PyMuPDF` | 「把這些 PDF 合併成一份，並把第 5～8 頁單獨抽出來另存」 |
 | PDF 加浮水印（防外流） | 講義想加「僅供 ○ 班使用」 | `pypdf`＋`reportlab` | 「幫這份 PDF 每頁加上淡灰色浮水印『302 班 期中複習』」 |
-| 掃描講義 OCR → 可編輯 | 掃描檔是圖片，無法選字、無法餵 AI | `ocrmypdf`🆕 | 「把這份掃描 PDF 做 OCR，變成可以複製文字的 PDF」 |
+| 掃描講義 OCR → 可編輯 | 掃描檔是圖片，無法選字、無法餵 AI | `ocrmypdf`🆕＋Tesseract＋Ghostscript | 「把這份掃描 PDF 做 OCR，變成可以複製文字的 PDF」 |
 | 抽課本某幾頁轉圖 | 只要課本某張圖貼進學習單 | `PyMuPDF`＋`pdf2image` | 「把這份課本 PDF 第 12 頁轉成圖片，去掉白邊」 |
 
 ## 🧰 其他常用小工具
@@ -47,7 +47,16 @@
 | 連結轉 QR Code | 要學生掃 Padlet/表單，手做 QR 很煩 | `qrcode`＋`pillow` | 「把這 5 個連結各生一張 QR Code，貼到學習單」 |
 | 抓 YouTube 現成字幕做逐字稿 | 想要影片逐字稿但不想聽打 | `youtube-transcript-api` | 「抓這支 YouTube 影片的字幕，整理成逐字稿」 |
 | 講稿轉語音旁白（免費） | 請人配音或買 AI 語音很貴 | `edge-tts` | 「把這份講稿轉成中文語音 mp3，語速慢一點」 |
-| 課本轉乾淨文字（餵 AI 前處理） | 課本格式亂，丟 AI 效果差 | `markitdown` | 「把這份 PDF/PPT 轉成 Markdown」 |
+| 課本轉乾淨文字（餵 AI 前處理） | 課本格式亂，丟 AI 效果差 | `markitdown[pdf,docx,pptx,xlsx]` | 「把這份 PDF／Word／PPT／Excel 轉成 Markdown」 |
+
+## 🧩 安裝狀態與按需項
+
+| 項目 | 狀態 | 備註 |
+|------|------|------|
+| `markitdown[pdf,docx,pptx,xlsx]` | 已納入 Item 34 | 補齊文件格式 extras；本機補裝後新增 `mammoth` 與 `cobble`。 |
+| Ghostscript / `gs` | 已納入 Item 34 系統相依 | 搭配 `ocrmypdf` 處理 PDF/A 與部分 OCR 流程；macOS 用 `brew install ghostscript`。 |
+| `pywin32` | Windows native bash 自動納入；macOS / Linux / WSL 不裝 | 只服務 Windows Microsoft Office COM 自動化；安裝腳本偵測到 `MINGW` / `MSYS` / `CYGWIN` 才加入同一個 Windows venv。 |
+| Windows repo-local `.venv` | 不取代本 LazyPack 位置 | 下載來源檔適合 Windows 單 repo 安裝；本 Item 34 維持跨專案共用的 `{{CODEX_HOME}}/python-tools`。 |
 
 ---
 
@@ -63,4 +72,3 @@
 
 > 製作：三師爸 Sense Bar｜youtube.com/@sensebar
 > 本列表為 EP03 隨附參考資料，歡迎自由下載分享。
-</content>

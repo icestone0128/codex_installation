@@ -25,14 +25,14 @@
 | PDF 解析可能被誤認為 Codex 內建 PDF plugin | `doc-to-md` 是自訂轉檔 skill，不是系統 PDF plugin |
 | `doc-to-md` 與 `vlm-to-md` 原本分成兩包 | 本版合併成同一個 `doc-to-md` skill，由 `doc_md_router.py` 自動判斷是否呼叫 VLM |
 | VLM 來源可能被理解成外部 API | 本版只使用本地 Python 前處理與助手內建視覺能力，不需要 API key 或本地大模型 |
-| Codex 執行時可能臨時建立 Python 環境 | 本版明定轉檔時優先呼叫使用者已由 Terminal 安裝的固定轉換器：`~/.codex/doc-to-md/doc-to-md` 與 `~/.codex/vlm-to-md/vlm-to-md`；不要為單次轉換建立臨時 venv |
+| Codex 執行時可能臨時建立 Python 環境 | 本版明定轉檔時優先呼叫使用者已由 Terminal 安裝的固定轉換器：`{{CODEX_HOME}}/doc-to-md/doc-to-md` 與 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md`；不要為單次轉換建立臨時 venv |
 
 ## 安裝方式
 
 Document to MD 有兩層安裝。Codex 實際轉檔時預設直接呼叫使用者已安裝的 Terminal 轉換器；不要為單次轉換建立 `/tmp` 或 `/private/tmp` 的臨時 Python 環境。
 
 1. **Codex Skill 安裝**：使用本文文末「內建 Skill 完整安裝內容」。執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
-2. **固定本機轉換器確認**：確認 `~/.codex/doc-to-md/doc-to-md` 與 `~/.codex/vlm-to-md/vlm-to-md` 已存在且可執行。這兩個是使用者先前用 Terminal 安裝好的文字轉檔與 VLM 前處理工具。
+2. **固定本機轉換器確認**：確認 `{{CODEX_HOME}}/doc-to-md/doc-to-md` 與 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md` 已存在且可執行。這兩個是使用者先前用 Terminal 安裝好的文字轉檔與 VLM 前處理工具。
 3. **fallback 才用內建腳本**：若固定轉換器不存在，才使用 skill 內建 `scripts/`；不要臨時建立 Python 環境。
 
 ### Mac / Linux：固定本機轉換器確認
@@ -40,14 +40,14 @@ Document to MD 有兩層安裝。Codex 實際轉檔時預設直接呼叫使用�
 開啟 Terminal，執行：
 
 ```bash
-test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
-test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+test -x {{CODEX_HOME}}/doc-to-md/doc-to-md && echo "text converter ok"
+test -x {{CODEX_HOME}}/vlm-to-md/vlm-to-md && echo "vlm converter ok"
 ```
 
 Codex 自動路由時，可用已安裝的文字轉檔 Python 執行 router，router 會優先呼叫上述兩個固定轉換器：
 
 ```bash
-~/.codex/doc-to-md/venv/bin/python3 "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" "input.pdf" -o "output/"
+{{CODEX_HOME}}/doc-to-md/venv/bin/python3 "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" "input.pdf" -o "output/"
 ```
 
 ### Mac / Linux：固定本機轉換器安裝
@@ -62,10 +62,10 @@ bash "{{CODEX_HOME}}/skills/doc-to-md/scripts/install.sh"
 
 - 尋找 Python 3.8 以上版本，優先使用 Python 3.13 到 3.9，再退到 `python3`。
 - 若找不到 Python 3.8+，提示到 python.org 安裝 Python 3.12 或更新版本。
-- 建立固定的 `~/.codex/doc-to-md/venv/`。
+- 建立固定的 `{{CODEX_HOME}}/doc-to-md/venv/`。
 - 用 pip 安裝 `PyMuPDF`、`ebooklib`、`beautifulsoup4`、`chardet`、`opencc-python-reimplemented`、`lxml`、`Pillow`。
-- 複製 `doc_md_router.py`、`doc_to_md.py`、`vlm_prep.py`、`package_kb.py` 與 `requirements.txt` 到 `~/.codex/doc-to-md/`。
-- 建立 `~/.codex/doc-to-md/doc-to-md` 文字轉檔啟動器。VLM 若是使用獨立安裝包，固定啟動器位於 `~/.codex/vlm-to-md/vlm-to-md`。
+- 複製 `doc_md_router.py`、`doc_to_md.py`、`vlm_prep.py`、`package_kb.py` 與 `requirements.txt` 到 `{{CODEX_HOME}}/doc-to-md/`。
+- 建立 `{{CODEX_HOME}}/doc-to-md/doc-to-md` 文字轉檔啟動器。VLM 若是使用獨立安裝包，固定啟動器位於 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md`。
 
 ### Windows：安裝 Python 轉換器
 
@@ -82,7 +82,7 @@ Windows 若跳出 SmartScreen，選「其他資訊」再選「仍要執行」。
 Mac / Linux：
 
 ```bash
-~/.codex/doc-to-md/doc-to-md --help
+{{CODEX_HOME}}/doc-to-md/doc-to-md --help
 ```
 
 Windows：
@@ -138,7 +138,7 @@ test -f "{{CODEX_HOME}}/skills/doc-to-md/references/full-usage.md" && echo "full
 
 ### 2. 轉換器安裝位置和 Codex skill 位置不同
 
-Codex skill 放在 `{{CODEX_HOME}}/skills/doc-to-md/`；本機轉換器預設安裝到 `~/.codex/doc-to-md/` 或 Windows 的 `%USERPROFILE%\.codex\doc-to-md\`。不要混成同一個概念。
+Codex skill 放在 `{{CODEX_HOME}}/skills/doc-to-md/`；本機轉換器預設安裝到 `{{CODEX_HOME}}/doc-to-md/` 或 Windows 的 `%USERPROFILE%\.codex\doc-to-md\`。不要混成同一個概念。
 
 ### 2.1 外層安裝包和內嵌 Skill 路徑不同
 
@@ -161,9 +161,9 @@ Codex 的文件 / PDF 系統能力可用於解析或視覺 QA；`doc-to-md` 是�
 - [ ] `{{CODEX_HOME}}/skills/doc-to-md/SKILL.md` 存在。
 - [ ] `references/full-usage.md`、`references/installer-readme.md`、`references/usage-guide.md`、`references/combined-routing-guide.md`、`references/vlm-usage-guide.md`、`references/vlm-design-notes.md` 存在。
 - [ ] `scripts/doc_md_router.py`、`scripts/doc_to_md.py`、`scripts/vlm_prep.py`、`scripts/package_kb.py`、`scripts/requirements.txt`、`scripts/install.sh`、`scripts/install.bat` 存在。
-- [ ] 固定文字轉檔器 `~/.codex/doc-to-md/doc-to-md --help` 可正常顯示。
-- [ ] 固定 VLM 轉檔器 `~/.codex/vlm-to-md/vlm-to-md --help` 可正常顯示。
-- [ ] 若需要自動路由 PDF，`~/.codex/doc-to-md/venv/bin/python3 "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" --help` 可正常顯示。
+- [ ] 固定文字轉檔器 `{{CODEX_HOME}}/doc-to-md/doc-to-md --help` 可正常顯示。
+- [ ] 固定 VLM 轉檔器 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md --help` 可正常顯示。
+- [ ] 若需要自動路由 PDF，`{{CODEX_HOME}}/doc-to-md/venv/bin/python3 "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" --help` 可正常顯示。
 - [ ] 開新 Codex 對話後，可用「doc-to-md」、「PDF 轉 Markdown」、「掃描 PDF 轉 Markdown」、「VLM to MD」或「圖表解讀」觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
@@ -212,8 +212,8 @@ the VLM-to-MD visual workflow.
   `$CODEX_HOME/skills/doc-to-md`.
 - If the user has already installed the Terminal converters, prefer those fixed
   installed programs:
-  - Text converter: `~/.codex/doc-to-md/doc-to-md`
-  - VLM converter: `~/.codex/vlm-to-md/vlm-to-md`
+  - Text converter: `{{CODEX_HOME}}/doc-to-md/doc-to-md`
+  - VLM converter: `{{CODEX_HOME}}/vlm-to-md/vlm-to-md`
 - Do not create a temporary virtual environment during document conversion.
 - Use bundled scripts only as fallback when fixed installed programs are not
   available.
@@ -244,8 +244,8 @@ Use `scripts/doc_md_router.py` first for normal user requests. It decides:
 
 ```bash
 # 1. Prefer the user's fixed Terminal installs when available
-test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
-test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+test -x {{CODEX_HOME}}/doc-to-md/doc-to-md && echo "text converter ok"
+test -x {{CODEX_HOME}}/vlm-to-md/vlm-to-md && echo "vlm converter ok"
 
 # 2. Run automatic routing. The router calls the fixed installed converters
 #    first, then falls back to bundled scripts.
@@ -256,7 +256,7 @@ If the current system `python3` cannot import PyMuPDF for PDF routing, run the
 router with the Python from the fixed text converter install:
 
 ```bash
-~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "<file>.pdf" -o "<out>"
+{{CODEX_HOME}}/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "<file>.pdf" -o "<out>"
 ```
 
 This uses the already installed Terminal environment. Do not create a one-off
@@ -282,9 +282,9 @@ Use direct scripts only when the user explicitly asks for a specific path:
 
 If the user already ran the Terminal installers, prefer these fixed programs:
 
-- **Text:** `~/.codex/doc-to-md/doc-to-md`
-- **VLM:** `~/.codex/vlm-to-md/vlm-to-md`
-- **Router Python when needed:** `~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py`
+- **Text:** `{{CODEX_HOME}}/doc-to-md/doc-to-md`
+- **VLM:** `{{CODEX_HOME}}/vlm-to-md/vlm-to-md`
+- **Router Python when needed:** `{{CODEX_HOME}}/doc-to-md/venv/bin/python3 scripts/doc_md_router.py`
 
 These are stable user-level tools, not temporary environments. Use them before
 attempting dependency installation.
@@ -302,7 +302,7 @@ If neither Option A nor Option B is available, instruct the user to install usin
 - Text usage guide: `references/full-usage.md`
 - VLM usage guide: `references/vlm-usage-guide.md`
 
-The local installers create `~/.codex/doc-to-md/` (Mac/Linux) or
+The local installers create `{{CODEX_HOME}}/doc-to-md/` (Mac/Linux) or
 `%USERPROFILE%\.codex\doc-to-md\` (Windows), install Python dependencies in a venv,
 copy all Python scripts, and create command-line launchers.
 
@@ -429,7 +429,7 @@ When both pipelines run on the same PDF:
 
 | Problem | Fix |
 |---------|-----|
-| `No module named 'fitz'` with system Python | Run router with `~/.codex/doc-to-md/venv/bin/python3`; this uses the existing fixed Terminal install |
+| `No module named 'fitz'` with system Python | Run router with `{{CODEX_HOME}}/doc-to-md/venv/bin/python3`; this uses the existing fixed Terminal install |
 | Fixed text converter missing | Re-run the `doc-to-md` Terminal installer |
 | Fixed VLM converter missing | Re-run the `vlm-to-md` Terminal installer |
 | Garbled characters | Try `--no-convert-chinese`; if still garbled, file may need OCR |
@@ -585,7 +585,7 @@ AI 助手會自動執行 Phase 1 + Phase 2。
 
 Mac：
 ```bash
-~/.codex/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
+{{CODEX_HOME}}/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
 ```
 
 Windows：
@@ -604,7 +604,7 @@ Windows：
 
 Mac：
 ```bash
-~/.codex/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
+{{CODEX_HOME}}/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
 ```
 
 Windows：
@@ -702,7 +702,7 @@ converted_at: "2026-04-25"  ← 轉換日期
 
 **Mac：**
 ```bash
-rm -rf ~/.codex/doc-to-md
+rm -rf {{CODEX_HOME}}/doc-to-md
 ```
 
 **Windows（PowerShell）：**
@@ -796,7 +796,7 @@ AI 助手會自動：
 
 **Mac：**
 ```bash
-~/.codex/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
+{{CODEX_HOME}}/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
 ```
 
 **Windows（PowerShell 或命令提示字元）：**
@@ -840,7 +840,7 @@ converted_at: "2026-04-25 17:00"
 |------|------|
 | 安裝時說「Python 版本太舊」 | 到 python.org 下載 Python 3.12，安裝後重開 Terminal 再試 |
 | Windows 顯示「已保護您的電腦」 | 點「其他資訊」→「仍要執行」 |
-| AI 助手說找不到轉換器 | 確認有執行過安裝程式，Mac 試 `~/.codex/doc-to-md/doc-to-md --help`，Windows 試 `%USERPROFILE%\.codex\doc-to-md\doc-to-md.bat --help` |
+| AI 助手說找不到轉換器 | 確認有執行過安裝程式，Mac 試 `{{CODEX_HOME}}/doc-to-md/doc-to-md --help`，Windows 試 `%USERPROFILE%\.codex\doc-to-md\doc-to-md.bat --help` |
 | 轉出來是亂碼 | 加上 `--no-convert-chinese` 參數再試一次 |
 | PDF 內容是掃描圖片 | 這種 PDF 需要先用 OCR 軟體處理（如 Adobe Acrobat） |
 | EPUB 章節是空的 | 可能有 DRM 保護，需先移除 |
@@ -852,7 +852,7 @@ converted_at: "2026-04-25 17:00"
 
 **Mac：**
 ```bash
-rm -rf ~/.codex/doc-to-md
+rm -rf {{CODEX_HOME}}/doc-to-md
 ```
 
 **Windows（PowerShell）：**
@@ -868,9 +868,9 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.doc-to-md"
 
 | 項目 | Mac | Windows |
 |------|-----|---------|
-| 安裝位置 | `~/.codex/doc-to-md/` | `%USERPROFILE%\.codex\doc-to-md\` |
-| 虛擬環境 | `~/.codex/doc-to-md/venv/` | `%USERPROFILE%\.codex\doc-to-md\venv\` |
-| 啟動器 | `~/.codex/doc-to-md/doc-to-md`（bash） | `%USERPROFILE%\.codex\doc-to-md\doc-to-md.bat` |
+| 安裝位置 | `{{CODEX_HOME}}/doc-to-md/` | `%USERPROFILE%\.codex\doc-to-md\` |
+| 虛擬環境 | `{{CODEX_HOME}}/doc-to-md/venv/` | `%USERPROFILE%\.codex\doc-to-md\venv\` |
+| 啟動器 | `{{CODEX_HOME}}/doc-to-md/doc-to-md`（bash） | `%USERPROFILE%\.codex\doc-to-md\doc-to-md.bat` |
 | Python 需求 | 3.8+（建議 3.12） | 3.8+（建議 3.12） |
 | 套件依賴 | PyMuPDF, ebooklib, beautifulsoup4, chardet, opencc-python-reimplemented, lxml | 同左 |
 | 支援格式 | PDF, EPUB, TXT | PDF, EPUB, TXT |
@@ -895,18 +895,18 @@ installed from Terminal. Do not create a temporary virtual environment for a
 one-off conversion.
 
 ```bash
-test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
-test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
-~/.codex/doc-to-md/venv/bin/python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py "book.pdf" -o ./100_Todo/projects/doc-to-md/book/
+test -x {{CODEX_HOME}}/doc-to-md/doc-to-md && echo "text converter ok"
+test -x {{CODEX_HOME}}/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+{{CODEX_HOME}}/doc-to-md/venv/bin/python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py "book.pdf" -o ./100_Todo/projects/doc-to-md/book/
 ```
 
-The router calls `~/.codex/doc-to-md/doc-to-md` and `~/.codex/vlm-to-md/vlm-to-md` first,
+The router calls `{{CODEX_HOME}}/doc-to-md/doc-to-md` and `{{CODEX_HOME}}/vlm-to-md/vlm-to-md` first,
 then falls back to bundled scripts only when those fixed installs are missing.
 
 ### macOS fixed converter check
 ```bash
-~/.codex/doc-to-md/doc-to-md --help
-~/.codex/vlm-to-md/vlm-to-md --help
+{{CODEX_HOME}}/doc-to-md/doc-to-md --help
+{{CODEX_HOME}}/vlm-to-md/vlm-to-md --help
 ```
 
 ### Windows fixed converter check
@@ -917,8 +917,8 @@ then falls back to bundled scripts only when those fixed installs are missing.
 
 ### Linux fixed converter check
 ```bash
-~/.codex/doc-to-md/doc-to-md --help
-~/.codex/vlm-to-md/vlm-to-md --help
+{{CODEX_HOME}}/doc-to-md/doc-to-md --help
+{{CODEX_HOME}}/vlm-to-md/vlm-to-md --help
 ```
 
 ### Persistent virtual environment (optional)
@@ -1237,15 +1237,15 @@ Use the user's fixed Terminal installs first. Do not create a temporary virtual
 environment for a single conversion.
 
 ```bash
-test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
-test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+test -x {{CODEX_HOME}}/doc-to-md/doc-to-md && echo "text converter ok"
+test -x {{CODEX_HOME}}/vlm-to-md/vlm-to-md && echo "vlm converter ok"
 ```
 
 If the current system `python3` lacks PyMuPDF for PDF routing, run the bundled
 router with the already installed text-converter Python:
 
 ```bash
-~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
+{{CODEX_HOME}}/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
 ```
 
 Automatic:
@@ -1388,7 +1388,7 @@ vlm-to-md /path/screenshots_folder/ -o /path/out/
 打開 Codex App：
 
 ```
-幫我把這個 PDF 用視覺轉成 Markdown：/Users/你的名字/Desktop/掃描檔.pdf
+幫我把這個 PDF 用視覺轉成 Markdown：{{HOME}}/Desktop/掃描檔.pdf
 ```
 
 AI 助手會自動跑 Phase 1 + Phase 2。
@@ -1397,7 +1397,7 @@ AI 助手會自動跑 Phase 1 + Phase 2。
 
 ```bash
 # Mac
-~/.codex/vlm-to-md/vlm-to-md --auto ~/Desktop/掃描檔.pdf -o ~/Desktop/
+{{CODEX_HOME}}/vlm-to-md/vlm-to-md --auto ~/Desktop/掃描檔.pdf -o ~/Desktop/
 # Windows
 %USERPROFILE%\.codex\vlm-to-md\vlm-to-md.bat --auto C:\Users\你\Desktop\掃描檔.pdf -o C:\Users\你\Desktop\
 ```
@@ -1451,7 +1451,7 @@ AI 助手會自動跑 Phase 1 + Phase 2。
 
 ```bash
 # Mac
-rm -rf ~/.codex/vlm-to-md
+rm -rf {{CODEX_HOME}}/vlm-to-md
 # Windows (PowerShell)
 Remove-Item -Recurse -Force "$env:USERPROFILE\.vlm-to-md"
 ```
@@ -1616,7 +1616,7 @@ def import_fitz():
             print(
                 "[ERROR] PyMuPDF is required for PDF routing. "
                 "Run this router with the fixed install Python, for example: "
-                "~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py",
+                "{{CODEX_HOME}}/doc-to-md/venv/bin/python3 scripts/doc_md_router.py",
                 file=sys.stderr,
             )
             return None
@@ -2844,7 +2844,7 @@ def process(input_path: str, out_dir: str, mode: str, dpi: int,
 
     if is_pdf:
         if not HAS_FITZ:
-            log("❌ 需要 PyMuPDF。請使用固定安裝的 VLM 轉換器：~/.codex/vlm-to-md/vlm-to-md")
+            log("❌ 需要 PyMuPDF。請使用固定安裝的 VLM 轉換器：{{CODEX_HOME}}/vlm-to-md/vlm-to-md")
             return 1
         doc = fitz.open(input_path)
         log(f"📄 開啟 PDF：{os.path.basename(input_path)}（{len(doc)} 頁）")
@@ -3336,7 +3336,7 @@ cat > "{{CODEX_HOME}}/skills/doc-to-md/scripts/install.sh" <<'CODEX_LAZYPACK_DOC
 set -e
 trap 'if [ -n "${EXTRACT_DIR:-}" ]; then rm -rf "$EXTRACT_DIR"; fi' EXIT
 
-INSTALL_DIR="$HOME/.codex/doc-to-md"
+INSTALL_DIR="${CODEX_HOME}/doc-to-md"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL_SRC="$SCRIPT_DIR/skill"
 EXTRACT_DIR=""
@@ -3442,28 +3442,28 @@ cp "$SKILL_SRC/scripts/requirements.txt" "$INSTALL_DIR/"
 # 建立全域啟動器
 cat > "$INSTALL_DIR/doc-to-md" << 'LAUNCHER'
 #!/bin/bash
-DIR="$HOME/.codex/doc-to-md"
+DIR="${CODEX_HOME}/doc-to-md"
 "$DIR/venv/bin/python3" "$DIR/doc_md_router.py" "$@"
 LAUNCHER
 chmod +x "$INSTALL_DIR/doc-to-md"
 
 cat > "$INSTALL_DIR/doc-to-md-text" << 'LAUNCHER'
 #!/bin/bash
-DIR="$HOME/.codex/doc-to-md"
+DIR="${CODEX_HOME}/doc-to-md"
 "$DIR/venv/bin/python3" "$DIR/doc_to_md.py" "$@"
 LAUNCHER
 chmod +x "$INSTALL_DIR/doc-to-md-text"
 
 cat > "$INSTALL_DIR/vlm-to-md" << 'LAUNCHER'
 #!/bin/bash
-DIR="$HOME/.codex/doc-to-md"
+DIR="${CODEX_HOME}/doc-to-md"
 "$DIR/venv/bin/python3" "$DIR/vlm_prep.py" "$@"
 LAUNCHER
 chmod +x "$INSTALL_DIR/vlm-to-md"
 
 cat > "$INSTALL_DIR/doc-to-md-package" << 'LAUNCHER'
 #!/bin/bash
-DIR="$HOME/.codex/doc-to-md"
+DIR="${CODEX_HOME}/doc-to-md"
 "$DIR/venv/bin/python3" "$DIR/package_kb.py" "$@"
 LAUNCHER
 chmod +x "$INSTALL_DIR/doc-to-md-package"
@@ -3482,7 +3482,7 @@ if [ -n "$SHELL_RC" ]; then
     if ! grep -q "doc-to-md" "$SHELL_RC" 2>/dev/null; then
         echo "" >> "$SHELL_RC"
         echo '# doc-to-md converter' >> "$SHELL_RC"
-        echo 'export PATH="$HOME/.codex/doc-to-md:$PATH"' >> "$SHELL_RC"
+        echo 'export PATH="${CODEX_HOME}/doc-to-md:$PATH"' >> "$SHELL_RC"
     fi
 fi
 

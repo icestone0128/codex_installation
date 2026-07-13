@@ -322,7 +322,7 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 
 本節是自含式安裝區塊。這個序號項目會安裝：`codex-skill-creator`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `~/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
 ````bash
 set -e
@@ -354,7 +354,7 @@ Use this skill as Arry's required entry workflow for creating and maintaining cu
 
 ## Default Paths
 
-- Custom global skills: `$CODEX_HOME/skills`, or `~/.codex/skills` when `$CODEX_HOME` is not set.
+- Custom global skills: `$CODEX_HOME/skills`, or `{{CODEX_HOME}}/skills` when `$CODEX_HOME` is not set.
 - This user's global skills symlink: `{{CODEX_HOME}}/skills`, pointing to Google Drive `codex_symlink/skills`.
 - Project-local skills: `<project-root>/000_Agent/skills`.
 - Global portable copy root: `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>`.
@@ -429,7 +429,7 @@ Before creating or substantially redesigning a skill, read `references/built-in-
    - Built-in system skill: do not patch; create a companion custom skill or a reference note.
    - Confirm that this request is being handled through `codex-skill-creator`; do not hand custom-skill ownership to the built-in creator.
    - For a new skill, normalize the name to lowercase hyphen-case, keep it at 64 characters or fewer, and use the built-in initializer when available:
-     `python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/init_skill.py" <skill-name> --path <parent> [--resources ...] --interface ...`.
+     `python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/init_skill.py" <skill-name> --path <parent> [--resources ...] --interface ...`.
    - If the built-in initializer is unavailable, create the same minimal structure manually and record that fallback in the result.
 2. Extract the useful workflow from the source material:
    - trigger scenarios
@@ -461,7 +461,7 @@ Before creating or substantially redesigning a skill, read `references/built-in-
    - personal paths are either replaced with portable placeholders or clearly labeled as this user's local defaults
    - no unresolved placeholders remain in active instructions unless they are intentionally part of a portable template
    - run the built-in validator when available:
-     `python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>`
+     `python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>`
    - before running it, confirm the selected interpreter can `import yaml`; if the default `python3` cannot, use another available interpreter with PyYAML and report the fallback rather than silently skipping validation
    - test every added script directly; for several similar scripts, test a representative sample
    - verify `agents/openai.yaml` still matches the skill name, purpose, and real invocation
@@ -569,7 +569,7 @@ Create only necessary directories. Avoid placeholder resources and auxiliary fil
 When the built-in helper exists, initialize a new skill with:
 
 ```bash
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/init_skill.py" \
+python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/init_skill.py" \
   <skill-name> --path <parent-directory> \
   [--resources scripts,references,assets] \
   --interface display_name="<Display Name>" \
@@ -600,7 +600,7 @@ Keep `SKILL.md` under 500 lines when practical. Link required references directl
 When supported, generate or refresh `agents/openai.yaml` with:
 
 ```bash
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/generate_openai_yaml.py" \
+python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/generate_openai_yaml.py" \
   <skill-folder> \
   --interface display_name="<Display Name>" \
   --interface short_description="<25-64 character UI description>" \
@@ -614,7 +614,7 @@ Quote all string values. Include optional icons, brand colors, dependencies, or 
 Run the built-in validator when available:
 
 ```bash
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>
+python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>
 ```
 
 First verify that the selected interpreter can `import yaml`. If the default `python3` lacks PyYAML, use another available interpreter that has it and report the fallback. Do not silently skip validation or install packages globally without considering the environment's package-management policy.
@@ -673,7 +673,7 @@ This reference adapts `02-skill-creator-bootstrap.md` for Codex App. The source 
 | 來源工具 global skills path | `{{CODEX_HOME}}/skills` for skills that must trigger across projects |
 | 來源工具 project-level skills path | `<project-root>/000_Agent/skills` for skills that serve only one project |
 | `000_Agent/skills` as symlink target | Do not symlink it into `{{CODEX_HOME}}/skills`; it is the assistant or project-local portable skill package |
-| alternate global discovery paths | Do not create them; this setup uses `{{CODEX_HOME}}/skills` or `~/.codex/skills` only |
+| alternate global discovery paths | Do not create them; this setup uses `{{CODEX_HOME}}/skills` or `{{CODEX_HOME}}/skills` only |
 | alternate project discovery paths | Do not create them; this setup uses `<project-root>/000_Agent/skills` only |
 | slash command `/skill-name` | Use `$skill-name` with the actual installed name, or natural-language triggers; do not depend on aliases |
 | 來源工具 `AskUserQuestion` | Use an available structured question UI; otherwise continue with numbered choices or concise plain-text questions |

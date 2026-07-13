@@ -2,7 +2,7 @@
 
 > 版本：2026-06-21 可自行安裝版
 > 用途：讓下載者從零開始設定 Codex App、全域 skills、plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
-> 原則：文件中的 `{{...}}` 都是下載者必須替換的值；`{{...}}` 佔位符必須替換成下載者自己的路徑、帳號與 project ID。
+> 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
 
 2026-06-21 更新：Item 09–16 已納入新版引導詞的 Codex-only 轉換；全域 skill 固定使用 `{{CODEX_HOME}}/skills`，專案 skill 固定使用 `<project-root>/000_Agent/skills`，並以 `codex-skill-creator` 作為所有自訂 skill 建立與維護的必要入口。
 
@@ -16,12 +16,19 @@
 | `{{HOME}}` | 使用者家目錄 | 你的 home folder |
 | `{{CODEX_HOME}}` | Codex 設定資料夾 | `{{HOME}}/.codex` |
 | `{{CODEX_CONFIG}}` | Codex MCP 設定檔 | `{{CODEX_HOME}}/config.toml` |
+| `{{GEMINI_CONFIG}}` | AntiGravity / Gemini 設定資料夾 | `{{HOME}}` 底下的 Gemini 設定位置 |
 | `{{WORK_ROOT}}` | 專案工作根目錄 | `{{HOME}}/Projects` 或雲端硬碟內的工作資料夾 |
 | `{{PROJECT_ROOT}}` | 目前要操作的單一專案資料夾 | `{{WORK_ROOT}}/my-project` |
 | `{{SETUP_REPO}}` | 這份懶人包所在專案 | `{{WORK_ROOT}}/codex_installation` |
+| `{{SETUP_REPO_NAME}}` | 這份懶人包 repo 名稱 | `codex_installation` |
+| `{{ANTIGRAVITY_SETUP_REPO}}` | AntiGravity 懶人包所在專案 | `{{WORK_ROOT}}/antigravity_installation` |
 | `{{SYNC_ROOT}}` | Codex symlink 雲端同步母資料夾 | Google Drive / iCloud / Dropbox 內的 `codex_symlink` |
 | `{{GLOBAL_RULES}}` | 可攜式全域核心規則主檔 | `{{SYNC_ROOT}}/core-rules.md` |
 | `{{BACKUP_ROOT}}` | 本機備份位置 | `{{HOME}}` |
+| `{{SECRETS_DIR}}` | 本機 secrets 資料夾 | `{{CODEX_HOME}}/secrets` |
+| `{{LOCAL_BIN}}` | 使用者本機 CLI wrapper 資料夾 | `{{HOME}}` 底下的本機 bin 資料夾 |
+| `{{DOWNLOADS_DIR}}` | 下載資料夾 | `{{HOME}}` 底下的下載資料夾 |
+| `{{LOCAL_FILE_PATH}}` | 使用者貼上的單一檔案或資料夾路徑 | 只作為 placeholder，不寫作者實體路徑 |
 | `{{OBSIDIAN_VAULT}}` | Obsidian vault 絕對路徑 | `{{HOME}}/Obsidian/secondbrain` |
 | `{{OBSIDIAN_PROJECTS}}` | Obsidian 專案庫資料夾 | `{{OBSIDIAN_VAULT}}/專案庫` |
 | `{{NOTEBOOKLM_OUTPUT}}` | NotebookLM 成品下載整理資料夾 | `{{HOME}}/Documents/NotebookLM` |
@@ -33,7 +40,8 @@
 | `{{FIREBASE_PROJECT_ID}}` | Firebase 專案 ID | `my-project-12345` |
 | `{{FIRECRAWL_API_KEY_SECRET_PATH}}` | Firecrawl API key 本機檔案 | `{{CODEX_HOME}}/secrets/firecrawl_api_key`；不寫進 repo |
 | `{{FILESYSTEM_ALLOWED_DIR}}` | Filesystem MCP 最小授權資料夾 | `{{HOME}}/Documents` |
-| `{{MCPVAULT_COMMAND}}` | Obsidian MCP 可執行檔 | `/opt/homebrew/bin/mcpvault` |
+| `{{HOMEBREW_PREFIX}}` | Homebrew 安裝前綴 | 由 `brew --prefix` 取得 |
+| `{{MCPVAULT_COMMAND}}` | Obsidian MCP 可執行檔 | `{{HOMEBREW_PREFIX}}/bin/mcpvault` |
 | `{{ASSISTANT_NAME}}` | 個人助手名稱 | `我的助手` |
 | `{{ASSISTANT_SKILL_NAME}}` | 個人助手 skill 名稱 | `my-assistant` |
 | `{{ASSISTANT_ROOT}}` | 個人助手全域資料層 | `{{SYNC_ROOT}}` |
@@ -41,7 +49,7 @@
 | `{{ASSISTANT_WORKFLOWS}}` | 個人助手跨專案 workflow 草稿 | `{{ASSISTANT_ROOT}}/workflows` |
 | `{{SETUP_PROJECT_NAME}}` | 設定專案在 Obsidian 的名稱 | `codex_installation` |
 
-後續文件若出現範例值，只能作為格式參考；下載者必須替換成自己的實際路徑與帳號。
+後續文件若出現範例值，只能作為格式參考；下載者必須替換成自己的實際路徑與帳號。維護者新增或更新 LazyPack 時，必須把公開文件、內嵌 installer、scripts 與 templates 內的本機路徑改成上表 placeholder，並在完成前掃描確認沒有實體安裝目錄或帳號字串殘留。
 
 ## 安裝主線
 
@@ -87,6 +95,7 @@
 33. [[33-Audio-to-Markdown-Skill-安裝]]
 34. [[34-Python-Tools-全域工具包安裝]]
 35. [[35-Taigi-Teaching-Agent-安裝]]
+36. [[36-Voice-Input-Normalization]]
 
 ## 全域 Skills 安裝總表
 
@@ -122,8 +131,9 @@
 31：youtube-transcript-collector
 32：voxcpm2-voice-cloner
 33：audio-to-md
-34：Python teaching file tools global runtime；不是 skill，安裝 Word / Excel / PPT / PDF / OCR / 圖表 / 影音輔助 Python 套件，並建立跨專案 wrapper；技能 runtime 仍各自放在 `{{CODEX_HOME}}/<skill-name>`
+34：Python teaching file tools global runtime；不是 skill，安裝 Word / Excel / PPT / PDF / OCR / 圖表 / 影音輔助 Python 套件，建立跨專案 wrapper，並在 macOS/Homebrew 上安裝 Tesseract、Ghostscript、Poppler、ffmpeg 等系統工具；技能 runtime 仍各自放在 `{{CODEX_HOME}}/<skill-name>`
 35：Taigi Teaching Agent；不是 skill，安裝 `mathruffian-dot/taigi-teaching-agent` 臺語教材產生器、Python 3.12 專用 venv 與 `taigi-teaching-agent` wrapper
+36：voice-input-normalization；語音輸入文字正規化跨 Agent 安裝，包含 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範已併入 Item 16 `cross-device-sync`
 ```
 
 路徑邊界固定如下：
@@ -132,7 +142,7 @@
 | --- | --- | --- |
 | 可攜式全域核心規則 | `{{GLOBAL_RULES}}`；`{{CODEX_HOME}}/AGENTS.md` 只作為 symlink 入口 | Codex 與其他 AI agent 共用的長期工作規則、路徑、同步規則與操作邊界 |
 | Codex 全域 skills | `{{CODEX_HOME}}/skills`；若跨裝置同步，才 symlink 到 `{{SYNC_ROOT}}/skills` | 需要被 Codex App 全域觸發的 skills |
-| LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...35.md` | 每個序號文件內嵌對應全域 skill、工具或 workflow 的完整安裝內容 |
+| LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...36.md` | 每個序號文件內嵌對應全域 skill、工具或 workflow 的完整安裝內容 |
 | 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每個專案共用的本機 Python 工具 venv 與 wrapper；不放模型、技能 runtime 或 symlink |
 | Arry/個人助手全域入口 | `{{CODEX_HOME}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
 | 個人助手跨專案記憶 | `{{ASSISTANT_ROOT}}/memories` | 個人偏好、踩坑、跨專案可重用決策 |
@@ -182,9 +192,10 @@
 | 28 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
 | 29 | `voxcpm2-voice-cloner` | [[32-VoxCPM2-Voice-Cloner-Skill-安裝]] | 可直接安裝；授權聲音克隆、合成聲音設計、Apple Silicon MPS／CUDA／CPU、本機 runtime／模型快取路由與 consent gate |
 | 30 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；產出文字後 Phase 2 流程相同，由 Codex 做逐段校稿、摘要與重點整理；內嵌完整 Python 腳本、實測紀錄與踩坑 |
-| 31 | Python teaching file tools runtime | [[34-Python-Tools-全域工具包安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools`，供所有專案共用 Word／Excel／PPT／PDF／OCR／圖表／影音輔助 Python 套件與 wrapper；既有 `audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` runtime 維持在 `{{CODEX_HOME}}/<skill-name>` |
+| 31 | Python teaching file tools runtime | [[34-Python-Tools-全域工具包安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools`，供所有專案共用 Word／Excel／PPT／PDF／OCR／圖表／影音輔助 Python 套件與 wrapper；macOS/Homebrew 會安裝 Tesseract、Ghostscript、Poppler、ffmpeg，LibreOffice 可用 `INSTALL_OFFICE_TOOLS=1` 按需安裝；既有 `audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` runtime 維持在 `{{CODEX_HOME}}/<skill-name>` |
 | 32 | Taigi Teaching Agent | [[35-Taigi-Teaching-Agent-安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools/taigi-teaching-agent`、專用 Python 3.12 venv 與 `taigi-teaching-agent` wrapper，用於臺羅標音、臺語 TTS、教材檢核與範例教材生成 |
-| 33 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 33 | Voice Input Normalization | [[36-Voice-Input-Normalization]] | 可直接安裝；包含 `voice-input-normalization`，提供 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範歸 Item 16 `cross-device-sync` |
+| 34 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 

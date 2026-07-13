@@ -12,6 +12,18 @@
 - 已安裝 Codex App。
 - 已決定 `{{CODEX_CONFIG}}`。
 - 已安裝 Node.js / npm。
+- 新電腦先跑最小檢查；缺工具時先告知用途與安裝位置，再取得使用者同意，不要靜默安裝：
+
+```bash
+node --version
+npm --version
+git --version
+python3 --version
+```
+
+- 多數本地 stdio MCP server 透過 `npx` 啟動，沒有 Node.js / npm 會直接失敗。
+- Git 只在安裝腳本需要 clone 或從 GitHub 安裝時才是必要。
+- Python 只在 Python CLI、uv tool 或 CLI-Anything harness 需要時才是必要。
 - 需要 Firecrawl 時，準備 `{{CODEX_HOME}}/secrets/firecrawl_api_key`，權限設為 `600`。
 - 需要 Filesystem MCP 時，先決定最小授權資料夾。
 
@@ -23,6 +35,13 @@ Codex App 使用：
 
 ```text
 {{CODEX_CONFIG}}
+```
+
+也可使用 Codex CLI 的 MCP 指令建立本機 stdio server：
+
+```bash
+codex mcp add <名稱> -- npx -y <MCP套件名>
+codex mcp list
 ```
 
 新增或修改 MCP server 後，通常要重啟 Codex App 或開新對話才會載入。
@@ -113,13 +132,23 @@ Codex App 有對應 plugins / connectors 時，優先使用 plugin，不必走�
 改完 `{{CODEX_CONFIG}}` 後：
 
 1. 重啟 Codex App 或開新對話。
-2. 請 Codex 回報目前可用 MCP / plugin 工具。
-3. Firecrawl：抓取 `https://example.com`。
-4. Filesystem：列出 `{{FILESYSTEM_ALLOWED_DIR}}` 內的一個測試資料夾。
-5. Browser plugin：開啟 `https://example.com` 並截圖。
-6. Google Drive / Gmail / Calendar：各查一個不敏感的測試項目。
+2. 若使用 CLI 設定，先跑 `codex mcp list`。
+3. 請 Codex 回報目前可用 MCP / plugin 工具。
+4. Firecrawl：抓取 `https://example.com`。
+5. Filesystem：列出 `{{FILESYSTEM_ALLOWED_DIR}}` 內的一個測試資料夾。
+6. Browser plugin：開啟 `https://example.com` 並截圖。
+7. Google Drive / Gmail / Calendar：各查一個不敏感的測試項目。
 
 若任何一項失敗，先檢查 command 絕對路徑、API key、登入狀態與 Codex 是否已重啟。
+
+## 跨系統 MCP 設定坑
+
+- Codex App 使用 TOML；不要直接 symlink 或照貼 Claude、AntiGravity、OpenCode 的 JSON 設定檔。
+- JSON 設定檔不能有註解或多餘逗號；若你正在轉寫其他 Agent 的範例，先轉成 Codex TOML。
+- Windows 路徑在 JSON 中要用 `C:/path` 或 `C:\\path`；單一 `\` 會破壞 JSON。Codex TOML 中也應避免未跳脫的反斜線。
+- Claude Code 在 Windows 原生環境啟動 `npx` stdio MCP 時常需要 `cmd /c`；這是 Claude 的格式，不要直接套進 Codex TOML。
+- ChatGPT App 的官方 Apps / Plugins 入口可能改名；若介面和文件不同，以目前 App UI 或官方文件為準。
+- 如果 MCP 裝太多造成回應變慢或工具選擇混亂，停用本專案不需要的 MCP，只保留當前任務需要的工具。
 
 ## npm cache 權限修正
 
@@ -166,7 +195,7 @@ args = ["-lc", "NPM_CONFIG_CACHE=/private/tmp/firecrawl-mcp-cache FIRECRAWL_API_
 
 本節會安裝：`heptabase-cli`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `~/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
 ```bash
 set -e
@@ -282,7 +311,7 @@ If it still fails, ask the user to make sure the desktop app has CLI enabled at
 `Settings > AI Features`.
 
 If you want a persistent `workspace-write` setup, ask the user to add this to
-`~/.codex/config.toml`:
+`{{CODEX_HOME}}/config.toml`:
 
 ```toml
 [sandbox_workspace_write]
