@@ -4,13 +4,13 @@
 
 專案名稱：codex_installation
 專案用途：Codex 安裝、連線、工作模式與專案初始化設定。
-主要工作目錄：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation`
+主要工作目錄：`{{SETUP_REPO}}`
 GitHub repo：`icestone0128/codex_installation`（Public）
 預設 branch：main
 
 ## Obsidian 對應筆記
 
-Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain`
+Obsidian vault：`{{OBSIDIAN_VAULT}}`
 專案駕駛艙：`專案庫/codex_installation/專案工作流程.md`
 收工時優先更新：同上
 
@@ -18,7 +18,7 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 
 ## 工作桌 + 三個家
 
-- 工作桌：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation`
+- 工作桌：`{{SETUP_REPO}}`
 - GitHub：`icestone0128/codex_installation`（Public）
 - Obsidian：主要 vault + `專案庫/codex_installation/專案工作流程.md`
 - Firebase：`codex-4e80b`
@@ -43,38 +43,38 @@ Obsidian vault：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gm
 
 全域 Skill 同步：
 
-- 全域 skills 預設位置：`/Users/arrywu/.codex/skills`
-- 目前 `/Users/arrywu/.codex/skills` 是 symlink，實體位置在 `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`
-- Skill 路徑採白名單：全域只使用 `/Users/arrywu/.codex/skills`，專案本地只使用 `<project-root>/000_Agent/skills`；不建立或使用其他工具的 skill 路徑。
-- 建立、擷取、轉換、更新、改名或驗證自訂 skill 時，一律先使用 `/Users/arrywu/.codex/skills/codex-skill-creator`；內建 `skill-creator` 只作為唯讀輔助參考。
+- 全域 skills 預設位置：`{{CODEX_HOME}}/skills`
+- 目前 `{{CODEX_HOME}}/skills` 是 symlink，實體位置在 `{{SYNC_ROOT}}/skills`
+- Skill 路徑採白名單：全域只使用 `{{CODEX_HOME}}/skills`，專案本地只使用 `<project-root>/000_Agent/skills`；不建立或使用其他工具的 skill 路徑。
+- 建立、擷取、轉換、更新、改名或驗證自訂 skill 時，一律先使用 `{{CODEX_HOME}}/skills/codex-skill-creator`；內建 `skill-creator` 只作為唯讀輔助參考。
 - Obsidian 同步索引：`專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
-- 全域 skill 的主版本是 symlink 實體目錄 `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/skills`；LazyPack 不是主版本，而是 repo 內可公開 push、可讓使用者下載安裝的自含式可攜化版本。
+- 全域 skill 的主版本是 symlink 實體目錄 `{{SYNC_ROOT}}/skills`；LazyPack 不是主版本，而是 repo 內可公開 push、可讓使用者下載安裝的自含式可攜化版本。
 - 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `200_Reference/lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容覆蓋所有應公開安裝的全域 skills、必要 references/scripts/assets 與安裝說明。
 - LazyPack 允許和全域 skills 目錄結構不同：可用一份序號文件包多個 skills，也可包含 MCP、plugin、Obsidian、GitHub、Firebase、NotebookLM 等非 skill 安裝項目；但 README 的安裝總表必須清楚標出哪些是完整內嵌安裝、哪些只是外部依賴或必裝檢查。
 - 個人專用或含個人記憶/身份設定的全域 skill 不放入公開 LazyPack；目前 `future-coach` 是 Arry 個人專用 skill，不公開安裝，也不算 LazyPack 缺口。
-- 同步後要實際比對 `/Users/arrywu/.codex/skills`、`200_Reference/lazy-pack/` 對應序號文件內嵌的 skill 名稱、LazyPack README 安裝總表與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
+- 同步後要實際比對 `{{CODEX_HOME}}/skills`、`200_Reference/lazy-pack/` 對應序號文件內嵌的 skill 名稱、LazyPack README 安裝總表與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
 - 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
 
 Arry 助手 AI 分身資料層：
 
 - AI 分身名稱：Arry 助手。
 - Arry 助手 Obsidian 同步主版本只限 Google Drive `codex_symlink` 內的 `knowledge/` 與 `memories/` 根目錄第一層檔案，不放在 public repo：
-  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/knowledge`
-  - `/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink/memories`
+  - `{{SYNC_ROOT}}/knowledge`
+  - `{{SYNC_ROOT}}/memories`
 - Arry 助手同步採用和 LazyPack 相同的「主版本 + Obsidian 實體鏡像 + 實際 diff 驗證」模型：
   - 主版本：上述 `knowledge/` 完整目錄與 `memories/` 根目錄第一層檔案；不是整個 `codex_symlink`。
-  - Obsidian 實體鏡像：`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/Arry 助手`
+  - Obsidian 實體鏡像：`{{OBSIDIAN_PROJECTS}}/{{SETUP_PROJECT_NAME}}/Arry 助手`
   - 收工同步義務由本檔與全域 `core-rules.md` 記憶。
   - 同步後只保留 `diff -qr` 作為一致性驗證方式；`knowledge/` 比對完整目錄，`memories/` 只比對第一層檔案清單與內容。
   - 不使用 Obsidian symlink 當同步替代品；同步完成後 Obsidian `Arry 助手/` 必須是只包含完整 `knowledge/` 與只含第一層檔案的 `memories/` 的實體鏡像資料夾，且與主版本一致。
 - 本 repo 的 `000_Agent/` 只保留指向說明，不存放真實個人記憶或偏好。
-- Codex 全域規則唯一實體主版本為 `codex_symlink/core-rules.md`；`/Users/arrywu/.codex/AGENTS.md` 只是指向它的 symlink，不再使用或重建 `codex_symlink/agents/AGENTS.md`。
+- Codex 全域規則唯一實體主版本為 `codex_symlink/core-rules.md`；`{{CODEX_HOME}}/AGENTS.md` 只是指向它的 symlink，不再使用或重建 `codex_symlink/agents/AGENTS.md`。
 - Arry 助手是 Codex App 與 AntiGravity 設定，不使用其他 AI 編輯器專用的規則檔（例如舊版 `CLAUDE.md` 等）或其專屬路徑。
-- 可被所有專案呼叫的部分放在全域 skill：`/Users/arrywu/.codex/skills/arry-assistant/SKILL.md`。
+- 可被所有專案呼叫的部分放在全域 skill：`{{CODEX_HOME}}/skills/arry-assistant/SKILL.md`。
 - Arry 助手本身是全域入口 skill；每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷新 skill 歸屬。
 - 任何自訂 skill 的建立與維護都必須由全域 `codex-skill-creator` 工作流處理。
-- 只有全域 Codex skills 才使用 `/Users/arrywu/.codex/skills`，此路徑目前指向 Google Drive `codex_symlink/skills`。
+- 只有全域 Codex skills 才使用 `{{CODEX_HOME}}/skills`，此路徑目前指向 Google Drive `codex_symlink/skills`。
 - Arry 助手跨專案記憶與個人偏好放在 `codex_symlink/memories/MEMORY.md`。
 - Arry 助手跨專案 workflow 草稿放在 `codex_symlink/workflows/`。
 - 任何 skill 不論全域或專案本地，都要做成可攜式版本：全域 skill 以 `codex_symlink/skills` 為主版本，並將可公開安裝內容內嵌到 repo `200_Reference/lazy-pack/` 對應序號文件、同步 Obsidian 全域 Skills 索引與 Obsidian 懶人包鏡像；專案 skill 保留完整 package 在該專案 `000_Agent/skills/` 並記錄到專案駕駛艙。
@@ -85,7 +85,7 @@ Arry 助手 AI 分身資料層：
 新專案初始化時：
 
 - 使用 `project-init-sync` 流程。
-- 以 `200_Reference/lazy-pack/10-專案初始化工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `/Users/arrywu/.codex/AGENTS.md`。
+- 以 `200_Reference/lazy-pack/10-專案初始化工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `{{CODEX_HOME}}/AGENTS.md`。
 
 ## 主要檔案
 
@@ -126,7 +126,7 @@ Arry 助手 AI 分身資料層：
 
 ### 可攜化與安全指南
 
-- **設定檔範本**：`200_Reference/templates/codex-config.template.toml` 作為安全設定檔範本，使用佔位符遮蔽金鑰，不直接同步真實的 `~/.codex/config.toml`。
+- **設定檔範本**：`200_Reference/templates/codex-config.template.toml` 作為安全設定檔範本，使用佔位符遮蔽金鑰，不直接同步真實的 `{{CODEX_HOME}}/config.toml`。
 - **安全邊界**：
   - 不提交 `.env`、API 金鑰、Token、密碼或 Admin 憑證。
   - 不在 Repo 或 Obsidian 中寫入學員真實姓名或敏感個資。

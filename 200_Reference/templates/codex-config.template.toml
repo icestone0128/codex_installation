@@ -2,12 +2,12 @@
 #
 # Purpose:
 # - Keep repeatable Codex preferences visible for a new device.
-# - Avoid syncing the real ~/.codex/config.toml directly.
+# - Avoid syncing the real {{CODEX_HOME}}/config.toml directly.
 # - Keep secrets, auth files, cache paths, sqlite files, logs, sessions, and
 #   machine-specific plugin cache state local to each device.
 #
 # Install pattern:
-# 1. Copy this template to ~/.codex/config.toml on the target device.
+# 1. Copy this template to {{CODEX_HOME}}/config.toml on the target device.
 # 2. Replace all {{PLACEHOLDER}} values with paths that exist on that device.
 # 3. Add secrets through local secret files, environment variables, or managed
 #    connector login flows. Do not commit real secret values.

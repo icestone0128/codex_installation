@@ -222,18 +222,18 @@ For macOS / Linux / WSL, use a local secret file and load it into the shell
 environment:
 
 ```bash
-mkdir -p "$HOME/.codex/secrets"
-chmod 700 "$HOME/.codex/secrets"
-printf "%s" "<paste-key-locally-not-in-chat>" > "$HOME/.codex/secrets/gemini_api_key"
-chmod 600 "$HOME/.codex/secrets/gemini_api_key"
+mkdir -p "${SECRETS_DIR}"
+chmod 700 "${SECRETS_DIR}"
+printf "%s" "<paste-key-locally-not-in-chat>" > "${SECRETS_DIR}/gemini_api_key"
+chmod 600 "${SECRETS_DIR}/gemini_api_key"
 ```
 
 Then add this to the user's shell startup file if it is appropriate for their
 environment:
 
 ```bash
-if [ -r "$HOME/.codex/secrets/gemini_api_key" ]; then
-  export GEMINI_API_KEY="$(cat "$HOME/.codex/secrets/gemini_api_key")"
+if [ -r "${SECRETS_DIR}/gemini_api_key" ]; then
+  export GEMINI_API_KEY="$(cat "${SECRETS_DIR}/gemini_api_key")"
 fi
 ```
 
@@ -369,17 +369,17 @@ Bad places:
 Store:
 
 ```bash
-mkdir -p "$HOME/.codex/secrets"
-chmod 700 "$HOME/.codex/secrets"
-printf "%s" "<paste-key-locally-not-in-chat>" > "$HOME/.codex/secrets/gemini_api_key"
-chmod 600 "$HOME/.codex/secrets/gemini_api_key"
+mkdir -p "${SECRETS_DIR}"
+chmod 700 "${SECRETS_DIR}"
+printf "%s" "<paste-key-locally-not-in-chat>" > "${SECRETS_DIR}/gemini_api_key"
+chmod 600 "${SECRETS_DIR}/gemini_api_key"
 ```
 
 Load:
 
 ```bash
-if [ -r "$HOME/.codex/secrets/gemini_api_key" ]; then
-  export GEMINI_API_KEY="$(cat "$HOME/.codex/secrets/gemini_api_key")"
+if [ -r "${SECRETS_DIR}/gemini_api_key" ]; then
+  export GEMINI_API_KEY="$(cat "${SECRETS_DIR}/gemini_api_key")"
 fi
 ```
 

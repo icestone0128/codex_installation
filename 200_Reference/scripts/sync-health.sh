@@ -2,10 +2,10 @@
 set -u
 
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
-SYNC_ROOT="${SYNC_ROOT:-/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_symlink}"
-SETUP_REPO="${SETUP_REPO:-/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/codex_installation}"
+: "${SYNC_ROOT:?Set SYNC_ROOT to your portable sync root before running this script.}"
+: "${SETUP_REPO:?Set SETUP_REPO to your setup repo before running this script.}"
 LAZYPACK_ROOT="${LAZYPACK_ROOT:-$SETUP_REPO/200_Reference/lazy-pack}"
-OBSIDIAN_LAZYPACK="${OBSIDIAN_LAZYPACK:-/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/懶人包}"
+: "${OBSIDIAN_LAZYPACK:?Set OBSIDIAN_LAZYPACK to your LazyPack mirror before running this script.}"
 
 failures=0
 warnings=0
@@ -28,7 +28,7 @@ check_path() {
   if [ -e "$1" ]; then
     pass "$2"
   else
-    fail "$2 ($1 missing)"
+    fail "$2 (missing)"
   fi
 }
 
@@ -38,7 +38,7 @@ check_symlink_target() {
   local label="$3"
 
   if [ ! -L "$link_path" ]; then
-    fail "$label ($link_path is not a symlink)"
+    fail "$label (not a symlink)"
     return
   fi
 
@@ -47,16 +47,16 @@ check_symlink_target() {
   if [ "$actual" = "$expected" ]; then
     pass "$label"
   else
-    fail "$label (expected $expected, got $actual)"
+    fail "$label (target mismatch)"
   fi
 }
 
 printf 'Codex sync health check\n'
-printf 'CODEX_HOME=%s\n' "$CODEX_HOME"
-printf 'SYNC_ROOT=%s\n' "$SYNC_ROOT"
-printf 'SETUP_REPO=%s\n' "$SETUP_REPO"
-printf 'LAZYPACK_ROOT=%s\n' "$LAZYPACK_ROOT"
-printf 'OBSIDIAN_LAZYPACK=%s\n\n' "$OBSIDIAN_LAZYPACK"
+printf 'CODEX_HOME=<set>\n'
+printf 'SYNC_ROOT=<set>\n'
+printf 'SETUP_REPO=<set>\n'
+printf 'LAZYPACK_ROOT=<set>\n'
+printf 'OBSIDIAN_LAZYPACK=<set>\n\n'
 
 check_path "$SYNC_ROOT/core-rules.md" "portable core-rules exists"
 check_symlink_target "$CODEX_HOME/AGENTS.md" "$SYNC_ROOT/core-rules.md" "Codex AGENTS.md points to portable core-rules"

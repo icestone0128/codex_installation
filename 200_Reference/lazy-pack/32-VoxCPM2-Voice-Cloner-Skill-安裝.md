@@ -163,7 +163,7 @@ The wrapper requires `--consent` for real-voice profile creation and cloning. Do
 ## Local Paths
 
 - Skill package: `{{CODEX_HOME}}/skills/voxcpm2-voice-cloner`
-- Runtime data: `${VOXCPM2_HOME:-$HOME/.codex/voxcpm2-voice-cloner}`. For Arry, keep this as a local real folder, not a symlink to Google Drive, so `.venv`, `model-cache`, `recordings`, and `output` stay fast on the current machine.
+- Runtime data: `${VOXCPM2_HOME:-${CODEX_HOME}/voxcpm2-voice-cloner}`. For Arry, keep this as a local real folder, not a symlink to Google Drive, so `.venv`, `model-cache`, `recordings`, and `output` stay fast on the current machine.
 - Python environment: `$VOXCPM2_HOME/.venv`
 - Voice profiles: `$VOXCPM2_HOME/voices/<voice-name>/`
 - Outputs: `$VOXCPM2_HOME/output/`
@@ -171,7 +171,7 @@ The wrapper requires `--consent` for real-voice profile creation and cloning. Do
 - Optional reusable profile root: `$VOXCPM2_VOICES_DIR/<voice-name>/`
 - Optional project output root: `$VOXCPM2_OUTPUT_DIR/`
 
-Never copy model weights, generated audio, or the runtime virtual environment into LazyPack, Obsidian, Git, the global skill package, or Google Drive sync folders. For Arry, the canonical runtime is the local real folder `$HOME/.codex/voxcpm2-voice-cloner`; do not point it at `codex_symlink/runtimes`. Reusable personal voice profiles may live in the user's private assistant asset layer; for Arry, the canonical profile folder is `codex_symlink/knowledge/arry-voice-profiles/Arry/`. Generated outputs default to the local runtime `output/` unless `$VOXCPM2_OUTPUT_DIR` is explicitly set for a project.
+Never copy model weights, generated audio, or the runtime virtual environment into LazyPack, Obsidian, Git, the global skill package, or Google Drive sync folders. For Arry, the canonical runtime is the local real folder `${CODEX_HOME}/voxcpm2-voice-cloner`; do not point it at `codex_symlink/runtimes`. Reusable personal voice profiles may live in the user's private assistant asset layer; for Arry, the canonical profile folder is `codex_symlink/knowledge/arry-voice-profiles/Arry/`. Generated outputs default to the local runtime `output/` unless `$VOXCPM2_OUTPUT_DIR` is explicitly set for a project.
 
 - **自適應專案收納 (Adaptive Project Path Routing)**: 當在標準四盒專案（含有 `100_Todo/`）下執行時：
   - **過程素材與工程** 應置於相對路徑 `100_Todo/drafts/voxcpm2-voice-cloner/`。
@@ -195,8 +195,8 @@ The setup uses `uv`, creates an isolated Python 3.12 environment, and installs t
 Set reusable paths:
 
 ```bash
-SKILL="${CODEX_HOME:-$HOME/.codex}/skills/voxcpm2-voice-cloner"
-HOME_DIR="${VOXCPM2_HOME:-$HOME/.codex/voxcpm2-voice-cloner}"
+SKILL="${CODEX_HOME:-${CODEX_HOME}}/skills/voxcpm2-voice-cloner"
+HOME_DIR="${VOXCPM2_HOME:-${CODEX_HOME}/voxcpm2-voice-cloner}"
 PY="$HOME_DIR/.venv/bin/python"
 TOOL="$SKILL/scripts/voice_cloner.py"
 ```
@@ -204,8 +204,8 @@ TOOL="$SKILL/scripts/voice_cloner.py"
 For Arry's local setup, ensure the runtime path is a real local directory before running setup or generation:
 
 ```bash
-mkdir -p "$HOME/.codex/voxcpm2-voice-cloner"
-test ! -L "$HOME/.codex/voxcpm2-voice-cloner"
+mkdir -p "${CODEX_HOME}/voxcpm2-voice-cloner"
+test ! -L "${CODEX_HOME}/voxcpm2-voice-cloner"
 ```
 
 Route reusable profiles and project outputs when needed:
@@ -323,7 +323,7 @@ The source repo's PowerShell, BAT, Intel XPU patch, and hard-coded Windows paths
 ## Runtime Layout
 
 ```text
-~/.codex/voxcpm2-voice-cloner/
+{{CODEX_HOME}}/voxcpm2-voice-cloner/
 ├── .venv/
 ├── model-cache/
 ├── voices/
@@ -340,7 +340,7 @@ The setup script leaves `uv` on its default cache path, normally `~/.cache/uv`. 
 For Arry, the runtime root must stay on the current machine as a real local folder:
 
 ```text
-~/.codex/voxcpm2-voice-cloner/
+{{CODEX_HOME}}/voxcpm2-voice-cloner/
 ├── .venv/
 ├── model-cache/
 ├── recordings/
@@ -348,7 +348,7 @@ For Arry, the runtime root must stay on the current machine as a real local fold
 └── output/
 ```
 
-Do not symlink `~/.codex/voxcpm2-voice-cloner` to `codex_symlink/runtimes` or any Google Drive folder. Syncing `.venv`, model weights, or generated output through Google Drive makes generation and imports slow. On another computer, create that computer's own local runtime and model cache; keep only reusable personal voice profiles in the private assistant asset layer.
+Do not symlink `{{CODEX_HOME}}/voxcpm2-voice-cloner` to `codex_symlink/runtimes` or any Google Drive folder. Syncing `.venv`, model weights, or generated output through Google Drive makes generation and imports slow. On another computer, create that computer's own local runtime and model cache; keep only reusable personal voice profiles in the private assistant asset layer.
 
 ## Profile And Output Routing
 
@@ -394,7 +394,7 @@ Every listed voice must already exist as a complete authorized profile.
 - `cpu`: slow fallback.
 - `xpu`: retained for compatible Intel environments; the source repo's Windows patch is not bundled into the Codex macOS path.
 
-Codex workspace sandboxing can hide Metal and make `torch.backends.mps.is_available()` return false. This setup adds narrow command rules for the fixed VoxCPM2 runtime interpreter and wrapper scripts. Run `doctor` and model generation through that approved external entry; do not allow arbitrary Python executables or the whole `~/.codex` tree.
+Codex workspace sandboxing can hide Metal and make `torch.backends.mps.is_available()` return false. This setup adds narrow command rules for the fixed VoxCPM2 runtime interpreter and wrapper scripts. Run `doctor` and model generation through that approved external entry; do not allow arbitrary Python executables or the whole `{{CODEX_HOME}}` tree.
 
 ## Troubleshooting
 
@@ -443,7 +443,7 @@ The source README states that its scripts are MIT-licensed and VoxCPM2 is Apache
 ## Codex Conversion
 
 - Replaced Windows BAT/PowerShell setup with `uv` and an isolated Python 3.12 runtime.
-- Replaced hard-coded project-relative voices and outputs with private local runtime state under `~/.codex/voxcpm2-voice-cloner`.
+- Replaced hard-coded project-relative voices and outputs with private local runtime state under `{{CODEX_HOME}}/voxcpm2-voice-cloner`.
 - Replaced CUDA/XPU/CPU-only detection with official `auto` device routing, including Apple Silicon MPS.
 - Replaced hard-coded dialogue speakers and XPU device with JSON-defined dialogue and device selection.
 - Added `agents/openai.yaml`, Codex metadata triggers, deterministic wrappers, validation, and LazyPack/Obsidian synchronization.
@@ -466,7 +466,7 @@ cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh" <<'C
 #!/usr/bin/env bash
 set -euo pipefail
 
-RUNTIME_HOME="${VOXCPM2_HOME:-$HOME/.codex/voxcpm2-voice-cloner}"
+RUNTIME_HOME="${VOXCPM2_HOME:-${CODEX_HOME}/voxcpm2-voice-cloner}"
 VENV="$RUNTIME_HOME/.venv"
 
 if ! command -v uv >/dev/null 2>&1; then

@@ -40432,7 +40432,7 @@ The capture pipeline downloads the site and extracts structured data for the res
 
 No API keys required for the base capture. However, before running, ask the user:
 
-> "For the best results, it is recommended to set a Gemini API key — it gives me AI-powered descriptions of every captured image, which helps me choose the right assets for each scene. It costs about $0.001 per image. You can skip this if you want, but the video quality will be better with it. To set it up safely: store the key locally at `~/.codex/secrets/gemini_api_key` with file mode `600`, then export `GEMINI_API_KEY` from that file only for the capture command. You can get a free key at ai.google.dev."
+> "For the best results, it is recommended to set a Gemini API key — it gives me AI-powered descriptions of every captured image, which helps me choose the right assets for each scene. It costs about $0.001 per image. You can skip this if you want, but the video quality will be better with it. To set it up safely: store the key locally at `{{SECRETS_DIR}}/gemini_api_key` with file mode `600`, then export `GEMINI_API_KEY` from that file only for the capture command. You can get a free key at ai.google.dev."
 
 If the user provides the key or already has one set, proceed. If they skip it, proceed anyway — the capture works without it, but `asset-descriptions.md` will have DOM-context descriptions only (position, size, alt text) instead of AI vision descriptions.
 

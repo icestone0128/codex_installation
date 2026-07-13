@@ -19,6 +19,7 @@ IMPORTS = [
     "matplotlib",
     "qrcode",
     "markitdown",
+    "mammoth",
     "ocrmypdf",
     "edge_tts",
     "yt_dlp",
@@ -42,7 +43,7 @@ def main() -> int:
         print("  OK all core imports")
 
     print("\nSystem tools:")
-    for tool in ["tesseract", "pdftoppm", "ffmpeg", "soffice"]:
+    for tool in ["tesseract", "gs", "pdftoppm", "ffmpeg", "soffice"]:
         path = shutil.which(tool)
         print(f"  {'OK' if path else 'MISSING'} {tool}: {path or '-'}")
 

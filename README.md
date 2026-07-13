@@ -38,6 +38,6 @@
 
 專案進度與工作流程放在：
 
-`/Users/arrywu/Library/CloudStorage/GoogleDrive-icestone0128@gmail.com/我的雲端硬碟/secondbrain/專案庫/codex_installation/專案工作流程.md`
+`{{OBSIDIAN_PROJECTS}}/{{SETUP_PROJECT_NAME}}/專案工作流程.md`
 
 Obsidian 同步與鏡像對應：請參照 `AGENTS.md` 中的專屬同步規則。

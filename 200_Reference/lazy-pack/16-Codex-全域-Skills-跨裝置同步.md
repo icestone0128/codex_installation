@@ -9,7 +9,7 @@
 
 ## 這份文件會做什麼
 
-這份懶人包只處理 **Codex 全域 skills** 的跨裝置同步，不處理個人助手或專案本地的 `000_Agent/skills`。
+這份懶人包主要處理 **Codex 全域 skills** 的跨裝置同步，也負責把跨 Agent 全域規則、`core-rules.md`、`AGENTS.md` 入口與其他 AI Agent 設定指南轉成安全可攜的 Codex / AntiGravity 相容模型；不處理專案本地的 `000_Agent/skills`。
 
 它會把：
 
@@ -31,13 +31,13 @@
 {{SYNC_ROOT}}/core-rules.md
 ```
 
-`{{CODEX_HOME}}/AGENTS.md` (或 AntiGravity 的 `~/.gemini/config/AGENTS.md`) 只作為全域入口 symlink，指向 `{{SYNC_ROOT}}/core-rules.md`。不要再建立或維護 `{{SYNC_ROOT}}/agents/AGENTS.md`。
+`{{CODEX_HOME}}/AGENTS.md` (或 AntiGravity 的 `{{GEMINI_CONFIG}}/AGENTS.md`) 只作為全域入口 symlink，指向 `{{SYNC_ROOT}}/core-rules.md`。不要再建立或維護 `{{SYNC_ROOT}}/agents/AGENTS.md`。
 
 路徑邊界：
 
-- `{{CODEX_HOME}}/skills`：Codex 全域 skills (在 AntiGravity 為 `~/.gemini/config/plugins/codex/skills`)；可 symlink 到 `{{SYNC_ROOT}}/skills`。
+- `{{CODEX_HOME}}/skills`：Codex 全域 skills (在 AntiGravity 為 `{{GEMINI_CONFIG}}/plugins/codex/skills`)；可 symlink 到 `{{SYNC_ROOT}}/skills`。
 - `{{SYNC_ROOT}}/core-rules.md`：可攜式全域核心規則主檔；其他 AI agent 也應讀這一份。
-- `{{CODEX_HOME}}/AGENTS.md`：Codex 全域規則入口 (在 AntiGravity 為 `~/.gemini/config/AGENTS.md`)；可 symlink 到 `{{SYNC_ROOT}}/core-rules.md`。
+- `{{CODEX_HOME}}/AGENTS.md`：Codex 全域規則入口 (在 AntiGravity 為 `{{GEMINI_CONFIG}}/AGENTS.md`)；可 symlink 到 `{{SYNC_ROOT}}/core-rules.md`。
 - `{{SYNC_ROOT}}/memories`、`{{SYNC_ROOT}}/workflows`、`{{SYNC_ROOT}}/knowledge`：個人助手全域資料層；不 symlink 到 `{{CODEX_HOME}}/skills`。
 - `<project-root>/000_Agent/skills`：單一專案本地 skill；不 symlink 到 `{{CODEX_HOME}}/skills`。
 
@@ -54,7 +54,7 @@
 - MCP、plugin、hooks、commands、subtask / delegation 設定是否只做格式轉換，不直接共用不相容設定檔。
 - session、logs、auth、cache、token、shell snapshot 是否明確排除。
 
-這個流程預設只輸出健檢報告，不會直接改檔。詳細檢查表已內嵌在 `cross-device-sync/references/multi-agent-compatibility.md`。
+這個流程預設只輸出健檢報告，不會直接改檔。詳細檢查表已內嵌在 `cross-device-sync/references/multi-agent-compatibility.md`；跨 Agent 全域設定規格放在 `cross-device-sync/references/global-settings-spec.md`。
 
 ## 不會同步的東西
 
@@ -75,12 +75,27 @@
 | 變數 | 說明 | 範例 |
 |---|---|---|
 | `{{CODEX_HOME}}` | Codex 設定資料夾 | `{{CODEX_HOME}}` |
+| `{{GEMINI_CONFIG}}` | AntiGravity / Gemini 設定資料夾 | `{{GEMINI_CONFIG}}` |
 | `{{SETUP_REPO}}` | 這份懶人包所在專案 | `{{SETUP_REPO}}` |
-| `{{SYNC_ROOT}}` | 雲端同步母資料夾 | `{{HOME}}/Library/CloudStorage/GoogleDrive-alex@example.com/My Drive/codex_symlink` |
+| `{{SYNC_ROOT}}` | 雲端同步母資料夾 | 你的雲端同步資料夾中的 `codex_symlink` |
 | `{{GLOBAL_RULES}}` | 可攜式全域核心規則主檔 | `{{SYNC_ROOT}}/core-rules.md` |
 | `{{BACKUP_ROOT}}` | 本機備份位置 | `{{HOME}}` |
+| `{{SECRETS_DIR}}` | 本機 secrets 資料夾 | `{{CODEX_HOME}}/secrets` |
+| `{{LOCAL_BIN}}` | 使用者本機 CLI wrapper 資料夾 | 你的本機 bin 資料夾 |
+| `{{OBSIDIAN_VAULT}}` | Obsidian vault | 你的 Obsidian vault |
+| `{{LOCAL_FILE_PATH}}` | 使用者貼上的單一檔案或資料夾路徑 | 只作為 placeholder |
 
 請先把上表變數替換成自己的實際路徑；不要直接複製其他人的本機路徑。
+
+## LazyPack 公開打包與 placeholder 規則
+
+當你把全域 skill、跨 Agent 規則、安裝腳本或工具設定打包成 LazyPack 時，公開內容必須保持可攜式：
+
+- 不展示作者本機實體安裝目錄、雲端帳號掛載路徑、Obsidian vault 真實路徑、工具家目錄或 email 字串。
+- Markdown、README、templates、內嵌 shell / Python installer 都使用 `{{...}}` placeholder。
+- 可執行腳本可以在本機 runtime 計算實際路徑，但一般輸出不列印完整路徑；只顯示 placeholder 或「已設定」狀態。
+- 新增 placeholder 時，同步更新 LazyPack README 的設定表。
+- 完成前掃描公開範圍，確認沒有實體路徑、帳號字串、literal tilde-style config home 或 absolute user-home 範例殘留。
 
 ## Step 1：安裝 cross-device-sync skill
 
@@ -267,7 +282,7 @@ RESULT=<可讀到的自訂 skill 數量與抽測結果>
 
 本節是自含式安裝區塊。這個序號項目會安裝：`cross-device-sync`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `~/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
 ````bash
 set -e
@@ -287,20 +302,20 @@ mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md")"
 cat > "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_42E4C9A28C'
 ---
 name: cross-device-sync
-description: Use when the user asks to set up, audit, repair, or document cross-device synchronization and portability for Codex App configuration, global skills, AGENTS.md rules, shared core-rules.md, Arry Assistant data, Obsidian project cockpits, AI assistant memory, or multi-agent compatibility across Macs, Windows/Linux, Google Drive, iCloud, Dropbox, OneDrive, GitHub backups, or other AI agents.
+description: Use when the user asks to set up, audit, repair, or document cross-device synchronization and portability for Codex App configuration, global skills, AGENTS.md rules, shared core-rules.md, Arry Assistant data, Obsidian project cockpits, AI assistant memory, cross-agent global settings, voice reply rules, speech input assumptions, or multi-agent compatibility across Macs, Windows/Linux, Google Drive, iCloud, Dropbox, OneDrive, GitHub backups, dotfiles/chezmoi, or other AI agents.
 metadata:
   short-description: Plan and verify Codex cross-device portability
 ---
 
 # Cross-Device Sync
 
-Use this skill to help the user make their Codex App setup portable across devices and compatible with other AI agents without binding assistant memory, skills, or rules to one local machine or one vendor-specific app folder.
+Use this skill to help the user make their Codex App setup portable across devices and compatible with other AI agents without binding assistant memory, skills, rules, or global settings to one local machine or one vendor-specific app folder.
 
 This is a Codex App portability workflow. If source material comes from another AI agent ecosystem, do not apply that source literally. In this environment, the default surfaces are:
 
-- Codex config and skills: `$CODEX_HOME`, or `~/.codex` when `$CODEX_HOME` is not set
+- Codex config and skills: `$CODEX_HOME`, or `{{CODEX_HOME}}` when `$CODEX_HOME` is not set
 - Portable global rules: `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`; `$CODEX_HOME/AGENTS.md` may be a symlink entrypoint to that file
-- Custom global skills: `$CODEX_HOME/skills`, or `~/.codex/skills` when `$CODEX_HOME` is not set
+- Custom global skills: `$CODEX_HOME/skills`, or `{{CODEX_HOME}}/skills` when `$CODEX_HOME` is not set
 - Project rules: `AGENTS.md`
 - Optional assistant data-layer root: `ASSISTANT_ROOT`
 - Optional assistant global layer: `ASSISTANT_ROOT`, containing `skills/`, `memories/`, `workflows/`, and `knowledge/`
@@ -316,10 +331,45 @@ This user's current defaults are documented in the root `README.md`; treat them 
 - Do not move, symlink, delete, or overwrite the user's existing Codex config, skills, memories, or Obsidian notes without first showing the concrete plan and getting explicit confirmation.
 - Always make a timestamped backup before any operation that moves files, rewrites symlinks, changes Git remotes, or edits shared assistant memory.
 - Never sync secrets, OAuth tokens, API keys, local credentials, app caches, shell snapshots, or machine-specific state across devices.
-- Treat `~/.codex/auth.json`, `~/.codex/sessions/`, `~/.codex/log/`, SQLite state, caches, and local override config as machine-local; never sync or commit them.
+- Treat `{{CODEX_HOME}}/auth.json`, `{{CODEX_HOME}}/sessions/`, `{{CODEX_HOME}}/log/`, SQLite state, caches, and local override config as machine-local; never sync or commit them.
 - Treat public repos as public. Do not put private backups, credentials, private memory, drafts, or personal logs into tracked project files.
 - Prefer the user's established project folder and knowledge cockpit pattern unless they choose another sync route.
 - For other AI agents, share durable Markdown assets such as `core-rules.md`, documented workflows, and portable skill packages; do not symlink incompatible app config files together.
+- Convert external agent global-setting guides into this portability model instead of creating a separate global-settings skill.
+
+## LazyPack Public Packaging Policy
+
+Use this route whenever the user asks to package, publish, mirror, or update a LazyPack item, portable installer, public README, embedded skill installer, setup script, template, or cross-agent installation guide.
+
+Public packaging rules:
+
+1. Never expose the author's real local installation directories, cloud-account mount paths, vault paths, user names, email addresses, repository checkout paths, or machine-specific tool homes in public LazyPack content.
+2. Use placeholders in public Markdown, embedded shell/Python scripts, templates, README tables, and Obsidian mirrors. Common placeholders include:
+   - `{{HOME}}`
+   - `{{CODEX_HOME}}`
+   - `{{GEMINI_CONFIG}}`
+   - `{{SYNC_ROOT}}`
+   - `{{GLOBAL_RULES}}`
+   - `{{SETUP_REPO}}`
+   - `{{ANTIGRAVITY_SETUP_REPO}}`
+   - `{{OBSIDIAN_VAULT}}`
+   - `{{OBSIDIAN_PROJECTS}}`
+   - `{{SECRETS_DIR}}`
+   - `{{LOCAL_BIN}}`
+   - `{{DOWNLOADS_DIR}}`
+   - `{{LOCAL_FILE_PATH}}`
+3. In executable installers, prefer environment variables with safe defaults over hardcoded public paths. Runtime code may compute a real local path internally, but it must not print the full path unless the user is running a private local diagnostic and has asked for it.
+4. Public examples must be provider-neutral. Use descriptions such as "your cloud-synced folder" instead of embedding a real Google Drive, iCloud, Dropbox, OneDrive, or account-specific path.
+5. Any LazyPack item that introduces placeholders must either link to the LazyPack README placeholder table or include a focused local table for the new variables.
+6. Before finishing, scan the public packaging scope for real-path residue. At minimum check LazyPack Markdown, public README files, setup scripts, templates, and embedded installer code for:
+   - real user home paths
+   - cloud account identifiers
+   - email-address mount paths
+   - literal tilde-style Codex or Gemini config homes shown as public install instructions instead of placeholders
+   - absolute user-home examples
+7. When reporting completion for public packaging work, explain the placeholders used, but do not expand them to the author's actual local paths.
+
+Private project notes may record verification results, but public LazyPack content must remain portable and machine-neutral.
 
 ## Workflow
 
@@ -328,10 +378,10 @@ This user's current defaults are documented in the root `README.md`; treat them 
    - Secondbrain `AGENTS.md` if Obsidian notes are involved
    - `arry-assistant` skill if Arry Assistant data is involved
 2. Inventory current state before proposing changes:
-   - `$CODEX_HOME/config.toml` or `~/.codex/config.toml`
+   - `$CODEX_HOME/config.toml` or `{{CODEX_HOME}}/config.toml`
    - `$CODEX_HOME/AGENTS.md` and its symlink target; if portability is intended, the target should be `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`
-   - `$CODEX_HOME/skills` or `~/.codex/skills`
-   - `$CODEX_HOME/memories` or `~/.codex/memories` if memory portability is in scope
+   - `$CODEX_HOME/skills` or `{{CODEX_HOME}}/skills`
+   - `$CODEX_HOME/memories` or `{{CODEX_HOME}}/memories` if memory portability is in scope
    - project `AGENTS.md` files that should travel with each project
    - relevant Obsidian cockpit notes
 3. Interview briefly in Traditional Chinese:
@@ -354,8 +404,8 @@ This user's current defaults are documented in the root `README.md`; treat them 
    - ignored files are actually ignored
    - no secrets or machine-local state are staged
    - Codex skill frontmatter still validates if skills were moved or created
-   - `$CODEX_HOME/skills` or `~/.codex/skills` remains the only global skill entry path, and project-local skills remain under `<project-root>/000_Agent/skills`
-7. Report exact paths changed, backup path, verification result, and whether Codex needs a restart or new conversation.
+   - `$CODEX_HOME/skills` or `{{CODEX_HOME}}/skills` remains the only global skill entry path, and project-local skills remain under `<project-root>/000_Agent/skills`
+7. Report exact paths changed for private local work. For public LazyPack or portable packaging work, report placeholder names and verification results without expanding the author's real local paths.
 
 ## Multi-Agent Compatibility Audit
 
@@ -372,13 +422,27 @@ Default behavior:
 
 Read `references/multi-agent-compatibility.md` for the detailed checklist and report template.
 
+## Cross-Agent Global Settings
+
+Use this route when the user provides an AI Agent global settings guide, asks where a global rule belongs, wants Codex / Claude Code / OpenCode / AntiGravity-Gemini to share policy safely, or mentions dotfiles/chezmoi for AI settings.
+
+Default behavior:
+
+1. Treat `core-rules.md` as the durable shared policy source where appropriate.
+2. Keep each agent's live config entrypoint separate; do not symlink incompatible config formats together.
+3. Convert app-specific rules into portable Markdown policy, references, or LazyPack content.
+4. Keep secrets, OAuth, sessions, cookies, local state DBs, and full private config contents out of repos and public notes.
+5. Put deterministic per-agent installers in their own focused skill or LazyPack item only when they perform a real installation task.
+
+Read `references/global-settings-spec.md` for the converted policy, path map, voice reply boundary, and speech-input assumption boundary.
+
 ## Codex Portability Map
 
 Use this mapping when converting non-Codex assistant instructions:
 
 | Source guide concept | Codex App version |
 |---|---|
-| `來源工具的舊 skills 路徑` | `$CODEX_HOME/skills` or `~/.codex/skills` |
+| `來源工具的舊 skills 路徑` | `$CODEX_HOME/skills` or `{{CODEX_HOME}}/skills` |
 | Source-specific global or project rule file | `AGENTS.md` for project rules, plus `core-rules.md` for portable global rules |
 | Global agent rules shared across tools | `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`, with `$CODEX_HOME/AGENTS.md` as a symlink entrypoint when supported |
 | Source-specific command shortcuts | Codex skill metadata and normal user prompts |
@@ -399,7 +463,7 @@ Use this mapping when converting non-Codex assistant instructions:
 
 Usually portable:
 
-- custom global skills under `$CODEX_HOME/skills` or `~/.codex/skills`, excluding `.system`
+- custom global skills under `$CODEX_HOME/skills` or `{{CODEX_HOME}}/skills`, excluding `.system`
 - portable global operating rules in `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`, so other AI agents can read the same rule file
 - reusable project rules and templates
 - personal assistant durable references and reusable memory under `ASSISTANT_ROOT/memories` and `ASSISTANT_ROOT/workflows`, when the user explicitly wants that layer synced
@@ -419,6 +483,7 @@ When more detail is needed:
 
 - Read `references/codex-playbook.md` before executing a real cross-device setup, audit, repair, GitHub backup, health-check script, or migration-manual task. It contains the full Codex-converted Section A-G workflow, routes, templates, checks, pitfalls, and FAQ.
 - Read `references/multi-agent-compatibility.md` before checking whether Codex settings, global rules, skills, memory, MCP, prompts, hooks, or project rules can be used by other AI agents.
+- Read `references/global-settings-spec.md` before converting a cross-agent global settings guide, voice reply rule, speech-input assumption, or dotfiles/chezmoi AI config policy into this setup.
 - Read `references/source-adaptation.md` when you need to understand how external assistant setup material was converted into Codex App-safe behavior.
 CODEX_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_42E4C9A28C
 
@@ -426,8 +491,8 @@ CODEX_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_42E4C9A28C
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml")"
 cat > "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML_24E59C1216'
 display_name: Cross-Device Sync
-short_description: Plan, install, and verify portable Codex setup across devices.
-default_prompt: Help me plan a safe Codex App cross-device sync setup.
+short_description: Plan portable Codex setup, global rules, and multi-agent compatibility.
+default_prompt: Help me plan a safe Codex App cross-device sync or cross-agent global settings setup.
 CODEX_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML_24E59C1216
 
 # cross-device-sync/references/codex-playbook.md
@@ -463,14 +528,14 @@ After an approved execution, the user should have some or all of:
 
 ## Codex Surfaces
 
-Default Codex surfaces on this machine:
+Default portable Codex surfaces:
 
 | Purpose | Path or rule |
 |---|---|
-| Codex home | `/Users/arrywu/.codex` |
-| Portable global rules | `{{SYNC_ROOT}}/core-rules.md`; `/Users/arrywu/.codex/AGENTS.md` may symlink to it |
-| Custom global skills | `/Users/arrywu/.codex/skills` symlinked to `{{SYNC_ROOT}}/skills` |
-| System skills | `/Users/arrywu/.codex/skills/.system` |
+| Codex home | `{{CODEX_HOME}}` |
+| Portable global rules | `{{SYNC_ROOT}}/core-rules.md`; `{{CODEX_HOME}}/AGENTS.md` may symlink to it |
+| Custom global skills | `{{CODEX_HOME}}/skills` symlinked to `{{SYNC_ROOT}}/skills` |
+| System skills | `{{CODEX_HOME}}/skills/.system` |
 | Project rules | `AGENTS.md` |
 | Main project | `{{SETUP_REPO}}` |
 | Arry Assistant global data-layer root | `{{SYNC_ROOT}}` |
@@ -478,12 +543,12 @@ Default Codex surfaces on this machine:
 | Arry Assistant local work/reference layers | `100_Todo/` and `200_Reference/` under `codex_installation` |
 | Obsidian vault | `{{OBSIDIAN_VAULT}}` |
 | Global skill mirror note | `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md` |
-| GitHub repo visibility | `icestone0128/codex_installation` is public |
+| GitHub repo visibility | `{{GITHUB_USER}}/{{SETUP_REPO_NAME}}` is public |
 
 ## Absolute Safety Rules
 
 1. Do not perform real sync setup during skill installation.
-2. Do not move, delete, symlink, or overwrite `/Users/arrywu/.codex`, `AGENTS.md`, Obsidian notes, Arry Assistant data, or Git history without explicit user approval after showing a concrete plan.
+2. Do not move, delete, symlink, or overwrite `{{CODEX_HOME}}`, `AGENTS.md`, Obsidian notes, Arry Assistant data, or Git history without explicit user approval after showing a concrete plan.
 3. Make a timestamped backup before moving files, replacing files with symlinks, changing remotes, or editing shared memory.
 4. Do not sync secrets or machine state:
    - `.env`, API keys, tokens, passwords
@@ -492,7 +557,7 @@ Default Codex surfaces on this machine:
    - cache, telemetry, shell snapshots, session state
    - generated logs unless the user explicitly wants archival logs
 5. Treat `codex_installation` as a public repo. Do not place private backups, credentials, private memory, drafts, or personal logs in tracked project paths.
-6. Do not edit system skills under `/Users/arrywu/.codex/skills/.system`.
+6. Do not edit system skills under `{{CODEX_HOME}}/skills/.system`.
 7. If Obsidian notes are involved, read the vault `AGENTS.md` and update additively.
 
 ## Section A: Preflight And Interview
@@ -502,8 +567,8 @@ Default Codex surfaces on this machine:
 Check whether the user's existing Codex App assistant base is present:
 
 ```bash
-test -d "/Users/arrywu/.codex" && echo "Codex home exists"
-test -d "/Users/arrywu/.codex/skills" && echo "Codex skills folder exists"
+test -d "{{CODEX_HOME}}" && echo "Codex home exists"
+test -d "{{CODEX_HOME}}/skills" && echo "Codex skills folder exists"
 test -d "{{SYNC_ROOT}}" && echo "Arry Assistant global root exists"
 test -d "{{SYNC_ROOT}}/memories" && echo "Arry Assistant memory exists"
 test -d "{{SYNC_ROOT}}/workflows" && echo "Arry Assistant workflows exists"
@@ -519,8 +584,8 @@ If core pieces are missing, stop and explain the missing prerequisite. Do not in
 Gather only metadata unless the user asks for deeper inspection:
 
 ```bash
-ls -la "/Users/arrywu/.codex" 2>/dev/null | head -40
-find "/Users/arrywu/.codex/skills" -maxdepth 2 -name SKILL.md -print 2>/dev/null | sort
+ls -la "{{CODEX_HOME}}" 2>/dev/null | head -40
+find "{{CODEX_HOME}}/skills" -maxdepth 2 -name SKILL.md -print 2>/dev/null | sort
 find "{{SETUP_REPO}}" -maxdepth 1 -type d -print 2>/dev/null | sort
 find "{{SYNC_ROOT}}/memories" -maxdepth 2 -type f -print 2>/dev/null | sort | head -80
 ```
@@ -581,8 +646,9 @@ Example:
 ```bash
 BACKUP_DIR="$HOME/codex-backup-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP_DIR"
-cp -a "$HOME/.codex/config.toml" "$BACKUP_DIR/config.toml" 2>/dev/null || true
-cp -a "$HOME/.codex/skills" "$BACKUP_DIR/skills" 2>/dev/null || true
+: "${CODEX_HOME:?Set CODEX_HOME before running this snippet.}"
+cp -a "${CODEX_HOME}/config.toml" "$BACKUP_DIR/config.toml" 2>/dev/null || true
+cp -a "${CODEX_HOME}/skills" "$BACKUP_DIR/skills" 2>/dev/null || true
 ```
 
 If Arry Assistant data will be changed:
@@ -641,7 +707,7 @@ Portable candidates:
 
 Avoid syncing:
 
-- `/Users/arrywu/.codex/skills/.system`
+- `{{CODEX_HOME}}/skills/.system`
 - credentials, OAuth state, secrets, `.env`
 - session state, temporary caches, logs
 - per-device config unless confirmed safe
@@ -653,15 +719,15 @@ Use symlinks only when they solve a real duplication problem and the user unders
 
 Safer default:
 
-- keep the Codex-facing path as `/Users/arrywu/.codex/skills`; it may be symlinked to `{{SYNC_ROOT}}/skills` after cross-device sync is configured
+- keep the Codex-facing path as `{{CODEX_HOME}}/skills`; it may be symlinked to `{{SYNC_ROOT}}/skills` after cross-device sync is configured
 - mirror documentation, install instructions, and inventory into Obsidian and the existing project notes
 - back up and version controlled exports as needed
-- on a second device, recreate the symlink only after confirming the Google Drive folder has synced and the local `/Users/arrywu/.codex/skills` target has been backed up
+- on a second device, recreate the symlink only after confirming the Google Drive folder has synced and the local `{{CODEX_HOME}}/skills` target has been backed up
 
 Riskier route:
 
 - move selected custom skills into the mother folder
-- symlink them back into `/Users/arrywu/.codex/skills/<skill-name>`
+- symlink them back into `{{CODEX_HOME}}/skills/<skill-name>`
 
 Before symlinking, verify:
 
@@ -796,7 +862,7 @@ set -euo pipefail
 echo "Codex sync health check"
 FAIL=0
 
-CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+: "${CODEX_HOME:?Set CODEX_HOME before running this check.}"
 SKILLS_DIR="$CODEX_HOME/skills"
 MOTHER="${1:-}"
 
@@ -922,7 +988,7 @@ Check these surfaces:
 | Surface | Portable approach |
 |---|---|
 | Global rules | `{{SYNC_ROOT}}/core-rules.md` remains the source of truth |
-| Codex global rules entrypoint | `/Users/arrywu/.codex/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md` |
+| Codex global rules entrypoint | `{{CODEX_HOME}}/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md` |
 | Other AI agent rules | use that agent's supported entrypoint to read or reference `core-rules.md` |
 | Global skills | keep Codex-compatible packages under `{{SYNC_ROOT}}/skills` |
 | Project skills | keep project-only packages under each project's `000_Agent/skills` |
@@ -1029,19 +1095,19 @@ Check:
 
 ```bash
 test -f "{{SYNC_ROOT}}/core-rules.md" && echo "core-rules exists"
-test -L "/Users/arrywu/.codex/AGENTS.md" && readlink "/Users/arrywu/.codex/AGENTS.md"
+test -L "{{CODEX_HOME}}/AGENTS.md" && readlink "{{CODEX_HOME}}/AGENTS.md"
 ```
 
 Expected:
 
 - `{{SYNC_ROOT}}/core-rules.md` exists.
-- `/Users/arrywu/.codex/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md`.
+- `{{CODEX_HOME}}/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md`.
 - There is no separate legacy global rules file competing with `core-rules.md`.
 
 AntiGravity supported entrypoints:
 
-- AntiGravity uses `~/.gemini/config/AGENTS.md` as its global rules entrypoint.
-- AntiGravity uses `~/.gemini/config/plugins/codex/skills` as its global skills entrypoint.
+- AntiGravity uses `{{GEMINI_CONFIG}}/AGENTS.md` as its global rules entrypoint.
+- AntiGravity uses `{{GEMINI_CONFIG}}/plugins/codex/skills` as its global skills entrypoint.
 - Both entrypoints should point to the same durable `{{SYNC_ROOT}}/core-rules.md` and `{{SYNC_ROOT}}/skills` assets when AntiGravity compatibility is part of the user's setup.
 
 For another AI agent, add that agent's own supported rules entrypoint and point or copy it to the same `core-rules.md` only if the agent supports that safely.
@@ -1186,6 +1252,66 @@ Do not edit files during the audit unless the user explicitly approves the propo
 This audit belongs inside LazyPack Item 16 because it is a portability and synchronization health check. It should not become a standalone global skill unless it grows into a broader migration system with its own scripts, templates, and repeated execution path.
 CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_MULTI_AGENT_COMPATIBILITY_MD_36192E36DD
 
+# cross-device-sync/references/global-settings-spec.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/global-settings-spec.md")"
+cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/global-settings-spec.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_GLOBAL_SETTINGS_SPEC_MD_9AF3C0C75F'
+# Cross-Agent Global Settings Spec
+
+This reference adapts AI agent global-setting guides into the `cross-device-sync` portability model. Treat source guides for Claude Code, OpenCode, Gemini/AntiGravity, or other agents as source context, not Codex paths to copy literally.
+
+## Agent Surfaces
+
+| Agent | User-level rule/config location | Notes |
+| --- | --- | --- |
+| Codex App / Codex CLI | `{{CODEX_HOME}}/AGENTS.md`, `{{CODEX_HOME}}/skills`, `{{CODEX_CONFIG}}` | `AGENTS.md` may be a symlink to a portable global rules file. MCP config uses Codex TOML, not Claude/OpenCode JSON. |
+| Claude Code | `{{HOME}}/.claude/CLAUDE.md`, `{{HOME}}/.claude/rules/` | Claude settings and rules are not Codex skills. Use only when the user asks to manage Claude. |
+| OpenCode | `{{HOME}}/.config/opencode/opencode.json`, `instructions/` | JSON must remain valid; do not print full config if it may contain secrets. |
+| AntiGravity / Gemini | `{{HOME}}/.gemini/GEMINI.md`, `{{HOME}}/.gemini/config/mcp_config.json` | Do not mix global prompt/context files with MCP config or credentials. |
+
+## Placement Rules
+
+- Cross-agent durable policy belongs in `{{SYNC_ROOT}}/core-rules.md` or another approved shared Markdown policy file.
+- Codex global skill behavior belongs in `{{CODEX_HOME}}/skills/<skill-name>`.
+- Project rules belong in project `AGENTS.md`, not in global skills.
+- Per-agent live config files are adapters. Keep their format separate and generate or update them only after user approval.
+- Do not create a standalone global-settings skill when the content is actually portability, compatibility, or global-rule placement policy; merge it into `cross-device-sync`.
+- Create a separate focused skill only when there is a real repeatable operation, deterministic script, or domain workflow that should trigger independently.
+
+## Voice Reply Rules
+
+- Trigger voice reply only when explicitly requested: "用語音回答", "唸出來", "唸給我聽", "用語音講結論".
+- Spoken script should be 100-250 Chinese characters when possible.
+- Prefer conclusion and next action; keep details in text.
+- Default Traditional Chinese voice: `zh-TW-YunJheNeural`.
+- Other common Traditional Chinese Edge-TTS voices: `zh-TW-HsiaoChenNeural`, `zh-TW-HsiaoYuNeural`.
+- Edge-TTS is a cloud TTS service. Do not use it for sensitive text unless the user accepts that boundary.
+- Do not substitute voice cloning. Authorized voice cloning belongs to a dedicated skill such as VoxCPM2.
+
+## Startup / Shutdown Sync
+
+Codex already has `startup-sync` and `shutdown-sync`. When adapting source rules:
+
+- `開工` means read project rules, cockpit, Git/GitHub/hosting state, and avoid unasked writes.
+- `收工` means summarize changes, sync allowed mirrors, update cockpit, check Git state, and ask before commit/push unless explicitly requested.
+- Do not import Claude-specific chezmoi automation as a Codex default.
+
+## Chezmoi / Dotfiles
+
+- Chezmoi can manage Claude or dotfiles, but it is not the Codex global skill sync mechanism.
+- If a target config is managed by chezmoi, update both the generated target and its chezmoi source/template only after user approval.
+- Never add secrets, session files, OAuth tokens, cookies, or local state DBs to dotfiles.
+- Do not commit or push dotfiles unless the user explicitly asks.
+
+## Speech Input Assumptions
+
+Speech-to-text mistakes should be handled by the dedicated `voice-input-normalization` skill. The shared principle is:
+
+- infer obvious low-risk corrections from context
+- confirm before acting on ambiguous names, paths, commands, numbers, dates, money, destructive actions, or authorization
+- do not silently rewrite critical details into guessed values
+CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_GLOBAL_SETTINGS_SPEC_MD_9AF3C0C75F
+
+
 # cross-device-sync/references/source-adaptation.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md")"
 cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD_F46F63E917'
@@ -1210,22 +1336,22 @@ This Codex version keeps the useful operating model but changes the target surfa
 
 | Original source-guide idea | Codex-compatible conversion |
 |---|---|
-| Source app config root is the main config root | `/Users/arrywu/.codex` is the Codex root |
-| `來源工具的舊 skills 路徑` stores skills | `/Users/arrywu/.codex/skills` stores global Codex skills |
+| Source app config root is the main config root | `{{CODEX_HOME}}` is the Codex root |
+| `來源工具的舊 skills 路徑` stores skills | `{{CODEX_HOME}}/skills` stores global Codex skills |
 | Source app rule file is the rule file | `AGENTS.md` is the project rule file; cross-tool global rules belong in `{{SYNC_ROOT}}/core-rules.md` |
 | Source app command shortcuts are user-facing entry points | Codex skills trigger by metadata and user intent |
 | Source app delegation format is part of the workflow | Codex validation passes or supported delegation tools are used only when explicitly requested or clearly useful |
 | `000_Agent/` is created by pro-kit 01 | This user's global Arry Assistant data lives under `codex_symlink/`; project-local data may use each project's `000_Agent/` |
-| Source examples refer to Raymond/Raymond-Agent | Use Arry Assistant and the user's existing Google Drive/Obsidian paths |
+| Source examples refer to Raymond/Raymond-Agent | Use Arry Assistant and the user's configured `{{SYNC_ROOT}}` / `{{OBSIDIAN_VAULT}}` placeholders |
 
 ## Codex-Specific Safety Changes
 
-- The skill must not automatically move or symlink `/Users/arrywu/.codex` assets during installation.
+- The skill must not automatically move or symlink `{{CODEX_HOME}}` assets during installation.
 - Any future sync setup must be plan-first and approval-gated because it can affect all Codex sessions.
 - The default sync approach for this user should align with Google Drive project folders and Obsidian project cockpits.
 - The existing Arry Assistant architecture uses Google Drive `codex_symlink/` as the global layer for `skills/`, `memories/`, `workflows/`, and `knowledge/`; project-local data may still use each project's `000_Agent/`.
-- `icestone0128/codex_installation` is public, so private backups and personal memory must not be staged or tracked there.
-- System skills under `/Users/arrywu/.codex/skills/.system` are Codex-managed and should not be edited or moved manually.
+- `{{GITHUB_USER}}/{{SETUP_REPO_NAME}}` is public, so private backups and personal memory must not be staged or tracked there.
+- System skills under `{{CODEX_HOME}}/skills/.system` are Codex-managed and should not be edited or moved manually.
 - Global skill changes must update the Obsidian mirror note at `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`.
 
 ## Interview Questions
@@ -1307,7 +1433,7 @@ A Codex health check should verify:
 
 The check should not print secrets, token contents, or private memory contents.
 
-This user's fixed skill paths are `/Users/arrywu/.codex/skills` for global skills and `<project-root>/000_Agent/skills` for project-local skills. Do not add alternate global or project discovery roots while adapting newer source guides.
+This user's fixed skill paths are `{{CODEX_HOME}}/skills` for global skills and `<project-root>/000_Agent/skills` for project-local skills. Do not add alternate global or project discovery roots while adapting newer source guides.
 
 ## Completeness Update
 
@@ -1339,7 +1465,7 @@ Codex App-compatible conversion:
 
 - source-specific names are not used as operating surfaces
 - `{{SYNC_ROOT}}/core-rules.md` is the cross-agent global rules source of truth
-- `/Users/arrywu/.codex/AGENTS.md` remains Codex's symlink entrypoint
+- `{{CODEX_HOME}}/AGENTS.md` remains Codex's symlink entrypoint
 - `{{SYNC_ROOT}}/skills`, `memories`, `workflows`, and `knowledge` remain the portable assistant data layer
 - other AI agents should read or adapt those durable assets through their own supported entrypoints
 CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD_F46F63E917

@@ -617,16 +617,16 @@ echo "Installed visual-note-generator skill into {{CODEX_HOME}}/skills/visual-no
 ## 驗證
 
 ```bash
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" \
-  "${CODEX_HOME:-$HOME/.codex}/skills/visual-note-generator"
+python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/quick_validate.py" \
+  "${CODEX_HOME:-${CODEX_HOME}}/skills/visual-note-generator"
 
-test -f "${CODEX_HOME:-$HOME/.codex}/skills/visual-note-generator/SKILL.md"
-test -f "${CODEX_HOME:-$HOME/.codex}/skills/visual-note-generator/agents/openai.yaml"
-test -f "${CODEX_HOME:-$HOME/.codex}/skills/visual-note-generator/references/default-style-profile.yaml"
-test -f "${CODEX_HOME:-$HOME/.codex}/skills/visual-note-generator/references/generation-guardrails.md"
-test -f "${CODEX_HOME:-$HOME/.codex}/skills/visual-note-generator/references/style-profile-guide.md"
-test -f "${CODEX_HOME:-$HOME/.codex}/skills/visual-note-generator/references/style-profile-template.yaml"
-test -f "${CODEX_HOME:-$HOME/.codex}/skills/visual-note-generator/references/workflow-contract.md"
+test -f "${CODEX_HOME:-${CODEX_HOME}}/skills/visual-note-generator/SKILL.md"
+test -f "${CODEX_HOME:-${CODEX_HOME}}/skills/visual-note-generator/agents/openai.yaml"
+test -f "${CODEX_HOME:-${CODEX_HOME}}/skills/visual-note-generator/references/default-style-profile.yaml"
+test -f "${CODEX_HOME:-${CODEX_HOME}}/skills/visual-note-generator/references/generation-guardrails.md"
+test -f "${CODEX_HOME:-${CODEX_HOME}}/skills/visual-note-generator/references/style-profile-guide.md"
+test -f "${CODEX_HOME:-${CODEX_HOME}}/skills/visual-note-generator/references/style-profile-template.yaml"
+test -f "${CODEX_HOME:-${CODEX_HOME}}/skills/visual-note-generator/references/workflow-contract.md"
 ```
 
 更新全域 Skill 後，建議開新 Codex 對話，讓 metadata 重新載入。

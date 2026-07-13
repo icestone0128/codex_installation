@@ -116,10 +116,10 @@ Codex 會依 Skill 流程：收集內容、確認尺寸、確認 handle、拆卡
 {{CODEX_HOME}}/skills
 ```
 
-通常是：
+如果需要在文件或腳本中表示實際位置，一律使用變數，不展開成本機絕對路徑：
 
 ```text
-/Users/<你的使用者名稱>/.codex/skills
+{{CODEX_HOME}}/skills
 ```
 
 如果這套卡片流程只服務某一個專案或個人助手資料層，不需要全域觸發，才放在該專案或助手的 `000_Agent/skills/social-cards`。不要把 `000_Agent/skills` symlink 到 `{{CODEX_HOME}}/skills`。
@@ -202,7 +202,7 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 
 本節是自含式安裝區塊。這個序號項目會安裝：`social-cards`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `~/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
 ````bash
 set -e

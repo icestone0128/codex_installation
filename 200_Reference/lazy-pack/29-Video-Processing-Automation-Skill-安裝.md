@@ -9,7 +9,7 @@
 - 初次同步日期：2026-06-03。
 - 來源 repo：https://github.com/mathruffian-dot/2026-YouTube
 - 來源 commit：`a0171ce`。
-- 2026-06-04 已補入 Groq Python SDK 安裝、Groq Google 登入建立 API key、安全複製與 `~/.codex/secrets/groq_api_key` 保存流程。
+- 2026-06-04 已補入 Groq Python SDK 安裝、Groq Google 登入建立 API key、安全複製與 `{{SECRETS_DIR}}/groq_api_key` 保存流程。
 - 2026-06-29 依實際重跑影片後製流程，補入 `espeakng-loader` 檢查、專案詞彙表 `200_Reference/vocabulary.md`、CFR source 保留、SRT 清理順序與 ffprobe 驗收。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md`。
 
@@ -27,10 +27,10 @@
 - `ffmpeg` / `ffprobe`。
 - `auto-editor`：`python3 -m pip install --user auto-editor`。
 - Groq Python SDK：`python3 -m pip install --user groq`。
-- Groq STT 路線需要 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key`。
+- Groq STT 路線需要 `GROQ_API_KEY` 或 `{{SECRETS_DIR}}/groq_api_key`。
 - Local Whisper 保留為可選 fallback；Groq STT 可用且使用者同意雲端轉錄時，預設不檢查、安裝或下載 Local Whisper。
 - 若 Groq 方案或模型可用性改變、Groq 不可用，或使用者明確要求本地處理，再考慮 Local Whisper fallback。
-- Codex sandbox 若在 Python 語法檢查時擋住 `~/Library/Caches/com.apple.python`，將該路徑加入 writable roots；本機已補入 `/Users/arrywu/Library/Caches/com.apple.python`。
+- Codex sandbox 若在 Python 語法檢查時擋住 `~/Library/Caches/com.apple.python`，將該路徑加入 writable roots；本機已補入 `{{HOME}}/Library/Caches/com.apple.python`。
 
 ## Groq 帳號與 API key
 
@@ -48,10 +48,10 @@ Groq Whisper STT 會把音訊送到 Groq。只有在使用者同意雲端 STT �
 8. 由使用者保存到本機秘密檔：
 
 ```bash
-mkdir -p ~/.codex/secrets
-chmod 700 ~/.codex/secrets
-pbpaste > ~/.codex/secrets/groq_api_key
-chmod 600 ~/.codex/secrets/groq_api_key
+mkdir -p {{SECRETS_DIR}}
+chmod 700 {{SECRETS_DIR}}
+pbpaste > {{SECRETS_DIR}}/groq_api_key
+chmod 600 {{SECRETS_DIR}}/groq_api_key
 ```
 
 若 key 曾貼到對話、log、截圖或 repo，先到 Groq Console revoke，再重新建立新 key。
@@ -64,7 +64,7 @@ ffmpeg -version
 ffprobe -version
 python3 -m auto_editor --version
 python3 -c "import groq; print('groq ok')"
-python3 -c "import os, pathlib; p=pathlib.Path('~/.codex/secrets/groq_api_key').expanduser(); print('Groq key:', 'ok' if os.getenv('GROQ_API_KEY') or p.exists() else 'missing')"
+python3 -c "import os, pathlib; p=pathlib.Path('{{SECRETS_DIR}}/groq_api_key').expanduser(); print('Groq key:', 'ok' if os.getenv('GROQ_API_KEY') or p.exists() else 'missing')"
 test -f "{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md" && echo "video-processing-automation SKILL.md ok"
 test -d "{{CODEX_HOME}}/skills/video-processing-automation/references" && echo "references ok"
 test -d "{{CODEX_HOME}}/skills/video-processing-automation/scripts" && echo "scripts ok"
@@ -97,7 +97,7 @@ test -d "{{CODEX_HOME}}/skills/video-processing-automation/scripts" && echo "scr
 
 - [ ] `{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md` 存在。
 - [ ] references / scripts 依本文內嵌 package 完整安裝。
-- [ ] 若使用 Groq STT，`python3 -c "import groq"` 可執行，且 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key` 存在。
+- [ ] 若使用 Groq STT，`python3 -c "import groq"` 可執行，且 `GROQ_API_KEY` 或 `{{SECRETS_DIR}}/groq_api_key` 存在。
 - [ ] 若專案有專有名詞，`200_Reference/vocabulary.md` 已建立並已用 `apply_vocab.py --vocab` 套用。
 - [ ] 最終 MP4 已用 `ffprobe` 驗證影音 stream；字幕已用 `validate_srt.py` 驗證。
 - [ ] 沒有把 API key、OAuth token、影片素材、個人照片或成品影片寫進 repo。
@@ -206,7 +206,7 @@ draft and final folders and document the route before writing files.
 3. Subtitle and transcript:
    - extract 16 kHz mono audio from the cut video with `ffmpeg`;
    - read `references/audio-subtitle.md`;
-   - use Groq Whisper when `GROQ_API_KEY` or `~/.codex/secrets/groq_api_key` is available and
+   - use Groq Whisper when `GROQ_API_KEY` or `{{SECRETS_DIR}}/groq_api_key` is available and
      the user accepts cloud transcription;
    - keep Local Whisper as an option, but do not install or download a model by
      default;
@@ -251,7 +251,7 @@ draft and final folders and document the route before writing files.
   user to revoke it in Groq Console and create a new key before continuing.
 - When creating a Groq key through the browser, leave the one-time key display
   open for the user or copy it to the user's clipboard without reading it back.
-  Store it only in a local secret location such as `~/.codex/secrets/groq_api_key` with mode
+  Store it only in a local secret location such as `{{SECRETS_DIR}}/groq_api_key` with mode
   `600`, or use a shell session variable for the current run.
 - Do not upload audio/video to cloud STT services unless the user accepts that
   route or the project already documents that route.
@@ -311,7 +311,7 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.
 - `ffprobe -version` works.
 - `python3 -m auto_editor --version` works or `auto-editor` is in PATH.
 - `python3 -c "import groq"` works when using Groq STT.
-- `GROQ_API_KEY` or `~/.codex/secrets/groq_api_key` exists before cloud STT.
+- `GROQ_API_KEY` or `{{SECRETS_DIR}}/groq_api_key` exists before cloud STT.
 - Scan the package for excluded source-tool terms before packaging or syncing;
   the scan should have no hits.
 CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD
@@ -617,7 +617,7 @@ path, add this narrow writable root to the Codex sandbox config and open a new
 Codex conversation:
 
 ```toml
-"/Users/arrywu/Library/Caches/com.apple.python",
+"{{HOME}}/Library/Caches/com.apple.python",
 ```
 
 For one-off verification before the new sandbox config is loaded, use a temp
@@ -628,7 +628,7 @@ cache path such as `PYTHONPYCACHEPREFIX=/private/tmp/python-pycache`.
 Cloud transcription uses Groq Whisper. Accept either:
 
 - environment variable: `GROQ_API_KEY`
-- local key file: `~/.codex/secrets/groq_api_key`
+- local key file: `{{SECRETS_DIR}}/groq_api_key`
 
 Do not commit either value.
 
@@ -652,10 +652,10 @@ Use this route only when the user has asked to set up Groq cloud STT.
 8. Ask the user to save the copied key locally:
 
 ```bash
-mkdir -p ~/.codex/secrets
-chmod 700 ~/.codex/secrets
-pbpaste > ~/.codex/secrets/groq_api_key
-chmod 600 ~/.codex/secrets/groq_api_key
+mkdir -p {{SECRETS_DIR}}
+chmod 700 {{SECRETS_DIR}}
+pbpaste > {{SECRETS_DIR}}/groq_api_key
+chmod 600 {{SECRETS_DIR}}/groq_api_key
 ```
 
 If the user accidentally pastes the key into chat, logs, screenshots, or a repo
@@ -688,7 +688,7 @@ ffprobe -version
 python3 -m auto_editor --version
 python3 -c "import groq; print('groq ok')"
 python3 -c "import espeakng_loader; print('espeakng_loader ok')"  # optional, only for local TTS paths
-python3 -c "import os, pathlib; p=pathlib.Path('~/.codex/secrets/groq_api_key').expanduser(); print('Groq key:', 'ok' if os.getenv('GROQ_API_KEY') or p.exists() else 'missing')"
+python3 -c "import os, pathlib; p=pathlib.Path('{{SECRETS_DIR}}/groq_api_key').expanduser(); print('Groq key:', 'ok' if os.getenv('GROQ_API_KEY') or p.exists() else 'missing')"
 ```
 
 `python3 -m auto_editor --version` can return a non-zero code in some versions
@@ -1692,7 +1692,7 @@ def load_api_key() -> str:
             return key_file.read_text(encoding="utf-8").strip()
     sys.exit(
         "[ERR] 找不到 Groq API Key（環境變數 GROQ_API_KEY 或 "
-        "~/.codex/secrets/groq_api_key）"
+        "{{SECRETS_DIR}}/groq_api_key）"
     )
 
 
