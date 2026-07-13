@@ -97,6 +97,7 @@
 35. [[35-Taigi-Teaching-Agent-安裝]]
 36. [[36-Voice-Input-Normalization]]
 37. [[37-Voice-Reply-Skill-安裝]]
+38. [[38-YAML-Image-Deck-Skill-安裝]]
 
 ## 全域 Skills 安裝總表
 
@@ -136,6 +137,7 @@
 35：Taigi Teaching Agent；不是 skill，安裝 `mathruffian-dot/taigi-teaching-agent` 臺語教材產生器、Python 3.12 專用 venv 與 `taigi-teaching-agent` wrapper
 36：voice-input-normalization；語音輸入文字正規化跨 Agent 安裝，包含 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範已併入 Item 16 `cross-device-sync`
 37：voice-reply；macOS / Codex 語音回覆 skill，優先 Edge-TTS 串流，其次 Edge-TTS 整檔播放，最後 macOS `say` 離線備援；安裝 `edge-tts` 到 `{{CODEX_HOME}}/voice-reply/.venv`，並建立 `{{CODEX_HOME}}/python-tools/bin/voice-reply` 與 `{{CODEX_HOME}}/python-tools/bin/edge-tts`
+38：yaml-image-deck；通用 YAML-controlled image-first deck，不限定 SOIL；用固定視覺語法、受控版型、黃金樣張與逐頁 YAML 內容產生 NotebookLM-style 圖片式簡報
 ```
 
 路徑邊界固定如下：
@@ -144,7 +146,7 @@
 | --- | --- | --- |
 | 可攜式全域核心規則 | `{{GLOBAL_RULES}}`；`{{CODEX_HOME}}/AGENTS.md` 只作為 symlink 入口 | Codex 與其他 AI agent 共用的長期工作規則、路徑、同步規則與操作邊界 |
 | Codex 全域 skills | `{{CODEX_HOME}}/skills`；若跨裝置同步，才 symlink 到 `{{SYNC_ROOT}}/skills` | 需要被 Codex App 全域觸發的 skills |
-| LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...37.md` | 每個序號文件內嵌對應全域 skill、工具或 workflow 的完整安裝內容 |
+| LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...38.md` | 每個序號文件內嵌對應全域 skill、工具或 workflow 的完整安裝內容 |
 | 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每個專案共用的本機 Python 工具 venv 與 wrapper；不放模型、技能 runtime 或 symlink |
 | Arry/個人助手全域入口 | `{{CODEX_HOME}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
 | 個人助手跨專案記憶 | `{{ASSISTANT_ROOT}}/memories` | 個人偏好、踩坑、跨專案可重用決策 |
@@ -182,23 +184,24 @@
 | 16 | `soil-html-deck` | [[19-SOIL-HTML-Deck-Skill-安裝]] | 可直接安裝；SOIL 互動 HTML 簡報 |
 | 17 | `soil-image-deck` | [[20-SOIL-Image-Deck-Skill-安裝]] | 可直接安裝；SOIL 全圖像 PPTX |
 | 18 | `soil-general-deck` | [[21-SOIL-General-Deck-Skill-安裝]] | 可直接安裝；SOIL 通用可編輯 PPTX |
-| 19 | `image-generator` | [[22-Image-Generator-Skill-安裝]] | 可直接安裝；Codex 內建生圖與修圖入口 |
-| 20 | `visual-note-generator` | [[23-Visual-Note-Generator-Skill-安裝]] | 可直接安裝；固定手繪筆記 Workflow、可替換 Style Profile、內建 Arry 預設風格與 16:9／2K 驗收 |
-| 21 | `diary-interview-assistant` | [[24-Diary-Interview-Assistant-Skill-安裝]] | 可直接安裝；間歇式日記訪談、寫作洞察與文章草稿提示 |
-| 22 | `gemini-free-api` | [[25-Gemini-Free-API-Skill-安裝]] | 可直接安裝；Gemini API Free Tier、`GEMINI_API_KEY` 安全儲存、收費邊界與後端整合 |
-| 23 | HyperFrames skill suite | [[26-HyperFrames-Skill-安裝]] | 可直接安裝；HTML/CSS/media/seekable animation 到 MP4 的影片 composition 工作流，含相片紀念影片預覽、音訊驗證與完稿後資料夾清理詢問；實際 render 需 Node.js 22+ 與 FFmpeg |
-| 24 | Video Spec Builder | [[27-Video-Spec-Builder-Skill-安裝]] | 可直接安裝；追問影片需求、拆分鏡、產出可交給 HyperFrames 的 `video-spec.md` |
-| 25 | `netlify-deploy` | [[28-Netlify-Deploy-Skill-安裝]] | 可直接安裝；官方 Netlify MCP 設定、Netlify 前端部署與 Clasp + Apps Script API 閉環部署流程 |
-| 26 | `video-processing-automation` | [[29-Video-Processing-Automation-Skill-安裝]] | 可直接安裝；原始影片到 YouTube / 社群影片上架包，含智能剪口播、Groq STT、專案詞彙表字幕修正、文字稿、封面、metadata、短片亮點與 ffprobe 驗收 |
-| 27 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時，先確認入口後生成腳本、設計、素材、旁白、HyperFrames composition 與渲染包；補入離線可重現資源、lint / validate / inspect / ffprobe 驗收；若已有影片則轉用 `video-processing-automation` |
-| 28 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
-| 29 | `voxcpm2-voice-cloner` | [[32-VoxCPM2-Voice-Cloner-Skill-安裝]] | 可直接安裝；授權聲音克隆、合成聲音設計、Apple Silicon MPS／CUDA／CPU、本機 runtime／模型快取路由與 consent gate |
-| 30 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；產出文字後 Phase 2 流程相同，由 Codex 做逐段校稿、摘要與重點整理；內嵌完整 Python 腳本、實測紀錄與踩坑 |
-| 31 | Python teaching file tools runtime | [[34-Python-Tools-全域工具包安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools`，供所有專案共用 Word／Excel／PPT／PDF／OCR／圖表／影音輔助 Python 套件與 wrapper；macOS/Homebrew 會安裝 Tesseract、Ghostscript、Poppler、ffmpeg，LibreOffice 可用 `INSTALL_OFFICE_TOOLS=1` 按需安裝；既有 `audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` runtime 維持在 `{{CODEX_HOME}}/<skill-name>` |
-| 32 | Taigi Teaching Agent | [[35-Taigi-Teaching-Agent-安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools/taigi-teaching-agent`、專用 Python 3.12 venv 與 `taigi-teaching-agent` wrapper，用於臺羅標音、臺語 TTS、教材檢核與範例教材生成 |
-| 33 | Voice Input Normalization | [[36-Voice-Input-Normalization]] | 可直接安裝；包含 `voice-input-normalization`，提供 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範歸 Item 16 `cross-device-sync` |
-| 34 | Voice Reply | [[37-Voice-Reply-Skill-安裝]] | 可直接安裝；macOS / Codex 語音回覆，優先 Edge-TTS 串流，整檔播放備援，最後 macOS `say` 離線備援 |
-| 35 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 19 | `yaml-image-deck` | [[38-YAML-Image-Deck-Skill-安裝]] | 可直接安裝；通用 YAML-controlled image-first deck，適合 NotebookLM-style 圖片式簡報、固定視覺語法、受控版型與黃金樣張，不限定 SOIL |
+| 20 | `image-generator` | [[22-Image-Generator-Skill-安裝]] | 可直接安裝；Codex 內建生圖與修圖入口 |
+| 21 | `visual-note-generator` | [[23-Visual-Note-Generator-Skill-安裝]] | 可直接安裝；固定手繪筆記 Workflow、可替換 Style Profile、內建 Arry 預設風格與 16:9／2K 驗收 |
+| 22 | `diary-interview-assistant` | [[24-Diary-Interview-Assistant-Skill-安裝]] | 可直接安裝；間歇式日記訪談、寫作洞察與文章草稿提示 |
+| 23 | `gemini-free-api` | [[25-Gemini-Free-API-Skill-安裝]] | 可直接安裝；Gemini API Free Tier、`GEMINI_API_KEY` 安全儲存、收費邊界與後端整合 |
+| 24 | HyperFrames skill suite | [[26-HyperFrames-Skill-安裝]] | 可直接安裝；HTML/CSS/media/seekable animation 到 MP4 的影片 composition 工作流，含相片紀念影片預覽、音訊驗證與完稿後資料夾清理詢問；實際 render 需 Node.js 22+ 與 FFmpeg |
+| 25 | Video Spec Builder | [[27-Video-Spec-Builder-Skill-安裝]] | 可直接安裝；追問影片需求、拆分鏡、產出可交給 HyperFrames 的 `video-spec.md` |
+| 26 | `netlify-deploy` | [[28-Netlify-Deploy-Skill-安裝]] | 可直接安裝；官方 Netlify MCP 設定、Netlify 前端部署與 Clasp + Apps Script API 閉環部署流程 |
+| 27 | `video-processing-automation` | [[29-Video-Processing-Automation-Skill-安裝]] | 可直接安裝；原始影片到 YouTube / 社群影片上架包，含智能剪口播、Groq STT、專案詞彙表字幕修正、文字稿、封面、metadata、短片亮點與 ffprobe 驗收 |
+| 28 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時，先確認入口後生成腳本、設計、素材、旁白、HyperFrames composition 與渲染包；補入離線可重現資源、lint / validate / inspect / ffprobe 驗收；若已有影片則轉用 `video-processing-automation` |
+| 29 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
+| 30 | `voxcpm2-voice-cloner` | [[32-VoxCPM2-Voice-Cloner-Skill-安裝]] | 可直接安裝；授權聲音克隆、合成聲音設計、Apple Silicon MPS／CUDA／CPU、本機 runtime／模型快取路由與 consent gate |
+| 31 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；產出文字後 Phase 2 流程相同，由 Codex 做逐段校稿、摘要與重點整理；內嵌完整 Python 腳本、實測紀錄與踩坑 |
+| 32 | Python teaching file tools runtime | [[34-Python-Tools-全域工具包安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools`，供所有專案共用 Word／Excel／PPT／PDF／OCR／圖表／影音輔助 Python 套件與 wrapper；macOS/Homebrew 會安裝 Tesseract、Ghostscript、Poppler、ffmpeg，LibreOffice 可用 `INSTALL_OFFICE_TOOLS=1` 按需安裝；既有 `audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` runtime 維持在 `{{CODEX_HOME}}/<skill-name>` |
+| 33 | Taigi Teaching Agent | [[35-Taigi-Teaching-Agent-安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools/taigi-teaching-agent`、專用 Python 3.12 venv 與 `taigi-teaching-agent` wrapper，用於臺羅標音、臺語 TTS、教材檢核與範例教材生成 |
+| 34 | Voice Input Normalization | [[36-Voice-Input-Normalization]] | 可直接安裝；包含 `voice-input-normalization`，提供 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範歸 Item 16 `cross-device-sync` |
+| 35 | Voice Reply | [[37-Voice-Reply-Skill-安裝]] | 可直接安裝；macOS / Codex 語音回覆，優先 Edge-TTS 串流，整檔播放備援，最後 macOS `say` 離線備援 |
+| 36 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
@@ -252,6 +255,7 @@ rg -n "<舊使用者名稱>|<舊 GitHub 帳號>|<舊 Firebase project id>|<舊�
 - SOIL HTML Deck skill 以 [[19-SOIL-HTML-Deck-Skill-安裝]] 為準。
 - SOIL Image Deck skill 以 [[20-SOIL-Image-Deck-Skill-安裝]] 為準。
 - SOIL General Deck skill 以 [[21-SOIL-General-Deck-Skill-安裝]] 為準。
+- YAML Image Deck skill 以 [[38-YAML-Image-Deck-Skill-安裝]] 為準；它是通用 YAML 圖片式簡報，不取代 SOIL 三組 skills。
 - Image Generator skill 以 [[22-Image-Generator-Skill-安裝]] 為準。
 - 2026-05-24 起，有序號的懶人包文件本身內嵌對應全域 skill 的完整安裝內容；別人拿到本懶人包後，不需要另外取得原作者本機的 `{{CODEX_HOME}}/skills` 目錄，也不需要 舊版獨立 skills 子目錄。
 - Diary Interview Assistant Skill 以 [[24-Diary-Interview-Assistant-Skill-安裝]] 為準。

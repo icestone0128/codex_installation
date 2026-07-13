@@ -75,6 +75,26 @@ for skill in notebooklm-architecture presentation-workflow; do
 done
 ```
 
+## 可選：NotebookLM YAML 到圖片式簡報的橋接
+
+若目標是「NotebookLM 風格，但想要更固定的視覺語法、版型路由與逐頁圖片控制」，可搭配安裝：
+
+- `presentation-workflow`：產生或修正 NotebookLM YAML style specification。
+- `yaml-image-deck`：把通用主題轉成 YAML-controlled image-first deck，使用固定視覺語法、受控版型、黃金樣張與逐頁 image generation。
+- `soil-image-deck`：當需求明確是教學簡報，且需要 SOIL 六引擎、引起動機 / 維持注意 / 喚起行動時使用。
+
+建議路由：
+
+| 使用情境 | 建議工具 |
+|---|---|
+| 連接 NotebookLM、讀取 notebook、下載成品 | NotebookLM MCP / connector |
+| 設計 NotebookLM Soul / Body Framework | `notebooklm-architecture` |
+| 產生 NotebookLM YAML 風格規格與逐頁規劃 | `presentation-workflow` |
+| NotebookLM 風格但改由 Codex 生圖並打包圖片式 PPTX | `yaml-image-deck` |
+| SOIL 教學圖片式 PPTX | `soil-image-deck` |
+
+`yaml-image-deck` 對應 LazyPack Item 38：`38-YAML-Image-Deck-Skill-安裝.md`。不要把它併入 `presentation-workflow`；前者負責 Codex 內建 Imagegen 與圖片式 deck 生產，後者負責 NotebookLM YAML 風格規格與簡報工作流。
+
 ## 驗證
 
 1. 重啟 Codex App 或開新對話。
@@ -107,11 +127,11 @@ tool_timeout_sec = 120
 
 ## 內建 Skill 完整安裝內容
 
-本節是自含式安裝區塊。這個序號項目會安裝：`notebooklm-architecture`, `presentation-workflow`。
+本節是自含式安裝區塊。這個序號項目會安裝：`notebooklm-architecture`, `presentation-workflow`。若需要 YAML-controlled image-first deck，請另安裝 Item 38 `yaml-image-deck`。
 
 使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
-```bash
+````bash
 set -e
 
 decode_base64() {
@@ -755,6 +775,6 @@ test -f "{{CODEX_HOME}}/skills/presentation-workflow/SKILL.md" && echo "presenta
 
 
 echo "embedded skills installed: notebooklm-architecture presentation-workflow"
-```
+````
 
 <!-- END EMBEDDED_SKILLS -->

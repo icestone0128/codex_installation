@@ -8,6 +8,8 @@
 
 - 初次同步日期：2026-05-25。
 - 原始來源包：使用者提供的 SOIL Deck skills package；本版已改名為 `soil-general-deck`。
+- 2026-07-13 補入 `references/soil-deck-core.md`，並在 SOIL engines 的頁面架構補入 `learning_task`、`semantic_structure` 與 renderer-neutral `layout.id`。
+- 2026-07-13 補入 `yaml-image-deck` 路由：非 SOIL 的 YAML-controlled image-first deck 改用 LazyPack Item 38。
 - Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md`。
 - Obsidian 全域索引已記錄用途：SOIL 通用可編輯 PPTX；用 SOIL engines 規劃簡報流，建立可編輯文字、AI 視覺、幾何圖與版面驗證。
 
@@ -18,6 +20,8 @@
 | 1 | 移除來源工具專用路徑與非 Codex skill 位置；正式版只保留 Codex 相容限制。 |
 | 2 | 將 reference 內的來源工具品質描述改為 `Codex-quality`。 |
 | 3 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/soil-general-deck/`。 |
+| 4 | 補入 SOIL Deck Core：先完成教學決策，再映射成可編輯 PowerPoint 文字、AI 視覺、幾何圖、表格或流程物件。 |
+| 5 | 補入分流規則：通用 YAML 圖片式 PPTX 使用 `yaml-image-deck`；SOIL 全圖片教學 PPTX 使用 `soil-image-deck`；本 skill 專注可編輯 PPTX。 |
 
 ## 安裝方式
 
@@ -31,6 +35,7 @@
 ```bash
 test -f "{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md" && echo "soil-general-deck SKILL.md ok"
 test -d "{{CODEX_HOME}}/skills/soil-general-deck/references" && echo "references ok"
+test -f "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-deck-core.md" && echo "soil deck core ok"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -50,9 +55,10 @@ test -d "{{CODEX_HOME}}/skills/soil-general-deck/references" && echo "references
 
 1. 讀取使用者提供的主題、素材、簡報目標、受眾與輸出格式。
 2. 先決定 SOIL 節奏：引起動機 -> 維持注意 -> 喚起行動。
-3. 依 skill 內 `SKILL.md` 與 references 規劃頁面、視覺、互動或 PowerPoint 結構。
-4. 若需要 bitmap 視覺，使用 Codex 內建 image generation 生成，不用本機假圖替代。
-5. 交付前檢查檔案可開啟、文字可讀、版面不溢出、引用資源可攜。
+3. 先建立 renderer-neutral SOIL Core，保留每頁的 learning task、semantic structure、layout id、visible text 與 speaker-only content。
+4. 再依 skill 內 `SKILL.md` 與 references 把 Core 映射成可編輯 PPTX 文字、AI 視覺、幾何圖、表格、流程或比較版面。
+5. 若需要 bitmap 視覺，使用 Codex 內建 image generation 生成，不用本機假圖替代。
+6. 交付前檢查檔案可開啟、文字可讀、版面不溢出、引用資源可攜。
 
 ## 踩坑紀錄
 
@@ -72,6 +78,7 @@ test -d "{{CODEX_HOME}}/skills/soil-general-deck/references" && echo "references
 
 - [ ] `{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md` 存在。
 - [ ] references 依本 skill package 實際內容存在。
+- [ ] `references/soil-deck-core.md` 存在。
 - [ ] 搜尋 package 內沒有非 Codex 安裝路徑或非 Codex frontmatter 欄位。
 - [ ] 開新 Codex 對話後，可用 `soil-general-deck` 或 SOIL 簡報相關語句觸發。
 
@@ -83,10 +90,11 @@ test -d "{{CODEX_HOME}}/skills/soil-general-deck/references" && echo "references
 
 使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
 
-```bash
+````bash
 set -e
 
 # ---- soil-general-deck ----
+rm -rf "{{CODEX_HOME}}/skills/soil-general-deck"
 mkdir -p "{{CODEX_HOME}}/skills/soil-general-deck"
 # soil-general-deck/SKILL.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md")"
@@ -108,6 +116,16 @@ metadata:
 
 Use this skill for editable general PowerPoint decks. The goal is information
 clarity first, visual design second, and file correctness last.
+
+Plan with renderer-neutral SOIL Core before committing to PowerPoint objects.
+Concept, flow, page roles, learning tasks, semantic structure, visible text,
+speaker-only content, and visual briefs should be explicit before production.
+YAML or structured specs come after the teaching decisions, not before them.
+
+Use `yaml-image-deck` instead when the user wants a non-SOIL
+YAML-controlled image-first deck or NotebookLM-style full-image PPTX. Use
+`soil-image-deck` instead when the output should be SOIL teaching content and
+every slide should be a full-page image.
 
 ## Output Contract
 
@@ -143,6 +161,7 @@ lesson duration.
    split. See `references/soil-engines.md`.
 2. Context positioning: arrange 引起動機 -> 維持注意 -> 喚起行動.
 3. Page architecture: choose page roles, one core point per page, layout recipe,
+   learning task, semantic relationship, visible text, speaker-only content,
    and any `visuals` or `geometry` needs. See `references/layout-recipes.md`.
 4. Cognitive editing: reduce noise, chunk, add information, structure, sequence,
    and step the content.
@@ -168,6 +187,8 @@ lesson duration.
 ## References
 
 - Read `references/soil-engines.md` for SOIL planning outputs.
+- Read `references/soil-deck-core.md` when a plan may also feed image or HTML
+  deck renderers, or when converting between SOIL deck types.
 - Read `references/layout-recipes.md` before building slides.
 - Read `references/visual-assets.md` when AI illustrations or background images
   are needed.
@@ -235,7 +256,7 @@ CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_GEOMETRY_MD
 
 # soil-general-deck/references/layout-recipes.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/layout-recipes.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/layout-recipes.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT-RECIPES_MD'
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/layout-recipes.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT_RECIPES_MD'
 # Layout Recipes
 
 Use a 16:9 canvas. Keep margins at least 0.5 inches unless a full-bleed slide is
@@ -305,11 +326,56 @@ PowerPoint editable text is not the same as Word OMML. For formulas:
   place it beside editable labels.
 - Avoid a single mixed text box containing long Chinese text and fragile formula
   notation.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT-RECIPES_MD
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT_RECIPES_MD
+
+# soil-general-deck/references/soil-deck-core.md
+mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-deck-core.md")"
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-deck-core.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_DECK_CORE_MD'
+# SOIL Deck Core
+
+Use one renderer-neutral planning model for Image, PowerPoint, and HTML outputs.
+Do not start by filling YAML. First make the teaching decisions clear, then map
+them to the renderer.
+
+```yaml
+- page: 1
+  soil_phase: hook
+  role: question
+  learning_task: "Care about the problem"
+  core_point: "The topic matters"
+  semantic_structure: focus
+  layout:
+    id: question_focus
+  visible_text:
+    title: "為什麼要學？"
+  speaker_only: "Connect the question to the audience"
+  visual: "One concrete tension or question"
+```
+
+## Renderer Mapping
+
+| Core field | Editable PPTX | Image/PPTX | Interactive HTML |
+|---|---|---|---|
+| `visible_text` | PowerPoint text boxes | baked text or plate overlay | live DOM text |
+| `visual` | AI illustration, plate, chart, or geometry | full slide image or plate | hero/supporting asset |
+| `layout.id` | PowerPoint layout recipe | image composition | responsive component |
+| `semantic_structure` | table, flow, comparison, hierarchy, or diagram | visual relationship | interaction routing |
+| `speaker_only` | notes or talk track | notes or talk track | optional speaker mode |
+
+## General Deck Use
+
+- Keep editable text native unless the user asks for baked image output.
+- Keep formulas, precise geometry, and numeric evidence native/editable when
+  correctness matters.
+- Use AI-generated bitmap visuals as visual assets, not as a substitute for
+  editable slide structure.
+- If the same teaching plan may become a `soil-image-deck` or `soil-html-deck`,
+  preserve `learning_task`, `semantic_structure`, and `layout.id` in the plan.
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_DECK_CORE_MD
 
 # soil-general-deck/references/soil-engines.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-engines.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-engines.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL-ENGINES_MD'
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-engines.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_ENGINES_MD'
 # SOIL Engines
 
 ## Engine 1: Concept Positioning
@@ -359,12 +425,19 @@ For each page, specify:
 - title
 - role
 - SOIL section
+- learning task
 - one core point
+- semantic structure: focus, comparison, hierarchy, process, classification,
+  case, data, summary, or action
 - layout recipe
 - visible text
 - speaker notes or oral-only content
 - visuals, if any
 - geometry, if any
+
+When the plan may later become `soil-image-deck` or `soil-html-deck`, keep these
+fields renderer-neutral and preserve the `layout.id` instead of describing only
+PowerPoint objects.
 
 ## Engine 4: Cognitive Editing
 
@@ -386,13 +459,15 @@ Define:
 - title font and body font
 - shape language: cards, lines, arrows, badges
 - image policy: style tokens, negative prompt, role-specific sizes
+- validation rules: overflow, readable text, visual consistency, and final file
+  inspection
 
 ## Engine 6: Production
 
 Build the PowerPoint only after visual/geometry requirements are clear. Do not
 make a complete deck and then retrofit diagrams; reserve layout space before
 production.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL-ENGINES_MD
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_ENGINES_MD
 
 # soil-general-deck/references/validation.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/validation.md")"
@@ -422,7 +497,7 @@ CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VALIDATION_MD
 
 # soil-general-deck/references/visual-assets.md
 mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/visual-assets.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/visual-assets.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL-ASSETS_MD'
+cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/visual-assets.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL_ASSETS_MD'
 # Visual Assets
 
 Use visuals only when they teach, orient, or create attention.
@@ -475,7 +550,8 @@ Use these rules when the output is "AI image + editable PowerPoint text":
 
 Do not embed relative paths that will break after moving the deck folder. Insert
 images into the PPTX file itself.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL-ASSETS_MD
-```
+CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL_ASSETS_MD
+
+````
 
 <!-- END EMBEDDED_SKILLS -->
