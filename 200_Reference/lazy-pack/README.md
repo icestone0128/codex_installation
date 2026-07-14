@@ -170,7 +170,7 @@
 | 2 | `project-init-sync` | [[10-專案初始化工作模式]] | 可直接安裝，需替換專案預設路徑 |
 | 3 | `startup-sync` | [[10-專案初始化工作模式]] | 可直接安裝，依專案 `AGENTS.md` 工作 |
 | 4 | `shutdown-sync` | [[10-專案初始化工作模式]] | 可直接安裝，依專案 `AGENTS.md` 工作 |
-| 5 | `arry-assistant` | [[09-個人助手設定]] | 個人助手模板，需改名與替換資料層路徑 |
+| 5 | `arry-assistant` | [[09-個人助手設定]] | 個人助手模板；含 `agent-execution-strategy.md` 策略總入口，安裝時需改名與替換資料層路徑 |
 | 6 | `secondbrain-research-digest` | [[05-第二大腦設定指南]] | 需設定 `{{OBSIDIAN_VAULT}}` |
 | 7 | `tool-integration-workflow` / `cli-anything` | [[12-外部工具整合工作流]] | `tool-integration-workflow` 可直接安裝；`cli-anything` 透過 `200_Reference/scripts/cli-anything/install_cli_anything.sh` 安裝上游 Codex skill 與 CLI-Hub |
 | 8 | `brainstorm` | [[13-Brainstorm-規劃模式]] | 可直接安裝 |
