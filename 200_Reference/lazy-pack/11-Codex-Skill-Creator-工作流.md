@@ -5,14 +5,14 @@
 
 ## 目標
 
-把 外部 / 第三方 取向的 Skill Creator 啟動包，轉成 Codex App 可用的 skill 建立流程，並判斷新 skill 應該放在全域還是專案本地。也支援把一段滿意對話、prompt、輸出格式或工作流萃取成可重用的 Codex skill。
+把外部／第三方取向的 Skill Creator 啟動包，改寫為三 Agent 共用的 skill 建立流程，同時支援 Codex、Claude、AntiGravity，並判斷新 skill 應該放在全域還是專案本地。也支援把一段滿意對話、prompt、輸出格式或工作流萃取成可重用的跨 Agent skill。
 
-這份文件是之後建立、優化、驗證 Codex skills 的正式懶人包。任何自訂 skill 建立或維護任務都必須先使用 `codex-skill-creator`；其他 creator 只能當輔助參考，不取代本流程。
+這份文件是之後建立、優化、驗證三 Agent 共用 skills 的正式懶人包。`codex-skill-creator` 是為了相容舊觸發語意而保留的 skill ID；它的產出必須同時相容 Codex、Claude 與 AntiGravity。
 
 ## 前置條件
 
 - 已完成 `README.md` 的設定表。
-- 已知道 Codex 全域 skills 位置：`{{CODEX_HOME}}/skills`。
+- 已知道三 Agent 共用 skills 主版本位置：`{{SYNC_ROOT}}/skills`。
 - 已知道專案本地 skills 位置：`<project-root>/000_Agent/skills`。
 - 已確認系統內建 skills 位置：`{{CODEX_HOME}}/skills/.system`。
 - 已知道 Obsidian 全域 skill 索引位置；若沒有，可先建立：
@@ -23,10 +23,10 @@
 
 ## 固定結論
 
-- 使用環境：Codex App。
-- 自訂全域 skills 固定放在 `{{CODEX_HOME}}/skills`。
-- Codex 內建系統 skills 在 `{{CODEX_HOME}}/skills/.system`，平常只讀取，不覆蓋。
-- 個人助手或單一專案的本地 skills 固定放在對應的 `000_Agent/skills`，不要 symlink 到 `{{CODEX_HOME}}/skills`。
+- 使用環境：Codex、Claude、AntiGravity 固定全部相容。
+- 自訂全域 skills 的唯一主版本固定放在 `{{SYNC_ROOT}}/skills`，三 Agent 原生入口由 Item 16 與 chezmoi 管理。
+- `{{CODEX_HOME}}/skills/.system` 是 Codex 內建 adapter 資產，平常只讀取；Claude 與 AntiGravity 使用各自原生入口，不複製 `.system`。
+- 個人助手或單一專案的本地 skills 固定放在對應的 `000_Agent/skills`，不要 symlink 到全域共用主版本。
 - `codex-skill-creator` 是自訂 skill 建立與維護的必要入口；系統內建 creator 只讀，只作輔助參考。
 - 全域 skills 有新增、修改或刪除時，要同步更新 Obsidian 的全域 Skills 索引。
 - 任何 skill 不論全域或專案本地，都要做成可攜式版本。
@@ -37,19 +37,19 @@
 
 | 問題 | 判斷 |
 | --- | --- |
-| 會跨多個專案重複使用嗎？ | 是，放全域 `{{CODEX_HOME}}/skills/<skill-name>` |
-| 需要在任何 Codex 對話都能觸發嗎？ | 是，放全域 |
+| 會跨多個專案重複使用嗎？ | 是，放全域 `{{SYNC_ROOT}}/skills/<skill-name>` |
+| 需要在任何 Codex、Claude 或 AntiGravity 對話都能觸發嗎？ | 是，放全域 |
 | 只服務目前專案的資料、流程、工具或客戶脈絡嗎？ | 是，放 `<project-root>/000_Agent/skills/<skill-name>` |
 | 含有不適合公開或跨專案複用的專案脈絡嗎？ | 放專案本地 |
 | 目前只是流程草稿，尚未穩定複用嗎？ | 先放 `000_Agent/skills`，成熟後再升級全域 |
 
 可攜化規則：
 
-- 全域 skill：實作在 `{{CODEX_HOME}}/skills/<skill-name>`，同步可攜副本到 `本文件文末內嵌內容：<skill-name>`，並更新 Obsidian 全域 Skills 索引。
+- 全域 skill：實作在 `{{SYNC_ROOT}}/skills/<skill-name>`，同步可攜副本到 `本文件文末內嵌內容：<skill-name>`，並更新 Obsidian 全域 Skills 索引。
 - 專案 skill：實作在 `<project-root>/000_Agent/skills/<skill-name>`，該資料夾必須包含完整 `SKILL.md` 與必要資源；若專案使用 Git，跟著專案提交。
-- 不把 `000_Agent/skills` symlink 到 `{{CODEX_HOME}}/skills`。
+- 不把 `000_Agent/skills` symlink 到 `{{SYNC_ROOT}}/skills`。
 
-## 建立 Codex Skill Creator 必要入口
+## 建立三 Agent Skill Creator 必要入口
 
 建議 skill 名稱：
 
@@ -60,17 +60,17 @@ codex-skill-creator
 建立：
 
 ```text
-{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md
-{{CODEX_HOME}}/skills/codex-skill-creator/agents/openai.yaml
-{{CODEX_HOME}}/skills/codex-skill-creator/references/built-in-quality-practices.md
-{{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
-{{CODEX_HOME}}/skills/codex-skill-creator/references/conversation-to-skill.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/agents/openai.yaml
+{{SYNC_ROOT}}/skills/codex-skill-creator/references/built-in-quality-practices.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/references/conversation-to-skill.md
 ```
 
 用途：
 
-- 把 外部 / 第三方 skill 教學轉成 Codex App 相容流程。
-- 把成功對話、prompt、輸出格式或重複工作流萃取成 Codex skill。
+- 把 外部 / 第三方 skill 教學轉成 三 Agent 相容流程。
+- 把成功對話、prompt、輸出格式或重複工作流萃取成三 Agent 共用 skill。
 - 建立、優化、驗證自訂全域或專案本地 skills。
 - 記得同步可攜式版本；全域 skill 同步 Obsidian 全域 skill 索引，專案 skill 同步專案駕駛艙。
 - 顯式呼叫使用 `$codex-skill-creator`；自然語句如「幫我建立 skill」、「把這段對話變成 skill」也必須觸發。
@@ -93,29 +93,29 @@ codex-skill-creator
 下載本 repo 後，直接使用本文文末的內建安裝腳本建立 companion skill：
 
 ```bash
-mkdir -p "{{CODEX_HOME}}/skills/codex-skill-creator"
+mkdir -p "{{SYNC_ROOT}}/skills/codex-skill-creator"
 # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
-test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill-creator installed"
+test -f "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill-creator installed"
 ```
 
 若下載者沒有使用 Obsidian 全域 skill 索引，安裝後可跳過本文的 Obsidian 同步步驟。
 
 ## 來源啟動包轉換規則
 
-| 外部 / 第三方 啟動包項目 | Codex App 相容做法 |
+| 外部 / 第三方 啟動包項目 | 三 Agent 相容做法 |
 | --- | --- |
-| 來源工具的全域 skills 路徑 | 需要全域觸發時改用 `{{CODEX_HOME}}/skills` |
+| 來源工具的全域 skills 路徑 | 需要全域觸發時改用共用主版本 `{{SYNC_ROOT}}/skills`，三 Agent 再各用原生入口讀取 |
 | 來源工具的專案級 skills 路徑 專案 skill | 改放該專案 `000_Agent/skills`，只服務該專案 |
-| `000_Agent/skills` symlink | 不建立；`000_Agent/skills` 是本地 skill 區，不等於 Codex 全域 skills |
-| 來源工具 slash command `/skill-name` | 改用實際安裝名稱 `$skill-name`，或使用符合 `description` 的自然語意 |
-| `allowed-tools` | 不寫入；Codex 工具權限由當前 session、plugin、connector 與沙箱控制 |
+| `000_Agent/skills` symlink | 不建立；`000_Agent/skills` 是專案本地 skill 區，不等於全域共用 skills |
+| 來源工具 slash command `/skill-name` | 保留可攜式自然語意觸發；若某 Agent 支援原生顯式呼叫，另在 adapter 註記它的呼叫方式 |
+| `allowed-tools` | 不寫入共用核心；工具權限依當前 Agent 的 session、plugin／connector／MCP 與 sandbox 控制 |
 | `disable-model-invocation` / `user-invocable` | 不寫入；觸發邊界寫在 `description` 與本文規則 |
 | `when_to_use` | 轉成 `description` 的觸發語意與本文工作流程 |
-| 來源工具 subagent 設定 | 不照搬；Codex 只有在使用者明確要求副代理時才使用 subagent |
+| 來源工具 subagent 設定 | 轉成共用的「可否委派、任務邊界、輸出契約」；各 Agent 實際委派命令放 adapter |
 | 安裝第三方或改用內建 creator | 不取代 `codex-skill-creator`；其他 creator 內容只作輔助參考 |
-| 告知重啟 來源工具 | 改成開新 Codex 對話或重啟 Codex App |
+| 告知重啟來源工具 | 對本次影響的 Codex、Claude、AntiGravity 分別開新對話或重載 skill 入口 |
 
-## Codex Skill 標準結構
+## 三 Agent 共用 Skill 標準結構
 
 最小結構：
 
@@ -192,14 +192,14 @@ metadata:
 建立：
 
 ```text
-{{CODEX_HOME}}/skills/<skill-name>/SKILL.md
+{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md
 <project-root>/000_Agent/skills/<skill-name>/SKILL.md
 ```
 
 視需要加：
 
 ```text
-{{CODEX_HOME}}/skills/<skill-name>/references/<reference>.md
+{{SYNC_ROOT}}/skills/<skill-name>/references/<reference>.md
 <project-root>/000_Agent/skills/<skill-name>/references/<reference>.md
 ```
 
@@ -219,8 +219,8 @@ metadata:
 範例檢查：
 
 ```bash
-find "{{CODEX_HOME}}/skills/<skill-name>" -maxdepth 2 -type f -print
-sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
+find "{{SYNC_ROOT}}/skills/<skill-name>" -maxdepth 2 -type f -print
+sed -n '1,20p' "{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md"
 ```
 
 ### 5. 同步
@@ -253,11 +253,11 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 本懶人包已附：
 
 ```text
-{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md
-{{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
-{{CODEX_HOME}}/skills/codex-skill-creator/references/conversation-to-skill.md
-{{CODEX_HOME}}/skills/secondbrain-research-digest/SKILL.md
-{{CODEX_HOME}}/skills/secondbrain-research-digest/references/research-note-template.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/references/conversation-to-skill.md
+{{SYNC_ROOT}}/skills/secondbrain-research-digest/SKILL.md
+{{SYNC_ROOT}}/skills/secondbrain-research-digest/references/research-note-template.md
 ```
 
 下載者應使用自己的 `{{CODEX_HOME}}` 與自己的 skill 名稱。
@@ -269,13 +269,13 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 1. 檢查 skill 檔案：
 
 ```bash
-find "{{CODEX_HOME}}/skills/<skill-name>" -maxdepth 2 -type f -print
+find "{{SYNC_ROOT}}/skills/<skill-name>" -maxdepth 2 -type f -print
 ```
 
 2. 檢查 frontmatter：
 
 ```bash
-sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
+sed -n '1,20p' "{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md"
 ```
 
 3. 確認：
@@ -285,36 +285,36 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
    - 沒有 來源工具的 skills 路徑、`allowed-tools`、`disable-model-invocation`、`user-invocable` 等 來源工具專用 正式設定。
    - `agents/openai.yaml` 與 `SKILL.md` 一致，且已執行系統內建 `quick_validate.py`（若可用）。
    - 新增 scripts 已實際執行；複雜 skill 已做獨立 forward-test，或記錄無法執行的原因與 fallback。
-4. 開新 Codex 對話，使用自然語言觸發該 skill 的任務。
+4. 分別用 Codex、Claude、AntiGravity 的原生入口重載 skill，並用同一組自然語言任務做最小驗證。
 5. 確認可攜式版本完整：全域 skill 同步 `本文件文末內嵌內容：<skill-name>`；專案 skill 保留在 `<project-root>/000_Agent/skills/<skill-name>`。
 6. 同步 Obsidian 全域 Skills 索引、專案駕駛艙或專案 README。
 
 ## 踩坑修正
 
 - 原始 `02-skill-creator-bootstrap.md` 是 來源工具 啟動包，不能原樣執行。
-- 不要把第三方 `skill-creator` sparse checkout 到 Codex 系統 skill 位置；Codex 已有內建 `.system/skill-creator`。
-- 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`，因為它由 Codex 管理。
-- Codex 全域 skills 不放在 來源工具的 skills 路徑；專案級 skills 放 `<project-root>/000_Agent/skills`，但不建立 symlink。
-- Codex 不應依賴 `/skill-name` slash command；要靠 `description` 寫清楚觸發語意。
-- 來源工具專用 frontmatter 欄位要轉成 Codex 可理解的文字規則，不要照抄。
-- 新增 skill 後不代表本對話立即可見；通常要開新對話或重啟 Codex App。
+- 不要把第三方 `skill-creator` sparse checkout 到任一 Agent 的內建系統目錄；共用主版本固定放 `{{SYNC_ROOT}}/skills`。
+- 不要覆蓋 `{{CODEX_HOME}}/skills/.system/skill-creator`，因為它是 Codex 自己管理的 adapter 資產。
+- 全域 skills 不放在來源工具的專屬路徑；專案級 skills 放 `<project-root>/000_Agent/skills`，但不建立到全域主版本的 symlink。
+- 共用核心不依賴單一 Agent 的 slash command；要靠 `description` 寫清楚自然語意觸發，再為各 Agent 記錄可選顯式呼叫 adapter。
+- 來源工具專用 frontmatter 欄位要轉成三 Agent 都能理解的共用文字規則；原生 metadata 只放對應 adapter。
+- 新增 skill 後不代表現有對話立即可見；通常要對三 Agent 各自開新對話或重載原生入口。
 - Obsidian 同步紀錄要放在「最近同步紀錄」表格，不要誤插到自訂 skills 表格。
 - Markdown 範本內若有巢狀 code fence，外層要用 `~~~markdown`，避免 YAML 範例提早結束區塊。
 - 候選清單若寫進 repo 內，會出現在 git 未追蹤狀態；收工時要明確決定是否納入版本控制。
 
 ## 之後怎麼用
 
-當使用者要求「建立 skill」、「優化 skill」、「把 來源 skill 教學轉成 Codex」、「把剛剛這段對話變成 skill」、「從對話萃取 Skill」、「跑 Skill Creator 啟動包」時：
+當使用者要求「建立 skill」、「優化 skill」、「把來源 skill 教學轉成三 Agent 共用版」、「把剛剛這段對話變成 skill」、「從對話萃取 Skill」、「跑 Skill Creator 啟動包」時：
 
-1. 先套用本文件的 Codex 相容規則。
+1. 先套用本文件的三 Agent 共用契約與 adapter 規則。
 2. 使用 `codex-skill-creator` companion skill。
 3. 若是從對話萃取 skill，先確認要固化的片段、skill 名稱、是否保留優化過程與觸發/輸出格式。
 4. 若是第一個真實工作 skill，先做簡短訪談。
-5. 判斷 skill 歸屬，建立或更新 `{{CODEX_HOME}}/skills/<skill-name>` 或 `<project-root>/000_Agent/skills/<skill-name>`。
+5. 判斷 skill 歸屬，建立或更新 `{{SYNC_ROOT}}/skills/<skill-name>` 或 `<project-root>/000_Agent/skills/<skill-name>`。
 6. 驗證 frontmatter、路徑與 reference。
 7. 若系統 helper 可用，執行 `init_skill.py`／`generate_openai_yaml.py`／`quick_validate.py` 對應步驟，並視複雜度做 forward-test。
 8. 同步可攜式版本：全域同步 LazyPack 與 Obsidian 全域 Skills；專案同步專案 `000_Agent/skills` 與專案駕駛艙。
-9. 回報是否需要開新對話或重啟 Codex App。
+9. 回報 Codex、Claude、AntiGravity 各自的安裝入口、重載方式、實際驗證與 fallback。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
@@ -322,26 +322,26 @@ sed -n '1,20p' "{{CODEX_HOME}}/skills/<skill-name>/SKILL.md"
 
 本節是自含式安裝區塊。這個序號項目會安裝：`codex-skill-creator`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
 # ---- codex-skill-creator ----
-mkdir -p "{{CODEX_HOME}}/skills/codex-skill-creator"
+mkdir -p "{{SYNC_ROOT}}/skills/codex-skill-creator"
 # codex-skill-creator/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD_0E95F5A366'
 ---
 name: codex-skill-creator
-description: Use for every request to create, extract, adapt, improve, validate, rename, or synchronize a custom Codex skill. This is the required entry workflow for global and project-local skill work, including turning third-party guides or successful conversations into reusable skills. Use global Codex skills under {{CODEX_HOME}}/skills and project skills under 000_Agent/skills.
+description: Use for every request to create, extract, adapt, improve, validate, rename, or synchronize a custom Agent Skill shared by Codex, Claude, and AntiGravity. This is the required entry workflow for global and project-local skill work, including turning third-party guides or successful conversations into reusable cross-agent packages. Use global source packages under {{SYNC_ROOT}}/skills and project skills under 000_Agent/skills.
 metadata:
-  short-description: Build Codex-compatible skills
+  short-description: Build cross-agent skills
 ---
 
-# Codex Skill Creator
+# Cross-Agent Skill Creator (`codex-skill-creator`)
 
-Use this skill as Arry's required entry workflow for creating and maintaining custom skills. When the user asks to create, extract, adapt, improve, validate, rename, or synchronize a skill, use `codex-skill-creator` first. Codex's built-in `skill-creator` is read-only supporting guidance; it does not replace this workflow or its ownership, portability, and three-surface sync rules.
+Use this skill as Arry's required entry workflow for creating and maintaining custom skills shared by Codex, Claude, and AntiGravity. The installed ID remains `codex-skill-creator` for trigger compatibility. Codex's built-in `skill-creator` is one read-only supporting adapter; it does not replace this workflow or its ownership, portability, and multi-surface sync rules.
 
 ## Invocation And Interview Rules
 
@@ -354,11 +354,11 @@ Use this skill as Arry's required entry workflow for creating and maintaining cu
 
 ## Default Paths
 
-- Custom global skills: `$CODEX_HOME/skills`, or `{{CODEX_HOME}}/skills` when `$CODEX_HOME` is not set.
-- This user's global skills symlink: `{{CODEX_HOME}}/skills`, pointing to Google Drive `codex_symlink/skills`.
+- Custom global skill source: `{{SYNC_ROOT}}/skills`.
+- Native entrypoints: Codex `{{CODEX_HOME}}/skills`, Claude `{{CLAUDE_HOME}}/skills`, and AntiGravity `{{GEMINI_CONFIG}}/skills`; chezmoi points all three to `{{SYNC_ROOT}}/skills`.
 - Project-local skills: `<project-root>/000_Agent/skills`.
 - Global portable copy root: `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>`.
-- Built-in system skills: `$CODEX_HOME/skills/.system` (read-only for normal work).
+- Codex built-in system skills: `$CODEX_HOME/skills/.system` (a read-only initializer/validator adapter, not the shared source).
 - Optional skill mirror note: ask the user for their Obsidian or project inventory path when no local mirror is already documented.
 - This user's current mirror note: `{{OBSIDIAN_PROJECTS}}/{{SETUP_PROJECT_NAME}}/全域 Skills/全域 Skills 同步.md`.
 - This user's current project root: `{{SETUP_REPO}}`.
@@ -374,33 +374,34 @@ Use this skill as Arry's required entry workflow for creating and maintaining cu
 
 ## Compatibility Rules
 
-1. Do not install or edit skills under 來源工具專用 skills paths, `來源工具舊 skills 路徑`, or 來源工具 command folders.
+1. Keep one shared package under `{{SYNC_ROOT}}/skills` or the project `000_Agent/skills`; native Agent paths are adapters, not additional sources.
 2. Do not overwrite `{{CODEX_HOME}}/skills/.system/skill-creator` or route the user around `codex-skill-creator`; built-in material may be consulted only as supporting guidance.
-3. Use Codex frontmatter with `name`, `description`, and optional `metadata.short-description`.
-4. Do not copy 來源工具專用 fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, `when_to_use`, or 來源工具 subagent config unless converting them into plain Codex instructions.
-5. Do not assume slash-command behavior. In Codex, skills are triggered by the skill metadata and current task context.
+3. Use shared frontmatter with `name`, `description`, and optional `metadata.short-description`; keep vendor-specific metadata in a native adapter file.
+4. Convert fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, `when_to_use`, or subagent config into portable trigger, permission, and workflow instructions unless all three agents support the field identically.
+5. Do not assume one invocation syntax. Put the durable trigger intent in metadata and document native invocation differences only when they matter.
 6. Keep `SKILL.md` concise. Move detailed examples, source adaptations, schemas, and checklists into `references/`.
 7. After adding, changing, or deleting a custom global skill, update the LazyPack portable copy and Obsidian global skill mirror note.
 8. After adding, changing, or deleting a project-local skill, keep the complete portable package under the project `000_Agent/skills` and update the project cockpit.
-9. Do not create alternative skill roots. Global work stays under `{{CODEX_HOME}}/skills`; project-local work stays under `<project-root>/000_Agent/skills`.
+9. Do not create alternative content roots. Global source work stays under `{{SYNC_ROOT}}/skills`; project-local work stays under `<project-root>/000_Agent/skills`.
+10. Any Agent-specific connector, MCP, image tool, sandbox, model, UI, or command step must include `Shared steps`, `Codex adapter`, `Claude adapter`, `AntiGravity adapter`, `Fallback`, and `Verification` notes. Read `../cross-device-sync/references/agent-execution-compatibility.md` for the contract.
 
 ## Ownership Decision
 
 Before creating or modifying a skill, decide where it belongs:
 
-- Global: reusable across projects, should trigger from any Codex project, or is part of Arry's standard workflow. Store in `{{CODEX_HOME}}/skills/<skill-name>` and sync `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>`.
+- Global: reusable across projects, should trigger from any of the three agents, or is part of Arry's standard workflow. Store in `{{SYNC_ROOT}}/skills/<skill-name>` and sync native entrypoints plus `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>`.
 - Project-local: only useful for the current project, depends on project-specific context, or is still a local draft. Store in `<project-root>/000_Agent/skills/<skill-name>`.
 - Arry assistant remains a global entry skill. Use it during project initialization to read the assistant data layer and help decide whether future skills are global or project-local.
 
-Do not symlink `000_Agent/skills` into `{{CODEX_HOME}}/skills`.
+Do not symlink `000_Agent/skills` into `{{SYNC_ROOT}}/skills`.
 
 ## Mode Selection
 
 Choose the branch before writing files:
 
-- Source-adapter mode: external or third-party skill material needs conversion into Codex conventions. Read `references/codex-bootstrap-adapter.md`.
+- Source-adapter mode: external or third-party skill material needs conversion into shared instructions and three native adapters. Read `references/codex-bootstrap-adapter.md`.
 - Conversation-extraction mode: the user wants to turn a successful conversation, prompt, output style, debugging pattern, or repeated workflow into a reusable skill. Read `references/conversation-to-skill.md`.
-- Direct-maintenance mode: an existing Codex skill needs a small improvement, validation, or sync repair. Read the target skill and patch only the needed sections.
+- Direct-maintenance mode: an existing shared skill needs a small improvement, validation, or sync repair. Read the target skill and patch only the needed sections.
 - First-skill interview mode: the user wants help finding a practical first skill. Use the short interview below.
 
 For field-by-field conversion details, read `references/codex-bootstrap-adapter.md` when the source material is 來源工具導向 or third-party-specific.
@@ -418,18 +419,18 @@ Before creating or substantially redesigning a skill, read `references/built-in-
 - Keep `SKILL.md` under 500 lines when practical. Move schemas, long examples, provider variants, and deep checklists into directly linked `references/` files; avoid reference chains deeper than one level.
 - Do not add auxiliary `README.md`, installation guides, changelogs, or placeholder resource files unless they are required by the skill's actual operation or explicitly requested.
 - Create only the resource directories the skill needs. Repeated deterministic work belongs in `scripts/`; domain guidance belongs in `references/`; output templates and media belong in `assets/`.
-- Treat `agents/openai.yaml` as recommended UI metadata. Keep it aligned with `SKILL.md`, quote string values, and make `default_prompt` explicitly mention `$<skill-name>`.
+- Treat `agents/openai.yaml` as a Codex UI adapter, not a package compatibility boundary. Keep it aligned with `SKILL.md`, quote string values, and make `default_prompt` explicitly mention `$<skill-name>`.
 
 ## Workflow
 
 1. Identify the target:
-   - New global skill: create `{{CODEX_HOME}}/skills/<skill-name>/SKILL.md`.
+   - New global skill: create `{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md`.
    - New project skill: create `<project-root>/000_Agent/skills/<skill-name>/SKILL.md`.
    - Existing custom skill: read the current skill first, then patch only the needed sections.
    - Built-in system skill: do not patch; create a companion custom skill or a reference note.
    - Confirm that this request is being handled through `codex-skill-creator`; do not hand custom-skill ownership to the built-in creator.
    - For a new skill, normalize the name to lowercase hyphen-case, keep it at 64 characters or fewer, and use the built-in initializer when available:
-     `python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/init_skill.py" <skill-name> --path <parent> [--resources ...] --interface ...`.
+     `python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/init_skill.py" <skill-name> --path <parent> [--resources ...] --interface ...`.
    - If the built-in initializer is unavailable, create the same minimal structure manually and record that fallback in the result.
 2. Extract the useful workflow from the source material:
    - trigger scenarios
@@ -439,17 +440,17 @@ Before creating or substantially redesigning a skill, read `references/built-in-
    - user-facing interview questions
    - failure handling
    - privacy or project-context boundaries
-3. Convert to Codex App conventions:
-   - replace 來源工具 paths with Codex paths
-   - replace slash-command assumptions with metadata-trigger guidance
-   - replace 來源工具 agents with optional validation passes or plain instructions
-   - replace CLI-only user instructions with Codex App language
+3. Convert to the shared three-agent contract:
+   - replace source-specific content roots with `{{SYNC_ROOT}}/skills` or project `000_Agent/skills`
+   - preserve trigger intent in metadata and document native invocation only when it differs
+   - keep shared task logic together and move only real runtime differences into the three adapter notes
+   - preserve a common CLI/script route whenever native tools differ
 4. Write the skill package:
    - `SKILL.md` for compact operating instructions
    - `references/` for detailed adapted source notes
    - `scripts/` only when deterministic checks are genuinely useful
    - `assets/` only when files are used in final outputs
-   - `agents/openai.yaml` for UI metadata unless the current environment does not support it; generate it with the built-in helper when available and verify it after substantial `SKILL.md` changes
+   - `agents/openai.yaml` as optional Codex UI metadata; Claude and AntiGravity continue to use the shared `SKILL.md` plus their native discovery behavior
    - if replacing an existing package, preserve or back up the previous package before the replacement
 5. Validate:
    - `SKILL.md` exists
@@ -457,14 +458,15 @@ Before creating or substantially redesigning a skill, read `references/built-in-
    - `name` matches the folder name
    - `description` clearly names the triggering tasks
    - referenced files actually exist
-   - no 來源工具專用 path or field remains unless it is explicitly labeled as source-only context
+   - no source-only path or field controls shared behavior unless it is isolated and labeled as a native adapter
    - personal paths are either replaced with portable placeholders or clearly labeled as this user's local defaults
    - no unresolved placeholders remain in active instructions unless they are intentionally part of a portable template
    - run the built-in validator when available:
-     `python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>`
+     `python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>`
    - before running it, confirm the selected interpreter can `import yaml`; if the default `python3` cannot, use another available interpreter with PyYAML and report the fallback rather than silently skipping validation
    - test every added script directly; for several similar scripts, test a representative sample
-   - verify `agents/openai.yaml` still matches the skill name, purpose, and real invocation
+   - verify `agents/openai.yaml` still matches the skill name, purpose, and real Codex invocation without changing Claude or AntiGravity behavior
+   - run `cross-device-sync/scripts/audit-agent-compatibility.py` on the changed package and portable documentation
 6. Sync portable copies and indexes:
    - Global skill: sync `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>` and the Obsidian global skill mirror note.
    - Project skill: keep the complete portable package under `<project-root>/000_Agent/skills/<skill-name>` and update the project cockpit.
@@ -472,7 +474,7 @@ Before creating or substantially redesigning a skill, read `references/built-in-
    - add or update the custom skill table row
    - add or update the skill summary section
    - append a dated sync record
-8. Report the result with exact paths, ownership level, portable-copy status, and any restart requirement. New or changed global skills may require a new Codex conversation before the trigger list reflects them.
+8. Report the result with exact paths, ownership level, portable-copy status, all three native entrypoints, and per-agent restart/fresh-session requirements.
 9. Test discoverability with the real skill name: use `$<skill-name>` when explicit invocation is useful, or a natural-language trigger covered by the skill description.
 10. Complete one realistic trial with representative input. Creating files without a real trigger-and-output check is not a finished skill workflow.
 11. Forward-test complex or high-impact skills with a fresh independent agent when that capability is available. Give it the raw skill and a realistic user request, not the intended answer or suspected defect. Ask the user first if the test may take substantial time, require extra approvals, or touch live systems. If independent agents are unavailable, document the local realistic trial as the fallback.
@@ -499,36 +501,37 @@ After the first skill is built:
 
 ## Validation Checklist
 
-- Global skill lives under `{{CODEX_HOME}}/skills/<skill-name>/`; project skill lives under `<project-root>/000_Agent/skills/<skill-name>/`.
+- Global skill source lives under `{{SYNC_ROOT}}/skills/<skill-name>/` and resolves through all three native entrypoints; project skill lives under `<project-root>/000_Agent/skills/<skill-name>/`.
 - Portable package exists in the correct place: `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>` for global, project `000_Agent/skills/<skill-name>` for project-local.
 - `SKILL.md` frontmatter includes `name` and `description`.
 - `description` includes concrete trigger phrases and use cases.
 - Detailed material is in `references/`, not bloating `SKILL.md`.
 - The chosen instruction freedom matches task fragility; deterministic operations use scripts when appropriate.
 - New skills were initialized with the built-in helper when available, or the fallback was reported.
-- `agents/openai.yaml` exists when supported and remains aligned with `SKILL.md`.
+- `agents/openai.yaml` exists when useful as the Codex UI adapter and remains aligned with `SKILL.md`; it is not required by Claude or AntiGravity.
 - The built-in `quick_validate.py` passed when available.
 - The skill avoids secrets, tokens, and personal data.
+- Agent-specific behavior has all three adapter notes, a shared fallback, and one verification contract.
 - The user-facing creation or maintenance route is `codex-skill-creator`, not the built-in creator.
 - Explicit invocation uses the actual folder/frontmatter name, for example `$social-cards` or `$landing-page`; do not invent aliases that are not installed.
 - Existing skill replacement has a backup or version-control recovery path; narrow updates preserve unrelated files.
 - At least one realistic trigger-and-output trial was completed or the unperformed trial is explicitly reported.
 - Complex skills received an uncontaminated forward-test when available, or the fallback and reason were reported.
 - Obsidian mirror note is updated for global skill changes; project cockpit is updated for project-local skill changes.
-CODEX_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD
+AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD_0E95F5A366
 
 # codex-skill-creator/agents/openai.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/codex-skill-creator/agents/openai.yaml" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_AGENTS_OPENAI_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/agents/openai.yaml" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
-  display_name: "Codex Skill Creator"
-  short_description: "Create and maintain portable Codex skills"
-  default_prompt: "Use $codex-skill-creator to create or improve a portable Codex skill."
-CODEX_LAZYPACK_CODEX_SKILL_CREATOR_AGENTS_OPENAI_YAML
+  display_name: "Cross-Agent Skill Creator"
+  short_description: "Create skills shared by Codex, Claude, and AntiGravity"
+  default_prompt: "Use $codex-skill-creator to create or improve a portable skill shared by Codex, Claude, and AntiGravity."
+AGENT_LAZYPACK_CODEX_SKILL_CREATOR_AGENTS_OPENAI_YAML_DEB9755D27
 
 # codex-skill-creator/references/built-in-quality-practices.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/references/built-in-quality-practices.md")"
-cat > "{{CODEX_HOME}}/skills/codex-skill-creator/references/built-in-quality-practices.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_BUILT_IN_QUALITY_PRACTICES_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/references/built-in-quality-practices.md")"
+cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/references/built-in-quality-practices.md" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_BUILT_IN_QUALITY_PRACTICES_MD_0B0EA38A28'
 # Built-in Skill Creator Quality Practices
 
 Use this reference when creating a new skill or substantially redesigning an existing one. It integrates the durable quality practices from Codex's built-in `skill-creator`; `codex-skill-creator` remains the single entry workflow and owns placement, portability, and synchronization.
@@ -569,7 +572,7 @@ Create only necessary directories. Avoid placeholder resources and auxiliary fil
 When the built-in helper exists, initialize a new skill with:
 
 ```bash
-python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/init_skill.py" \
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/init_skill.py" \
   <skill-name> --path <parent-directory> \
   [--resources scripts,references,assets] \
   --interface display_name="<Display Name>" \
@@ -600,7 +603,7 @@ Keep `SKILL.md` under 500 lines when practical. Link required references directl
 When supported, generate or refresh `agents/openai.yaml` with:
 
 ```bash
-python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/generate_openai_yaml.py" \
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/generate_openai_yaml.py" \
   <skill-folder> \
   --interface display_name="<Display Name>" \
   --interface short_description="<25-64 character UI description>" \
@@ -614,7 +617,7 @@ Quote all string values. Include optional icons, brand colors, dependencies, or 
 Run the built-in validator when available:
 
 ```bash
-python3 "${CODEX_HOME:-${CODEX_HOME}}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>
 ```
 
 First verify that the selected interpreter can `import yaml`. If the default `python3` lacks PyYAML, use another available interpreter that has it and report the fallback. Do not silently skip validation or install packages globally without considering the environment's package-management policy.
@@ -634,13 +637,13 @@ For complex or high-impact skills, use a fresh independent agent when available.
 Ask the user before forward-testing only when it may take substantial time, require additional approvals, or modify live systems. If independent agents are unavailable, perform and report a realistic local trial instead.
 
 Iterate from observed failures, then revalidate metadata, scripts, portable copies, and indexes.
-CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_BUILT_IN_QUALITY_PRACTICES_MD
+AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_BUILT_IN_QUALITY_PRACTICES_MD_0B0EA38A28
 
 # codex-skill-creator/references/codex-bootstrap-adapter.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md")"
-cat > "{{CODEX_HOME}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CODEX_BOOTSTRAP_ADAPTER_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md")"
+cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CODEX_BOOTSTRAP_ADAPTER_MD_30B8989A3A'
 ---
-title: Codex Skill Creator Bootstrap Adapter
+title: Cross-Agent Skill Creator Bootstrap Adapter
 date: 2026-05-20
 type: reference
 tags:
@@ -649,9 +652,9 @@ tags:
   - compatibility
 ---
 
-# Codex Skill Creator Bootstrap Adapter
+# Cross-Agent Skill Creator Bootstrap Adapter
 
-This reference adapts `02-skill-creator-bootstrap.md` for Codex App. The source is useful as a workflow pattern, but it is 來源工具-oriented and must not be copied verbatim.
+This reference adapts `02-skill-creator-bootstrap.md` into one package shared by Codex, Claude, and AntiGravity. The source is useful as a workflow pattern, but source-specific paths and commands must not be copied verbatim.
 
 ## Keep From The Source
 
@@ -666,24 +669,24 @@ This reference adapts `02-skill-creator-bootstrap.md` for Codex App. The source 
 - Finish by creating and realistically testing one useful skill; installation or scaffolding alone is not completion.
 - Keep a small candidate backlog and improve skills after real use instead of mass-generating speculative packages.
 
-## Convert For Codex
+## Convert For Three Agents
 
-| Source assumption | Codex-compatible version |
+| Source assumption | Shared package and native adapters |
 |---|---|
-| 來源工具 global skills path | `{{CODEX_HOME}}/skills` for skills that must trigger across projects |
+| Source-specific global skills path | `{{SYNC_ROOT}}/skills` for skills that must trigger across projects; chezmoi exposes it through all three native paths |
 | 來源工具 project-level skills path | `<project-root>/000_Agent/skills` for skills that serve only one project |
-| `000_Agent/skills` as symlink target | Do not symlink it into `{{CODEX_HOME}}/skills`; it is the assistant or project-local portable skill package |
-| alternate global discovery paths | Do not create them; this setup uses `{{CODEX_HOME}}/skills` or `{{CODEX_HOME}}/skills` only |
+| `000_Agent/skills` as symlink target | Do not symlink it into `{{SYNC_ROOT}}/skills`; it is the project-local portable skill package |
+| alternate global content roots | Do not create them; native Agent paths remain thin entrypoint adapters to `{{SYNC_ROOT}}/skills` |
 | alternate project discovery paths | Do not create them; this setup uses `<project-root>/000_Agent/skills` only |
-| slash command `/skill-name` | Use `$skill-name` with the actual installed name, or natural-language triggers; do not depend on aliases |
-| 來源工具 `AskUserQuestion` | Use an available structured question UI; otherwise continue with numbered choices or concise plain-text questions |
-| 來源工具 subagents in `agents/*.md` | Do not copy the source configuration. For forward-testing, use a fresh Codex agent when available; ask first only when the test may be slow, require extra approvals, or touch live systems |
-| `allowed-tools` | Omit; Codex tool access is controlled by the session and plugin permissions |
+| slash command `/skill-name` | Preserve natural-language trigger intent; document `$skill-name` or another native syntax only as an adapter |
+| source structured-question tool | Use the active Agent's structured UI when available; otherwise continue with numbered choices or concise plain-text questions |
+| source subagents in `agents/*.md` | Keep the task boundary portable; use the active Agent's supported delegation only when authorized and available |
+| `allowed-tools` | Convert to plain permission and fallback rules unless all three agents support the field identically |
 | `disable-model-invocation` / `user-invocable` | Omit; express trigger boundaries in `description` and body instructions |
 | Third-party or built-in creator install | Use `codex-skill-creator` as the required custom-skill workflow; consult other creator material only as supporting guidance |
-| Tell user to restart 來源工具 | Say a new Codex conversation or app restart may be needed for new skill metadata to appear |
+| Tell user to restart the source tool | Record the fresh-session or restart step for Codex, Claude, and AntiGravity separately |
 
-## Codex Skill Package Standard
+## Shared Agent Skill Package Standard
 
 Minimum:
 
@@ -751,11 +754,11 @@ Do not edit the system skill contents under `.system`; the mirror note may list 
 When adapting newer installation guides, retain environment inspection, complete-package validation, iterative testing, plain-text interview fallback, and explicit `$skill-name` examples. Do not import alternate skill roots, another runtime's rule files, another runtime's commands, or another creator as the primary user workflow.
 
 Adapt the source's candidate-list idea to an approved project location such as `<project-root>/100_Todo/projects/skill-candidates.md`; do not create a duplicate daily-memory system. A useful cadence is: build one skill, run it 3-5 times, revise from observed failures, then decide whether the next candidate is still worth creating.
-CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CODEX_BOOTSTRAP_ADAPTER_MD
+AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CODEX_BOOTSTRAP_ADAPTER_MD_30B8989A3A
 
 # codex-skill-creator/references/conversation-to-skill.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/codex-skill-creator/references/conversation-to-skill.md")"
-cat > "{{CODEX_HOME}}/skills/codex-skill-creator/references/conversation-to-skill.md" <<'CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CONVERSATION_TO_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/references/conversation-to-skill.md")"
+cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/references/conversation-to-skill.md" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CONVERSATION_TO_SKILL_MD_4D4BF7D9EA'
 ---
 title: Conversation To Skill Extraction
 date: 2026-06-14
@@ -768,11 +771,11 @@ tags:
 
 # Conversation To Skill Extraction
 
-Use this branch when the user says a previous conversation, prompt, result, or workflow should become a reusable Codex skill.
+Use this branch when the user says a previous conversation, prompt, result, or workflow should become a reusable skill shared by Codex, Claude, and AntiGravity.
 
 ## Goal
 
-Turn the satisfying part of a conversation into a portable skill that another Codex session can use without needing the full original chat.
+Turn the satisfying part of a conversation into a portable skill that another session in any of the three agents can use without needing the full original chat.
 
 The output should preserve the reusable method, not the entire conversation history.
 
@@ -793,8 +796,8 @@ If the conversation contains private data, secrets, personal stories, client det
    - user trigger phrases
    - desired output
    - required inputs
-   - decisions Codex must make
-   - things Codex must avoid
+   - decisions the active agent must make
+   - things every agent must avoid
 2. Separate reusable method from incidental context:
    - keep stable steps, heuristics, formats, and checks
    - remove one-off names, temporary paths, credentials, and private details
@@ -820,7 +823,7 @@ If the conversation contains private data, secrets, personal stories, client det
 For a new global skill:
 
 ```text
-{{CODEX_HOME}}/skills/<skill-name>/
+{{SYNC_ROOT}}/skills/<skill-name>/
 ├── SKILL.md
 └── references/
     └── <method-or-pattern>.md
@@ -840,15 +843,15 @@ If examples are needed, include short synthetic examples. Do not paste the full 
 ## Skill Draft Checklist
 
 - The description names the real user phrase that should trigger the skill.
-- The body tells Codex when to read each reference file.
+- The body tells the active agent when to read each reference file.
 - The workflow explains what to do first, what to ask, what to produce, and how to verify.
 - The skill contains no secrets, raw private chat, or one-off project state unless it is project-local and intentionally scoped.
-- The final report states whether the skill is global or project-local, where it was written, what portable copy was updated, and whether a new Codex conversation may be needed.
-CODEX_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CONVERSATION_TO_SKILL_MD
+- The final report states whether the skill is global or project-local, where it was written, what portable copy was updated, and which agents need a fresh session or restart.
+AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CONVERSATION_TO_SKILL_MD_4D4BF7D9EA
 
-test -f "{{CODEX_HOME}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill-creator installed"
-
-echo "embedded skills installed: codex-skill-creator"
+test -f "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill-creator installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

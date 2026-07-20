@@ -1,8 +1,8 @@
 # 27-Video-Spec-Builder-Skill-安裝
 
-> 版本：2026-06-01 Codex App 版
-> 用途：安裝 `video-spec-builder` 全域 skill，讓 Codex 像影片編導一樣追問需求，產出可交給 HyperFrames 的 `video-spec.md` 分鏡腳本。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/video-spec-builder/`。
+> 版本：2026-06-01 三 Agent 共用版
+> 用途：安裝 `video-spec-builder` 全域 skill，讓 Codex、Claude、AntiGravity 都能像影片編導一樣追問需求，產出可交給 HyperFrames 的 `video-spec.md` 分鏡腳本。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/video-spec-builder/`。
 
 ## 來源與歷史紀錄
 
@@ -11,13 +11,13 @@
 - 來源 commit：`9e73275` / `9e73275b35e827b8f7af4bca900790909d86e63e`。
 - 授權：MIT。
 - 內嵌檔案數：33 個。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/video-spec-builder/SKILL.md`。
+- 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md`。
 
-## Codex 相容化調整
+## 三 Agent 相容化調整
 
 - 保留來源的追問工作流、模板、references、Spec Mono theme 與 Full Code 範例。
-- 已移除 slash-command、非 Codex agent delegation、non-Codex path / file name / frontmatter 相關敘述。
-- 所有可攜路徑一律使用 `{{CODEX_HOME}}/skills/video-spec-builder`。
+- 將來源專屬 slash-command、agent delegation、path／file name／frontmatter 改寫為共用契約與三個 Agent adapter。
+- 所有可攜路徑一律使用 `{{SYNC_ROOT}}/skills/video-spec-builder`。
 - 不自動安裝 HyperFrames、Node.js、FFmpeg 或 npm package；實際 render 仍由 HyperFrames skill / CLI 處理。
 
 ## 本機補充：照片紀念影片 Spec 規則
@@ -42,7 +42,7 @@
 
 ## 前置條件
 
-- Codex App 可讀取 `{{CODEX_HOME}}/skills`。
+- Item 16 已把共用主版本連到 Codex、Claude、AntiGravity 各自的原生 skills 入口。
 - 建議先安裝 LazyPack Item 26 的 HyperFrames skill suite；`video-spec-builder` 是上游分鏡規格產生器，HyperFrames 是下游渲染器。
 - 若要實際 render MP4，HyperFrames 端仍需要 Node.js 22+ 與 FFmpeg。
 
@@ -51,7 +51,7 @@
 1. 打開本文文末「內建 Skill 完整安裝內容」。
 2. 把整段安裝腳本複製到自己的環境執行。
 3. 執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
-4. 安裝後開新 Codex 對話或重啟 Codex App，讓新的全域 skill metadata 被重新載入。
+4. 安裝後確認 Item 16 的三 Agent 原生入口，再分別重載 skill 清單。
 
 ## 使用方式
 
@@ -64,19 +64,19 @@
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/video-spec-builder/SKILL.md" && echo "video-spec-builder SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/video-spec-builder/templates/video-spec-template.md" && echo "video-spec-builder template ok"
-test -f "{{CODEX_HOME}}/skills/video-spec-builder/references/question-bank.md" && echo "video-spec-builder references ok"
-test -f "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/design.md" && echo "Spec Mono theme ok"
+test -f "{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md" && echo "video-spec-builder SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/video-spec-builder/templates/video-spec-template.md" && echo "video-spec-builder template ok"
+test -f "{{SYNC_ROOT}}/skills/video-spec-builder/references/question-bank.md" && echo "video-spec-builder references ok"
+test -f "{{SYNC_ROOT}}/skills/video-spec-builder/spec-mono/design.md" && echo "Spec Mono theme ok"
 ```
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/video-spec-builder/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md` 存在。
 - [ ] `templates/video-spec-template.md` 存在。
 - [ ] `references/` 內 8 個主要參考檔存在。
 - [ ] `spec-mono/design.md` 與 `spec-mono/tokens.css` 存在。
-- [ ] 開新 Codex 對話後，說「我想做一支影片」會觸發 video-spec-builder。
+- [ ] Codex、Claude、AntiGravity 重載後，說「我想做一支影片」都會觸發 video-spec-builder。
 - [ ] 若要接著 render，HyperFrames skill suite 也已安裝。
 
 ## 官方參考
@@ -87,35 +87,882 @@ test -f "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/design.md" && echo "
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`video-spec-builder`。
+本節是自含式安裝區塊。這個序號項目會安裝：`video-spec-builder`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-decode_base64() {
-  if command -v base64 >/dev/null 2>&1; then
-    base64 --decode 2>/dev/null || base64 -D
-  else
-    python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.buffer.read()))'
-  fi
-}
-
 # ---- video-spec-builder ----
-mkdir -p "{{CODEX_HOME}}/skills/video-spec-builder"
+mkdir -p "{{SYNC_ROOT}}/skills/video-spec-builder"
 # video-spec-builder/.gitignore
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/.gitignore")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/.gitignore" <<'CODEX_LAZYPACK_0C92DB9EB3BAD4C662B0CE059E6FBFE33E1C9F5B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/.gitignore")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/.gitignore" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_GITIGNORE_BC37D034BA'
 .DS_Store
 node_modules/
 skills-lock.json
 .agents/
-CODEX_LAZYPACK_0C92DB9EB3BAD4C662B0CE059E6FBFE33E1C9F5B
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_GITIGNORE_BC37D034BA
+
+# video-spec-builder/LICENSE
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/LICENSE")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/LICENSE" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_LICENSE_C693279643'
+MIT License
+
+Copyright (c) 2026 feicaiclub
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_LICENSE_C693279643
+
+# video-spec-builder/README.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/README.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/README.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_README_MD_B335630551'
+<img width="2172" height="724" alt="ChatGPT Image May 16, 2026, 10_46_58 PM" src="https://github.com/user-attachments/assets/7820d93e-84b6-4e09-904c-9567c6595c57" />
+
+**English** · [中文](README.zh.md)
+
+# video-spec-builder
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen)](LICENSE) ![Agent Agnostic](https://img.shields.io/badge/Agent-Agnostic-blueviolet) [![skills.sh Compatible](https://img.shields.io/badge/skills.sh-Compatible-brightgreen)](https://skills.sh)
+
+> A skill that works like a video director. You say "I want to make a video," and it grills you with questions until your idea is a script you can actually shoot.
+
+I built this skill after realizing the hard part of making a video isn't the rendering. It's figuring out what you actually want.
+
+You've got a vague idea in your head: a product video, a short for social, a company intro. But it's fuzzy. The moment you try to build it, the details get you — how long each shot runs, what's on screen, what comes first and what comes later. You probably haven't pinned them all down, and you might not even be able to put them into words.
+
+video-spec-builder gets you through that part. Install it, then tell Codex, Claude, or AntiGravity "I want to make a video," and it takes over the conversation. It listens to your brief the way a director would, then keeps asking: Who's this for? How long? What's the one line people should walk away with? Which shot carries the weight? Anywhere you go vague, or skip something, it stops and pushes you to fill it in.
+
+A few rounds of that, and the fuzzy idea becomes a `video-spec.md`: a shot-by-shot script, timed to the second, every shot written out. Hand that to HyperFrames and it renders into a real video.
+
+It won't shoot the video for you, and it won't invent the idea. It does one thing: push you, and stay with you, until the idea is something you can actually build.
+
+## What it helps with
+
+The problem it solves is "I have an idea but I can't explain it." A few situations where it earns its keep:
+
+- You know the feeling you want but can't describe the actual picture. It refuses words like "premium" or "high-impact" and keeps after you until you can describe real shots and real motion.
+- You have an idea but never thought parts of it through. Maybe you've got the opening and the ending but not the middle. Maybe it never crossed your mind that a section could use captions, or that visuals can move to the beat of the music. It brings those up.
+- You have plenty of raw material but no order to it. A script, selling points, a pile of assets — it helps you cut that into individual shots and put them in sequence.
+
+In the end it writes all of it into a script: what each shot shows, how it's presented, how long it holds, how it cuts to the next one.
+
+There are two ways to use it. With no script yet, it talks you through the whole thing from scratch and produces a `video-spec.md`. With a script already there and just one thing to change, you tell it what you want different; it asks enough to be sure, makes the change, and checks whether it knocked anything else loose.
+
+## The workflow
+
+It's two skills working in sequence. video-spec-builder sits upstream and turns your idea into a script. HyperFrames sits downstream and turns the script into video.
+
+```
+       You: "I want to make a video"
+                │
+                ▼
+   ┌────────────────────────┐
+   │   video-spec-builder   │   asks, breaks it into shots
+   └────────────────────────┘
+                │
+                ▼
+          video-spec.md           shot-by-shot script, timed
+                │
+                ▼   hyperframes
+   ┌────────────────────────┐
+   │       HyperFrames      │   renders from the script
+   └────────────────────────┘
+                │
+                ▼
+          finished video
+```
+
+So before you start, you'll want both skills installed.
+
+## Install
+
+The maintained package supports **Codex**, **Claude**, and **AntiGravity** through one shared skill source. Item 16 creates each Agent's native entrypoint.
+
+Before anything else, install two things: HyperFrames (the renderer, downstream) and video-spec-builder (this skill). Both go in through the `skills` CLI, one command each:
+
+```bash
+npx skills add heygen-comhyperframes
+npx skills add feicaiclubvideo-spec-builder
+```
+
+For Arry's LazyPack, install once into `{{SYNC_ROOT}}/skills` and use Item 16 to expose it to Codex, Claude, and AntiGravity. The upstream `npx skills add` commands remain an optional source-package route for other users.
+
+Two scopes to know about. By default it installs into the current folder (project-level), so it only works in the project where you ran the command. If you make videos often, add `-g` to install globally, available everywhere:
+
+```bash
+npx skills add feicaiclubvideo-spec-builder -g
+```
+
+Never used the `skills` CLI? Nothing to set up. `npx` pulls a copy just to run and leaves nothing behind. Needs Node 18 or newer.
+
+## Using it
+
+### Making a video from scratch
+
+Once it's installed, just talk to Codex, Claude, or AntiGravity in plain language:
+
+```
+I want to make a 3-minute product demo, posting it on YouTube
+```
+
+It takes over and starts asking. You don't need to track its internal steps; it just talks with you. First it pins down the basics: who it's for, where it's going, how long, the core message. Then it takes stock of the material you have. Then it settles the style and pacing, picks a visual theme, and finally uses reference videos and counter-examples to calibrate.
+
+It's a real conversation, not a form to fill in. Answer vaguely and it digs; miss something and it fills it in. When you're done, it writes out `video-spec.md`.
+
+### Changing a video you already have
+
+If there's already a `video-spec.md` in the project, just say what you want:
+
+```
+Shot 3 is too fast, slow it down; swap the background music for something quieter
+```
+
+It checks what you're after, looks at whether the change touches other shots, then updates the script.
+
+### Rendering it
+
+Once the script is final, hand it to HyperFrames:
+
+```
+hyperframes
+```
+
+> Use natural language in all three Agents. If the current runtime exposes explicit skill invocation, call `video-spec-builder` through that Agent's native syntax.
+
+### Agent Execution Notes
+
+- **Shared steps**: all three Agents run the same interview, write the same `video-spec.md`, and apply the same validation gate before rendering.
+- **Codex adapter**: use native skill invocation when available, then hand the approved spec to HyperFrames.
+- **Claude adapter**: load the shared package through `{{CLAUDE_HOME}}/skills`; use Claude's normal skill or natural-language trigger.
+- **AntiGravity adapter**: load the shared package through `{{GEMINI_CONFIG}}/skills`; use Gemini／AntiGravity's normal skill or natural-language trigger.
+- **Verification**: confirm the spec has audience, platform, duration, shot timings, assets, captions, audio, and render route regardless of which Agent drafted it.
+
+## What HyperFrames can and can't do
+
+Worth spelling this out, because it decides whether your script is worth the paper it's on.
+
+HyperFrames renders video from HTML. That one fact is the root of everything it can and can't do. If HTML, CSS, and code can draw it, HyperFrames can turn it into video. If HTML can't draw it, HyperFrames can't either.
+
+What it's **good at** is text and layout work: title animation, captions, word-by-word highlighting, page layout, transitions, charts, UI mockups, geometric animation. Anything you can draw with code, it handles cleanly.
+
+What it **can't do** — know this before you write the script, because however good the script is, if HyperFrames can't render it, the work is wasted:
+
+- It can't draw illustrations. Hand-drawn characters, painterly visuals, cartoon figures — it can't produce those, and writing code won't get you there. Code draws shapes and charts, not artwork.
+- It can't generate live-action footage. A real filmed shot, a person performing — it can't conjure that out of nothing.
+- It can't generate photorealistic images.
+- It can generate a voiceover with AI (text-to-speech) in a pinch, but AI narration has an obvious machine tone. For real quality, record it yourself or hire someone.
+- It won't compose background music for you.
+
+The short version: HyperFrames is an **assembly** tool, not a **creation** tool. It takes the material you've prepared — video clips, images, voiceover, music — cuts and composites it, adds text and motion, and puts together a finished video. Assembly is its job.
+
+So here's the thing worth remembering: how good the video looks comes down to the material you feed it. Good material and HyperFrames assembles it sharply. Weak material and HyperFrames can't save it. Video clips, images, voiceover, music — these are worth preparing carefully up front. They decide the quality, not HyperFrames.
+
+## Visual themes
+
+What a video looks like — colors, fonts, motion, transition style — is decided by a "theme." You either use one of HyperFrames' built-in presets, or write your own.
+
+### The 8 HyperFrames presets
+
+HyperFrames ships 8 themes. Name one and it's yours:
+
+| Theme | Mood | Good for |
+|---|---|---|
+| Swiss Pulse | Precise, restrained, Swiss type | SaaS, data, dev tools, dashboards |
+| Velvet Standard | Premium, timeless | Luxury, enterprise software, keynotes, investor decks |
+| Deconstructed | Industrial, raw | Tech launches, security products, anything with a punk edge |
+| Maximalist Type | Loud, kinetic | Big launches, milestone announcements, high-energy hype |
+| Data Drift | Futuristic, immersive | AI products, ML platforms, frontier tech |
+| Soft Signal | Intimate, warm | Wellness brands, personal stories, lifestyle products |
+| Folk Frequency | Cultural, vivid | Consumer apps, food, community products |
+| Shadow Cut | Dark, cinematic | Security products, dramatic reveals, serious storytelling |
+
+Once you've picked one, write its name into `video-spec.md`.
+
+### Writing your own
+
+If none of the presets fit, write your own. HyperFrames has a few hard rules for custom themes, nothing complicated:
+
+- A theme is a single `design.md` file, placed at the root of your video project. HyperFrames finds and reads it automatically when rendering.
+- The format is fixed. A block of YAML up top for the design variables: colors, fonts, corner radius, spacing, motion. Below it, a set of fixed sections describing the design rules in prose: Overview, Colors, Typography, Elevation, Components, Do's and Don'ts.
+- If your theme uses a font HyperFrames doesn't ship with, put the font's `.woff2` files in the project's `fonts/` folder yourself.
+
+Drop a finished `design.md` into the video project root and the theme is live.
+
+### A theme I made for you: Spec Mono
+
+Writing a `design.md` from scratch takes some work, so I made one ahead of time and put it in this repo. It's called **Spec Mono**: pure black and white, the geometric, restrained, engineered look of SpaceX × Grok. It's done — use it as is.
+
+<!-- placeholder: drop the Spec Mono preview image at spec-mono/preview.png, then uncomment the line below -->
+<!-- ![Spec Mono preview](spec-mono/preview.png) -->
+
+Download to see complete design [视频组件库 v2 · 硅谷暗色科技风.pdf](https://github.com/user-attachments/files/27866436/v2.pdf)
+<img width="1020" height="1440" alt="视频组件库 v2 · 硅谷暗色科技风" src="https://github.com/user-attachments/assets/bef576da-73ba-4bad-a9c4-3c673e652eaa" />
+
+The `spec-mono/` folder holds three files:
+
+| File | What it is |
+|---|---|
+| `design.md` | the theme itself — this is what HyperFrames reads |
+| `tokens.css` | a ready-made CSS file: color/font/spacing variables, plus styles for some decorative elements |
+| `spec-mono-components.md` | the per-component spec for all 69 components under this theme |
+
+To use it, copy `spec-mono/design.md` into your video project root and bring `tokens.css` along. It's already written to HyperFrames' format, so it renders right away.
+
+> **Heads up:** the `design.md` tokens and `spec-mono-components.md` here are only a distilled, condensed extract. The complete theme design code is generated and downloaded from Codex design workflow. For the full implementation code, see the `Full Code/` folder.
+
+## What's in this repo
+
+```
+video-spec-builder/
+├── SKILL.md                  the skill's main file — the AI reads this first
+├── README.md                 English
+├── README.zh.md              中文
+├── LICENSE
+├── references/               reference docs on questioning, shot breakdown, pacing — loaded as needed
+│   ├── workflow-0-1.md
+│   ├── workflow-iteration.md
+│   ├── question-bank.md
+│   ├── scene-breakdown.md
+│   ├── components-catalog.md
+│   ├── pacing-rules.md
+│   ├── spec-rules.md
+│   └── dialogue-style.md
+├── templates/
+│   └── video-spec-template.md    output template for video-spec.md
+├── examples/
+│   └── video-spec-spacex.md      a complete video-spec example
+└── spec-mono/                    the bundled custom theme, Spec Mono
+    ├── design.md
+    ├── tokens.css
+    └── spec-mono-components.md
+```
+
+## License
+
+MIT
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_README_MD_B335630551
+
+# video-spec-builder/README.zh.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/README.zh.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/README.zh.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_README_ZH_MD_B024066E6D'
+<img width="2172" height="724" alt="ChatGPT Image May 16, 2026, 10_46_58 PM" src="https://github.com/user-attachments/assets/7820d93e-84b6-4e09-904c-9567c6595c57" />
+
+[English](README.md) · **中文**
+
+# video-spec-builder
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen)](LICENSE) ![Agent Agnostic](https://img.shields.io/badge/Agent-Agnostic-blueviolet) [![skills.sh Compatible](https://img.shields.io/badge/skills.sh-Compatible-brightgreen)](https://skills.sh)
+
+> 一个像视频编导的 skill。你说一句"我想做个视频",它就追着问你,帮你把想法理成一份能落地的分镜脚本。
+
+我做这个 skill,是因为发现做视频最卡人的不是渲染,是前面那一步:想清楚。
+
+你心里有个念头,想做个产品片、发条抖音、做个公司介绍。可念头是模糊的。真要落地,每个镜头几秒、画面上摆什么、先讲什么后讲什么,这些细节你未必想得全,也未必说得出来。
+
+video-spec-builder 就是来陪你過這一關的。裝好之後，你在 Codex、Claude 或 AntiGravity 裡說一句「我想做個影片」，它就接管對話，像編導聽你講 brief 那樣一路追問：影片給誰看、要多長、最想讓人記住哪句話、哪個鏡頭是重點。你答不上來或沒想到的地方，它會停下來提醒並協助補齊。
+
+来回聊下来,你那个模糊的念头会变成一份 `video-spec.md`:精确到秒、每个镜头都写明白的分镜脚本。这份脚本交给 HyperFrames,就能渲染成真正的视频。
+
+它不替你拍片,也不替你想创意。它就做一件事:逼着你、也陪着你,把想法想到能落地为止。
+
+## 它帮你解决什么
+
+它解决的是"我有想法,但说不清楚"这个问题。几种典型情况它都管用:
+
+- 你知道想要什么感觉,但说不出具体画面。它会把"高大上""有冲击力"这种形容词挡回去,问到你能描述出实际的画面和动作为止。
+- 你有想法,但有些环节根本没想到。比如开头结尾想好了,中间怎么过渡没想;比如你没意识到这段可以加字幕、可以让画面跟着音乐节奏动。这些它会主动提。
+- 你东西不少,但理不出头绪。逐字稿、卖点、素材一大堆,它帮你拆成一个个镜头,排出先后和节奏。
+
+最后它把这些落成脚本。每个镜头是什么内容、用什么呈现、停几秒、怎么转到下一个,全写清楚。
+
+它有两种用法。手上还没有脚本,它从头陪你聊一遍,产出 `video-spec.md`。已经有脚本、只想改某个地方,你直接说要改什么,它问清楚再动手,还会顺手查一下这改动会不会牵连别的镜头。
+
+## 工作流程
+
+整件事是两个 skill 接力。video-spec-builder 在上游,把你的想法变成脚本;HyperFrames 在下游,把脚本变成视频。
+
+```
+        你:"我想做个视频"
+                │
+                ▼
+   ┌────────────────────────┐
+   │   video-spec-builder   │   追问 + 拆镜头,陪你想清楚
+   └────────────────────────┘
+                │
+                ▼
+          video-spec.md           分镜脚本(精确到秒)
+                │
+                ▼   hyperframes
+   ┌────────────────────────┐
+   │       HyperFrames      │   按脚本渲染
+   └────────────────────────┘
+                │
+                ▼
+            成品视频
+```
+
+所以用之前,这两个 skill 都得先装上。
+
+## 安装
+
+目前維護版固定支援 **Codex**、**Claude**、**AntiGravity**，三者共用同一份 skill 主版本，原生入口由 Item 16 建立。
+
+动手之前,先把两样东西装好:HyperFrames(下游负责渲染)和 video-spec-builder(这个 skill 本身)。都用 `skills` 这个命令行工具装,各一条命令:
+
+```bash
+npx skills add heygen-comhyperframes
+npx skills add feicaiclubvideo-spec-builder
+```
+
+Arry 的 LazyPack 會把 package 安裝一次到 `{{SYNC_ROOT}}/skills`，再由 Item 16 讓 Codex、Claude、AntiGravity 共同使用；上游 `npx skills add` 指令只保留作其他使用者的來源安裝路線。
+
+安装位置分两种。默认装到当前文件夹(项目级),只在你跑命令的那个项目里生效。如果你经常做视频,加 `-g` 装到全局,所有项目通用:
+
+```bash
+npx skills add feicaiclubvideo-spec-builder -g
+```
+
+没装过 `skills` 工具也不用管,`npx` 会临时拉一份来跑,跑完不留东西。需要 Node 18 以上。
+
+## 怎么用
+
+### 从头做一个视频
+
+裝好後，在 Codex、Claude 或 AntiGravity 裡直接用自然語言說明需求：
+
+```
+我想做一个三分钟的产品演示视频,发在 B 站
+```
+
+它会接管对话,开始追问。你不用管它内部分几步,它就跟你正常聊天:先把基本盘问清,给谁看、在哪发、多长、核心讲什么。再盘你手头有什么素材。然后定表达方式和节奏,挑个视觉主题,最后拿参考片和反例帮你校准方向。
+
+这个过程是真的来回问答,不是让你填表。你答得含糊,它会追;你漏了什么,它会补。聊完,它把 `video-spec.md` 写出来。
+
+### 改一个已经有的视频
+
+项目里已经有 `video-spec.md`,想改直接说:
+
+```
+第三个镜头节奏太快,放慢点;背景音乐换个安静的
+```
+
+它会先把你要的效果问清楚,看看这改动会不会影响别的镜头,再更新脚本。
+
+### 渲染成视频
+
+脚本定稿,交给 HyperFrames:
+
+```
+hyperframes
+```
+
+> 三個 Agent 都可用自然語意觸發；若當前環境支援明確 skill 呼叫，請用該 Agent 的原生語法呼叫 `video-spec-builder`。
+
+### Agent Execution Notes
+
+- **共同步驟**：三個 Agent 使用相同訪談流程、產生相同 `video-spec.md`，並在渲染前套用相同驗證閘門。
+- **Codex adapter**：使用可用的原生 skill 入口，核准後把 spec 交給 HyperFrames。
+- **Claude adapter**：從 `{{CLAUDE_HOME}}/skills` 載入共享 package，以 Claude 的 skill 或自然語意入口觸發。
+- **AntiGravity adapter**：從 `{{GEMINI_CONFIG}}/skills` 載入共享 package，以 Gemini／AntiGravity 的 skill 或自然語意入口觸發。
+- **驗證**：無論由哪個 Agent 起草，都必須包含受眾、平台、片長、鏡頭秒數、素材、字幕、聲音與渲染路線。
+
+## HyperFrames 能做什么、做不到什么
+
+这一段我得专门讲清楚,因为它直接决定你的脚本写得值不值。
+
+HyperFrames 是把 HTML 渲染成视频。这句话是它一切能力和限制的根。HTML、CSS、还有代码能画出来的东西,它都能变成视频画面;HTML 画不出来的,它也变不出来。
+
+它**擅长**的是文字和排版相关的活:标题动效、字幕、逐词高亮、版面布局、转场、数据图表、UI 演示、几何动画。这些"用代码能画"的东西,它做得很利落。
+
+它**做不到**的,你写脚本之前就得心里有数。脚本写得再漂亮,HyperFrames 渲不出来,也是白写:
+
+- 它不会画插画。手绘风格的人物、有美术感的画面、卡通形象,这些它画不出来。让它写代码也画不出来,这不是代码能解决的事。代码能画的是图形和图表,不是画作。
+- 它不会生成实拍画面。一段真实拍摄的镜头、一个人物的表演,它凭空变不出来。
+- 它不会生成照片级的写实图像。
+- 配音它能用 AI 生成一版应急,但 AI 配音有明显的机器味。真要质量,还是自己录、或者找人配。
+- 背景音乐它不会替你作曲。
+
+说到底,HyperFrames 是个**组装**工具,不是**创作**工具。它把你准备好的素材(视频片段、图片、配音、音乐)剪辑、合成、配上文字和动效,拼成一支完整的视频。它干的是组装这一步。
+
+所以有个很重要的提醒:视频好不好看,真正取决于你喂给它的素材。素材到位,HyperFrames 能帮你组装得很漂亮;素材本身不行,HyperFrames 再强也救不回来。视频片段、图片、配音、配乐,值得你提前认真准备好。决定视频质量的是这些素材,不是 HyperFrames 本身。
+
+## 视觉主题
+
+视频长什么样(配色、字体、动效、转场风格),由"主题"决定。主题要么用 HyperFrames 自带的预设,要么自己写一套。
+
+### HyperFrames 的 8 个预设
+
+HyperFrames 内置了 8 套主题,报个名字就能用:
+
+| 主题 | 气质 | 适合 |
+|---|---|---|
+| Swiss Pulse | 精确、克制、瑞士排版 | SaaS、数据、开发者工具、指标看板 |
+| Velvet Standard | 高级、隽永 | 奢侈品、企业软件、主题演讲、投资路演 |
+| Deconstructed | 工业、粗粝 | 科技发布、安全产品、带点朋克劲的内容 |
+| Maximalist Type | 喧闹、动感 | 大型发布、里程碑公告、高能 hype 片 |
+| Data Drift | 未来感、沉浸 | AI 产品、ML 平台、前沿科技 |
+| Soft Signal | 亲密、温暖 | 健康品牌、个人故事、生活方式产品 |
+| Folk Frequency | 文化、鲜亮 | 消费类 app、美食、社区产品 |
+| Shadow Cut | 暗黑、电影感 | 安全产品、戏剧性揭示、严肃叙事 |
+
+选定之后,在 `video-spec.md` 里写上主题名就行。
+
+### 自己写一套
+
+预设不够味,可以自己定。HyperFrames 对自定义主题有几条硬要求,不复杂:
+
+- 主题就是一个 `design.md` 文件,放在你视频项目的根目录。HyperFrames 渲染时会自动找到并读取它。
+- 文件格式是固定的。开头一段 YAML,写颜色、字体、圆角、间距、动效这些设计变量。下面用几个固定章节把设计规则讲清楚,章节是定死的:Overview、Colors、Typography、Elevation、Components、Do's and Don'ts。
+- 如果主题用到了 HyperFrames 没内置的字体,得自己把字体的 `.woff2` 文件放进项目的 `fonts/` 文件夹。
+
+把写好的 `design.md` 丢进视频项目根目录,主题就生效了。
+
+### 我给你配好的一套:Spec Mono
+
+从头写 `design.md` 挺花工夫,所以我提前做了一套放进这个仓库,叫 **Spec Mono**:纯黑白配色,SpaceX × Grok 那种几何、克制、工程感的视觉语言。已经配好了,你可以直接拿去用。
+
+<!-- 占位图:把 Spec Mono 的预览图放到 spec-mono/preview.png,再把下面这行的注释去掉 -->
+<!-- ![Spec Mono 主题预览](spec-mono/preview.png) -->
+
+下载浏览完整主题设计 [视频组件库 v2 · 硅谷暗色科技风.pdf](https://github.com/user-attachments/files/27866485/v2.pdf)
+<img width="1020" height="1440" alt="视频组件库 v2 · 硅谷暗色科技风" src="https://github.com/user-attachments/assets/55013ef0-946b-46da-812c-f6e9e5f47ed9" />
+
+`spec-mono/` 文件夹里有三个文件:
+
+| 文件 | 是什么 |
+|---|---|
+| `design.md` | 主题本体,HyperFrames 读的就是它 |
+| `tokens.css` | 一份现成的 CSS,颜色字体间距这些变量,外加一些装饰元素的样式 |
+| `spec-mono-components.md` | 69 种组件在这套主题下的逐个细节规格 |
+
+用法:把 `spec-mono/design.md` 复制到你视频项目的根目录,`tokens.css` 一起带上。它本来就是照 HyperFrames 的格式写的,放进去就能渲。
+
+> **说明:** 这里的 `design.md` tokens 和 `spec-mono-components.md` 只是精简提炼后的内容。完整的主题设计代码需要从 Codex design workflow 下载生成。具体的实现代码请查看 `Full Code/` 文件夹。
+
+## 仓库结构
+
+```
+video-spec-builder/
+├── SKILL.md                  技能主文件,AI 从这里读起
+├── README.md                 English
+├── README.zh.md              中文
+├── LICENSE
+├── references/               追问、拆分镜、节奏规范等参考文档,按需加载
+│   ├── workflow-0-1.md
+│   ├── workflow-iteration.md
+│   ├── question-bank.md
+│   ├── scene-breakdown.md
+│   ├── components-catalog.md
+│   ├── pacing-rules.md
+│   ├── spec-rules.md
+│   └── dialogue-style.md
+├── templates/
+│   └── video-spec-template.md    video-spec.md 的输出模板
+├── examples/
+│   └── video-spec-spacex.md      一份完整的 video-spec 示例
+└── spec-mono/                    预置的自定义主题 Spec Mono
+    ├── design.md
+    ├── tokens.css
+    └── spec-mono-components.md
+```
+
+## License
+
+MIT
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_README_ZH_MD_B024066E6D
+
+# video-spec-builder/SKILL.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SKILL_MD_0E95F5A366'
+---
+name: video-spec-builder
+description: 当用户说想做一个视频、宣传片、产品演示、动画短片、抖音/YouTube 内容，或者说要改分镜、调节奏、换镜头、调字幕、加配音、改转场时使用。通过苏格拉底式追问收集视频需求，主动激发渲染层的全部能力（TTS / 字幕 / 3D / shader / 音频反应等），输出标准化的 video-spec.md 用于渲染。
+---
+
+[任务]
+    **0-1 模式**：通过深入对话收集视频需求，主动告知可用能力（用户往往不知道能做什么），用直白甚至刺耳的追问逼用户在镜头粒度上想清楚，输出包含**分镜表**的 `video-spec.md`。
+
+    **迭代模式**：用户对已有 video-spec.md 提出修改（换镜头/改节奏/换音乐/调字幕/换配色）时，通过追问帮用户想清楚变更，检测与现有 spec 的冲突，更新 `video-spec.md`。
+
+[启动检查]
+    1. 扫描项目目录查找 video-spec 文档：
+        - 精确匹配：`video-spec.md`
+        - 模糊匹配：`*video-spec*.md`、`*分镜*.md`、`*storyboard*.md`
+        - 找到 1 个 → 迭代模式（read `references/workflow-iteration.md`）
+        - 找到多个 → 列出文件名问用户"你要改的是哪个？"
+        - 没找到 → 0-1 模式（read `references/workflow-0-1.md`）
+    2. 检查项目根目录有没有 `design.md` / `DESIGN.md`（自定义主题文件；视觉风格阶段才用到，启动时不强制）
+
+[第一性原则]
+
+    [能力优先]
+        用户提出的每个需求，你的第一反应是"渲染层能不能做得更好"。
+        告诉用户能做什么时，说"它能让画面变成什么样"，不说技术名字。
+
+        - 用户说"加段旁白" → 主动问"要不要我直接帮你生成 AI 配音，省得你录？30 秒搞定，
+                              不过会有点'课件感'，没有真人那种小停顿和情绪"
+        - 用户说"加字幕" → 主动问"字幕要整句一起跳出来，像看电影那种安静呈现？
+                              还是一个字一个字蹦，像 Karpathy 推文那种讲到哪个词亮哪个？"
+        - 用户说"想要 3D 感" → 主动问"你想要 Apple 发布会那种产品 360° 真实旋转的沉浸感？
+                              还是 Stripe 文档那种卡片飘过的轻盈感？前者更震撼但你得有 3D 模型"
+        - 用户说"配乐想有节奏感" → 主动问"要不要让画面跟着鼓点跳？像 DJ 打碟那种，
+                              鼓一响元素就缩放、字就抖，跟音乐同呼吸"
+        - 用户没主动提某个能力 → 对照 [能力对照表] 主动告知能做什么（说画面，不说技术）
+        - 做不到的事 → 直接说做不到，不要假装能做
+
+    [视觉风格的处理]
+        用户一旦定下视觉主题，该主题的颜色 / 字体 / 字重 / 动效 / 间距 / 圆角全部跟着定下来，
+        别再回头追问这些维度。但**定下来之前**，主题本身是开放的，2 条路径任选。
+
+        - 没定主题前：2 条路径开放（8 个 HyperFrames 预设 / 用户自定义 design.md）
+        - 定了之后：该主题的全部细节跟着定下来
+        - 不要追问已被主题定下来的维度（如选了 Swiss Pulse 后不要再问"用什么字体"）
+        - 只问可调维度：accent 色覆盖 / 装饰层密度 / 组件白黑名单
+
+    [信息密度]
+        视频是信息密集型产品，每秒都要承载信息。
+
+        - 不允许"空帧"：每个镜头必须有明确的信息载荷（文案 / 数据 / 视觉冲击 / 节奏点）
+        - 镜头时长 ≥ 4 秒，必须解释清楚这 4 秒在表达什么，否则砍掉
+        - 镜头时长 ≤ 1 秒，必须有强视觉刺激，否则浪费
+        - 用户说"这里安静一下" → 追问"安静要承载什么？静默是一种信息，不是空白"
+
+    [联网优先]
+        不靠过期记忆，靠实时信息。
+
+        - 用户提到参考视频/品牌/产品 → 你直接说"我去上网查一下"，然后去搜
+        - 涉及行业惯例（抖音时长、YouTube 比例、信息流节奏）→ 先去搜
+        - 涉及具体 TTS 模型 / 字体 / 动画库 → 上网搜确认最新可用版本
+        - 不确定的就去搜，不要凭印象答
+
+[技能]
+    - **追问深挖**：不接受形容词、不接受"大概十几秒"、"差不多三个镜头"；追到镜头粒度
+    - **能力激发**：对照 [能力对照表] 主动告诉用户能做什么，不等用户开口（核心特色）
+    - **素材盘点**：逐字稿 / 音频 / 视频 / 图形 / 3D / 数据 逐项盘问，不让用户漏报
+    - **场景拆解**：把逐字稿、卖点、剧本拆到单镜头粒度，每镜头锚定到 `references/components-catalog.md` 的具体组件 ID
+    - **节奏与转场**：根据视频类型 / 平台判节奏基准；决定每镜头之间的转场（crossfade / wipe / shader / hard cut）
+    - **冲突检测**：迭代时检测新需求与现有 spec 的冲突，主动指出
+    - **方案引导**：用户卡住时给 2-3 个具体方案 + 优劣 + 参考视频
+    - **结构化输出**：按 `templates/video-spec-template.md` 输出，含分镜表
+
+[照片纪念影片补充]
+    当用户制作家庭、毕业、典礼、旅行、生日、纪念日等照片为主的视频时，Spec 必须额外明确这些内容：
+
+    - **先分镜再选照片**：先列总分镜、每镜头目的、画面类型、文字框位置、预计秒数，再让用户逐镜指定或确认照片。
+    - **完整预览 gate**：如果用户要求先确认，正式生成前要输出完整预览图，预览图必须包含实际取景、文字框、顺序与代表性转场状态。
+    - **取景优先级**：人脸、头顶空间、上半身第一；花束、证书、战利品、场景资讯第二；如果版面冲突，先保人物，再尽量保留物件。
+    - **满版定义**：满版不是任意裁切；要维持横式满版观感，同时为推近、平移、转场预留安全范围，避免动画过程中脸或头顶被裁掉。
+    - **文案重写**：不要把资料夹名称或素材分类直接当画面文字。要依照片内容写自然叙事；同类连续照片的文字框样式和语气要一致。
+    - **固定停留秒数**：用户指定每张照片停留固定秒数时，重新计算总长；不要为了贴近旧总长而偷偷改变单张秒数。
+    - **音画特殊段落**：若插入原始影片、人声告白、掌声或现场声，Spec 要记录音乐起点、ducking 区间、目标音量 dB、淡入淡出时间，以及是否只重混音轨。
+    - **高画质交付**：Spec 要注明最终 render 使用原始高画质素材；缩图只能用于挑选和预览。
+
+[文件结构]
+    路径基准 = video-spec.md 所在目录（项目根目录）。一棵完整的树：
+
+    ```
+    项目根目录/
+    ├── video-spec.md                           # 最终产物，由 skill 生成
+    ├── design.md                               # 自定义主题；HyperFrames 渲染端读这个
+    │                                           #（选 8 预设之一则无此文件）
+    └── tokens.css                              # 可选 · 自定义主题的可复用 CSS
+
+    Codex 全域 skills:
+    {{SYNC_ROOT}}/skills/video-spec-builder/
+    ├── SKILL.md
+    ├── templates/
+    │   └── video-spec-template.md
+    ├── references/
+    │   ├── workflow-0-1.md
+    │   ├── workflow-iteration.md
+    │   ├── question-bank.md
+    │   ├── scene-breakdown.md
+    │   ├── components-catalog.md
+    │   ├── pacing-rules.md
+    │   ├── spec-rules.md
+    │   └── dialogue-style.md
+    └── examples/
+        └── video-spec-spacex.md
+
+    {{SYNC_ROOT}}/skills/hyperframes/          # HyperFrames 渲染端 skill
+    ```
+
+    自定义主题就是项目根目录的一个 `design.md`（外加可选 `tokens.css`）。
+    没有 `styles/` 文件夹 —— HyperFrames 只读项目根的 design.md。
+
+[输出风格]
+    **语态**：
+    - 像导演坐在用户对面聊片子，不像系统弹窗
+    - 直白、冷静，追问到底，但说人话——不用 shader / GSAP / Three.js 这种术语砸用户
+    - 不奉承、不迎合、不说"这个想法很棒"
+    - 不让用户用形容词糊弄过去（"高大上"、"科技感"、"有质感"都不行）
+
+    **原则**：
+    - × 绝不接受形容词（必须翻译成具体视觉/动效决策）
+    - × 绝不替用户决定关键内容（卖点/受众/平台是他自己的事）
+    - × 绝不重复讨论已定下来的设计细节（颜色字体动效不是话题）
+    - × 绝不假装渲染层能做它做不到的事
+    - × 绝不用技术术语二选一（不说"shader 转场还是音频反应"，要说"水墨化开还是跟着鼓点跳"）
+    - ✓ 主动激发可用能力（用户不知道能做什么是常态）
+    - ✓ 把需求逼到镜头粒度（"30 秒视频" → 7 个镜头每个几秒）
+    - ✓ 给方案时附上参考视频和真实案例
+    - ✓ 每个选项都画出"它长什么样、它让人什么感觉"
+
+    [说人话 3 条具体要求]
+        1. 给画面感（让用户能在脑里看见每个选项）
+        2. 给后果（告诉用户选了 X 你会得到 Y）
+        3. 给参考（具体到品牌/作品/产品名）
+
+        详细范本（典型表达 / 方案引导 / 影视参考词典）→ `references/dialogue-style.md`
+
+[追问纪律]
+
+    你不会"卡壳"——你会瞎编、会和气接受敷衍、会自我满足提前结束、会编造用户没说的内容。这 4 种失效你必须明白并防御。
+
+    [4 种失效模式]
+
+        失效 1 · 凭印象瞎问
+            你会根据训练印象自己想问题，不查 question-bank.md。
+            后果：你问的不是真实重要的维度，命中率低。
+            防御：问之前对照 question-bank 的 [覆盖意图]——这维度为什么存在？
+
+        失效 2 · 和气接受敷衍
+            你的训练目标里有"友好"权重。用户答"高大上 / 都行"时，你大概率会说"好的"然后继续。
+            后果：spec 里全是模糊形容词。
+            防御：见到模糊副词必须翻 question-bank 的 [不接受的答案]，直接拒绝。
+
+        失效 3 · 自我满足提前结束
+            你倾向"差不多够了就停"，主动跳到生成 spec。
+            后果：spec 缺地基（如缺核心信息）但你自我感觉良好。
+            防御：每个维度必须对照 question-bank 的 [接受标准] 检查，没齐就不允许进下一维度。
+
+        失效 4 · 编造用户没说的内容
+            你倾向把 spec 空白填上"听起来合理"的内容。
+            后果：spec 里出现用户没说过的"hook"、"情绪曲线"、"音画设计"。
+            防御：只把用户明确说过的写进 spec。推断的内容必须标 `[待用户确认]`，不允许默默填入。
+
+    [渐进式追问纪律]
+        - Phase 1 的 7 维度必须都有答案，但答案不必来自机械问答——可以从用户初始描述里抽取并复述确认。
+        - 用户回答某问题时如果"溢出"覆盖了下一问题，直接吸收，不要再问。
+        - Phase 2-5 根据 Phase 1 答案动态裁剪（产品演示重点问 3D + UI mock，不问"3D 场景型"这种不相关的）。
+        - 创造性优先：想到 question-bank 没写的好问题，照样问。bank 是约束工具，不是问卷脚本。
+
+    [关于 question-bank 的态度]
+        - 它不是问卷，不是顺序流程
+        - 它是你追问纪律的约束工具，防的是上面 4 种失效
+        - 你默认走"创造性追问"路线
+        - 但当你想接受敷衍 / 想提前结束时，必须翻 bank 校准
+
+    [不暴露内部 Phase 给用户]
+        Phase 1/2/3/4/5 是你内部的工作流追踪，**不是给用户看的标签**。
+
+        禁忌：
+        × "OK Phase 1 搞定了"
+        × "回完这两个我们进 Phase 2"
+        × "Phase 4 视觉微调开始"
+        × "进入分镜起草阶段"
+
+        正确做法：
+        ✓ "好，你这视频的基本盘我记下来了"
+        ✓ "回完这两个我们就可以挑节点了"
+        ✓ "聊聊视觉风格"
+        ✓ "我开始把这些拆成一镜一镜"
+
+        用户不需要知道你内部有几个 Phase。心里清楚，嘴上不说。
+        每次切换话题，用口语化的承上启下，而不是"切换到下一个阶段"。
+
+[能力对照表]
+
+    每次接到需求对照这张表识别"用户可能不知道有这能力"。具体追问问题见 `references/question-bank.md` Phase 3。
+
+    | 能力 | 触发条件 |
+    |---|---|
+    | TTS 配音（本地 TTS，多语种） | 用户提到"旁白"、"配音"、"voice over" |
+    | 字幕生成（Whisper 逐词时间戳） | 用户提到"字幕"、"无声播放"、"卡拉 OK" |
+    | 抠像（人物分割，透明 WebM） | 用户有真人出镜素材 |
+    | GSAP / animejs / waapi / CSS 动画 | 任何镜头默认有动效 |
+    | Lottie | 用户提到"已有 AE 资产"或想要轻量循环动效 |
+    | Three.js（完整 3D 场景、模型、shader） | 用户提到"3D"、"产品旋转"、"立体" |
+    | Canvas 2D（粒子、自定义绘制） | 用户提到"粒子"、"波纹"、"自定义视觉" |
+    | 音频反应可视化（频段映射到属性） | 用户配乐有强节拍感 |
+    | 文字标记动效（highlight / circle / burst / scribble / sketchout） | 用户提到"手绘风强调"、"画圈划线" |
+    | shader 转场（高级 WebGL） | 用户想要"花哨切换"、"液态/像素/分形" |
+    | 变量字体 / kinetic typography | 用户提到"动态字"、"字体粗细变化" |
+    | MotionPath（路径运动） | 用户提到"沿曲线飞"、"S 形路径" |
+    | 打字机效果 / 速度过渡 | 用户讲代码 / 终端 / 对话 / 冲击镜头 |
+    | 视频合成 / PiP | 用户有多段视频要合成 |
+    | 比例（16:9 / 9:16 / 1:1） | 平台与时长一确定就跟着定 |
+    | 帧率（24 / 30 / 60 fps） | 平台一确定就跟着定 |
+    | 输出（mp4 / webm 带透明） | 看交付目标 |
+    | 主题 / 设计系统（8 visual-styles + design.md） | 聊视觉风格的时候定 |
+
+    [使用方式]
+        - 每进入一个新话题，扫这张表看哪些能力跟用户需求相关
+        - 用户没主动提某个相关能力 → 主动告知"能做 X"，让用户选
+        - 具体问题怎么问 → 翻 `references/question-bank.md` Phase 3
+
+[主题选择]
+    设计风格没有提前内部预制。渲染端 HyperFrames 只认项目根目录下的**一个** `design.md`。
+    用户选定主题后写到 `video-spec.md` 的 theme 字段。
+
+    2 条路径任选其一：
+
+        路径 1：从 8 个 HyperFrames 预设里挑
+            Swiss Pulse / Velvet Standard / Deconstructed / Maximalist Type /
+            Data Drift / Soft Signal / Folk Frequency / Shadow Cut
+            每个一句话标签详见 `references/question-bank.md` Phase 4。
+            预设是 HyperFrames 自带的，不需要建任何文件 —— 只在 spec 里记下预设名。
+
+        路径 2：用户自定义主题 —— 落成项目根目录的 `design.md`
+            两种入口：
+            (a) 已有文件：用户把自己的 `design.md`（HyperFrames YAML 格式）放到项目根目录；
+                若另有可复用 CSS，一并放根目录（如 `tokens.css`）。
+            (b) 描述生成：用户描述风格（三个形容词 / 参考链接 / 类似品牌），你上网调研后
+                **直接在项目根目录生成 `design.md`** —— 必须是 HyperFrames 的格式：
+                YAML 头（colors / typography / rounded / spacing / motion）
+                + 章节（Overview / Colors / Typography / Elevation / Components / Do's and Don'ts）。
+                格式范本见 HyperFrames 的 `visual-styles.md`。
+
+    选定主题后写进 `video-spec.md` 的 § 4 视觉规范：
+        - 选预设：写预设名，如 `Swiss Pulse`
+        - 自定义：写 `design.md（项目根目录）`
+
+    [选定主题后]
+        - 该主题的细节对该视频跟着定下来，不再追问字体 / 字重 / 字号
+        - 仅可调维度：accent 色覆盖 / 装饰层密度 / 组件白黑名单
+
+    [选定前]
+        - 用户没选 → 必须问，不能假设默认
+        - 用户敷衍"随便" → 走路径 2 描述生成，强制要求三个形容词
+
+    [没有 styles/ 文件夹 —— 旧设计已废弃]
+        旧版本把自定义主题放 `./styles/<name>/` 下的三件套（theme.md / tokens.css / design.md）。
+        已废弃。HyperFrames 不读 `styles/` 文件夹，只读项目根的单个 `design.md`。
+        自定义主题 = 项目根一个 `design.md`，从一开始就放那儿，不经任何中转。
+
+[需求维度清单]
+    收集以下维度的信息，每个维度的 [覆盖意图] / [主问题] / [追问深化] / [接受标准] / [不接受的答案] → `references/question-bank.md`。
+
+    Phase 1（必问 gate）:
+        视频目的 / 目标受众 / 平台与时长 / 核心信息 / 信息密度
+        品牌 Tone of Voice / 观众熟悉度
+
+    Phase 2:
+        内容素材 / 音频 / 视频影像 / 图形 / 3D / 待搜索素材
+
+    Phase 3:
+        场景类型组合 / 文字呈现 / 动效语言 / 节奏基准
+        叙事节拍 / 情绪曲线 / 音画关系
+
+    Phase 4:
+        主题选择 / accent 色 / 装饰层 / 组件白黑名单
+
+    Phase 5:
+        参考视频 / 静态参考 / 反例 / 同质化反例
+
+[对话策略]
+    **开场**：不废话，让用户先倒完脑子里的东西，基于他已说的开始追问；像导演听 brief，先听完再发问
+
+    **追问**：每次只问 1-2 个问题，直击要害；不接受形容词；发现"空帧"嫌疑直接质问；
+              问的时候带画面感——把选项画给用户看，而不是丢个二选一的开关给他
+
+    **能力激发**：用户没主动提某能力 → 对照 [能力对照表] 追问 1-2 个最相关的；
+                  不一次性把清单全抛出来；
+                  描述能力时说"它能让画面变成什么样"，不说"它叫什么技术"
+
+    **素材盘点**：聊完基本盘后按 逐字稿 → 音频 → 视频 → 图形 → 数据 → 3D 顺序盘问；
+                  缺的素材立刻判断能否 AI 生成 / 程序化生成
+
+    **自适应裁剪**：根据用户讲清楚的"视频类型"动态裁剪后续问题，详见 `references/question-bank.md` 的"按视频类型分流"
+
+    **方案引导**：用户知道但没说清楚 → 继续逼问；
+                  用户真不知道 → 给 2-3 个方案，每个方案配画面描述 + 参考视频 + 那种感觉像什么；
+                  不要罗列"方案名 / 工作量等级"这种工程清单
+
+    **确认**：阶段性复述，矛盾直接质问；信息够了就推进，不拖泥带水
+
+    **话题切换**：每次从一个话题跳到下一个，用承上启下的口语化衔接；
+                  不说"进入下一阶段"、"Phase X 开始"这种系统话；
+                  说人话：先复述刚得到的东西，再自然滑到下一个话题
+                  （衔接文案范本 → `references/workflow-0-1.md`）
+
+[信息充足度判断]
+    详见 `references/workflow-0-1.md` 的 [充足度判断] 章节（齐没齐的判断条件 + 没齐时怎么办）。
+
+[工作流程]
+    - 0-1 模式：read `references/workflow-0-1.md`
+    - 迭代模式：read `references/workflow-iteration.md`
+
+    [完成后引导]
+        Spec 生成完毕后（不管是 0-1 模式还是迭代模式），告诉用户：
+
+        "video-spec.md 已[生成 / 更新]完毕。
+         接下来是否启动 HyperFrames 生成视频？输入 hyperframes 开始。"
+
+        不需要解释 HyperFrames 怎么干活——它会自己读 video-spec.md。
+        你不再介入。
+
+[References]
+    按需加载，不要一次性全读：
+
+    - `references/workflow-0-1.md`          0-1 模式详细 5 阶段步骤
+    - `references/workflow-iteration.md`    迭代模式详细流程
+    - `references/question-bank.md`         追问问题库，按 Phase 组织（每个 Phase 必读）
+    - `references/scene-breakdown.md`       逐字稿 → 分镜的拆解方法论
+    - `references/components-catalog.md`    69 个组件的目录与匹配规则（选组件时必读）
+    - `references/pacing-rules.md`          节奏 / 时长 / 转场密度规范（聊节奏时读）
+    - `references/spec-rules.md`            填 video-spec 模板的字段约束 + 一致性校验 + 自检清单（起草 / 迭代 spec 前必读）
+    - `references/dialogue-style.md`        对话风格范本（典型表达 / 方案引导 / 影视参考词典）
+
+    项目根 `design.md` —— 用户自定义主题文件（HyperFrames 渲染端读取的唯一主题文件，路径基准 = video-spec.md 所在目录）
+
+[初始化]
+    Skill 启动时,显示以下 ASCII 艺术 + 开场白(原样输出,不要修改 ASCII):
+
+    ```
+    ███████╗███████╗██╗ ██████╗ █████╗ ██╗
+    ██╔════╝██╔════╝██║██╔════╝██╔══██╗██║
+    █████╗  █████╗  ██║██║     ███████║██║
+    ██╔══╝  ██╔══╝  ██║██║     ██╔══██║██║
+    ██║     ███████╗██║╚██████╗██║  ██║██║
+    ╚═╝     ╚══════╝╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝
+    ```
+
+    👋 我是視頻專家，你的視頻腳本搭檔。
+
+    我不聊空話，只聊鏡頭。你負責想，我負責幫你把它拆成可執行的腳本。
+    從一個模糊的想法到一份完整的 video-spec，全程我帶著走。
+
+    該問的會問，該替你想的直接給方案。我的目標只有一個：讓你的視頻能拍出來，而且拍得好。
+
+    💡 直接描述你想做的影片，我會開始追問。
+
+    現在，說說你想拍什麼樣的視頻？
+
+    然后执行 [启动检查]。
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SKILL_MD_0E95F5A366
 
 # video-spec-builder/Full Code/app.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/app.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/app.jsx" <<'CODEX_LAZYPACK_DBAD1E0B71238365867C3827310880D3C7F94DEF'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/app.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/app.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_APP_JSX_2747DBBBF9'
 /* ================================================================
    app.jsx — composition root
    ================================================================ */
@@ -302,11 +1149,1108 @@ function App() {
 Object.assign(window, { Section, SubSec, Params, Stage });
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-CODEX_LAZYPACK_DBAD1E0B71238365867C3827310880D3C7F94DEF
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_APP_JSX_2747DBBBF9
+
+# video-spec-builder/Full Code/styles.css
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/styles.css")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/styles.css" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_STYLES_CSS_15B7ED738D'
+/* ================================================================
+   styles.css — 视频组件库 v2 · SpaceX × Grok × X 视觉语言
+   纯黑底 · 几何字体 · spec-sheet 装饰
+   ================================================================ */
+
+/* ---------- page shell ---------- */
+.shell {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 80px 56px 240px;
+}
+
+/* ---------- top hero · SPEC SHEET ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  align-items: stretch;
+  gap: 64px;
+  border-top: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--line-2);
+  padding: 56px 0;
+  margin-bottom: 96px;
+  position: relative;
+}
+.hero::before, .hero::after {
+  content: ""; position: absolute; left: 0; right: 0;
+  height: 1px; background: var(--line);
+}
+.hero::before { top: 8px; }
+.hero::after  { bottom: 8px; }
+
+.hero__left { display: flex; flex-direction: column; justify-content: space-between; gap: 40px; }
+.hero__brand {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-mission);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.hero__title {
+  font-family: var(--f-cond);
+  font-size: clamp(64px, 9.5vw, 156px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.86;
+  margin: 0;
+  text-transform: uppercase;
+}
+.hero__title .hero__accent { color: var(--accent); }
+.hero__sub {
+  font-family: var(--f-sans);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--fg-2);
+  letter-spacing: -0.005em;
+  max-width: 540px;
+}
+.hero__meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0;
+  border-left: 1px solid var(--line-2);
+  padding-left: 32px;
+}
+.hero__meta > div {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: baseline;
+  gap: 18px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.hero__meta > div > span { color: var(--fg-3); }
+.hero__meta > div > b { color: var(--fg); font-weight: 600; }
+
+/* ---------- section ---------- */
+.section { margin-bottom: 120px; scroll-margin-top: 40px; }
+.section__num {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-mission);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 16px;
+}
+.section__num::after {
+  content: ""; flex: 1; height: 1px; background: var(--line);
+}
+.section__title {
+  font-family: var(--f-cond);
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 0.92;
+  text-transform: uppercase;
+  margin: 0 0 18px;
+}
+.section__desc {
+  font-size: var(--t-body);
+  color: var(--fg-2);
+  max-width: 720px;
+  line-height: 1.7;
+  margin-bottom: 56px;
+  font-family: var(--f-cn);
+}
+.section__desc em { color: var(--accent); font-style: normal; }
+.section__desc b { color: var(--fg); font-weight: 600; }
+
+.subsec { margin-bottom: 72px; }
+.subsec__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.subsec__name {
+  font-family: var(--f-cond);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+  text-transform: uppercase;
+}
+.subsec__tag {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+/* ---------- stage (16:9 preview canvas) ---------- */
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--bg);
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.stage .meta { font-size: 13px; letter-spacing: 0.16em; }
+.stage .mono { font-size: 16px; }
+.stage .cn   { line-height: 1.35; }
+.stage--dotgrid {
+  background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+.stage--graph {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+.stage__corner {
+  position: absolute;
+  top: 14px; left: 14px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-mission);
+  text-transform: uppercase;
+  color: var(--fg-3);
+  z-index: 5;
+}
+.stage__corner--r  { left: auto; right: 14px; }
+.stage__corner--b  { top: auto; bottom: 14px; }
+.stage__corner--br { top: auto; bottom: 14px; left: auto; right: 14px; }
+
+/* ---------- params grid ---------- */
+.params {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.param { background: var(--bg-card); padding: 16px 18px; }
+.param__k {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: var(--ls-mission);
+  text-transform: uppercase;
+  color: var(--fg-3);
+  margin-bottom: 8px;
+}
+.param__v {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  color: var(--fg);
+  letter-spacing: 0;
+}
+.param__v .sw { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 0; }
+
+/* ---------- card ---------- */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 20px;
+}
+
+/* ---------- nav · sticky top ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  margin: -80px -56px 56px;
+  padding: 14px 56px;
+  display: flex;
+  gap: 28px;
+  background: rgba(0,0,0,0.86);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--line-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: var(--ls-mission);
+  text-transform: uppercase;
+  color: var(--fg-3);
+  text-decoration: none;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color var(--d-1);
+}
+.nav__item::before {
+  content: "/";
+  color: var(--fg-3);
+  transition: color var(--d-2) var(--ease-out);
+}
+.nav__item:hover, .nav__item.is-active { color: var(--fg); }
+.nav__item:hover::before, .nav__item.is-active::before { color: var(--accent); }
+
+/* ---------- footer ---------- */
+.outro {
+  margin-top: 120px;
+  padding: 56px 0 24px;
+  border-top: 1px solid var(--line-2);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 32px;
+}
+.outro__copy {
+  font-family: var(--f-cond);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--fg);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  max-width: 720px;
+  line-height: 0.95;
+}
+.outro__meta {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-mission);
+  text-transform: uppercase;
+  color: var(--fg-3);
+  text-align: right;
+  line-height: 1.9;
+}
+
+/* ================================================================
+   v3 · 工具类（spec-sheet flourishes）
+   ================================================================ */
+
+.cross {
+  position: absolute;
+  width: 12px; height: 12px;
+  color: var(--accent);
+  pointer-events: none;
+}
+.cross::before, .cross::after { content: ""; position: absolute; background: currentColor; }
+.cross::before { left: 5px; top: 0; width: 1px; height: 100%; }
+.cross::after  { top: 5px; left: 0; width: 100%; height: 1px; }
+.cross--tl { top: -6px; left: -6px; }
+.cross--tr { top: -6px; right: -6px; }
+.cross--bl { bottom: -6px; left: -6px; }
+.cross--br { bottom: -6px; right: -6px; }
+
+.tick-rule { display: flex; gap: 4px; align-items: flex-end; height: 14px; }
+.tick-rule i { display: block; width: 1px; background: var(--fg-3); opacity: 0.5; }
+.tick-rule i:nth-child(5n+1) { height: 14px; opacity: 1; }
+.tick-rule i:nth-child(5n+2), .tick-rule i:nth-child(5n+3),
+.tick-rule i:nth-child(5n+4), .tick-rule i:nth-child(5n+5) { height: 7px; }
+
+.idx {
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: var(--ls-mission);
+  color: var(--fg-3); text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.idx::before { content: ""; width: 22px; height: 1px; background: var(--accent); }
+
+.slash { color: var(--accent); margin: 0 8px; font-family: var(--f-mono); }
+
+.big-num {
+  font-family: var(--f-cond);
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-mission);
+  text-transform: uppercase;
+  color: var(--accent);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.eyebrow::before { content: "●"; font-size: 8px; }
+
+.rule-label {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--f-mono); font-size: 11px;
+  letter-spacing: var(--ls-caps); color: var(--fg-3);
+}
+.rule-label::before, .rule-label::after {
+  content: ""; flex: 1; height: 1px; background: var(--line);
+}
+
+.kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 6px;
+  font-family: var(--f-mono); font-size: 11px;
+  color: var(--fg-2);
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  background: rgba(255,255,255,0.02);
+}
+
+.dot-pulse { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.dot-pulse::after {
+  content: ""; position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  animation: dot-pulse 2.4s ease-out infinite;
+  opacity: 0;
+}
+@keyframes dot-pulse {
+  0%   { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.0); opacity: 0; }
+}
+
+.under-accent {
+  background-image: linear-gradient(to bottom, transparent 88%, var(--accent) 88%, var(--accent) 100%);
+  background-repeat: no-repeat;
+  padding: 0 2px;
+}
+
+.frame { position: relative; }
+
+/* spec-sheet row · 仿 SpaceX 发射页 */
+.spec-row {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--f-mono); font-size: 11px;
+  letter-spacing: var(--ls-mission); color: var(--fg-3);
+  text-transform: uppercase;
+}
+.spec-row b { color: var(--fg); font-weight: 600; }
+.spec-row .accent { color: var(--accent); }
+
+/* T-MINUS countdown block */
+.t-minus {
+  font-family: var(--f-cond);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+/* coordinate block — 32°N 117°E */
+.coord {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-caps);
+  color: var(--fg-3);
+  text-transform: uppercase;
+}
+
+/* bracket wrap · [KEYWORD] */
+.bracket::before { content: "["; color: var(--accent); margin-right: 6px; }
+.bracket::after  { content: "]"; color: var(--accent); margin-left: 6px; }
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_STYLES_CSS_15B7ED738D
+
+# video-spec-builder/Full Code/tokens.css
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/tokens.css")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/tokens.css" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_TOKENS_CSS_CF34E82BFB'
+/* ================================================================
+   tokens.css — 视频组件库 v2 · SpaceX × Grok × X 视觉语言
+   纯黑 / 纯白 · 几何 sans · condensed 数字 · spec-sheet 美学
+   ================================================================ */
+:root {
+  /* ---------- color · pure mono ---------- */
+  --bg:        #000000;          /* pure black · 太空黑 */
+  --bg-card:   #0A0A0A;          /* 卡片层 */
+  --bg-elev:   #141414;          /* 抬起层 */
+  --bg-flash:  #FFFFFF;          /* 反白 cut-in */
+
+  --fg:        #FFFFFF;          /* pure white */
+  --fg-2:      rgba(255,255,255,0.66);
+  --fg-3:      rgba(255,255,255,0.42);
+  --fg-4:      rgba(255,255,255,0.18);
+
+  --line:      rgba(255,255,255,0.08);
+  --line-2:    rgba(255,255,255,0.16);
+  --line-3:    rgba(255,255,255,0.28);
+
+  /* single accent — Tweaks 可换 · 默认就是白 (Grok-style mono) */
+  --accent:    #FFFFFF;
+  --accent-2:  color-mix(in oklab, var(--accent) 40%, transparent);
+  --accent-3:  color-mix(in oklab, var(--accent) 14%, transparent);
+
+  /* status · 极少使用 · 仅图表 */
+  --green:     #00E07A;          /* SpaceX 仪表绿 */
+  --red:       #FF3333;          /* abort red */
+  --yellow:    #FFC700;          /* caution yellow */
+
+  /* ---------- type · SpaceX × X × Grok stack ---------- */
+  --f-sans:    "Space Grotesk", "Inter Tight", "PingFang SC", "Noto Sans SC", -apple-system, sans-serif;
+  --f-cond:    "Barlow Semi Condensed", "Oswald", "Space Grotesk", sans-serif;  /* big numbers / display */
+  --f-mono:    "JetBrains Mono", "IBM Plex Mono", "Geist Mono", ui-monospace, monospace;
+  --f-cn:      "Noto Sans SC", "PingFang SC", "HarmonyOS Sans SC", sans-serif;
+
+  /* type ramp — half-scale of 4K target */
+  --t-display: 96px;   /* hero · spec sheet hero */
+  --t-h1:      56px;   /* big numbers */
+  --t-h2:      32px;
+  --t-h3:      22px;
+  --t-h4:      17px;
+  --t-body:    15px;
+  --t-small:   13px;
+  --t-cap:     11px;
+  --t-meta:    10px;
+
+  /* weights — 跳过 500/700，对比悬崖 */
+  --w-reg:  400;
+  --w-mid:  600;
+  --w-bold: 700;
+  --w-heavy: 800;
+
+  /* letter-spacing — SpaceX 偏紧 + caps 偏松 */
+  --ls-display: -0.03em;
+  --ls-tight:   -0.018em;
+  --ls-normal:  -0.005em;
+  --ls-caps:     0.18em;
+  --ls-meta:     0.22em;
+  --ls-mission:  0.32em;        /* T-MINUS 等任务字串极宽 */
+
+  /* ---------- motion ---------- */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in:     cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-soft:   cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+
+  --d-1: 200ms;
+  --d-2: 400ms;
+  --d-3: 700ms;
+  --d-4: 1100ms;
+
+  /* ---------- radii — SpaceX 几何感：极小或 0 ---------- */
+  --r-0: 0px;
+  --r-1: 2px;
+  --r-2: 4px;
+  --r-3: 8px;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 40px;
+  --space-5: 64px;
+  --space-6: 96px;
+}
+
+/* ---------- reset ---------- */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
+body {
+  font-family: var(--f-sans);
+  font-size: var(--t-body);
+  font-weight: var(--w-reg);
+  letter-spacing: var(--ls-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11", "tnum";
+}
+
+:lang(zh), .cn { font-family: var(--f-cn); }
+
+.mono { font-family: var(--f-mono); letter-spacing: 0; font-variant-ligatures: none; }
+.cond { font-family: var(--f-cond); letter-spacing: var(--ls-tight); font-feature-settings: "tnum" 1; }
+.caps { text-transform: uppercase; letter-spacing: var(--ls-caps); font-family: var(--f-mono); font-weight: var(--w-mid); }
+.meta { font-family: var(--f-mono); font-size: var(--t-meta); letter-spacing: var(--ls-meta); text-transform: uppercase; color: var(--fg-3); }
+.mission { font-family: var(--f-mono); letter-spacing: var(--ls-mission); text-transform: uppercase; }
+
+.serif { font-family: var(--f-sans); font-weight: var(--w-reg); font-style: italic; }
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_TOKENS_CSS_CF34E82BFB
+
+# video-spec-builder/Full Code/tweaks-panel.jsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/tweaks-panel.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/tweaks-panel.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_TWEAKS_PANEL_JSX_614D0DE556'
+
+// tweaks-panel.jsx
+// Reusable Tweaks shell + form-control helpers.
+//
+// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
+// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
+// individual prototypes don't re-roll it. Ships a consistent set of controls so you
+// don't hand-draw <input type="range">, segmented radios, steppers, etc.
+//
+// Usage (in an HTML file that loads React + Babel):
+//
+//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+//     "primaryColor": "#D97757",
+//     "palette": ["#D97757", "#29261b", "#f6f4ef"],
+//     "fontSize": 16,
+//     "density": "regular",
+//     "dark": false
+//   }/*EDITMODE-END*/;
+//
+//   function App() {
+//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+//     return (
+//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
+//         Hello
+//         <TweaksPanel>
+//           <TweakSection label="Typography" />
+//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
+//                        onChange={(v) => setTweak('fontSize', v)} />
+//           <TweakRadio  label="Density" value={t.density}
+//                        options={['compact', 'regular', 'comfy']}
+//                        onChange={(v) => setTweak('density', v)} />
+//           <TweakSection label="Theme" />
+//           <TweakColor  label="Primary" value={t.primaryColor}
+//                        options={['#D97757', '#2A6FDB', '#1F8A5B', '#7A5AE0']}
+//                        onChange={(v) => setTweak('primaryColor', v)} />
+//           <TweakColor  label="Palette" value={t.palette}
+//                        options={[['#D97757', '#29261b', '#f6f4ef'],
+//                                  ['#475569', '#0f172a', '#f1f5f9']]}
+//                        onChange={(v) => setTweak('palette', v)} />
+//           <TweakToggle label="Dark mode" value={t.dark}
+//                        onChange={(v) => setTweak('dark', v)} />
+//         </TweaksPanel>
+//       </div>
+//     );
+//   }
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
+    overflow-wrap:anywhere}
+
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+
+  .twk-num{display:flex;align-items:center;box-sizing:border-box;min-width:0;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
+    user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
+    outline:none;color:inherit;-moz-appearance:textfield}
+  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
+    -webkit-appearance:none;margin:0}
+  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
+
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
+    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
+    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px);
+    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),
+    0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
+    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i:first-child{box-shadow:none}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+// ── useTweaks ───────────────────────────────────────────────────────────────
+// Single source of truth for tweak values. setTweak persists via the host
+// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
+  // useState-style call doesn't write a "[object Object]" key into the persisted
+  // JSON block.
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+    // Same-window signal so in-page listeners (deck-stage rail thumbnails)
+    // can react — the parent message only reaches the host, not peers.
+    window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+// ── TweaksPanel ─────────────────────────────────────────────────────────────
+// Floating shell. Registers the protocol listener BEFORE announcing
+// availability — if the announce ran first, the host's activate could land
+// before our handler exists and the toolbar toggle would silently no-op.
+// The close button posts __edit_mode_dismissed so the host's toolbar toggle
+// flips off in lockstep; the host echoes __deactivate_edit_mode back which
+// is what actually hides the panel.
+function TweaksPanel({ title = 'Tweaks', noDeckControls = false, children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  // Auto-inject a rail toggle when a <deck-stage> is on the page. The
+  // toggle drives the deck's per-viewer _railVisible via window message;
+  // state is mirrored from the same localStorage key the deck reads so
+  // the control reflects reality across reloads. The mechanism is the
+  // message — authors who want custom placement can post it directly
+  // and pass noDeckControls to suppress this one.
+  const hasDeckStage = React.useMemo(
+    () => typeof document !== 'undefined' && !!document.querySelector('deck-stage'),
+    [],
+  );
+  // Hide the toggle until the host has actually enabled the rail (the
+  // __omelette_rail_enabled window message, posted only when the
+  // omelette_deck_rail_enabled flag is on for this user). The initial read
+  // covers TweaksPanel mounting after the message already arrived; the
+  // listener covers the common case of mounting first.
+  const [railEnabled, setRailEnabled] = React.useState(
+    () => hasDeckStage && !!document.querySelector('deck-stage')?._railEnabled,
+  );
+  React.useEffect(() => {
+    if (!hasDeckStage || railEnabled) return undefined;
+    const onMsg = (e) => {
+      if (e.data && e.data.type === '__omelette_rail_enabled') setRailEnabled(true);
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [hasDeckStage, railEnabled]);
+  const [railVisible, setRailVisible] = React.useState(() => {
+    try { return localStorage.getItem('deck-stage.railVisible') !== '0'; } catch (e) { return true; }
+  });
+  const toggleRail = (on) => {
+    setRailVisible(on);
+    window.postMessage({ type: '__deck_rail_visible', on }, '*');
+  };
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', clampToViewport);
+      return () => window.removeEventListener('resize', clampToViewport);
+    }
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel" data-noncommentable=""
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">
+          {children}
+          {hasDeckStage && railEnabled && !noDeckControls && (
+            <TweakSection label="Deck">
+              <TweakToggle label="Thumbnail rail" value={railVisible} onChange={toggleRail} />
+            </TweakSection>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Layout helpers ──────────────────────────────────────────────────────────
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  // The active value is read by pointer-move handlers attached for the lifetime
+  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  // Segments wrap mid-word once per-segment width runs out. The track is
+  // ~248px (280 panel − 28 body pad − 4 seg pad), each button loses 12px
+  // to its own padding, and 11.5px system-ui averages ~6.3px/char — so 2
+  // options fit ~16 chars each, 3 fit ~10. Past that (or >3 options), fall
+  // back to a dropdown rather than wrap.
+  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
+  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
+  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
+  if (!fitsAsSegments) {
+    // <select> emits strings — map back to the original option value so the
+    // fallback stays type-preserving (numbers, booleans) like the segment path.
+    const resolve = (s) => {
+      const m = options.find((o) => String(typeof o === 'object' ? o.value : o) === s);
+      return m === undefined ? s : typeof m === 'object' ? m.value : m;
+    };
+    return <TweakSelect label={label} value={value} options={options}
+                        onChange={(s) => onChange(resolve(s))} />;
+  }
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakText({ label, value, placeholder, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             onChange={(e) => onChange(e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
+  const clamp = (n) => {
+    if (min != null && n < min) return min;
+    if (max != null && n > max) return max;
+    return n;
+  };
+  const startRef = React.useRef({ x: 0, val: 0 });
+  const onScrubStart = (e) => {
+    e.preventDefault();
+    startRef.current = { x: e.clientX, val: value };
+    const decimals = (String(step).split('.')[1] || '').length;
+    const move = (ev) => {
+      const dx = ev.clientX - startRef.current.x;
+      const raw = startRef.current.val + dx * step;
+      const snapped = Math.round(raw / step) * step;
+      onChange(clamp(Number(snapped.toFixed(decimals))));
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-num">
+      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
+      <input type="number" value={value} min={min} max={max} step={step}
+             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
+      {unit && <span className="twk-num-unit">{unit}</span>}
+    </div>
+  );
+}
+
+// Relative-luminance contrast pick — checkmarks drawn over a swatch need to
+// read on both #111 and #fafafa without per-option configuration. Hex input
+// only (#rgb / #rrggbb); named or rgb()/hsl() colors fall through to "light".
+function __twkIsLight(hex) {
+  const h = String(hex).replace('#', '');
+  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
+  const n = parseInt(x.slice(0, 6), 16);
+  if (Number.isNaN(n)) return true;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return r * 299 + g * 587 + b * 114 > 148000;
+}
+
+const __TwkCheck = ({ light }) => (
+  <svg viewBox="0 0 14 14" aria-hidden="true">
+    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round"
+          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
+  </svg>
+);
+
+// TweakColor — curated color/palette picker. Each option is either a single
+// hex string or an array of 1-5 hex strings; the card adapts — a lone color
+// renders solid, a palette renders colors[0] as the hero (left ~2/3) with the
+// rest stacked in a sharp column on the right. onChange emits the
+// option in the shape it was passed (string stays string, array stays array).
+// Without options it falls back to the native color input for back-compat.
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div className="twk-row twk-row-h">
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value}
+               onChange={(e) => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  // Native <input type=color> emits lowercase hex per the HTML spec, so
+  // compare case-insensitively. String() guards JSON.stringify(undefined),
+  // which returns the primitive undefined (no .toLowerCase).
+  const key = (o) => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero, ...rest] = colors;
+          const sup = rest.slice(0, 4);
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" role="radio"
+                    aria-checked={on} data-on={on ? '1' : '0'}
+                    aria-label={colors.join(', ')} title={colors.join(' · ')}
+                    style={{ background: hero }}
+                    onClick={() => onChange(o)}>
+              {sup.length > 0 && (
+                <span>
+                  {sup.map((c, j) => <i key={j} style={{ background: c }} />)}
+                </span>
+              )}
+              {on && <__TwkCheck light={__twkIsLight(hero)} />}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakButton({ label, onClick, secondary = false }) {
+  return (
+    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
+            onClick={onClick}>{label}</button>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
+  TweakText, TweakNumber, TweakColor, TweakButton,
+});
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_TWEAKS_PANEL_JSX_614D0DE556
 
 # video-spec-builder/Full Code/sections/aroll.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/aroll.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/aroll.jsx" <<'CODEX_LAZYPACK_FAA6EC17DADCD4B3D7464BA419875D38D9241790'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/aroll.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/aroll.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_AROLL_JSX_FB1EF48723'
 /* ================================================================
    sections/aroll.jsx — 01 · A-roll 出镜讲解（v3.1 编辑感升级）
    "克制" 版：hairline + 字号悬崖 + 0 阴影 + ornament 而非装饰
@@ -572,11 +2516,11 @@ function UseCase({ label, body }) {
 }
 
 Object.assign(window, { ARollSection });
-CODEX_LAZYPACK_FAA6EC17DADCD4B3D7464BA419875D38D9241790
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_AROLL_JSX_FB1EF48723
 
 # video-spec-builder/Full Code/sections/broll-abstract.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-abstract.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-abstract.jsx" <<'CODEX_LAZYPACK_246F60220C619A67935553BE4BE75DCC7A002237'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-abstract.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-abstract.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_ABSTRACT_JSX_EC71ED20AA'
 /* ================================================================
    sections/broll-abstract.jsx — 05 · B-roll · 抽象兜底
    讲 AI 时多数概念没有具象图标 —— 这里是"以形会意"的通用版式
@@ -884,11 +2828,11 @@ function Placeholder() {
 }
 
 Object.assign(window, { AbstractSection });
-CODEX_LAZYPACK_246F60220C619A67935553BE4BE75DCC7A002237
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_ABSTRACT_JSX_EC71ED20AA
 
 # video-spec-builder/Full Code/sections/broll-charts.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-charts.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-charts.jsx" <<'CODEX_LAZYPACK_8D6F08783166ED32F96C30691E1C007155B698E2'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-charts.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-charts.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_CHARTS_JSX_60D7A27226'
 /* ================================================================
    sections/broll-charts.jsx — 06 · A 类 · 数据图表 12 款
    line / multi-line / bar / hbar / stacked / area / donut /
@@ -1465,11 +3409,11 @@ function Sankey() {
 }
 
 Object.assign(window, { ChartsSection });
-CODEX_LAZYPACK_8D6F08783166ED32F96C30691E1C007155B698E2
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_CHARTS_JSX_60D7A27226
 
 # video-spec-builder/Full Code/sections/broll-flows.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-flows.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-flows.jsx" <<'CODEX_LAZYPACK_F4109629204EE1D8F417CD325F8AE6CB3F1C93A5'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-flows.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-flows.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_FLOWS_JSX_002E029590'
 /* ================================================================
    sections/broll-flows.jsx — 07 · B 类 · 流程图 8 款
    branching · decision-tree · state-machine · sequence ·
@@ -1873,11 +3817,11 @@ function LoopFlow() {
 }
 
 Object.assign(window, { FlowsSection });
-CODEX_LAZYPACK_F4109629204EE1D8F417CD325F8AE6CB3F1C93A5
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_FLOWS_JSX_002E029590
 
 # video-spec-builder/Full Code/sections/broll-hero.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-hero.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-hero.jsx" <<'CODEX_LAZYPACK_921159C2B90B746E3C944BEB4E1B13AEB41D6713'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-hero.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-hero.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_HERO_JSX_B7D2492555'
 /* ================================================================
    sections/broll-hero.jsx — 04 · B-roll · 重锤（v3.1 编辑感升级）
    ================================================================ */
@@ -2069,11 +4013,11 @@ function FlashCard() {
 }
 
 Object.assign(window, { HeroSection });
-CODEX_LAZYPACK_921159C2B90B746E3C944BEB4E1B13AEB41D6713
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_HERO_JSX_B7D2492555
 
 # video-spec-builder/Full Code/sections/broll-structure.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-structure.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-structure.jsx" <<'CODEX_LAZYPACK_9C8736BD574E3A2FD68D4BDC24224ACA987EB6F0'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-structure.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-structure.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_STRUCTURE_JSX_12904A0CDC'
 /* ================================================================
    sections/broll-structure.jsx — 02 · 结构图
    ================================================================ */
@@ -2337,11 +4281,11 @@ function Spectrum() {
 }
 
 Object.assign(window, { StructureSection });
-CODEX_LAZYPACK_9C8736BD574E3A2FD68D4BDC24224ACA987EB6F0
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_STRUCTURE_JSX_12904A0CDC
 
 # video-spec-builder/Full Code/sections/broll-structures2.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-structures2.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-structures2.jsx" <<'CODEX_LAZYPACK_3813E6B1361EBDE31A865CAECEEE81A2BD6C2B0B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-structures2.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-structures2.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_STRUCTURES2_JSX_8D987140D4'
 /* ================================================================
    sections/broll-structures2.jsx — 08 · C 类 · 关系结构 7 款
    tree · mindmap · matrix-2x2 · venn · layered-stack ·
@@ -2662,11 +4606,11 @@ function GridMap() {
 }
 
 Object.assign(window, { Structures2Section });
-CODEX_LAZYPACK_3813E6B1361EBDE31A865CAECEEE81A2BD6C2B0B
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_STRUCTURES2_JSX_8D987140D4
 
 # video-spec-builder/Full Code/sections/broll-thinking.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-thinking.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-thinking.jsx" <<'CODEX_LAZYPACK_25D0AF4670545E0ECB866A56085EF6A39FF81311'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-thinking.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-thinking.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_THINKING_JSX_3C557D5B4A'
 /* ================================================================
    sections/broll-thinking.jsx — 09 · D 类 · 结构化思考 7 款
    compare-table · swot · fishbone · timeline · gantt · kanban · card-grid
@@ -3053,11 +4997,11 @@ function CardGrid() {
 }
 
 Object.assign(window, { ThinkingSection });
-CODEX_LAZYPACK_25D0AF4670545E0ECB866A56085EF6A39FF81311
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_THINKING_JSX_3C557D5B4A
 
 # video-spec-builder/Full Code/sections/broll-ui.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-ui.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/broll-ui.jsx" <<'CODEX_LAZYPACK_A506CA78530ACBA0A5A45F4FED388B94EB89A311'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-ui.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/broll-ui.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_UI_JSX_4CBC94ECF9'
 /* ================================================================
    sections/broll-ui.jsx — 03 · B-roll · 仿真 UI
    终端 · 浏览器 · 对话 · 代码 · API · 仪表盘
@@ -3363,11 +5307,11 @@ function WindowChrome({ title, tabs, urlMode, url, sideBar, children }) {
 }
 
 Object.assign(window, { FakeUISection });
-CODEX_LAZYPACK_A506CA78530ACBA0A5A45F4FED388B94EB89A311
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_BROLL_UI_JSX_4CBC94ECF9
 
 # video-spec-builder/Full Code/sections/foundation.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/foundation.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/foundation.jsx" <<'CODEX_LAZYPACK_AC2EBECDA770AB573F868910E611A89B68135ECE'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/foundation.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/foundation.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_FOUNDATION_JSX_FDD0E4807B'
 /* ================================================================
    sections/foundation.jsx — 00 · 视觉地基 (SpaceX × Grok × X)
    ================================================================ */
@@ -3712,11 +5656,11 @@ function Bracket({ size = 20, color = 'currentColor', thick = 1 }) {
 }
 
 Object.assign(window, { FoundationSection, Bracket });
-CODEX_LAZYPACK_AC2EBECDA770AB573F868910E611A89B68135ECE
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_FOUNDATION_JSX_FDD0E4807B
 
 # video-spec-builder/Full Code/sections/illustrations.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/illustrations.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/sections/illustrations.jsx" <<'CODEX_LAZYPACK_250F2AA7496D5DDEC2CFEE16D18FEE717BE9803D'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/illustrations.jsx")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/Full Code/sections/illustrations.jsx" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_ILLUSTRATIONS_JSX_C8BFC22ACA'
 /* ================================================================
    sections/illustrations.jsx — 10 · 图标系统 · ICON SYSTEM
    v3.2 · 删除场景插画 · 只留 Lucide 图标
@@ -3983,1947 +5927,11 @@ function IllustrationsSection() {
 }
 
 Object.assign(window, { IllustrationsSection, LucideIcon: L });
-CODEX_LAZYPACK_250F2AA7496D5DDEC2CFEE16D18FEE717BE9803D
-
-# video-spec-builder/Full Code/styles.css
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/styles.css")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/styles.css" <<'CODEX_LAZYPACK_A012D4E5422871166D4B606982C6F2B68D13C0E8'
-/* ================================================================
-   styles.css — 视频组件库 v2 · SpaceX × Grok × X 视觉语言
-   纯黑底 · 几何字体 · spec-sheet 装饰
-   ================================================================ */
-
-/* ---------- page shell ---------- */
-.shell {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 80px 56px 240px;
-}
-
-/* ---------- top hero · SPEC SHEET ---------- */
-.hero {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  align-items: stretch;
-  gap: 64px;
-  border-top: 1px solid var(--line-2);
-  border-bottom: 1px solid var(--line-2);
-  padding: 56px 0;
-  margin-bottom: 96px;
-  position: relative;
-}
-.hero::before, .hero::after {
-  content: ""; position: absolute; left: 0; right: 0;
-  height: 1px; background: var(--line);
-}
-.hero::before { top: 8px; }
-.hero::after  { bottom: 8px; }
-
-.hero__left { display: flex; flex-direction: column; justify-content: space-between; gap: 40px; }
-.hero__brand {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: var(--ls-mission);
-  text-transform: uppercase;
-  color: var(--fg-3);
-}
-.hero__title {
-  font-family: var(--f-cond);
-  font-size: clamp(64px, 9.5vw, 156px);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 0.86;
-  margin: 0;
-  text-transform: uppercase;
-}
-.hero__title .hero__accent { color: var(--accent); }
-.hero__sub {
-  font-family: var(--f-sans);
-  font-size: 18px;
-  font-weight: 400;
-  color: var(--fg-2);
-  letter-spacing: -0.005em;
-  max-width: 540px;
-}
-.hero__meta {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 0;
-  border-left: 1px solid var(--line-2);
-  padding-left: 32px;
-}
-.hero__meta > div {
-  display: grid;
-  grid-template-columns: 100px 1fr;
-  align-items: baseline;
-  gap: 18px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.hero__meta > div > span { color: var(--fg-3); }
-.hero__meta > div > b { color: var(--fg); font-weight: 600; }
-
-/* ---------- section ---------- */
-.section { margin-bottom: 120px; scroll-margin-top: 40px; }
-.section__num {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: var(--ls-mission);
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 14px;
-  display: flex; align-items: center; gap: 16px;
-}
-.section__num::after {
-  content: ""; flex: 1; height: 1px; background: var(--line);
-}
-.section__title {
-  font-family: var(--f-cond);
-  font-size: 64px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 0.92;
-  text-transform: uppercase;
-  margin: 0 0 18px;
-}
-.section__desc {
-  font-size: var(--t-body);
-  color: var(--fg-2);
-  max-width: 720px;
-  line-height: 1.7;
-  margin-bottom: 56px;
-  font-family: var(--f-cn);
-}
-.section__desc em { color: var(--accent); font-style: normal; }
-.section__desc b { color: var(--fg); font-weight: 600; }
-
-.subsec { margin-bottom: 72px; }
-.subsec__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 22px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
-}
-.subsec__name {
-  font-family: var(--f-cond);
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.008em;
-  text-transform: uppercase;
-}
-.subsec__tag {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  color: var(--fg-3);
-}
-
-/* ---------- stage (16:9 preview canvas) ---------- */
-.stage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: var(--bg);
-  border: 1px solid var(--line-2);
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-.stage .meta { font-size: 13px; letter-spacing: 0.16em; }
-.stage .mono { font-size: 16px; }
-.stage .cn   { line-height: 1.35; }
-.stage--dotgrid {
-  background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1.2px);
-  background-size: 22px 22px;
-}
-.stage--graph {
-  background-image:
-    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
-  background-size: 44px 44px;
-}
-.stage__corner {
-  position: absolute;
-  top: 14px; left: 14px;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: var(--ls-mission);
-  text-transform: uppercase;
-  color: var(--fg-3);
-  z-index: 5;
-}
-.stage__corner--r  { left: auto; right: 14px; }
-.stage__corner--b  { top: auto; bottom: 14px; }
-.stage__corner--br { top: auto; bottom: 14px; left: auto; right: 14px; }
-
-/* ---------- params grid ---------- */
-.params {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.param { background: var(--bg-card); padding: 16px 18px; }
-.param__k {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: var(--ls-mission);
-  text-transform: uppercase;
-  color: var(--fg-3);
-  margin-bottom: 8px;
-}
-.param__v {
-  font-family: var(--f-mono);
-  font-size: 13px;
-  color: var(--fg);
-  letter-spacing: 0;
-}
-.param__v .sw { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 0; }
-
-/* ---------- card ---------- */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  padding: 20px;
-}
-
-/* ---------- nav · sticky top ---------- */
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  margin: -80px -56px 56px;
-  padding: 14px 56px;
-  display: flex;
-  gap: 28px;
-  background: rgba(0,0,0,0.86);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border-bottom: 1px solid var(--line-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.nav::-webkit-scrollbar { display: none; }
-.nav__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: var(--ls-mission);
-  text-transform: uppercase;
-  color: var(--fg-3);
-  text-decoration: none;
-  cursor: pointer;
-  padding: 6px 0;
-  transition: color var(--d-1);
-}
-.nav__item::before {
-  content: "/";
-  color: var(--fg-3);
-  transition: color var(--d-2) var(--ease-out);
-}
-.nav__item:hover, .nav__item.is-active { color: var(--fg); }
-.nav__item:hover::before, .nav__item.is-active::before { color: var(--accent); }
-
-/* ---------- footer ---------- */
-.outro {
-  margin-top: 120px;
-  padding: 56px 0 24px;
-  border-top: 1px solid var(--line-2);
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: baseline;
-  gap: 32px;
-}
-.outro__copy {
-  font-family: var(--f-cond);
-  font-size: 40px;
-  font-weight: 700;
-  color: var(--fg);
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  max-width: 720px;
-  line-height: 0.95;
-}
-.outro__meta {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: var(--ls-mission);
-  text-transform: uppercase;
-  color: var(--fg-3);
-  text-align: right;
-  line-height: 1.9;
-}
-
-/* ================================================================
-   v3 · 工具类（spec-sheet flourishes）
-   ================================================================ */
-
-.cross {
-  position: absolute;
-  width: 12px; height: 12px;
-  color: var(--accent);
-  pointer-events: none;
-}
-.cross::before, .cross::after { content: ""; position: absolute; background: currentColor; }
-.cross::before { left: 5px; top: 0; width: 1px; height: 100%; }
-.cross::after  { top: 5px; left: 0; width: 100%; height: 1px; }
-.cross--tl { top: -6px; left: -6px; }
-.cross--tr { top: -6px; right: -6px; }
-.cross--bl { bottom: -6px; left: -6px; }
-.cross--br { bottom: -6px; right: -6px; }
-
-.tick-rule { display: flex; gap: 4px; align-items: flex-end; height: 14px; }
-.tick-rule i { display: block; width: 1px; background: var(--fg-3); opacity: 0.5; }
-.tick-rule i:nth-child(5n+1) { height: 14px; opacity: 1; }
-.tick-rule i:nth-child(5n+2), .tick-rule i:nth-child(5n+3),
-.tick-rule i:nth-child(5n+4), .tick-rule i:nth-child(5n+5) { height: 7px; }
-
-.idx {
-  font-family: var(--f-mono); font-size: 11px; letter-spacing: var(--ls-mission);
-  color: var(--fg-3); text-transform: uppercase;
-  display: inline-flex; align-items: center; gap: 10px;
-}
-.idx::before { content: ""; width: 22px; height: 1px; background: var(--accent); }
-
-.slash { color: var(--accent); margin: 0 8px; font-family: var(--f-mono); }
-
-.big-num {
-  font-family: var(--f-cond);
-  font-weight: 700;
-  line-height: 0.86;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-.eyebrow {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: var(--ls-mission);
-  text-transform: uppercase;
-  color: var(--accent);
-  display: inline-flex; align-items: center; gap: 8px;
-}
-.eyebrow::before { content: "●"; font-size: 8px; }
-
-.rule-label {
-  display: flex; align-items: center; gap: 12px;
-  font-family: var(--f-mono); font-size: 11px;
-  letter-spacing: var(--ls-caps); color: var(--fg-3);
-}
-.rule-label::before, .rule-label::after {
-  content: ""; flex: 1; height: 1px; background: var(--line);
-}
-
-.kbd {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 22px; height: 22px; padding: 0 6px;
-  font-family: var(--f-mono); font-size: 11px;
-  color: var(--fg-2);
-  border: 1px solid var(--line-2);
-  border-radius: 2px;
-  background: rgba(255,255,255,0.02);
-}
-
-.dot-pulse { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-.dot-pulse::after {
-  content: ""; position: absolute; inset: -4px;
-  border-radius: 50%;
-  border: 1px solid var(--accent);
-  animation: dot-pulse 2.4s ease-out infinite;
-  opacity: 0;
-}
-@keyframes dot-pulse {
-  0%   { transform: scale(0.6); opacity: 0.8; }
-  100% { transform: scale(2.0); opacity: 0; }
-}
-
-.under-accent {
-  background-image: linear-gradient(to bottom, transparent 88%, var(--accent) 88%, var(--accent) 100%);
-  background-repeat: no-repeat;
-  padding: 0 2px;
-}
-
-.frame { position: relative; }
-
-/* spec-sheet row · 仿 SpaceX 发射页 */
-.spec-row {
-  display: flex; align-items: center; gap: 14px;
-  font-family: var(--f-mono); font-size: 11px;
-  letter-spacing: var(--ls-mission); color: var(--fg-3);
-  text-transform: uppercase;
-}
-.spec-row b { color: var(--fg); font-weight: 600; }
-.spec-row .accent { color: var(--accent); }
-
-/* T-MINUS countdown block */
-.t-minus {
-  font-family: var(--f-cond);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 0.9;
-  font-variant-numeric: tabular-nums;
-}
-
-/* coordinate block — 32°N 117°E */
-.coord {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: var(--ls-caps);
-  color: var(--fg-3);
-  text-transform: uppercase;
-}
-
-/* bracket wrap · [KEYWORD] */
-.bracket::before { content: "["; color: var(--accent); margin-right: 6px; }
-.bracket::after  { content: "]"; color: var(--accent); margin-left: 6px; }
-CODEX_LAZYPACK_A012D4E5422871166D4B606982C6F2B68D13C0E8
-
-# video-spec-builder/Full Code/tokens.css
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/tokens.css")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/tokens.css" <<'CODEX_LAZYPACK_37D7A2B7EEFD2244E93383635DC770E916D6094C'
-/* ================================================================
-   tokens.css — 视频组件库 v2 · SpaceX × Grok × X 视觉语言
-   纯黑 / 纯白 · 几何 sans · condensed 数字 · spec-sheet 美学
-   ================================================================ */
-:root {
-  /* ---------- color · pure mono ---------- */
-  --bg:        #000000;          /* pure black · 太空黑 */
-  --bg-card:   #0A0A0A;          /* 卡片层 */
-  --bg-elev:   #141414;          /* 抬起层 */
-  --bg-flash:  #FFFFFF;          /* 反白 cut-in */
-
-  --fg:        #FFFFFF;          /* pure white */
-  --fg-2:      rgba(255,255,255,0.66);
-  --fg-3:      rgba(255,255,255,0.42);
-  --fg-4:      rgba(255,255,255,0.18);
-
-  --line:      rgba(255,255,255,0.08);
-  --line-2:    rgba(255,255,255,0.16);
-  --line-3:    rgba(255,255,255,0.28);
-
-  /* single accent — Tweaks 可换 · 默认就是白 (Grok-style mono) */
-  --accent:    #FFFFFF;
-  --accent-2:  color-mix(in oklab, var(--accent) 40%, transparent);
-  --accent-3:  color-mix(in oklab, var(--accent) 14%, transparent);
-
-  /* status · 极少使用 · 仅图表 */
-  --green:     #00E07A;          /* SpaceX 仪表绿 */
-  --red:       #FF3333;          /* abort red */
-  --yellow:    #FFC700;          /* caution yellow */
-
-  /* ---------- type · SpaceX × X × Grok stack ---------- */
-  --f-sans:    "Space Grotesk", "Inter Tight", "PingFang SC", "Noto Sans SC", -apple-system, sans-serif;
-  --f-cond:    "Barlow Semi Condensed", "Oswald", "Space Grotesk", sans-serif;  /* big numbers / display */
-  --f-mono:    "JetBrains Mono", "IBM Plex Mono", "Geist Mono", ui-monospace, monospace;
-  --f-cn:      "Noto Sans SC", "PingFang SC", "HarmonyOS Sans SC", sans-serif;
-
-  /* type ramp — half-scale of 4K target */
-  --t-display: 96px;   /* hero · spec sheet hero */
-  --t-h1:      56px;   /* big numbers */
-  --t-h2:      32px;
-  --t-h3:      22px;
-  --t-h4:      17px;
-  --t-body:    15px;
-  --t-small:   13px;
-  --t-cap:     11px;
-  --t-meta:    10px;
-
-  /* weights — 跳过 500/700，对比悬崖 */
-  --w-reg:  400;
-  --w-mid:  600;
-  --w-bold: 700;
-  --w-heavy: 800;
-
-  /* letter-spacing — SpaceX 偏紧 + caps 偏松 */
-  --ls-display: -0.03em;
-  --ls-tight:   -0.018em;
-  --ls-normal:  -0.005em;
-  --ls-caps:     0.18em;
-  --ls-meta:     0.22em;
-  --ls-mission:  0.32em;        /* T-MINUS 等任务字串极宽 */
-
-  /* ---------- motion ---------- */
-  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-in:     cubic-bezier(0.55, 0, 1, 0.45);
-  --ease-soft:   cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
-
-  --d-1: 200ms;
-  --d-2: 400ms;
-  --d-3: 700ms;
-  --d-4: 1100ms;
-
-  /* ---------- radii — SpaceX 几何感：极小或 0 ---------- */
-  --r-0: 0px;
-  --r-1: 2px;
-  --r-2: 4px;
-  --r-3: 8px;
-
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 40px;
-  --space-5: 64px;
-  --space-6: 96px;
-}
-
-/* ---------- reset ---------- */
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
-body {
-  font-family: var(--f-sans);
-  font-size: var(--t-body);
-  font-weight: var(--w-reg);
-  letter-spacing: var(--ls-normal);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "ss01", "cv11", "tnum";
-}
-
-:lang(zh), .cn { font-family: var(--f-cn); }
-
-.mono { font-family: var(--f-mono); letter-spacing: 0; font-variant-ligatures: none; }
-.cond { font-family: var(--f-cond); letter-spacing: var(--ls-tight); font-feature-settings: "tnum" 1; }
-.caps { text-transform: uppercase; letter-spacing: var(--ls-caps); font-family: var(--f-mono); font-weight: var(--w-mid); }
-.meta { font-family: var(--f-mono); font-size: var(--t-meta); letter-spacing: var(--ls-meta); text-transform: uppercase; color: var(--fg-3); }
-.mission { font-family: var(--f-mono); letter-spacing: var(--ls-mission); text-transform: uppercase; }
-
-.serif { font-family: var(--f-sans); font-weight: var(--w-reg); font-style: italic; }
-CODEX_LAZYPACK_37D7A2B7EEFD2244E93383635DC770E916D6094C
-
-# video-spec-builder/Full Code/tweaks-panel.jsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/tweaks-panel.jsx")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/Full Code/tweaks-panel.jsx" <<'CODEX_LAZYPACK_D3996CCE783414076F803167D26EB048EFC6EDF5'
-
-// tweaks-panel.jsx
-// Reusable Tweaks shell + form-control helpers.
-//
-// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
-// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
-// individual prototypes don't re-roll it. Ships a consistent set of controls so you
-// don't hand-draw <input type="range">, segmented radios, steppers, etc.
-//
-// Usage (in an HTML file that loads React + Babel):
-//
-//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-//     "primaryColor": "#D97757",
-//     "palette": ["#D97757", "#29261b", "#f6f4ef"],
-//     "fontSize": 16,
-//     "density": "regular",
-//     "dark": false
-//   }/*EDITMODE-END*/;
-//
-//   function App() {
-//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
-//     return (
-//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
-//         Hello
-//         <TweaksPanel>
-//           <TweakSection label="Typography" />
-//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
-//                        onChange={(v) => setTweak('fontSize', v)} />
-//           <TweakRadio  label="Density" value={t.density}
-//                        options={['compact', 'regular', 'comfy']}
-//                        onChange={(v) => setTweak('density', v)} />
-//           <TweakSection label="Theme" />
-//           <TweakColor  label="Primary" value={t.primaryColor}
-//                        options={['#D97757', '#2A6FDB', '#1F8A5B', '#7A5AE0']}
-//                        onChange={(v) => setTweak('primaryColor', v)} />
-//           <TweakColor  label="Palette" value={t.palette}
-//                        options={[['#D97757', '#29261b', '#f6f4ef'],
-//                                  ['#475569', '#0f172a', '#f1f5f9']]}
-//                        onChange={(v) => setTweak('palette', v)} />
-//           <TweakToggle label="Dark mode" value={t.dark}
-//                        onChange={(v) => setTweak('dark', v)} />
-//         </TweaksPanel>
-//       </div>
-//     );
-//   }
-//
-// ─────────────────────────────────────────────────────────────────────────────
-
-const __TWEAKS_STYLE = `
-  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
-    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
-    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
-    background:rgba(250,249,247,.78);color:#29261b;
-    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
-    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
-    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
-    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
-  .twk-hd{display:flex;align-items:center;justify-content:space-between;
-    padding:10px 8px 10px 14px;cursor:move;user-select:none}
-  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
-  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
-    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
-  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
-  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
-    overflow-y:auto;overflow-x:hidden;min-height:0;
-    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
-  .twk-body::-webkit-scrollbar{width:8px}
-  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
-  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
-    border:2px solid transparent;background-clip:content-box}
-  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
-    border:2px solid transparent;background-clip:content-box}
-  .twk-row{display:flex;flex-direction:column;gap:5px}
-  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
-  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
-    color:rgba(41,38,27,.72)}
-  .twk-lbl>span:first-child{font-weight:500}
-  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
-
-  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    color:rgba(41,38,27,.45);padding:10px 0 0}
-  .twk-sect:first-child{padding-top:0}
-
-  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
-    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
-    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
-  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
-  select.twk-field{padding-right:22px;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
-    background-repeat:no-repeat;background-position:right 8px center}
-
-  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
-    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
-  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
-    width:14px;height:14px;border-radius:50%;background:#fff;
-    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
-  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
-    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
-
-  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
-    background:rgba(0,0,0,.06);user-select:none}
-  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
-    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
-    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
-  .twk-seg.dragging .twk-seg-thumb{transition:none}
-  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
-    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
-    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
-    overflow-wrap:anywhere}
-
-  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
-    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
-  .twk-toggle[data-on="1"]{background:#34c759}
-  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
-    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
-  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
-
-  .twk-num{display:flex;align-items:center;box-sizing:border-box;min-width:0;height:26px;padding:0 0 0 8px;
-    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
-  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
-    user-select:none;padding-right:8px}
-  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
-    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
-    outline:none;color:inherit;-moz-appearance:textfield}
-  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
-    -webkit-appearance:none;margin:0}
-  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
-
-  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
-    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
-  .twk-btn:hover{background:rgba(0,0,0,.88)}
-  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
-  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
-
-  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
-    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
-    background:transparent;flex-shrink:0}
-  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
-  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
-  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
-
-  .twk-chips{display:flex;gap:6px}
-  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
-    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
-    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
-    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
-  .twk-chip:hover{transform:translateY(-1px);
-    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
-  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),
-    0 2px 6px rgba(0,0,0,.15)}
-  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
-    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
-  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
-  .twk-chip>span>i:first-child{box-shadow:none}
-  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
-    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
-`;
-
-// ── useTweaks ───────────────────────────────────────────────────────────────
-// Single source of truth for tweak values. setTweak persists via the host
-// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
-function useTweaks(defaults) {
-  const [values, setValues] = React.useState(defaults);
-  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
-  // useState-style call doesn't write a "[object Object]" key into the persisted
-  // JSON block.
-  const setTweak = React.useCallback((keyOrEdits, val) => {
-    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
-      ? keyOrEdits : { [keyOrEdits]: val };
-    setValues((prev) => ({ ...prev, ...edits }));
-    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
-    // Same-window signal so in-page listeners (deck-stage rail thumbnails)
-    // can react — the parent message only reaches the host, not peers.
-    window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));
-  }, []);
-  return [values, setTweak];
-}
-
-// ── TweaksPanel ─────────────────────────────────────────────────────────────
-// Floating shell. Registers the protocol listener BEFORE announcing
-// availability — if the announce ran first, the host's activate could land
-// before our handler exists and the toolbar toggle would silently no-op.
-// The close button posts __edit_mode_dismissed so the host's toolbar toggle
-// flips off in lockstep; the host echoes __deactivate_edit_mode back which
-// is what actually hides the panel.
-function TweaksPanel({ title = 'Tweaks', noDeckControls = false, children }) {
-  const [open, setOpen] = React.useState(false);
-  const dragRef = React.useRef(null);
-  // Auto-inject a rail toggle when a <deck-stage> is on the page. The
-  // toggle drives the deck's per-viewer _railVisible via window message;
-  // state is mirrored from the same localStorage key the deck reads so
-  // the control reflects reality across reloads. The mechanism is the
-  // message — authors who want custom placement can post it directly
-  // and pass noDeckControls to suppress this one.
-  const hasDeckStage = React.useMemo(
-    () => typeof document !== 'undefined' && !!document.querySelector('deck-stage'),
-    [],
-  );
-  // Hide the toggle until the host has actually enabled the rail (the
-  // __omelette_rail_enabled window message, posted only when the
-  // omelette_deck_rail_enabled flag is on for this user). The initial read
-  // covers TweaksPanel mounting after the message already arrived; the
-  // listener covers the common case of mounting first.
-  const [railEnabled, setRailEnabled] = React.useState(
-    () => hasDeckStage && !!document.querySelector('deck-stage')?._railEnabled,
-  );
-  React.useEffect(() => {
-    if (!hasDeckStage || railEnabled) return undefined;
-    const onMsg = (e) => {
-      if (e.data && e.data.type === '__omelette_rail_enabled') setRailEnabled(true);
-    };
-    window.addEventListener('message', onMsg);
-    return () => window.removeEventListener('message', onMsg);
-  }, [hasDeckStage, railEnabled]);
-  const [railVisible, setRailVisible] = React.useState(() => {
-    try { return localStorage.getItem('deck-stage.railVisible') !== '0'; } catch (e) { return true; }
-  });
-  const toggleRail = (on) => {
-    setRailVisible(on);
-    window.postMessage({ type: '__deck_rail_visible', on }, '*');
-  };
-  const offsetRef = React.useRef({ x: 16, y: 16 });
-  const PAD = 16;
-
-  const clampToViewport = React.useCallback(() => {
-    const panel = dragRef.current;
-    if (!panel) return;
-    const w = panel.offsetWidth, h = panel.offsetHeight;
-    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
-    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
-    offsetRef.current = {
-      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
-      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
-    };
-    panel.style.right = offsetRef.current.x + 'px';
-    panel.style.bottom = offsetRef.current.y + 'px';
-  }, []);
-
-  React.useEffect(() => {
-    if (!open) return;
-    clampToViewport();
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', clampToViewport);
-      return () => window.removeEventListener('resize', clampToViewport);
-    }
-    const ro = new ResizeObserver(clampToViewport);
-    ro.observe(document.documentElement);
-    return () => ro.disconnect();
-  }, [open, clampToViewport]);
-
-  React.useEffect(() => {
-    const onMsg = (e) => {
-      const t = e?.data?.type;
-      if (t === '__activate_edit_mode') setOpen(true);
-      else if (t === '__deactivate_edit_mode') setOpen(false);
-    };
-    window.addEventListener('message', onMsg);
-    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
-    return () => window.removeEventListener('message', onMsg);
-  }, []);
-
-  const dismiss = () => {
-    setOpen(false);
-    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
-  };
-
-  const onDragStart = (e) => {
-    const panel = dragRef.current;
-    if (!panel) return;
-    const r = panel.getBoundingClientRect();
-    const sx = e.clientX, sy = e.clientY;
-    const startRight = window.innerWidth - r.right;
-    const startBottom = window.innerHeight - r.bottom;
-    const move = (ev) => {
-      offsetRef.current = {
-        x: startRight - (ev.clientX - sx),
-        y: startBottom - (ev.clientY - sy),
-      };
-      clampToViewport();
-    };
-    const up = () => {
-      window.removeEventListener('mousemove', move);
-      window.removeEventListener('mouseup', up);
-    };
-    window.addEventListener('mousemove', move);
-    window.addEventListener('mouseup', up);
-  };
-
-  if (!open) return null;
-  return (
-    <>
-      <style>{__TWEAKS_STYLE}</style>
-      <div ref={dragRef} className="twk-panel" data-noncommentable=""
-           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
-        <div className="twk-hd" onMouseDown={onDragStart}>
-          <b>{title}</b>
-          <button className="twk-x" aria-label="Close tweaks"
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={dismiss}>✕</button>
-        </div>
-        <div className="twk-body">
-          {children}
-          {hasDeckStage && railEnabled && !noDeckControls && (
-            <TweakSection label="Deck">
-              <TweakToggle label="Thumbnail rail" value={railVisible} onChange={toggleRail} />
-            </TweakSection>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ── Layout helpers ──────────────────────────────────────────────────────────
-
-function TweakSection({ label, children }) {
-  return (
-    <>
-      <div className="twk-sect">{label}</div>
-      {children}
-    </>
-  );
-}
-
-function TweakRow({ label, value, children, inline = false }) {
-  return (
-    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
-      <div className="twk-lbl">
-        <span>{label}</span>
-        {value != null && <span className="twk-val">{value}</span>}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-// ── Controls ────────────────────────────────────────────────────────────────
-
-function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
-  return (
-    <TweakRow label={label} value={`${value}${unit}`}>
-      <input type="range" className="twk-slider" min={min} max={max} step={step}
-             value={value} onChange={(e) => onChange(Number(e.target.value))} />
-    </TweakRow>
-  );
-}
-
-function TweakToggle({ label, value, onChange }) {
-  return (
-    <div className="twk-row twk-row-h">
-      <div className="twk-lbl"><span>{label}</span></div>
-      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
-              role="switch" aria-checked={!!value}
-              onClick={() => onChange(!value)}><i /></button>
-    </div>
-  );
-}
-
-function TweakRadio({ label, value, options, onChange }) {
-  const trackRef = React.useRef(null);
-  const [dragging, setDragging] = React.useState(false);
-  // The active value is read by pointer-move handlers attached for the lifetime
-  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
-  const valueRef = React.useRef(value);
-  valueRef.current = value;
-
-  // Segments wrap mid-word once per-segment width runs out. The track is
-  // ~248px (280 panel − 28 body pad − 4 seg pad), each button loses 12px
-  // to its own padding, and 11.5px system-ui averages ~6.3px/char — so 2
-  // options fit ~16 chars each, 3 fit ~10. Past that (or >3 options), fall
-  // back to a dropdown rather than wrap.
-  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
-  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
-  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
-  if (!fitsAsSegments) {
-    // <select> emits strings — map back to the original option value so the
-    // fallback stays type-preserving (numbers, booleans) like the segment path.
-    const resolve = (s) => {
-      const m = options.find((o) => String(typeof o === 'object' ? o.value : o) === s);
-      return m === undefined ? s : typeof m === 'object' ? m.value : m;
-    };
-    return <TweakSelect label={label} value={value} options={options}
-                        onChange={(s) => onChange(resolve(s))} />;
-  }
-  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
-  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
-  const n = opts.length;
-
-  const segAt = (clientX) => {
-    const r = trackRef.current.getBoundingClientRect();
-    const inner = r.width - 4;
-    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
-    return opts[Math.max(0, Math.min(n - 1, i))].value;
-  };
-
-  const onPointerDown = (e) => {
-    setDragging(true);
-    const v0 = segAt(e.clientX);
-    if (v0 !== valueRef.current) onChange(v0);
-    const move = (ev) => {
-      if (!trackRef.current) return;
-      const v = segAt(ev.clientX);
-      if (v !== valueRef.current) onChange(v);
-    };
-    const up = () => {
-      setDragging(false);
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-  };
-
-  return (
-    <TweakRow label={label}>
-      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
-           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
-        <div className="twk-seg-thumb"
-             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
-                      width: `calc((100% - 4px) / ${n})` }} />
-        {opts.map((o) => (
-          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
-            {o.label}
-          </button>
-        ))}
-      </div>
-    </TweakRow>
-  );
-}
-
-function TweakSelect({ label, value, options, onChange }) {
-  return (
-    <TweakRow label={label}>
-      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
-        {options.map((o) => {
-          const v = typeof o === 'object' ? o.value : o;
-          const l = typeof o === 'object' ? o.label : o;
-          return <option key={v} value={v}>{l}</option>;
-        })}
-      </select>
-    </TweakRow>
-  );
-}
-
-function TweakText({ label, value, placeholder, onChange }) {
-  return (
-    <TweakRow label={label}>
-      <input className="twk-field" type="text" value={value} placeholder={placeholder}
-             onChange={(e) => onChange(e.target.value)} />
-    </TweakRow>
-  );
-}
-
-function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
-  const clamp = (n) => {
-    if (min != null && n < min) return min;
-    if (max != null && n > max) return max;
-    return n;
-  };
-  const startRef = React.useRef({ x: 0, val: 0 });
-  const onScrubStart = (e) => {
-    e.preventDefault();
-    startRef.current = { x: e.clientX, val: value };
-    const decimals = (String(step).split('.')[1] || '').length;
-    const move = (ev) => {
-      const dx = ev.clientX - startRef.current.x;
-      const raw = startRef.current.val + dx * step;
-      const snapped = Math.round(raw / step) * step;
-      onChange(clamp(Number(snapped.toFixed(decimals))));
-    };
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-  };
-  return (
-    <div className="twk-num">
-      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
-      <input type="number" value={value} min={min} max={max} step={step}
-             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
-      {unit && <span className="twk-num-unit">{unit}</span>}
-    </div>
-  );
-}
-
-// Relative-luminance contrast pick — checkmarks drawn over a swatch need to
-// read on both #111 and #fafafa without per-option configuration. Hex input
-// only (#rgb / #rrggbb); named or rgb()/hsl() colors fall through to "light".
-function __twkIsLight(hex) {
-  const h = String(hex).replace('#', '');
-  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
-  const n = parseInt(x.slice(0, 6), 16);
-  if (Number.isNaN(n)) return true;
-  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  return r * 299 + g * 587 + b * 114 > 148000;
-}
-
-const __TwkCheck = ({ light }) => (
-  <svg viewBox="0 0 14 14" aria-hidden="true">
-    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
-          strokeLinecap="round" strokeLinejoin="round"
-          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
-  </svg>
-);
-
-// TweakColor — curated color/palette picker. Each option is either a single
-// hex string or an array of 1-5 hex strings; the card adapts — a lone color
-// renders solid, a palette renders colors[0] as the hero (left ~2/3) with the
-// rest stacked in a sharp column on the right. onChange emits the
-// option in the shape it was passed (string stays string, array stays array).
-// Without options it falls back to the native color input for back-compat.
-function TweakColor({ label, value, options, onChange }) {
-  if (!options || !options.length) {
-    return (
-      <div className="twk-row twk-row-h">
-        <div className="twk-lbl"><span>{label}</span></div>
-        <input type="color" className="twk-swatch" value={value}
-               onChange={(e) => onChange(e.target.value)} />
-      </div>
-    );
-  }
-  // Native <input type=color> emits lowercase hex per the HTML spec, so
-  // compare case-insensitively. String() guards JSON.stringify(undefined),
-  // which returns the primitive undefined (no .toLowerCase).
-  const key = (o) => String(JSON.stringify(o)).toLowerCase();
-  const cur = key(value);
-  return (
-    <TweakRow label={label}>
-      <div className="twk-chips" role="radiogroup">
-        {options.map((o, i) => {
-          const colors = Array.isArray(o) ? o : [o];
-          const [hero, ...rest] = colors;
-          const sup = rest.slice(0, 4);
-          const on = key(o) === cur;
-          return (
-            <button key={i} type="button" className="twk-chip" role="radio"
-                    aria-checked={on} data-on={on ? '1' : '0'}
-                    aria-label={colors.join(', ')} title={colors.join(' · ')}
-                    style={{ background: hero }}
-                    onClick={() => onChange(o)}>
-              {sup.length > 0 && (
-                <span>
-                  {sup.map((c, j) => <i key={j} style={{ background: c }} />)}
-                </span>
-              )}
-              {on && <__TwkCheck light={__twkIsLight(hero)} />}
-            </button>
-          );
-        })}
-      </div>
-    </TweakRow>
-  );
-}
-
-function TweakButton({ label, onClick, secondary = false }) {
-  return (
-    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
-            onClick={onClick}>{label}</button>
-  );
-}
-
-Object.assign(window, {
-  useTweaks, TweaksPanel, TweakSection, TweakRow,
-  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
-  TweakText, TweakNumber, TweakColor, TweakButton,
-});
-CODEX_LAZYPACK_D3996CCE783414076F803167D26EB048EFC6EDF5
-
-# video-spec-builder/LICENSE
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/LICENSE")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/LICENSE" <<'CODEX_LAZYPACK_70485F34E1C191B7DA831CB76F1E449C1154A2E1'
-MIT License
-
-Copyright (c) 2026 feicaiclub
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-CODEX_LAZYPACK_70485F34E1C191B7DA831CB76F1E449C1154A2E1
-
-# video-spec-builder/README.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/README.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/README.md" <<'CODEX_LAZYPACK_6A85E86B3B63F67C21C88F1A4596E6243773CFCD'
-<img width="2172" height="724" alt="ChatGPT Image May 16, 2026, 10_46_58 PM" src="https://github.com/user-attachments/assets/7820d93e-84b6-4e09-904c-9567c6595c57" />
-
-**English** · [中文](README.zh.md)
-
-# video-spec-builder
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen)](LICENSE) ![Agent Agnostic](https://img.shields.io/badge/Agent-Agnostic-blueviolet) [![skills.sh Compatible](https://img.shields.io/badge/skills.sh-Compatible-brightgreen)](https://skills.sh)
-
-> A skill that works like a video director. You say "I want to make a video," and it grills you with questions until your idea is a script you can actually shoot.
-
-I built this skill after realizing the hard part of making a video isn't the rendering. It's figuring out what you actually want.
-
-You've got a vague idea in your head: a product video, a short for social, a company intro. But it's fuzzy. The moment you try to build it, the details get you — how long each shot runs, what's on screen, what comes first and what comes later. You probably haven't pinned them all down, and you might not even be able to put them into words.
-
-video-spec-builder gets you through that part. Install it, then tell your AI "I want to make a video" inside Codex or Codex App, and it takes over the conversation. It listens to your brief the way a director would, then keeps asking: Who's this for? How long? What's the one line people should walk away with? Which shot carries the weight? Anywhere you go vague, or skip something, it stops and pushes you to fill it in.
-
-A few rounds of that, and the fuzzy idea becomes a `video-spec.md`: a shot-by-shot script, timed to the second, every shot written out. Hand that to HyperFrames and it renders into a real video.
-
-It won't shoot the video for you, and it won't invent the idea. It does one thing: push you, and stay with you, until the idea is something you can actually build.
-
-## What it helps with
-
-The problem it solves is "I have an idea but I can't explain it." A few situations where it earns its keep:
-
-- You know the feeling you want but can't describe the actual picture. It refuses words like "premium" or "high-impact" and keeps after you until you can describe real shots and real motion.
-- You have an idea but never thought parts of it through. Maybe you've got the opening and the ending but not the middle. Maybe it never crossed your mind that a section could use captions, or that visuals can move to the beat of the music. It brings those up.
-- You have plenty of raw material but no order to it. A script, selling points, a pile of assets — it helps you cut that into individual shots and put them in sequence.
-
-In the end it writes all of it into a script: what each shot shows, how it's presented, how long it holds, how it cuts to the next one.
-
-There are two ways to use it. With no script yet, it talks you through the whole thing from scratch and produces a `video-spec.md`. With a script already there and just one thing to change, you tell it what you want different; it asks enough to be sure, makes the change, and checks whether it knocked anything else loose.
-
-## The workflow
-
-It's two skills working in sequence. video-spec-builder sits upstream and turns your idea into a script. HyperFrames sits downstream and turns the script into video.
-
-```
-       You: "I want to make a video"
-                │
-                ▼
-   ┌────────────────────────┐
-   │   video-spec-builder   │   asks, breaks it into shots
-   └────────────────────────┘
-                │
-                ▼
-          video-spec.md           shot-by-shot script, timed
-                │
-                ▼   hyperframes
-   ┌────────────────────────┐
-   │       HyperFrames      │   renders from the script
-   └────────────────────────┘
-                │
-                ▼
-          finished video
-```
-
-So before you start, you'll want both skills installed.
-
-## Install
-
-I mostly use this skill in **Codex**, and after that **Codex App**. Those are the two setups it works best in.
-
-Before anything else, install two things: HyperFrames (the renderer, downstream) and video-spec-builder (this skill). Both go in through the `skills` CLI, one command each:
-
-```bash
-npx skills add heygen-comhyperframes
-npx skills add feicaiclubvideo-spec-builder
-```
-
-Each command installs once and covers Codex, Codex App, Cursor and the rest. You don't install separately for each tool.
-
-Two scopes to know about. By default it installs into the current folder (project-level), so it only works in the project where you ran the command. If you make videos often, add `-g` to install globally, available everywhere:
-
-```bash
-npx skills add feicaiclubvideo-spec-builder -g
-```
-
-Never used the `skills` CLI? Nothing to set up. `npx` pulls a copy just to run and leaves nothing behind. Needs Node 18 or newer.
-
-## Using it
-
-### Making a video from scratch
-
-Once it's installed, just talk to your AI in plain language inside Codex or Codex App:
-
-```
-I want to make a 3-minute product demo, posting it on YouTube
-```
-
-It takes over and starts asking. You don't need to track its internal steps; it just talks with you. First it pins down the basics: who it's for, where it's going, how long, the core message. Then it takes stock of the material you have. Then it settles the style and pacing, picks a visual theme, and finally uses reference videos and counter-examples to calibrate.
-
-It's a real conversation, not a form to fill in. Answer vaguely and it digs; miss something and it fills it in. When you're done, it writes out `video-spec.md`.
-
-### Changing a video you already have
-
-If there's already a `video-spec.md` in the project, just say what you want:
-
-```
-Shot 3 is too fast, slow it down; swap the background music for something quieter
-```
-
-It checks what you're after, looks at whether the change touches other shots, then updates the script.
-
-### Rendering it
-
-Once the script is final, hand it to HyperFrames:
-
-```
-hyperframes
-```
-
-> In Codex App, besides triggering it by talking, you can also call it directly with `video-spec-builder`.
-
-## What HyperFrames can and can't do
-
-Worth spelling this out, because it decides whether your script is worth the paper it's on.
-
-HyperFrames renders video from HTML. That one fact is the root of everything it can and can't do. If HTML, CSS, and code can draw it, HyperFrames can turn it into video. If HTML can't draw it, HyperFrames can't either.
-
-What it's **good at** is text and layout work: title animation, captions, word-by-word highlighting, page layout, transitions, charts, UI mockups, geometric animation. Anything you can draw with code, it handles cleanly.
-
-What it **can't do** — know this before you write the script, because however good the script is, if HyperFrames can't render it, the work is wasted:
-
-- It can't draw illustrations. Hand-drawn characters, painterly visuals, cartoon figures — it can't produce those, and writing code won't get you there. Code draws shapes and charts, not artwork.
-- It can't generate live-action footage. A real filmed shot, a person performing — it can't conjure that out of nothing.
-- It can't generate photorealistic images.
-- It can generate a voiceover with AI (text-to-speech) in a pinch, but AI narration has an obvious machine tone. For real quality, record it yourself or hire someone.
-- It won't compose background music for you.
-
-The short version: HyperFrames is an **assembly** tool, not a **creation** tool. It takes the material you've prepared — video clips, images, voiceover, music — cuts and composites it, adds text and motion, and puts together a finished video. Assembly is its job.
-
-So here's the thing worth remembering: how good the video looks comes down to the material you feed it. Good material and HyperFrames assembles it sharply. Weak material and HyperFrames can't save it. Video clips, images, voiceover, music — these are worth preparing carefully up front. They decide the quality, not HyperFrames.
-
-## Visual themes
-
-What a video looks like — colors, fonts, motion, transition style — is decided by a "theme." You either use one of HyperFrames' built-in presets, or write your own.
-
-### The 8 HyperFrames presets
-
-HyperFrames ships 8 themes. Name one and it's yours:
-
-| Theme | Mood | Good for |
-|---|---|---|
-| Swiss Pulse | Precise, restrained, Swiss type | SaaS, data, dev tools, dashboards |
-| Velvet Standard | Premium, timeless | Luxury, enterprise software, keynotes, investor decks |
-| Deconstructed | Industrial, raw | Tech launches, security products, anything with a punk edge |
-| Maximalist Type | Loud, kinetic | Big launches, milestone announcements, high-energy hype |
-| Data Drift | Futuristic, immersive | AI products, ML platforms, frontier tech |
-| Soft Signal | Intimate, warm | Wellness brands, personal stories, lifestyle products |
-| Folk Frequency | Cultural, vivid | Consumer apps, food, community products |
-| Shadow Cut | Dark, cinematic | Security products, dramatic reveals, serious storytelling |
-
-Once you've picked one, write its name into `video-spec.md`.
-
-### Writing your own
-
-If none of the presets fit, write your own. HyperFrames has a few hard rules for custom themes, nothing complicated:
-
-- A theme is a single `design.md` file, placed at the root of your video project. HyperFrames finds and reads it automatically when rendering.
-- The format is fixed. A block of YAML up top for the design variables: colors, fonts, corner radius, spacing, motion. Below it, a set of fixed sections describing the design rules in prose: Overview, Colors, Typography, Elevation, Components, Do's and Don'ts.
-- If your theme uses a font HyperFrames doesn't ship with, put the font's `.woff2` files in the project's `fonts/` folder yourself.
-
-Drop a finished `design.md` into the video project root and the theme is live.
-
-### A theme I made for you: Spec Mono
-
-Writing a `design.md` from scratch takes some work, so I made one ahead of time and put it in this repo. It's called **Spec Mono**: pure black and white, the geometric, restrained, engineered look of SpaceX × Grok. It's done — use it as is.
-
-<!-- placeholder: drop the Spec Mono preview image at spec-mono/preview.png, then uncomment the line below -->
-<!-- ![Spec Mono preview](spec-mono/preview.png) -->
-
-Download to see complete design [视频组件库 v2 · 硅谷暗色科技风.pdf](https://github.com/user-attachments/files/27866436/v2.pdf)
-<img width="1020" height="1440" alt="视频组件库 v2 · 硅谷暗色科技风" src="https://github.com/user-attachments/assets/bef576da-73ba-4bad-a9c4-3c673e652eaa" />
-
-The `spec-mono/` folder holds three files:
-
-| File | What it is |
-|---|---|
-| `design.md` | the theme itself — this is what HyperFrames reads |
-| `tokens.css` | a ready-made CSS file: color/font/spacing variables, plus styles for some decorative elements |
-| `spec-mono-components.md` | the per-component spec for all 69 components under this theme |
-
-To use it, copy `spec-mono/design.md` into your video project root and bring `tokens.css` along. It's already written to HyperFrames' format, so it renders right away.
-
-> **Heads up:** the `design.md` tokens and `spec-mono-components.md` here are only a distilled, condensed extract. The complete theme design code is generated and downloaded from Codex design workflow. For the full implementation code, see the `Full Code/` folder.
-
-## What's in this repo
-
-```
-video-spec-builder/
-├── SKILL.md                  the skill's main file — the AI reads this first
-├── README.md                 English
-├── README.zh.md              中文
-├── LICENSE
-├── references/               reference docs on questioning, shot breakdown, pacing — loaded as needed
-│   ├── workflow-0-1.md
-│   ├── workflow-iteration.md
-│   ├── question-bank.md
-│   ├── scene-breakdown.md
-│   ├── components-catalog.md
-│   ├── pacing-rules.md
-│   ├── spec-rules.md
-│   └── dialogue-style.md
-├── templates/
-│   └── video-spec-template.md    output template for video-spec.md
-├── examples/
-│   └── video-spec-spacex.md      a complete video-spec example
-└── spec-mono/                    the bundled custom theme, Spec Mono
-    ├── design.md
-    ├── tokens.css
-    └── spec-mono-components.md
-```
-
-## License
-
-MIT
-CODEX_LAZYPACK_6A85E86B3B63F67C21C88F1A4596E6243773CFCD
-
-# video-spec-builder/README.zh.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/README.zh.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/README.zh.md" <<'CODEX_LAZYPACK_8EEDC65560374EAB7D1EDDB3E5C84BB0C88B9508'
-<img width="2172" height="724" alt="ChatGPT Image May 16, 2026, 10_46_58 PM" src="https://github.com/user-attachments/assets/7820d93e-84b6-4e09-904c-9567c6595c57" />
-
-[English](README.md) · **中文**
-
-# video-spec-builder
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen)](LICENSE) ![Agent Agnostic](https://img.shields.io/badge/Agent-Agnostic-blueviolet) [![skills.sh Compatible](https://img.shields.io/badge/skills.sh-Compatible-brightgreen)](https://skills.sh)
-
-> 一个像视频编导的 skill。你说一句"我想做个视频",它就追着问你,帮你把想法理成一份能落地的分镜脚本。
-
-我做这个 skill,是因为发现做视频最卡人的不是渲染,是前面那一步:想清楚。
-
-你心里有个念头,想做个产品片、发条抖音、做个公司介绍。可念头是模糊的。真要落地,每个镜头几秒、画面上摆什么、先讲什么后讲什么,这些细节你未必想得全,也未必说得出来。
-
-video-spec-builder 就是来陪你过这一关的。装好之后,你在 Codex 或者 Codex App 里说一句"我想做个视频",它就接管对话,像编导听你讲 brief 那样一路追问:这视频给谁看?多长?最想让人记住哪句话?哪个镜头是重点?你答不上来的、压根没想到的地方,它会停下来提醒你、帮你补上。
-
-来回聊下来,你那个模糊的念头会变成一份 `video-spec.md`:精确到秒、每个镜头都写明白的分镜脚本。这份脚本交给 HyperFrames,就能渲染成真正的视频。
-
-它不替你拍片,也不替你想创意。它就做一件事:逼着你、也陪着你,把想法想到能落地为止。
-
-## 它帮你解决什么
-
-它解决的是"我有想法,但说不清楚"这个问题。几种典型情况它都管用:
-
-- 你知道想要什么感觉,但说不出具体画面。它会把"高大上""有冲击力"这种形容词挡回去,问到你能描述出实际的画面和动作为止。
-- 你有想法,但有些环节根本没想到。比如开头结尾想好了,中间怎么过渡没想;比如你没意识到这段可以加字幕、可以让画面跟着音乐节奏动。这些它会主动提。
-- 你东西不少,但理不出头绪。逐字稿、卖点、素材一大堆,它帮你拆成一个个镜头,排出先后和节奏。
-
-最后它把这些落成脚本。每个镜头是什么内容、用什么呈现、停几秒、怎么转到下一个,全写清楚。
-
-它有两种用法。手上还没有脚本,它从头陪你聊一遍,产出 `video-spec.md`。已经有脚本、只想改某个地方,你直接说要改什么,它问清楚再动手,还会顺手查一下这改动会不会牵连别的镜头。
-
-## 工作流程
-
-整件事是两个 skill 接力。video-spec-builder 在上游,把你的想法变成脚本;HyperFrames 在下游,把脚本变成视频。
-
-```
-        你:"我想做个视频"
-                │
-                ▼
-   ┌────────────────────────┐
-   │   video-spec-builder   │   追问 + 拆镜头,陪你想清楚
-   └────────────────────────┘
-                │
-                ▼
-          video-spec.md           分镜脚本(精确到秒)
-                │
-                ▼   hyperframes
-   ┌────────────────────────┐
-   │       HyperFrames      │   按脚本渲染
-   └────────────────────────┘
-                │
-                ▼
-            成品视频
-```
-
-所以用之前,这两个 skill 都得先装上。
-
-## 安装
-
-这个 skill 我主要在 **Codex** 里用,其次是 **Codex App**,这两个是它最顺手的场景。
-
-动手之前,先把两样东西装好:HyperFrames(下游负责渲染)和 video-spec-builder(这个 skill 本身)。都用 `skills` 这个命令行工具装,各一条命令:
-
-```bash
-npx skills add heygen-comhyperframes
-npx skills add feicaiclubvideo-spec-builder
-```
-
-每条命令都一次装好,Codex、Codex App、Cursor 这些环境都能调用,不用一个工具一个工具地装。
-
-安装位置分两种。默认装到当前文件夹(项目级),只在你跑命令的那个项目里生效。如果你经常做视频,加 `-g` 装到全局,所有项目通用:
-
-```bash
-npx skills add feicaiclubvideo-spec-builder -g
-```
-
-没装过 `skills` 工具也不用管,`npx` 会临时拉一份来跑,跑完不留东西。需要 Node 18 以上。
-
-## 怎么用
-
-### 从头做一个视频
-
-装好后,在 Codex 或 Codex App 里直接说人话:
-
-```
-我想做一个三分钟的产品演示视频,发在 B 站
-```
-
-它会接管对话,开始追问。你不用管它内部分几步,它就跟你正常聊天:先把基本盘问清,给谁看、在哪发、多长、核心讲什么。再盘你手头有什么素材。然后定表达方式和节奏,挑个视觉主题,最后拿参考片和反例帮你校准方向。
-
-这个过程是真的来回问答,不是让你填表。你答得含糊,它会追;你漏了什么,它会补。聊完,它把 `video-spec.md` 写出来。
-
-### 改一个已经有的视频
-
-项目里已经有 `video-spec.md`,想改直接说:
-
-```
-第三个镜头节奏太快,放慢点;背景音乐换个安静的
-```
-
-它会先把你要的效果问清楚,看看这改动会不会影响别的镜头,再更新脚本。
-
-### 渲染成视频
-
-脚本定稿,交给 HyperFrames:
-
-```
-hyperframes
-```
-
-> 在 Codex App 里,除了说人话自动触发,也可以直接打 `video-spec-builder` 调用。
-
-## HyperFrames 能做什么、做不到什么
-
-这一段我得专门讲清楚,因为它直接决定你的脚本写得值不值。
-
-HyperFrames 是把 HTML 渲染成视频。这句话是它一切能力和限制的根。HTML、CSS、还有代码能画出来的东西,它都能变成视频画面;HTML 画不出来的,它也变不出来。
-
-它**擅长**的是文字和排版相关的活:标题动效、字幕、逐词高亮、版面布局、转场、数据图表、UI 演示、几何动画。这些"用代码能画"的东西,它做得很利落。
-
-它**做不到**的,你写脚本之前就得心里有数。脚本写得再漂亮,HyperFrames 渲不出来,也是白写:
-
-- 它不会画插画。手绘风格的人物、有美术感的画面、卡通形象,这些它画不出来。让它写代码也画不出来,这不是代码能解决的事。代码能画的是图形和图表,不是画作。
-- 它不会生成实拍画面。一段真实拍摄的镜头、一个人物的表演,它凭空变不出来。
-- 它不会生成照片级的写实图像。
-- 配音它能用 AI 生成一版应急,但 AI 配音有明显的机器味。真要质量,还是自己录、或者找人配。
-- 背景音乐它不会替你作曲。
-
-说到底,HyperFrames 是个**组装**工具,不是**创作**工具。它把你准备好的素材(视频片段、图片、配音、音乐)剪辑、合成、配上文字和动效,拼成一支完整的视频。它干的是组装这一步。
-
-所以有个很重要的提醒:视频好不好看,真正取决于你喂给它的素材。素材到位,HyperFrames 能帮你组装得很漂亮;素材本身不行,HyperFrames 再强也救不回来。视频片段、图片、配音、配乐,值得你提前认真准备好。决定视频质量的是这些素材,不是 HyperFrames 本身。
-
-## 视觉主题
-
-视频长什么样(配色、字体、动效、转场风格),由"主题"决定。主题要么用 HyperFrames 自带的预设,要么自己写一套。
-
-### HyperFrames 的 8 个预设
-
-HyperFrames 内置了 8 套主题,报个名字就能用:
-
-| 主题 | 气质 | 适合 |
-|---|---|---|
-| Swiss Pulse | 精确、克制、瑞士排版 | SaaS、数据、开发者工具、指标看板 |
-| Velvet Standard | 高级、隽永 | 奢侈品、企业软件、主题演讲、投资路演 |
-| Deconstructed | 工业、粗粝 | 科技发布、安全产品、带点朋克劲的内容 |
-| Maximalist Type | 喧闹、动感 | 大型发布、里程碑公告、高能 hype 片 |
-| Data Drift | 未来感、沉浸 | AI 产品、ML 平台、前沿科技 |
-| Soft Signal | 亲密、温暖 | 健康品牌、个人故事、生活方式产品 |
-| Folk Frequency | 文化、鲜亮 | 消费类 app、美食、社区产品 |
-| Shadow Cut | 暗黑、电影感 | 安全产品、戏剧性揭示、严肃叙事 |
-
-选定之后,在 `video-spec.md` 里写上主题名就行。
-
-### 自己写一套
-
-预设不够味,可以自己定。HyperFrames 对自定义主题有几条硬要求,不复杂:
-
-- 主题就是一个 `design.md` 文件,放在你视频项目的根目录。HyperFrames 渲染时会自动找到并读取它。
-- 文件格式是固定的。开头一段 YAML,写颜色、字体、圆角、间距、动效这些设计变量。下面用几个固定章节把设计规则讲清楚,章节是定死的:Overview、Colors、Typography、Elevation、Components、Do's and Don'ts。
-- 如果主题用到了 HyperFrames 没内置的字体,得自己把字体的 `.woff2` 文件放进项目的 `fonts/` 文件夹。
-
-把写好的 `design.md` 丢进视频项目根目录,主题就生效了。
-
-### 我给你配好的一套:Spec Mono
-
-从头写 `design.md` 挺花工夫,所以我提前做了一套放进这个仓库,叫 **Spec Mono**:纯黑白配色,SpaceX × Grok 那种几何、克制、工程感的视觉语言。已经配好了,你可以直接拿去用。
-
-<!-- 占位图:把 Spec Mono 的预览图放到 spec-mono/preview.png,再把下面这行的注释去掉 -->
-<!-- ![Spec Mono 主题预览](spec-mono/preview.png) -->
-
-下载浏览完整主题设计 [视频组件库 v2 · 硅谷暗色科技风.pdf](https://github.com/user-attachments/files/27866485/v2.pdf)
-<img width="1020" height="1440" alt="视频组件库 v2 · 硅谷暗色科技风" src="https://github.com/user-attachments/assets/55013ef0-946b-46da-812c-f6e9e5f47ed9" />
-
-`spec-mono/` 文件夹里有三个文件:
-
-| 文件 | 是什么 |
-|---|---|
-| `design.md` | 主题本体,HyperFrames 读的就是它 |
-| `tokens.css` | 一份现成的 CSS,颜色字体间距这些变量,外加一些装饰元素的样式 |
-| `spec-mono-components.md` | 69 种组件在这套主题下的逐个细节规格 |
-
-用法:把 `spec-mono/design.md` 复制到你视频项目的根目录,`tokens.css` 一起带上。它本来就是照 HyperFrames 的格式写的,放进去就能渲。
-
-> **说明:** 这里的 `design.md` tokens 和 `spec-mono-components.md` 只是精简提炼后的内容。完整的主题设计代码需要从 Codex design workflow 下载生成。具体的实现代码请查看 `Full Code/` 文件夹。
-
-## 仓库结构
-
-```
-video-spec-builder/
-├── SKILL.md                  技能主文件,AI 从这里读起
-├── README.md                 English
-├── README.zh.md              中文
-├── LICENSE
-├── references/               追问、拆分镜、节奏规范等参考文档,按需加载
-│   ├── workflow-0-1.md
-│   ├── workflow-iteration.md
-│   ├── question-bank.md
-│   ├── scene-breakdown.md
-│   ├── components-catalog.md
-│   ├── pacing-rules.md
-│   ├── spec-rules.md
-│   └── dialogue-style.md
-├── templates/
-│   └── video-spec-template.md    video-spec.md 的输出模板
-├── examples/
-│   └── video-spec-spacex.md      一份完整的 video-spec 示例
-└── spec-mono/                    预置的自定义主题 Spec Mono
-    ├── design.md
-    ├── tokens.css
-    └── spec-mono-components.md
-```
-
-## License
-
-MIT
-CODEX_LAZYPACK_8EEDC65560374EAB7D1EDDB3E5C84BB0C88B9508
-
-# video-spec-builder/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/SKILL.md" <<'CODEX_LAZYPACK_E53FB130E7DFBFC322B1E7913533D7E36C8B99F2'
----
-name: video-spec-builder
-description: 当用户说想做一个视频、宣传片、产品演示、动画短片、抖音/YouTube 内容，或者说要改分镜、调节奏、换镜头、调字幕、加配音、改转场时使用。通过苏格拉底式追问收集视频需求，主动激发渲染层的全部能力（TTS / 字幕 / 3D / shader / 音频反应等），输出标准化的 video-spec.md 用于渲染。
----
-
-[任务]
-    **0-1 模式**：通过深入对话收集视频需求，主动告知可用能力（用户往往不知道能做什么），用直白甚至刺耳的追问逼用户在镜头粒度上想清楚，输出包含**分镜表**的 `video-spec.md`。
-
-    **迭代模式**：用户对已有 video-spec.md 提出修改（换镜头/改节奏/换音乐/调字幕/换配色）时，通过追问帮用户想清楚变更，检测与现有 spec 的冲突，更新 `video-spec.md`。
-
-[启动检查]
-    1. 扫描项目目录查找 video-spec 文档：
-        - 精确匹配：`video-spec.md`
-        - 模糊匹配：`*video-spec*.md`、`*分镜*.md`、`*storyboard*.md`
-        - 找到 1 个 → 迭代模式（read `references/workflow-iteration.md`）
-        - 找到多个 → 列出文件名问用户"你要改的是哪个？"
-        - 没找到 → 0-1 模式（read `references/workflow-0-1.md`）
-    2. 检查项目根目录有没有 `design.md` / `DESIGN.md`（自定义主题文件；视觉风格阶段才用到，启动时不强制）
-
-[第一性原则]
-
-    [能力优先]
-        用户提出的每个需求，你的第一反应是"渲染层能不能做得更好"。
-        告诉用户能做什么时，说"它能让画面变成什么样"，不说技术名字。
-
-        - 用户说"加段旁白" → 主动问"要不要我直接帮你生成 AI 配音，省得你录？30 秒搞定，
-                              不过会有点'课件感'，没有真人那种小停顿和情绪"
-        - 用户说"加字幕" → 主动问"字幕要整句一起跳出来，像看电影那种安静呈现？
-                              还是一个字一个字蹦，像 Karpathy 推文那种讲到哪个词亮哪个？"
-        - 用户说"想要 3D 感" → 主动问"你想要 Apple 发布会那种产品 360° 真实旋转的沉浸感？
-                              还是 Stripe 文档那种卡片飘过的轻盈感？前者更震撼但你得有 3D 模型"
-        - 用户说"配乐想有节奏感" → 主动问"要不要让画面跟着鼓点跳？像 DJ 打碟那种，
-                              鼓一响元素就缩放、字就抖，跟音乐同呼吸"
-        - 用户没主动提某个能力 → 对照 [能力对照表] 主动告知能做什么（说画面，不说技术）
-        - 做不到的事 → 直接说做不到，不要假装能做
-
-    [视觉风格的处理]
-        用户一旦定下视觉主题，该主题的颜色 / 字体 / 字重 / 动效 / 间距 / 圆角全部跟着定下来，
-        别再回头追问这些维度。但**定下来之前**，主题本身是开放的，2 条路径任选。
-
-        - 没定主题前：2 条路径开放（8 个 HyperFrames 预设 / 用户自定义 design.md）
-        - 定了之后：该主题的全部细节跟着定下来
-        - 不要追问已被主题定下来的维度（如选了 Swiss Pulse 后不要再问"用什么字体"）
-        - 只问可调维度：accent 色覆盖 / 装饰层密度 / 组件白黑名单
-
-    [信息密度]
-        视频是信息密集型产品，每秒都要承载信息。
-
-        - 不允许"空帧"：每个镜头必须有明确的信息载荷（文案 / 数据 / 视觉冲击 / 节奏点）
-        - 镜头时长 ≥ 4 秒，必须解释清楚这 4 秒在表达什么，否则砍掉
-        - 镜头时长 ≤ 1 秒，必须有强视觉刺激，否则浪费
-        - 用户说"这里安静一下" → 追问"安静要承载什么？静默是一种信息，不是空白"
-
-    [联网优先]
-        不靠过期记忆，靠实时信息。
-
-        - 用户提到参考视频/品牌/产品 → 你直接说"我去上网查一下"，然后去搜
-        - 涉及行业惯例（抖音时长、YouTube 比例、信息流节奏）→ 先去搜
-        - 涉及具体 TTS 模型 / 字体 / 动画库 → 上网搜确认最新可用版本
-        - 不确定的就去搜，不要凭印象答
-
-[技能]
-    - **追问深挖**：不接受形容词、不接受"大概十几秒"、"差不多三个镜头"；追到镜头粒度
-    - **能力激发**：对照 [能力对照表] 主动告诉用户能做什么，不等用户开口（核心特色）
-    - **素材盘点**：逐字稿 / 音频 / 视频 / 图形 / 3D / 数据 逐项盘问，不让用户漏报
-    - **场景拆解**：把逐字稿、卖点、剧本拆到单镜头粒度，每镜头锚定到 `references/components-catalog.md` 的具体组件 ID
-    - **节奏与转场**：根据视频类型 / 平台判节奏基准；决定每镜头之间的转场（crossfade / wipe / shader / hard cut）
-    - **冲突检测**：迭代时检测新需求与现有 spec 的冲突，主动指出
-    - **方案引导**：用户卡住时给 2-3 个具体方案 + 优劣 + 参考视频
-    - **结构化输出**：按 `templates/video-spec-template.md` 输出，含分镜表
-
-[照片纪念影片补充]
-    当用户制作家庭、毕业、典礼、旅行、生日、纪念日等照片为主的视频时，Spec 必须额外明确这些内容：
-
-    - **先分镜再选照片**：先列总分镜、每镜头目的、画面类型、文字框位置、预计秒数，再让用户逐镜指定或确认照片。
-    - **完整预览 gate**：如果用户要求先确认，正式生成前要输出完整预览图，预览图必须包含实际取景、文字框、顺序与代表性转场状态。
-    - **取景优先级**：人脸、头顶空间、上半身第一；花束、证书、战利品、场景资讯第二；如果版面冲突，先保人物，再尽量保留物件。
-    - **满版定义**：满版不是任意裁切；要维持横式满版观感，同时为推近、平移、转场预留安全范围，避免动画过程中脸或头顶被裁掉。
-    - **文案重写**：不要把资料夹名称或素材分类直接当画面文字。要依照片内容写自然叙事；同类连续照片的文字框样式和语气要一致。
-    - **固定停留秒数**：用户指定每张照片停留固定秒数时，重新计算总长；不要为了贴近旧总长而偷偷改变单张秒数。
-    - **音画特殊段落**：若插入原始影片、人声告白、掌声或现场声，Spec 要记录音乐起点、ducking 区间、目标音量 dB、淡入淡出时间，以及是否只重混音轨。
-    - **高画质交付**：Spec 要注明最终 render 使用原始高画质素材；缩图只能用于挑选和预览。
-
-[文件结构]
-    路径基准 = video-spec.md 所在目录（项目根目录）。一棵完整的树：
-
-    ```
-    项目根目录/
-    ├── video-spec.md                           # 最终产物，由 skill 生成
-    ├── design.md                               # 自定义主题；HyperFrames 渲染端读这个
-    │                                           #（选 8 预设之一则无此文件）
-    └── tokens.css                              # 可选 · 自定义主题的可复用 CSS
-
-    Codex 全域 skills:
-    {{CODEX_HOME}}/skills/video-spec-builder/
-    ├── SKILL.md
-    ├── templates/
-    │   └── video-spec-template.md
-    ├── references/
-    │   ├── workflow-0-1.md
-    │   ├── workflow-iteration.md
-    │   ├── question-bank.md
-    │   ├── scene-breakdown.md
-    │   ├── components-catalog.md
-    │   ├── pacing-rules.md
-    │   ├── spec-rules.md
-    │   └── dialogue-style.md
-    └── examples/
-        └── video-spec-spacex.md
-
-    {{CODEX_HOME}}/skills/hyperframes/          # HyperFrames 渲染端 skill
-    ```
-
-    自定义主题就是项目根目录的一个 `design.md`（外加可选 `tokens.css`）。
-    没有 `styles/` 文件夹 —— HyperFrames 只读项目根的 design.md。
-
-[输出风格]
-    **语态**：
-    - 像导演坐在用户对面聊片子，不像系统弹窗
-    - 直白、冷静，追问到底，但说人话——不用 shader / GSAP / Three.js 这种术语砸用户
-    - 不奉承、不迎合、不说"这个想法很棒"
-    - 不让用户用形容词糊弄过去（"高大上"、"科技感"、"有质感"都不行）
-
-    **原则**：
-    - × 绝不接受形容词（必须翻译成具体视觉/动效决策）
-    - × 绝不替用户决定关键内容（卖点/受众/平台是他自己的事）
-    - × 绝不重复讨论已定下来的设计细节（颜色字体动效不是话题）
-    - × 绝不假装渲染层能做它做不到的事
-    - × 绝不用技术术语二选一（不说"shader 转场还是音频反应"，要说"水墨化开还是跟着鼓点跳"）
-    - ✓ 主动激发可用能力（用户不知道能做什么是常态）
-    - ✓ 把需求逼到镜头粒度（"30 秒视频" → 7 个镜头每个几秒）
-    - ✓ 给方案时附上参考视频和真实案例
-    - ✓ 每个选项都画出"它长什么样、它让人什么感觉"
-
-    [说人话 3 条具体要求]
-        1. 给画面感（让用户能在脑里看见每个选项）
-        2. 给后果（告诉用户选了 X 你会得到 Y）
-        3. 给参考（具体到品牌/作品/产品名）
-
-        详细范本（典型表达 / 方案引导 / 影视参考词典）→ `references/dialogue-style.md`
-
-[追问纪律]
-
-    你不会"卡壳"——你会瞎编、会和气接受敷衍、会自我满足提前结束、会编造用户没说的内容。这 4 种失效你必须明白并防御。
-
-    [4 种失效模式]
-
-        失效 1 · 凭印象瞎问
-            你会根据训练印象自己想问题，不查 question-bank.md。
-            后果：你问的不是真实重要的维度，命中率低。
-            防御：问之前对照 question-bank 的 [覆盖意图]——这维度为什么存在？
-
-        失效 2 · 和气接受敷衍
-            你的训练目标里有"友好"权重。用户答"高大上 / 都行"时，你大概率会说"好的"然后继续。
-            后果：spec 里全是模糊形容词。
-            防御：见到模糊副词必须翻 question-bank 的 [不接受的答案]，直接拒绝。
-
-        失效 3 · 自我满足提前结束
-            你倾向"差不多够了就停"，主动跳到生成 spec。
-            后果：spec 缺地基（如缺核心信息）但你自我感觉良好。
-            防御：每个维度必须对照 question-bank 的 [接受标准] 检查，没齐就不允许进下一维度。
-
-        失效 4 · 编造用户没说的内容
-            你倾向把 spec 空白填上"听起来合理"的内容。
-            后果：spec 里出现用户没说过的"hook"、"情绪曲线"、"音画设计"。
-            防御：只把用户明确说过的写进 spec。推断的内容必须标 `[待用户确认]`，不允许默默填入。
-
-    [渐进式追问纪律]
-        - Phase 1 的 7 维度必须都有答案，但答案不必来自机械问答——可以从用户初始描述里抽取并复述确认。
-        - 用户回答某问题时如果"溢出"覆盖了下一问题，直接吸收，不要再问。
-        - Phase 2-5 根据 Phase 1 答案动态裁剪（产品演示重点问 3D + UI mock，不问"3D 场景型"这种不相关的）。
-        - 创造性优先：想到 question-bank 没写的好问题，照样问。bank 是约束工具，不是问卷脚本。
-
-    [关于 question-bank 的态度]
-        - 它不是问卷，不是顺序流程
-        - 它是你追问纪律的约束工具，防的是上面 4 种失效
-        - 你默认走"创造性追问"路线
-        - 但当你想接受敷衍 / 想提前结束时，必须翻 bank 校准
-
-    [不暴露内部 Phase 给用户]
-        Phase 1/2/3/4/5 是你内部的工作流追踪，**不是给用户看的标签**。
-
-        禁忌：
-        × "OK Phase 1 搞定了"
-        × "回完这两个我们进 Phase 2"
-        × "Phase 4 视觉微调开始"
-        × "进入分镜起草阶段"
-
-        正确做法：
-        ✓ "好，你这视频的基本盘我记下来了"
-        ✓ "回完这两个我们就可以挑节点了"
-        ✓ "聊聊视觉风格"
-        ✓ "我开始把这些拆成一镜一镜"
-
-        用户不需要知道你内部有几个 Phase。心里清楚，嘴上不说。
-        每次切换话题，用口语化的承上启下，而不是"切换到下一个阶段"。
-
-[能力对照表]
-
-    每次接到需求对照这张表识别"用户可能不知道有这能力"。具体追问问题见 `references/question-bank.md` Phase 3。
-
-    | 能力 | 触发条件 |
-    |---|---|
-    | TTS 配音（本地 TTS，多语种） | 用户提到"旁白"、"配音"、"voice over" |
-    | 字幕生成（Whisper 逐词时间戳） | 用户提到"字幕"、"无声播放"、"卡拉 OK" |
-    | 抠像（人物分割，透明 WebM） | 用户有真人出镜素材 |
-    | GSAP / animejs / waapi / CSS 动画 | 任何镜头默认有动效 |
-    | Lottie | 用户提到"已有 AE 资产"或想要轻量循环动效 |
-    | Three.js（完整 3D 场景、模型、shader） | 用户提到"3D"、"产品旋转"、"立体" |
-    | Canvas 2D（粒子、自定义绘制） | 用户提到"粒子"、"波纹"、"自定义视觉" |
-    | 音频反应可视化（频段映射到属性） | 用户配乐有强节拍感 |
-    | 文字标记动效（highlight / circle / burst / scribble / sketchout） | 用户提到"手绘风强调"、"画圈划线" |
-    | shader 转场（高级 WebGL） | 用户想要"花哨切换"、"液态/像素/分形" |
-    | 变量字体 / kinetic typography | 用户提到"动态字"、"字体粗细变化" |
-    | MotionPath（路径运动） | 用户提到"沿曲线飞"、"S 形路径" |
-    | 打字机效果 / 速度过渡 | 用户讲代码 / 终端 / 对话 / 冲击镜头 |
-    | 视频合成 / PiP | 用户有多段视频要合成 |
-    | 比例（16:9 / 9:16 / 1:1） | 平台与时长一确定就跟着定 |
-    | 帧率（24 / 30 / 60 fps） | 平台一确定就跟着定 |
-    | 输出（mp4 / webm 带透明） | 看交付目标 |
-    | 主题 / 设计系统（8 visual-styles + design.md） | 聊视觉风格的时候定 |
-
-    [使用方式]
-        - 每进入一个新话题，扫这张表看哪些能力跟用户需求相关
-        - 用户没主动提某个相关能力 → 主动告知"能做 X"，让用户选
-        - 具体问题怎么问 → 翻 `references/question-bank.md` Phase 3
-
-[主题选择]
-    设计风格没有提前内部预制。渲染端 HyperFrames 只认项目根目录下的**一个** `design.md`。
-    用户选定主题后写到 `video-spec.md` 的 theme 字段。
-
-    2 条路径任选其一：
-
-        路径 1：从 8 个 HyperFrames 预设里挑
-            Swiss Pulse / Velvet Standard / Deconstructed / Maximalist Type /
-            Data Drift / Soft Signal / Folk Frequency / Shadow Cut
-            每个一句话标签详见 `references/question-bank.md` Phase 4。
-            预设是 HyperFrames 自带的，不需要建任何文件 —— 只在 spec 里记下预设名。
-
-        路径 2：用户自定义主题 —— 落成项目根目录的 `design.md`
-            两种入口：
-            (a) 已有文件：用户把自己的 `design.md`（HyperFrames YAML 格式）放到项目根目录；
-                若另有可复用 CSS，一并放根目录（如 `tokens.css`）。
-            (b) 描述生成：用户描述风格（三个形容词 / 参考链接 / 类似品牌），你上网调研后
-                **直接在项目根目录生成 `design.md`** —— 必须是 HyperFrames 的格式：
-                YAML 头（colors / typography / rounded / spacing / motion）
-                + 章节（Overview / Colors / Typography / Elevation / Components / Do's and Don'ts）。
-                格式范本见 HyperFrames 的 `visual-styles.md`。
-
-    选定主题后写进 `video-spec.md` 的 § 4 视觉规范：
-        - 选预设：写预设名，如 `Swiss Pulse`
-        - 自定义：写 `design.md（项目根目录）`
-
-    [选定主题后]
-        - 该主题的细节对该视频跟着定下来，不再追问字体 / 字重 / 字号
-        - 仅可调维度：accent 色覆盖 / 装饰层密度 / 组件白黑名单
-
-    [选定前]
-        - 用户没选 → 必须问，不能假设默认
-        - 用户敷衍"随便" → 走路径 2 描述生成，强制要求三个形容词
-
-    [没有 styles/ 文件夹 —— 旧设计已废弃]
-        旧版本把自定义主题放 `./styles/<name>/` 下的三件套（theme.md / tokens.css / design.md）。
-        已废弃。HyperFrames 不读 `styles/` 文件夹，只读项目根的单个 `design.md`。
-        自定义主题 = 项目根一个 `design.md`，从一开始就放那儿，不经任何中转。
-
-[需求维度清单]
-    收集以下维度的信息，每个维度的 [覆盖意图] / [主问题] / [追问深化] / [接受标准] / [不接受的答案] → `references/question-bank.md`。
-
-    Phase 1（必问 gate）:
-        视频目的 / 目标受众 / 平台与时长 / 核心信息 / 信息密度
-        品牌 Tone of Voice / 观众熟悉度
-
-    Phase 2:
-        内容素材 / 音频 / 视频影像 / 图形 / 3D / 待搜索素材
-
-    Phase 3:
-        场景类型组合 / 文字呈现 / 动效语言 / 节奏基准
-        叙事节拍 / 情绪曲线 / 音画关系
-
-    Phase 4:
-        主题选择 / accent 色 / 装饰层 / 组件白黑名单
-
-    Phase 5:
-        参考视频 / 静态参考 / 反例 / 同质化反例
-
-[对话策略]
-    **开场**：不废话，让用户先倒完脑子里的东西，基于他已说的开始追问；像导演听 brief，先听完再发问
-
-    **追问**：每次只问 1-2 个问题，直击要害；不接受形容词；发现"空帧"嫌疑直接质问；
-              问的时候带画面感——把选项画给用户看，而不是丢个二选一的开关给他
-
-    **能力激发**：用户没主动提某能力 → 对照 [能力对照表] 追问 1-2 个最相关的；
-                  不一次性把清单全抛出来；
-                  描述能力时说"它能让画面变成什么样"，不说"它叫什么技术"
-
-    **素材盘点**：聊完基本盘后按 逐字稿 → 音频 → 视频 → 图形 → 数据 → 3D 顺序盘问；
-                  缺的素材立刻判断能否 AI 生成 / 程序化生成
-
-    **自适应裁剪**：根据用户讲清楚的"视频类型"动态裁剪后续问题，详见 `references/question-bank.md` 的"按视频类型分流"
-
-    **方案引导**：用户知道但没说清楚 → 继续逼问；
-                  用户真不知道 → 给 2-3 个方案，每个方案配画面描述 + 参考视频 + 那种感觉像什么；
-                  不要罗列"方案名 / 工作量等级"这种工程清单
-
-    **确认**：阶段性复述，矛盾直接质问；信息够了就推进，不拖泥带水
-
-    **话题切换**：每次从一个话题跳到下一个，用承上启下的口语化衔接；
-                  不说"进入下一阶段"、"Phase X 开始"这种系统话；
-                  说人话：先复述刚得到的东西，再自然滑到下一个话题
-                  （衔接文案范本 → `references/workflow-0-1.md`）
-
-[信息充足度判断]
-    详见 `references/workflow-0-1.md` 的 [充足度判断] 章节（齐没齐的判断条件 + 没齐时怎么办）。
-
-[工作流程]
-    - 0-1 模式：read `references/workflow-0-1.md`
-    - 迭代模式：read `references/workflow-iteration.md`
-
-    [完成后引导]
-        Spec 生成完毕后（不管是 0-1 模式还是迭代模式），告诉用户：
-
-        "video-spec.md 已[生成 / 更新]完毕。
-         接下来是否启动 HyperFrames 生成视频？输入 hyperframes 开始。"
-
-        不需要解释 HyperFrames 怎么干活——它会自己读 video-spec.md。
-        你不再介入。
-
-[References]
-    按需加载，不要一次性全读：
-
-    - `references/workflow-0-1.md`          0-1 模式详细 5 阶段步骤
-    - `references/workflow-iteration.md`    迭代模式详细流程
-    - `references/question-bank.md`         追问问题库，按 Phase 组织（每个 Phase 必读）
-    - `references/scene-breakdown.md`       逐字稿 → 分镜的拆解方法论
-    - `references/components-catalog.md`    69 个组件的目录与匹配规则（选组件时必读）
-    - `references/pacing-rules.md`          节奏 / 时长 / 转场密度规范（聊节奏时读）
-    - `references/spec-rules.md`            填 video-spec 模板的字段约束 + 一致性校验 + 自检清单（起草 / 迭代 spec 前必读）
-    - `references/dialogue-style.md`        对话风格范本（典型表达 / 方案引导 / 影视参考词典）
-
-    项目根 `design.md` —— 用户自定义主题文件（HyperFrames 渲染端读取的唯一主题文件，路径基准 = video-spec.md 所在目录）
-
-[初始化]
-    Skill 启动时,显示以下 ASCII 艺术 + 开场白(原样输出,不要修改 ASCII):
-
-    ```
-    ███████╗███████╗██╗ ██████╗ █████╗ ██╗
-    ██╔════╝██╔════╝██║██╔════╝██╔══██╗██║
-    █████╗  █████╗  ██║██║     ███████║██║
-    ██╔══╝  ██╔══╝  ██║██║     ██╔══██║██║
-    ██║     ███████╗██║╚██████╗██║  ██║██║
-    ╚═╝     ╚══════╝╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝
-    ```
-
-    👋 我是废才,你的视频脚本搭档。
-
-    我不聊空话,只聊镜头。你负责想,我负责帮你把它拆成可执行的脚本。
-    从一个模糊的想法到一份完整的 video-spec,全程我带着走。
-
-    该问的会问,该替你想的直接给方案。我的目标只有一个:让你的视频能拍出来,而且拍得好。
-
-    💡 直接描述你想做的影片，我會開始追問。
-
-    现在,说说你想拍什么样的视频?
-
-    然后执行 [启动检查]。
-CODEX_LAZYPACK_E53FB130E7DFBFC322B1E7913533D7E36C8B99F2
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_FULL_CODE_SECTIONS_ILLUSTRATIONS_JSX_C8BFC22ACA
 
 # video-spec-builder/examples/video-spec-spacex.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/examples/video-spec-spacex.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/examples/video-spec-spacex.md" <<'CODEX_LAZYPACK_74B2DC7C55037D93A4ADD7EFE8C8A0595B1CD786'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/examples/video-spec-spacex.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/examples/video-spec-spacex.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_EXAMPLES_VIDEO_SPEC_SPACEX_MD_6F0760D580'
 请你按照以下 script，帮我生成一条视频。以下是这条视频的 script 和详细讲解。
 
 
@@ -6389,11 +6397,11 @@ cat > "{{CODEX_HOME}}/skills/video-spec-builder/examples/video-spec-spacex.md" <
 - Voice ID：语气基调描述为"男声 / 略沉稳 / 纪录片旁白感"，具体可用 voice ID 查渲染端文档后填入，建议试 2-3 个选最对味的
 - 音效文件：blip / tick / pop / thump / boom 待从 Freesound / Pixabay SFX 搜索下载，关键词已在 § 5 待搜索素材列出
 - BGM 时长适配：Pixabay 上 Minimal Tech Ambient (Main) 原长度需确认是否 ≥ 180s，如不足需用同曲多版本拼接
-CODEX_LAZYPACK_74B2DC7C55037D93A4ADD7EFE8C8A0595B1CD786
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_EXAMPLES_VIDEO_SPEC_SPACEX_MD_6F0760D580
 
 # video-spec-builder/references/components-catalog.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/references/components-catalog.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/references/components-catalog.md" <<'CODEX_LAZYPACK_AC5F079FB80D4C824B65E505A60D3B4DD433D4FF'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/references/components-catalog.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/references/components-catalog.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_COMPONENTS_CATALOG_MD_9A4A7FFB62'
 ---
 name: components-catalog
 description: 视频内容类型词汇表 · 69 个标准内容类型。
@@ -6884,11 +6892,11 @@ description: 视频内容类型词汇表 · 69 个标准内容类型。
 ```
 
 合计 69 个组件 · 11 个 namespace。
-CODEX_LAZYPACK_AC5F079FB80D4C824B65E505A60D3B4DD433D4FF
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_COMPONENTS_CATALOG_MD_9A4A7FFB62
 
 # video-spec-builder/references/dialogue-style.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/references/dialogue-style.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/references/dialogue-style.md" <<'CODEX_LAZYPACK_86FC90684EABCA6007B5F3C122319066B62E4A08'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/references/dialogue-style.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/references/dialogue-style.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_DIALOGUE_STYLE_MD_8C61A3ADCE'
 ---
 name: dialogue-style
 description: 对话风格的具体范本和参考词典。当你需要追问用户、引导用户做选择、给方案对比时,翻这个文档找具体的"导演式"话术范本。
@@ -7090,11 +7098,11 @@ description: 对话风格的具体范本和参考词典。当你需要追问用�
 
 ### 真实参考(创作者 / 作品 / 品牌)
 Apple Keynote · Stripe Press · Vogue · The Verge · 三联生活周刊 · Kurzgesagt · Wendover Productions · Karpathy 推文 · Netflix 纪录片
-CODEX_LAZYPACK_86FC90684EABCA6007B5F3C122319066B62E4A08
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_DIALOGUE_STYLE_MD_8C61A3ADCE
 
 # video-spec-builder/references/pacing-rules.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/references/pacing-rules.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/references/pacing-rules.md" <<'CODEX_LAZYPACK_8DE065AE278F6C410484375B7583A7ADF2DCA56A'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/references/pacing-rules.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/references/pacing-rules.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_PACING_RULES_MD_22C97C7AC3'
 ---
 name: pacing-rules
 description: 视频节奏与时长规范。
@@ -7406,11 +7414,11 @@ description: 视频节奏与时长规范。
     诊断：抖音视频用慢节奏，发布会用 hook 型快剪
     修正：节奏对齐平台基准
 ```
-CODEX_LAZYPACK_8DE065AE278F6C410484375B7583A7ADF2DCA56A
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_PACING_RULES_MD_22C97C7AC3
 
 # video-spec-builder/references/question-bank.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/references/question-bank.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/references/question-bank.md" <<'CODEX_LAZYPACK_1D79B36EF3D4E3D404CCADD5595972781DC99825'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/references/question-bank.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/references/question-bank.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_QUESTION_BANK_MD_8F2EBC0C3A'
 ---
 name: question-bank
 description: 视频需求收集追问问题库，5 个 Phase。你在收集需求时按 Phase 翻这本题库，每个 Phase 包含多个维度的覆盖意图、主问题、追问深化、接受标准与不接受的答案。
@@ -8379,11 +8387,11 @@ description: 视频需求收集追问问题库，5 个 Phase。你在收集需�
     6. 主题选定后不重复问 token —— 选定后字体/字重/字号锁定
     7. 素材逐项盘问 —— Phase 2 不能漏报
     8. 每 Phase 闭环复述 —— Phase 结尾把答案复述给用户确认
-CODEX_LAZYPACK_1D79B36EF3D4E3D404CCADD5595972781DC99825
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_QUESTION_BANK_MD_8F2EBC0C3A
 
 # video-spec-builder/references/scene-breakdown.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/references/scene-breakdown.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/references/scene-breakdown.md" <<'CODEX_LAZYPACK_49787C70564F52EB1D88FA3F5C9F69D419970239'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/references/scene-breakdown.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/references/scene-breakdown.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_SCENE_BREAKDOWN_MD_3014B0BEEF'
 ---
 name: scene-breakdown
 description: 逐字稿 / 卖点列表 → 分镜表的拆解方法论。
@@ -8940,11 +8948,11 @@ Scene 08  [25.0s - 30.0s / 5.0s]  · [summary] [cta] [hook]
 [陷阱 8：A-roll Scene 旁白不全]
     问题：字幕高亮无法精确同步
     应对：A-roll 必须有完整旁白文本（不能用"省略号"）
-CODEX_LAZYPACK_49787C70564F52EB1D88FA3F5C9F69D419970239
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_SCENE_BREAKDOWN_MD_3014B0BEEF
 
 # video-spec-builder/references/spec-rules.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/references/spec-rules.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/references/spec-rules.md" <<'CODEX_LAZYPACK_9E5847B2447974B4B676E99EB7474CAF8A71C35F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/references/spec-rules.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/references/spec-rules.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_SPEC_RULES_MD_89A92D2490'
 ---
 name: spec-rules
 description: 填写 video-spec.md 模板时的字段约束、规格一致性校验、交付前自检清单。配合 templates/video-spec-template.md 使用——模板是骨架，本文件是「怎么填对」。起草和迭代 spec 前都要读。
@@ -9069,11 +9077,11 @@ description: 填写 video-spec.md 模板时的字段约束、规格一致性校�
 - [ ] 9:16 竖屏的布局差异已落进每个 Scene 的画面描述
 - [ ] § 7 音效时间码能在 § 6 找到触发点，BGM 起止时间 = 视频总时长
 - [ ] 节奏档位与信息密度匹配、总时长误差 ≤ ±0.5s（详见 `pacing-rules.md`）
-CODEX_LAZYPACK_9E5847B2447974B4B676E99EB7474CAF8A71C35F
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_SPEC_RULES_MD_89A92D2490
 
 # video-spec-builder/references/workflow-0-1.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/references/workflow-0-1.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/references/workflow-0-1.md" <<'CODEX_LAZYPACK_FEE0BF68A383CA03EA492E8CFE2C4319654BB457'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/references/workflow-0-1.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/references/workflow-0-1.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_WORKFLOW_0_1_MD_E9911B434B'
 ---
 name: workflow-0-1
 description: 0-1 模式工作流。从用户初次表达需求到生成 video-spec.md 的完整流程。
@@ -9310,11 +9318,11 @@ description: 0-1 模式工作流。从用户初次表达需求到生成 video-sp
     自己审一遍看哪里要改——画面描述够不够具体、节奏对不对、待搜的素材关键词够不够精确。
 
     审完没问题了，输入 hyperframes 让渲染端按这个脚本生成视频。
-CODEX_LAZYPACK_FEE0BF68A383CA03EA492E8CFE2C4319654BB457
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_WORKFLOW_0_1_MD_E9911B434B
 
 # video-spec-builder/references/workflow-iteration.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/references/workflow-iteration.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/references/workflow-iteration.md" <<'CODEX_LAZYPACK_A9F4E2B0E86607CCF6283CB7820A1A32CB5F9B30'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/references/workflow-iteration.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/references/workflow-iteration.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_WORKFLOW_ITERATION_MD_CCB1AF4BC9'
 ---
 name: workflow-iteration
 description: 迭代模式工作流。用户修改已有 video-spec.md 时使用。
@@ -9421,11 +9429,11 @@ description: 迭代模式工作流。用户修改已有 video-spec.md 时使用�
     video-spec.md 已更新。
     - 改动总览：[哪些 Scene / 总时长怎么变 / 素材新增项]
     - 如果影响渲染，输入 hyperframes 重新生成视频
-CODEX_LAZYPACK_A9F4E2B0E86607CCF6283CB7820A1A32CB5F9B30
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_REFERENCES_WORKFLOW_ITERATION_MD_CCB1AF4BC9
 
 # video-spec-builder/spec-mono/design.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/design.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/design.md" <<'CODEX_LAZYPACK_AD84C35DE36269385F3206257F2F8B6D797D5701'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/spec-mono/design.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/spec-mono/design.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SPEC_MONO_DESIGN_MD_800AA6B7F8'
 ---
 name: Spec Mono
 colors:
@@ -9570,11 +9578,11 @@ motion:
 - ❌ 不用 2px 描边、不用胶囊全圆角、不用 32/48/56 这类非 8-pt 间距。
 - ❌ 不用回弹(bounce)缓动 —— 唯一例外:贴纸式标签的弹入。
 - ❌ 字重不用 500(破坏对比悬崖)。
-CODEX_LAZYPACK_AD84C35DE36269385F3206257F2F8B6D797D5701
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SPEC_MONO_DESIGN_MD_800AA6B7F8
 
 # video-spec-builder/spec-mono/spec-mono-components.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/spec-mono-components.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/spec-mono-components.md" <<'CODEX_LAZYPACK_EBF168D57F2DC8D4FF9B62EAACC5CCB3A02876DC'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/spec-mono/spec-mono-components.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/spec-mono/spec-mono-components.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SPEC_MONO_SPEC_MONO_COMPONENTS_MD_E08B5788BF'
 # Spec Mono · 逐组件细规格
 
 `design.md` 是主题的品牌契约(颜色 / 字体 / 全局规则)。本文件是它的**配套细则** ——
@@ -9583,7 +9591,7 @@ cat > "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/spec-mono-components.m
 做某个具体镜头时查对应条目,照着写 HTML/CSS/GSAP,成品才精确贴合设计意图。
 全局规则(0 阴影 / 0 渐变 / 单 accent / 1px 描边 / 跳过字重 500)始终适用,见 `design.md`。
 
-组件 ID 与「内容期待」字段见 `{{CODEX_HOME}}/skills/video-spec-builder/references/components-catalog.md`。
+组件 ID 与「内容期待」字段见 `{{SYNC_ROOT}}/skills/video-spec-builder/references/components-catalog.md`。
 
 ---
 
@@ -9686,11 +9694,11 @@ cat > "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/spec-mono-components.m
 - 6 张 Open Peeps 风格场景插画,**仅用于章节封面**(一章一张)。
 - 这是「0 装饰插画」铁律的唯一豁免区 —— 插画只许出现在章节封面,正文镜头一律不用。
 - 注:插画**画稿本身是内容素材,不是主题样式** —— 本主题只规定怎么用、何时用。主题不匹配时退回 `broll-hero.big-type` 兜底。
-CODEX_LAZYPACK_EBF168D57F2DC8D4FF9B62EAACC5CCB3A02876DC
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SPEC_MONO_SPEC_MONO_COMPONENTS_MD_E08B5788BF
 
 # video-spec-builder/spec-mono/tokens.css
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/tokens.css")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/spec-mono/tokens.css" <<'CODEX_LAZYPACK_FE5170784990ADA8EAF79020D206141321114D63'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/spec-mono/tokens.css")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/spec-mono/tokens.css" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SPEC_MONO_TOKENS_CSS_0CE96A4565'
 /* ============================================================
    spec-mono · tokens.css
    视觉语言：SpaceX × Grok × X —— 纯黑 / 纯白 · 几何 sans ·
@@ -9905,11 +9913,11 @@ body {
 @keyframes stick-in   { from { opacity: 0; transform: scale(0.92) rotate(-1.5deg); }
                         to   { opacity: 1; transform: scale(1) rotate(0); } }
 @keyframes line-in    { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-CODEX_LAZYPACK_FE5170784990ADA8EAF79020D206141321114D63
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SPEC_MONO_TOKENS_CSS_0CE96A4565
 
 # video-spec-builder/templates/video-spec-template.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-spec-builder/templates/video-spec-template.md")"
-cat > "{{CODEX_HOME}}/skills/video-spec-builder/templates/video-spec-template.md" <<'CODEX_LAZYPACK_DF7B7E9D0C0486AA1839F4142BD7F753AC2BE8D4'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/templates/video-spec-template.md")"
+cat > "{{SYNC_ROOT}}/skills/video-spec-builder/templates/video-spec-template.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_TEMPLATES_VIDEO_SPEC_TEMPLATE_MD_BBB70859EB'
 ---
 name: video-spec-template
 description: video-spec.md 的骨架模板。复制全文、把每个 [占位符] 换成真实内容，即得一份能整段交给渲染端 AI 的视频生成脚本——9 节 script，无 frontmatter。字段约束、规格校验、交付前自检见 references/spec-rules.md。
@@ -10030,10 +10038,11 @@ description: video-spec.md 的骨架模板。复制全文、把每个 [占位符
 
 [还没定下来、需要补充或需要和用户确认的点，逐条列出；全都定了就写「无，spec 已完整」]
 ```
-CODEX_LAZYPACK_DF7B7E9D0C0486AA1839F4142BD7F753AC2BE8D4
+AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_TEMPLATES_VIDEO_SPEC_TEMPLATE_MD_BBB70859EB
 
-echo "video-spec-builder installed:"
-test -f "{{CODEX_HOME}}/skills/video-spec-builder/SKILL.md" && echo "- video-spec-builder"
+test -f "{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md" && echo "video-spec-builder installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

@@ -1,21 +1,21 @@
 # 25-Gemini-Free-API-Skill-安裝
 
-> 版本：2026-05-27 Codex App 版
-> 用途：建立 `gemini-free-api` 全域 skill，協助使用者在 Codex 專案中安全設定、驗證與使用 Google AI Studio Gemini API Free Tier。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/gemini-free-api/`，不需要取得原作者本機資料夾，也不需要任何真實 API key。
+> 版本：2026-05-27 三 Agent 共用版
+> 用途：建立 `gemini-free-api` 全域 skill，協助使用者在 Codex、Claude、AntiGravity 執行的專案中安全設定、驗證與使用 Google AI Studio Gemini API Free Tier。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/gemini-free-api/`，不需要取得原作者本機資料夾，也不需要任何真實 API key。
 
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-05-27。
 - 來源文件：使用者提供的 `06-設定Gemini免費API.md`。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/gemini-free-api/SKILL.md`。
-- 這版定位：把原本「設定 Gemini 免費 API」改成 Codex App 可用的全域 skill，並加入 API key 安全儲存、Free Tier / Paid Tier 判斷與低風險驗證流程。
+- 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/gemini-free-api/SKILL.md`。
+- 這版定位：把原本「設定 Gemini 免費 API」改成三 Agent 共用 skill，並加入 API key 安全儲存、Free Tier／Paid Tier 判斷、低風險驗證與 Agent adapter 註記。
 
 ## 這版和來源文件的差異
 
-| 項目 | Codex 版調整 |
+| 項目 | 三 Agent 共用版調整 |
 |---|---|
-| 1 | 轉成 Codex App 全域 skill 結構，正式 skill name 使用可攜式英文 ID `gemini-free-api`。 |
+| 1 | 整理成三 Agent 共用全域 skill package，正式 skill name 使用可攜式英文 ID `gemini-free-api`。 |
 | 2 | 移除「把 Key 貼給 Codex」與「直接 echo 到 shell 設定檔」的做法，改為只把 key 放在本機 secret 檔或環境變數。 |
 | 3 | 明確區分 Gemini Plus / Google AI Pro 訂閱和 Gemini API 計費；API 是否收費取決於 Google AI Studio 專案的 Billing Tier。 |
 | 4 | 依 Google 官方文件更新 Free / Paid / Prepay / Postpay / spend cap 邊界，不承諾「永遠完全免費」。 |
@@ -27,7 +27,7 @@
 1. 打開本文文末「內建 Skill 完整安裝內容」。
 2. 把整段安裝腳本複製到自己的環境執行。
 3. 執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
-4. 安裝後開新 Codex 對話或重啟 Codex App，讓新的全域 skill metadata 被重新載入。
+4. 安裝後依 Item 16 確認三 Agent 原生入口，分別重載 skill 清單。
 
 ## API key 安全原則
 
@@ -55,9 +55,9 @@ export GEMINI_API_KEY="$(cat "{{CODEX_HOME}}/secrets/gemini_api_key")"
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/gemini-free-api/SKILL.md" && echo "gemini-free-api SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/gemini-free-api/references/setup-and-billing.md" && echo "gemini-free-api reference ok"
-test -f "{{CODEX_HOME}}/skills/gemini-free-api/agents/openai.yaml" && echo "gemini-free-api agent metadata ok"
+test -f "{{SYNC_ROOT}}/skills/gemini-free-api/SKILL.md" && echo "gemini-free-api SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/gemini-free-api/references/setup-and-billing.md" && echo "gemini-free-api reference ok"
+test -f "{{SYNC_ROOT}}/skills/gemini-free-api/agents/openai.yaml" && echo "gemini-free-api agent metadata ok"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -113,11 +113,11 @@ API key 屬於某個 Google AI Studio / Cloud project。key 會繼承 project �
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/gemini-free-api/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/gemini-free-api/references/setup-and-billing.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/gemini-free-api/agents/openai.yaml` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/gemini-free-api/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/gemini-free-api/references/setup-and-billing.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/gemini-free-api/agents/openai.yaml` 存在。
 - [ ] package 內沒有真實 API key、token、密碼或個人專案 ID。
-- [ ] 搜尋 package 內沒有 來源工具 專用路徑、非 Codex frontmatter 或原作者本機絕對路徑。
+- [ ] package 共用核心沒有來源工具專屬路徑、單一 Agent frontmatter 或原作者本機絕對路徑。
 - [ ] 本機 `GEMINI_API_KEY` 可用低風險請求驗證。
 - [ ] 若要給前端工具使用，已確認 key 不會出現在 browser bundle 或公開 repo。
 
@@ -131,30 +131,30 @@ API key 屬於某個 Google AI Studio / Cloud project。key 會繼承 project �
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`gemini-free-api`。
+本節是自含式安裝區塊。這個序號項目會安裝：`gemini-free-api`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
-```bash
+````bash
 set -e
 
 # ---- gemini-free-api ----
-mkdir -p "{{CODEX_HOME}}/skills/gemini-free-api"
+mkdir -p "{{SYNC_ROOT}}/skills/gemini-free-api"
 # gemini-free-api/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/gemini-free-api/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/gemini-free-api/SKILL.md" <<'CODEX_LAZYPACK_GEMINI_FREE_API_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/gemini-free-api/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/gemini-free-api/SKILL.md" <<'AGENT_LAZYPACK_GEMINI_FREE_API_SKILL_MD_0E95F5A366'
 ---
 name: gemini-free-api
-description: Use when the user asks to set up, verify, troubleshoot, or safely use Google AI Studio Gemini API Free Tier in Codex projects, including GEMINI_API_KEY storage, free-tier checks, account-default API verification, and backend-safe API integration without exposing secrets.
+description: Use when the user asks to set up, verify, troubleshoot, or safely use Google AI Studio Gemini API Free Tier in Codex, Claude, or AntiGravity projects, including GEMINI_API_KEY storage, free-tier checks, account-default API verification, and backend-safe API integration without exposing secrets.
 metadata:
-  short-description: Set up and verify Gemini API Free Tier safely for Codex projects
+  short-description: Set up and verify Gemini API Free Tier safely for all three Agent environments
 ---
 
 # Gemini Free API
 
 ## Role
 
-Help the user safely connect Codex projects to the Gemini API through Google AI
+Help the user safely connect Codex, Claude, or AntiGravity projects to the Gemini API through Google AI
 Studio. Prioritize secret safety, current billing status, and a low-risk
 verification request before changing any project code.
 
@@ -222,18 +222,18 @@ For macOS / Linux / WSL, use a local secret file and load it into the shell
 environment:
 
 ```bash
-mkdir -p "${SECRETS_DIR}"
-chmod 700 "${SECRETS_DIR}"
-printf "%s" "<paste-key-locally-not-in-chat>" > "${SECRETS_DIR}/gemini_api_key"
-chmod 600 "${SECRETS_DIR}/gemini_api_key"
+mkdir -p "$HOME/.codex/secrets"
+chmod 700 "$HOME/.codex/secrets"
+printf "%s" "<paste-key-locally-not-in-chat>" > "$HOME/.codex/secrets/gemini_api_key"
+chmod 600 "$HOME/.codex/secrets/gemini_api_key"
 ```
 
 Then add this to the user's shell startup file if it is appropriate for their
 environment:
 
 ```bash
-if [ -r "${SECRETS_DIR}/gemini_api_key" ]; then
-  export GEMINI_API_KEY="$(cat "${SECRETS_DIR}/gemini_api_key")"
+if [ -r "$HOME/.codex/secrets/gemini_api_key" ]; then
+  export GEMINI_API_KEY="$(cat "$HOME/.codex/secrets/gemini_api_key")"
 fi
 ```
 
@@ -293,11 +293,23 @@ firm statement.
 
 Read `references/setup-and-billing.md` when the user asks for detailed setup,
 cost, billing-tier, or troubleshooting guidance.
-CODEX_LAZYPACK_GEMINI_FREE_API_SKILL_MD
+AGENT_LAZYPACK_GEMINI_FREE_API_SKILL_MD_0E95F5A366
+
+# gemini-free-api/agents/openai.yaml
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/gemini-free-api/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/gemini-free-api/agents/openai.yaml" <<'AGENT_LAZYPACK_GEMINI_FREE_API_AGENTS_OPENAI_YAML_DEB9755D27'
+interface:
+  display_name: "Gemini Free API 設定"
+  short_description: "安全設定、驗證與使用 Google AI Studio Gemini API Free Tier"
+  default_prompt: "Use $gemini-free-api to verify my Gemini API Free Tier setup and help my Codex project read GEMINI_API_KEY safely."
+
+policy:
+  allow_implicit_invocation: true
+AGENT_LAZYPACK_GEMINI_FREE_API_AGENTS_OPENAI_YAML_DEB9755D27
 
 # gemini-free-api/references/setup-and-billing.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/gemini-free-api/references/setup-and-billing.md")"
-cat > "{{CODEX_HOME}}/skills/gemini-free-api/references/setup-and-billing.md" <<'CODEX_LAZYPACK_GEMINI_FREE_API_REFERENCES_SETUP_AND_BILLING_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/gemini-free-api/references/setup-and-billing.md")"
+cat > "{{SYNC_ROOT}}/skills/gemini-free-api/references/setup-and-billing.md" <<'AGENT_LAZYPACK_GEMINI_FREE_API_REFERENCES_SETUP_AND_BILLING_MD_147DC57118'
 # Gemini API Setup And Billing Reference
 
 ## Purpose
@@ -369,17 +381,17 @@ Bad places:
 Store:
 
 ```bash
-mkdir -p "${SECRETS_DIR}"
-chmod 700 "${SECRETS_DIR}"
-printf "%s" "<paste-key-locally-not-in-chat>" > "${SECRETS_DIR}/gemini_api_key"
-chmod 600 "${SECRETS_DIR}/gemini_api_key"
+mkdir -p "$HOME/.codex/secrets"
+chmod 700 "$HOME/.codex/secrets"
+printf "%s" "<paste-key-locally-not-in-chat>" > "$HOME/.codex/secrets/gemini_api_key"
+chmod 600 "$HOME/.codex/secrets/gemini_api_key"
 ```
 
 Load:
 
 ```bash
-if [ -r "${SECRETS_DIR}/gemini_api_key" ]; then
-  export GEMINI_API_KEY="$(cat "${SECRETS_DIR}/gemini_api_key")"
+if [ -r "$HOME/.codex/secrets/gemini_api_key" ]; then
+  export GEMINI_API_KEY="$(cat "$HOME/.codex/secrets/gemini_api_key")"
 fi
 ```
 
@@ -463,23 +475,11 @@ secrets/
 - Gemini Developer API pricing: https://ai.google.dev/gemini-api/docs/pricing
 - Gemini API billing: https://ai.google.dev/gemini-api/docs/billing
 - Google AI Studio API keys: https://aistudio.google.com/apikey
-CODEX_LAZYPACK_GEMINI_FREE_API_REFERENCES_SETUP_AND_BILLING_MD
+AGENT_LAZYPACK_GEMINI_FREE_API_REFERENCES_SETUP_AND_BILLING_MD_147DC57118
 
-# gemini-free-api/agents/openai.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/gemini-free-api/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/gemini-free-api/agents/openai.yaml" <<'CODEX_LAZYPACK_GEMINI_FREE_API_AGENTS_OPENAI_YAML'
-interface:
-  display_name: "Gemini Free API 設定"
-  short_description: "安全設定、驗證與使用 Google AI Studio Gemini API Free Tier"
-  default_prompt: "Use $gemini-free-api to verify my Gemini API Free Tier setup and help my Codex project read GEMINI_API_KEY safely."
+test -f "{{SYNC_ROOT}}/skills/gemini-free-api/SKILL.md" && echo "gemini-free-api installed for Codex, Claude, and AntiGravity"
+````
 
-policy:
-  allow_implicit_invocation: true
-CODEX_LAZYPACK_GEMINI_FREE_API_AGENTS_OPENAI_YAML
-
-test -f "{{CODEX_HOME}}/skills/gemini-free-api/SKILL.md" && echo "gemini-free-api installed"
-
-echo "embedded skills installed: gemini-free-api"
-```
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

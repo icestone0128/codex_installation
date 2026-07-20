@@ -1,8 +1,8 @@
 # 29-Video-Processing-Automation-Skill-安裝
 
-> 版本：2026-06-29 Codex App 版
+> 版本：2026-06-29 三 Agent 共用版
 > 用途：安裝 `video-processing-automation` 全域 skill，把原始影片處理成 YouTube / 社群影片上架包，包含智能剪口播、字幕、文字稿、標題、封面、metadata 與短片亮點流程。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/video-processing-automation/`。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/video-processing-automation/`。
 
 ## 來源與歷史紀錄
 
@@ -11,13 +11,13 @@
 - 來源 commit：`a0171ce`。
 - 2026-06-04 已補入 Groq Python SDK 安裝、Groq Google 登入建立 API key、安全複製與 `{{SECRETS_DIR}}/groq_api_key` 保存流程。
 - 2026-06-29 依實際重跑影片後製流程，補入 `espeakng-loader` 檢查、專案詞彙表 `200_Reference/vocabulary.md`、CFR source 保留、SRT 清理順序與 ffprobe 驗收。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md`。
+- Codex 全域 skill：`{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md`。
 
 ## Codex 相容化調整
 
 - 保留來源 repo 的影片生產線核心：smart cut、Groq Whisper STT、SRT 重切、字幕清理、標題候選、封面提示、metadata、短片候選與切片腳本。
-- 排除來源工具專屬入口、設定資料夾、handoff 狀態、個人頻道輸出範例、個人品牌素材與非 Codex 路由。
-- 封面圖預設使用 Codex 影像生成能力或使用者提供的圖像流程，不依賴來源 repo 的本機生圖腳本。
+- 將來源工具專屬入口、設定資料夾、handoff 狀態與 agent 路由改寫為共用工作流與 Codex／Claude／AntiGravity adapter；個人頻道範例與品牌素材改為專案輸入。
+- 封面圖預設使用當前 Agent 的原生影像生成能力、已核准 API／CLI fallback，或使用者提供的圖像流程，不依賴來源 repo 的本機生圖腳本。
 - 頻道名稱、人物照、色票、專有詞彙與輸出路徑都改成專案輸入，不寫死在全域 skill。
 - 不內嵌 API key、OAuth token、影片素材、成品影片或個人圖片。
 
@@ -65,9 +65,9 @@ ffprobe -version
 python3 -m auto_editor --version
 python3 -c "import groq; print('groq ok')"
 python3 -c "import os, pathlib; p=pathlib.Path('{{SECRETS_DIR}}/groq_api_key').expanduser(); print('Groq key:', 'ok' if os.getenv('GROQ_API_KEY') or p.exists() else 'missing')"
-test -f "{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md" && echo "video-processing-automation SKILL.md ok"
-test -d "{{CODEX_HOME}}/skills/video-processing-automation/references" && echo "references ok"
-test -d "{{CODEX_HOME}}/skills/video-processing-automation/scripts" && echo "scripts ok"
+test -f "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md" && echo "video-processing-automation SKILL.md ok"
+test -d "{{SYNC_ROOT}}/skills/video-processing-automation/references" && echo "references ok"
+test -d "{{SYNC_ROOT}}/skills/video-processing-automation/scripts" && echo "scripts ok"
 ```
 
 ## 使用方式
@@ -95,39 +95,38 @@ test -d "{{CODEX_HOME}}/skills/video-processing-automation/scripts" && echo "scr
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md` 存在。
 - [ ] references / scripts 依本文內嵌 package 完整安裝。
 - [ ] 若使用 Groq STT，`python3 -c "import groq"` 可執行，且 `GROQ_API_KEY` 或 `{{SECRETS_DIR}}/groq_api_key` 存在。
 - [ ] 若專案有專有名詞，`200_Reference/vocabulary.md` 已建立並已用 `apply_vocab.py --vocab` 套用。
 - [ ] 最終 MP4 已用 `ffprobe` 驗證影音 stream；字幕已用 `validate_srt.py` 驗證。
 - [ ] 沒有把 API key、OAuth token、影片素材、個人照片或成品影片寫進 repo。
-- [ ] 開新 Codex 對話後可用 `video-processing-automation` 或影片自動化相關語句觸發。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用 `video-processing-automation` 或影片自動化相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`video-processing-automation`。
+本節是自含式安裝區塊。這個序號項目會安裝：`video-processing-automation`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
-```bash
+````bash
 set -e
 
 # ---- video-processing-automation ----
-mkdir -p "{{CODEX_HOME}}/skills/video-processing-automation"
-
+mkdir -p "{{SYNC_ROOT}}/skills/video-processing-automation"
 # video-processing-automation/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/SKILL.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD_0E95F5A366'
 ---
 name: video-processing-automation
 description: >
-  Use when the user asks Codex to process raw video into a YouTube-ready or
+  Use when the user asks Codex, Claude, or AntiGravity to process raw video into a YouTube-ready or
   social-video-ready package: smart cut, silence removal, speech-to-subtitle,
   transcript cleanup, title candidates, cover prompt/image generation,
   metadata, short highlight clips, and final output packaging. Adapted into a
-  portable Codex App-compatible workflow from mathruffian-dot/2026-YouTube.
+  portable cross-agent workflow from mathruffian-dot/2026-YouTube.
 metadata:
   short-description: YouTube/video processing automation workflow
 ---
@@ -138,10 +137,10 @@ Use this skill to turn raw talking-head or tutorial video into a packaged video
 deliverable with edited video, subtitles, transcript, cover image, metadata, SEO
 tags, and optional short highlight versions.
 
-This is a Codex App-compatible global skill adapted from
-`mathruffian-dot/2026-YouTube`. It keeps the useful production logic and scripts,
-but excludes source-tool-specific agent files, local paths, handoff files,
-example outputs, personal channel identity, and non-Codex routing.
+This is a cross-agent global skill adapted from `mathruffian-dot/2026-YouTube`.
+It keeps the useful production logic and scripts while replacing source-specific
+entrypoints, local paths, and personal examples with one shared workflow and
+native Codex, Claude, and AntiGravity adapters.
 
 ## Output Contract
 
@@ -206,7 +205,7 @@ draft and final folders and document the route before writing files.
 3. Subtitle and transcript:
    - extract 16 kHz mono audio from the cut video with `ffmpeg`;
    - read `references/audio-subtitle.md`;
-   - use Groq Whisper when `GROQ_API_KEY` or `{{SECRETS_DIR}}/groq_api_key` is available and
+   - use Groq Whisper when `GROQ_API_KEY` or `~/.codex/secrets/groq_api_key` is available and
      the user accepts cloud transcription;
    - keep Local Whisper as an option, but do not install or download a model by
      default;
@@ -231,7 +230,7 @@ draft and final folders and document the route before writing files.
      `100_Todo/projects/<video-id>/` when `100_Todo/` exists.
 7. Cover:
    - read `references/cover-style.md`;
-   - use Codex image generation or the user-provided image workflow;
+   - use `image-generator` with the active Agent adapter or the user-provided image workflow;
    - if image generation cannot use a reference image, state the limitation and
      provide a strong `cover-prompt.md`.
 8. Metadata:
@@ -251,7 +250,7 @@ draft and final folders and document the route before writing files.
   user to revoke it in Groq Console and create a new key before continuing.
 - When creating a Groq key through the browser, leave the one-time key display
   open for the user or copy it to the user's clipboard without reading it back.
-  Store it only in a local secret location such as `{{SECRETS_DIR}}/groq_api_key` with mode
+  Store it only in a local secret location such as `~/.codex/secrets/groq_api_key` with mode
   `600`, or use a shell session variable for the current run.
 - Do not upload audio/video to cloud STT services unless the user accepts that
   route or the project already documents that route.
@@ -260,8 +259,8 @@ draft and final folders and document the route before writing files.
 - Keep this global skill portable: all reusable instructions live in this skill
   package; project-specific channel names, persona photos, brand palettes,
   vocabulary, and output folders belong in the project.
-- Use Codex image generation for covers by default. Do not depend on source
-  repository image scripts or API-key-specific cover routes.
+- Use `image-generator` and its native Agent adapter for covers by default. Do
+  not enable a paid or key-based route without user approval.
 - Avoid copying source repo sample outputs, personal channel assets, or
   project-local handoff files into new projects.
 
@@ -280,30 +279,46 @@ draft and final folders and document the route before writing files.
 ```bash
 python3 -m pip install --user auto-editor groq
 
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/smart_cut.py" \
   "raw/<video-id>/input.mp4" \
   --out "100_Todo/drafts/<video-id>/<video-id>.cut.mp4"
 
 ffmpeg -y -i "100_Todo/drafts/<video-id>/<video-id>.cut.mp4" \
   -vn -ac 1 -ar 16000 "100_Todo/drafts/<video-id>/<video-id>.wav"
 
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_groq.py" \
   "100_Todo/drafts/<video-id>/<video-id>.wav" \
   --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.groq.json"
 
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/resegment.py" \
   "100_Todo/drafts/<video-id>/_subtitles/<video-id>.groq.json" \
   --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.raw.srt"
 
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/apply_vocab.py" \
   "100_Todo/drafts/<video-id>/_subtitles/<video-id>.raw.srt" \
   --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.vocab.srt" \
   --vocab "200_Reference/vocabulary.md"
 
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/validate_srt.py" \
   --raw "100_Todo/drafts/<video-id>/_subtitles/<video-id>.vocab.srt" \
   --clean "100_Todo/drafts/<video-id>/_subtitles/<video-id>.clean.srt"
 ```
+
+## Agent Execution Notes
+
+- Shared steps: all three Agents run the same scripts, folder routes, title
+  selection gates, subtitle rules, metadata templates, and ffprobe checks.
+- Codex adapter: use the available terminal and native image tool; Codex sandbox
+  permission differences belong in the execution note, not a separate workflow.
+- Claude adapter: run the same scripts through the available terminal and use
+  the native image tool or approved shared cover route.
+- AntiGravity adapter: run the same scripts through the available terminal and
+  use the native image tool or approved shared cover route.
+- Fallback: if a native image tool is absent, use the authorized shared
+  CLI/API/browser route from `image-generator`; STT provider choice remains the
+  same explicit privacy/cost decision in every Agent.
+- Verification: require the same SRT validation, ffprobe media checks, package
+  file list, and user-selected title/short candidate.
 
 ## Verification
 
@@ -311,14 +326,14 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.
 - `ffprobe -version` works.
 - `python3 -m auto_editor --version` works or `auto-editor` is in PATH.
 - `python3 -c "import groq"` works when using Groq STT.
-- `GROQ_API_KEY` or `{{SECRETS_DIR}}/groq_api_key` exists before cloud STT.
-- Scan the package for excluded source-tool terms before packaging or syncing;
-  the scan should have no hits.
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD
+- `GROQ_API_KEY` or `~/.codex/secrets/groq_api_key` exists before cloud STT.
+- Run the cross-agent exclusion-word audit before packaging or syncing; the scan
+  should have no hits.
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD_0E95F5A366
 
 # video-processing-automation/references/audio-subtitle.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/audio-subtitle.md")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/audio-subtitle.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/references/audio-subtitle.md")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/references/audio-subtitle.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD_CBD5910BE8'
 # Audio To Subtitle
 
 Use this reference to create clean SRT and TXT transcripts.
@@ -347,7 +362,7 @@ ffmpeg -y -i "100_Todo/drafts/<video-id>/<video-id>.cut.mp4" \
 
 ```bash
 mkdir -p "100_Todo/drafts/<video-id>/_subtitles"
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_groq.py" \
   "100_Todo/drafts/<video-id>/<video-id>.wav" \
   --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.groq.json"
 ```
@@ -355,7 +370,7 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_gr
 3. Resegment:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/resegment.py" \
   "100_Todo/drafts/<video-id>/_subtitles/<video-id>.groq.json" \
   --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.raw.srt"
 ```
@@ -363,7 +378,7 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py"
 4. Apply vocabulary:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/apply_vocab.py" \
   "100_Todo/drafts/<video-id>/_subtitles/<video-id>.raw.srt" \
   --out "100_Todo/drafts/<video-id>/_subtitles/<video-id>.vocab.srt" \
   --vocab "200_Reference/vocabulary.md"
@@ -378,7 +393,7 @@ the script will still apply portable built-in replacements.
 6. Validate:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/validate_srt.py" \
   --raw "100_Todo/drafts/<video-id>/_subtitles/<video-id>.vocab.srt" \
   --clean "100_Todo/drafts/<video-id>/_subtitles/<video-id>.clean.srt"
 ```
@@ -386,7 +401,7 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.
 7. Convert to TXT:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/srt_to_txt.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/srt_to_txt.py" \
   "100_Todo/drafts/<video-id>/_subtitles/<video-id>.clean.srt" \
   --out "100_Todo/drafts/<video-id>/<video-id>.txt"
 ```
@@ -445,7 +460,7 @@ python3 -m pip install opencv-python pillow --break-system-packages
 
 ### 執行燒錄
 ```bash
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/burn_subtitles.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/burn_subtitles.py" \
   "100_Todo/drafts/<video-id>/<video-id>.cut.mp4" \
   "100_Todo/drafts/<video-id>/<video-id>.srt" \
   "100_Todo/projects/<video-id>/<chosen-title>.mp4"
@@ -455,11 +470,11 @@ python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/burn_subtitle
 - **字型**：預設會優先讀取 macOS 系統的蘋方字型 (`PingFang.ttc`)，若在 Windows 或 Linux 上會自動 fallback 到 Arial 或是 Pillow 的預設字型。
 - **樣式**：在影片底部 12% 高度處，以 75% 不透明度的深灰色背景圓角卡片包覆暖白色文字，以確保不論背景明暗皆具備極高的可讀性。
 - **音軌保留**：腳本會自動將原影片的音軌以 `copy` 模式無損打包回最終輸出檔，畫質與音軌均保持一致。
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_AUDIO_SUBTITLE_MD_CBD5910BE8
 
 # video-processing-automation/references/cover-style.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/cover-style.md")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/cover-style.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_COVER_STYLE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/references/cover-style.md")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/references/cover-style.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_COVER_STYLE_MD_4DE92A2DF6'
 # Cover Style
 
 This is a portable cover-prompt checklist. Replace project-specific brand,
@@ -500,11 +515,11 @@ unrelated background objects.
   reference image when a persona must remain consistent.
 - If Codex image generation cannot accept a reference image in the current
   session, say so and provide the prompt plus a fallback plan.
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_COVER_STYLE_MD
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_COVER_STYLE_MD_4DE92A2DF6
 
 # video-processing-automation/references/metadata-template.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/metadata-template.md")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/metadata-template.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_METADATA_TEMPLATE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/references/metadata-template.md")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/references/metadata-template.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_METADATA_TEMPLATE_MD_645E6628C2'
 # Metadata Template
 
 Use this structure for `metadata.md`.
@@ -584,11 +599,11 @@ Generate candidates in several styles:
 
 For long-form videos, provide 10 candidates and pause. For short videos, provide
 3 tighter candidates and pause.
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_METADATA_TEMPLATE_MD
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_METADATA_TEMPLATE_MD_645E6628C2
 
 # video-processing-automation/references/setup.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/setup.md")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/setup.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SETUP_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/references/setup.md")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/references/setup.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SETUP_MD_1E0E7D7B42'
 # Setup And Environment
 
 ## Required Tools
@@ -628,7 +643,7 @@ cache path such as `PYTHONPYCACHEPREFIX=/private/tmp/python-pycache`.
 Cloud transcription uses Groq Whisper. Accept either:
 
 - environment variable: `GROQ_API_KEY`
-- local key file: `{{SECRETS_DIR}}/groq_api_key`
+- local key file: `~/.codex/secrets/groq_api_key`
 
 Do not commit either value.
 
@@ -652,10 +667,10 @@ Use this route only when the user has asked to set up Groq cloud STT.
 8. Ask the user to save the copied key locally:
 
 ```bash
-mkdir -p {{SECRETS_DIR}}
-chmod 700 {{SECRETS_DIR}}
-pbpaste > {{SECRETS_DIR}}/groq_api_key
-chmod 600 {{SECRETS_DIR}}/groq_api_key
+mkdir -p ~/.codex/secrets
+chmod 700 ~/.codex/secrets
+pbpaste > ~/.codex/secrets/groq_api_key
+chmod 600 ~/.codex/secrets/groq_api_key
 ```
 
 If the user accidentally pastes the key into chat, logs, screenshots, or a repo
@@ -688,7 +703,7 @@ ffprobe -version
 python3 -m auto_editor --version
 python3 -c "import groq; print('groq ok')"
 python3 -c "import espeakng_loader; print('espeakng_loader ok')"  # optional, only for local TTS paths
-python3 -c "import os, pathlib; p=pathlib.Path('{{SECRETS_DIR}}/groq_api_key').expanduser(); print('Groq key:', 'ok' if os.getenv('GROQ_API_KEY') or p.exists() else 'missing')"
+python3 -c "import os, pathlib; p=pathlib.Path('~/.codex/secrets/groq_api_key').expanduser(); print('Groq key:', 'ok' if os.getenv('GROQ_API_KEY') or p.exists() else 'missing')"
 ```
 
 `python3 -m auto_editor --version` can return a non-zero code in some versions
@@ -708,11 +723,11 @@ For a project that should be downloadable and runnable by another person:
   they are useful for reproducibility.
 - Verify regenerated outputs with `ffprobe` for both video and audio streams
   before considering the package complete.
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SETUP_MD
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SETUP_MD_1E0E7D7B42
 
 # video-processing-automation/references/short-video.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/short-video.md")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/short-video.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SHORT_VIDEO_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/references/short-video.md")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/references/short-video.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SHORT_VIDEO_MD_D964795228'
 # Short Highlight Video
 
 Use this reference after a long video already has:
@@ -744,7 +759,7 @@ A/B/C, ask for new candidates, or provide direct timecodes.
 ## Cutting
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/clip_cut.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/clip_cut.py" \
   --input-mp4 "100_Todo/drafts/<video-id>/<video-id>.cut.mp4" \
   --input-srt "100_Todo/drafts/<video-id>/<video-id>.srt" \
   --segments "00:00:08.500-00:00:13.200,00:00:45.100-00:01:30.800" \
@@ -770,11 +785,11 @@ Short metadata differs from long-form metadata:
 - Avoid cutting in the middle of a sentence.
 - Keep 3-6 segments; too many fragments feel incoherent.
 - Verify output duration with `ffprobe`.
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SHORT_VIDEO_MD
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SHORT_VIDEO_MD_D964795228
 
 # video-processing-automation/references/smart-cut.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/smart-cut.md")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/smart-cut.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SMART_CUT_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/references/smart-cut.md")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/references/smart-cut.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SMART_CUT_MD_CF9770A7B5'
 # Smart Cut
 
 Use smart cut when the user wants silence removal, talking-head cleanup, or a
@@ -804,7 +819,7 @@ from the raw video before cutting, timestamps will no longer align.
 ffmpeg -y -i "raw/<video-id>/input.mp4" -map 0:v -map 0:a -r 30 -vsync cfr "100_Todo/drafts/<video-id>/input_cfr.mp4"
 
 # 2. 進行智慧裁剪 (--no-open 避免伺服器環境自動彈出播放器)
-python3 "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py" \
+python3 "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/smart_cut.py" \
   "100_Todo/drafts/<video-id>/input_cfr.mp4" \
   --out "100_Todo/drafts/<video-id>/<video-id>.cut.mp4"
 ```
@@ -835,11 +850,11 @@ Tuning:
   `ffprobe -v error -show_entries stream=codec_type,codec_name,width,height,duration <file>`.
 - Listen to the first 20-30 seconds before continuing to transcription when the
   source is noisy or has music.
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SMART_CUT_MD
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SMART_CUT_MD_CF9770A7B5
 
 # video-processing-automation/references/source-adaptation.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/references/source-adaptation.md")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/references/source-adaptation.md" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/references/source-adaptation.md")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/references/source-adaptation.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40'
 # Source Adaptation
 
 Source repo: `https://github.com/mathruffian-dot/2026-YouTube`
@@ -869,16 +884,16 @@ Inspected source commit: `a0171ce`
 ## Codex Adaptation
 
 - The global skill name is `video-processing-automation`.
-- The skill uses Codex App global skill paths through `{{CODEX_HOME}}`.
+- The skill uses `{{SYNC_ROOT}}/skills` as the shared source, with native Codex, Claude, and AntiGravity entrypoints managed by Item 16.
 - Cover images default to Codex image generation or user-supplied assets.
 - Project-specific vocabulary, persona references, and brand guides are treated
   as project inputs instead of global defaults.
 - Cloud transcription must be confirmed when privacy matters.
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40
 
 # video-processing-automation/scripts/apply_vocab.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/apply_vocab.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_APPLY_VOCAB_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/apply_vocab.py")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/apply_vocab.py" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_APPLY_VOCAB_PY_5FD98DDBE6'
 #!/usr/bin/env python3
 """對 SRT 做機械式詞彙替換（只動文字行，時間碼與段號原封不動）。
 
@@ -1003,11 +1018,213 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_APPLY_VOCAB_PY
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_APPLY_VOCAB_PY_5FD98DDBE6
+
+# video-processing-automation/scripts/burn_subtitles.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/burn_subtitles.py")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/burn_subtitles.py" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_BURN_SUBTITLES_PY_6ECF6BA5FF'
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+burn_subtitles.py — 使用 OpenCV & Pillow 將 SRT 字幕燒錄進影片中。
+解決 ffmpeg 沒有 subtitles 濾鏡的問題。
+"""
+import sys
+import re
+import cv2
+import numpy as np
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont
+
+
+def parse_time(tc_str: str) -> float:
+    # 格式: 00:00:03,820
+    h, m, rest = tc_str.split(":")
+    s, ms = rest.split(",")
+    return int(h) * 3600 + int(m) * 60 + float(s) + float(ms) / 1000.0
+
+
+def parse_srt(srt_path: Path):
+    content = srt_path.read_text(encoding="utf-8-sig")
+    # 相容 Windows \r\n 與 \n\n 分隔
+    blocks = re.split(r"\r?\n\r?\n", content.strip())
+    subs = []
+    for b in blocks:
+        lines = b.strip().splitlines()
+        if len(lines) >= 3:
+            time_line = lines[1].strip()
+            time_match = re.match(
+                r"(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})",
+                time_line,
+            )
+            if time_match:
+                start = parse_time(time_match.group(1))
+                end = parse_time(time_match.group(2))
+                text = "\n".join(lines[2:]).strip()
+                # 去除任何 HTML 標記，如 <span> 等
+                text = re.sub(r"<[^>]+>", "", text)
+                subs.append((start, end, text))
+    return subs
+
+
+def get_system_font() -> str:
+    # 優先使用 macOS 蘋方字體，其次是黑體、Arial 等
+    candidates = [
+        "/System/Library/Fonts/PingFang.ttc",
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        "/System/Library/Fonts/STHeiti Light.ttc",
+        "/Library/Fonts/Microsoft/Arial.ttf",
+    ]
+    for c in candidates:
+        if Path(c).exists():
+            return c
+    return ""  # 找不到則使用 Pillow 預設字體
+
+
+def main():
+    if len(sys.argv) < 4:
+        print("Usage: python3 burn_subtitles.py <input_video> <input_srt> <output_video>")
+        sys.exit(1)
+
+    in_video = Path(sys.argv[1])
+    in_srt = Path(sys.argv[2])
+    out_video = Path(sys.argv[3])
+
+    if not in_video.exists():
+        sys.exit(f"Input video not found: {in_video}")
+    if not in_srt.exists():
+        sys.exit(f"SRT not found: {in_srt}")
+
+    # 解析字幕
+    subs = parse_srt(in_srt)
+    print(f"[INFO] 載入 {len(subs)} 段字幕。")
+
+    # 開啟視訊
+    cap = cv2.VideoCapture(str(in_video))
+    if not cap.isOpened():
+        sys.exit("Error opening video capture")
+
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    print(f"[INFO] 影片屬性: {width}x{height}, FPS: {fps}, 總幀數: {total_frames}")
+
+    # 設定寫入器 (使用 mp4v 編碼，暫時寫入無聲檔案)
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out_dir = out_video.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    tmp_output = out_dir / f"tmp_silent_{out_video.name}"
+    writer = cv2.VideoWriter(str(tmp_output), fourcc, fps, (width, height))
+    if not writer.isOpened():
+        sys.exit("Error opening video writer")
+
+    font_path = get_system_font()
+    print(f"[INFO] 使用字體: {font_path or 'Pillow Default'}")
+
+    frame_idx = 0
+    font_size = int(height * 0.038) # 根據高度動態計算合適的字體大小 (例如 1080p 下約 41px)
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        timestamp = frame_idx / fps
+
+        # 尋找當前時間點的字幕
+        current_text = ""
+        for start, end, text in subs:
+            if start <= timestamp <= end:
+                current_text = text
+                break
+
+        if current_text:
+            # 轉換影像格式 (BGR to RGB)
+            img_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            draw = ImageDraw.Draw(img_pil)
+
+            # 載入字體
+            if font_path:
+                font = ImageFont.truetype(font_path, font_size)
+            else:
+                font = ImageFont.load_default()
+
+            lines = current_text.splitlines()
+
+            # 定位距離底部 12% 高度
+            bottom_margin = int(height * 0.12)
+            y_start = height - bottom_margin - (len(lines) * (font_size + 10))
+
+            for j, line in enumerate(lines):
+                # 測量文字大小
+                bbox = draw.textbbox((0, 0), line, font=font)
+                text_w = bbox[2] - bbox[0]
+                text_h = bbox[3] - bbox[1]
+
+                x = (width - text_w) // 2
+                y = y_start + j * (font_size + 15)
+
+                # 繪製半透明圓角背景底色卡片
+                pad_x = 24
+                pad_y = 10
+                draw.rounded_rectangle(
+                    [x - pad_x, y - pad_y, x + text_w + pad_x, y + text_h + pad_y],
+                    radius=12,
+                    fill=(42, 42, 42, 192) # 75% 不透明度
+                )
+
+                # 繪製暖白文字
+                draw.text((x, y - 2), line, font=font, fill=(253, 251, 247))
+
+            frame = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
+
+        writer.write(frame)
+        frame_idx += 1
+        if frame_idx % 100 == 0:
+            print(f"[INFO] 處理進度: {frame_idx}/{total_frames} 幀...")
+
+    cap.release()
+    writer.release()
+    print("[INFO] 影像渲染完成，開始合併音軌...")
+
+    # 使用 ffmpeg 將原始影片的音軌與剛才處理的無聲影片進行無損合併
+    import subprocess
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", str(tmp_output),
+        "-i", str(in_video),
+        "-map", "0:v",
+        "-map", "1:a",
+        "-c:v", "copy",
+        "-c:a", "copy",
+        str(out_video)
+    ]
+
+    print(f"[CMD] {' '.join(cmd)}")
+    rc = subprocess.call(cmd)
+
+    # 刪除暫存無聲影片
+    if tmp_output.exists():
+        try:
+            tmp_output.unlink()
+        except OSError:
+            pass
+
+    if rc == 0:
+        print(f"[OK] 字幕影片製作完成：{out_video}")
+    else:
+        sys.exit(f"[ERR] ffmpeg 合併音軌失敗，退出碼 {rc}")
+
+
+if __name__ == "__main__":
+    main()
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_BURN_SUBTITLES_PY_6ECF6BA5FF
 
 # video-processing-automation/scripts/clip_cut.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/clip_cut.py")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/clip_cut.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_CLIP_CUT_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/clip_cut.py")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/clip_cut.py" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_CLIP_CUT_PY_337F3C1870'
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -1253,11 +1470,11 @@ def main():
 
 if __name__ == '__main__':
     main()
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_CLIP_CUT_PY
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_CLIP_CUT_PY_337F3C1870
 
 # video-processing-automation/scripts/resegment.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/resegment.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_RESEGMENT_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/resegment.py")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/resegment.py" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_RESEGMENT_PY_185AC250E4'
 #!/usr/bin/env python3
 """依 Groq JSON 重新切段，輸出 SRT。
 
@@ -1464,11 +1681,11 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_RESEGMENT_PY
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_RESEGMENT_PY_185AC250E4
 
 # video-processing-automation/scripts/smart_cut.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/smart_cut.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SMART_CUT_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/smart_cut.py")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/smart_cut.py" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SMART_CUT_PY_5EC07F3E6C'
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -1555,11 +1772,11 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SMART_CUT_PY
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SMART_CUT_PY_5EC07F3E6C
 
 # video-processing-automation/scripts/srt_to_txt.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/srt_to_txt.py")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/srt_to_txt.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SRT_TO_TXT_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/srt_to_txt.py")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/srt_to_txt.py" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SRT_TO_TXT_PY_D1B61E765F'
 #!/usr/bin/env python3
 """把清字後的 SRT 轉成可閱讀的純文字檔。
 
@@ -1632,11 +1849,11 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SRT_TO_TXT_PY
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_SRT_TO_TXT_PY_D1B61E765F
 
 # video-processing-automation/scripts/transcribe_groq.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/transcribe_groq.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_TRANSCRIBE_GROQ_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_groq.py")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_groq.py" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_TRANSCRIBE_GROQ_PY_88CE6C2517'
 #!/usr/bin/env python3
 """透過 Groq API 做 STT，產出 word-level 時間碼 JSON。
 
@@ -1692,7 +1909,7 @@ def load_api_key() -> str:
             return key_file.read_text(encoding="utf-8").strip()
     sys.exit(
         "[ERR] 找不到 Groq API Key（環境變數 GROQ_API_KEY 或 "
-        "{{SECRETS_DIR}}/groq_api_key）"
+        "~/.codex/secrets/groq_api_key）"
     )
 
 
@@ -1820,11 +2037,11 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_TRANSCRIBE_GROQ_PY
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_TRANSCRIBE_GROQ_PY_88CE6C2517
 
 # video-processing-automation/scripts/validate_srt.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/validate_srt.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_VALIDATE_SRT_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/validate_srt.py")"
+cat > "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/validate_srt.py" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_VALIDATE_SRT_PY_0A4B3A405E'
 #!/usr/bin/env python3
 """驗證清洗後的 SRT 與原始 SRT 時間碼完全一致、段落結構不變。
 
@@ -1922,210 +2139,11 @@ if __name__ == "__main__":
     ap.add_argument("--clean", required=True, type=Path)
     args = ap.parse_args()
     sys.exit(validate(args.raw, args.clean))
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_VALIDATE_SRT_PY
+AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_VALIDATE_SRT_PY_0A4B3A405E
 
-# video-processing-automation/scripts/burn_subtitles.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/video-processing-automation/scripts/burn_subtitles.py")"
-cat > "{{CODEX_HOME}}/skills/video-processing-automation/scripts/burn_subtitles.py" <<'CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_BURN_SUBTITLES_PY'
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-burn_subtitles.py — 使用 OpenCV & Pillow 將 SRT 字幕燒錄進影片中。
-解決 ffmpeg 沒有 subtitles 濾鏡的問題。
-"""
-import sys
-import re
-import cv2
-import numpy as np
-from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+test -f "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md" && echo "video-processing-automation installed for Codex, Claude, and AntiGravity"
+````
 
-
-def parse_time(tc_str: str) -> float:
-    # 格式: 00:00:03,820
-    h, m, rest = tc_str.split(":")
-    s, ms = rest.split(",")
-    return int(h) * 3600 + int(m) * 60 + float(s) + float(ms) / 1000.0
-
-
-def parse_srt(srt_path: Path):
-    content = srt_path.read_text(encoding="utf-8-sig")
-    # 相容 Windows \r\n 與 \n\n 分隔
-    blocks = re.split(r"\r?\n\r?\n", content.strip())
-    subs = []
-    for b in blocks:
-        lines = b.strip().splitlines()
-        if len(lines) >= 3:
-            time_line = lines[1].strip()
-            time_match = re.match(
-                r"(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})",
-                time_line,
-            )
-            if time_match:
-                start = parse_time(time_match.group(1))
-                end = parse_time(time_match.group(2))
-                text = "\n".join(lines[2:]).strip()
-                # 去除任何 HTML 標記，如 <span> 等
-                text = re.sub(r"<[^>]+>", "", text)
-                subs.append((start, end, text))
-    return subs
-
-
-def get_system_font() -> str:
-    # 優先使用 macOS 蘋方字體，其次是黑體、Arial 等
-    candidates = [
-        "/System/Library/Fonts/PingFang.ttc",
-        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
-        "/System/Library/Fonts/STHeiti Light.ttc",
-        "/Library/Fonts/Microsoft/Arial.ttf",
-    ]
-    for c in candidates:
-        if Path(c).exists():
-            return c
-    return ""  # 找不到則使用 Pillow 預設字體
-
-
-def main():
-    if len(sys.argv) < 4:
-        print("Usage: python3 burn_subtitles.py <input_video> <input_srt> <output_video>")
-        sys.exit(1)
-
-    in_video = Path(sys.argv[1])
-    in_srt = Path(sys.argv[2])
-    out_video = Path(sys.argv[3])
-
-    if not in_video.exists():
-        sys.exit(f"Input video not found: {in_video}")
-    if not in_srt.exists():
-        sys.exit(f"SRT not found: {in_srt}")
-
-    # 解析字幕
-    subs = parse_srt(in_srt)
-    print(f"[INFO] 載入 {len(subs)} 段字幕。")
-
-    # 開啟視訊
-    cap = cv2.VideoCapture(str(in_video))
-    if not cap.isOpened():
-        sys.exit("Error opening video capture")
-
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    print(f"[INFO] 影片屬性: {width}x{height}, FPS: {fps}, 總幀數: {total_frames}")
-
-    # 設定寫入器 (使用 mp4v 編碼，暫時寫入無聲檔案)
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out_dir = out_video.parent
-    out_dir.mkdir(parents=True, exist_ok=True)
-    
-    tmp_output = out_dir / f"tmp_silent_{out_video.name}"
-    writer = cv2.VideoWriter(str(tmp_output), fourcc, fps, (width, height))
-    if not writer.isOpened():
-        sys.exit("Error opening video writer")
-
-    font_path = get_system_font()
-    print(f"[INFO] 使用字體: {font_path or 'Pillow Default'}")
-
-    frame_idx = 0
-    font_size = int(height * 0.038) # 根據高度動態計算合適的字體大小 (例如 1080p 下約 41px)
-
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        timestamp = frame_idx / fps
-        
-        # 尋找當前時間點的字幕
-        current_text = ""
-        for start, end, text in subs:
-            if start <= timestamp <= end:
-                current_text = text
-                break
-
-        if current_text:
-            # 轉換影像格式 (BGR to RGB)
-            img_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            draw = ImageDraw.Draw(img_pil)
-            
-            # 載入字體
-            if font_path:
-                font = ImageFont.truetype(font_path, font_size)
-            else:
-                font = ImageFont.load_default()
-
-            lines = current_text.splitlines()
-            
-            # 定位距離底部 12% 高度
-            bottom_margin = int(height * 0.12)
-            y_start = height - bottom_margin - (len(lines) * (font_size + 10))
-
-            for j, line in enumerate(lines):
-                # 測量文字大小
-                bbox = draw.textbbox((0, 0), line, font=font)
-                text_w = bbox[2] - bbox[0]
-                text_h = bbox[3] - bbox[1]
-
-                x = (width - text_w) // 2
-                y = y_start + j * (font_size + 15)
-
-                # 繪製半透明圓角背景底色卡片
-                pad_x = 24
-                pad_y = 10
-                draw.rounded_rectangle(
-                    [x - pad_x, y - pad_y, x + text_w + pad_x, y + text_h + pad_y],
-                    radius=12,
-                    fill=(42, 42, 42, 192) # 75% 不透明度
-                )
-
-                # 繪製暖白文字
-                draw.text((x, y - 2), line, font=font, fill=(253, 251, 247))
-
-            frame = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
-
-        writer.write(frame)
-        frame_idx += 1
-        if frame_idx % 100 == 0:
-            print(f"[INFO] 處理進度: {frame_idx}/{total_frames} 幀...")
-
-    cap.release()
-    writer.release()
-    print("[INFO] 影像渲染完成，開始合併音軌...")
-
-    # 使用 ffmpeg 將原始影片的音軌與剛才處理的無聲影片進行無損合併
-    import subprocess
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", str(tmp_output),
-        "-i", str(in_video),
-        "-map", "0:v",
-        "-map", "1:a",
-        "-c:v", "copy",
-        "-c:a", "copy",
-        str(out_video)
-    ]
-    
-    print(f"[CMD] {' '.join(cmd)}")
-    rc = subprocess.call(cmd)
-    
-    # 刪除暫存無聲影片
-    if tmp_output.exists():
-        try:
-            tmp_output.unlink()
-        except OSError:
-            pass
-
-    if rc == 0:
-        print(f"[OK] 字幕影片製作完成：{out_video}")
-    else:
-        sys.exit(f"[ERR] ffmpeg 合併音軌失敗，退出碼 {rc}")
-
-
-if __name__ == "__main__":
-    main()
-CODEX_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SCRIPTS_BURN_SUBTITLES_PY
-
-```
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

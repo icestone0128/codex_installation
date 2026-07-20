@@ -2,6 +2,9 @@
 set -u
 
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+CLAUDE_HOME="${CLAUDE_HOME:-$HOME/.claude}"
+GEMINI_HOME="${GEMINI_HOME:-$HOME/.gemini}"
+CHEZMOI_SOURCE="${CHEZMOI_SOURCE:-$HOME/.local/share/chezmoi}"
 : "${SYNC_ROOT:?Set SYNC_ROOT to your portable sync root before running this script.}"
 : "${SETUP_REPO:?Set SETUP_REPO to your setup repo before running this script.}"
 LAZYPACK_ROOT="${LAZYPACK_ROOT:-$SETUP_REPO/200_Reference/lazy-pack}"
@@ -51,8 +54,11 @@ check_symlink_target() {
   fi
 }
 
-printf 'Codex sync health check\n'
+printf 'Cross-agent sync health check\n'
 printf 'CODEX_HOME=<set>\n'
+printf 'CLAUDE_HOME=<set>\n'
+printf 'GEMINI_HOME=<set>\n'
+printf 'CHEZMOI_SOURCE=<set>\n'
 printf 'SYNC_ROOT=<set>\n'
 printf 'SETUP_REPO=<set>\n'
 printf 'LAZYPACK_ROOT=<set>\n'
@@ -64,6 +70,26 @@ check_symlink_target "$CODEX_HOME/skills" "$SYNC_ROOT/skills" "Codex skills poin
 check_symlink_target "$CODEX_HOME/memories" "$SYNC_ROOT/memories" "Codex memories points to portable memories"
 check_symlink_target "$CODEX_HOME/rules" "$SYNC_ROOT/rules" "Codex rules points to portable rules"
 check_symlink_target "$CODEX_HOME/automations" "$SYNC_ROOT/automations" "Codex automations points to portable automations"
+check_symlink_target "$CLAUDE_HOME/CLAUDE.md" "$SYNC_ROOT/core-rules.md" "Claude CLAUDE.md points to portable core-rules"
+check_symlink_target "$CLAUDE_HOME/skills" "$SYNC_ROOT/skills" "Claude skills points to portable skills"
+check_symlink_target "$GEMINI_HOME/GEMINI.md" "$SYNC_ROOT/core-rules.md" "AntiGravity GEMINI.md points to portable core-rules"
+check_symlink_target "$GEMINI_HOME/config/skills" "$SYNC_ROOT/skills" "AntiGravity skills points to portable skills"
+
+if command -v chezmoi >/dev/null 2>&1; then
+  pass "chezmoi installed ($(chezmoi --version | awk '{print $3}' | tr -d ','))"
+  if [ -d "$CHEZMOI_SOURCE" ]; then
+    pass "chezmoi source exists"
+  else
+    fail "chezmoi source exists"
+  fi
+  if [ -z "$(chezmoi status 2>/dev/null)" ]; then
+    pass "chezmoi managed entrypoints match templates"
+  else
+    warn "chezmoi reports pending entrypoint changes"
+  fi
+else
+  fail "chezmoi installed (required by LazyPack Item 16)"
+fi
 
 if [ -d "$SYNC_ROOT/skills" ]; then
   skill_count="$(find -L "$SYNC_ROOT/skills" -maxdepth 2 -name SKILL.md -print 2>/dev/null | wc -l | tr -d ' ')"
@@ -99,10 +125,10 @@ else
 fi
 
 if [ -f "$CODEX_HOME/config.toml" ]; then
-  if grep -Eq '(API_KEY|TOKEN|PASSWORD|SECRET)=[^{}[:space:]]+' "$CODEX_HOME/config.toml"; then
-    warn "config.toml appears to contain inline secret-like values; keep it local and do not sync directly"
+  if grep -Eq '(fc-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,}|sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})' "$CODEX_HOME/config.toml"; then
+    warn "config.toml appears to contain a literal token pattern; keep it local and move the credential to the secrets directory"
   else
-    pass "config.toml has no obvious inline secret pattern"
+    pass "config.toml has no obvious literal token pattern (secret-file/env references are allowed)"
   fi
 else
   warn "config.toml not found"

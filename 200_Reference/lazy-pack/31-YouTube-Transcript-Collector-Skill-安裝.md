@@ -1,14 +1,14 @@
 # 31-YouTube-Transcript-Collector-Skill-安裝
 
-> 版本：2026-06-16 Codex App 版
+> 版本：2026-06-16 三 Agent 共用版
 > 用途：安裝 `youtube-transcript-collector` 全域 skill，固定「先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，再逐支抓繁體中文字幕 MD」的工作流程。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/youtube-transcript-collector/`。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/youtube-transcript-collector/`。
 
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-06-15。
 - 來源：本次 Sense Bar YouTube 字幕整理工作流。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/youtube-transcript-collector/SKILL.md`。
+- Codex 全域 skill：`{{SYNC_ROOT}}/skills/youtube-transcript-collector/SKILL.md`。
 - 本機驗證：`fetch_zh_tw_subtitles.py` 語法檢查通過；已用 6 欄 `總表.md` 驗證解析成功。
 - 驗證依賴：若 `quick_validate.py` 缺 `yaml` module，先安裝 `python3 -m pip install --user PyYAML`；本機已驗證 PyYAML 6.0.3 可 import。
 - 2026-06-16 補強：非直播影片若 web client 因 PO-token 或字幕列表缺漏抓不到中文字幕，先改用 `yt-dlp --extractor-args "youtube:player_client=android"` 探測與下載，再判斷是否真的沒有字幕。
@@ -77,39 +77,39 @@ macOS 使用者 site install 常見路徑：
 逐支抓字幕：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --next --cookies
+python3 "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --next --cookies
 ```
 
 指定第 N 支：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 1 --cookies
+python3 "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 1 --cookies
 ```
 
 下載 `zh-Hant` 字幕：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 34 --lang zh-Hant --cookies
+python3 "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 34 --lang zh-Hant --cookies
 ```
 
 PO-token 或 web client 看不到字幕時，改用 android player client：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 34 --lang zh-Hant --player-client android --sleep-after 0
+python3 "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 34 --lang zh-Hant --player-client android --sleep-after 0
 ```
 
 只用既有 VTT 重新產生 MD，不連 YouTube：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 1 --from-existing --sleep-after 0
+python3 "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" --table "<task-folder>/總表.md" --index 1 --from-existing --sleep-after 0
 ```
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/youtube-transcript-collector/SKILL.md" && echo "skill ok"
-test -f "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" && echo "script ok"
-python3 -m py_compile "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py"
+test -f "{{SYNC_ROOT}}/skills/youtube-transcript-collector/SKILL.md" && echo "skill ok"
+test -f "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" && echo "script ok"
+python3 -m py_compile "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py"
 python3 -m pip install --user PyYAML
 python3 -c 'import yaml; print(yaml.__version__)'
 ```
@@ -131,19 +131,18 @@ python3 -c 'import yaml; print(yaml.__version__)'
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`youtube-transcript-collector`。
+本節是自含式安裝區塊。這個序號項目會安裝：`youtube-transcript-collector`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
-```bash
+````bash
 set -e
 
 # ---- youtube-transcript-collector ----
-mkdir -p "{{CODEX_HOME}}/skills/youtube-transcript-collector/agents"
-mkdir -p "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts"
-
+mkdir -p "{{SYNC_ROOT}}/skills/youtube-transcript-collector"
 # youtube-transcript-collector/SKILL.md
-cat > "{{CODEX_HOME}}/skills/youtube-transcript-collector/SKILL.md" <<'CODEX_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/youtube-transcript-collector/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/youtube-transcript-collector/SKILL.md" <<'AGENT_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SKILL_MD_0E95F5A366'
 ---
 name: youtube-transcript-collector
 description: Build YouTube video URL inventory tables and fetch Traditional Chinese subtitle Markdown files with yt-dlp. Use when the user asks to find videos from a YouTube channel or URL set, create a 總表.md / summary table first, identify livestream replays and Chinese subtitle availability, then download or regenerate zh-TW / zh-Hant subtitle Markdown files one video at a time while avoiding YouTube rate limits.
@@ -228,7 +227,7 @@ yt-dlp --flat-playlist --dump-json "https://www.youtube.com/@channel/streams"
 - Merge the `/videos` and `/streams` results by video ID before keyword filtering and table updates.
 - Use playlist URLs as an additional source when the user supplies one.
 - Cross-check with YouTube search or browser inspection when a channel mixes videos, streams, and Shorts.
-- Filter by the user's keywords, such as Claude AI, Claude Code, Codex, AntiGravity, OpenCode, AI Agent.
+- Filter by the user's keywords, such as Codex, AntiGravity, OpenCode, AI Agent.
 - Keep the list stable in `總表.md`; use it as the source of truth for titles and processing order.
 - Keep `字幕 MD` empty until an actual Markdown subtitle file exists.
 - Put status text only in `字幕狀態`, never in `字幕 MD`.
@@ -397,20 +396,22 @@ Before finishing:
 - Livestream rows are marked `直播影片` and have no subtitle MD/raw subtitle residue.
 - `status.json` records successes, failures, subtitle probe results, and livestream findings when available.
 - No parallel subtitle download processes are still running.
-CODEX_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SKILL_MD
+AGENT_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SKILL_MD_0E95F5A366
 
 # youtube-transcript-collector/agents/openai.yaml
-cat > "{{CODEX_HOME}}/skills/youtube-transcript-collector/agents/openai.yaml" <<'CODEX_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_OPENAI_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/youtube-transcript-collector/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/youtube-transcript-collector/agents/openai.yaml" <<'AGENT_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "YouTube Transcript Collector"
   short_description: "先列 YouTube 總表，再逐支抓繁中字幕"
   default_prompt: "Use $youtube-transcript-collector to build a YouTube video summary table first, then fetch Traditional Chinese subtitle Markdown files one by one."
 policy:
   allow_implicit_invocation: true
-CODEX_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_OPENAI_YAML
+AGENT_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_AGENTS_OPENAI_YAML_DEB9755D27
 
 # youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py
-cat > "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" <<'CODEX_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SCRIPT'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py")"
+cat > "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py" <<'AGENT_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SCRIPTS_FETCH_ZH_TW_SUBTITLES_PY_A5E1E6A1D1'
 #!/usr/bin/env python3
 from __future__ import annotations
 
@@ -701,10 +702,12 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-CODEX_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SCRIPT
-chmod +x "{{CODEX_HOME}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py"
+AGENT_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SCRIPTS_FETCH_ZH_TW_SUBTITLES_PY_A5E1E6A1D1
+chmod +x "{{SYNC_ROOT}}/skills/youtube-transcript-collector/scripts/fetch_zh_tw_subtitles.py"
 
-echo "youtube-transcript-collector installed"
-```
+test -f "{{SYNC_ROOT}}/skills/youtube-transcript-collector/SKILL.md" && echo "youtube-transcript-collector installed for Codex, Claude, and AntiGravity"
+````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

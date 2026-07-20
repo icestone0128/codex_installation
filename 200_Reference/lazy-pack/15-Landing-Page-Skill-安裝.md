@@ -3,9 +3,9 @@
 > 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不需要額外的舊版獨立 skills 子目錄。
 
 
-> 版本：2026-06-14 Codex App 版
-> 用途：把 Landing Page 生成與既有文案轉 CMS HTML 流程安裝成 Codex App 全域 Skill，用來產生課程頁、銷售頁、活動報名頁、產品頁、名單收集頁，或把完整既有文案排版成可貼入 CMS 的 HTML。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/landing-page/`，再用自然語句觸發。
+> 版本：2026-06-14 三 Agent 共用版
+> 用途：把 Landing Page 生成與既有文案轉 CMS HTML 流程安裝成 Codex、Claude、AntiGravity 共用全域 Skill，用來產生課程頁、銷售頁、活動報名頁、產品頁、名單收集頁，或把完整既有文案排版成可貼入 CMS 的 HTML。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/landing-page/`，再用自然語句觸發。
 
 ## 來源與授權
 
@@ -16,13 +16,13 @@
 - 原作者：Raymond Hou / 雷蒙
 - 原始授權：CC BY-NC-SA 4.0，個人使用、學習、分享自由，禁止商業用途。
 
-本文件只做 Codex App 相容改寫。若要商業使用，請先確認原始授權與作者授權。
+本文件只做 三 Agent 相容改寫。若要商業使用，請先確認原始授權與作者授權。
 
 ## 這版和原始來源工具文件的差異
 
-| 原始文件 | Codex 版 |
+| 原始文件 | 三 Agent 共用版 |
 |---|---|
-| 安裝到來源工具的全域 skills 路徑 | 安裝到 `{{CODEX_HOME}}/skills/landing-page` |
+| 安裝到來源工具的全域 skills 路徑 | 安裝到 `{{SYNC_ROOT}}/skills/landing-page` |
 | 依賴 slash command 或特定工具選單 | Codex 依 `SKILL.md` metadata 與自然語句觸發 |
 | 可選 UUPM 設計工具 | UUPM 為選用；未安裝時使用 bundled fallback design rules |
 | 可能假設特定本機路徑 | 全部改成 `{{...}}` 佔位符 |
@@ -33,29 +33,29 @@
 下載本懶人包後，讓 Codex 在你的設定專案根目錄執行：
 
 ```bash
-mkdir -p "{{CODEX_HOME}}/skills/landing-page"
+mkdir -p "{{SYNC_ROOT}}/skills/landing-page"
 # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
-test -f "{{CODEX_HOME}}/skills/landing-page/SKILL.md" && echo "landing-page installed"
+test -f "{{SYNC_ROOT}}/skills/landing-page/SKILL.md" && echo "landing-page installed"
 ```
 
-安裝後開新 Codex 對話或重啟 Codex App，讓 skill metadata 重新載入。
+安裝後對 Codex、Claude、AntiGravity 分別重載 skill 清單。
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/landing-page/SKILL.md" && echo "SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/landing-page/references/question-bank.md" && echo "question bank ok"
-test -f "{{CODEX_HOME}}/skills/landing-page/references/cms-html-mode.md" && echo "cms html mode ok"
-test -f "{{CODEX_HOME}}/skills/landing-page/references/fallback-design-rules.md" && echo "fallback design rules ok"
-test -f "{{CODEX_HOME}}/skills/landing-page/templates/base.html" && echo "base template ok"
-test -f "{{CODEX_HOME}}/skills/landing-page/templates/countdown.js" && echo "countdown template ok"
+test -f "{{SYNC_ROOT}}/skills/landing-page/SKILL.md" && echo "SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/landing-page/references/question-bank.md" && echo "question bank ok"
+test -f "{{SYNC_ROOT}}/skills/landing-page/references/cms-html-mode.md" && echo "cms html mode ok"
+test -f "{{SYNC_ROOT}}/skills/landing-page/references/fallback-design-rules.md" && echo "fallback design rules ok"
+test -f "{{SYNC_ROOT}}/skills/landing-page/templates/base.html" && echo "base template ok"
+test -f "{{SYNC_ROOT}}/skills/landing-page/templates/countdown.js" && echo "countdown template ok"
 ```
 
 合理結果是六行都顯示 `ok`。
 
 ## 使用方式
 
-安裝後開新 Codex 對話或重啟 Codex App，然後用下列任一方式觸發：
+安裝後對 Codex、Claude、AntiGravity 分別重載 skill 清單，然後用下列任一方式觸發：
 
 - `$landing-page`
 - 「使用 landing-page skill 幫我做一頁課程銷售頁」
@@ -126,7 +126,7 @@ Landing Page skill 只產生本機 HTML、內容結構與設計方向。不要�
 
 ### 5. 修改全域 skill 後要重啟或開新對話
 
-Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安裝或改名後，開新對話或重啟 Codex App 再測試。
+三 Agent 都不一定會在同一個對話立刻載入新的 skill metadata。安裝或改名後，對三者分別開新對話或重載入口再測試。
 
 ### 6. CMS HTML mode 不等於重新寫銷售文案
 
@@ -134,7 +134,7 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/landing-page/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/landing-page/SKILL.md` 存在。
 - [ ] `SKILL.md` 的 `name` 是 `landing-page`。
 - [ ] `metadata.short-description` 是 `Landing page generator and CMS HTML layout`。
 - [ ] `references/question-bank.md` 存在。
@@ -143,7 +143,7 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 - [ ] `references/uupm-integration.md` 存在，且被視為選用。
 - [ ] `templates/base.html` 存在。
 - [ ] `templates/countdown.js` 存在。
-- [ ] 開新 Codex 對話後，用 `$landing-page`、「landing page」、「銷售頁」、「報名頁」、「活動頁」、「既有文案轉 HTML」或「CMS HTML」可觸發。
+- [ ] Codex、Claude、AntiGravity 重載後，用 `landing-page`、「landing page」、「銷售頁」、「報名頁」、「活動頁」、「既有文案轉 HTML」或「CMS HTML」都可觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
@@ -151,27 +151,19 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 
 本節是自含式安裝區塊。這個序號項目會安裝：`landing-page`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-decode_base64() {
-  if base64 --help 2>/dev/null | grep -q -- '-d'; then
-    base64 -d
-  else
-    base64 -D
-  fi
-}
-
 # ---- landing-page ----
-mkdir -p "{{CODEX_HOME}}/skills/landing-page"
+mkdir -p "{{SYNC_ROOT}}/skills/landing-page"
 # landing-page/README.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/README.md")"
-cat > "{{CODEX_HOME}}/skills/landing-page/README.md" <<'CODEX_LAZYPACK_LANDING_PAGE_README_MD_3DA552F6D4'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/README.md")"
+cat > "{{SYNC_ROOT}}/skills/landing-page/README.md" <<'AGENT_LAZYPACK_LANDING_PAGE_README_MD_B335630551'
 # landing-page
 
-Codex-compatible landing page skill adapted from "引導式 Landing Page 生成 by 雷小蒙 / Raymond Hou" and extended with a CMS-ready layout mode for existing landing page copy.
+Cross-agent landing page skill adapted from "引導式 Landing Page 生成 by 雷小蒙 / Raymond Hou" and extended with a CMS-ready layout mode for existing landing page copy.
 
 ## What It Does
 
@@ -205,7 +197,7 @@ Ask naturally, for example:
 - `把這份 landing page 文案轉成 CMS HTML`
 - `既有文案不要改，幫我排版成 HTML`
 
-Codex skills are triggered by metadata and context. Explicit invocation uses `$landing-page`; do not depend on a slash-command menu or an uninstalled `$landing` alias.
+Codex、Claude、AntiGravity 都以各自可用的 skill metadata、自然語意或明確名稱觸發。`$landing-page` 是支援此語法時的明確呼叫方式；不要依賴單一 Agent 的 slash-command 選單或未安裝的 `$landing` alias。
 
 ## Package Structure
 
@@ -228,22 +220,22 @@ landing-page/
 Copy this folder to the Codex global skills folder:
 
 ```bash
-mkdir -p "{{CODEX_HOME}}/skills/landing-page"
-Use `{{SETUP_REPO}}/200_Reference/lazy-pack/15-Landing-Page-Skill-安裝.md` and run the "內建 Skill 完整安裝內容" block to create `{{CODEX_HOME}}/skills/landing-page/`.
+mkdir -p "{{SYNC_ROOT}}/skills/landing-page"
+Use `{{SETUP_REPO}}/200_Reference/lazy-pack/15-Landing-Page-Skill-安裝.md` and run the "內建 Skill 完整安裝內容" block to create `{{SYNC_ROOT}}/skills/landing-page/`.
 ```
 
-Start a new Codex conversation or restart Codex App if the skill metadata does not refresh immediately.
+若 skill metadata 沒有立即刷新，分別開啟新的 Codex、Claude、AntiGravity session；確認三個原生入口都解析到共享 package 後再判斷安裝失敗。
 
 ## License
 
 Source attribution: 雷蒙三十 Starter Kit / Raymond Hou.
 
 License: CC BY-NC-SA 4.0. Personal use, learning, and sharing are allowed; commercial use is not allowed under this license.
-CODEX_LAZYPACK_LANDING_PAGE_README_MD_3DA552F6D4
+AGENT_LAZYPACK_LANDING_PAGE_README_MD_B335630551
 
 # landing-page/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/landing-page/SKILL.md" <<'CODEX_LAZYPACK_LANDING_PAGE_SKILL_MD_B0E622561D'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/landing-page/SKILL.md" <<'AGENT_LAZYPACK_LANDING_PAGE_SKILL_MD_0E95F5A366'
 ---
 name: landing-page
 description: Use when the user asks to create, rewrite, restyle, or convert a landing page, sales page, course page, event signup page, product launch page, or lead-capture page, including explicit $landing-page invocation. Supports guided generation from a rough offer and CMS HTML layout mode for preserving complete existing copy while converting it into semantic, CMS-ready HTML. Trigger phrases include landing page, landing-page skill, 銷售頁, 報名頁, 課程頁, 活動頁, 產品頁, 既有文案轉 HTML, CMS HTML, and 幫我做 landing page.
@@ -258,7 +250,7 @@ Use this skill in two distinct modes:
 - Guided generation mode: guide the user from a rough offer into a complete landing page.
 - CMS HTML layout mode: preserve an existing landing page copy deck and convert it into semantic, CMS-ready HTML with layout decisions, image placeholders, and style options.
 
-The source workflow was adapted for Codex App, so do not depend on slash-command menus, non-Codex skill folders, or assistant-specific installers.
+The source workflow was adapted into one shared package with native Codex, Claude, and AntiGravity entrypoints, so do not depend on one vendor's slash-command menu or installer.
 
 Explicit invocation uses the installed name `$landing-page`. Do not use an uninstalled `$landing` alias. For restyling, use `$landing-page` with a request to read the existing `answers.json` and restyle the selected slug.
 
@@ -368,7 +360,7 @@ For guided generation mode, first check whether the active project has a design 
 
 If found, summarize the brand colors, typography, and tone, then ask whether to use it. If the user confirms, use it and skip optional design-system discovery.
 
-If no design guide exists, check whether a Codex-compatible UUPM installation is available by looking for a `uipro` command or a Codex skill/package named `ui-ux-pro-max`. If it is unavailable or fails, use `references/fallback-design-rules.md`.
+If no design guide exists, check whether a shared UUPM installation is available by looking for a `uipro` command or a package named `ui-ux-pro-max` through the active Agent's skills entrypoint. If it is unavailable or fails, use `references/fallback-design-rules.md`.
 
 Always present 2 or 3 style directions before writing the page. Each direction should include color, typography, layout mood, section rhythm, and why it fits the offer.
 
@@ -457,11 +449,11 @@ Before final response:
 ## Attribution
 
 Adapted from "引導式 Landing Page 生成 by 雷小蒙 / Raymond Hou" under CC BY-NC-SA 4.0. Preserve attribution and non-commercial license notes when sharing this skill package.
-CODEX_LAZYPACK_LANDING_PAGE_SKILL_MD_B0E622561D
+AGENT_LAZYPACK_LANDING_PAGE_SKILL_MD_0E95F5A366
 
 # landing-page/references/cms-html-mode.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/references/cms-html-mode.md")"
-cat > "{{CODEX_HOME}}/skills/landing-page/references/cms-html-mode.md" <<'CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_CMS_HTML_MODE_MD_03F298EB17'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/references/cms-html-mode.md")"
+cat > "{{SYNC_ROOT}}/skills/landing-page/references/cms-html-mode.md" <<'AGENT_LAZYPACK_LANDING_PAGE_REFERENCES_CMS_HTML_MODE_MD_324B53764B'
 # CMS HTML Layout Mode
 
 Use this mode when the user already has landing page copy and wants it converted into CMS-ready HTML.
@@ -677,11 +669,11 @@ Maintainability:
 - Image placeholders include ID, ratio, and visual role.
 - Class names are semantic in embedded-style mode.
 - The part ends by waiting for "繼續".
-CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_CMS_HTML_MODE_MD_03F298EB17
+AGENT_LAZYPACK_LANDING_PAGE_REFERENCES_CMS_HTML_MODE_MD_324B53764B
 
 # landing-page/references/fallback-design-rules.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/references/fallback-design-rules.md")"
-cat > "{{CODEX_HOME}}/skills/landing-page/references/fallback-design-rules.md" <<'CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_FALLBACK_DESIGN_RULES_MD_46EA510EE0'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/references/fallback-design-rules.md")"
+cat > "{{SYNC_ROOT}}/skills/landing-page/references/fallback-design-rules.md" <<'AGENT_LAZYPACK_LANDING_PAGE_REFERENCES_FALLBACK_DESIGN_RULES_MD_E13A009BBA'
 # Fallback Design Rules — Codex fallback design mode
 
 UUPM 未安裝或失敗時，Codex 直接依使用者答案產生視覺方向。沒有產業資料庫、沒有 anti-pattern 清單，但遵守以下三條鐵律不會難看。
@@ -826,11 +818,11 @@ Grid／多欄：`max-w-5xl`（1024px）
 - [ ] 響應式斷點：375 / 768 / 1024
 
 任何一項不符合，在 Step 5 的輸出訊息裡附 ⚠️ 提醒。
-CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_FALLBACK_DESIGN_RULES_MD_46EA510EE0
+AGENT_LAZYPACK_LANDING_PAGE_REFERENCES_FALLBACK_DESIGN_RULES_MD_E13A009BBA
 
 # landing-page/references/question-bank.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/references/question-bank.md")"
-cat > "{{CODEX_HOME}}/skills/landing-page/references/question-bank.md" <<'CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_QUESTION_BANK_MD_FB40032176'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/references/question-bank.md")"
+cat > "{{SYNC_ROOT}}/skills/landing-page/references/question-bank.md" <<'AGENT_LAZYPACK_LANDING_PAGE_REFERENCES_QUESTION_BANK_MD_8F2EBC0C3A'
 # Question Bank — 引導式問答完整題目
 
 所有問題呈現時遵守這個樣板：
@@ -1149,14 +1141,14 @@ C3. CTA 按鈕上要寫什麼？連去哪裡？
 如果使用者在任何題目回 `幫我生 3 個`，AI 根據前面已答的問題生 3 個候選，讓使用者挑一個或修改。
 
 如果使用者說「我全部貼一次」、「熟練模式」，跳過 guardrails 展示，直接收整段文案後一次分類到對應區塊。
-CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_QUESTION_BANK_MD_FB40032176
+AGENT_LAZYPACK_LANDING_PAGE_REFERENCES_QUESTION_BANK_MD_8F2EBC0C3A
 
 # landing-page/references/uupm-integration.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/references/uupm-integration.md")"
-cat > "{{CODEX_HOME}}/skills/landing-page/references/uupm-integration.md" <<'CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_UUPM_INTEGRATION_MD_B1B74F025D'
-# UUPM Integration — Codex-compatible optional path
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/references/uupm-integration.md")"
+cat > "{{SYNC_ROOT}}/skills/landing-page/references/uupm-integration.md" <<'AGENT_LAZYPACK_LANDING_PAGE_REFERENCES_UUPM_INTEGRATION_MD_8CE0D8B781'
+# UUPM Integration — Cross-Agent Optional Path
 
-This reference adapts the upstream UUPM workflow for Codex App. UUPM is optional; the `landing-page` skill must still work by using `fallback-design-rules.md` when UUPM is unavailable, unwanted, or failing.
+This reference adapts the upstream UUPM workflow for Codex, Claude, and AntiGravity. UUPM is optional; the `landing-page` skill must still work by using `fallback-design-rules.md` when UUPM is unavailable, unwanted, or failing.
 
 Source snapshot checked: `source-tool-mini-course` commit `b2cd801`.
 
@@ -1167,14 +1159,14 @@ After the positioning questions, check only non-destructive signals:
 ```bash
 if command -v uipro >/dev/null 2>&1; then
   echo "UUPM_COMMAND_AVAILABLE"
-elif [ -d "${CODEX_HOME}/skills/ui-ux-pro-max" ]; then
+elif [ -d "$HOME/.codex/skills/ui-ux-pro-max" ]; then
   echo "UUPM_CODEX_SKILL_AVAILABLE"
 else
   echo "UUPM_NOT_AVAILABLE"
 fi
 ```
 
-Do not check or create 來源工具專用 paths such as `來源工具舊 skills 路徑` in normal Codex App use.
+不要建立來源工具的舊 skills 路徑；Codex、Claude、AntiGravity 都透過各自原生入口讀取 `{{SYNC_ROOT}}/skills/landing-page`。
 
 ## 2. When UUPM Is Unavailable
 
@@ -1184,7 +1176,7 @@ Use a concise note, not an installation prompt:
 我目前沒有偵測到可直接使用的 UUPM 設計系統工具。這不影響生成頁面；我會先用內建 fallback 設計規則產生 2-3 個風格方向。之後若你想整合 UUPM，可以另外開一個工具整合任務處理。
 ```
 
-If the user asks to install UUPM, route that as a separate tool-integration task and verify the current Codex-compatible install path before making changes.
+If the user asks to install UUPM, route that as a separate tool-integration task and verify the current shared package path plus the active Agent adapter before making changes.
 
 ## 3. Building A Query
 
@@ -1205,9 +1197,9 @@ productivity notion online course education calm professional
 
 ## 4. Calling An Available UUPM Tool
 
-Prefer a documented `uipro` command if present. If the only available integration is a Codex-compatible `ui-ux-pro-max` skill folder, inspect that skill's current instructions before calling any script.
+Prefer a documented `uipro` command if present. If the only available integration is a shared `ui-ux-pro-max` skill folder, inspect that skill's current instructions and active Agent adapter before calling any script.
 
-The upstream 來源工具導向 flow expects a design-system Markdown output similar to `design-system/MASTER.md`. In Codex, save or copy the chosen design summary into:
+The upstream source-oriented flow expects a design-system Markdown output similar to `design-system/MASTER.md`. In the shared workflow, save or copy the chosen design summary into:
 
 ```text
 generated-pages/<slug>/design-system.md
@@ -1304,11 +1296,11 @@ Use fallback mode when:
 - UUPM output cannot be parsed.
 - Any UUPM script or command fails.
 - Browser or shell verification is unavailable.
-CODEX_LAZYPACK_LANDING_PAGE_REFERENCES_UUPM_INTEGRATION_MD_B1B74F025D
+AGENT_LAZYPACK_LANDING_PAGE_REFERENCES_UUPM_INTEGRATION_MD_8CE0D8B781
 
 # landing-page/templates/base.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/templates/base.html")"
-cat > "{{CODEX_HOME}}/skills/landing-page/templates/base.html" <<'CODEX_LAZYPACK_LANDING_PAGE_TEMPLATES_BASE_HTML_B5C369EB70'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/templates/base.html")"
+cat > "{{SYNC_ROOT}}/skills/landing-page/templates/base.html" <<'AGENT_LAZYPACK_LANDING_PAGE_TEMPLATES_BASE_HTML_690B81FAD8'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1658,11 +1650,11 @@ cat > "{{CODEX_HOME}}/skills/landing-page/templates/base.html" <<'CODEX_LAZYPACK
 
 </body>
 </html>
-CODEX_LAZYPACK_LANDING_PAGE_TEMPLATES_BASE_HTML_B5C369EB70
+AGENT_LAZYPACK_LANDING_PAGE_TEMPLATES_BASE_HTML_690B81FAD8
 
 # landing-page/templates/countdown.js
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/landing-page/templates/countdown.js")"
-cat > "{{CODEX_HOME}}/skills/landing-page/templates/countdown.js" <<'CODEX_LAZYPACK_LANDING_PAGE_TEMPLATES_COUNTDOWN_JS_17F3E66BBC'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/templates/countdown.js")"
+cat > "{{SYNC_ROOT}}/skills/landing-page/templates/countdown.js" <<'AGENT_LAZYPACK_LANDING_PAGE_TEMPLATES_COUNTDOWN_JS_E64F359D7F'
 (function () {
   'use strict';
 
@@ -1747,11 +1739,11 @@ cat > "{{CODEX_HOME}}/skills/landing-page/templates/countdown.js" <<'CODEX_LAZYP
     }, 1000);
   }
 })();
-CODEX_LAZYPACK_LANDING_PAGE_TEMPLATES_COUNTDOWN_JS_17F3E66BBC
+AGENT_LAZYPACK_LANDING_PAGE_TEMPLATES_COUNTDOWN_JS_E64F359D7F
 
-test -f "{{CODEX_HOME}}/skills/landing-page/SKILL.md" && echo "landing-page installed"
-
-echo "embedded skills installed: landing-page"
+test -f "{{SYNC_ROOT}}/skills/landing-page/SKILL.md" && echo "landing-page installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

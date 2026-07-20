@@ -1,29 +1,33 @@
 # 16-Codex-全域-Skills-跨裝置同步
 
-> 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不需要額外的舊版獨立 skills 子目錄。
+> 2026-07-21 更新：chezmoi 維持必要安裝；新增開工／收工共用 checkpoint、受控 `chezmoi update` 與新入口才使用的 `chezmoi add` 規則。請使用文末自含式 Skill 安裝內容。
 
 
-> 版本：2026-05-21 Codex App 版
-> 用途：把 Codex 全域 skills 搬到雲端同步資料夾，並讓 `{{CODEX_HOME}}/skills` 用 symlink 指回雲端實體資料夾。
-> 成品：下載者可直接安裝 `cross-device-sync` skill，並依本文件把全域 skills 同步到 Google Drive / iCloud / Dropbox / OneDrive。
+> 版本：2026-07-21 Cross-Agent Session Checkpoint 版
+> 用途：用「雲端內容主版本 + chezmoi 原生入口」讓 Codex、Claude、AntiGravity 在新電腦或既有電腦共用專案、全域規則與 skills。
+> 成品：下載者可安裝 `cross-device-sync`，再用內建 `bootstrap-agent-sync.sh` 安裝 chezmoi、預覽、備份、建立入口並驗證。
 
 ## 這份文件會做什麼
 
-這份懶人包主要處理 **Codex 全域 skills** 的跨裝置同步，也負責把跨 Agent 全域規則、`core-rules.md`、`AGENTS.md` 入口與其他 AI Agent 設定指南轉成安全可攜的 Codex / AntiGravity 相容模型；不處理專案本地的 `000_Agent/skills`。
+這份懶人包處理 **電腦與 Agent 的全域 bootstrap**。它不取代 Item 10 的專案初始化流程，也不把專案本地 `000_Agent/skills` 混進全域 skills。
 
-它會把：
-
-```text
-{{CODEX_HOME}}/skills
-```
-
-改成 symlink，指向你雲端資料夾裡的：
+共享內容主版本是：
 
 ```text
+{{SYNC_ROOT}}/core-rules.md
 {{SYNC_ROOT}}/skills
+{{SYNC_ROOT}}/memories
 ```
 
-這樣新裝置只要登入同一個雲端帳號，再重建 symlink，就能讀到同一份全域 skills。
+chezmoi 負責在每台電腦建立原生入口：
+
+```text
+Codex:       {{CODEX_HOME}}/AGENTS.md, {{CODEX_HOME}}/skills, {{CODEX_HOME}}/memories
+Claude:      {{CLAUDE_HOME}}/CLAUDE.md, {{CLAUDE_HOME}}/skills
+AntiGravity: {{GEMINI_HOME}}/GEMINI.md, {{GEMINI_HOME}}/config/skills
+```
+
+這樣新裝置先同步 `{{SYNC_ROOT}}`，再跑同一支 bootstrap，就能重建入口。Claude 或 AntiGravity 尚未安裝也可以先建立入口；Agent 本體與登入仍各自安裝、各自登入。
 
 若你也要讓 Codex 與其他 AI agent 共用同一份全域規則，主檔固定放：
 
@@ -31,15 +35,77 @@
 {{SYNC_ROOT}}/core-rules.md
 ```
 
-`{{CODEX_HOME}}/AGENTS.md` (或 AntiGravity 的 `{{GEMINI_CONFIG}}/AGENTS.md`) 只作為全域入口 symlink，指向 `{{SYNC_ROOT}}/core-rules.md`。不要再建立或維護 `{{SYNC_ROOT}}/agents/AGENTS.md`。
+不要再建立或維護 `{{SYNC_ROOT}}/agents/AGENTS.md`。`core-rules.md` 與 `skills/` 都只有一個內容主版本；各 Agent home 只有入口。
 
 路徑邊界：
 
-- `{{CODEX_HOME}}/skills`：Codex 全域 skills (在 AntiGravity 為 `{{GEMINI_CONFIG}}/plugins/codex/skills`)；可 symlink 到 `{{SYNC_ROOT}}/skills`。
+- `{{CODEX_HOME}}/skills`：Codex 全域 skills 入口。
+- `{{CLAUDE_HOME}}/skills`：Claude skills 入口；`{{CLAUDE_HOME}}/CLAUDE.md` 是全域規則入口。
+- `{{GEMINI_HOME}}/config/skills`：AntiGravity 正式 skills 入口；`{{GEMINI_HOME}}/GEMINI.md` 是正式全域規則入口。
+- `{{GEMINI_HOME}}/config/AGENTS.md` 與 `{{GEMINI_HOME}}/config/plugins/codex/skills`：既有環境的相容別名，不是新主路徑。
 - `{{SYNC_ROOT}}/core-rules.md`：可攜式全域核心規則主檔；其他 AI agent 也應讀這一份。
-- `{{CODEX_HOME}}/AGENTS.md`：Codex 全域規則入口 (在 AntiGravity 為 `{{GEMINI_CONFIG}}/AGENTS.md`)；可 symlink 到 `{{SYNC_ROOT}}/core-rules.md`。
+- `{{CHEZMOI_SOURCE}}`：只保存可攜式 symlink templates；機器實際 `syncRoot` 放在 chezmoi local config。
 - `{{SYNC_ROOT}}/memories`、`{{SYNC_ROOT}}/workflows`、`{{SYNC_ROOT}}/knowledge`：個人助手全域資料層；不 symlink 到 `{{CODEX_HOME}}/skills`。
 - `<project-root>/000_Agent/skills`：單一專案本地 skill；不 symlink 到 `{{CODEX_HOME}}/skills`。
+
+## 必裝需求與責任分工
+
+| 項目 | 是否必要 | 負責內容 |
+|---|---:|---|
+| 雲端同步工具 | 必要 | 同步 `{{SYNC_ROOT}}` 的實體內容 |
+| chezmoi | **必要** | 新電腦 bootstrap、入口重建、衝突預覽與修復 |
+| Git | chezmoi source 選配 | 只有使用者要版本備份時才 commit／remote／push |
+| Codex / Claude / AntiGravity 本體 | 按需安裝 | 各自執行與登入；未安裝者仍可先準備入口 |
+| Item 10 | 新專案必要 | `AGENTS.md`、薄 `CLAUDE.md`、`HANDOFF.md` 與開工／收工生命週期 |
+
+chezmoi 不取代 symlink：symlink 是 Agent 每次讀取共享內容的即時入口；chezmoi 是在每台電腦安全、可重跑地建立這些 symlink 的管理器。
+
+## Agent CLI 按需安裝
+
+先建立 Item 16 的共享入口，再逐機安裝 Agent 本體；兩者互不取代。每台新電腦先確認必要 runtime：
+
+```bash
+git --version
+node --version
+npm --version
+```
+
+Gemini CLI 需要 Node.js 20 以上。macOS 已有 Homebrew 與 Node.js 時，2026-07-21 實測的穩定安裝路徑為：
+
+```bash
+# Claude Code：Homebrew stable cask
+brew install --cask claude-code
+
+# Gemini CLI：Google 官方 npm stable package
+npm install -g @google/gemini-cli@latest
+```
+
+Claude Code 官方也提供 macOS、Linux 與 WSL 的原生安裝器；非 Homebrew 環境可依官方當期文件使用：
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+安裝後先做不需模型呼叫的驗證：
+
+```bash
+command -v claude
+claude --version
+claude doctor
+
+command -v gemini
+gemini --version
+gemini --help
+```
+
+登入是另一個本機步驟。執行前先確認要使用的帳號與訂閱／配額；OAuth 會開啟瀏覽器，憑證不可寫入 LazyPack、專案、Obsidian 或 chezmoi source：
+
+```bash
+claude auth login
+gemini
+```
+
+Claude 可用 `claude auth status` 做只讀狀態檢查。Gemini 第一次執行時選擇 Google Login、Gemini API key 或 Vertex AI；個人使用預設採 Google Login。更新時沿用原安裝管道：Homebrew Claude 執行 `brew upgrade --cask claude-code`，npm Gemini 執行 `npm install -g @google/gemini-cli@latest`。
 
 ## 多 Agent 相容性健檢
 
@@ -48,13 +114,12 @@
 健檢重點：
 
 - `{{SYNC_ROOT}}/core-rules.md` 是否仍是唯一全域核心規則主檔。
-- `{{CODEX_HOME}}/AGENTS.md` 是否只是 Codex App 的 symlink 入口。
-- 其他 AI agent 若要接入，是否透過自己的規則入口讀同一份 `core-rules.md`。
+- 三個 Agent 的原生規則入口是否都指向同一份 `core-rules.md`。
 - `{{SYNC_ROOT}}/skills`、`memories`、`workflows`、`knowledge` 是否保持可攜式 Markdown / package 結構。
 - MCP、plugin、hooks、commands、subtask / delegation 設定是否只做格式轉換，不直接共用不相容設定檔。
 - session、logs、auth、cache、token、shell snapshot 是否明確排除。
 
-這個流程預設只輸出健檢報告，不會直接改檔。詳細檢查表已內嵌在 `cross-device-sync/references/multi-agent-compatibility.md`；跨 Agent 全域設定規格放在 `cross-device-sync/references/global-settings-spec.md`。
+bootstrap 預設 dry-run；只有加 `--apply` 才修改入口。詳細檢查表已內嵌在 `cross-device-sync/references/multi-agent-compatibility.md`；跨 Agent 全域設定規格放在 `cross-device-sync/references/global-settings-spec.md`。
 
 ## 不會同步的東西
 
@@ -66,7 +131,7 @@
 - shell snapshots
 - 本機狀態與登入資訊
 
-這些跨裝置同步容易壞，也有隱私風險。本文件只同步 Codex 全域 `skills/`。個人助手全域記憶與 workflow 放在 `{{SYNC_ROOT}}/memories` 與 `{{SYNC_ROOT}}/workflows`，不要和 Codex 全域 skills 混成同一個 symlink。
+這些跨裝置同步容易壞，也有隱私風險。本文件只讓 Agent 入口連到共享內容；登入與執行狀態全部留在本機。
 
 ## 先填變數
 
@@ -75,7 +140,9 @@
 | 變數 | 說明 | 範例 |
 |---|---|---|
 | `{{CODEX_HOME}}` | Codex 設定資料夾 | `{{CODEX_HOME}}` |
-| `{{GEMINI_CONFIG}}` | AntiGravity / Gemini 設定資料夾 | `{{GEMINI_CONFIG}}` |
+| `{{CLAUDE_HOME}}` | Claude 設定資料夾 | `{{HOME}}` 底下的 Claude 設定位置 |
+| `{{GEMINI_HOME}}` | AntiGravity / Gemini 家目錄 | `{{HOME}}` 底下的 Gemini 設定位置 |
+| `{{CHEZMOI_SOURCE}}` | chezmoi source state | `{{HOME}}` 底下的 chezmoi 預設 source 位置 |
 | `{{SETUP_REPO}}` | 這份懶人包所在專案 | `{{SETUP_REPO}}` |
 | `{{SYNC_ROOT}}` | 雲端同步母資料夾 | 你的雲端同步資料夾中的 `codex_symlink` |
 | `{{GLOBAL_RULES}}` | 可攜式全域核心規則主檔 | `{{SYNC_ROOT}}/core-rules.md` |
@@ -102,12 +169,78 @@
 先把本懶人包附的 skill 複製到 Codex 全域 skills。
 
 ```bash
-mkdir -p "{{CODEX_HOME}}/skills/cross-device-sync"
+mkdir -p "{{SYNC_ROOT}}/skills/cross-device-sync"
 # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
-test -f "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" && echo "cross-device-sync installed"
+test -f "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md" && echo "cross-device-sync installed"
 ```
 
-安裝後建議開新 Codex 對話，再用「跨裝置同步」或「cross-device-sync」觸發。
+安裝後先不要手動搬資料夾。使用內建 installer：
+
+```bash
+SCRIPT="{{SYNC_ROOT}}/skills/cross-device-sync/scripts/bootstrap-agent-sync.sh"
+
+# 只預覽；不安裝、不改入口
+bash "$SCRIPT" \
+  --sync-root "{{SYNC_ROOT}}" \
+  --agents codex,claude,antigravity
+
+# 確認預覽與備份位置後，必要時安裝 chezmoi 並套用
+bash "$SCRIPT" \
+  --sync-root "{{SYNC_ROOT}}" \
+  --agents codex,claude,antigravity \
+  --install-chezmoi \
+  --apply
+```
+
+腳本支援 macOS Homebrew、Linux Homebrew／官方 installer、Windows 原生 winget。它會驗證 `{{SYNC_ROOT}}`、備份既有入口、拒絕不明實體檔或錯誤 symlink、初始化 chezmoi、寫入 machine-local `syncRoot`、apply 並逐一驗證。
+
+完成後：
+
+```bash
+chezmoi status
+chezmoi doctor
+```
+
+`chezmoi status` 應為空。`chezmoi doctor` 若只警告 source Git repo 尚未 commit，代表功能可用；是否建立 remote、commit 或 push 仍由使用者決定。
+
+## 開工／收工自動 checkpoint
+
+Item 10 的 `startup-sync` 與 `shutdown-sync` 固定呼叫同一支腳本；Codex、Claude、AntiGravity 都使用相同命令：
+
+```bash
+CHECKPOINT="{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh"
+
+# 開工：檢查入口，並在安全條件齊備時 update
+bash "$CHECKPOINT" --phase startup --sync-root "{{SYNC_ROOT}}" --update
+
+# 收工：檢查入口與 source 狀態，不自動套用遠端變更
+bash "$CHECKPOINT" --phase shutdown --sync-root "{{SYNC_ROOT}}"
+```
+
+checkpoint 固定先執行 bootstrap dry-run 與 `chezmoi status`。開工加 `--update` 時，只有下列條件全部成立才會備份九個 Agent 入口後執行 `chezmoi update`：
+
+- chezmoi source 是 Git repo 且已有至少一個 commit。
+- source worktree 乾淨。
+- source 已設定 remote。
+
+條件不足時是安全 no-op，腳本只回報 `CHEZMOI_UPDATE=skipped:<reason>`，不開 TTY、不覆寫現有入口。
+
+`chezmoi add` 不是日常開工／收工動作。既有九個入口已是含 `{{ .syncRoot }}` 的 templates；直接對它們執行 `chezmoi add --template-symlinks` 會要求移除 template 屬性，headless shell 還會因嘗試開 `/dev/tty` 失敗。只在新增白名單入口時，才先擴充 `bootstrap-agent-sync.sh` 的可攜 template、備份與 dry-run，再用受控 `chezmoi add` 檢視 diff。
+
+## 實際踩坑紀錄（2026-07-20～2026-07-21 驗證）
+
+- Homebrew 第一次執行可能先自動更新，數分鐘沒有明顯輸出；不要因安靜就重複啟動另一個安裝程序。
+- `chezmoi init --promptString` 配對的是 template 顯示給使用者的 prompt 文字，不是 `.chezmoi.toml.tmpl` 裡的 key。配錯時 headless shell 會嘗試開 `/dev/tty`，出現 `device not configured`。
+- installer 內的 `CHEZMOI_SOURCE` 只是腳本變數，不是 chezmoi 原生全域環境變數。直接驗證非預設 source 時要明確傳 `chezmoi --source <path> ...`。
+- 原有正確 symlink 可以保留；chézmoi 管的是「如何重建」，不是強迫把內容搬走。實體檔或指向別處的 symlink 一律先備份與人工判斷。
+- Agent CLI 沒安裝不等於不能建立入口；入口與 Agent 本體安裝應分開處理，登入憑證更不能跟著同步。
+- Gemini 官方首頁雖列出 `brew install gemini-cli`，但 2026-07-21 的 Homebrew formula 已標示為上游不支援並排定停用；新安裝改走 Google 官方部署文件的 `npm install -g @google/gemini-cli@latest`，不要改裝成不同產品的 CLI。
+- 在離線測試 source 對已管理 symlink 重跑 `chezmoi add --template-symlinks` 時，chezmoi 警告會「remove template attribute」；無 TTY 環境隨後失敗為 `could not open a new TTY`。這證實既有 templates 不應在每次收工重新 add。
+- `chezmoi update` 本質上會更新 source 並 apply；因此不應在 source 尚無 commit／remote 或 worktree 不乾淨時自動執行。checkpoint 把這三個條件收成機器可驗證的 gate。
+
+## 舊版手動搬移流程（只供既有安裝遷移參考）
+
+以下 Step 2–6 保留給已經依舊版建立實體 `{{CODEX_HOME}}/skills` 的使用者理解遷移原理。新安裝與新電腦一律使用上面的 chezmoi bootstrap，不要手動拆開執行。
 
 ## Step 2：確認目前 skills 不是 symlink
 
@@ -179,7 +312,7 @@ echo "LINK=$(readlink "$SOURCE")"
 test -L "{{CODEX_HOME}}/skills" && echo "skills is symlink"
 test -d "$(readlink "{{CODEX_HOME}}/skills")" && echo "target exists"
 find "$(readlink "{{CODEX_HOME}}/skills")" -maxdepth 2 -name SKILL.md -not -path "*/.system/*" -print | wc -l
-test -f "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" && echo "cross-device-sync readable"
+test -f "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md" && echo "cross-device-sync readable"
 ```
 
 合理結果：
@@ -222,7 +355,7 @@ ln -s "$TARGET" "$SOURCE"
 test -f "$SOURCE/cross-device-sync/SKILL.md" && echo "skills symlink ready"
 ```
 
-每台電腦的 Codex App 仍需要各自登入，不要同步 `auth.json`。
+每台電腦的 Codex、Claude、AntiGravity 都需要各自安裝與登入；不同步任一 Agent 的 `auth.json`、token、cookie、OAuth session 或 local state。
 
 ## 回復方式
 
@@ -246,10 +379,10 @@ mv "{{CODEX_HOME}}/skills.before-symlink-YYYYMMDD-HHMMSS" "{{CODEX_HOME}}/skills
 
 - 不要同步整個 `{{CODEX_HOME}}`。
 - 不要同步 `auth.json`、token、`.env`、sqlite、logs、sessions、cache。
-- 全域 skill 入口固定是 `{{CODEX_HOME}}/skills`；專案 skill 固定放 `<project-root>/000_Agent/skills`，不建立其他 skill root。
+- 全域 skill 主版本固定是 `{{SYNC_ROOT}}/skills`；Codex、Claude、AntiGravity 只使用 chezmoi 管理的原生入口，專案 skill 固定放 `<project-root>/000_Agent/skills`。
 - 不要把私密 skills、個人記憶或草稿放進 public repo。
 - 先備份，再 symlink。
-- 改完後重開 Codex 新對話或重啟 Codex App。
+- 改完後重開正在使用的 Agent 對話或 App。
 
 ## 驗收紀錄範本
 
@@ -268,13 +401,16 @@ RESULT=<可讀到的自訂 skill 數量與抽測結果>
 
 - [ ] `{{CODEX_HOME}}/skills` 是 symlink。
 - [ ] `readlink "{{CODEX_HOME}}/skills"` 指向 `{{SYNC_ROOT}}/skills`。
+- [ ] `{{CLAUDE_HOME}}/CLAUDE.md` 與 `{{CLAUDE_HOME}}/skills` 指向共享主版本（Claude 未安裝也先準備）。
+- [ ] `{{GEMINI_HOME}}/GEMINI.md` 與 `{{GEMINI_HOME}}/config/skills` 指向共享主版本（AntiGravity 未安裝也先準備）。
+- [ ] `chezmoi status` 為空，`chezmoi doctor` 沒有功能性錯誤。
 - [ ] `{{SYNC_ROOT}}/skills` 內有自訂 skills。
-- [ ] `{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md` 可讀。
+- [ ] `{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md` 可讀。
 - [ ] 本機備份資料夾存在。
 - [ ] 未同步整個 `{{CODEX_HOME}}`。
 - [ ] 未同步任何 token、憑證、`.env`、sqlite、logs、sessions。
-- [ ] 沒有建立 `{{CODEX_HOME}}/skills` 與 `<project-root>/000_Agent/skills` 以外的 skill root。
-- [ ] 開新 Codex 對話後，全域 skills 可觸發。
+- [ ] chezmoi source 只有 templates，沒有 token、auth、session、cache 或私密資料。
+- [ ] 開新 Agent 對話後，所選 Agent 可讀共享規則與 skills。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
@@ -282,40 +418,35 @@ RESULT=<可讀到的自訂 skill 數量與抽測結果>
 
 本節是自含式安裝區塊。這個序號項目會安裝：`cross-device-sync`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-decode_base64() {
-  if base64 --help 2>/dev/null | grep -q -- '-d'; then
-    base64 -d
-  else
-    base64 -D
-  fi
-}
-
 # ---- cross-device-sync ----
-mkdir -p "{{CODEX_HOME}}/skills/cross-device-sync"
+mkdir -p "{{SYNC_ROOT}}/skills/cross-device-sync"
 # cross-device-sync/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_42E4C9A28C'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_0E95F5A366'
 ---
 name: cross-device-sync
-description: Use when the user asks to set up, audit, repair, or document cross-device synchronization and portability for Codex App configuration, global skills, AGENTS.md rules, shared core-rules.md, Arry Assistant data, Obsidian project cockpits, AI assistant memory, cross-agent global settings, voice reply rules, speech input assumptions, or multi-agent compatibility across Macs, Windows/Linux, Google Drive, iCloud, Dropbox, OneDrive, GitHub backups, dotfiles/chezmoi, or other AI agents.
+description: Use when the user asks to install, bootstrap, audit, repair, or document cross-device and cross-agent synchronization for Claude Code, Codex, AntiGravity/Gemini, chezmoi/dotfiles, global skills, AGENTS.md or CLAUDE.md rules, shared core-rules.md, Arry Assistant data, Obsidian cockpits, AI assistant memory, cloud sync, GitHub backups, or a new-computer migration across macOS, Windows, Linux, Google Drive, iCloud, Dropbox, or OneDrive.
 metadata:
-  short-description: Plan and verify Codex cross-device portability
+  short-description: Bootstrap and verify cross-agent portability
 ---
 
 # Cross-Device Sync
 
-Use this skill to help the user make their Codex App setup portable across devices and compatible with other AI agents without binding assistant memory, skills, rules, or global settings to one local machine or one vendor-specific app folder.
+Use this skill to make the user's AI-agent setup portable across devices without binding rules, skills, memory, or bootstrap logic to one machine or one vendor-specific app folder.
 
-This is a Codex App portability workflow. If source material comes from another AI agent ecosystem, do not apply that source literally. In this environment, the default surfaces are:
+The durable assets remain agent-neutral where possible. Each agent uses its own supported adapter entrypoints:
 
-- Codex config and skills: `$CODEX_HOME`, or `{{CODEX_HOME}}` when `$CODEX_HOME` is not set
+- Codex: `$CODEX_HOME/AGENTS.md` and `$CODEX_HOME/skills`, or `~/.codex/...`
+- Claude Code: `$CLAUDE_HOME/CLAUDE.md` and `$CLAUDE_HOME/skills`, or `~/.claude/...`
+- AntiGravity/Gemini: `~/.gemini/GEMINI.md` and `~/.gemini/config/skills`; older `~/.gemini/config/AGENTS.md` and `plugins/codex/skills` may remain as compatibility aliases during migration
+- Chezmoi source state: `~/.local/share/chezmoi` by default; it manages entrypoint templates and symlinks, not the shared content itself
 - Portable global rules: `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`; `$CODEX_HOME/AGENTS.md` may be a symlink entrypoint to that file
-- Custom global skills: `$CODEX_HOME/skills`, or `{{CODEX_HOME}}/skills` when `$CODEX_HOME` is not set
+- Custom global skill source: `SYNC_ROOT/skills`; expose the same package source through Codex, Claude, and AntiGravity native skills entrypoints
 - Project rules: `AGENTS.md`
 - Optional assistant data-layer root: `ASSISTANT_ROOT`
 - Optional assistant global layer: `ASSISTANT_ROOT`, containing `skills/`, `memories/`, `workflows/`, and `knowledge/`
@@ -327,15 +458,62 @@ This user's current defaults are documented in the root `README.md`; treat them 
 
 ## Non-Negotiables
 
-- Do not create, depend on, or repair another tool's app-specific config paths, rule files, command shims, or delegation formats unless the user explicitly asks to migrate from that tool.
+- Arry's default profile always manages Codex, Claude, and AntiGravity entrypoints, including future-ready entrypoints when an app is not installed yet. Keep each agent's native config format separate and do not copy tool-specific commands, hooks, MCP config, or delegation formats literally.
 - Do not move, symlink, delete, or overwrite the user's existing Codex config, skills, memories, or Obsidian notes without first showing the concrete plan and getting explicit confirmation.
 - Always make a timestamped backup before any operation that moves files, rewrites symlinks, changes Git remotes, or edits shared assistant memory.
 - Never sync secrets, OAuth tokens, API keys, local credentials, app caches, shell snapshots, or machine-specific state across devices.
-- Treat `{{CODEX_HOME}}/auth.json`, `{{CODEX_HOME}}/sessions/`, `{{CODEX_HOME}}/log/`, SQLite state, caches, and local override config as machine-local; never sync or commit them.
+- Treat `~/.codex/auth.json`, `~/.codex/sessions/`, `~/.codex/log/`, SQLite state, caches, and local override config as machine-local; never sync or commit them.
 - Treat public repos as public. Do not put private backups, credentials, private memory, drafts, or personal logs into tracked project files.
 - Prefer the user's established project folder and knowledge cockpit pattern unless they choose another sync route.
-- For other AI agents, share durable Markdown assets such as `core-rules.md`, documented workflows, and portable skill packages; do not symlink incompatible app config files together.
+- Share durable Markdown assets such as `core-rules.md`, documented workflows, and portable skill packages across all three agents; do not symlink incompatible app config files together.
 - Convert external agent global-setting guides into this portability model instead of creating a separate global-settings skill.
+
+## Chezmoi And Symlink Roles
+
+- Cloud storage or Git synchronizes durable content. A symlink exposes that content at an agent's live path.
+- Chezmoi installs, recreates, templates, audits, and repairs those live entrypoints on each device. It does not replace the cloud sync provider.
+- Keep `SYNC_ROOT` machine-specific in the local chezmoi config. Store only `{{ .syncRoot }}` templates in the source state so account-specific cloud paths do not enter a portable dotfiles repo.
+- A local chezmoi source repo may remain uncommitted while testing. `chezmoi doctor` will report a dirty working-tree warning until the user explicitly chooses a private remote and authorizes commit/push.
+- Use `scripts/bootstrap-agent-sync.sh` for deterministic audit/apply behavior on macOS, Linux, or WSL. Windows native users should install chezmoi with WinGet and run the equivalent documented commands; symlinks may require Developer Mode or an elevated shell.
+
+## Startup And Shutdown Checkpoint
+
+Use `scripts/session-sync-checkpoint.sh` from all three Agents so the user does not need to restate the chezmoi policy for every task.
+
+Startup command:
+
+```bash
+"{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh" \
+  --phase startup \
+  --sync-root "{{SYNC_ROOT}}" \
+  --update
+```
+
+Shutdown command:
+
+```bash
+"{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh" \
+  --phase shutdown \
+  --sync-root "{{SYNC_ROOT}}"
+```
+
+Policy:
+
+- Both phases run the bootstrap dry-run and `chezmoi status`.
+- Startup may run `chezmoi update` automatically only when the source has at least one commit, a configured remote, and a clean working tree. The script backs up all managed Agent entrypoints first. Otherwise update is a safe no-op and reports the reason once.
+- Shutdown does not pull or apply remote changes.
+- Do not run `chezmoi add` on the nine existing managed symlinks. An isolated test confirmed that chezmoi warns this would remove the template attribute; in a headless Agent it also attempts `/dev/tty`. That would replace the portable `.syncRoot` template with machine-specific state.
+- `chezmoi add` is only for a genuinely new approved entrypoint. Extend the bootstrap whitelist and create its `{{ .syncRoot }}` template first, back up the destination, then inspect the source diff and rerun the checkpoint. Changes inside `{{SYNC_ROOT}}` do not need `chezmoi add` because cloud/Git sync owns that content.
+- Project session state is separate from machine bootstrap: `startup-sync` always reads project-root `HANDOFF.md`; `shutdown-sync` always creates or refreshes it.
+
+### Agent execution notes
+
+- Shared steps: all three Agents call the same checkpoint script and use the same handoff fields and safety gates.
+- Codex adapter: run through the available terminal; Codex sandbox must allow the narrow chezmoi config/source and managed entrypoint paths.
+- Claude adapter: run the same script through Claude's terminal environment; when no local terminal is available, use the project's normal shell and return the checkpoint output to Claude.
+- AntiGravity adapter: run the same script through the local shell; verify the Gemini entrypoints listed by the bootstrap dry-run.
+- Fallback: run `bootstrap-agent-sync.sh --dry-run`, `chezmoi status`, and the guarded Git-source checks manually without changing the policy.
+- Verification: the nine entrypoints still resolve to `SYNC_ROOT`, `chezmoi status` is clean or its differences are reported, and `HANDOFF.md` matches live project state.
 
 ## LazyPack Public Packaging Policy
 
@@ -347,7 +525,10 @@ Public packaging rules:
 2. Use placeholders in public Markdown, embedded shell/Python scripts, templates, README tables, and Obsidian mirrors. Common placeholders include:
    - `{{HOME}}`
    - `{{CODEX_HOME}}`
+   - `{{CLAUDE_HOME}}`
+   - `{{GEMINI_HOME}}`
    - `{{GEMINI_CONFIG}}`
+   - `{{CHEZMOI_SOURCE}}`
    - `{{SYNC_ROOT}}`
    - `{{GLOBAL_RULES}}`
    - `{{SETUP_REPO}}`
@@ -378,38 +559,42 @@ Private project notes may record verification results, but public LazyPack conte
    - Secondbrain `AGENTS.md` if Obsidian notes are involved
    - `arry-assistant` skill if Arry Assistant data is involved
 2. Inventory current state before proposing changes:
-   - `$CODEX_HOME/config.toml` or `{{CODEX_HOME}}/config.toml`
+   - `$CODEX_HOME/config.toml` or `~/.codex/config.toml`
    - `$CODEX_HOME/AGENTS.md` and its symlink target; if portability is intended, the target should be `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`
-   - `$CODEX_HOME/skills` or `{{CODEX_HOME}}/skills`
-   - `$CODEX_HOME/memories` or `{{CODEX_HOME}}/memories` if memory portability is in scope
+   - `$CODEX_HOME/skills` or `~/.codex/skills`
+   - `$CODEX_HOME/memories` or `~/.codex/memories` if memory portability is in scope
    - project `AGENTS.md` files that should travel with each project
    - relevant Obsidian cockpit notes
-3. Interview briefly in Traditional Chinese:
+3. Confirm the machine and sync context briefly in Traditional Chinese; do not ask Arry to choose among the three required agents:
    - device mix: one computer, multiple Macs, Mac plus Windows, Windows/Linux first, or custom
    - preferred sync channel: Google Drive, iCloud, Dropbox, OneDrive, GitHub only, or let Codex recommend
    - backup/versioning preference: private GitHub repo, public repo with strict ignores, local backup only, or decide later
    - health-check frequency: manual, weekly, or scheduled
 4. Recommend a route and wait for explicit approval before state changes.
 5. After approval, implement in small reversible steps:
+   - run `scripts/bootstrap-agent-sync.sh --sync-root <path> --dry-run`
+   - install chezmoi only when missing and explicitly approved; prefer the official package-manager route
    - create timestamped backups
-   - create the chosen mother folder
-   - copy or move only approved portable assets
-   - create symlinks only when they reduce duplication and are safe on the selected platform
+   - initialize or reuse the approved chezmoi source state without adding a remote, commit, or push automatically
+   - keep `SYNC_ROOT` in machine-local chezmoi config data and agent adapters in portable templates
+   - apply the Codex, Claude, and AntiGravity rule/skill entrypoint symlinks; create future-ready parent folders even when a corresponding app is not installed yet
    - create `.gitignore` before any Git add
    - create a health-check script if useful
    - create or update a migration note
 6. Verify:
    - paths exist
+   - `chezmoi status` is empty after apply
+   - `chezmoi doctor` has no functional failures; an uncommitted source warning is acceptable until private versioning is approved
    - symlink targets exist if symlinks were used
    - ignored files are actually ignored
    - no secrets or machine-local state are staged
    - Codex skill frontmatter still validates if skills were moved or created
-   - `$CODEX_HOME/skills` or `{{CODEX_HOME}}/skills` remains the only global skill entry path, and project-local skills remain under `<project-root>/000_Agent/skills`
+   - Codex, Claude, and AntiGravity use their native global skill entrypoints; `SYNC_ROOT/skills` remains the shared package source, and project-local skills remain under the project's documented path
 7. Report exact paths changed for private local work. For public LazyPack or portable packaging work, report placeholder names and verification results without expanding the author's real local paths.
 
 ## Multi-Agent Compatibility Audit
 
-Use this route when the user asks whether their setup can be used by other AI agents, whether another agent should read the same memory/rules, or whether a non-Codex guide should be merged into this portability workflow.
+Use this route when the user asks whether the three agents can use the same setup, whether another runtime should read the same memory/rules, or whether a single-agent guide should be merged into this portability workflow.
 
 Default behavior:
 
@@ -432,22 +617,22 @@ Default behavior:
 2. Keep each agent's live config entrypoint separate; do not symlink incompatible config formats together.
 3. Convert app-specific rules into portable Markdown policy, references, or LazyPack content.
 4. Keep secrets, OAuth, sessions, cookies, local state DBs, and full private config contents out of repos and public notes.
-5. Put deterministic per-agent installers in their own focused skill or LazyPack item only when they perform a real installation task.
+5. Keep the deterministic chezmoi/bootstrap installer in this skill and LazyPack Item 16; project lifecycle behavior remains in Item 10.
 
 Read `references/global-settings-spec.md` for the converted policy, path map, voice reply boundary, and speech-input assumption boundary.
 
-## Codex Portability Map
+## Three-Agent Portability Map
 
-Use this mapping when converting non-Codex assistant instructions:
+Use this mapping when converting a single-agent source guide:
 
-| Source guide concept | Codex App version |
+| Source guide concept | Shared package and native adapters |
 |---|---|
-| `來源工具的舊 skills 路徑` | `$CODEX_HOME/skills` or `{{CODEX_HOME}}/skills` |
-| Source-specific global or project rule file | `AGENTS.md` for project rules, plus `core-rules.md` for portable global rules |
-| Global agent rules shared across tools | `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`, with `$CODEX_HOME/AGENTS.md` as a symlink entrypoint when supported |
-| Source-specific command shortcuts | Codex skill metadata and normal user prompts |
-| Source-specific delegation format | Codex validation passes or supported delegation tools only when explicitly requested |
-| Source-specific memory folder | `$CODEX_HOME/memories` plus optional personal assistant durable data when relevant |
+| Source-specific global skills path | `SYNC_ROOT/skills`, exposed through `$CODEX_HOME/skills`, `$CLAUDE_HOME/skills`, and `$GEMINI_CONFIG/skills` |
+| Source-specific global or project rule file | `AGENTS.md` for canonical project rules, `core-rules.md` for portable global rules, and thin native adapters such as Claude's `CLAUDE.md` |
+| Global agent rules shared across tools | `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`, with native symlink entrypoints for all three agents |
+| Source-specific command shortcuts | Agent Skills metadata, natural-language triggers, and a documented native invocation for each agent when syntax differs |
+| Source-specific delegation format | Shared task boundaries plus the active agent's supported delegation or validation mechanism |
+| Source-specific memory folder | `SYNC_ROOT/memories` as durable source; any native memory hook is an adapter and must not fork the data |
 | `000_Agent` from source kit | Project-local assistant layer only; this user's global assistant layer is `ASSISTANT_ROOT` with `memories/`, `workflows/`, `knowledge/`, and `skills/` |
 | Source-specific credentials/local state | Do not sync; each device logs in independently |
 
@@ -463,7 +648,7 @@ Use this mapping when converting non-Codex assistant instructions:
 
 Usually portable:
 
-- custom global skills under `$CODEX_HOME/skills` or `{{CODEX_HOME}}/skills`, excluding `.system`
+- custom global skill packages under `SYNC_ROOT/skills`, excluding agent-managed system/bundled packages
 - portable global operating rules in `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`, so other AI agents can read the same rule file
 - reusable project rules and templates
 - personal assistant durable references and reusable memory under `ASSISTANT_ROOT/memories` and `ASSISTANT_ROOT/workflows`, when the user explicitly wants that layer synced
@@ -484,25 +669,123 @@ When more detail is needed:
 - Read `references/codex-playbook.md` before executing a real cross-device setup, audit, repair, GitHub backup, health-check script, or migration-manual task. It contains the full Codex-converted Section A-G workflow, routes, templates, checks, pitfalls, and FAQ.
 - Read `references/multi-agent-compatibility.md` before checking whether Codex settings, global rules, skills, memory, MCP, prompts, hooks, or project rules can be used by other AI agents.
 - Read `references/global-settings-spec.md` before converting a cross-agent global settings guide, voice reply rule, speech-input assumption, or dotfiles/chezmoi AI config policy into this setup.
-- Read `references/source-adaptation.md` when you need to understand how external assistant setup material was converted into Codex App-safe behavior.
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_42E4C9A28C
+- Read `references/source-adaptation.md` when you need to understand how external assistant setup material was converted into shared packages and native adapters.
+- Read `references/agent-execution-compatibility.md` before adding or reviewing an Agent-specific connector, plugin, MCP, image tool, sandbox, model, or script branch.
+- Run `python3 scripts/audit-agent-compatibility.py --root <path> [...]` to catch exclusionary or single-agent-default wording before syncing LazyPack and Obsidian mirrors.
+- Run `scripts/bootstrap-agent-sync.sh --help` before a real first-install/bootstrap execution. Always audit with `--dry-run` before `--apply`.
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_0E95F5A366
 
 # cross-device-sync/agents/openai.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/agents/openai.yaml" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML_24E59C1216'
-display_name: Cross-Device Sync
-short_description: Plan portable Codex setup, global rules, and multi-agent compatibility.
-default_prompt: Help me plan a safe Codex App cross-device sync or cross-agent global settings setup.
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML_24E59C1216
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/agents/openai.yaml" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML_DEB9755D27'
+display_name: Cross-Device & Agent Sync
+short_description: Bootstrap Claude, Codex, and AntiGravity portability.
+default_prompt: Use $cross-device-sync to audit or bootstrap a safe chezmoi-managed cross-device and cross-agent setup.
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML_DEB9755D27
+
+# cross-device-sync/references/agent-execution-compatibility.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/references/agent-execution-compatibility.md")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/references/agent-execution-compatibility.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_AGENT_EXECUTION_COMPATIBILITY_MD_961557E704'
+# Codex / Claude / AntiGravity Execution Compatibility
+
+Use this contract whenever a shared skill or project workflow depends on an Agent-specific tool, config format, permission model, model route, or UI.
+
+## Shared Contract
+
+The three agents must share:
+
+- one task goal and scope;
+- one source package under `{{SYNC_ROOT}}/skills` or the project `000_Agent/skills`;
+- one input and output contract;
+- one safety and approval boundary;
+- one project state source: `AGENTS.md`, `HANDOFF.md`, project files, and the Obsidian cockpit when used;
+- one verification standard.
+
+Only the execution adapter may vary. A missing native feature is a routing decision, not a reason to drop that agent.
+
+## Required Note Format
+
+Whenever an execution step differs, record it in the same skill, script help, README, or project workflow:
+
+```markdown
+### Agent execution notes
+
+- Shared steps: inputs, outputs, safety gates, and verification common to all three.
+- Codex adapter: native tool/config/permission/restart details.
+- Claude adapter: native tool/config/permission/restart details.
+- AntiGravity adapter: native tool/config/permission/restart details.
+- Fallback: shared CLI/script, approved API, or browser/manual route.
+- Verification: the same observable result for every adapter.
+```
+
+Do not create three independent workflows. Keep the common logic together and limit each adapter note to the real runtime difference.
+
+## Route Matrix
+
+| Capability | Shared first choice | Codex adapter | Claude adapter | AntiGravity adapter |
+| --- | --- | --- | --- | --- |
+| Rules | `core-rules.md` and project `AGENTS.md` | `AGENTS.md` native entry | thin `CLAUDE.md` import or global symlink | `GEMINI.md` native entry |
+| Skills | `{{SYNC_ROOT}}/skills` | `{{CODEX_HOME}}/skills` symlink | `{{CLAUDE_HOME}}/skills` symlink | `{{GEMINI_CONFIG}}/skills` symlink |
+| Deterministic work | project/shared script | run through available terminal | run through available terminal | run through available terminal |
+| MCP or connector | same service intent and permission scope | Codex-native config/tool surface | Claude-native config/tool surface verified at execution time | AntiGravity-native config/tool surface verified at execution time |
+| Image generation | same visual brief and acceptance criteria | native image tool when available | native image tool when available; otherwise approved shared route | native image tool when available; otherwise approved shared route |
+| Browser/UI | same read/write authorization boundary | available browser/computer tool or shared browser script | available browser/computer tool or shared browser script | available browser/computer tool or shared browser script |
+| Model selection | same task and output contract | current Codex primary model | current Claude native default | current AntiGravity primary model |
+
+Agent capabilities and config syntax can change. Check the active tool list, local `--help`, repository instructions, or current official documentation before writing a config-specific command. Record the verified native command without changing the shared workflow.
+
+## Script Branching
+
+For a script whose behavior really differs by runtime, prefer:
+
+```text
+--agent auto|codex|claude|antigravity
+```
+
+Rules:
+
+1. `auto` may inspect explicit environment markers or installed commands, but must print the selected adapter.
+2. Explicit selection must override detection.
+3. Every adapter must accept the same core inputs and produce the same output shape.
+4. Put credentials in the local secret store or native auth layer, never in arguments, logs, LazyPack, or shared Markdown.
+5. Tests must cover `--help`, invalid agent values, `auto`, and at least one dry-run for every adapter.
+
+If there is no behavioral difference, do not add an artificial branch; run the same shared script from all three agents.
+
+## Skill Package Notes
+
+- `SKILL.md`, `references/`, `scripts/`, and `assets/` are the shared package.
+- `agents/openai.yaml` is a Codex UI adapter only. Its presence must not change the package's Claude or AntiGravity behavior.
+- Vendor-specific frontmatter or command metadata belongs in a native adapter file only when supported. Keep shared trigger intent and procedure in `SKILL.md`.
+- Public installers write the package to `{{SYNC_ROOT}}/skills`; Item 16 and chezmoi expose it at all three native entrypoints.
+
+## Verification Gate
+
+Before declaring a workflow compatible:
+
+1. Run the shared package validator and every added script test.
+2. Confirm the three native entrypoints resolve to the same skill source.
+3. Run the exclusion-word audit:
+
+```bash
+python3 "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-compatibility.py" \
+  --root "{{SYNC_ROOT}}/core-rules.md" \
+  --root "{{SYNC_ROOT}}/skills" \
+  --root "{{SETUP_REPO}}/200_Reference/lazy-pack"
+```
+
+4. For each native adapter actually used, perform one low-risk read-only or dry-run check.
+5. Confirm all adapters lead to the same expected output or state.
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_AGENT_EXECUTION_COMPATIBILITY_MD_961557E704
 
 # cross-device-sync/references/codex-playbook.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/codex-playbook.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/codex-playbook.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_CODEX_PLAYBOOK_MD_514C6287CE'
-# Codex Cross-Device Sync Playbook
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/references/codex-playbook.md")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/references/codex-playbook.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_CODEX_PLAYBOOK_MD_4F30E54D07'
+# Cross-Device And Cross-Agent Sync Playbook
 
-This is the Codex App-compatible execution version of an external cross-device assistant setup guide.
+This is the executable Codex, Claude, and AntiGravity adaptation of an external cross-device assistant setup guide.
 
-The original source targeted a different assistant app. This playbook keeps the useful operating coverage, but replaces app-specific assumptions with Codex App, Arry Assistant, Google Drive, Obsidian, and `AGENTS.md` conventions.
+The original source targeted one assistant app. This playbook keeps the useful portability model while separating shared assets from Codex, Claude, and AntiGravity native entrypoints. Chezmoi owns reproducible bootstrap; the cloud sync root owns content.
 
 ## Purpose
 
@@ -511,7 +794,7 @@ Help the user make their AI assistant setup portable:
 - keep reusable rules, skills, memory, workflow docs, and migration notes owned by the user
 - avoid hiding important assets only inside one local app folder
 - separate portable assets from credentials, cache, app state, and device-specific files
-- support a new computer, a second computer, or future migration to another AI tool
+- support a new computer, a second computer, and active use from Codex, Claude, or AntiGravity
 
 ## What The User Should Get
 
@@ -520,23 +803,28 @@ After an approved execution, the user should have some or all of:
 - a sync route selected for their device mix
 - a timestamped backup before risky file movement
 - a visible mother folder for portable assistant assets
-- optional symlinks from local app paths to the mother folder, only when approved and technically appropriate
+- required chezmoi-managed native entrypoint symlinks for each selected agent, after preview and conflict checks
 - optional private GitHub backup with a `.gitignore`
 - optional `sync-health.sh` or equivalent health check
 - a migration note explaining how to restore on a new device or adapt to a future AI tool
 - a final verification report with exact changed paths
 
-## Codex Surfaces
+## Shared And Native Surfaces
 
 Default portable Codex surfaces:
 
 | Purpose | Path or rule |
 |---|---|
-| Codex home | `{{CODEX_HOME}}` |
-| Portable global rules | `{{SYNC_ROOT}}/core-rules.md`; `{{CODEX_HOME}}/AGENTS.md` may symlink to it |
-| Custom global skills | `{{CODEX_HOME}}/skills` symlinked to `{{SYNC_ROOT}}/skills` |
+| Portable global rules | `{{SYNC_ROOT}}/core-rules.md` |
+| Shared custom skills | `{{SYNC_ROOT}}/skills` |
+| Codex entrypoints | `{{CODEX_HOME}}/AGENTS.md`, `{{CODEX_HOME}}/skills`, `{{CODEX_HOME}}/memories` |
+| Claude entrypoints | `{{CLAUDE_HOME}}/CLAUDE.md`, `{{CLAUDE_HOME}}/skills` |
+| AntiGravity entrypoints | `{{GEMINI_HOME}}/GEMINI.md`, `{{GEMINI_HOME}}/config/skills` |
+| AntiGravity compatibility aliases | `{{GEMINI_HOME}}/config/AGENTS.md`, `{{GEMINI_HOME}}/config/plugins/codex/skills` |
+| Chezmoi source | `{{CHEZMOI_SOURCE}}`; templates only, secrets excluded |
 | System skills | `{{CODEX_HOME}}/skills/.system` |
-| Project rules | `AGENTS.md` |
+| Project rules | canonical `AGENTS.md`; Claude adapter is a thin `CLAUDE.md` containing `@AGENTS.md` |
+| Cross-agent session state | required project `HANDOFF.md`; startup reads it and shutdown creates or refreshes it |
 | Main project | `{{SETUP_REPO}}` |
 | Arry Assistant global data-layer root | `{{SYNC_ROOT}}` |
 | Arry Assistant memory/workflow layer | `{{SYNC_ROOT}}/memories`, `{{SYNC_ROOT}}/workflows` |
@@ -548,7 +836,7 @@ Default portable Codex surfaces:
 ## Absolute Safety Rules
 
 1. Do not perform real sync setup during skill installation.
-2. Do not move, delete, symlink, or overwrite `{{CODEX_HOME}}`, `AGENTS.md`, Obsidian notes, Arry Assistant data, or Git history without explicit user approval after showing a concrete plan.
+2. Do not move, delete, symlink, or overwrite agent entrypoints, `AGENTS.md`, Obsidian notes, Arry Assistant data, or Git history without explicit user approval after showing a concrete plan.
 3. Make a timestamped backup before moving files, replacing files with symlinks, changing remotes, or editing shared memory.
 4. Do not sync secrets or machine state:
    - `.env`, API keys, tokens, passwords
@@ -559,6 +847,7 @@ Default portable Codex surfaces:
 5. Treat `codex_installation` as a public repo. Do not place private backups, credentials, private memory, drafts, or personal logs in tracked project paths.
 6. Do not edit system skills under `{{CODEX_HOME}}/skills/.system`.
 7. If Obsidian notes are involved, read the vault `AGENTS.md` and update additively.
+8. Chezmoi is required for bootstrap and repair, but it must not own the cloud content tree, credentials, sessions, caches, MCP auth, or project repositories.
 
 ## Section A: Preflight And Interview
 
@@ -727,7 +1016,7 @@ Safer default:
 Riskier route:
 
 - move selected custom skills into the mother folder
-- symlink them back into `{{CODEX_HOME}}/skills/<skill-name>`
+- symlink them back into `{{SYNC_ROOT}}/skills/<skill-name>`
 
 Before symlinking, verify:
 
@@ -851,7 +1140,7 @@ If using GitHub CLI or connector, prefer private repositories for assistant memo
 
 ## Section E: Health Check Script
 
-Generate a health check only after the target architecture is known. A Codex version should check Codex assets, not another assistant app's assets.
+Generate a health check only after the target architecture is known. The check must cover the shared source and all three native entrypoints.
 
 Suggested `sync-health.sh` shape:
 
@@ -859,11 +1148,14 @@ Suggested `sync-health.sh` shape:
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Codex sync health check"
+echo "Codex / Claude / AntiGravity sync health check"
 FAIL=0
 
 : "${CODEX_HOME:?Set CODEX_HOME before running this check.}"
-SKILLS_DIR="$CODEX_HOME/skills"
+: "${CLAUDE_HOME:?Set CLAUDE_HOME before running this check.}"
+: "${GEMINI_CONFIG:?Set GEMINI_CONFIG before running this check.}"
+: "${SYNC_ROOT:?Set SYNC_ROOT before running this check.}"
+SKILLS_DIR="$SYNC_ROOT/skills"
 MOTHER="${1:-}"
 
 check_exists() {
@@ -878,7 +1170,12 @@ check_exists() {
 }
 
 check_exists "Codex home" "$CODEX_HOME"
-check_exists "Codex skills" "$SKILLS_DIR"
+check_exists "Claude home" "$CLAUDE_HOME"
+check_exists "AntiGravity config" "$GEMINI_CONFIG"
+check_exists "Shared skills" "$SKILLS_DIR"
+check_exists "Codex skills entry" "$CODEX_HOME/skills"
+check_exists "Claude skills entry" "$CLAUDE_HOME/skills"
+check_exists "AntiGravity skills entry" "$GEMINI_CONFIG/skills"
 
 if [ -n "$MOTHER" ]; then
   check_exists "Mother folder" "$MOTHER"
@@ -938,13 +1235,14 @@ Suggested sections:
 
 ## New Computer
 
-1. Install Codex App and sign in normally.
+1. Install the desired agents and sign in normally; agent installation and assistant-content bootstrap are separate steps.
 2. Sync or clone the mother folder.
-3. Restore or install approved custom skills.
-4. Recreate any approved symlinks.
-5. Log in separately for services that use OAuth or local credentials.
-6. Confirm `000_Agent/`, `100_Todo/`, and `200_Reference/` boundaries are still intact.
-7. Run the health check.
+3. Install chezmoi using the platform-native package manager.
+4. Run the bundled Item 16 bootstrap in dry-run mode, then apply it to recreate Codex, Claude, and AntiGravity native entrypoints.
+5. Restore or install any tool-specific integrations that cannot share the Markdown skill package directly.
+6. Log in separately for services that use OAuth or local credentials.
+7. Confirm `000_Agent/`, `100_Todo/`, and `200_Reference/` boundaries are still intact.
+8. Run `chezmoi status`, `chezmoi doctor`, and the health check.
 
 ## Future AI Tool
 
@@ -979,7 +1277,7 @@ Before reporting done, verify:
 
 ## Section H: Multi-Agent Compatibility Audit
 
-Use this section when the user does not want to use another specific vendor's app, but wants Codex assets to remain readable by future or parallel AI agents.
+Use this section when the user wants the same assistant assets available from Codex, Claude, and AntiGravity, or wants to add another agent later.
 
 This is an audit-first flow. Do not change files until the user approves the report.
 
@@ -989,13 +1287,15 @@ Check these surfaces:
 |---|---|
 | Global rules | `{{SYNC_ROOT}}/core-rules.md` remains the source of truth |
 | Codex global rules entrypoint | `{{CODEX_HOME}}/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md` |
-| Other AI agent rules | use that agent's supported entrypoint to read or reference `core-rules.md` |
-| Global skills | keep Codex-compatible packages under `{{SYNC_ROOT}}/skills` |
+| Claude global rules entrypoint | `{{CLAUDE_HOME}}/CLAUDE.md` points to `{{SYNC_ROOT}}/core-rules.md` |
+| AntiGravity global rules entrypoint | `{{GEMINI_HOME}}/GEMINI.md` points to `{{SYNC_ROOT}}/core-rules.md` |
+| Global skills | keep portable packages under `{{SYNC_ROOT}}/skills`; link each supported native skills entrypoint |
 | Project skills | keep project-only packages under each project's `000_Agent/skills` |
 | MCP/tools | convert by intent into the target app's config format; never share incompatible config files directly |
 | Memory | store durable preferences and decisions in Markdown under `{{SYNC_ROOT}}/memories` |
 | Sessions/logs/auth/cache | keep local; do not sync |
-| Project state | use project `AGENTS.md` plus Obsidian cockpit notes |
+| Project state | use canonical project `AGENTS.md`, required `HANDOFF.md`, and Obsidian cockpit notes |
+| Bootstrap state | keep chezmoi templates in `{{CHEZMOI_SOURCE}}`; keep machine-specific `syncRoot` in the local chezmoi config |
 
 Report each item as one of:
 
@@ -1015,6 +1315,10 @@ For the full checklist and report template, read `references/multi-agent-compati
 - Private and public GitHub backups need different privacy defaults.
 - Health checks should not be cron by default; scheduled checks are local machine configuration and should be opt-in.
 - Sync `core-rules.md`, skills, and memory; do not sync app state/cache/credentials.
+- Chezmoi's `--promptString` matches the visible prompt text, not the template key; a headless mismatch tries `/dev/tty` and fails.
+- `CHEZMOI_SOURCE` in the bundled installer is a script option variable, not a native chezmoi environment variable; direct CLI verification must pass `--source` when using a non-default source.
+- Homebrew may spend several minutes auto-updating before the first `brew install chezmoi` prints useful progress.
+- Never replace an unexpected physical file or a symlink to a different target automatically; back it up and resolve the conflict first.
 - A migration manual is part of portability because future setup context is otherwise lost.
 
 ## FAQ Converted To Codex
@@ -1053,15 +1357,94 @@ Yes. Use separate repos or a strict `.gitignore`. Public repos should exclude pe
 
 ## Attribution Note
 
-The source file credits Raymond Hou / 雷蒙 and is licensed CC BY-NC-SA 4.0 for personal use. Keep attribution in derived notes when quoting or redistributing source-derived material. This Codex skill is an operational adaptation for the user's local Codex App workflow.
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_CODEX_PLAYBOOK_MD_514C6287CE
+The source file credits Raymond Hou / 雷蒙 and is licensed CC BY-NC-SA 4.0 for personal use. Keep attribution in derived notes when quoting or redistributing source-derived material. This file is the Codex-specific adapter playbook inside a three-Agent shared skill; Claude and AntiGravity use the companion compatibility references and the same portability contract.
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_CODEX_PLAYBOOK_MD_4F30E54D07
+
+# cross-device-sync/references/global-settings-spec.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/references/global-settings-spec.md")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/references/global-settings-spec.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_GLOBAL_SETTINGS_SPEC_MD_8CD5E9DFC7'
+# Cross-Agent Global Settings Spec
+
+This reference adapts AI agent global-setting guides into the `cross-device-sync` portability model. Treat source guides for Claude Code, OpenCode, Gemini/AntiGravity, or other agents as source context, not Codex paths to copy literally.
+
+## Agent Surfaces
+
+| Agent | User-level rule/config location | Notes |
+| --- | --- | --- |
+| Codex App / Codex CLI | `{{CODEX_HOME}}/AGENTS.md`, `{{CODEX_HOME}}/skills`, `{{CODEX_CONFIG}}` | `AGENTS.md` may be a symlink to a portable global rules file. MCP config uses Codex TOML, not Claude/OpenCode JSON. |
+| Claude Code | `{{CLAUDE_HOME}}/CLAUDE.md`, `{{CLAUDE_HOME}}/skills/`, `{{CLAUDE_HOME}}/rules/` | `CLAUDE.md` can be a symlink to the shared core rules. A project `CLAUDE.md` should import `AGENTS.md` with `@AGENTS.md` when both agents share the project. |
+| OpenCode | `{{HOME}}/.config/opencode/opencode.json`, `instructions/` | JSON must remain valid; do not print full config if it may contain secrets. |
+| AntiGravity / Gemini | `{{GEMINI_HOME}}/GEMINI.md`, `{{GEMINI_CONFIG}}/skills/`, `{{GEMINI_CONFIG}}/mcp_config.json` | Current global rule and skills entrypoints are `GEMINI.md` and `config/skills`. Older `config/AGENTS.md` and `config/plugins/codex/skills` may remain as temporary compatibility aliases. |
+
+## Placement Rules
+
+- Cross-agent durable policy belongs in `{{SYNC_ROOT}}/core-rules.md` or another approved shared Markdown policy file.
+- Portable global skill packages belong in `{{SYNC_ROOT}}/skills/<skill-name>`; each agent exposes compatible packages through its native global skills entrypoint.
+- Project rules belong in project `AGENTS.md`, not in global skills.
+- Per-agent live config files are adapters. Keep their format separate and generate or update them only after user approval.
+- Do not create a standalone global-settings skill when the content is actually portability, compatibility, or global-rule placement policy; merge it into `cross-device-sync`.
+- Create a separate focused skill only when there is a real repeatable operation, deterministic script, or domain workflow that should trigger independently.
+
+## Voice Reply Rules
+
+- Trigger voice reply only when explicitly requested: "用語音回答", "唸出來", "唸給我聽", "用語音講結論".
+- Spoken script should be 100-250 Chinese characters when possible.
+- Prefer conclusion and next action; keep details in text.
+- Default Traditional Chinese voice: `zh-TW-YunJheNeural`.
+- Other common Traditional Chinese Edge-TTS voices: `zh-TW-HsiaoChenNeural`, `zh-TW-HsiaoYuNeural`.
+- Edge-TTS is a cloud TTS service. Do not use it for sensitive text unless the user accepts that boundary.
+- Do not substitute voice cloning. Authorized voice cloning belongs to a dedicated skill such as VoxCPM2.
+
+## Startup / Shutdown Sync
+
+The shared skill root provides `startup-sync` and `shutdown-sync` for Codex, Claude, and AntiGravity. When adapting source rules:
+
+- `開工` means read project rules and required `HANDOFF.md`, run the guarded chezmoi startup checkpoint, then inspect cockpit, Git/GitHub/hosting state and avoid unasked project writes.
+- `收工` means create or update required `HANDOFF.md`, run the chezmoi shutdown checkpoint, summarize changes, sync allowed mirrors, update cockpit, check Git state, and ask before commit/push unless explicitly requested.
+- Item 10 owns project initialization/startup/shutdown behavior. Item 16 owns machine bootstrap, agent adapters, chezmoi, and cross-device repair.
+- `chezmoi add` is not a routine shutdown action. Use it only for a newly approved bootstrap whitelist entry after adding a portable `.syncRoot` template, backing up, and reviewing the source diff.
+
+## Chezmoi / Dotfiles
+
+- Chezmoi is the required bootstrap and adapter manager for the cross-device profile. Cloud storage or Git still synchronizes the durable content; symlinks remain the live entrypoint mechanism.
+- Keep machine-specific `syncRoot` data in the local chezmoi config. The source state stores templates such as `{{ .syncRoot }}/core-rules.md`, not one user's cloud account path.
+- Manage Codex, Claude, and AntiGravity entrypoints separately. Never symlink their incompatible MCP, auth, session, cache, or full settings files together.
+- Always run a dry-run/diff, create a timestamped backup, and stop on physical-file or mismatched-symlink conflicts before apply.
+- Never add secrets, session files, OAuth tokens, cookies, or local state DBs to dotfiles.
+- Do not add a dotfiles remote, commit, or push unless the user explicitly asks. A dirty-source warning from `chezmoi doctor` is expected before the source is intentionally versioned.
+
+### Required install routes
+
+| Platform | Preferred chezmoi installation |
+| --- | --- |
+| macOS with Homebrew | `brew install chezmoi` |
+| Windows native | `winget install twpayne.chezmoi` |
+| Linux / WSL | Distribution package manager when current enough; otherwise the official installer into `{{HOME}}/.local/bin` |
+
+Use `cross-device-sync/scripts/bootstrap-agent-sync.sh` on macOS, Linux, or WSL. Its default is dry-run; writes require `--apply`, and automatic chezmoi installation additionally requires `--install-chezmoi`.
+
+### Verified pitfalls
+
+- Homebrew may auto-update before downloading chezmoi, so a quiet period is not automatically a failure. Wait for the final bottle/install result before switching routes.
+- `--promptString` matches the visible prompt text, not the stored data key. For the bundled template, headless initialization must pass `--promptString "Portable AI assistant sync root=<path>"`; using `syncRoot=<path>` tries to open `/dev/tty` and fails in a headless Agent shell.
+- `CHEZMOI_SOURCE` is a LazyPack/script environment variable, not a native chezmoi global flag. Direct CLI verification of an alternate source must use `chezmoi --source <path> ...`.
+- Existing physical files or symlinks pointing elsewhere are conflicts. Back them up and resolve them intentionally; do not force-apply over them.
+
+## Speech Input Assumptions
+
+Speech-to-text mistakes should be handled by the dedicated `voice-input-normalization` skill. The shared principle is:
+
+- infer obvious low-risk corrections from context
+- confirm before acting on ambiguous names, paths, commands, numbers, dates, money, destructive actions, or authorization
+- do not silently rewrite critical details into guessed values
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_GLOBAL_SETTINGS_SPEC_MD_8CD5E9DFC7
 
 # cross-device-sync/references/multi-agent-compatibility.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/multi-agent-compatibility.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/multi-agent-compatibility.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_MULTI_AGENT_COMPATIBILITY_MD_36192E36DD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/references/multi-agent-compatibility.md")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/references/multi-agent-compatibility.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_MULTI_AGENT_COMPATIBILITY_MD_8767475F57'
 # Multi-Agent Compatibility Audit
 
-Use this checklist when the user wants Codex, future AI agents, or another local agent runtime to share the same durable assistant setup.
+Use this checklist to keep Codex, Claude, and AntiGravity on the same durable assistant setup.
 
 The goal is not to make every app read the same config folder. The goal is to keep the user's rules, skills, workflows, memory, and migration notes in portable Markdown/packages, then expose each AI agent to those assets through that agent's own supported entrypoints.
 
@@ -1104,13 +1487,15 @@ Expected:
 - `{{CODEX_HOME}}/AGENTS.md` points to `{{SYNC_ROOT}}/core-rules.md`.
 - There is no separate legacy global rules file competing with `core-rules.md`.
 
-AntiGravity supported entrypoints:
+Supported entrypoints:
 
-- AntiGravity uses `{{GEMINI_CONFIG}}/AGENTS.md` as its global rules entrypoint.
-- AntiGravity uses `{{GEMINI_CONFIG}}/plugins/codex/skills` as its global skills entrypoint.
-- Both entrypoints should point to the same durable `{{SYNC_ROOT}}/core-rules.md` and `{{SYNC_ROOT}}/skills` assets when AntiGravity compatibility is part of the user's setup.
+- Codex uses `{{CODEX_HOME}}/AGENTS.md` and `{{CODEX_HOME}}/skills`.
+- Claude Code uses `{{CLAUDE_HOME}}/CLAUDE.md` and `{{CLAUDE_HOME}}/skills`.
+- AntiGravity uses `{{GEMINI_HOME}}/GEMINI.md` and `{{GEMINI_CONFIG}}/skills`.
+- Older AntiGravity `{{GEMINI_CONFIG}}/AGENTS.md` and `{{GEMINI_CONFIG}}/plugins/codex/skills` may remain as compatibility aliases during a verified migration.
+- All three entrypoints point to the same durable `{{SYNC_ROOT}}/core-rules.md` and `{{SYNC_ROOT}}/skills` through their native paths.
 
-For another AI agent, add that agent's own supported rules entrypoint and point or copy it to the same `core-rules.md` only if the agent supports that safely.
+If a fourth agent is added later, give it a thin native adapter to the same durable assets after validating its supported formats.
 
 ### 2. Classify Skills And Workflows
 
@@ -1125,13 +1510,13 @@ Classification:
 
 | Asset | Default decision |
 |---|---|
-| Codex-compatible `SKILL.md` package | Portable, keep under `SYNC_ROOT/skills` |
+| Agent Skills-compatible `SKILL.md` package | Portable source, keep under `SYNC_ROOT/skills`; document the three native execution adapters whenever tools or invocation differ |
 | Project-only skill | Keep in project `000_Agent/skills` |
 | Draft workflow | Keep in `SYNC_ROOT/workflows` until promoted |
 | Runtime plugin cache | Local-only, do not sync |
 | Agent marketplace install metadata | Local-only or reinstall per app |
 
-Do not symlink project `000_Agent/skills` into global Codex skills.
+Do not symlink project `000_Agent/skills` into the shared global skills source.
 
 ### 3. Check MCP And External Tools
 
@@ -1143,15 +1528,16 @@ Audit:
 test -f "{{CODEX_CONFIG}}" && sed -n '1,220p' "{{CODEX_CONFIG}}"
 ```
 
-Classify each integration:
+Classify each integration with three adapter columns:
 
-- connector/plugin available in Codex App
-- local CLI route
-- API route with secret stored outside repo
-- MCP server route requiring config conversion
-- browser/manual route
+- Codex connector／plugin or Codex TOML MCP route
+- Claude connector／plugin, `.mcp.json`, or Claude native config route
+- AntiGravity／Gemini connector, MCP config, or native tool route
+- shared local CLI route
+- approved API route with secret stored outside repo
+- browser/manual fallback
 
-Rule: convert settings by intent. Do not symlink one agent's config file into another agent's config location.
+Rule: convert settings by intent. Do not symlink one agent's config file into another agent's config location. Every required integration must document all three adapters or an explicit shared fallback.
 
 ### 4. Check Memory And Durable Preferences
 
@@ -1188,7 +1574,28 @@ For each active project:
 - `AGENTS.md` points to stable project rules, not daily progress
 - cockpit carries progress, next actions, and sync notes
 
-For other AI agents, prefer reading the same project `AGENTS.md` if supported. If the agent expects another file name, generate a thin adapter that points back to `AGENTS.md` or `core-rules.md`, rather than forking the rules.
+Keep the same project `AGENTS.md` as canonical. Claude receives a thin `CLAUDE.md` import; AntiGravity uses the same project contract through its native rule discovery. Do not fork the rules.
+
+Claude Code does not read `AGENTS.md` directly. For a shared project, use a thin project `CLAUDE.md` containing `@AGENTS.md`, then append only genuinely Claude-specific instructions.
+
+### 5.1 Check Chezmoi Ownership
+
+When chezmoi is part of the selected profile, verify:
+
+```bash
+chezmoi source-path
+chezmoi diff
+chezmoi status
+chezmoi doctor
+```
+
+Expected:
+
+- `diff` and `status` are empty after apply.
+- rule and skill entrypoints are managed symlinks pointing to the selected `SYNC_ROOT`.
+- the source state contains templates, not a public copy of one user's cloud account path.
+- no auth, session, MCP credential, cookie, cache, or local database is managed.
+- a dirty working-tree warning is acceptable until the user chooses and authorizes private dotfiles versioning.
 
 ### 6. Check Commands, Hooks, And Agent Delegation
 
@@ -1245,83 +1652,23 @@ Use this format:
 3. 哪些步驟要等使用者確認：
 ```
 
-Do not edit files during the audit unless the user explicitly approves the proposed plan.
+For an audit-only request, do not edit files. For an implementation request, apply the approved compatibility contract and then rerun the deterministic audit.
 
 ## Fit With LazyPack Item 16
 
-This audit belongs inside LazyPack Item 16 because it is a portability and synchronization health check. It should not become a standalone global skill unless it grows into a broader migration system with its own scripts, templates, and repeated execution path.
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_MULTI_AGENT_COMPATIBILITY_MD_36192E36DD
-
-# cross-device-sync/references/global-settings-spec.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/global-settings-spec.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/global-settings-spec.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_GLOBAL_SETTINGS_SPEC_MD_9AF3C0C75F'
-# Cross-Agent Global Settings Spec
-
-This reference adapts AI agent global-setting guides into the `cross-device-sync` portability model. Treat source guides for Claude Code, OpenCode, Gemini/AntiGravity, or other agents as source context, not Codex paths to copy literally.
-
-## Agent Surfaces
-
-| Agent | User-level rule/config location | Notes |
-| --- | --- | --- |
-| Codex App / Codex CLI | `{{CODEX_HOME}}/AGENTS.md`, `{{CODEX_HOME}}/skills`, `{{CODEX_CONFIG}}` | `AGENTS.md` may be a symlink to a portable global rules file. MCP config uses Codex TOML, not Claude/OpenCode JSON. |
-| Claude Code | `{{HOME}}/.claude/CLAUDE.md`, `{{HOME}}/.claude/rules/` | Claude settings and rules are not Codex skills. Use only when the user asks to manage Claude. |
-| OpenCode | `{{HOME}}/.config/opencode/opencode.json`, `instructions/` | JSON must remain valid; do not print full config if it may contain secrets. |
-| AntiGravity / Gemini | `{{HOME}}/.gemini/GEMINI.md`, `{{HOME}}/.gemini/config/mcp_config.json` | Do not mix global prompt/context files with MCP config or credentials. |
-
-## Placement Rules
-
-- Cross-agent durable policy belongs in `{{SYNC_ROOT}}/core-rules.md` or another approved shared Markdown policy file.
-- Codex global skill behavior belongs in `{{CODEX_HOME}}/skills/<skill-name>`.
-- Project rules belong in project `AGENTS.md`, not in global skills.
-- Per-agent live config files are adapters. Keep their format separate and generate or update them only after user approval.
-- Do not create a standalone global-settings skill when the content is actually portability, compatibility, or global-rule placement policy; merge it into `cross-device-sync`.
-- Create a separate focused skill only when there is a real repeatable operation, deterministic script, or domain workflow that should trigger independently.
-
-## Voice Reply Rules
-
-- Trigger voice reply only when explicitly requested: "用語音回答", "唸出來", "唸給我聽", "用語音講結論".
-- Spoken script should be 100-250 Chinese characters when possible.
-- Prefer conclusion and next action; keep details in text.
-- Default Traditional Chinese voice: `zh-TW-YunJheNeural`.
-- Other common Traditional Chinese Edge-TTS voices: `zh-TW-HsiaoChenNeural`, `zh-TW-HsiaoYuNeural`.
-- Edge-TTS is a cloud TTS service. Do not use it for sensitive text unless the user accepts that boundary.
-- Do not substitute voice cloning. Authorized voice cloning belongs to a dedicated skill such as VoxCPM2.
-
-## Startup / Shutdown Sync
-
-Codex already has `startup-sync` and `shutdown-sync`. When adapting source rules:
-
-- `開工` means read project rules, cockpit, Git/GitHub/hosting state, and avoid unasked writes.
-- `收工` means summarize changes, sync allowed mirrors, update cockpit, check Git state, and ask before commit/push unless explicitly requested.
-- Do not import Claude-specific chezmoi automation as a Codex default.
-
-## Chezmoi / Dotfiles
-
-- Chezmoi can manage Claude or dotfiles, but it is not the Codex global skill sync mechanism.
-- If a target config is managed by chezmoi, update both the generated target and its chezmoi source/template only after user approval.
-- Never add secrets, session files, OAuth tokens, cookies, or local state DBs to dotfiles.
-- Do not commit or push dotfiles unless the user explicitly asks.
-
-## Speech Input Assumptions
-
-Speech-to-text mistakes should be handled by the dedicated `voice-input-normalization` skill. The shared principle is:
-
-- infer obvious low-risk corrections from context
-- confirm before acting on ambiguous names, paths, commands, numbers, dates, money, destructive actions, or authorization
-- do not silently rewrite critical details into guessed values
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_GLOBAL_SETTINGS_SPEC_MD_9AF3C0C75F
-
+This audit and the deterministic chezmoi bootstrap belong inside LazyPack Item 16 because they manage machine portability and agent adapters. Project creation, `HANDOFF.md`, startup, and shutdown remain in Item 10.
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_MULTI_AGENT_COMPATIBILITY_MD_8767475F57
 
 # cross-device-sync/references/source-adaptation.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md")"
-cat > "{{CODEX_HOME}}/skills/cross-device-sync/references/source-adaptation.md" <<'CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD_F46F63E917'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/references/source-adaptation.md")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/references/source-adaptation.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40'
 # Source Adaptation: Cross-Device Assistant Setup
 
 Source type: external assistant portability guide
 
 The source document described moving an assistant app configuration into a portable user-owned folder, backing it up, linking it back into the app, adding optional GitHub backup, generating a health-check script, and writing a migration manual.
 
-This Codex version keeps the useful operating model but changes the target surfaces and safety rules.
+The current version keeps the useful operating model but exposes durable assets through native Claude Code, Codex, and AntiGravity adapters. Chezmoi manages device bootstrap and adapter reconstruction; it does not replace cloud content synchronization.
 
 ## Preserved Ideas
 
@@ -1334,24 +1681,25 @@ This Codex version keeps the useful operating model but changes the target surfa
 
 ## Converted Assumptions
 
-| Original source-guide idea | Codex-compatible conversion |
+| Original source-guide idea | Shared package and three native adapters |
 |---|---|
-| Source app config root is the main config root | `{{CODEX_HOME}}` is the Codex root |
-| `來源工具的舊 skills 路徑` stores skills | `{{CODEX_HOME}}/skills` stores global Codex skills |
+| Source app config root is the main config root | `{{SYNC_ROOT}}` stores durable shared assets; each Agent keeps its own config root |
+| Source-specific skills path stores skills | `{{SYNC_ROOT}}/skills` stores shared global packages and all three native entrypoints point to it |
 | Source app rule file is the rule file | `AGENTS.md` is the project rule file; cross-tool global rules belong in `{{SYNC_ROOT}}/core-rules.md` |
-| Source app command shortcuts are user-facing entry points | Codex skills trigger by metadata and user intent |
-| Source app delegation format is part of the workflow | Codex validation passes or supported delegation tools are used only when explicitly requested or clearly useful |
+| Source app command shortcuts are user-facing entry points | Shared metadata and user intent define triggers; native invocation is an adapter |
+| Source app delegation format is part of the workflow | Shared task boundaries remain stable; each Agent uses its supported delegation or validation mechanism |
 | `000_Agent/` is created by pro-kit 01 | This user's global Arry Assistant data lives under `codex_symlink/`; project-local data may use each project's `000_Agent/` |
 | Source examples refer to Raymond/Raymond-Agent | Use Arry Assistant and the user's configured `{{SYNC_ROOT}}` / `{{OBSIDIAN_VAULT}}` placeholders |
+| One app folder is the shared source | Keep `{{SYNC_ROOT}}` as the shared content source and use per-agent entrypoint adapters managed by chezmoi |
 
-## Codex-Specific Safety Changes
+## Shared Safety And Adapter Changes
 
-- The skill must not automatically move or symlink `{{CODEX_HOME}}` assets during installation.
-- Any future sync setup must be plan-first and approval-gated because it can affect all Codex sessions.
+- Installing the skill alone must not move or symlink live agent assets. The bundled bootstrap defaults to dry-run and requires explicit `--apply`.
+- Any future sync setup must be plan-first and approval-gated because it can affect all three Agent environments.
 - The default sync approach for this user should align with Google Drive project folders and Obsidian project cockpits.
 - The existing Arry Assistant architecture uses Google Drive `codex_symlink/` as the global layer for `skills/`, `memories/`, `workflows/`, and `knowledge/`; project-local data may still use each project's `000_Agent/`.
 - `{{GITHUB_USER}}/{{SETUP_REPO_NAME}}` is public, so private backups and personal memory must not be staged or tracked there.
-- System skills under `{{CODEX_HOME}}/skills/.system` are Codex-managed and should not be edited or moved manually.
+- System or bundled skills managed by any Agent remain local adapters and should not be edited or moved into the shared source manually.
 - Global skill changes must update the Obsidian mirror note at `專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`.
 
 ## Interview Questions
@@ -1387,7 +1735,7 @@ For private backups:
 **/.credentials.json
 **/token*
 
-# Codex local or machine state
+# Agent-local or machine state
 .codex/tmp/
 .codex/cache/
 .codex/sessions/
@@ -1421,7 +1769,7 @@ Adjust these blocks to the actual folder layout before writing them.
 
 ## Health Check Shape
 
-A Codex health check should verify:
+A cross-agent health check should verify:
 
 - selected mother folder exists
 - approved portable files exist
@@ -1433,11 +1781,11 @@ A Codex health check should verify:
 
 The check should not print secrets, token contents, or private memory contents.
 
-This user's fixed skill paths are `{{CODEX_HOME}}/skills` for global skills and `<project-root>/000_Agent/skills` for project-local skills. Do not add alternate global or project discovery roots while adapting newer source guides.
+`{{SYNC_ROOT}}/skills` remains the package source of truth. Codex, Claude, and AntiGravity may expose it through their documented global skill entrypoints; those entrypoints are adapters, not additional sources of truth. Project-local skills remain in the project's documented local skill folder.
 
 ## Completeness Update
 
-The first installed version summarized the source at a high level. The complete Codex conversion now lives in `codex-playbook.md` and covers:
+The first installed version summarized the source at a high level. The complete portability conversion now lives in `codex-playbook.md` and covers:
 
 - Section A preflight and four-question interview
 - Section B mandatory backup
@@ -1447,11 +1795,11 @@ The first installed version summarized the source at a high level. The complete 
 - Section F migration manual template
 - Section G completion checklist
 - Section H multi-agent compatibility audit, adapted from a later cross-tool health-check guide
-- pitfalls and FAQ converted from the source app to Codex App
+- pitfalls and FAQ converted from the source app into shared guidance plus Codex, Claude, and AntiGravity adapters
 
 ## 2026-06-01 Multi-Agent Compatibility Addition
 
-The later source was reviewed as a portability health-check pattern. The user does not plan to use that source app, so the useful parts were converted into a generic multi-agent audit instead of a new standalone skill.
+The later source was reviewed as a portability health-check pattern. Its concepts were converted into a generic multi-agent audit instead of copying one runtime's paths and hooks literally.
 
 Preserved ideas:
 
@@ -1461,18 +1809,642 @@ Preserved ideas:
 - convert settings formats instead of symlinking incompatible app config files
 - output risks and suggested next steps before execution
 
-Codex App-compatible conversion:
+Three-agent compatibility conversion:
 
 - source-specific names are not used as operating surfaces
 - `{{SYNC_ROOT}}/core-rules.md` is the cross-agent global rules source of truth
-- `{{CODEX_HOME}}/AGENTS.md` remains Codex's symlink entrypoint
+- Codex, Claude, and AntiGravity keep native symlink entrypoints
 - `{{SYNC_ROOT}}/skills`, `memories`, `workflows`, and `knowledge` remain the portable assistant data layer
-- other AI agents should read or adapt those durable assets through their own supported entrypoints
-CODEX_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD_F46F63E917
+- all three Agents read those durable assets through their own supported entrypoints
 
-test -f "{{CODEX_HOME}}/skills/cross-device-sync/SKILL.md" && echo "cross-device-sync installed"
+## 2026-07-20 Chezmoi And Three-Agent Bootstrap
 
-echo "embedded skills installed: cross-device-sync"
+The architecture was expanded after the user clarified that Claude Code remains a future target and that LazyPack must retain first-install capability even when a tool is not installed on the current computer.
+
+Kept and strengthened:
+
+- chezmoi as the required new-device bootstrap and adapter manager
+- symlinks as the final live connection to shared content
+- one shared `core-rules.md` and one shared skill-package source
+- per-agent native entrypoints for Claude Code, Codex, and AntiGravity
+- first-time detection, installation guidance, timestamped backup, dry-run, apply, and verification
+
+Integrated from `mathruffian-dot/cross-device-agent-skills` at the architectural level:
+
+- a small project `HANDOFF.md` for the latest cross-agent session state
+- startup reads the handoff before proposing work
+- shutdown refreshes the handoff but still requires explicit Git commit/push intent
+- project `AGENTS.md` remains canonical; Claude receives a thin `CLAUDE.md` adapter instead of a forked rule set
+
+Do not copy the upstream lowercase paths, `git add .`, Claude-only home assumptions, or commit/push behavior literally.
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40
+
+# cross-device-sync/scripts/audit-agent-compatibility.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-compatibility.py")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-compatibility.py" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_AUDIT_AGENT_COMPATIBILITY_PY_5BE365A65B'
+#!/usr/bin/env python3
+"""Find wording that turns a shared workflow back into a single-agent default."""
+
+from __future__ import annotations
+
+import argparse
+from dataclasses import dataclass
+from pathlib import Path
+import re
+import sys
+
+
+TEXT_SUFFIXES = {".md", ".py", ".sh", ".toml", ".yaml", ".yml", ".json", ".txt"}
+SKIP_PARTS = {".git", ".system", "node_modules", "__pycache__", ".venv", "venv"}
+
+
+@dataclass(frozen=True)
+class Rule:
+    label: str
+    pattern: re.Pattern[str]
+
+
+RULES = (
+    Rule("single-agent label", re.compile(r"codex" + r"[- /]?only|only\s+" + r"codex", re.I)),
+    Rule("single-agent Chinese default", re.compile(r"只(使用|安裝|支援)[^\n]{0,20}" + r"Codex", re.I)),
+    Rule("single-agent edition", re.compile(r"Codex\s*App\s*" + r"版", re.I)),
+    Rule("single-agent compatibility", re.compile(r"Codex(?:\s*App)?[- ]?" + r"compatible", re.I)),
+    Rule("single-agent conversion", re.compile(r"轉成\s*" + r"Codex(?:\s*App)?", re.I)),
+    Rule("agent removal wording", re.compile(r"(清除|移除|排除)[^\n]{0,40}" + r"Claude", re.I)),
+    Rule("agent exclusion wording", re.compile(r"排除[^\n]{0,40}(Agent|代理)|non[- ]" + r"Codex\s+(agent|routing|skill|path)", re.I)),
+    Rule("single-agent profile choice", re.compile(r"Codex only[^\n]{0,80}(Claude only|AntiGravity only)", re.I)),
+)
+
+
+def iter_files(root: Path):
+    if root.is_file():
+        yield root
+        return
+    if not root.is_dir():
+        return
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or path.suffix.lower() not in TEXT_SUFFIXES:
+            continue
+        if any(part in SKIP_PARTS for part in path.parts):
+            continue
+        yield path
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Audit shared rules, skills, LazyPack, and notes for single-agent-default wording."
+    )
+    parser.add_argument("--root", action="append", required=True, help="File or directory to scan; repeatable.")
+    args = parser.parse_args()
+
+    findings: list[tuple[Path, int, str]] = []
+    scanned: set[Path] = set()
+    self_path = Path(__file__).resolve()
+
+    for raw_root in args.root:
+        root = Path(raw_root).expanduser().resolve()
+        if not root.exists():
+            print(f"ERROR missing root: {root}", file=sys.stderr)
+            return 2
+        for path in iter_files(root):
+            resolved = path.resolve()
+            if resolved == self_path or resolved in scanned:
+                continue
+            scanned.add(resolved)
+            try:
+                lines = path.read_text(encoding="utf-8").splitlines()
+            except UnicodeDecodeError:
+                continue
+            for number, line in enumerate(lines, 1):
+                if "Rule(" in line and "re.compile" in line:
+                    continue
+                for rule in RULES:
+                    if rule.pattern.search(line):
+                        findings.append((path, number, rule.label))
+
+    print(f"scanned_files={len(scanned)}")
+    if findings:
+        for path, number, label in findings:
+            print(f"{path}:{number}: {label}")
+        print(f"findings={len(findings)}")
+        return 1
+
+    print("findings=0")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_AUDIT_AGENT_COMPATIBILITY_PY_5BE365A65B
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-compatibility.py"
+
+# cross-device-sync/scripts/bootstrap-agent-sync.sh
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/bootstrap-agent-sync.sh")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/bootstrap-agent-sync.sh" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_BOOTSTRAP_AGENT_SYNC_SH_E2A05A691B'
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  bootstrap-agent-sync.sh --sync-root PATH [options]
+
+Options:
+  --agents LIST       Comma-separated: codex,claude,antigravity
+                      Default: codex,claude,antigravity
+  --source PATH       Chezmoi source directory
+                      Default: ~/.local/share/chezmoi
+  --backup-root PATH  Backup parent directory. Default: ~
+  --install-chezmoi   Install chezmoi when missing (requires --apply)
+  --apply             Write source templates and apply managed symlinks
+  --dry-run           Audit and print the plan only (default)
+  -h, --help          Show this help
+
+The script manages only AI-agent rule/skill entrypoint symlinks. It never
+syncs credentials, sessions, caches, MCP configs, or secrets.
+EOF
+}
+
+apply=0
+install_chezmoi=0
+agents="codex,claude,antigravity"
+sync_root=""
+source_dir="${CHEZMOI_SOURCE:-$HOME/.local/share/chezmoi}"
+backup_root="${BACKUP_ROOT:-$HOME}"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --agents)
+      agents="${2:?--agents requires a value}"
+      shift 2
+      ;;
+    --sync-root)
+      sync_root="${2:?--sync-root requires a value}"
+      shift 2
+      ;;
+    --source)
+      source_dir="${2:?--source requires a value}"
+      shift 2
+      ;;
+    --backup-root)
+      backup_root="${2:?--backup-root requires a value}"
+      shift 2
+      ;;
+    --install-chezmoi)
+      install_chezmoi=1
+      shift
+      ;;
+    --apply)
+      apply=1
+      shift
+      ;;
+    --dry-run)
+      apply=0
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'ERROR unknown argument: %s\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+if [ -z "$sync_root" ]; then
+  printf 'ERROR --sync-root is required\n' >&2
+  exit 2
+fi
+
+case "$sync_root" in
+  /*) ;;
+  *)
+    printf 'ERROR --sync-root must be an absolute path\n' >&2
+    exit 2
+    ;;
+esac
+
+if [ ! -f "$sync_root/core-rules.md" ] || [ ! -d "$sync_root/skills" ]; then
+  printf 'ERROR sync root must contain core-rules.md and skills/\n' >&2
+  exit 1
+fi
+
+has_agent() {
+  case ",$agents," in
+    *",$1,"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+for agent in codex claude antigravity; do
+  if has_agent "$agent"; then
+    :
+  fi
+done
+
+unknown_agents="$(printf '%s' "$agents" | tr ',' '\n' | sed '/^codex$/d; /^claude$/d; /^antigravity$/d; /^$/d')"
+if [ -n "$unknown_agents" ]; then
+  printf 'ERROR unsupported agent(s): %s\n' "$(printf '%s' "$unknown_agents" | tr '\n' ' ')" >&2
+  exit 2
+fi
+
+install_chezmoi_now() {
+  if command -v chezmoi >/dev/null 2>&1; then
+    return
+  fi
+
+  if [ "$apply" -ne 1 ] || [ "$install_chezmoi" -ne 1 ]; then
+    printf 'MISSING chezmoi; rerun with --install-chezmoi --apply\n'
+    return 1
+  fi
+
+  case "$(uname -s)" in
+    Darwin)
+      if command -v brew >/dev/null 2>&1; then
+        brew install chezmoi
+      else
+        printf 'ERROR Homebrew is required for the default macOS install route\n' >&2
+        return 1
+      fi
+      ;;
+    Linux)
+      if command -v brew >/dev/null 2>&1; then
+        brew install chezmoi
+      elif command -v curl >/dev/null 2>&1; then
+        sh -c "$(curl -fsLS https://get.chezmoi.io/lb)"
+        export PATH="$HOME/.local/bin:$PATH"
+      else
+        printf 'ERROR install curl or use the official package-manager command for chezmoi\n' >&2
+        return 1
+      fi
+      ;;
+    MINGW*|MSYS*|CYGWIN*)
+      if command -v winget >/dev/null 2>&1; then
+        winget install --id twpayne.chezmoi --exact
+      else
+        printf 'ERROR run in PowerShell: winget install twpayne.chezmoi\n' >&2
+        return 1
+      fi
+      ;;
+    *)
+      printf 'ERROR unsupported OS; follow https://www.chezmoi.io/install/\n' >&2
+      return 1
+      ;;
+  esac
+
+  command -v chezmoi >/dev/null 2>&1 || {
+    printf 'ERROR chezmoi installed but is not available in PATH; restart the shell and rerun\n' >&2
+    return 1
+  }
+}
+
+codex_home="${CODEX_HOME:-$HOME/.codex}"
+claude_home="${CLAUDE_HOME:-$HOME/.claude}"
+gemini_home="${GEMINI_HOME:-$HOME/.gemini}"
+gemini_config="${GEMINI_CONFIG:-$gemini_home/config}"
+
+targets=()
+if has_agent codex; then
+  targets+=(
+    "$codex_home/AGENTS.md|$sync_root/core-rules.md"
+    "$codex_home/skills|$sync_root/skills"
+  )
+  if [ -d "$sync_root/memories" ]; then
+    targets+=("$codex_home/memories|$sync_root/memories")
+  fi
+fi
+if has_agent claude; then
+  targets+=(
+    "$claude_home/CLAUDE.md|$sync_root/core-rules.md"
+    "$claude_home/skills|$sync_root/skills"
+  )
+fi
+if has_agent antigravity; then
+  targets+=(
+    "$gemini_home/GEMINI.md|$sync_root/core-rules.md"
+    "$gemini_config/skills|$sync_root/skills"
+    "$gemini_config/AGENTS.md|$sync_root/core-rules.md"
+    "$gemini_config/plugins/codex/skills|$sync_root/skills"
+  )
+fi
+
+printf 'Agent sync bootstrap\n'
+printf 'MODE=%s\n' "$([ "$apply" -eq 1 ] && printf apply || printf dry-run)"
+printf 'AGENTS=%s\n' "$agents"
+printf 'SYNC_ROOT=<configured>\n'
+printf 'CHEZMOI_SOURCE=<configured>\n'
+
+conflicts=0
+for spec in "${targets[@]}"; do
+  target="${spec%%|*}"
+  expected="${spec#*|}"
+  if [ -L "$target" ]; then
+    actual="$(readlink "$target")"
+    if [ "$actual" = "$expected" ]; then
+      printf 'OK symlink: %s\n' "${target#$HOME/}"
+    else
+      printf 'CONFLICT symlink target differs: %s\n' "${target#$HOME/}"
+      conflicts=$((conflicts + 1))
+    fi
+  elif [ -e "$target" ]; then
+    printf 'CONFLICT physical target exists: %s\n' "${target#$HOME/}"
+    conflicts=$((conflicts + 1))
+  else
+    printf 'CREATE symlink: %s\n' "${target#$HOME/}"
+  fi
+done
+
+if [ "$conflicts" -gt 0 ]; then
+  printf 'ERROR resolve or back up %s conflict(s) before applying\n' "$conflicts" >&2
+  exit 1
+fi
+
+if [ "$apply" -ne 1 ]; then
+  if command -v chezmoi >/dev/null 2>&1; then
+    printf 'OK chezmoi: %s\n' "$(chezmoi --version | sed 's/,.*//')"
+  else
+    printf 'MISSING chezmoi\n'
+  fi
+  printf 'DRY_RUN complete; no files changed\n'
+  exit 0
+fi
+
+install_chezmoi_now
+
+stamp="$(date +%Y%m%d-%H%M%S)"
+backup_dir="$backup_root/agent-sync-backup-$stamp"
+mkdir -p "$backup_dir/entrypoints"
+for spec in "${targets[@]}"; do
+  target="${spec%%|*}"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    safe_name="$(printf '%s' "${target#$HOME/}" | tr '/' '_')"
+    cp -a "$target" "$backup_dir/entrypoints/$safe_name"
+  fi
+done
+
+if [ ! -d "$source_dir/.git" ]; then
+  chezmoi init --source "$source_dir"
+fi
+
+write_source() {
+  path="$1"
+  content="$2"
+  mkdir -p "$(dirname "$path")"
+  if [ -f "$path" ] && [ "$(cat "$path")" != "$content" ]; then
+    cp -a "$path" "$backup_dir/$(printf '%s' "${path#$source_dir/}" | tr '/' '_').before"
+  fi
+  printf '%s\n' "$content" > "$path"
+}
+
+write_source "$source_dir/.chezmoi.toml.tmpl" '{{- $syncRoot := promptStringOnce . "syncRoot" "Portable AI assistant sync root" -}}
+[data]
+    syncRoot = {{ $syncRoot | quote }}'
+
+if has_agent codex; then
+  write_source "$source_dir/dot_codex/symlink_AGENTS.md.tmpl" '{{ .syncRoot }}/core-rules.md'
+  write_source "$source_dir/dot_codex/symlink_skills.tmpl" '{{ .syncRoot }}/skills'
+  if [ -d "$sync_root/memories" ]; then
+    write_source "$source_dir/dot_codex/symlink_memories.tmpl" '{{ .syncRoot }}/memories'
+  fi
+fi
+if has_agent claude; then
+  write_source "$source_dir/dot_claude/symlink_CLAUDE.md.tmpl" '{{ .syncRoot }}/core-rules.md'
+  write_source "$source_dir/dot_claude/symlink_skills.tmpl" '{{ .syncRoot }}/skills'
+fi
+if has_agent antigravity; then
+  write_source "$source_dir/dot_gemini/symlink_GEMINI.md.tmpl" '{{ .syncRoot }}/core-rules.md'
+  write_source "$source_dir/dot_gemini/config/symlink_skills.tmpl" '{{ .syncRoot }}/skills'
+  write_source "$source_dir/dot_gemini/config/symlink_AGENTS.md.tmpl" '{{ .syncRoot }}/core-rules.md'
+  write_source "$source_dir/dot_gemini/config/plugins/codex/symlink_skills.tmpl" '{{ .syncRoot }}/skills'
+fi
+
+config_path="$(chezmoi dump-config --format=json | sed -n 's/.*"configFile"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)"
+if [ -z "$config_path" ] || [ ! -f "$config_path" ]; then
+  chezmoi init --source "$source_dir" \
+    --promptString "Portable AI assistant sync root=$sync_root"
+else
+  configured_root="$(chezmoi execute-template '{{ .syncRoot }}' 2>/dev/null || true)"
+  if [ "$configured_root" != "$sync_root" ]; then
+    printf 'ERROR existing chezmoi data.syncRoot differs; update the local config intentionally\n' >&2
+    exit 1
+  fi
+fi
+
+chezmoi --source "$source_dir" apply
+
+for spec in "${targets[@]}"; do
+  target="${spec%%|*}"
+  expected="${spec#*|}"
+  if [ ! -L "$target" ] || [ "$(readlink "$target")" != "$expected" ] || [ ! -e "$target" ]; then
+    printf 'ERROR verification failed: %s\n' "${target#$HOME/}" >&2
+    exit 1
+  fi
+done
+
+printf 'APPLY complete\n'
+printf 'BACKUP=%s\n' "$backup_dir"
+printf 'Run: chezmoi diff && chezmoi status && chezmoi doctor\n'
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_BOOTSTRAP_AGENT_SYNC_SH_E2A05A691B
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/bootstrap-agent-sync.sh"
+
+# cross-device-sync/scripts/session-sync-checkpoint.sh
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SESSION_SYNC_CHECKPOINT_SH_29BFBFC51C'
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  session-sync-checkpoint.sh --phase startup|shutdown --sync-root PATH [options]
+
+Options:
+  --source PATH       Chezmoi source directory.
+                      Default: ~/.local/share/chezmoi
+  --backup-root PATH  Backup parent used before an automatic update.
+                      Default: ~
+  --update            On startup, run chezmoi update only when the source has
+                      a commit, a remote, and a clean working tree.
+  -h, --help          Show this help.
+
+The checkpoint never runs chezmoi add for existing managed templates. Adding
+an already managed symlink can remove its template attribute and hardcode a
+machine path. New managed entrypoints must first be added to the bootstrap
+whitelist with a {{ .syncRoot }} template and reviewed as a setup change.
+EOF
+}
+
+phase=""
+sync_root=""
+source_dir="${CHEZMOI_SOURCE:-$HOME/.local/share/chezmoi}"
+backup_root="${BACKUP_ROOT:-$HOME}"
+run_update=0
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --phase)
+      phase="${2:?--phase requires startup or shutdown}"
+      shift 2
+      ;;
+    --sync-root)
+      sync_root="${2:?--sync-root requires a path}"
+      shift 2
+      ;;
+    --source)
+      source_dir="${2:?--source requires a path}"
+      shift 2
+      ;;
+    --backup-root)
+      backup_root="${2:?--backup-root requires a path}"
+      shift 2
+      ;;
+    --update)
+      run_update=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'ERROR unknown argument: %s\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+case "$phase" in
+  startup|shutdown) ;;
+  *)
+    printf 'ERROR --phase must be startup or shutdown\n' >&2
+    exit 2
+    ;;
+esac
+
+case "$sync_root" in
+  /*) ;;
+  *)
+    printf 'ERROR --sync-root must be an absolute path\n' >&2
+    exit 2
+    ;;
+esac
+
+if [ ! -f "$sync_root/core-rules.md" ] || [ ! -d "$sync_root/skills" ]; then
+  printf 'ERROR sync root must contain core-rules.md and skills/\n' >&2
+  exit 1
+fi
+
+if ! command -v chezmoi >/dev/null 2>&1; then
+  printf 'ERROR chezmoi is required; install it through LazyPack Item 16\n' >&2
+  exit 1
+fi
+
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+bootstrap="$script_dir/bootstrap-agent-sync.sh"
+if [ ! -x "$bootstrap" ]; then
+  printf 'ERROR bootstrap helper is missing or not executable\n' >&2
+  exit 1
+fi
+
+printf 'Session sync checkpoint\n'
+printf 'PHASE=%s\n' "$phase"
+printf 'SYNC_ROOT=<configured>\n'
+printf 'CHEZMOI_SOURCE=<configured>\n'
+
+"$bootstrap" \
+  --sync-root "$sync_root" \
+  --source "$source_dir" \
+  --dry-run
+
+status_output="$(chezmoi --source "$source_dir" status)"
+if [ -n "$status_output" ]; then
+  printf 'CHEZMOI_STATUS=changes-detected\n'
+  printf '%s\n' "$status_output"
+else
+  printf 'CHEZMOI_STATUS=clean\n'
+fi
+
+if [ "$phase" != "startup" ] || [ "$run_update" -ne 1 ]; then
+  printf 'CHEZMOI_UPDATE=not-requested\n'
+  printf 'CHEZMOI_ADD=not-needed-for-existing-templates\n'
+  exit 0
+fi
+
+skip_update() {
+  printf 'CHEZMOI_UPDATE=skipped:%s\n' "$1"
+  printf 'CHEZMOI_ADD=not-needed-for-existing-templates\n'
+  exit 0
+}
+
+if [ ! -d "$source_dir/.git" ]; then
+  skip_update 'no-git-source'
+fi
+
+if ! git -C "$source_dir" rev-parse --verify HEAD >/dev/null 2>&1; then
+  skip_update 'no-source-commit'
+fi
+
+if [ -n "$(git -C "$source_dir" status --porcelain)" ]; then
+  skip_update 'source-dirty'
+fi
+
+remote_name="$(git -C "$source_dir" remote | head -1)"
+if [ -z "$remote_name" ]; then
+  skip_update 'no-remote'
+fi
+
+stamp="$(date +%Y%m%d-%H%M%S)"
+backup_dir="$backup_root/agent-sync-backup-$stamp/session-startup"
+mkdir -p "$backup_dir"
+
+entrypoints=(
+  "$HOME/.codex/AGENTS.md"
+  "$HOME/.codex/skills"
+  "$HOME/.codex/memories"
+  "$HOME/.claude/CLAUDE.md"
+  "$HOME/.claude/skills"
+  "$HOME/.gemini/GEMINI.md"
+  "$HOME/.gemini/config/AGENTS.md"
+  "$HOME/.gemini/config/skills"
+  "$HOME/.gemini/config/plugins/codex/skills"
+)
+
+for target in "${entrypoints[@]}"; do
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    safe_name="$(printf '%s' "${target#$HOME/}" | tr '/' '_')"
+    cp -a "$target" "$backup_dir/$safe_name"
+  fi
+done
+
+printf 'CHEZMOI_UPDATE=running\n'
+chezmoi --source "$source_dir" update
+
+"$bootstrap" \
+  --sync-root "$sync_root" \
+  --source "$source_dir" \
+  --dry-run
+
+status_output="$(chezmoi --source "$source_dir" status)"
+if [ -n "$status_output" ]; then
+  printf 'ERROR chezmoi status is not clean after update\n' >&2
+  printf '%s\n' "$status_output" >&2
+  printf 'BACKUP=%s\n' "$backup_dir" >&2
+  exit 1
+fi
+
+printf 'CHEZMOI_UPDATE=complete\n'
+printf 'BACKUP=%s\n' "$backup_dir"
+printf 'CHEZMOI_ADD=not-needed-for-existing-templates\n'
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SESSION_SYNC_CHECKPOINT_SH_29BFBFC51C
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh"
+
+test -f "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md" && echo "cross-device-sync installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

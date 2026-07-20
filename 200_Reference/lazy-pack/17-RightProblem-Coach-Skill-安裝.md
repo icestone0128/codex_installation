@@ -1,39 +1,39 @@
 # 17-RightProblem-Coach-Skill-安裝
 
-> 版本：2026-05-24 Codex App 版
-> 用途：把 RightProblem Coach 問題結構化流程安裝成 Codex App 全域 Skill，用 #問對問題 將模糊問題轉成可執行的問題規格書。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/rightproblem-coach/`，不需要額外的 `skills/` 子目錄。
+> 版本：2026-05-24 三 Agent 共用版
+> 用途：把 RightProblem Coach 問題結構化流程安裝成 Codex、Claude、AntiGravity 共用全域 Skill，用 #問對問題 將模糊問題轉成可執行的問題規格書。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/rightproblem-coach/`，不需要額外的 `skills/` 子目錄。
 
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-05-10。
 - 原始來源包：`rightproblem-coach_v2.0_20260309_1500.zip`。
 - 2026-05-24 重新核對來源包內容：包含 `SKILL.md`、`references/analysis-framework.md`、`references/hc-guide.md`、`references/template.html`；`__MACOSX/` 與 `.DS_Store` 為 macOS 壓縮附帶檔，不納入安裝內容。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/rightproblem-coach/SKILL.md`。
+- Codex 全域 skill：`{{SYNC_ROOT}}/skills/rightproblem-coach/SKILL.md`。
 - Obsidian 全域索引已記錄用途：用 #問對問題 將模糊問題轉成 9 大區塊問題規格書 HTML。
 
 ## 這版和來源工具文件的差異
 
-| 原始取向 | Codex 版 |
+| 原始取向 | 三 Agent 共用版 |
 |---|---|
-| 可能依賴來源工具的 skill 路徑 | 改為 `{{CODEX_HOME}}/skills/rightproblem-coach` |
-| 可能依賴特定 slash command | Codex 依 `SKILL.md` metadata 與自然語意觸發 |
+| 可能依賴來源工具的 skill 路徑 | 改為 `{{SYNC_ROOT}}/skills/rightproblem-coach` |
+| 可能依賴特定 slash command | 共用核心依 `SKILL.md` metadata 與自然語意觸發；顯式呼叫另記 Agent adapter |
 | 產出流程分散在來源包 | 本文內嵌 `SKILL.md`、`references/analysis-framework.md`、`references/hc-guide.md`、`references/template.html` |
-| 問題分析容易只停在建議 | Codex 版固定產出 9 大區塊問題規格書 HTML |
+| 問題分析容易只停在建議 | 三 Agent 共用版固定產出 9 大區塊問題規格書 HTML |
 
 ## 安裝方式
 
 使用本文文末「內建 Skill 完整安裝內容」。執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
 
-安裝後開新 Codex 對話或重啟 Codex App，讓 skill metadata 重新載入。
+安裝後對 Codex、Claude、AntiGravity 分別重載 skill 清單。
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/rightproblem-coach/SKILL.md" && echo "rightproblem-coach SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/rightproblem-coach/references/analysis-framework.md" && echo "analysis framework ok"
-test -f "{{CODEX_HOME}}/skills/rightproblem-coach/references/hc-guide.md" && echo "hc guide ok"
-test -f "{{CODEX_HOME}}/skills/rightproblem-coach/references/template.html" && echo "template ok"
+test -f "{{SYNC_ROOT}}/skills/rightproblem-coach/SKILL.md" && echo "rightproblem-coach SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/rightproblem-coach/references/analysis-framework.md" && echo "analysis framework ok"
+test -f "{{SYNC_ROOT}}/skills/rightproblem-coach/references/hc-guide.md" && echo "hc guide ok"
+test -f "{{SYNC_ROOT}}/skills/rightproblem-coach/references/template.html" && echo "template ok"
 ```
 
 合理結果是四行都顯示 `ok`。
@@ -81,28 +81,28 @@ RightProblem Coach 可以提出結構化判斷，但不應假裝已經知道所�
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/rightproblem-coach/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/rightproblem-coach/SKILL.md` 存在。
 - [ ] `references/analysis-framework.md` 存在。
 - [ ] `references/hc-guide.md` 存在。
 - [ ] `references/template.html` 存在。
-- [ ] 開新 Codex 對話後，可用「#問對問題」或「RightProblem Coach」觸發。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用「#問對問題」或「RightProblem Coach」觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`rightproblem-coach`。
+本節是自含式安裝區塊。這個序號項目會安裝：`rightproblem-coach`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
-```bash
+````bash
 set -e
 
 # ---- rightproblem-coach ----
-mkdir -p "{{CODEX_HOME}}/skills/rightproblem-coach"
+mkdir -p "{{SYNC_ROOT}}/skills/rightproblem-coach"
 # rightproblem-coach/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/rightproblem-coach/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/rightproblem-coach/SKILL.md" <<'CODEX_LAZYPACK_RIGHTPROBLEM_COACH_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/rightproblem-coach/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/rightproblem-coach/SKILL.md" <<'AGENT_LAZYPACK_RIGHTPROBLEM_COACH_SKILL_MD_0E95F5A366'
 ---
 name: rightproblem-coach
 description: 問題結構化教練。當需要：(1) 將模糊問題轉化為結構清晰的問題規格書 (2) 用 #問對問題 思考習慣分析問題根因 (3) 生成視覺化 HTML 問題規格書時使用此 Skill。基於密涅瓦大學 HC + PRD 分析框架。
@@ -187,11 +187,11 @@ description: 問題結構化教練。當需要：(1) 將模糊問題轉化為結
 ## 語言
 
 繁體中文（台灣用語）
-CODEX_LAZYPACK_RIGHTPROBLEM_COACH_SKILL_MD
+AGENT_LAZYPACK_RIGHTPROBLEM_COACH_SKILL_MD_0E95F5A366
 
 # rightproblem-coach/references/analysis-framework.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/rightproblem-coach/references/analysis-framework.md")"
-cat > "{{CODEX_HOME}}/skills/rightproblem-coach/references/analysis-framework.md" <<'CODEX_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_ANALYSIS_FRAMEWORK_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/rightproblem-coach/references/analysis-framework.md")"
+cat > "{{SYNC_ROOT}}/skills/rightproblem-coach/references/analysis-framework.md" <<'AGENT_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_ANALYSIS_FRAMEWORK_MD_6DFFD1C505'
 # 問題分析增強框架
 
 基於 PRD 最佳實踐（spec-kit + 多代理評審），為問題規格書提供更深度的分析工具。
@@ -330,11 +330,11 @@ cat > "{{CODEX_HOME}}/skills/rightproblem-coach/references/analysis-framework.md
 | 缺少驗收標準 | 成功無法驗證 | 每個目標附量化標準 |
 | 優先級全是 P1 | 無法區分輕重 | 強制 P1 不超過 70% |
 | 把症狀當問題 | 治標不治本 | 用 5 Whys 找根因 |
-CODEX_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_ANALYSIS_FRAMEWORK_MD
+AGENT_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_ANALYSIS_FRAMEWORK_MD_6DFFD1C505
 
 # rightproblem-coach/references/hc-guide.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/rightproblem-coach/references/hc-guide.md")"
-cat > "{{CODEX_HOME}}/skills/rightproblem-coach/references/hc-guide.md" <<'CODEX_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_HC_GUIDE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/rightproblem-coach/references/hc-guide.md")"
+cat > "{{SYNC_ROOT}}/skills/rightproblem-coach/references/hc-guide.md" <<'AGENT_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_HC_GUIDE_MD_085E58C049'
 # #問對問題(#rightproblem) — 思考習慣指南
 
 > 花再多時間解決錯誤的問題，都是浪費。在動手之前，先確認你問的是對的問題。
@@ -421,11 +421,11 @@ AI 時代的陷阱：AI 太好用了，你問什麼它就認真回答什麼—�
 - [ ] 利害關係人對問題的定義一致嗎？
 - [ ] 這個問題定義足夠具體，可以產生可行的解決方案嗎？
 - [ ] 你有沒有把症狀和問題區分開來？
-CODEX_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_HC_GUIDE_MD
+AGENT_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_HC_GUIDE_MD_085E58C049
 
 # rightproblem-coach/references/template.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/rightproblem-coach/references/template.html")"
-cat > "{{CODEX_HOME}}/skills/rightproblem-coach/references/template.html" <<'CODEX_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_TEMPLATE_HTML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/rightproblem-coach/references/template.html")"
+cat > "{{SYNC_ROOT}}/skills/rightproblem-coach/references/template.html" <<'AGENT_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_TEMPLATE_HTML_1DA349A95E'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1187,11 +1187,11 @@ function downloadPNG() {
 
 </body>
 </html>
-CODEX_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_TEMPLATE_HTML
+AGENT_LAZYPACK_RIGHTPROBLEM_COACH_REFERENCES_TEMPLATE_HTML_1DA349A95E
 
-test -f "{{CODEX_HOME}}/skills/rightproblem-coach/SKILL.md" && echo "rightproblem-coach installed"
+test -f "{{SYNC_ROOT}}/skills/rightproblem-coach/SKILL.md" && echo "rightproblem-coach installed for Codex, Claude, and AntiGravity"
+````
 
-echo "embedded skills installed: rightproblem-coach"
-```
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

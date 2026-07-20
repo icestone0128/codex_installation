@@ -1,8 +1,8 @@
 # 20-SOIL-Image-Deck-Skill-安裝
 
-> 版本：2026-07-13 Codex App v2 版
+> 版本：2026-07-20 三 Agent 共用 v2 版
 > 用途：建立 SOIL 風格 image-first 簡報，每頁以 AI 生成全頁圖像為核心，再打包成 .pptx，支援 baked 與 plate 模式。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/soil-image-deck/`，不需要取得原作者本機資料夾。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/soil-image-deck/`，不需要取得原作者本機資料夾。
 
 ## 來源與歷史紀錄
 
@@ -11,17 +11,17 @@
 - 原始來源包：使用者提供的 SOIL Deck skills package；本版已整理為 `soil-image-deck`。
 - v2 來源：`mathruffian-dot/soil-image-deck`，讀取 commit `a4da933 feat: add shared SOIL deck core`。
 - 2026-07-13 補入 `yaml-image-deck` 路由：通用 YAML 圖片式簡報改用 LazyPack Item 38；需要 SOIL 六引擎才使用本 skill。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-image-deck/SKILL.md`。
+- 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md`。
 - Obsidian 全域索引已記錄用途：SOIL 全圖像 PPTX；以 Codex 影像生成建立每頁全版圖，再用打包腳本輸出 baked 或可疊 editable text 的 plate 模式。
 
 ## 這版和來源工具文件的差異
 
-| 項目 | Codex 版調整 |
+| 項目 | 三 Agent 共用版調整 |
 |---|---|
 | 1 | 將 Windows-only 範例改為跨平台 `python` / `python3` 指令，避免限定單一終端環境。 |
 | 2 | v2 改為完整 SOIL image deck package，包含 `assets/soil-spec-template.yaml`、`references/soil-deck-core.md`、YAML profile、prompt contract、layout recipes、validation 與 subagent batching 指引。 |
 | 3 | 新增 `scripts/validate_spec.py` 與 `scripts/verify_images.py`，並更新 `scripts/pack_pptx.py`：baked 模式先裁切 16:9；plate 模式要求繁中粗圓字型，不再默默退回尖角預設字型。 |
-| 4 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/soil-image-deck/`。 |
+| 4 | 正式安裝路徑統一為 `{{SYNC_ROOT}}/skills/soil-image-deck/`。 |
 | 5 | 補入分流規則：`yaml-image-deck` 處理非 SOIL 的 NotebookLM-style / YAML-controlled image deck，本 skill 專注 SOIL 教學圖片式 PPTX。 |
 
 ## 安裝方式
@@ -32,22 +32,22 @@
 4. 若要使用內建 Python helpers，安裝依賴：
 
 ```bash
-python -m pip install -r "{{CODEX_HOME}}/skills/soil-image-deck/requirements.txt"
+python -m pip install -r "{{SYNC_ROOT}}/skills/soil-image-deck/requirements.txt"
 ```
 
 依賴包含 `PyYAML`、`Pillow` 與 `python-pptx`，供 `validate_spec.py`、`verify_images.py` 與 `pack_pptx.py` 使用。
 
-5. 安裝後開新 Codex 對話或重啟 Codex App，讓新的全域 skill metadata 被重新載入。
+5. 安裝後依 Item 16 確認三 Agent 原生入口，分別重載 skill 清單。
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/soil-image-deck/SKILL.md" && echo "soil-image-deck SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/soil-image-deck/assets/soil-spec-template.yaml" && echo "soil spec template ok"
-test -d "{{CODEX_HOME}}/skills/soil-image-deck/references" && echo "references ok"
-test -d "{{CODEX_HOME}}/skills/soil-image-deck/scripts" && echo "scripts ok"
-python -m pip install -r "{{CODEX_HOME}}/skills/soil-image-deck/requirements.txt"
-python "{{CODEX_HOME}}/skills/soil-image-deck/scripts/validate_spec.py" --spec "{{CODEX_HOME}}/skills/soil-image-deck/assets/soil-spec-template.yaml"
+test -f "{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md" && echo "soil-image-deck SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/soil-image-deck/assets/soil-spec-template.yaml" && echo "soil spec template ok"
+test -d "{{SYNC_ROOT}}/skills/soil-image-deck/references" && echo "references ok"
+test -d "{{SYNC_ROOT}}/skills/soil-image-deck/scripts" && echo "scripts ok"
+python -m pip install -r "{{SYNC_ROOT}}/skills/soil-image-deck/requirements.txt"
+python "{{SYNC_ROOT}}/skills/soil-image-deck/scripts/validate_spec.py" --spec "{{SYNC_ROOT}}/skills/soil-image-deck/assets/soil-spec-template.yaml"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -69,18 +69,18 @@ python "{{CODEX_HOME}}/skills/soil-image-deck/scripts/validate_spec.py" --spec "
 2. 先完成 SOIL 六引擎：概念定位、脈絡定位、頁面架構、認知編修、風格建構、生產驗證。
 3. 先做 renderer-neutral SOIL Core，保留 `learning_task`、`semantic_structure`、`layout.id`、`visible_text` 與 `speaker_only`，YAML 最後才出場。
 4. 建立或更新 `spec.yaml`，先跑 `validate_spec.py`，再生成黃金樣張並鎖定風格。
-5. 若需要 bitmap 視覺，使用 Codex 內建 image generation 生成，不用本機假圖替代。
+5. 若需要 bitmap 視覺，使用當前 Agent 的原生生圖能力；若缺少，改走已核准 API／CLI／手動流程，不用本機假圖替代。
 6. 以 `verify_images.py` 檢查圖片存在與 16:9 比例，打包後再檢查 PPTX 可開啟、文字可讀、版面不溢出、引用資源可攜。
 
 ## 踩坑紀錄
 
 ### 1. 不要把來源工具專用路徑帶進正式安裝
 
-正式版只使用 Codex 全域 skill 路徑 `{{CODEX_HOME}}/skills/soil-image-deck/`。不要建立非 Codex skill 位置、來源工具專用命令或來源作者的本機路徑。
+正式版使用三 Agent 共用主版本 `{{SYNC_ROOT}}/skills/soil-image-deck/`。來源工具專用命令改寫為共用工作流與三個 adapter，不複製來源作者的本機路徑。
 
 ### 2. AI 圖像規則不能用本機假圖替代
 
-這三組 SOIL skills 的品質前提是視覺素材由 Codex 影像生成能力產生。只有精準幾何、數學圖或明確 prototype 需求可使用 deterministic SVG / Python 圖形。
+這三組 SOIL skills 的品質前提是視覺素材由當前 Agent 可用的高品質影像生成路線產生。只有精準幾何、數學圖或明確 prototype 需求可使用 deterministic SVG／Python 圖形。
 
 ### 3. 可攜式 package 要包含 assets / references / scripts / agents
 
@@ -96,29 +96,28 @@ v2 的重點是先完成概念、脈絡、頁面架構與認知編修，再把�
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/soil-image-deck/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md` 存在。
 - [ ] assets / references / scripts / agents 依本 skill package 實際內容存在。
 - [ ] `validate_spec.py` 可通過內建 `assets/soil-spec-template.yaml`。
-- [ ] 搜尋 package 內沒有非 Codex 安裝路徑或非 Codex frontmatter 欄位。
-- [ ] 開新 Codex 對話後，可用 `soil-image-deck` 或 SOIL 簡報相關語句觸發。
+- [ ] package 共用核心沒有來源工具專屬路徑或單一 Agent frontmatter；差異均有 adapter 註記。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用 `soil-image-deck` 或 SOIL 簡報相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`soil-image-deck`。
+本節是自含式安裝區塊。這個序號項目會安裝：`soil-image-deck`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
 # ---- soil-image-deck ----
-rm -rf "{{CODEX_HOME}}/skills/soil-image-deck"
-mkdir -p "{{CODEX_HOME}}/skills/soil-image-deck"
+mkdir -p "{{SYNC_ROOT}}/skills/soil-image-deck"
 # soil-image-deck/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/SKILL.md" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_SKILL_MD_0E95F5A366'
 ---
 name: soil-image-deck
 description: Create SOIL-style image-first teaching presentations in which every slide is driven by an AI-generated full-page visual. Use when the user asks for a SOIL image deck, pure-image teaching slides, NotebookLM-style educational slides, a YAML-driven SOIL deck, visual-impact teacher training slides, or a baked/plate PPTX that follows 引起動機、維持注意、喚起行動 and the SOIL six-engine workflow.
@@ -145,7 +144,8 @@ Default to `yaml_spec`, `sequential`, and `golden_sample`. Use `subagents` only 
 
 ## Hard Image Rule
 
-- Generate every slide visual with Codex built-in image generation first.
+- Generate every slide visual through `image-generator` and the active Agent's
+  native adapter or approved shared route first.
 - Do not replace image generation with Pillow, CSS, SVG, procedural shapes, or placeholders.
 - Use an API/CLI image path only when the user explicitly requests it.
 - Save every accepted image inside the project before packaging.
@@ -190,7 +190,7 @@ For environments without Artifact Tool, `scripts/pack_pptx.py` is a portability 
 Install the fallback script dependencies before using local packaging:
 
 ```bash
-python -m pip install -r "{{CODEX_HOME}}/skills/soil-image-deck/requirements.txt"
+python -m pip install -r "{{SYNC_ROOT}}/skills/soil-image-deck/requirements.txt"
 ```
 
 Required packages:
@@ -215,20 +215,28 @@ Keep formulas, precise geometry, charts, and numeric evidence native/editable wh
 - Read `references/prompting.md` before image generation.
 - Read `references/subagent-batching.md` when the user requests parallel generation.
 - Read `references/validation.md` before packaging and delivery.
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_SKILL_MD
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_SKILL_MD_0E95F5A366
+
+# soil-image-deck/requirements.txt
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/requirements.txt")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/requirements.txt" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_REQUIREMENTS_TXT_4D7C51B1EF'
+PyYAML
+Pillow
+python-pptx
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_REQUIREMENTS_TXT_4D7C51B1EF
 
 # soil-image-deck/agents/openai.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/agents/openai.yaml" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_AGENTS_OPENAI_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/agents/openai.yaml" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "SOIL Image Deck"
   short_description: "用 SOIL 六引擎、黃金樣張與 YAML 生成一致的教學圖片簡報"
   default_prompt: "Use $soil-image-deck to turn this teaching topic into a SOIL image-first deck."
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_AGENTS_OPENAI_YAML
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_AGENTS_OPENAI_YAML_DEB9755D27
 
 # soil-image-deck/assets/soil-spec-template.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/assets/soil-spec-template.yaml")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/assets/soil-spec-template.yaml" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_ASSETS_SOIL_SPEC_TEMPLATE_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/assets/soil-spec-template.yaml")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/assets/soil-spec-template.yaml" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_ASSETS_SOIL_SPEC_TEMPLATE_YAML_117B91FFD2'
 schema_version: "soil_image_deck_v2"
 
 deck:
@@ -320,11 +328,11 @@ validation:
     - "文字錯誤"
     - "字體不夠粗圓"
     - "教學任務或版型不清楚"
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_ASSETS_SOIL_SPEC_TEMPLATE_YAML
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_ASSETS_SOIL_SPEC_TEMPLATE_YAML_117B91FFD2
 
 # soil-image-deck/references/layout-recipes.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/references/layout-recipes.md")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/references/layout-recipes.md" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_LAYOUT_RECIPES_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/references/layout-recipes.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/references/layout-recipes.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_LAYOUT_RECIPES_MD_3B74F384E1'
 # SOIL Controlled Layouts
 
 | Teaching job | Layout ID | Budget |
@@ -343,11 +351,11 @@ cat > "{{CODEX_HOME}}/skills/soil-image-deck/references/layout-recipes.md" <<'CO
 | 過渡 | `section_divider` | One line, full bleed |
 
 Do not repeat one layout more than twice in a row. Alternate visual weight while preserving title anchor, palette, rounded typography, material, and recurring motif.
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_LAYOUT_RECIPES_MD
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_LAYOUT_RECIPES_MD_3B74F384E1
 
 # soil-image-deck/references/prompting.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/references/prompting.md")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/references/prompting.md" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_PROMPTING_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/references/prompting.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/references/prompting.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_PROMPTING_MD_F5263C9E0F'
 # SOIL Image Prompt Contract
 
 Compile prompts in this order:
@@ -373,11 +381,11 @@ text, exactly once, with no extra characters.
 State that the output is the slide itself, not a screen, projector, or mockup.
 
 For plate mode, prohibit all text and generate calm reserved zones around the final overlay layout.
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_PROMPTING_MD
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_PROMPTING_MD_F5263C9E0F
 
 # soil-image-deck/references/soil-deck-core.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/references/soil-deck-core.md")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/references/soil-deck-core.md" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SOIL_DECK_CORE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/references/soil-deck-core.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/references/soil-deck-core.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SOIL_DECK_CORE_MD_6359B215C1'
 # SOIL Deck Core
 
 Use one renderer-neutral planning model for Image, PowerPoint, and HTML outputs.
@@ -408,11 +416,11 @@ Core fields cover audience, purpose, SOIL flow, design system, page role, learni
 | `speaker_only` | notes or talk track | optional speaker mode |
 
 When upgrading an Image Deck to HTML, preserve the core and add HTML-only `interaction`, `accessibility`, responsive behavior, and static fallback fields. Do not restart concept planning unless the existing core is incomplete.
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SOIL_DECK_CORE_MD
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SOIL_DECK_CORE_MD_6359B215C1
 
 # soil-image-deck/references/soil-engines.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/references/soil-engines.md")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/references/soil-engines.md" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SOIL_ENGINES_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/references/soil-engines.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/references/soil-engines.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SOIL_ENGINES_MD_355967CF80'
 # SOIL Planning Outputs
 
 ## Engine 1: Concept
@@ -446,11 +454,11 @@ For every page specify page number, SOIL phase, role, core point, learning task,
 ## Engines 5–6
 
 Write the YAML design contract only after engines 1–4. Then generate and validate the deck; do not use YAML as a substitute for teaching judgment.
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SOIL_ENGINES_MD
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SOIL_ENGINES_MD_355967CF80
 
 # soil-image-deck/references/subagent-batching.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/references/subagent-batching.md")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/references/subagent-batching.md" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SUBAGENT_BATCHING_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/references/subagent-batching.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/references/subagent-batching.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SUBAGENT_BATCHING_MD_3439466C63'
 # SOIL Subagent Batching
 
 Use only when the user explicitly requests parallel generation and subagents are available.
@@ -464,11 +472,11 @@ Use only when the user explicitly requests parallel generation and subagents are
 7. The primary agent reviews the final montage and selectively regenerates failures.
 
 Parallel generation shares quota and does not guarantee consistency without the golden sample.
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SUBAGENT_BATCHING_MD
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_SUBAGENT_BATCHING_MD_3439466C63
 
 # soil-image-deck/references/validation.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/references/validation.md")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/references/validation.md" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_VALIDATION_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/references/validation.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/references/validation.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_VALIDATION_MD_13ED9B90BE'
 # SOIL Deck Validation
 
 Validate teaching quality and artifact quality.
@@ -494,11 +502,11 @@ Delivery checks:
 3. Package the deck.
 4. Render the exported PPTX and inspect the rendered montage.
 5. Run overflow checks and report final absolute paths.
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_VALIDATION_MD
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_VALIDATION_MD_13ED9B90BE
 
 # soil-image-deck/references/yaml-profile.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/references/yaml-profile.md")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/references/yaml-profile.md" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_YAML_PROFILE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/references/yaml-profile.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/references/yaml-profile.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_YAML_PROFILE_MD_92303F5525'
 # SOIL YAML Profile
 
 Use these top-level sections:
@@ -534,19 +542,11 @@ Required per-slide fields:
 ```
 
 Use percentage zones for image prompts. Use PowerPoint coordinates only in `plate` overlay blocks.
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_YAML_PROFILE_MD
-
-# soil-image-deck/requirements.txt
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/requirements.txt")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/requirements.txt" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_REQUIREMENTS_TXT'
-PyYAML
-Pillow
-python-pptx
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_REQUIREMENTS_TXT
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_REFERENCES_YAML_PROFILE_MD_92303F5525
 
 # soil-image-deck/scripts/pack_pptx.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/scripts/pack_pptx.py")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/scripts/pack_pptx.py" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_PACK_PPTX_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/scripts/pack_pptx.py")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/scripts/pack_pptx.py" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_PACK_PPTX_PY_51D5CCA4D8'
 """
 soil-image-deck 打包腳本
 
@@ -927,12 +927,11 @@ def main():
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_PACK_PPTX_PY
-chmod +x "{{CODEX_HOME}}/skills/soil-image-deck/scripts/pack_pptx.py"
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_PACK_PPTX_PY_51D5CCA4D8
 
 # soil-image-deck/scripts/validate_spec.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/scripts/validate_spec.py")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/scripts/validate_spec.py" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_VALIDATE_SPEC_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/scripts/validate_spec.py")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/scripts/validate_spec.py" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_VALIDATE_SPEC_PY_95CCEC28C1'
 #!/usr/bin/env python3
 import argparse
 from pathlib import Path
@@ -1012,12 +1011,11 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_VALIDATE_SPEC_PY
-chmod +x "{{CODEX_HOME}}/skills/soil-image-deck/scripts/validate_spec.py"
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_VALIDATE_SPEC_PY_95CCEC28C1
 
 # soil-image-deck/scripts/verify_images.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-image-deck/scripts/verify_images.py")"
-cat > "{{CODEX_HOME}}/skills/soil-image-deck/scripts/verify_images.py" <<'CODEX_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_VERIFY_IMAGES_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/scripts/verify_images.py")"
+cat > "{{SYNC_ROOT}}/skills/soil-image-deck/scripts/verify_images.py" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_VERIFY_IMAGES_PY_D0F52176BC'
 #!/usr/bin/env python3
 import argparse
 from pathlib import Path
@@ -1063,9 +1061,11 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_VERIFY_IMAGES_PY
-chmod +x "{{CODEX_HOME}}/skills/soil-image-deck/scripts/verify_images.py"
+AGENT_LAZYPACK_SOIL_IMAGE_DECK_SCRIPTS_VERIFY_IMAGES_PY_D0F52176BC
 
+test -f "{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md" && echo "soil-image-deck installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

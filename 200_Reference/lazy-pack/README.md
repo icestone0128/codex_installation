@@ -1,10 +1,10 @@
 # Codex 懶人包總目錄
 
-> 版本：2026-06-21 可自行安裝版
-> 用途：讓下載者從零開始設定 Codex App、全域 skills、plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
+> 版本：2026-07-21 可自行安裝版
+> 用途：讓下載者從零開始設定 Codex、Claude、AntiGravity 共用的全域規則與 skills，以及 plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
 
-2026-06-21 更新：Item 09–16 已納入新版引導詞的 Codex-only 轉換；全域 skill 固定使用 `{{CODEX_HOME}}/skills`，專案 skill 固定使用 `<project-root>/000_Agent/skills`，並以 `codex-skill-creator` 作為所有自訂 skill 建立與維護的必要入口。
+2026-07-21 更新：Item 10 將 `HANDOFF.md` 收為開工必讀、收工必寫；Item 16 加入共享 `session-sync-checkpoint.sh`，以可驗證 gate 執行 `chezmoi update`，並限制 `chezmoi add` 只用於新增白名單入口。共享全域 skill 主版本固定為 `{{SYNC_ROOT}}/skills`，專案 skill 固定為 `<project-root>/000_Agent/skills`。
 
 ## 先填這張設定表
 
@@ -16,13 +16,16 @@
 | `{{HOME}}` | 使用者家目錄 | 你的 home folder |
 | `{{CODEX_HOME}}` | Codex 設定資料夾 | `{{HOME}}/.codex` |
 | `{{CODEX_CONFIG}}` | Codex MCP 設定檔 | `{{CODEX_HOME}}/config.toml` |
-| `{{GEMINI_CONFIG}}` | AntiGravity / Gemini 設定資料夾 | `{{HOME}}` 底下的 Gemini 設定位置 |
+| `{{CLAUDE_HOME}}` | Claude 設定資料夾 | `{{HOME}}/.claude` |
+| `{{GEMINI_HOME}}` | AntiGravity / Gemini 家目錄 | `{{HOME}}/.gemini` |
+| `{{GEMINI_CONFIG}}` | AntiGravity / Gemini 相容設定資料夾 | `{{GEMINI_HOME}}/config` |
+| `{{CHEZMOI_SOURCE}}` | chezmoi source state | `{{HOME}}/.local/share/chezmoi` |
 | `{{WORK_ROOT}}` | 專案工作根目錄 | `{{HOME}}/Projects` 或雲端硬碟內的工作資料夾 |
 | `{{PROJECT_ROOT}}` | 目前要操作的單一專案資料夾 | `{{WORK_ROOT}}/my-project` |
 | `{{SETUP_REPO}}` | 這份懶人包所在專案 | `{{WORK_ROOT}}/codex_installation` |
 | `{{SETUP_REPO_NAME}}` | 這份懶人包 repo 名稱 | `codex_installation` |
 | `{{ANTIGRAVITY_SETUP_REPO}}` | AntiGravity 懶人包所在專案 | `{{WORK_ROOT}}/antigravity_installation` |
-| `{{SYNC_ROOT}}` | Codex symlink 雲端同步母資料夾 | Google Drive / iCloud / Dropbox 內的 `codex_symlink` |
+| `{{SYNC_ROOT}}` | 三 Agent 共用的雲端內容主版本 | Google Drive／iCloud／Dropbox 內的同步資料夾（可沿用 `codex_symlink` 既有名稱） |
 | `{{GLOBAL_RULES}}` | 可攜式全域核心規則主檔 | `{{SYNC_ROOT}}/core-rules.md` |
 | `{{BACKUP_ROOT}}` | 本機備份位置 | `{{HOME}}` |
 | `{{SECRETS_DIR}}` | 本機 secrets 資料夾 | `{{CODEX_HOME}}/secrets` |
@@ -53,7 +56,7 @@
 
 ## 安裝主線
 
-照這個順序做，下載者可以從空白 Codex App 一路安裝到可開新專案：
+照這個順序做，下載者可以從空白環境建立 Codex、Claude、AntiGravity 共用專案架構。即使當下尚未安裝其中某個 Agent，Item 16 仍會預先建好入口：
 
 1. [[01-Codex-必裝-Skills-與-Plugins]]
 2. [[02-Codex-MCP-Essentials]]
@@ -63,16 +66,17 @@
 6. [[06-連接-GitHub-與-Obsidian]]
 7. [[07-連接-NotebookLM]]
 8. [[08-連接-Firebase-資料庫]]
-9. [[09-個人助手設定]]
-10. [[10-專案初始化工作模式]]
+9. [[16-Codex-全域-Skills-跨裝置同步]]（chezmoi 必裝；先建立 Agent 全域入口）
+10. [[09-個人助手設定]]
+11. [[10-專案初始化工作模式]]
 
 ## 進階模組
 
 主線完成後，再依需求安裝：
 
-11. [[11-Codex-Skill-Creator-工作流]]
-12. [[12-外部工具整合工作流]]
-13. [[13-Brainstorm-規劃模式]]
+12. [[11-Codex-Skill-Creator-工作流]]
+13. [[12-外部工具整合工作流]]
+14. [[13-Brainstorm-規劃模式]]
 14. [[14-Social-Cards-Skill-安裝]]
 15. [[15-Landing-Page-Skill-安裝]]
 16. [[16-Codex-全域-Skills-跨裝置同步]]
@@ -104,18 +108,18 @@
 全域 skill 的完整內容已內嵌在對應的有序號懶人包文件中，不再另外提供獨立的 `skills/` 子目錄。安裝時請打開對應編號文件，使用文末「內建 Skill 完整安裝內容」。
 
 ```text
-01：必裝 Codex skills 與基礎 plugins / connectors 檢查，例如 `pdf`、`playwright`、Notion、PDF、Browser plugin；不設定外部瀏覽器 MCP server
+01：三 Agent 共用 `pdf`、`playwright` skills，並對 Codex／Claude／AntiGravity 各自的 plugins、connectors、MCP 與原生 browser 能力做 adapter 檢查
 02：MCP / 外部工具 / CLI 連線，例如 Firecrawl、Filesystem、heptabase-cli
 05：secondbrain-research-digest
 07：notebooklm-architecture、presentation-workflow
 09：arry-assistant
-10：project-init-sync、startup-sync、shutdown-sync
+10：project-init-sync、startup-sync、shutdown-sync；開工必讀、收工必寫 `HANDOFF.md`，共用 Item 16 checkpoint
 11：codex-skill-creator
 12：tool-integration-workflow、cli-anything；包含「通道 x 鑰匙」判斷、Google Workspace 個人資料 OAuth 規則、常見服務路線、跨 Agent 設定入口，以及沒有現成工具時的 CLI-Anything 安裝與 fallback 指引
 13：brainstorm
 14：social-cards
 15：landing-page
-16：cross-device-sync
+16：cross-device-sync；chezmoi 必裝，負責 Codex／Claude／AntiGravity 原生入口的 dry-run、備份、apply、驗證與新電腦重建；內建 session checkpoint、受控 update 與新入口 add 規則
 17：rightproblem-coach
 18：doc-to-md
 19：soil-html-deck
@@ -136,29 +140,35 @@
 34：Python teaching file tools global runtime；不是 skill，安裝 Word / Excel / PPT / PDF / OCR / 圖表 / 影音輔助 Python 套件，建立跨專案 wrapper，並在 macOS/Homebrew 上安裝 Tesseract、Ghostscript、Poppler、ffmpeg 等系統工具；技能 runtime 仍各自放在 `{{CODEX_HOME}}/<skill-name>`
 35：Taigi Teaching Agent；不是 skill，安裝 `mathruffian-dot/taigi-teaching-agent` 臺語教材產生器、Python 3.12 專用 venv 與 `taigi-teaching-agent` wrapper
 36：voice-input-normalization；語音輸入文字正規化跨 Agent 安裝，包含 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範已併入 Item 16 `cross-device-sync`
-37：voice-reply；macOS / Codex 語音回覆 skill，優先 Edge-TTS 串流，其次 Edge-TTS 整檔播放，最後 macOS `say` 離線備援；安裝 `edge-tts` 到 `{{CODEX_HOME}}/voice-reply/.venv`，並建立 `{{CODEX_HOME}}/python-tools/bin/voice-reply` 與 `{{CODEX_HOME}}/python-tools/bin/edge-tts`
+37：voice-reply；三 Agent 共用的 macOS 語音回覆 skill，優先 Edge-TTS 串流，其次 Edge-TTS 整檔播放，最後 macOS `say` 離線備援；本機 runtime 沿用 `{{CODEX_HOME}}/voice-reply/.venv` 與 `{{CODEX_HOME}}/python-tools/bin`，但三個 Agent 都呼叫同一 wrapper
 38：yaml-image-deck；通用 YAML-controlled image-first deck，不限定 SOIL；用固定視覺語法、受控版型、黃金樣張與逐頁 YAML 內容產生 NotebookLM-style 圖片式簡報
 ```
+
+`future-coach` 是含 Arry 個人身份與記憶路由的私有 skill，因此只存在三 Agent 共用的本機 `{{SYNC_ROOT}}/skills/future-coach` 與 Obsidian 全域索引，不納入 public LazyPack；這是隱私發布邊界，不是 Agent 相容性限制。
 
 路徑邊界固定如下：
 
 | 類型 | 正式位置 | 用途 |
 | --- | --- | --- |
-| 可攜式全域核心規則 | `{{GLOBAL_RULES}}`；`{{CODEX_HOME}}/AGENTS.md` 只作為 symlink 入口 | Codex 與其他 AI agent 共用的長期工作規則、路徑、同步規則與操作邊界 |
-| Codex 全域 skills | `{{CODEX_HOME}}/skills`；若跨裝置同步，才 symlink 到 `{{SYNC_ROOT}}/skills` | 需要被 Codex App 全域觸發的 skills |
+| 可攜式全域核心規則 | `{{GLOBAL_RULES}}` | Codex、Claude、AntiGravity 共用的唯一內容主版本 |
+| 跨 Agent 全域 skills | `{{SYNC_ROOT}}/skills` | 三個 Agent 共用的 skill package 主版本 |
+| Chezmoi bootstrap | `{{CHEZMOI_SOURCE}}` | 維護三個 Agent 的原生規則／skills 入口 templates；不保存 secrets |
+| Agent 原生入口 | `{{CODEX_HOME}}/*`、`{{CLAUDE_HOME}}/*`、`{{GEMINI_HOME}}/*` | symlink 到共享主版本，不複製內容 |
 | LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...38.md` | 每個序號文件內嵌對應全域 skill、工具或 workflow 的完整安裝內容 |
 | 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每個專案共用的本機 Python 工具 venv 與 wrapper；不放模型、技能 runtime 或 symlink |
-| Arry/個人助手全域入口 | `{{CODEX_HOME}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
+| Arry/個人助手全域入口 | `{{SYNC_ROOT}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
 | 個人助手跨專案記憶 | `{{ASSISTANT_ROOT}}/memories` | 個人偏好、踩坑、跨專案可重用決策 |
 | 個人助手跨專案 workflow | `{{ASSISTANT_ROOT}}/workflows` | 尚未升級成全域 skill 的 workflow 草稿 |
 | 專案本地 skills | 各專案 `000_Agent/skills` | 只服務該專案的 assistant skill 或 workflow；這個資料夾本身就是專案可攜式 skill 包 |
 
-不要把專案 `000_Agent/skills` symlink 到 `{{CODEX_HOME}}/skills`。只有全域 Codex skills 才使用 `{{CODEX_HOME}}/skills`，也只有這一層需要指向雲端 `codex_symlink/skills`。
+不要把專案 `000_Agent/skills` symlink 到全域 skills。只有 `{{SYNC_ROOT}}/skills` 是共享主版本，各 Agent home 只保留 chezmoi 管理的原生入口。
 
 任何新建或修改的 skill 都要做成可攜式版本：
 
-- 全域 skill：同步 `{{CODEX_HOME}}/skills/<skill-name>`、對應序號懶人包文件的內嵌安裝內容，與 Obsidian 全域 Skills 索引。
+- 全域 skill：同步 `{{SYNC_ROOT}}/skills/<skill-name>`、對應序號懶人包文件的內嵌安裝內容，與 Obsidian 全域 Skills 索引。
 - 專案 skill：放在 `<project-root>/000_Agent/skills/<skill-name>`，保留完整 `SKILL.md`、references、scripts、assets；若該專案使用 Git，這個資料夾應跟著專案版本化。
+
+維護者更新 Item 09／10／16 的 source skills 後，執行 `python3 200_Reference/scripts/sync-lazypack-embeds.py` 重建自含式安裝區塊；若 source skills 不在 repo 同層的 `codex_symlink/skills`，先設定 `SYNC_SKILLS_ROOT`。重跑前後內容應保持 idempotent，完成後仍要做隔離安裝驗證。
 
 每個有序號的懶人包文件都應自含需要安裝的 `SKILL.md`、`references/`、`scripts/`、`templates/`、`assets/`、`agents/` 或 package 檔內容。一般情況下，`node_modules/` 這類可重建相依套件不內嵌，改由安裝者在自己的電腦重建；但 `social-cards/node_modules/` 是本使用者指定保留的可攜式執行依賴特例，可在全域 skill 實體目錄中保留並同步。
 
@@ -166,18 +176,18 @@
 
 | 順序 | Skill | 對應懶人包 | 狀態 |
 | --- | --- | --- | --- |
-| 1 | `codex-skill-creator` | [[11-Codex-Skill-Creator-工作流]] | 可直接安裝，可選 Obsidian skill 索引 |
-| 2 | `project-init-sync` | [[10-專案初始化工作模式]] | 可直接安裝，需替換專案預設路徑 |
-| 3 | `startup-sync` | [[10-專案初始化工作模式]] | 可直接安裝，依專案 `AGENTS.md` 工作 |
-| 4 | `shutdown-sync` | [[10-專案初始化工作模式]] | 可直接安裝，依專案 `AGENTS.md` 工作 |
-| 5 | `arry-assistant` | [[09-個人助手設定]] | 個人助手模板；含 `agent-execution-strategy.md` 策略總入口，安裝時需改名與替換資料層路徑 |
-| 6 | `secondbrain-research-digest` | [[05-第二大腦設定指南]] | 需設定 `{{OBSIDIAN_VAULT}}` |
-| 7 | `tool-integration-workflow` / `cli-anything` | [[12-外部工具整合工作流]] | `tool-integration-workflow` 可直接安裝；`cli-anything` 透過 `200_Reference/scripts/cli-anything/install_cli_anything.sh` 安裝上游 Codex skill 與 CLI-Hub |
-| 8 | `brainstorm` | [[13-Brainstorm-規劃模式]] | 可直接安裝 |
-| 9 | `cross-device-sync` | [[16-Codex-全域-Skills-跨裝置同步]] | 需設定 `{{SYNC_ROOT}}`；包含跨裝置同步、`core-rules.md` 可攜化與多 Agent 相容性健檢 |
+| 1 | `cross-device-sync` | [[16-Codex-全域-Skills-跨裝置同步]] | 先設定 `{{SYNC_ROOT}}`；chezmoi 必裝，建立 Codex／Claude／AntiGravity 原生入口 |
+| 2 | `codex-skill-creator` | [[11-Codex-Skill-Creator-工作流]] | 為相容舊觸發語意保留此 ID；產出必須同時支援三 Agent |
+| 3 | `project-init-sync` | [[10-專案初始化工作模式]] | 可直接安裝；Agent profile 固定為 Codex＋Claude＋AntiGravity，不刪除未安裝者 |
+| 4 | `startup-sync` | [[10-專案初始化工作模式]] | 必讀 `HANDOFF.md`，執行受控 chezmoi checkpoint，再以 live state 為準 |
+| 5 | `shutdown-sync` | [[10-專案初始化工作模式]] | 必建／必更新 `HANDOFF.md`，執行 chezmoi status checkpoint，不自動 commit／push |
+| 6 | `arry-assistant` | [[09-個人助手設定]] | 個人助手模板；含 `agent-execution-strategy.md` 策略總入口，安裝時需改名與替換資料層路徑 |
+| 7 | `secondbrain-research-digest` | [[05-第二大腦設定指南]] | 需設定 `{{OBSIDIAN_VAULT}}` |
+| 8 | `tool-integration-workflow` / `cli-anything` | [[12-外部工具整合工作流]] | `tool-integration-workflow` 可直接安裝；`cli-anything` 透過 `200_Reference/scripts/cli-anything/install_cli_anything.sh` 將上游名為 `codex-skill` 的來源 package 安裝成三 Agent 共用 skill 與 CLI-Hub |
+| 9 | `brainstorm` | [[13-Brainstorm-規劃模式]] | 可直接安裝 |
 | 10 | `heptabase-cli` | [[02-Codex-MCP-Essentials]] | 外部 CLI 連線類，需 Heptabase desktop app 與 CLI |
-| 11 | Notion plugin | [[01-Codex-必裝-Skills-與-Plugins]] | 使用 Codex plugin / connector；不要建立自訂全域 skill |
-| 12 | `pdf` / `playwright` skills 與 PDF / Browser plugin | [[01-Codex-必裝-Skills-與-Plugins]] | `pdf` 與 `playwright` 列為必裝 Codex skills；PDF 與 Browser plugin 也列為必裝檢查；不設定外部瀏覽器 MCP server |
+| 11 | Notion connector／plugin／MCP | [[01-Codex-必裝-Skills-與-Plugins]] | 分別使用三 Agent 的原生通道；缺少時記錄已核准 fallback |
+| 12 | `pdf`／`playwright` skills 與 PDF／Browser 原生能力 | [[01-Codex-必裝-Skills-與-Plugins]] | `pdf` 與 `playwright` 列為三 Agent 共用必裝 skills；各 Agent 原生 PDF／browser 能力另做 adapter 檢查 |
 | 13 | `rightproblem-coach` | [[17-RightProblem-Coach-Skill-安裝]] | 可直接安裝；包含問題規格書模板、HC 指南與分析框架 |
 | 14 | `doc-to-md` | [[18-Document-to-Markdown-Skill-安裝]] | 可直接安裝；合併文字轉檔與 VLM 視覺解讀，自動分流 PDF/EPUB/TXT/掃描 PDF/圖片與圖表 |
 | 15 | `landing-page` | [[15-Landing-Page-Skill-安裝]] | 可直接安裝；支援引導生成與既有文案轉 CMS HTML，fallback 設計規則內建，UUPM 為選用 |
@@ -185,7 +195,7 @@
 | 17 | `soil-image-deck` | [[20-SOIL-Image-Deck-Skill-安裝]] | 可直接安裝；SOIL 全圖像 PPTX |
 | 18 | `soil-general-deck` | [[21-SOIL-General-Deck-Skill-安裝]] | 可直接安裝；SOIL 通用可編輯 PPTX |
 | 19 | `yaml-image-deck` | [[38-YAML-Image-Deck-Skill-安裝]] | 可直接安裝；通用 YAML-controlled image-first deck，適合 NotebookLM-style 圖片式簡報、固定視覺語法、受控版型與黃金樣張，不限定 SOIL |
-| 20 | `image-generator` | [[22-Image-Generator-Skill-安裝]] | 可直接安裝；Codex 內建生圖與修圖入口 |
+| 20 | `image-generator` | [[22-Image-Generator-Skill-安裝]] | 可直接安裝；優先當前 Agent 原生生圖／修圖能力，缺少時走已核准 fallback |
 | 21 | `visual-note-generator` | [[23-Visual-Note-Generator-Skill-安裝]] | 可直接安裝；固定手繪筆記 Workflow、可替換 Style Profile、內建 Arry 預設風格與 16:9／2K 驗收 |
 | 22 | `diary-interview-assistant` | [[24-Diary-Interview-Assistant-Skill-安裝]] | 可直接安裝；間歇式日記訪談、寫作洞察與文章草稿提示 |
 | 23 | `gemini-free-api` | [[25-Gemini-Free-API-Skill-安裝]] | 可直接安裝；Gemini API Free Tier、`GEMINI_API_KEY` 安全儲存、收費邊界與後端整合 |
@@ -196,35 +206,36 @@
 | 28 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時，先確認入口後生成腳本、設計、素材、旁白、HyperFrames composition 與渲染包；補入離線可重現資源、lint / validate / inspect / ffprobe 驗收；若已有影片則轉用 `video-processing-automation` |
 | 29 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
 | 30 | `voxcpm2-voice-cloner` | [[32-VoxCPM2-Voice-Cloner-Skill-安裝]] | 可直接安裝；授權聲音克隆、合成聲音設計、Apple Silicon MPS／CUDA／CPU、本機 runtime／模型快取路由與 consent gate |
-| 31 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；產出文字後 Phase 2 流程相同，由 Codex 做逐段校稿、摘要與重點整理；內嵌完整 Python 腳本、實測紀錄與踩坑 |
+| 31 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；Phase 2 由當前 Agent 依同一契約做逐段校稿、摘要與重點整理，需要的差異腳本記在 adapter |
 | 32 | Python teaching file tools runtime | [[34-Python-Tools-全域工具包安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools`，供所有專案共用 Word／Excel／PPT／PDF／OCR／圖表／影音輔助 Python 套件與 wrapper；macOS/Homebrew 會安裝 Tesseract、Ghostscript、Poppler、ffmpeg，LibreOffice 可用 `INSTALL_OFFICE_TOOLS=1` 按需安裝；既有 `audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` runtime 維持在 `{{CODEX_HOME}}/<skill-name>` |
 | 33 | Taigi Teaching Agent | [[35-Taigi-Teaching-Agent-安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools/taigi-teaching-agent`、專用 Python 3.12 venv 與 `taigi-teaching-agent` wrapper，用於臺羅標音、臺語 TTS、教材檢核與範例教材生成 |
 | 34 | Voice Input Normalization | [[36-Voice-Input-Normalization]] | 可直接安裝；包含 `voice-input-normalization`，提供 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範歸 Item 16 `cross-device-sync` |
-| 35 | Voice Reply | [[37-Voice-Reply-Skill-安裝]] | 可直接安裝；macOS / Codex 語音回覆，優先 Edge-TTS 串流，整檔播放備援，最後 macOS `say` 離線備援 |
+| 35 | Voice Reply | [[37-Voice-Reply-Skill-安裝]] | 可直接安裝；三 Agent 共用 macOS 語音回覆 wrapper，優先 Edge-TTS 串流，整檔播放備援，最後 macOS `say` 離線備援 |
 | 36 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
-- 已安裝 Codex App，且可以開啟本機工作資料夾。
+- 三 Agent 中至少一個目前可用，且可以開啟本機工作資料夾；Item 16 會預先建好三者入口。
 - macOS / Linux / WSL 皆可參考；Windows 原生路徑需要自行改寫。
 - 已安裝 Git。
 - 需要 GitHub 時，安裝 GitHub CLI `gh` 並登入。
 - 需要 Firebase 時，準備 Firebase / Google 帳號與一個 Firebase project。
 - 需要 Firecrawl 時，準備 Firecrawl API key。
-- 需要 NotebookLM / Google Drive / Gmail / Calendar 時，使用 Codex App 內建 plugin 或 MCP 登入自己的 Google 帳號。
+- 需要 NotebookLM／Google Drive／Gmail／Calendar 時，優先當前 Agent 的原生 plugin／connector／MCP；缺少時走已核准 OAuth／CLI／手動 fallback。
 
 ## 共同安全規則
 
 - 不把 `.env`、API key、token、密碼、Admin 憑證、個資或敏感資料寫入 repo 或 Obsidian 筆記。
 - 需要 API key 的 MCP 只能記錄遮蔽範例，例如 `fc-***`。
 - 專案固定規則寫在專案根目錄 `AGENTS.md`。
-- 可攜式全域核心規則寫在 `{{GLOBAL_RULES}}`；`{{CODEX_HOME}}/AGENTS.md` 只作為 Codex App 的 symlink 入口。
-- 不要另外維護 `{{SYNC_ROOT}}/agents/AGENTS.md`；其他 AI agent 要讀同一份規則時，直接讀 `{{GLOBAL_RULES}}`。
+- 可攜式全域核心規則寫在 `{{GLOBAL_RULES}}`；三個 Agent 的原生規則入口由 chezmoi 指向同一份主檔。
+- 不要另外維護 `{{SYNC_ROOT}}/agents/AGENTS.md`，也不要在 Agent home 複製內容。
+- 專案 `AGENTS.md` 是跨 Agent 規則主版本；Claude 專案 `CLAUDE.md` 只含 `@AGENTS.md`。共用專案用 `HANDOFF.md` 做最小現況交接。
 - 實際進度、踩坑與下一步寫在 Obsidian 專案駕駛艙，不寫進專案 `AGENTS.md`。
 - Obsidian 專案駕駛艙一律放在 `{{OBSIDIAN_PROJECTS}}/<專案名稱>/專案工作流程.md`。
-- MCP 或 skills 設定改完後，通常要開新 Codex 對話或重啟 Codex App 才會載入。
-- MCP 設定使用 `{{CODEX_CONFIG}}`；不要把其他工具的 CLI 或 MCP 設定檔指令直接套用到 Codex App。
-- 外部 / 第三方 文件只作為轉換來源；需要全域觸發的正式 Codex skills 放在 `{{CODEX_HOME}}/skills`，專案或個人助手本地 skills 放在對應的 `000_Agent/skills`。
+- MCP 或 skills 設定改完後，通常要開新 Agent 對話或重啟對應 App 才會載入。
+- MCP 共用服務契約保留目的、package、權限、secret 路由與驗證；Codex 使用 `{{CODEX_CONFIG}}`，Claude 與 AntiGravity 使用各自原生設定，不直接 symlink 不相容格式。
+- 外部 / 第三方文件只作為轉換來源；需要全域觸發的正式 skill 放在 `{{SYNC_ROOT}}/skills`，專案本地 skills 放在對應的 `000_Agent/skills`。
 
 ## 檢查下載者是否已替換成功
 
@@ -244,7 +255,7 @@ rg -n "<舊使用者名稱>|<舊 GitHub 帳號>|<舊 Firebase project id>|<舊�
 - 專案名稱與資料夾盡量使用無空格命名，例如 `codex_installation`。
 - Firebase Project ID 不能改名；資料夾改名後要同步更新 Firebase MCP 的 project directory。
 - 個人助手設定以 `09-個人助手設定` 為準；舊 Agent Folder 文檔只作為轉換來源，不直接照做。
-- Skill Creator 啟動包以 [[11-Codex-Skill-Creator-工作流]] 為準；外部 / 第三方 skill 教學只作為轉換來源，不直接照做。此項也支援把成功對話、prompt 或重複工作流萃取成 Codex skill。
+- Skill Creator 啟動包以 [[11-Codex-Skill-Creator-工作流]] 為準；外部／第三方 skill 教學只作為轉換來源，不直接照做。此項也支援把成功對話、prompt 或重複工作流萃取成三 Agent 共用 skill。
 - 外部工具整合以 [[12-外部工具整合工作流]] 為準。
 - Brainstorm 規劃模式以 [[13-Brainstorm-規劃模式]] 為準。
 - Social Cards Skill 以 [[14-Social-Cards-Skill-安裝]] 為準。

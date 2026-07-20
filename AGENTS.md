@@ -29,6 +29,8 @@ Obsidian vault：`{{OBSIDIAN_VAULT}}`
 
 - 使用 `startup-sync` 流程。
 - 讀本檔。
+- 讀取根目錄 `HANDOFF.md` 並與 live state 核對；缺少時由本次收工補建。
+- 執行共享 chezmoi startup checkpoint；符合 commit＋remote＋clean 三項安全閘門時才自動 update，否則安全 no-op。
 - 讀 Obsidian 駕駛艙。
 - 檢查 Git 狀態。
 - 不自動 pull、commit、push。
@@ -36,6 +38,8 @@ Obsidian vault：`{{OBSIDIAN_VAULT}}`
 收工時：
 
 - 使用 `shutdown-sync` 流程。
+- 一律建立或更新根目錄 `HANDOFF.md`，只保留 Current state、Next action、Blockers、Last verified。
+- 執行共享 chezmoi shutdown checkpoint；既有 `.syncRoot` templates 不執行 `chezmoi add`。
 - 更新 Obsidian 駕駛艙。
 - 如規則、路徑、專案邊界改變才更新本檔。
 - 若本次有新增、修改、刪除或重新編號 LazyPack 內容，必須確認 `200_Reference/lazy-pack/` 已同步到 Obsidian `專案庫/codex_installation/懶人包/`，並把 repo 內 LazyPack 變更納入本專案 GitHub commit/push 範圍。
@@ -43,17 +47,17 @@ Obsidian vault：`{{OBSIDIAN_VAULT}}`
 
 全域 Skill 同步：
 
-- 全域 skills 預設位置：`{{CODEX_HOME}}/skills`
-- 目前 `{{CODEX_HOME}}/skills` 是 symlink，實體位置在 `{{SYNC_ROOT}}/skills`
-- Skill 路徑採白名單：全域只使用 `{{CODEX_HOME}}/skills`，專案本地只使用 `<project-root>/000_Agent/skills`；不建立或使用其他工具的 skill 路徑。
-- 建立、擷取、轉換、更新、改名或驗證自訂 skill 時，一律先使用 `{{CODEX_HOME}}/skills/codex-skill-creator`；內建 `skill-creator` 只作為唯讀輔助參考。
+- 全域 skills 唯一實體主版本：`{{SYNC_ROOT}}/skills`。
+- Codex `{{CODEX_HOME}}/skills`、Claude `{{CLAUDE_HOME}}/skills` 與 AntiGravity `{{GEMINI_CONFIG}}/skills` 是 chezmoi 管理的原生入口，都指向 `{{SYNC_ROOT}}/skills`。
+- Skill 路徑採白名單：共用主版本只使用 `{{SYNC_ROOT}}/skills`，三個 Agent 只使用上述原生入口，專案本地只使用 `<project-root>/000_Agent/skills`。
+- 建立、擷取、轉換、更新、改名或驗證自訂 skill 時，一律先使用 `{{SYNC_ROOT}}/skills/codex-skill-creator`；名稱保留是為了現有觸發相容，輸出 package 必須同時相容 Codex、Claude 與 AntiGravity。
 - Obsidian 同步索引：`專案庫/codex_installation/全域 Skills/全域 Skills 同步.md`
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
 - 全域 skill 的主版本是 symlink 實體目錄 `{{SYNC_ROOT}}/skills`；LazyPack 不是主版本，而是 repo 內可公開 push、可讓使用者下載安裝的自含式可攜化版本。
 - 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `200_Reference/lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容覆蓋所有應公開安裝的全域 skills、必要 references/scripts/assets 與安裝說明。
 - LazyPack 允許和全域 skills 目錄結構不同：可用一份序號文件包多個 skills，也可包含 MCP、plugin、Obsidian、GitHub、Firebase、NotebookLM 等非 skill 安裝項目；但 README 的安裝總表必須清楚標出哪些是完整內嵌安裝、哪些只是外部依賴或必裝檢查。
 - 個人專用或含個人記憶/身份設定的全域 skill 不放入公開 LazyPack；目前 `future-coach` 是 Arry 個人專用 skill，不公開安裝，也不算 LazyPack 缺口。
-- 同步後要實際比對 `{{CODEX_HOME}}/skills`、`200_Reference/lazy-pack/` 對應序號文件內嵌的 skill 名稱、LazyPack README 安裝總表與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
+- 同步後要實際比對 `{{SYNC_ROOT}}/skills`、Codex／Claude／AntiGravity 三個原生入口、`200_Reference/lazy-pack/` 對應序號文件內嵌的 skill 名稱、LazyPack README 安裝總表與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。
 - 若全域 skill 變更影響固定工作規則、路徑或專案邊界，也要同步更新本檔。
 
 Arry 助手 AI 分身資料層：
@@ -69,12 +73,14 @@ Arry 助手 AI 分身資料層：
   - 同步後只保留 `diff -qr` 作為一致性驗證方式；`knowledge/` 比對完整目錄，`memories/` 只比對第一層檔案清單與內容。
   - 不使用 Obsidian symlink 當同步替代品；同步完成後 Obsidian `Arry 助手/` 必須是只包含完整 `knowledge/` 與只含第一層檔案的 `memories/` 的實體鏡像資料夾，且與主版本一致。
 - 本 repo 的 `000_Agent/` 只保留指向說明，不存放真實個人記憶或偏好。
-- Codex 全域規則唯一實體主版本為 `codex_symlink/core-rules.md`；`{{CODEX_HOME}}/AGENTS.md` 只是指向它的 symlink，不再使用或重建 `codex_symlink/agents/AGENTS.md`。
-- Arry 助手是 Codex App 與 AntiGravity 設定，不使用其他 AI 編輯器專用的規則檔（例如舊版 `CLAUDE.md` 等）或其專屬路徑。
-- 可被所有專案呼叫的部分放在全域 skill：`{{CODEX_HOME}}/skills/arry-assistant/SKILL.md`。
+- 跨 Agent 全域規則唯一實體主版本為 `codex_symlink/core-rules.md`；Codex、Claude 與 AntiGravity 的原生規則入口都由 Item 16 的 chezmoi bootstrap 指向它，不再使用或重建 `codex_symlink/agents/AGENTS.md`。
+- 跨 Agent skills 唯一實體主版本為 `codex_symlink/skills`；Codex 使用 `~/.codex/skills`、Claude 使用 `~/.claude/skills`、AntiGravity 使用 `~/.gemini/config/skills`。舊 AntiGravity `config/AGENTS.md` 與 `config/plugins/codex/skills` 只保留相容入口。
+- chezmoi 是新電腦安裝、入口重建與修復的必要工具；既有 Google Drive symlink 仍負責即時共用內容。chezmoi 不同步 secrets、sessions、cache、OAuth/MCP 認證或 repo Git 歷史，也不自動 commit/push source。
+- 每次開工／收工由 `cross-device-sync/scripts/session-sync-checkpoint.sh` 自動執行 bootstrap dry-run 與 `chezmoi status`；開工只在 source 已有 commit、remote 且乾淨時自動 update。`chezmoi add` 不用於既有九個 templates，只在新增白名單入口時使用受控 #16 流程。
+- 可被所有專案與三個 Agent 呼叫的部分放在全域 skill 主版本：`{{SYNC_ROOT}}/skills/arry-assistant/SKILL.md`。
 - Arry 助手本身是全域入口 skill；每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷新 skill 歸屬。
 - 任何自訂 skill 的建立與維護都必須由全域 `codex-skill-creator` 工作流處理。
-- 只有全域 Codex skills 才使用 `{{CODEX_HOME}}/skills`，此路徑目前指向 Google Drive `codex_symlink/skills`。
+- 全域 skills 的唯一主版本是 `codex_symlink/skills`；各 Agent home 只保留 chezmoi 管理的原生入口 symlink。
 - Arry 助手跨專案記憶與個人偏好放在 `codex_symlink/memories/MEMORY.md`。
 - Arry 助手跨專案 workflow 草稿放在 `codex_symlink/workflows/`。
 - Arry 助手跨策略總入口放在 `codex_symlink/knowledge/agent-execution-strategy.md`；需要實際執行、修改或同步時，先判斷任務階段，再按需載入詳細 Knowledge，不一次載入全部策略。
@@ -82,11 +88,19 @@ Arry 助手 AI 分身資料層：
 - 若來源文件含 AI 分身預設名稱，不使用來源預設名，改用「Arry 助手」。
 - 若 Arry 助手資料層與新專案初始化規則衝突，先詢問使用者再決定。
 - `project-init-sync`、`startup-sync`、`shutdown-sync` 已整合 Arry 助手雙層資料層：未來新專案預設建立本地 `100_Todo/`、`200_Reference/`；若該專案需要本地 assistant skill 或本地記憶，再建立該專案自己的 `000_Agent/skills/`、`000_Agent/memories/`，並引用 `codex_symlink` 全域 Arry 助手資料層。現有專案開工/收工時可同步跨專案記憶。
+- 專案 `AGENTS.md` 是跨 Agent 規則主版本；一律建立只含 `@AGENTS.md` 的薄 `CLAUDE.md`。一律使用 `HANDOFF.md` 記錄 current state、next action、blockers 與 last verified；開工先讀、收工更新，不放 secrets 或耐久記憶。
+
+三 Agent 執行契約：
+
+- Arry 的專案固定同時支援 Codex、Claude 與 AntiGravity，共用同一份 `AGENTS.md`、`HANDOFF.md`、專案腳本、輸入輸出契約與驗證標準。
+- 凡是 connector、plugin、MCP、內建生圖、sandbox、UI 操作或模型路由不同，必須在同一份 skill／腳本／文件中記錄「共用步驟／Codex adapter／Claude adapter／AntiGravity adapter／驗證」。
+- 若某 Agent 沒有對等原生能力，改走共用腳本／CLI、該 Agent 的 MCP／plugin、經授權 API 或瀏覽器／人工步驟；不得將其中任一 Agent 標記為不支援。
+- 分流腳本優先提供 `--agent auto|codex|claude|antigravity`（或等價參數），但三條路徑必須交付同一結果契約。
 
 新專案初始化時：
 
 - 使用 `project-init-sync` 流程。
-- 以 `200_Reference/lazy-pack/10-專案初始化工作模式.md` 為本專案內的固定參考檔；全域規則已同步到 `{{CODEX_HOME}}/AGENTS.md`。
+- 以 `200_Reference/lazy-pack/10-專案初始化工作模式.md` 為本專案內的固定參考檔；全域規則已由 chezmoi 同步到 Codex `{{CODEX_HOME}}/AGENTS.md`、Claude `{{CLAUDE_HOME}}/CLAUDE.md` 與 AntiGravity `{{GEMINI_HOME}}/GEMINI.md`。
 
 ## 主要檔案
 

@@ -139,7 +139,7 @@ Python 套件之外，部分功能需要系統工具：
 | ffmpeg | `yt-dlp` 下載合併影音 | `brew install ffmpeg` |
 | Microsoft Word 或 LibreOffice | `docx2pdf` / Office 轉 PDF | 安裝 Office 或 LibreOffice |
 
-安裝腳本預設會在 macOS + Homebrew 上安裝 `tesseract`、`tesseract-lang`、`ghostscript`、`poppler` 與 `ffmpeg`。LibreOffice / Microsoft Office 屬大型 GUI app 或商業軟體，預設不安裝；需要 `soffice` 時用 `INSTALL_OFFICE_TOOLS=1` 跑腳本，或自行安裝 Microsoft Office / LibreOffice。安裝完系統工具後，通常要重開終端機或重啟 Codex 對話，PATH 才會刷新。
+安裝腳本預設會在 macOS + Homebrew 上安裝 `tesseract`、`tesseract-lang`、`ghostscript`、`poppler` 與 `ffmpeg`。LibreOffice / Microsoft Office 屬大型 GUI app 或商業軟體，預設不安裝；需要 `soffice` 時用 `INSTALL_OFFICE_TOOLS=1` 跑腳本，或自行安裝 Microsoft Office / LibreOffice。安裝完系統工具後，通常要重開終端，並對 Codex、Claude、AntiGravity 分別開新對話或重載環境，PATH 才會刷新。
 
 ### Tesseract 安裝與 Homebrew 權限修復
 
@@ -258,7 +258,7 @@ test -d "{{HOME}}/.local/share/uv"
 "{{CODEX_HOME}}/doc-to-md/doc-to-md" --help
 "{{CODEX_HOME}}/vlm-to-md/vlm-to-md" --help
 "{{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/bin/python" \
-  "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py" doctor
+  "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py" doctor
 "{{HOME}}/.local/bin/notebooklm-mcp" --help
 tesseract --list-langs | grep -E '^(chi_tra|chi_sim|eng|osd)$'
 gs --version
