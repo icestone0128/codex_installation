@@ -1,16 +1,16 @@
 # 02-Codex-MCP-Essentials
 
-> 2026-06-01 更新：Heptabase CLI Skill 已依 `heptameta/heptabase-cli-skills` v1.4.0 重新同步，維持 `0.4.x` 相容，並補齊 property、PDF、file、transcript 與 Codex sandbox references。
+> 2026-07-20 更新：MCP 改為「共用服務契約＋Codex／Claude／AntiGravity 原生 adapter」。Heptabase CLI Skill 維持 `0.4.x` 相容；Codex sandbox references 明確標示為 Codex 專屬 adapter，不當作其他 Agent 設定格式。
 
 
 ## 目標
 
-把 來源工具 CLI 取向的 MCP 安裝概念，改成適合 Codex App 的 MCP / plugin 設定方式。
+把來源工具 CLI 取向的 MCP 安裝概念，改成 Codex、Claude、AntiGravity 都可執行的整合方式：共用服務目的、package、權限、secret 路由與驗證，設定檔則分別使用三個原生 adapter。
 
 ## 前置條件
 
-- 已安裝 Codex App。
-- 已決定 `{{CODEX_CONFIG}}`。
+- 三 Agent 中至少一個現在可用；Item 16 已準備三者原生入口。
+- 若設定 Codex adapter，已決定 `{{CODEX_CONFIG}}`；Claude 與 AntiGravity 依當前安裝版本的官方 help 確認原生 MCP 設定位置。
 - 已安裝 Node.js / npm。
 - 新電腦先跑最小檢查；缺工具時先告知用途與安裝位置，再取得使用者同意，不要靜默安裝：
 
@@ -27,11 +27,11 @@ python3 --version
 - 需要 Firecrawl 時，準備 `{{CODEX_HOME}}/secrets/firecrawl_api_key`，權限設為 `600`。
 - 需要 Filesystem MCP 時，先決定最小授權資料夾。
 
-## Codex App 與 來源工具 CLI 差異
+## 三 Agent MCP adapter
 
-來源工具 CLI 常用 `來源工具 mcp add ...` 或 來源工具 MCP 設定檔。
+共用層只定義服務目的、package／endpoint、權限、secret 路由與最小驗證。不同 MCP client 的設定檔格式不共用、不 symlink。
 
-Codex App 使用：
+Codex adapter 使用：
 
 ```text
 {{CODEX_CONFIG}}
@@ -45,6 +45,8 @@ codex mcp list
 ```
 
 新增或修改 MCP server 後，通常要重啟 Codex App 或開新對話才會載入。
+
+Claude adapter：依當前版本的 `claude mcp add`、專案 `.mcp.json` 或 user config 建立，並用 `claude mcp list` 或官方 help 確認。AntiGravity adapter：依當前版本 MCP Store 或 `{{GEMINI_CONFIG}}/mcp_config.json` 建立並重載。若原生 MCP 通道不可用，三者都可回退到官方 CLI、已核准 API 或手動流程。
 
 ## Firecrawl MCP
 
@@ -74,7 +76,7 @@ tool_timeout_sec = 120
 
 ## Filesystem MCP
 
-用途：讓 Codex 透過 MCP 存取工作區外的指定資料夾。
+用途：讓當前 Agent 透過 MCP 存取工作區外的指定資料夾。三 Agent 的授權範圍要分別驗證，不得假設共用權限。
 
 先選最小授權範圍，例如：
 
@@ -106,7 +108,7 @@ tool_timeout_sec = 120
 
 ## Heptabase CLI Skill
 
-用途：讓 Codex 透過 Heptabase CLI 管理 note、journal、tag、card、whiteboard 與 AI Tutor 內容。
+用途：讓 Codex、Claude、AntiGravity 都能透過共用 Heptabase CLI skill 管理 note、journal、tag、card、whiteboard 與 AI Tutor 內容。
 
 這一項歸在 02，因為它是外部工具 / CLI 連線能力，不放在 01 的基礎 plugin 檢查裡。使用前請確認：
 
@@ -119,7 +121,7 @@ tool_timeout_sec = 120
 
 ## Google Drive / Gmail / Calendar
 
-Codex App 有對應 plugins / connectors 時，優先使用 plugin，不必走舊的 Google Workspace CLI (`gws`) 路線。
+當前 Agent 有對應 plugins／connectors 時，優先使用原生通道；沒有時使用經核准的 OAuth／CLI／API 路線，不因某 Agent 缺少 plugin 而排除它。
 
 建議：
 
@@ -129,22 +131,22 @@ Codex App 有對應 plugins / connectors 時，優先使用 plugin，不必走�
 
 ## 驗證
 
-改完 `{{CODEX_CONFIG}}` 後：
+完成當前 Agent adapter 後：
 
-1. 重啟 Codex App 或開新對話。
-2. 若使用 CLI 設定，先跑 `codex mcp list`。
-3. 請 Codex 回報目前可用 MCP / plugin 工具。
+1. 重載對應的 Codex、Claude 或 AntiGravity 對話／MCP 設定。
+2. 使用該 Agent 的原生 list／status 指令或工具清單確認載入；Codex 可用 `codex mcp list`，Claude 可用 `claude mcp list`。
+3. 請當前 Agent 回報目前可用 MCP／plugin／connector 工具。
 4. Firecrawl：抓取 `https://example.com`。
 5. Filesystem：列出 `{{FILESYSTEM_ALLOWED_DIR}}` 內的一個測試資料夾。
 6. Browser plugin：開啟 `https://example.com` 並截圖。
 7. Google Drive / Gmail / Calendar：各查一個不敏感的測試項目。
 
-若任何一項失敗，先檢查 command 絕對路徑、API key、登入狀態與 Codex 是否已重啟。
+若任何一項失敗，先檢查 command 絕對路徑、API key、登入狀態與當前 Agent 是否已重載，再測試共用 CLI／API fallback。
 
 ## 跨系統 MCP 設定坑
 
 - Codex App 使用 TOML；不要直接 symlink 或照貼 Claude、AntiGravity、OpenCode 的 JSON 設定檔。
-- JSON 設定檔不能有註解或多餘逗號；若你正在轉寫其他 Agent 的範例，先轉成 Codex TOML。
+- JSON 設定檔不能有註解或多餘逗號；共用的 MCP 目的、package 與權限保持一致，再分別寫成 Codex TOML、Claude 原生設定與 AntiGravity 原生設定。
 - Windows 路徑在 JSON 中要用 `C:/path` 或 `C:\\path`；單一 `\` 會破壞 JSON。Codex TOML 中也應避免未跳脫的反斜線。
 - Claude Code 在 Windows 原生環境啟動 `npx` stdio MCP 時常需要 `cmd /c`；這是 Claude 的格式，不要直接套進 Codex TOML。
 - ChatGPT App 的官方 Apps / Plugins 入口可能改名；若介面和文件不同，以目前 App UI 或官方文件為準。
@@ -173,7 +175,7 @@ args = ["-lc", "NPM_CONFIG_CACHE=/private/tmp/firecrawl-mcp-cache FIRECRAWL_API_
 
 ## 設定範例
 
-本機曾成功測試：
+本機 Codex adapter 曾成功測試；Claude 與 AntiGravity 安裝後也要重複同一組低風險測試：
 
 - Firecrawl 抓 `https://example.com`。
 - Filesystem MCP 授權單一路徑。
@@ -183,28 +185,28 @@ args = ["-lc", "NPM_CONFIG_CACHE=/private/tmp/firecrawl-mcp-cache FIRECRAWL_API_
 
 ## 踩坑修正
 
-- Codex App 已有 Browser plugin 時，瀏覽器自動化優先使用 plugin。
+- 當前 Agent 已有原生 browser／computer-use 時，瀏覽器自動化優先使用原生通道；需要可重現 CLI 時改用 `playwright` skill。
 - Filesystem MCP 授權範圍不能太大，否則安全風險高。
 - Firecrawl key 不能進 Git、Obsidian 公開筆記或 README。
-- 重啟 Codex App 或開新對話後，再確認 MCP 是否出現在實際可呼叫工具清單。
+- 對影響到的 Codex、Claude、AntiGravity 分別重載後，再確認 MCP 是否出現在實際可呼叫工具清單。
 
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`heptabase-cli`。
+本節是自含式安裝區塊。這個序號項目會安裝：`heptabase-cli`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
-```bash
+````bash
 set -e
 
 # ---- heptabase-cli ----
-mkdir -p "{{CODEX_HOME}}/skills/heptabase-cli"
+mkdir -p "{{SYNC_ROOT}}/skills/heptabase-cli"
 # heptabase-cli/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/heptabase-cli/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/heptabase-cli/SKILL.md" <<'CODEX_LAZYPACK_HEPTABASE_CLI_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_SKILL_MD_0E95F5A366'
 ---
 name: heptabase-cli
 description: Interact with Heptabase using the CLI to manage knowledge base content, search cards, edit properties, read parsed PDF and media transcript content, export local files, manage whiteboard cards, and browse AI Tutor goals, courses, and lessons.
@@ -285,11 +287,11 @@ Every command prints JSON to stdout. You can parse it with `jq` or pipe it to ot
 ## Warnings
 
 - **Use the CLI as the only data access path.** Never directly read, write, or modify Heptabase app data through local database files, app storage, cache files, internal endpoints, or any other non-CLI mechanism. If the CLI does not support the requested operation, stop and report that it is not supported.
-CODEX_LAZYPACK_HEPTABASE_CLI_SKILL_MD
+AGENT_LAZYPACK_HEPTABASE_CLI_SKILL_MD_0E95F5A366
 
 # heptabase-cli/references/codex-sandbox.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/heptabase-cli/references/codex-sandbox.md")"
-cat > "{{CODEX_HOME}}/skills/heptabase-cli/references/codex-sandbox.md" <<'CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_CODEX_SANDBOX_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/codex-sandbox.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/references/codex-sandbox.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_CODEX_SANDBOX_MD_5151D78187'
 # Codex Sandbox Troubleshooting
 
 The Heptabase CLI talks to the running desktop app through a local server. Codex
@@ -311,7 +313,7 @@ If it still fails, ask the user to make sure the desktop app has CLI enabled at
 `Settings > AI Features`.
 
 If you want a persistent `workspace-write` setup, ask the user to add this to
-`{{CODEX_HOME}}/config.toml`:
+`~/.codex/config.toml`:
 
 ```toml
 [sandbox_workspace_write]
@@ -319,11 +321,11 @@ network_access = true
 ```
 
 Restart Codex and retry the command.
-CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_CODEX_SANDBOX_MD
+AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_CODEX_SANDBOX_MD_5151D78187
 
 # heptabase-cli/references/file-reading.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/heptabase-cli/references/file-reading.md")"
-cat > "{{CODEX_HOME}}/skills/heptabase-cli/references/file-reading.md" <<'CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_FILE_READING_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/file-reading.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/references/file-reading.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_FILE_READING_MD_0BE79148E0'
 # File Reading
 
 Use `heptabase file list` to resolve a PDF/media card ID into exportable file IDs. Use `heptabase file export` to copy a local raw file into a scratch directory so native file-reading tools can inspect it.
@@ -418,11 +420,11 @@ Now read `/tmp/hepta-read/report-55555555-5555-4555-8555-555555555555.pdf` with 
 - `file list --card-id` returns empty `files`: this card has no exportable local file. If the user expected a PDF/media file, ask them to verify the card.
 - `file export` says the file is unavailable locally: ask the user to open/sync the file in Heptabase, then retry.
 - Invalid or missing `--output-dir`: create a scratch directory with `mktemp -d` and retry.
-CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_FILE_READING_MD
+AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_FILE_READING_MD_0BE79148E0
 
 # heptabase-cli/references/pdf-reading.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/heptabase-cli/references/pdf-reading.md")"
-cat > "{{CODEX_HOME}}/skills/heptabase-cli/references/pdf-reading.md" <<'CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_PDF_READING_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/pdf-reading.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/references/pdf-reading.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_PDF_READING_MD_31FFFB5E2E'
 # PDF Reading
 
 ## Common Usage Pattern
@@ -464,11 +466,11 @@ heptabase pdf read <pdfCardId> --start-page 1 --end-page 5
 - `parsedStatus: "processing"`: wait and retry later.
 - `parsedStatus: "failed"` or `"notSupported"`: parsed Markdown is not available for this PDF.
 - `parsedStatus: null`: this PDF card is not parsed yet. Ask the user to open the PDF in Heptabase and click the **Parse** button.
-CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_PDF_READING_MD
+AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_PDF_READING_MD_31FFFB5E2E
 
 # heptabase-cli/references/property-values.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/heptabase-cli/references/property-values.md")"
-cat > "{{CODEX_HOME}}/skills/heptabase-cli/references/property-values.md" <<'CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_PROPERTY_VALUES_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/property-values.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/references/property-values.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_PROPERTY_VALUES_MD_8FC6105DC1'
 # Property Value Formats
 
 Read property definitions and current values before writing:
@@ -566,11 +568,11 @@ heptabase card set-property <cardIdOrDate> --property-id <propertyId> --json-val
 # Clear a property
 heptabase card set-property <cardIdOrDate> --property-id <propertyId> --json-value null
 ```
-CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_PROPERTY_VALUES_MD
+AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_PROPERTY_VALUES_MD_8FC6105DC1
 
 # heptabase-cli/references/transcript-reading.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/heptabase-cli/references/transcript-reading.md")"
-cat > "{{CODEX_HOME}}/skills/heptabase-cli/references/transcript-reading.md" <<'CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_TRANSCRIPT_READING_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/transcript-reading.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/references/transcript-reading.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_TRANSCRIPT_READING_MD_21904738FE'
 # Transcript Reading
 
 ## Common Usage Pattern
@@ -613,12 +615,11 @@ heptabase video read <videoCardId> --start-seconds 0 --end-seconds 300
 - `transcriptStatus: "processing"`: wait and retry later.
 - `transcriptStatus: "failed"`: parsed transcript content is not available for this media card.
 - `transcriptStatus: null`: this media card has not been transcribed yet. Ask the user to generate a transcript in Heptabase first.
-CODEX_LAZYPACK_HEPTABASE_CLI_REFERENCES_TRANSCRIPT_READING_MD
+AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_TRANSCRIPT_READING_MD_21904738FE
 
-test -f "{{CODEX_HOME}}/skills/heptabase-cli/SKILL.md" && echo "heptabase-cli installed"
-test -f "{{CODEX_HOME}}/skills/heptabase-cli/references/codex-sandbox.md" && echo "heptabase-cli references installed"
+test -f "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md" && echo "heptabase-cli installed for Codex, Claude, and AntiGravity"
+````
 
-echo "embedded skills installed: heptabase-cli"
-```
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

@@ -47,7 +47,7 @@ git -C "$SOURCE_DIR" -c advice.detachedHead=false checkout "$CLI_ANYTHING_COMMIT
 skill_dir="$CODEX_HOME/skills/cli-anything"
 if [[ -e "$skill_dir" ]]; then
   backup="${skill_dir}.backup.$(date +%Y%m%d-%H%M%S)"
-  log "backing up existing Codex skill to $backup"
+  log "backing up existing three-agent shared skill to $backup"
   mv "$skill_dir" "$backup"
 fi
 
@@ -70,7 +70,7 @@ exec "$HUB_ROOT/.venv/bin/cli-hub" "\$@"
 EOF
 chmod +x "$BIN_DIR/cli-hub"
 
-log "verifying Codex skill files"
+log "verifying three-agent shared skill files"
 test -f "$skill_dir/SKILL.md"
 test -f "$skill_dir/references/HARNESS.md"
 test -f "$skill_dir/references/commands/cli-anything.md"

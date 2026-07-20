@@ -1,6 +1,6 @@
 # 32-VoxCPM2-Voice-Cloner-Skill-安裝
 
-> 來源：`mathruffian-dot/voxcpm2-voice-cloner`，稽核 commit `3d151de3ce5e51762af4f28756ac47e00a867257`。本版已轉為 Codex App、macOS Apple Silicon、CUDA 與 CPU 相容的全域 Skill。
+> 來源：`mathruffian-dot/voxcpm2-voice-cloner`，稽核 commit `3d151de3ce5e51762af4f28756ac47e00a867257`。本版已轉為 Codex、Claude、AntiGravity 共用，並支援 macOS Apple Silicon、CUDA 與 CPU 的全域 Skill。
 
 ## 用途
 
@@ -44,7 +44,7 @@
 ## 安裝後的固定路徑
 
 ```text
-{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/
+{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/
 {{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/
 {{CODEX_HOME}}/voxcpm2-voice-cloner/model-cache/
 {{SYNC_ROOT}}/knowledge/arry-voice-profiles/Arry/
@@ -68,10 +68,10 @@ writable_roots = [
 在 `{{CODEX_HOME}}/rules/default.rules` 加入固定入口：
 
 ```text
-prefix_rule(pattern=["bash", "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh"], decision="allow")
-prefix_rule(pattern=["{{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/bin/python", "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py"], decision="allow")
-prefix_rule(pattern=["{{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/bin/python", "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/record_ui.py"], decision="allow")
-prefix_rule(pattern=["{{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/bin/python", "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/record_cli.py"], decision="allow")
+prefix_rule(pattern=["bash", "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh"], decision="allow")
+prefix_rule(pattern=["{{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/bin/python", "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py"], decision="allow")
+prefix_rule(pattern=["{{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/bin/python", "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/record_ui.py"], decision="allow")
+prefix_rule(pattern=["{{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/bin/python", "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/record_cli.py"], decision="allow")
 ```
 
 Apple Silicon 的 Metal 裝置可能在一般 workspace sandbox 內被隱藏，造成 `mps=False`。後續 `doctor` 與生成動作應走上述固定外部入口；不要改成允許任意 Python。
@@ -88,14 +88,14 @@ test ! -L "{{CODEX_HOME}}/voxcpm2-voice-cloner"
 若 `{{CODEX_HOME}}/voxcpm2-voice-cloner/model-cache/` 已由另一台電腦同步完成，下一步不應重新下載模型；若 `.venv` 因平台或 Python 路徑不相容，可重跑 setup，但保留 `model-cache/`。
 
 ```bash
-bash "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh"
+bash "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh"
 ```
 
 驗證：
 
 ```bash
 "{{CODEX_HOME}}/voxcpm2-voice-cloner/.venv/bin/python" \
-  "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py" doctor
+  "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py" doctor
 ```
 
 Apple Silicon 應在外部固定入口看到 `mps=True`。
@@ -134,15 +134,18 @@ $voxcpm2-voice-cloner
 
 ## 內建 Skill 完整安裝內容
 
-本節是自含式安裝區塊，會安裝 `voxcpm2-voice-cloner` Skill package；不會安裝 runtime、模型權重或聲音資料。先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾。
+本節是自含式安裝區塊。這個序號項目會安裝：`voxcpm2-voice-cloner`。
+
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-mkdir -p "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner"
+# ---- voxcpm2-voice-cloner ----
+mkdir -p "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner"
 # voxcpm2-voice-cloner/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/SKILL.md" <<'CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/SKILL.md" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SKILL_MD_0E95F5A366'
 ---
 name: voxcpm2-voice-cloner
 description: Use when the user asks to install or run VoxCPM2, clone an authorized voice, synthesize speech from a voice reference, design a synthetic voice, record or import a voice profile, list local voice profiles, or generate multi-speaker dialogue. Supports macOS Apple Silicon MPS, CUDA, and CPU through a local Python 3.12 runtime. Require explicit permission for every cloned real-person voice.
@@ -162,8 +165,8 @@ The wrapper requires `--consent` for real-voice profile creation and cloning. Do
 
 ## Local Paths
 
-- Skill package: `{{CODEX_HOME}}/skills/voxcpm2-voice-cloner`
-- Runtime data: `${VOXCPM2_HOME:-${CODEX_HOME}/voxcpm2-voice-cloner}`. For Arry, keep this as a local real folder, not a symlink to Google Drive, so `.venv`, `model-cache`, `recordings`, and `output` stay fast on the current machine.
+- Skill package: `{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner`
+- Runtime data: `${VOXCPM2_HOME:-$HOME/.codex/voxcpm2-voice-cloner}`. For Arry, keep this as a local real folder, not a symlink to Google Drive, so `.venv`, `model-cache`, `recordings`, and `output` stay fast on the current machine.
 - Python environment: `$VOXCPM2_HOME/.venv`
 - Voice profiles: `$VOXCPM2_HOME/voices/<voice-name>/`
 - Outputs: `$VOXCPM2_HOME/output/`
@@ -171,7 +174,7 @@ The wrapper requires `--consent` for real-voice profile creation and cloning. Do
 - Optional reusable profile root: `$VOXCPM2_VOICES_DIR/<voice-name>/`
 - Optional project output root: `$VOXCPM2_OUTPUT_DIR/`
 
-Never copy model weights, generated audio, or the runtime virtual environment into LazyPack, Obsidian, Git, the global skill package, or Google Drive sync folders. For Arry, the canonical runtime is the local real folder `${CODEX_HOME}/voxcpm2-voice-cloner`; do not point it at `codex_symlink/runtimes`. Reusable personal voice profiles may live in the user's private assistant asset layer; for Arry, the canonical profile folder is `codex_symlink/knowledge/arry-voice-profiles/Arry/`. Generated outputs default to the local runtime `output/` unless `$VOXCPM2_OUTPUT_DIR` is explicitly set for a project.
+Never copy model weights, generated audio, or the runtime virtual environment into LazyPack, Obsidian, Git, the global skill package, or Google Drive sync folders. For Arry, the canonical runtime is the local real folder `$HOME/.codex/voxcpm2-voice-cloner`; do not point it at `codex_symlink/runtimes`. Reusable personal voice profiles may live in the user's private assistant asset layer; for Arry, the canonical profile folder is `codex_symlink/knowledge/arry-voice-profiles/Arry/`. Generated outputs default to the local runtime `output/` unless `$VOXCPM2_OUTPUT_DIR` is explicitly set for a project.
 
 - **自適應專案收納 (Adaptive Project Path Routing)**: 當在標準四盒專案（含有 `100_Todo/`）下執行時：
   - **過程素材與工程** 應置於相對路徑 `100_Todo/drafts/voxcpm2-voice-cloner/`。
@@ -185,7 +188,7 @@ Read `references/runtime.md` before installing or repairing the runtime.
 Run:
 
 ```bash
-bash "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh"
+bash "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh"
 ```
 
 The setup uses `uv`, creates an isolated Python 3.12 environment, and installs the pinned VoxCPM runtime. It does not download model weights until the first generation request.
@@ -195,8 +198,8 @@ The setup uses `uv`, creates an isolated Python 3.12 environment, and installs t
 Set reusable paths:
 
 ```bash
-SKILL="${CODEX_HOME:-${CODEX_HOME}}/skills/voxcpm2-voice-cloner"
-HOME_DIR="${VOXCPM2_HOME:-${CODEX_HOME}/voxcpm2-voice-cloner}"
+SKILL="${CODEX_HOME:-$HOME/.codex}/skills/voxcpm2-voice-cloner"
+HOME_DIR="${VOXCPM2_HOME:-$HOME/.codex/voxcpm2-voice-cloner}"
 PY="$HOME_DIR/.venv/bin/python"
 TOOL="$SKILL/scripts/voice_cloner.py"
 ```
@@ -204,8 +207,8 @@ TOOL="$SKILL/scripts/voice_cloner.py"
 For Arry's local setup, ensure the runtime path is a real local directory before running setup or generation:
 
 ```bash
-mkdir -p "${CODEX_HOME}/voxcpm2-voice-cloner"
-test ! -L "${CODEX_HOME}/voxcpm2-voice-cloner"
+mkdir -p "$HOME/.codex/voxcpm2-voice-cloner"
+test ! -L "$HOME/.codex/voxcpm2-voice-cloner"
 ```
 
 Route reusable profiles and project outputs when needed:
@@ -288,26 +291,26 @@ After setup:
 ## Source And Maintenance
 
 Read `references/upstream.md` before refreshing this skill from upstream. Preserve the consent gate, private local-data boundary, MPS support, current official API compatibility, LazyPack package, and Obsidian index during upgrades.
-CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SKILL_MD
+AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SKILL_MD_0E95F5A366
 
 # voxcpm2-voice-cloner/agents/openai.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/agents/openai.yaml" <<'CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_AGENTS_OPENAI_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/agents/openai.yaml" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "VoxCPM2 Voice Cloner"
   short_description: "Clone authorized voices with local VoxCPM2"
   default_prompt: "Use $voxcpm2-voice-cloner to create speech from an authorized voice reference."
-CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_AGENTS_OPENAI_YAML
+AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_AGENTS_OPENAI_YAML_DEB9755D27
 
 # voxcpm2-voice-cloner/assets/sample_text.txt
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/assets/sample_text.txt")"
-cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/assets/sample_text.txt" <<'CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_ASSETS_SAMPLE_TEXT_TXT'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/assets/sample_text.txt")"
+cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/assets/sample_text.txt" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_ASSETS_SAMPLE_TEXT_TXT_6D1F2EBBC6'
 今天我正在錄製一段授權的參考聲音。這段錄音會用於本機語音合成測試，我會保持自然語速、清楚發音，並完整朗讀與逐字稿相同的內容。
-CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_ASSETS_SAMPLE_TEXT_TXT
+AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_ASSETS_SAMPLE_TEXT_TXT_6D1F2EBBC6
 
 # voxcpm2-voice-cloner/references/runtime.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/references/runtime.md")"
-cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/references/runtime.md" <<'CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_REFERENCES_RUNTIME_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/references/runtime.md")"
+cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/references/runtime.md" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_REFERENCES_RUNTIME_MD_C3A561024C'
 # VoxCPM2 Runtime Guide
 
 ## Requirements
@@ -323,7 +326,7 @@ The source repo's PowerShell, BAT, Intel XPU patch, and hard-coded Windows paths
 ## Runtime Layout
 
 ```text
-{{CODEX_HOME}}/voxcpm2-voice-cloner/
+~/.codex/voxcpm2-voice-cloner/
 ├── .venv/
 ├── model-cache/
 ├── voices/
@@ -340,7 +343,7 @@ The setup script leaves `uv` on its default cache path, normally `~/.cache/uv`. 
 For Arry, the runtime root must stay on the current machine as a real local folder:
 
 ```text
-{{CODEX_HOME}}/voxcpm2-voice-cloner/
+~/.codex/voxcpm2-voice-cloner/
 ├── .venv/
 ├── model-cache/
 ├── recordings/
@@ -348,7 +351,7 @@ For Arry, the runtime root must stay on the current machine as a real local fold
 └── output/
 ```
 
-Do not symlink `{{CODEX_HOME}}/voxcpm2-voice-cloner` to `codex_symlink/runtimes` or any Google Drive folder. Syncing `.venv`, model weights, or generated output through Google Drive makes generation and imports slow. On another computer, create that computer's own local runtime and model cache; keep only reusable personal voice profiles in the private assistant asset layer.
+Do not symlink `~/.codex/voxcpm2-voice-cloner` to `codex_symlink/runtimes` or any Google Drive folder. Syncing `.venv`, model weights, or generated output through Google Drive makes generation and imports slow. On another computer, create that computer's own local runtime and model cache; keep only reusable personal voice profiles in the private assistant asset layer.
 
 ## Profile And Output Routing
 
@@ -394,7 +397,7 @@ Every listed voice must already exist as a complete authorized profile.
 - `cpu`: slow fallback.
 - `xpu`: retained for compatible Intel environments; the source repo's Windows patch is not bundled into the Codex macOS path.
 
-Codex workspace sandboxing can hide Metal and make `torch.backends.mps.is_available()` return false. This setup adds narrow command rules for the fixed VoxCPM2 runtime interpreter and wrapper scripts. Run `doctor` and model generation through that approved external entry; do not allow arbitrary Python executables or the whole `{{CODEX_HOME}}` tree.
+Codex workspace sandboxing can hide Metal and make `torch.backends.mps.is_available()` return false. This setup adds narrow command rules for the fixed VoxCPM2 runtime interpreter and wrapper scripts. Run `doctor` and model generation through that approved external entry; do not allow arbitrary Python executables or the whole `~/.codex` tree.
 
 ## Troubleshooting
 
@@ -424,11 +427,11 @@ The initial CPU smoke test with `--steps 1 --max-len 8` produced a 48 kHz, 1.28 
 - Do not use public Gradio shares.
 - Do not clone celebrities, coworkers, clients, family, or any third party without explicit permission.
 - Label externally distributed synthetic audio when listeners could reasonably mistake it for authentic speech.
-CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_REFERENCES_RUNTIME_MD
+AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_REFERENCES_RUNTIME_MD_C3A561024C
 
 # voxcpm2-voice-cloner/references/upstream.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/references/upstream.md")"
-cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/references/upstream.md" <<'CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_REFERENCES_UPSTREAM_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/references/upstream.md")"
+cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/references/upstream.md" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_REFERENCES_UPSTREAM_MD_5FFB542FCE'
 # Upstream Adaptation Record
 
 ## Sources
@@ -443,7 +446,7 @@ The source README states that its scripts are MIT-licensed and VoxCPM2 is Apache
 ## Codex Conversion
 
 - Replaced Windows BAT/PowerShell setup with `uv` and an isolated Python 3.12 runtime.
-- Replaced hard-coded project-relative voices and outputs with private local runtime state under `{{CODEX_HOME}}/voxcpm2-voice-cloner`.
+- Replaced hard-coded project-relative voices and outputs with private local runtime state under `~/.codex/voxcpm2-voice-cloner`.
 - Replaced CUDA/XPU/CPU-only detection with official `auto` device routing, including Apple Silicon MPS.
 - Replaced hard-coded dialogue speakers and XPU device with JSON-defined dialogue and device selection.
 - Added `agents/openai.yaml`, Codex metadata triggers, deterministic wrappers, validation, and LazyPack/Obsidian synchronization.
@@ -458,15 +461,311 @@ The source README states that its scripts are MIT-licensed and VoxCPM2 is Apache
 4. Diff upstream Python behavior against `scripts/voice_cloner.py` and `scripts/record_ui.py`.
 5. Preserve local private-data boundaries and consent checks.
 6. Run syntax checks, official Skill validation, runtime doctor, LazyPack offline reconstruction, and Obsidian mirror diff.
-CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_REFERENCES_UPSTREAM_MD
+AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_REFERENCES_UPSTREAM_MD_5FFB542FCE
+
+# voxcpm2-voice-cloner/scripts/record_cli.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/record_cli.py")"
+cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/record_cli.py" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_RECORD_CLI_PY_93ECB8D4BA'
+#!/usr/bin/env python3
+"""Record an authorized VoxCPM2 voice profile without browser microphone APIs."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import time
+from pathlib import Path
+
+import numpy as np
+import sounddevice as sd
+import soundfile as sf
+
+SAMPLE_RATE = 16000
+SKILL_DIR = Path(__file__).resolve().parent.parent
+
+
+def runtime_home() -> Path:
+    return Path(os.environ.get("VOXCPM2_HOME", Path.home() / ".codex" / "voxcpm2-voice-cloner")).expanduser()
+
+
+def voices_root() -> Path:
+    return Path(os.environ.get("VOXCPM2_VOICES_DIR", runtime_home() / "voices")).expanduser()
+
+
+def safe_name(value: str) -> str:
+    name = value.strip()
+    if not name or name in {".", ".."} or "/" in name or "\\" in name or "\x00" in name:
+        raise argparse.ArgumentTypeError("voice name must be one directory-safe name")
+    return name
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Record an authorized local VoxCPM2 voice profile")
+    parser.add_argument("--voice", required=True, type=safe_name)
+    parser.add_argument("--seconds", type=float, default=20.0)
+    parser.add_argument("--delay", type=int, default=15)
+    parser.add_argument("--device", help="sounddevice input device id or exact name")
+    parser.add_argument("--consent", action="store_true")
+    args = parser.parse_args()
+
+    if not args.consent:
+        raise SystemExit("Refusing real-voice recording without --consent confirming speaker permission.")
+    if args.seconds <= 0 or args.seconds > 120:
+        raise SystemExit("--seconds must be between 0 and 120")
+
+    transcript = (SKILL_DIR / "assets" / "sample_text.txt").read_text(encoding="utf-8").strip()
+    device = int(args.device) if args.device and args.device.isdigit() else args.device
+    selected = sd.query_devices(device, "input") if device is not None else sd.query_devices(kind="input")
+
+    print(f"voice={args.voice}")
+    print(f"input_device={selected['name']}")
+    print(f"record_seconds={args.seconds}")
+    print("Read this text exactly:")
+    print(transcript)
+    for remaining in range(args.delay, 0, -1):
+        print(f"recording_starts_in={remaining}", flush=True)
+        time.sleep(1)
+
+    print("recording_started", flush=True)
+    frames = int(args.seconds * SAMPLE_RATE)
+    audio = sd.rec(frames, samplerate=SAMPLE_RATE, channels=1, dtype="float32", device=device)
+    sd.wait()
+    audio = np.asarray(audio).reshape(-1)
+    peak = float(np.max(np.abs(audio))) if len(audio) else 0.0
+    rms = float(np.sqrt(np.mean(np.square(audio)))) if len(audio) else 0.0
+    if peak <= 0.001 or rms <= 0.0001:
+        raise SystemExit(f"Recording is silent or too quiet: peak={peak:.6f} rms={rms:.6f}")
+    if peak > 1.0:
+        audio = audio / peak
+
+    folder = voices_root() / args.voice
+    folder.mkdir(parents=True, exist_ok=True)
+    wav_path = folder / "ref_voice.wav"
+    sf.write(wav_path, audio.astype("float32"), SAMPLE_RATE)
+    (folder / "prompt.txt").write_text(transcript + "\n", encoding="utf-8")
+
+    print("recording_saved")
+    print(f"profile={folder.resolve()}")
+    print(f"audio={wav_path.resolve()}")
+    print(f"peak={peak:.6f}")
+    print(f"rms={rms:.6f}")
+
+
+if __name__ == "__main__":
+    main()
+AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_RECORD_CLI_PY_93ECB8D4BA
+chmod +x "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/record_cli.py"
+
+# voxcpm2-voice-cloner/scripts/record_ui.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/record_ui.py")"
+cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/record_ui.py" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_RECORD_UI_PY_6B389EF7CC'
+#!/usr/bin/env python3
+"""Local-only Gradio UI for authorized VoxCPM2 reference recording/import."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import time
+import uuid
+from pathlib import Path
+
+import gradio as gr
+import numpy as np
+import resampy
+import sounddevice as sd
+import soundfile as sf
+
+SAMPLE_RATE = 16000
+SKILL_DIR = Path(__file__).resolve().parent.parent
+
+
+def runtime_home() -> Path:
+    return Path(os.environ.get("VOXCPM2_HOME", Path.home() / ".codex" / "voxcpm2-voice-cloner")).expanduser()
+
+
+def voices_root() -> Path:
+    return Path(os.environ.get("VOXCPM2_VOICES_DIR", runtime_home() / "voices")).expanduser()
+
+
+def recordings_root() -> Path:
+    return Path(os.environ.get("VOXCPM2_RECORDINGS_DIR", runtime_home() / "recordings")).expanduser()
+
+
+def safe_name(value: str) -> str:
+    name = value.strip()
+    if not name or name in {".", ".."} or "/" in name or "\\" in name or "\x00" in name:
+        raise ValueError("聲音名稱只能是一個安全的資料夾名稱")
+    return name
+
+
+def input_devices() -> list[str]:
+    """Return backend-visible microphones for the In-App Browser UI."""
+    devices: list[str] = []
+    for index, device in enumerate(sd.query_devices()):
+        if int(device["max_input_channels"]) > 0:
+            devices.append(f"{index}: {device['name']}")
+    return devices
+
+
+def default_input_device(choices: list[str]) -> str | None:
+    if not choices:
+        return None
+    try:
+        default_name = str(sd.query_devices(kind="input")["name"])
+    except Exception:
+        return choices[0]
+    return next((choice for choice in choices if choice.split(": ", 1)[-1] == default_name), choices[0])
+
+
+def refresh_devices():
+    choices = input_devices()
+    return gr.Dropdown(
+        choices=choices,
+        value=default_input_device(choices),
+        label="本機麥克風",
+    ), ("✅ 已重新抓取本機麥克風。" if choices else "❌ 本機後端找不到可用麥克風。")
+
+
+def record_from_backend(seconds: float, device_choice: str | None, consent: bool):
+    """Record through local Python instead of browser media APIs."""
+    if not consent:
+        yield "❌ 錄音前請先確認你擁有此聲音或已取得說話者明確授權。", None
+        return
+    if not device_choice:
+        yield "❌ 請先按「重新抓取麥克風」並選擇本機麥克風。", None
+        return
+    try:
+        duration = float(seconds)
+        if duration < 5 or duration > 120:
+            raise ValueError
+        device_index = int(device_choice.split(":", 1)[0])
+    except (TypeError, ValueError):
+        yield "❌ 錄音秒數必須介於 5 到 120 秒，且麥克風選擇必須有效。", None
+        return
+
+    for remaining in range(3, 0, -1):
+        yield f"🎤 {remaining} 秒後開始錄音，請準備朗讀逐字稿。", None
+        time.sleep(1)
+    yield f"🔴 錄音中，請朗讀逐字稿（{duration:g} 秒）…", None
+
+    try:
+        frames = int(duration * SAMPLE_RATE)
+        captured = sd.rec(
+            frames,
+            samplerate=SAMPLE_RATE,
+            channels=1,
+            dtype="float32",
+            device=device_index,
+        )
+        sd.wait()
+    except Exception as exc:
+        yield f"❌ 本機錄音失敗：{type(exc).__name__}: {exc}", None
+        return
+
+    captured = np.asarray(captured).reshape(-1)
+    peak = float(np.max(np.abs(captured))) if len(captured) else 0.0
+    rms = float(np.sqrt(np.mean(np.square(captured)))) if len(captured) else 0.0
+    if peak <= 0.001 or rms <= 0.0001:
+        yield f"❌ 錄音為靜音或音量過低（peak={peak:.4f}, rms={rms:.4f}）。", None
+        return
+
+    temp_dir = recordings_root()
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    temp_path = temp_dir / f"recording-{uuid.uuid4().hex}.wav"
+    sf.write(temp_path, captured.astype("float32"), SAMPLE_RATE)
+    yield f"✅ 錄音完成（peak={peak:.4f}, rms={rms:.4f}），請先預覽，再儲存 Profile。", str(temp_path)
+
+
+def save_recording(audio_path: str | None, voice_name: str, transcript: str, consent: bool):
+    if not consent:
+        return "❌ 請確認你擁有此聲音或已取得說話者明確授權。", None
+    if not audio_path:
+        return "❌ 請先錄音或上傳音檔。", None
+    try:
+        name = safe_name(voice_name)
+    except ValueError as exc:
+        return f"❌ {exc}", None
+    text = transcript.strip()
+    if not text:
+        return "❌ 逐字稿不可空白，且必須與參考音訊完全相符。", None
+    audio, sample_rate = sf.read(audio_path)
+    if audio.ndim > 1:
+        audio = audio.mean(axis=1)
+    if sample_rate != SAMPLE_RATE:
+        audio = resampy.resample(audio, sample_rate, SAMPLE_RATE)
+    peak = float(np.abs(audio).max()) if len(audio) else 0.0
+    if peak <= 0:
+        return "❌ 音檔是空白或靜音。", None
+    audio = audio / peak * 0.95
+    folder = voices_root() / name
+    folder.mkdir(parents=True, exist_ok=True)
+    wav_path = folder / "ref_voice.wav"
+    sf.write(wav_path, audio.astype("float32"), SAMPLE_RATE)
+    (folder / "prompt.txt").write_text(text + "\n", encoding="utf-8")
+    return f"✅ 已儲存授權聲音：{folder.resolve()}", str(wav_path)
+
+
+def build_ui():
+    default_text = (SKILL_DIR / "assets" / "sample_text.txt").read_text(encoding="utf-8").strip()
+    devices = input_devices()
+    with gr.Blocks(title="VoxCPM2 授權聲音錄製") as app:
+        gr.Markdown("# VoxCPM2 授權聲音錄製\n僅可錄製自己的聲音，或已取得說話者明確授權的聲音。")
+        voice = gr.Textbox(label="聲音名稱")
+        transcript = gr.Textbox(label="精確逐字稿", value=default_text, lines=6)
+        consent = gr.Checkbox(label="我確認擁有此聲音或已取得說話者明確授權")
+        gr.Markdown("## In-App Browser 本機錄音\n錄音由本機後端擷取，不依賴瀏覽器的麥克風裝置清單。")
+        with gr.Row():
+            device = gr.Dropdown(
+                choices=devices,
+                value=default_input_device(devices),
+                label="本機麥克風",
+            )
+            refresh = gr.Button("重新抓取麥克風")
+        seconds = gr.Slider(5, 120, value=20, step=1, label="錄音秒數")
+        record = gr.Button("開始本機錄音", variant="secondary")
+        audio = gr.Audio(label="錄音預覽／上傳既有音檔", type="filepath", sources=["upload"])
+        save = gr.Button("儲存授權聲音", variant="primary")
+        result = gr.Textbox(label="結果", interactive=False)
+        preview = gr.Audio(label="已儲存 Profile 預覽", interactive=False)
+        refresh.click(refresh_devices, [], [device, result])
+        record.click(record_from_backend, [seconds, device, consent], [result, audio])
+        save.click(save_recording, [audio, voice, transcript, consent], [result, preview])
+    return app
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=7860)
+    args = parser.parse_args()
+    if args.host not in {"127.0.0.1", "localhost", "::1"}:
+        raise SystemExit("recording UI must bind to a loopback address")
+    home = runtime_home()
+    recordings = recordings_root()
+    voices = voices_root()
+    recordings.mkdir(parents=True, exist_ok=True)
+    voices.mkdir(parents=True, exist_ok=True)
+    build_ui().launch(
+        server_name=args.host,
+        server_port=args.port,
+        share=False,
+        allowed_paths=[str(recordings), str(voices)],
+    )
+
+
+if __name__ == "__main__":
+    main()
+AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_RECORD_UI_PY_6B389EF7CC
+chmod +x "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/record_ui.py"
 
 # voxcpm2-voice-cloner/scripts/setup_runtime.sh
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh")"
-cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh" <<'CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_SETUP_RUNTIME_SH'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh")"
+cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_SETUP_RUNTIME_SH_C1963A1830'
 #!/usr/bin/env bash
 set -euo pipefail
 
-RUNTIME_HOME="${VOXCPM2_HOME:-${CODEX_HOME}/voxcpm2-voice-cloner}"
+RUNTIME_HOME="${VOXCPM2_HOME:-$HOME/.codex/voxcpm2-voice-cloner}"
 VENV="$RUNTIME_HOME/.venv"
 
 if ! command -v uv >/dev/null 2>&1; then
@@ -497,13 +796,14 @@ uv pip check --python "$VENV/bin/python"
 echo "runtime_home=$RUNTIME_HOME"
 echo "python=$VENV/bin/python"
 echo "Model weights are downloaded only when generation first runs."
-CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_SETUP_RUNTIME_SH
+AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_SETUP_RUNTIME_SH_C1963A1830
+chmod +x "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh"
 
 # voxcpm2-voice-cloner/scripts/voice_cloner.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py")"
-cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py" <<'CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_VOICE_CLONER_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py")"
+cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_VOICE_CLONER_PY_57610C391A'
 #!/usr/bin/env python3
-"""Codex-compatible VoxCPM2 voice profile and synthesis wrapper."""
+"""Cross-agent VoxCPM2 voice profile and synthesis wrapper."""
 
 from __future__ import annotations
 
@@ -769,305 +1069,12 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_VOICE_CLONER_PY
+AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_VOICE_CLONER_PY_57610C391A
+chmod +x "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py"
 
-# voxcpm2-voice-cloner/scripts/record_ui.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/record_ui.py")"
-cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/record_ui.py" <<'CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_RECORD_UI_PY'
-#!/usr/bin/env python3
-"""Local-only Gradio UI for authorized VoxCPM2 reference recording/import."""
-
-from __future__ import annotations
-
-import argparse
-import os
-import time
-import uuid
-from pathlib import Path
-
-import gradio as gr
-import numpy as np
-import resampy
-import sounddevice as sd
-import soundfile as sf
-
-SAMPLE_RATE = 16000
-SKILL_DIR = Path(__file__).resolve().parent.parent
-
-
-def runtime_home() -> Path:
-    return Path(os.environ.get("VOXCPM2_HOME", Path.home() / ".codex" / "voxcpm2-voice-cloner")).expanduser()
-
-
-def voices_root() -> Path:
-    return Path(os.environ.get("VOXCPM2_VOICES_DIR", runtime_home() / "voices")).expanduser()
-
-
-def recordings_root() -> Path:
-    return Path(os.environ.get("VOXCPM2_RECORDINGS_DIR", runtime_home() / "recordings")).expanduser()
-
-
-def safe_name(value: str) -> str:
-    name = value.strip()
-    if not name or name in {".", ".."} or "/" in name or "\\" in name or "\x00" in name:
-        raise ValueError("聲音名稱只能是一個安全的資料夾名稱")
-    return name
-
-
-def input_devices() -> list[str]:
-    """Return backend-visible microphones for the In-App Browser UI."""
-    devices: list[str] = []
-    for index, device in enumerate(sd.query_devices()):
-        if int(device["max_input_channels"]) > 0:
-            devices.append(f"{index}: {device['name']}")
-    return devices
-
-
-def default_input_device(choices: list[str]) -> str | None:
-    if not choices:
-        return None
-    try:
-        default_name = str(sd.query_devices(kind="input")["name"])
-    except Exception:
-        return choices[0]
-    return next((choice for choice in choices if choice.split(": ", 1)[-1] == default_name), choices[0])
-
-
-def refresh_devices():
-    choices = input_devices()
-    return gr.Dropdown(
-        choices=choices,
-        value=default_input_device(choices),
-        label="本機麥克風",
-    ), ("✅ 已重新抓取本機麥克風。" if choices else "❌ 本機後端找不到可用麥克風。")
-
-
-def record_from_backend(seconds: float, device_choice: str | None, consent: bool):
-    """Record through local Python instead of browser media APIs."""
-    if not consent:
-        yield "❌ 錄音前請先確認你擁有此聲音或已取得說話者明確授權。", None
-        return
-    if not device_choice:
-        yield "❌ 請先按「重新抓取麥克風」並選擇本機麥克風。", None
-        return
-    try:
-        duration = float(seconds)
-        if duration < 5 or duration > 120:
-            raise ValueError
-        device_index = int(device_choice.split(":", 1)[0])
-    except (TypeError, ValueError):
-        yield "❌ 錄音秒數必須介於 5 到 120 秒，且麥克風選擇必須有效。", None
-        return
-
-    for remaining in range(3, 0, -1):
-        yield f"🎤 {remaining} 秒後開始錄音，請準備朗讀逐字稿。", None
-        time.sleep(1)
-    yield f"🔴 錄音中，請朗讀逐字稿（{duration:g} 秒）…", None
-
-    try:
-        frames = int(duration * SAMPLE_RATE)
-        captured = sd.rec(
-            frames,
-            samplerate=SAMPLE_RATE,
-            channels=1,
-            dtype="float32",
-            device=device_index,
-        )
-        sd.wait()
-    except Exception as exc:
-        yield f"❌ 本機錄音失敗：{type(exc).__name__}: {exc}", None
-        return
-
-    captured = np.asarray(captured).reshape(-1)
-    peak = float(np.max(np.abs(captured))) if len(captured) else 0.0
-    rms = float(np.sqrt(np.mean(np.square(captured)))) if len(captured) else 0.0
-    if peak <= 0.001 or rms <= 0.0001:
-        yield f"❌ 錄音為靜音或音量過低（peak={peak:.4f}, rms={rms:.4f}）。", None
-        return
-
-    temp_dir = recordings_root()
-    temp_dir.mkdir(parents=True, exist_ok=True)
-    temp_path = temp_dir / f"recording-{uuid.uuid4().hex}.wav"
-    sf.write(temp_path, captured.astype("float32"), SAMPLE_RATE)
-    yield f"✅ 錄音完成（peak={peak:.4f}, rms={rms:.4f}），請先預覽，再儲存 Profile。", str(temp_path)
-
-
-def save_recording(audio_path: str | None, voice_name: str, transcript: str, consent: bool):
-    if not consent:
-        return "❌ 請確認你擁有此聲音或已取得說話者明確授權。", None
-    if not audio_path:
-        return "❌ 請先錄音或上傳音檔。", None
-    try:
-        name = safe_name(voice_name)
-    except ValueError as exc:
-        return f"❌ {exc}", None
-    text = transcript.strip()
-    if not text:
-        return "❌ 逐字稿不可空白，且必須與參考音訊完全相符。", None
-    audio, sample_rate = sf.read(audio_path)
-    if audio.ndim > 1:
-        audio = audio.mean(axis=1)
-    if sample_rate != SAMPLE_RATE:
-        audio = resampy.resample(audio, sample_rate, SAMPLE_RATE)
-    peak = float(np.abs(audio).max()) if len(audio) else 0.0
-    if peak <= 0:
-        return "❌ 音檔是空白或靜音。", None
-    audio = audio / peak * 0.95
-    folder = voices_root() / name
-    folder.mkdir(parents=True, exist_ok=True)
-    wav_path = folder / "ref_voice.wav"
-    sf.write(wav_path, audio.astype("float32"), SAMPLE_RATE)
-    (folder / "prompt.txt").write_text(text + "\n", encoding="utf-8")
-    return f"✅ 已儲存授權聲音：{folder.resolve()}", str(wav_path)
-
-
-def build_ui():
-    default_text = (SKILL_DIR / "assets" / "sample_text.txt").read_text(encoding="utf-8").strip()
-    devices = input_devices()
-    with gr.Blocks(title="VoxCPM2 授權聲音錄製") as app:
-        gr.Markdown("# VoxCPM2 授權聲音錄製\n僅可錄製自己的聲音，或已取得說話者明確授權的聲音。")
-        voice = gr.Textbox(label="聲音名稱")
-        transcript = gr.Textbox(label="精確逐字稿", value=default_text, lines=6)
-        consent = gr.Checkbox(label="我確認擁有此聲音或已取得說話者明確授權")
-        gr.Markdown("## In-App Browser 本機錄音\n錄音由本機後端擷取，不依賴瀏覽器的麥克風裝置清單。")
-        with gr.Row():
-            device = gr.Dropdown(
-                choices=devices,
-                value=default_input_device(devices),
-                label="本機麥克風",
-            )
-            refresh = gr.Button("重新抓取麥克風")
-        seconds = gr.Slider(5, 120, value=20, step=1, label="錄音秒數")
-        record = gr.Button("開始本機錄音", variant="secondary")
-        audio = gr.Audio(label="錄音預覽／上傳既有音檔", type="filepath", sources=["upload"])
-        save = gr.Button("儲存授權聲音", variant="primary")
-        result = gr.Textbox(label="結果", interactive=False)
-        preview = gr.Audio(label="已儲存 Profile 預覽", interactive=False)
-        refresh.click(refresh_devices, [], [device, result])
-        record.click(record_from_backend, [seconds, device, consent], [result, audio])
-        save.click(save_recording, [audio, voice, transcript, consent], [result, preview])
-    return app
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=7860)
-    args = parser.parse_args()
-    if args.host not in {"127.0.0.1", "localhost", "::1"}:
-        raise SystemExit("recording UI must bind to a loopback address")
-    home = runtime_home()
-    recordings = recordings_root()
-    voices = voices_root()
-    recordings.mkdir(parents=True, exist_ok=True)
-    voices.mkdir(parents=True, exist_ok=True)
-    build_ui().launch(
-        server_name=args.host,
-        server_port=args.port,
-        share=False,
-        allowed_paths=[str(recordings), str(voices)],
-    )
-
-
-if __name__ == "__main__":
-    main()
-CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_RECORD_UI_PY
-
-# voxcpm2-voice-cloner/scripts/record_cli.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/record_cli.py")"
-cat > "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/record_cli.py" <<'CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_RECORD_CLI_PY'
-#!/usr/bin/env python3
-"""Record an authorized VoxCPM2 voice profile without browser microphone APIs."""
-
-from __future__ import annotations
-
-import argparse
-import os
-import time
-from pathlib import Path
-
-import numpy as np
-import sounddevice as sd
-import soundfile as sf
-
-SAMPLE_RATE = 16000
-SKILL_DIR = Path(__file__).resolve().parent.parent
-
-
-def runtime_home() -> Path:
-    return Path(os.environ.get("VOXCPM2_HOME", Path.home() / ".codex" / "voxcpm2-voice-cloner")).expanduser()
-
-
-def voices_root() -> Path:
-    return Path(os.environ.get("VOXCPM2_VOICES_DIR", runtime_home() / "voices")).expanduser()
-
-
-def safe_name(value: str) -> str:
-    name = value.strip()
-    if not name or name in {".", ".."} or "/" in name or "\\" in name or "\x00" in name:
-        raise argparse.ArgumentTypeError("voice name must be one directory-safe name")
-    return name
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Record an authorized local VoxCPM2 voice profile")
-    parser.add_argument("--voice", required=True, type=safe_name)
-    parser.add_argument("--seconds", type=float, default=20.0)
-    parser.add_argument("--delay", type=int, default=15)
-    parser.add_argument("--device", help="sounddevice input device id or exact name")
-    parser.add_argument("--consent", action="store_true")
-    args = parser.parse_args()
-
-    if not args.consent:
-        raise SystemExit("Refusing real-voice recording without --consent confirming speaker permission.")
-    if args.seconds <= 0 or args.seconds > 120:
-        raise SystemExit("--seconds must be between 0 and 120")
-
-    transcript = (SKILL_DIR / "assets" / "sample_text.txt").read_text(encoding="utf-8").strip()
-    device = int(args.device) if args.device and args.device.isdigit() else args.device
-    selected = sd.query_devices(device, "input") if device is not None else sd.query_devices(kind="input")
-
-    print(f"voice={args.voice}")
-    print(f"input_device={selected['name']}")
-    print(f"record_seconds={args.seconds}")
-    print("Read this text exactly:")
-    print(transcript)
-    for remaining in range(args.delay, 0, -1):
-        print(f"recording_starts_in={remaining}", flush=True)
-        time.sleep(1)
-
-    print("recording_started", flush=True)
-    frames = int(args.seconds * SAMPLE_RATE)
-    audio = sd.rec(frames, samplerate=SAMPLE_RATE, channels=1, dtype="float32", device=device)
-    sd.wait()
-    audio = np.asarray(audio).reshape(-1)
-    peak = float(np.max(np.abs(audio))) if len(audio) else 0.0
-    rms = float(np.sqrt(np.mean(np.square(audio)))) if len(audio) else 0.0
-    if peak <= 0.001 or rms <= 0.0001:
-        raise SystemExit(f"Recording is silent or too quiet: peak={peak:.6f} rms={rms:.6f}")
-    if peak > 1.0:
-        audio = audio / peak
-
-    folder = voices_root() / args.voice
-    folder.mkdir(parents=True, exist_ok=True)
-    wav_path = folder / "ref_voice.wav"
-    sf.write(wav_path, audio.astype("float32"), SAMPLE_RATE)
-    (folder / "prompt.txt").write_text(transcript + "\n", encoding="utf-8")
-
-    print("recording_saved")
-    print(f"profile={folder.resolve()}")
-    print(f"audio={wav_path.resolve()}")
-    print(f"peak={peak:.6f}")
-    print(f"rms={rms:.6f}")
-
-
-if __name__ == "__main__":
-    main()
-CODEX_LAZYPACK_VOXCPM2_VOICE_CLONER_SCRIPTS_RECORD_CLI_PY
-
-chmod +x "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/setup_runtime.sh" "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/voice_cloner.py" "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/record_ui.py" "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/scripts/record_cli.py"
-
-test -f "{{CODEX_HOME}}/skills/voxcpm2-voice-cloner/SKILL.md" && echo "voxcpm2-voice-cloner installed"
+test -f "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/SKILL.md" && echo "voxcpm2-voice-cloner installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

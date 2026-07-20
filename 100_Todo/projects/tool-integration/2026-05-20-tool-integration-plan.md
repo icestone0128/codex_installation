@@ -7,7 +7,7 @@ adapted_for: Codex App
 
 # 外部工具整合計畫（2026-05-20）
 
-> 這份計畫是從 `/Users/arrywu/Downloads/03-tool-integration.md` 轉成 Codex App 可執行版本後產出的。
+> 這份計畫源自 `/Users/arrywu/Downloads/03-tool-integration.md`；現行版已整理為 Codex、Claude、AntiGravity 共用工作流，Agent 特有步驟需另列 adapter 與驗證方式。
 > 原文件是其他 AI 編輯器的設定腳本；本版改用 Codex App 與 AntiGravity、全域 skills、專案 `000_Agent/` 資料層與已安裝 connectors 的工作方式。
 
 ## 決策原則速查

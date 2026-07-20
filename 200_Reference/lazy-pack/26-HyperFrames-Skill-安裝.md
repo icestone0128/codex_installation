@@ -1,24 +1,24 @@
 # 26-HyperFrames-Skill-安裝
 
-> 版本：2026-06-01 Codex App 版
-> 用途：安裝 HeyGen HyperFrames 官方 Codex skill suite，讓 Codex 可以協助以 HTML、CSS、動畫與媒體素材製作可渲染的影片 composition。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 15 個 `{{CODEX_HOME}}/skills/` 全域 skills。
+> 版本：2026-06-01 三 Agent 共用版
+> 用途：安裝 HeyGen HyperFrames skill suite，讓 Codex、Claude、AntiGravity 都可協助以 HTML、CSS、動畫與媒體素材製作可渲染的影片 composition。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 15 個 `{{SYNC_ROOT}}/skills/` 全域 skills。
 
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-06-01。
 - 來源 repo：https://github.com/heygen-com/hyperframes
 - 來源 commit：`3c7e2f36` / `3c7e2f36497de471e5a63ecc6d582522d206b208`。
-- HyperFrames Codex plugin version：`0.6.64`。
+- 上游 HyperFrames plugin 參考版本：`0.6.64`。
 - 授權：Apache-2.0。
 - 內嵌檔案數：172 個。
-- Codex 全域 skill 位置：`{{CODEX_HOME}}/skills/<skill-name>/SKILL.md`。
+- 三 Agent 共用 skill 主版本：`{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md`。
 
-## Codex 相容化調整
+## 三 Agent 相容化調整
 
-- 只內嵌上游 `skills/` 目錄，不內嵌任何非 Codex plugin metadata。
-- 已移除 slash-command、非 Codex agent delegation、non-Codex path / file name / frontmatter 相關敘述。
-- 所有可攜路徑一律使用 `{{CODEX_HOME}}/skills/<skill-name>`。
+- 內嵌上游 `skills/` 的可攜 package；上游 plugin metadata 只當來源參考，不當作共用核心設定。
+- 將來源專屬 slash-command、agent delegation、path／file name／frontmatter 改寫為共用契約與 Codex／Claude／AntiGravity adapter。
+- 所有可攜路徑一律使用 `{{SYNC_ROOT}}/skills/<skill-name>`。
 
 ## 本機補充：相片紀念影片與音訊驗證
 
@@ -54,17 +54,17 @@
 
 ## 前置條件
 
-- Codex App 可讀取 `{{CODEX_HOME}}/skills`。
+- Item 16 已把共用主版本連到 Codex、Claude、AntiGravity 各自的原生 skills 入口。
 - 使用 HyperFrames CLI 實際預覽或渲染時，需要 Node.js 22+。
 - 實際輸出 MP4 時，需要 FFmpeg。
-- 這份 LazyPack 只安裝 Codex skills；不會自動安裝 npm package、Node.js 或 FFmpeg。
+- 這份 LazyPack 安裝三 Agent 共用 skill packages；不會自動安裝 npm package、Node.js 或 FFmpeg。
 
 ## 安裝方式
 
 1. 打開本文文末「內建 Skill 完整安裝內容」。
 2. 把整段安裝腳本複製到自己的環境執行。
 3. 執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
-4. 安裝後開新 Codex 對話或重啟 Codex App，讓新的全域 skill metadata 被重新載入。
+4. 安裝後確認 Item 16 的三 Agent 原生入口，再分別重載 skill 清單。
 
 ## 基本使用方式
 
@@ -77,21 +77,21 @@
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/animejs/SKILL.md" && echo "animejs SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/contribute-catalog/SKILL.md" && echo "contribute-catalog SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/css-animations/SKILL.md" && echo "css-animations SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/gsap/SKILL.md" && echo "gsap SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/hyperframes/SKILL.md" && echo "hyperframes SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/hyperframes-cli/SKILL.md" && echo "hyperframes-cli SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/hyperframes-media/SKILL.md" && echo "hyperframes-media SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/hyperframes-registry/SKILL.md" && echo "hyperframes-registry SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/lottie/SKILL.md" && echo "lottie SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/remotion-to-hyperframes/SKILL.md" && echo "remotion-to-hyperframes SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/tailwind/SKILL.md" && echo "tailwind SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/three/SKILL.md" && echo "three SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/typegpu/SKILL.md" && echo "typegpu SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/waapi/SKILL.md" && echo "waapi SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/website-to-hyperframes/SKILL.md" && echo "website-to-hyperframes SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/animejs/SKILL.md" && echo "animejs SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/contribute-catalog/SKILL.md" && echo "contribute-catalog SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/css-animations/SKILL.md" && echo "css-animations SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/gsap/SKILL.md" && echo "gsap SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/hyperframes/SKILL.md" && echo "hyperframes SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/hyperframes-cli/SKILL.md" && echo "hyperframes-cli SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md" && echo "hyperframes-media SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/hyperframes-registry/SKILL.md" && echo "hyperframes-registry SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/lottie/SKILL.md" && echo "lottie SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/SKILL.md" && echo "remotion-to-hyperframes SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/tailwind/SKILL.md" && echo "tailwind SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/three/SKILL.md" && echo "three SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/typegpu/SKILL.md" && echo "typegpu SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/waapi/SKILL.md" && echo "waapi SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/website-to-hyperframes/SKILL.md" && echo "website-to-hyperframes SKILL.md ok"
 ```
 
 若要驗證實際 HyperFrames CLI 環境，請另外確認：
@@ -106,22 +106,22 @@ npx hyperframes --help
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/animejs/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/contribute-catalog/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/css-animations/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/gsap/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/hyperframes/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/hyperframes-cli/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/hyperframes-media/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/hyperframes-registry/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/lottie/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/remotion-to-hyperframes/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/tailwind/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/three/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/typegpu/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/waapi/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/website-to-hyperframes/SKILL.md` 存在。
-- [ ] 開新 Codex 對話後，HyperFrames 相關 skills 會出現在可用 skill 清單。
+- [ ] `{{SYNC_ROOT}}/skills/animejs/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/contribute-catalog/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/css-animations/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/gsap/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/hyperframes/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/hyperframes-cli/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/hyperframes-registry/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/lottie/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/remotion-to-hyperframes/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/tailwind/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/three/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/typegpu/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/waapi/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/website-to-hyperframes/SKILL.md` 存在。
+- [ ] Codex、Claude、AntiGravity 重載後，HyperFrames 相關 skills 都會出現在可用 skill 清單。
 - [ ] 若要 render MP4，已安裝 Node.js 22+ 與 FFmpeg。
 - [ ] 未把 API key、token、私有媒體素材或未授權素材寫進公開 repo。
 
@@ -134,26 +134,18 @@ npx hyperframes --help
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`animejs`、`contribute-catalog`、`css-animations`、`gsap`、`hyperframes`、`hyperframes-cli`、`hyperframes-media`、`hyperframes-registry`、`lottie`、`remotion-to-hyperframes`、`tailwind`、`three`、`typegpu`、`waapi`、`website-to-hyperframes`。
+本節是自含式安裝區塊。這個序號項目會安裝：`animejs`、`contribute-catalog`、`css-animations`、`gsap`、`hyperframes`、`hyperframes-cli`、`hyperframes-media`、`hyperframes-registry`、`lottie`、`remotion-to-hyperframes`、`tailwind`、`three`、`typegpu`、`waapi`、`website-to-hyperframes`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-decode_base64() {
-  if command -v base64 >/dev/null 2>&1; then
-    base64 --decode 2>/dev/null || base64 -D
-  else
-    python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.buffer.read()))'
-  fi
-}
-
 # ---- animejs ----
-mkdir -p "{{CODEX_HOME}}/skills/animejs"
+mkdir -p "{{SYNC_ROOT}}/skills/animejs"
 # animejs/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/animejs/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/animejs/SKILL.md" <<'CODEX_LAZYPACK_CA8325AB06CC568E603986568EFAA47D327F2DC8'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/animejs/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/animejs/SKILL.md" <<'AGENT_LAZYPACK_ANIMEJS_SKILL_MD_0E95F5A366'
 ---
 name: animejs
 description: Anime.js adapter patterns for HyperFrames. Use when writing Anime.js animations or timelines inside HyperFrames compositions, registering animations on window.__hfAnime, making Anime.js seek-driven and deterministic, or translating Anime.js examples into render-safe HyperFrames HTML.
@@ -268,13 +260,15 @@ npx hyperframes validate
 
 - HyperFrames adapter source: `packages/core/src/runtime/adapters/animejs.ts`.
 - Anime.js documentation for `autoplay`, `pause()`, and `seek()`: https://animejs.com/documentation/
-CODEX_LAZYPACK_CA8325AB06CC568E603986568EFAA47D327F2DC8
+AGENT_LAZYPACK_ANIMEJS_SKILL_MD_0E95F5A366
+
+test -f "{{SYNC_ROOT}}/skills/animejs/SKILL.md" && echo "animejs installed for Codex, Claude, and AntiGravity"
 
 # ---- contribute-catalog ----
-mkdir -p "{{CODEX_HOME}}/skills/contribute-catalog"
+mkdir -p "{{SYNC_ROOT}}/skills/contribute-catalog"
 # contribute-catalog/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/contribute-catalog/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/contribute-catalog/SKILL.md" <<'CODEX_LAZYPACK_77A42A33351FF874AD479B4E3668CD042B3C7761'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/contribute-catalog/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/contribute-catalog/SKILL.md" <<'AGENT_LAZYPACK_CONTRIBUTE_CATALOG_SKILL_MD_0E95F5A366'
 ---
 name: contribute-catalog
 description: Author a new HyperFrames registry block (caption style, VFX block, transition, lower third) or component (text effect, overlay, snippet) and ship it as an upstream PR to the hyperframes repo. Use ONLY when the user wants to CONTRIBUTE to the public catalog — for in-project caption/transition authoring use the `hyperframes` skill, for installing existing registry items use the `hyperframes-registry` skill.
@@ -486,11 +480,11 @@ gh pr create --title "feat(registry): {name}" --body "preview: {hyperframes.dev-
 - [ ] `npx hyperframes publish` run (claim your project URL)
 - [ ] Preview MP4 attached to PR (external) or catalog PNG uploaded (internal)
 - [ ] All IDs unique and prefixed
-CODEX_LAZYPACK_77A42A33351FF874AD479B4E3668CD042B3C7761
+AGENT_LAZYPACK_CONTRIBUTE_CATALOG_SKILL_MD_0E95F5A366
 
 # contribute-catalog/templates.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/contribute-catalog/templates.md")"
-cat > "{{CODEX_HOME}}/skills/contribute-catalog/templates.md" <<'CODEX_LAZYPACK_1A03BCCB269C0F601C624E2E90D92B1F48DF210C'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/contribute-catalog/templates.md")"
+cat > "{{SYNC_ROOT}}/skills/contribute-catalog/templates.md" <<'AGENT_LAZYPACK_CONTRIBUTE_CATALOG_TEMPLATES_MD_1BE6C5B917'
 # Contribute Templates
 
 Copy-paste starter templates for each component type. These embed the proven patterns that pass lint and validate.
@@ -908,13 +902,15 @@ Tags by category:
 - `COMPNAME` → your component name (e.g., `shimmer-sweep`)
 - Background should be `transparent` so it overlays cleanly
 - No `data-composition-id` or `window.__timelines` — the parent owns timing
-CODEX_LAZYPACK_1A03BCCB269C0F601C624E2E90D92B1F48DF210C
+AGENT_LAZYPACK_CONTRIBUTE_CATALOG_TEMPLATES_MD_1BE6C5B917
+
+test -f "{{SYNC_ROOT}}/skills/contribute-catalog/SKILL.md" && echo "contribute-catalog installed for Codex, Claude, and AntiGravity"
 
 # ---- css-animations ----
-mkdir -p "{{CODEX_HOME}}/skills/css-animations"
+mkdir -p "{{SYNC_ROOT}}/skills/css-animations"
 # css-animations/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/css-animations/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/css-animations/SKILL.md" <<'CODEX_LAZYPACK_3A33C3ED7E7A6701730CF3A18835568E6F14D012'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/css-animations/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/css-animations/SKILL.md" <<'AGENT_LAZYPACK_CSS_ANIMATIONS_SKILL_MD_0E95F5A366'
 ---
 name: css-animations
 description: CSS animation adapter patterns for HyperFrames. Use when authoring CSS keyframes, animation-delay based timing, animation-fill-mode, animation-play-state, or CSS-only motion that HyperFrames must seek deterministically during preview and rendering.
@@ -1039,13 +1035,15 @@ npx hyperframes validate
 - HyperFrames adapter source: `packages/core/src/runtime/adapters/css.ts`.
 - MDN CSS animation documentation: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/animation
 - MDN `animation-fill-mode`: https://developer.mozilla.org/en-US/docs/Web/CSS/animation-fill-mode
-CODEX_LAZYPACK_3A33C3ED7E7A6701730CF3A18835568E6F14D012
+AGENT_LAZYPACK_CSS_ANIMATIONS_SKILL_MD_0E95F5A366
+
+test -f "{{SYNC_ROOT}}/skills/css-animations/SKILL.md" && echo "css-animations installed for Codex, Claude, and AntiGravity"
 
 # ---- gsap ----
-mkdir -p "{{CODEX_HOME}}/skills/gsap"
+mkdir -p "{{SYNC_ROOT}}/skills/gsap"
 # gsap/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/gsap/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/gsap/SKILL.md" <<'CODEX_LAZYPACK_9F2481F42CF64D2251676AE708A0D39007EED792'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/gsap/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/gsap/SKILL.md" <<'AGENT_LAZYPACK_GSAP_SKILL_MD_0E95F5A366'
 ---
 name: gsap
 description: GSAP animation reference for HyperFrames. Covers gsap.to(), from(), fromTo(), easing, stagger, defaults, timelines (gsap.timeline(), position parameter, labels, nesting, playback), and performance (transforms, will-change, quickTo). Use when writing GSAP animations in HyperFrames compositions.
@@ -1286,11 +1284,11 @@ Pause or kill off-screen animations.
 - HyperFrames adapter source: `packages/core/src/runtime/adapters/gsap.ts`.
 - GSAP documentation: https://gsap.com/docs/v3/
 - GSAP timeline pause and seek behavior: https://gsap.com/docs/v3/GSAP/Timeline/pause%28%29/
-CODEX_LAZYPACK_9F2481F42CF64D2251676AE708A0D39007EED792
+AGENT_LAZYPACK_GSAP_SKILL_MD_0E95F5A366
 
 # gsap/references/effects.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/gsap/references/effects.md")"
-cat > "{{CODEX_HOME}}/skills/gsap/references/effects.md" <<'CODEX_LAZYPACK_7F5AE4112EBBB68C49A7B13182CF4073E1AF5C8F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/gsap/references/effects.md")"
+cat > "{{SYNC_ROOT}}/skills/gsap/references/effects.md" <<'AGENT_LAZYPACK_GSAP_REFERENCES_EFFECTS_MD_12DD61FD03'
 # GSAP Effects for HyperFrames
 
 Drop-in animation patterns for HyperFrames compositions. Each effect is self-contained with HTML, CSS, and code.
@@ -1588,11 +1586,11 @@ Layer multiple canvases with CSS z-index for depth — a background layer driven
 <canvas id="bg-layer" style="position:absolute;top:0;left:0;z-index:1;"></canvas>
 <canvas id="main-layer" style="position:absolute;top:0;left:0;z-index:2;"></canvas>
 ```
-CODEX_LAZYPACK_7F5AE4112EBBB68C49A7B13182CF4073E1AF5C8F
+AGENT_LAZYPACK_GSAP_REFERENCES_EFFECTS_MD_12DD61FD03
 
 # gsap/scripts/extract-audio-data.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/gsap/scripts/extract-audio-data.py")"
-cat > "{{CODEX_HOME}}/skills/gsap/scripts/extract-audio-data.py" <<'CODEX_LAZYPACK_AA94E7A9460EE9E3CF1868098DC1E4A4D73F10C9'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/gsap/scripts/extract-audio-data.py")"
+cat > "{{SYNC_ROOT}}/skills/gsap/scripts/extract-audio-data.py" <<'AGENT_LAZYPACK_GSAP_SCRIPTS_EXTRACT_AUDIO_DATA_PY_101DB257C8'
 #!/usr/bin/env python3
 """
 Extract per-frame audio visualization data from an audio or video file.
@@ -1781,13 +1779,15 @@ def main():
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_AA94E7A9460EE9E3CF1868098DC1E4A4D73F10C9
+AGENT_LAZYPACK_GSAP_SCRIPTS_EXTRACT_AUDIO_DATA_PY_101DB257C8
+
+test -f "{{SYNC_ROOT}}/skills/gsap/SKILL.md" && echo "gsap installed for Codex, Claude, and AntiGravity"
 
 # ---- hyperframes ----
-mkdir -p "{{CODEX_HOME}}/skills/hyperframes"
+mkdir -p "{{SYNC_ROOT}}/skills/hyperframes"
 # hyperframes/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/SKILL.md" <<'CODEX_LAZYPACK_783947F3CBF233F7459C3BF2B62455DFC041B62F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes
 description: Create video compositions, animations, title cards, overlays, captions, voiceovers, audio-reactive visuals, and scene transitions in HyperFrames HTML. Use when asked to build any HTML-based video content, add captions or subtitles synced to audio, generate text-to-speech narration, create audio-reactive animation (beat sync, glow, pulse driven by music), add animated text highlighting (marker sweeps, hand-drawn circles, burst lines, scribble, sketchout), or add transitions between scenes (crossfades, wipes, reveals, shader transitions). Covers composition authoring, timing, media, and the full video production workflow. For dev-loop CLI commands (init, lint, inspect, preview, render) see the hyperframes-cli skill; for asset preprocessing commands (tts, transcribe, remove-background) see the hyperframes-media skill.
@@ -2315,11 +2315,11 @@ Skip on small edits (fixing a color, adjusting one duration). Run on new composi
   - Shader transitions are in `@hyperframes/shader-transitions` (`packages/shader-transitions/`) — read package source, not skill files.
 
 GSAP patterns and effects are in the `gsap` skill.
-CODEX_LAZYPACK_783947F3CBF233F7459C3BF2B62455DFC041B62F
+AGENT_LAZYPACK_HYPERFRAMES_SKILL_MD_0E95F5A366
 
 # hyperframes/data-in-motion.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/data-in-motion.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/data-in-motion.md" <<'CODEX_LAZYPACK_2FBB2D97254FCF24ADD3BA0D9B33D854924E0519'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/data-in-motion.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/data-in-motion.md" <<'AGENT_LAZYPACK_HYPERFRAMES_DATA_IN_MOTION_MD_8D094FBF6F'
 # Data in Motion
 
 Light guidance for data and stats in video compositions. The [house style](./house-style.md) handles aesthetics — this just addresses data-specific pitfalls.
@@ -2339,11 +2339,11 @@ A number on its own floats in empty space. Pair every metric with a visual eleme
 - **No 6-panel dashboards** — 2-3 related metrics side-by-side is fine, 6+ is a web pattern
 - **No gridlines, tick marks, or legends** — visual noise that adds nothing in motion
 - **No chart library output** — build with GSAP + SVG/CSS, not D3 or Chart.js
-CODEX_LAZYPACK_2FBB2D97254FCF24ADD3BA0D9B33D854924E0519
+AGENT_LAZYPACK_HYPERFRAMES_DATA_IN_MOTION_MD_8D094FBF6F
 
 # hyperframes/house-style.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/house-style.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/house-style.md" <<'CODEX_LAZYPACK_10E836FC728040AF181D7C5A166B8B5C4B3ABE8F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/house-style.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/house-style.md" <<'AGENT_LAZYPACK_HYPERFRAMES_HOUSE_STYLE_MD_9AA9D196B6'
 # House Style
 
 Creative direction for compositions when no `design.md` is provided. These are starting points — override anything that doesn't serve the content. When a `design.md` exists, its brand values take precedence; house-style fills gaps.
@@ -2417,182 +2417,11 @@ Declare one background, one foreground, one accent before writing HTML.
 | Monochrome        | Dramatic, typography-focused                  | [palettes/monochrome.md](palettes/monochrome.md)           |
 
 Or derive from OKLCH — pick a hue, build bg/fg/accent at different lightnesses, tint everything toward that hue.
-CODEX_LAZYPACK_10E836FC728040AF181D7C5A166B8B5C4B3ABE8F
-
-# hyperframes/palettes/bold-energetic.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/palettes/bold-energetic.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/palettes/bold-energetic.md" <<'CODEX_LAZYPACK_321BEED1FF819E3A10FE7AF200EB67650373F492'
-# Bold / Energetic
-
-Product launches, social media, announcements, high-energy content.
-
-```
-#FFBE0B #FB5607 #FF006E #8338EC #3A86FF
-#F72585 #7209B7 #3A0CA3 #4361EE #4CC9F0
-#EF476F #FFD166 #06D6A0 #118AB2 #073B4C
-#FF595E #FFCA3A #8AC926 #1982C4 #6A4C93
-#9B5DE5 #F15BB5 #FEE440 #00BBF9 #00F5D4
-#390099 #9E0059 #FF0054 #FF5400 #FFBD00
-#3D348B #7678ED #F7B801 #F18701 #F35B04
-#FFBC42 #D81159 #8F2D56 #218380 #73D2DE
-```
-CODEX_LAZYPACK_321BEED1FF819E3A10FE7AF200EB67650373F492
-
-# hyperframes/palettes/clean-corporate.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/palettes/clean-corporate.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/palettes/clean-corporate.md" <<'CODEX_LAZYPACK_48E98223BCB800206A85988EC1982B3565492E93'
-# Clean / Corporate
-
-Explainers, tutorials, presentations, professional content.
-
-```
-#FFFCF2 #CCC5B9 #403D39 #252422 #EB5E28
-#22223B #4A4E69 #9A8C98 #C9ADA7 #F2E9E4
-#3D5A80 #98C1D9 #E0FBFC #EE6C4D #293241
-#2B2D42 #8D99AE #EDF2F4 #EF233C #D90429
-#353535 #3C6E71 #FFFFFF #D9D9D9 #284B63
-#E7ECEF #274C77 #6096BA #A3CEF1 #8B8C89
-#CFDBD5 #E8EDDF #F5CB5C #242423 #333533
-#2F6690 #3A7CA5 #D9DCD6 #16425B #81C3D7
-```
-CODEX_LAZYPACK_48E98223BCB800206A85988EC1982B3565492E93
-
-# hyperframes/palettes/dark-premium.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/palettes/dark-premium.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/palettes/dark-premium.md" <<'CODEX_LAZYPACK_4D39E9F231BBCF54D98BA6B21592D7ABFB322CFF'
-# Dark / Premium
-
-Tech, finance, luxury, cinematic content.
-
-```
-#000000 #14213D #FCA311 #E5E5E5 #FFFFFF
-#000814 #001D3D #003566 #FFC300 #FFD60A
-#0D1B2A #1B263B #415A77 #778DA9 #E0E1DD
-#0D1321 #1D2D44 #3E5C76 #748CAB #F0EBD8
-#011627 #FDFFFC #2EC4B6 #E71D36 #FF9F1C
-#0B090A #161A1D #660708 #A4161A #E5383B
-#001427 #708D81 #F4D58D #BF0603 #8D0801
-#001524 #15616D #FFECD1 #FF7D00 #78290F
-```
-CODEX_LAZYPACK_4D39E9F231BBCF54D98BA6B21592D7ABFB322CFF
-
-# hyperframes/palettes/jewel-rich.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/palettes/jewel-rich.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/palettes/jewel-rich.md" <<'CODEX_LAZYPACK_1A133F23C2861B5756FBC1A0F966E0DE8F68F920'
-# Jewel / Rich
-
-Luxury, events, sophisticated, high-end content.
-
-```
-#5F0F40 #9A031E #FB8B24 #E36414 #0F4C5C
-#780000 #C1121F #FDF0D5 #003049 #669BBC
-#10002B #240046 #3C096C #5A189A #7B2CBF
-#355070 #6D597A #B56576 #E56B6F #EAAC8B
-#6F1D1B #BB9457 #432818 #99582A #FFE6A7
-#231942 #5E548E #9F86C0 #BE95C4 #E0B1CB
-#461220 #8C2F39 #B23A48 #FCB9B2 #FED0BB
-#780116 #F7B538 #DB7C26 #D8572A #C32F27
-```
-CODEX_LAZYPACK_1A133F23C2861B5756FBC1A0F966E0DE8F68F920
-
-# hyperframes/palettes/monochrome.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/palettes/monochrome.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/palettes/monochrome.md" <<'CODEX_LAZYPACK_87688D9780068BD13254CE03472C60207110C40C'
-# Monochrome
-
-Dramatic, typography-focused, serious content.
-
-```
-#F8F9FA #E9ECEF #DEE2E6 #CED4DA #ADB5BD #6C757D #495057 #343A40 #212529
-#0466C8 #0353A4 #023E7D #002855 #001233
-#012A4A #013A63 #01497C #2A6F97 #468FAF #89C2D9
-#582F0E #7F4F24 #936639 #A68A64 #C2C5AA
-#463F3A #8A817C #BCB8B1 #F4F3EE #E0AFA0
-#03071E #370617 #6A040F #9D0208 #DC2F02 #F48C06 #FFBA08
-#590D22 #800F2F #A4133C #FF4D6D #FF8FA3 #FFCCD5
-#220901 #621708 #941B0C #BC3908 #F6AA1C
-```
-CODEX_LAZYPACK_87688D9780068BD13254CE03472C60207110C40C
-
-# hyperframes/palettes/nature-earth.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/palettes/nature-earth.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/palettes/nature-earth.md" <<'CODEX_LAZYPACK_DA1F1834548935F70FBC808B8FB97AE315FFFF9E'
-# Nature / Earth
-
-Sustainability, outdoor, organic, wellness content.
-
-```
-#606C38 #283618 #FEFAE0 #DDA15E #BC6C25
-#DAD7CD #A3B18A #588157 #3A5A40 #344E41
-#386641 #6A994E #A7C957 #F2E8CF #BC4749
-#CAD2C5 #84A98C #52796F #354F52 #2F3E46
-#F0EAD2 #DDE5B6 #ADC178 #A98467 #6C584C
-#132A13 #31572C #4F772D #90A955 #ECF39E
-#6B9080 #A4C3B2 #CCE3DE #EAF4F4 #F6FFF8
-#233D4D #FE7F2D #FCCA46 #A1C181 #619B8A
-```
-CODEX_LAZYPACK_DA1F1834548935F70FBC808B8FB97AE315FFFF9E
-
-# hyperframes/palettes/neon-electric.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/palettes/neon-electric.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/palettes/neon-electric.md" <<'CODEX_LAZYPACK_72E74B1A126D85C3983C668B61346D7A79AF786C'
-# Neon / Electric
-
-Gaming, tech, nightlife, Gen Z content.
-
-```
-#F72585 #B5179E #7209B7 #560BAD #3A0CA3
-#70D6FF #FF70A6 #FF9770 #FFD670 #E9FF70
-#7400B8 #6930C3 #5E60CE #5390D9 #48BFE3
-#0B132B #1C2541 #3A506B #5BC0BE #6FFFE9
-#540D6E #EE4266 #FFD23F #3BCEAC #0EAD69
-#2D00F7 #6A00F4 #8900F2 #A100F2 #F20089
-#FF6D00 #FF7900 #FF8500 #FF9100 #240046
-#BBFBFF #8DD8FF #4E71FF #5409DA
-```
-CODEX_LAZYPACK_72E74B1A126D85C3983C668B61346D7A79AF786C
-
-# hyperframes/palettes/pastel-soft.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/palettes/pastel-soft.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/palettes/pastel-soft.md" <<'CODEX_LAZYPACK_E553521D2C7E49894DB3318996EE60832456DD55'
-# Pastel / Soft
-
-Fashion, beauty, lifestyle, wellness content.
-
-```
-#CDB4DB #FFC8DD #FFAFCC #BDE0FE #A2D2FF
-#CCD5AE #E9EDC9 #FEFAE0 #FAEDCD #D4A373
-#FFD6FF #E7C6FF #C8B6FF #B8C0FF #BBD0FF
-#FFA69E #FAF3DD #B8F2E6 #AED9E0 #5E6472
-#EDAFB8 #F7E1D7 #DEDBD2 #B0C4B1 #4A5759
-#555B6E #89B0AE #BEE3DB #FAF9F9 #FFD6BA
-#006D77 #83C5BE #EDF6F9 #FFDDD2 #E29578
-#0081A7 #00AFB9 #FDFCDC #FED9B7 #F07167
-```
-CODEX_LAZYPACK_E553521D2C7E49894DB3318996EE60832456DD55
-
-# hyperframes/palettes/warm-editorial.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/palettes/warm-editorial.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/palettes/warm-editorial.md" <<'CODEX_LAZYPACK_0308ABE176BD8EA9A8FA111663FD7FD033A0202A'
-# Warm / Editorial
-
-Storytelling, documentaries, case studies, narrative content.
-
-```
-#264653 #2A9D8F #E9C46A #F4A261 #E76F51
-#335C67 #FFF3B0 #E09F3E #9E2A2B #540B0E
-#F4F1DE #E07A5F #3D405B #81B29A #F2CC8F
-#F6BD60 #F7EDE2 #F5CAC3 #84A59D #F28482
-#003049 #D62828 #F77F00 #FCBF49 #EAE2B7
-#588B8B #FFFFFF #FFD5C2 #F28F3B #C8553D
-#283D3B #197278 #EDDDD4 #C44536 #772E25
-#0D3B66 #FAF0CA #F4D35E #EE964B #F95738
-```
-CODEX_LAZYPACK_0308ABE176BD8EA9A8FA111663FD7FD033A0202A
+AGENT_LAZYPACK_HYPERFRAMES_HOUSE_STYLE_MD_9AA9D196B6
 
 # hyperframes/patterns.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/patterns.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/patterns.md" <<'CODEX_LAZYPACK_C30B1B3A1CAF0CCA1E5EE67A8438C92EC58720FC'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/patterns.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/patterns.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PATTERNS_MD_E2A72C06EE'
 # Composition Patterns
 
 ## Picture-in-Picture (Video in a Frame)
@@ -2784,11 +2613,630 @@ Use separate elements on the same track, each with its own time range. Slides au
   </script>
 </div>
 ```
-CODEX_LAZYPACK_C30B1B3A1CAF0CCA1E5EE67A8438C92EC58720FC
+AGENT_LAZYPACK_HYPERFRAMES_PATTERNS_MD_E2A72C06EE
+
+# hyperframes/visual-styles.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/visual-styles.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/visual-styles.md" <<'AGENT_LAZYPACK_HYPERFRAMES_VISUAL_STYLES_MD_8D3FA723EB'
+# Visual Style Library
+
+Named visual identities for HyperFrames videos. Each style is grounded in a real graphic design tradition and expressed as a DESIGN.md-compatible token block. Use them as starters — copy the YAML into your project's `design.md` front matter, then customize.
+
+**How to pick:** Match mood first, content second. Ask: _"What should the viewer FEEL?"_
+
+**How to use:** Copy the style's YAML token block into `design.md` front matter. Add `## Overview`, `## Colors`, `## Typography`, `## Elevation`, `## Components`, `## Do's and Don'ts` prose sections to complete the file.
+
+## Quick Reference
+
+| Style           | Mood                  | Best for                           | Transition shader                 |
+| --------------- | --------------------- | ---------------------------------- | --------------------------------- |
+| Swiss Pulse     | Clinical, precise     | SaaS, data, dev tools, metrics     | Cinematic Zoom or SDF Iris        |
+| Velvet Standard | Premium, timeless     | Luxury, enterprise, keynotes       | Cross-Warp Morph                  |
+| Deconstructed   | Industrial, raw       | Tech launches, security, punk      | Glitch or Whip Pan                |
+| Maximalist Type | Loud, kinetic         | Big announcements, launches        | Ridged Burn                       |
+| Data Drift      | Futuristic, immersive | AI, ML, cutting-edge tech          | Gravitational Lens or Domain Warp |
+| Soft Signal     | Intimate, warm        | Wellness, personal stories, brand  | Thermal Distortion                |
+| Folk Frequency  | Cultural, vivid       | Consumer apps, food, communities   | Swirl Vortex or Ripple Waves      |
+| Shadow Cut      | Dark, cinematic       | Dramatic reveals, security, exposé | Domain Warp                       |
+
+---
+
+## 1. Swiss Pulse — Josef Müller-Brockmann
+
+**Mood:** Clinical, precise | **Best for:** SaaS dashboards, developer tools, APIs, metrics
+
+```yaml
+name: Swiss Pulse
+colors:
+  primary: "#1a1a1a"
+  on-primary: "#ffffff"
+  accent: "#0066FF"
+typography:
+  headline:
+    fontFamily: Helvetica Neue
+    fontSize: 5rem
+    fontWeight: 700
+  label:
+    fontFamily: Inter
+    fontSize: 0.875rem
+    fontWeight: 400
+  stat:
+    fontFamily: Helvetica Neue
+    fontSize: 7rem
+    fontWeight: 700
+rounded:
+  none: 0px
+  sm: 2px
+spacing:
+  sm: 8px
+  md: 16px
+  lg: 32px
+motion:
+  energy: high
+  easing:
+    entry: "expo.out"
+    exit: "power4.in"
+    ambient: "none"
+  duration:
+    entrance: 0.4
+    hold: 1.5
+    transition: 0.6
+  atmosphere:
+    - grid-lines
+    - registration-marks
+  transition: cinematic-zoom
+```
+
+Grid-locked compositions. Every element snaps to an invisible 12-column grid. Numbers dominate the frame at 80–120px. Animated counters count up from 0. Hard cuts, no decorative transitions. Nothing floats.
+
+---
+
+## 2. Velvet Standard — Massimo Vignelli
+
+**Mood:** Premium, timeless | **Best for:** Luxury products, enterprise software, keynotes, investor decks
+
+```yaml
+name: Velvet Standard
+colors:
+  primary: "#0a0a0a"
+  on-primary: "#ffffff"
+  accent: "#1a237e"
+typography:
+  headline:
+    fontFamily: Inter
+    fontSize: 3rem
+    fontWeight: 300
+    letterSpacing: 0.15em
+    textTransform: uppercase
+  body:
+    fontFamily: Inter
+    fontSize: 1rem
+    fontWeight: 300
+    lineHeight: 1.6
+rounded:
+  sm: 0px
+  md: 2px
+spacing:
+  sm: 16px
+  md: 32px
+  lg: 64px
+motion:
+  energy: calm
+  easing:
+    entry: "sine.inOut"
+    exit: "power1.in"
+    ambient: "sine.inOut"
+  duration:
+    entrance: 1.2
+    hold: 3.0
+    transition: 1.5
+  atmosphere:
+    - subtle-grain
+    - hairline-rules
+  transition: cross-warp-morph
+```
+
+Generous negative space. Symmetrical, centered, architectural precision. Thin sans-serif, ALL CAPS, wide letter-spacing. Sequential reveals with long holds. Nothing snaps — everything glides with intention. Luxury takes its time.
+
+---
+
+## 3. Deconstructed — Neville Brody
+
+**Mood:** Industrial, raw | **Best for:** Tech news, developer launches, security products, punk-energy reveals
+
+```yaml
+name: Deconstructed
+colors:
+  primary: "#1a1a1a"
+  on-primary: "#f0f0f0"
+  accent: "#D4501E"
+typography:
+  headline:
+    fontFamily: Space Grotesk
+    fontSize: 4rem
+    fontWeight: 700
+  label:
+    fontFamily: Space Mono
+    fontSize: 0.75rem
+    fontWeight: 700
+    textTransform: uppercase
+rounded:
+  none: 0px
+spacing:
+  sm: 4px
+  md: 12px
+  lg: 24px
+motion:
+  energy: high
+  easing:
+    entry: "back.out(2.5)"
+    exit: "steps(8)"
+    ambient: "elastic.out(1.2, 0.4)"
+  duration:
+    entrance: 0.3
+    hold: 1.0
+    transition: 0.5
+  atmosphere:
+    - scan-lines
+    - glitch-artifacts
+    - grain-overlay
+  transition: glitch
+```
+
+Type at angles, overlapping edges, escaping frames. Bold industrial weight. Gritty textures: scan-line effects, glitch artifacts baked into design. Text SLAMS and SHATTERS. Letters scramble then snap to final position. Intentional irregularity — nothing should feel polished.
+
+---
+
+## 4. Maximalist Type — Paula Scher
+
+**Mood:** Loud, kinetic | **Best for:** Big product launches, milestone announcements, high-energy hype videos
+
+```yaml
+name: Maximalist Type
+colors:
+  primary: "#0a0a0a"
+  on-primary: "#ffffff"
+  accent-red: "#E63946"
+  accent-yellow: "#FFD60A"
+typography:
+  headline:
+    fontFamily: Anton
+    fontSize: 8rem
+    fontWeight: 400
+    textTransform: uppercase
+  subhead:
+    fontFamily: Space Grotesk
+    fontSize: 3rem
+    fontWeight: 700
+rounded:
+  none: 0px
+spacing:
+  sm: 0px
+  md: 8px
+motion:
+  energy: high
+  easing:
+    entry: "expo.out"
+    exit: "back.out(1.8)"
+    ambient: "power3.out"
+  duration:
+    entrance: 0.3
+    hold: 0.8
+    transition: 0.4
+  atmosphere:
+    - type-layers
+    - color-blocks
+  transition: ridged-burn
+```
+
+Text IS the visual. Overlapping type layers at different scales and angles, filling 50–80% of frame. Bold saturated colors — maximum contrast. Everything kinetic: slamming, sliding, scaling. 2–3 second rapid-fire scenes. No static moments. Fast arrivals, hard stops.
+
+---
+
+## 5. Data Drift — Refik Anadol
+
+**Mood:** Futuristic, immersive | **Best for:** AI products, ML platforms, data companies, speculative tech
+
+```yaml
+name: Data Drift
+colors:
+  primary: "#0a0a0a"
+  on-primary: "#e0e0e0"
+  accent-purple: "#7c3aed"
+  accent-cyan: "#06b6d4"
+typography:
+  headline:
+    fontFamily: Inter
+    fontSize: 2.5rem
+    fontWeight: 200
+    letterSpacing: 0.05em
+  body:
+    fontFamily: Inter
+    fontSize: 0.875rem
+    fontWeight: 300
+rounded:
+  sm: 4px
+  md: 12px
+  full: 9999px
+spacing:
+  sm: 16px
+  md: 32px
+  lg: 64px
+motion:
+  energy: moderate
+  easing:
+    entry: "sine.inOut"
+    exit: "power2.out"
+    ambient: "sine.inOut"
+  duration:
+    entrance: 1.0
+    hold: 2.5
+    transition: 1.5
+  atmosphere:
+    - particle-field
+    - light-traces
+    - radial-glow
+  transition: gravitational-lens
+```
+
+Thin futuristic sans-serif — floating, weightless, minimal. Fluid morphing compositions. Extreme scale shifts (micro → macro). Particles coalesce into numbers. Light traces data paths through the frame. Smooth, continuous, organic. Nothing hard.
+
+---
+
+## 6. Soft Signal — Stefan Sagmeister
+
+**Mood:** Intimate, warm | **Best for:** Wellness brands, personal stories, lifestyle products, human-centered apps
+
+```yaml
+name: Soft Signal
+colors:
+  primary: "#FFF8EC"
+  on-primary: "#2a2a2a"
+  accent-amber: "#F5A623"
+  accent-rose: "#C4A3A3"
+  accent-sage: "#8FAF8C"
+typography:
+  headline:
+    fontFamily: Playfair Display
+    fontSize: 3rem
+    fontWeight: 400
+    fontStyle: italic
+  body:
+    fontFamily: Inter
+    fontSize: 1rem
+    fontWeight: 300
+    lineHeight: 1.7
+rounded:
+  sm: 8px
+  md: 16px
+  lg: 24px
+  full: 9999px
+spacing:
+  sm: 12px
+  md: 24px
+  lg: 48px
+motion:
+  energy: calm
+  easing:
+    entry: "sine.inOut"
+    exit: "power1.inOut"
+    ambient: "sine.inOut"
+  duration:
+    entrance: 1.0
+    hold: 3.0
+    transition: 1.5
+  atmosphere:
+    - soft-gradient
+    - warm-grain
+  transition: thermal-distortion
+```
+
+Handwritten-style or humanist serif fonts. Personal, lowercase, delicate. Close-up framing: single element fills the frame. Slow drifts and floats, never snaps. Soft organic motion. Nothing should feel hurried or polished. Intimate, never corporate.
+
+---
+
+## 7. Folk Frequency — Eduardo Terrazas
+
+**Mood:** Cultural, vivid | **Best for:** Consumer apps, food platforms, community products, festive launches
+
+```yaml
+name: Folk Frequency
+colors:
+  primary: "#ffffff"
+  on-primary: "#1a1a1a"
+  accent-pink: "#FF1493"
+  accent-blue: "#0047AB"
+  accent-yellow: "#FFE000"
+  accent-green: "#009B77"
+typography:
+  headline:
+    fontFamily: Fredoka One
+    fontSize: 4rem
+    fontWeight: 400
+  body:
+    fontFamily: Nunito
+    fontSize: 1rem
+    fontWeight: 600
+rounded:
+  sm: 8px
+  md: 16px
+  lg: 32px
+  full: 9999px
+spacing:
+  sm: 8px
+  md: 16px
+  lg: 32px
+motion:
+  energy: high
+  easing:
+    entry: "back.out(1.6)"
+    exit: "elastic.out(1, 0.5)"
+    ambient: "sine.inOut"
+  duration:
+    entrance: 0.5
+    hold: 1.5
+    transition: 0.8
+  atmosphere:
+    - pattern-tiles
+    - confetti-burst
+    - color-blocks
+  transition: swirl-vortex
+```
+
+Bold warm rounded type. Pattern and repetition — folk art rhythm and density. Layered compositions with rich visual texture. Every frame feels handcrafted. Colorful motion: elements bounce, pop, spin into place with joy. Overshoots feel intentional. Celebratory energy.
+
+---
+
+## 8. Shadow Cut — Hans Hillmann
+
+**Mood:** Dark, cinematic | **Best for:** Security products, dramatic reveals, investigative content, intense launches
+
+```yaml
+name: Shadow Cut
+colors:
+  primary: "#0a0a0a"
+  on-primary: "#f0f0f0"
+  surface: "#3a3a3a"
+  accent: "#C1121F"
+typography:
+  headline:
+    fontFamily: Oswald
+    fontSize: 4rem
+    fontWeight: 700
+    textTransform: uppercase
+  body:
+    fontFamily: Inter
+    fontSize: 0.875rem
+    fontWeight: 400
+rounded:
+  none: 0px
+  sm: 2px
+spacing:
+  sm: 8px
+  md: 16px
+  lg: 48px
+motion:
+  energy: moderate
+  easing:
+    entry: "power3.out"
+    exit: "power4.in"
+    ambient: "sine.inOut"
+  duration:
+    entrance: 0.8
+    hold: 2.5
+    transition: 1.2
+  atmosphere:
+    - deep-shadow
+    - vignette
+    - grain-overlay
+  transition: domain-warp
+```
+
+Near-monochrome: deep blacks, cold greys, stark white + one blood accent. Sharp angular text like film noir title cards. Heavy contrast, no softness. Elements emerge from darkness — reveal is the narrative. Slow creeping push-ins, dramatic scale reveals. The pause before the hit matters. Domain Warp dissolves reality before the next scene.
+
+---
+
+## Mood → Style Guide
+
+| If the content feels...            | Use...          |
+| ---------------------------------- | --------------- |
+| Data-driven, analytical, technical | Swiss Pulse     |
+| Premium, enterprise, luxury        | Velvet Standard |
+| Raw, punk, aggressive, rebellious  | Deconstructed   |
+| Hype, loud, high-energy launch     | Maximalist Type |
+| AI, ML, speculative, futuristic    | Data Drift      |
+| Human, warm, personal, wellness    | Soft Signal     |
+| Cultural, fun, consumer, festive   | Folk Frequency  |
+| Dark, dramatic, intense, cinematic | Shadow Cut      |
+
+---
+
+## Creating Custom Styles
+
+These 8 styles are starters — not constraints. Create your own:
+
+1. **Name it** after a designer, art movement, or cultural reference
+2. **Write YAML tokens** — `colors` (2–5 tokens), `typography` (2–3 scales), `rounded`, `spacing`, `motion` (energy + easing + duration + atmosphere + transition)
+3. **Add prose** — one paragraph describing the feel, what to do, what to avoid
+4. **Token references** — use `{colors.accent}`, `{typography.headline}` in component definitions
+
+The pattern: **YAML tokens (what) → prose rationale (why) → components (how they combine).**
+AGENT_LAZYPACK_HYPERFRAMES_VISUAL_STYLES_MD_8D3FA723EB
+
+# hyperframes/palettes/bold-energetic.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/palettes/bold-energetic.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/palettes/bold-energetic.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PALETTES_BOLD_ENERGETIC_MD_A617D1437E'
+# Bold / Energetic
+
+Product launches, social media, announcements, high-energy content.
+
+```
+#FFBE0B #FB5607 #FF006E #8338EC #3A86FF
+#F72585 #7209B7 #3A0CA3 #4361EE #4CC9F0
+#EF476F #FFD166 #06D6A0 #118AB2 #073B4C
+#FF595E #FFCA3A #8AC926 #1982C4 #6A4C93
+#9B5DE5 #F15BB5 #FEE440 #00BBF9 #00F5D4
+#390099 #9E0059 #FF0054 #FF5400 #FFBD00
+#3D348B #7678ED #F7B801 #F18701 #F35B04
+#FFBC42 #D81159 #8F2D56 #218380 #73D2DE
+```
+AGENT_LAZYPACK_HYPERFRAMES_PALETTES_BOLD_ENERGETIC_MD_A617D1437E
+
+# hyperframes/palettes/clean-corporate.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/palettes/clean-corporate.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/palettes/clean-corporate.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PALETTES_CLEAN_CORPORATE_MD_3C3E8B3806'
+# Clean / Corporate
+
+Explainers, tutorials, presentations, professional content.
+
+```
+#FFFCF2 #CCC5B9 #403D39 #252422 #EB5E28
+#22223B #4A4E69 #9A8C98 #C9ADA7 #F2E9E4
+#3D5A80 #98C1D9 #E0FBFC #EE6C4D #293241
+#2B2D42 #8D99AE #EDF2F4 #EF233C #D90429
+#353535 #3C6E71 #FFFFFF #D9D9D9 #284B63
+#E7ECEF #274C77 #6096BA #A3CEF1 #8B8C89
+#CFDBD5 #E8EDDF #F5CB5C #242423 #333533
+#2F6690 #3A7CA5 #D9DCD6 #16425B #81C3D7
+```
+AGENT_LAZYPACK_HYPERFRAMES_PALETTES_CLEAN_CORPORATE_MD_3C3E8B3806
+
+# hyperframes/palettes/dark-premium.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/palettes/dark-premium.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/palettes/dark-premium.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PALETTES_DARK_PREMIUM_MD_7A88FCF6D0'
+# Dark / Premium
+
+Tech, finance, luxury, cinematic content.
+
+```
+#000000 #14213D #FCA311 #E5E5E5 #FFFFFF
+#000814 #001D3D #003566 #FFC300 #FFD60A
+#0D1B2A #1B263B #415A77 #778DA9 #E0E1DD
+#0D1321 #1D2D44 #3E5C76 #748CAB #F0EBD8
+#011627 #FDFFFC #2EC4B6 #E71D36 #FF9F1C
+#0B090A #161A1D #660708 #A4161A #E5383B
+#001427 #708D81 #F4D58D #BF0603 #8D0801
+#001524 #15616D #FFECD1 #FF7D00 #78290F
+```
+AGENT_LAZYPACK_HYPERFRAMES_PALETTES_DARK_PREMIUM_MD_7A88FCF6D0
+
+# hyperframes/palettes/jewel-rich.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/palettes/jewel-rich.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/palettes/jewel-rich.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PALETTES_JEWEL_RICH_MD_72CA418C91'
+# Jewel / Rich
+
+Luxury, events, sophisticated, high-end content.
+
+```
+#5F0F40 #9A031E #FB8B24 #E36414 #0F4C5C
+#780000 #C1121F #FDF0D5 #003049 #669BBC
+#10002B #240046 #3C096C #5A189A #7B2CBF
+#355070 #6D597A #B56576 #E56B6F #EAAC8B
+#6F1D1B #BB9457 #432818 #99582A #FFE6A7
+#231942 #5E548E #9F86C0 #BE95C4 #E0B1CB
+#461220 #8C2F39 #B23A48 #FCB9B2 #FED0BB
+#780116 #F7B538 #DB7C26 #D8572A #C32F27
+```
+AGENT_LAZYPACK_HYPERFRAMES_PALETTES_JEWEL_RICH_MD_72CA418C91
+
+# hyperframes/palettes/monochrome.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/palettes/monochrome.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/palettes/monochrome.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PALETTES_MONOCHROME_MD_93A3BD4427'
+# Monochrome
+
+Dramatic, typography-focused, serious content.
+
+```
+#F8F9FA #E9ECEF #DEE2E6 #CED4DA #ADB5BD #6C757D #495057 #343A40 #212529
+#0466C8 #0353A4 #023E7D #002855 #001233
+#012A4A #013A63 #01497C #2A6F97 #468FAF #89C2D9
+#582F0E #7F4F24 #936639 #A68A64 #C2C5AA
+#463F3A #8A817C #BCB8B1 #F4F3EE #E0AFA0
+#03071E #370617 #6A040F #9D0208 #DC2F02 #F48C06 #FFBA08
+#590D22 #800F2F #A4133C #FF4D6D #FF8FA3 #FFCCD5
+#220901 #621708 #941B0C #BC3908 #F6AA1C
+```
+AGENT_LAZYPACK_HYPERFRAMES_PALETTES_MONOCHROME_MD_93A3BD4427
+
+# hyperframes/palettes/nature-earth.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/palettes/nature-earth.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/palettes/nature-earth.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PALETTES_NATURE_EARTH_MD_C40A11A6CC'
+# Nature / Earth
+
+Sustainability, outdoor, organic, wellness content.
+
+```
+#606C38 #283618 #FEFAE0 #DDA15E #BC6C25
+#DAD7CD #A3B18A #588157 #3A5A40 #344E41
+#386641 #6A994E #A7C957 #F2E8CF #BC4749
+#CAD2C5 #84A98C #52796F #354F52 #2F3E46
+#F0EAD2 #DDE5B6 #ADC178 #A98467 #6C584C
+#132A13 #31572C #4F772D #90A955 #ECF39E
+#6B9080 #A4C3B2 #CCE3DE #EAF4F4 #F6FFF8
+#233D4D #FE7F2D #FCCA46 #A1C181 #619B8A
+```
+AGENT_LAZYPACK_HYPERFRAMES_PALETTES_NATURE_EARTH_MD_C40A11A6CC
+
+# hyperframes/palettes/neon-electric.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/palettes/neon-electric.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/palettes/neon-electric.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PALETTES_NEON_ELECTRIC_MD_7156B6DD4D'
+# Neon / Electric
+
+Gaming, tech, nightlife, Gen Z content.
+
+```
+#F72585 #B5179E #7209B7 #560BAD #3A0CA3
+#70D6FF #FF70A6 #FF9770 #FFD670 #E9FF70
+#7400B8 #6930C3 #5E60CE #5390D9 #48BFE3
+#0B132B #1C2541 #3A506B #5BC0BE #6FFFE9
+#540D6E #EE4266 #FFD23F #3BCEAC #0EAD69
+#2D00F7 #6A00F4 #8900F2 #A100F2 #F20089
+#FF6D00 #FF7900 #FF8500 #FF9100 #240046
+#BBFBFF #8DD8FF #4E71FF #5409DA
+```
+AGENT_LAZYPACK_HYPERFRAMES_PALETTES_NEON_ELECTRIC_MD_7156B6DD4D
+
+# hyperframes/palettes/pastel-soft.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/palettes/pastel-soft.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/palettes/pastel-soft.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PALETTES_PASTEL_SOFT_MD_377A67CBF2'
+# Pastel / Soft
+
+Fashion, beauty, lifestyle, wellness content.
+
+```
+#CDB4DB #FFC8DD #FFAFCC #BDE0FE #A2D2FF
+#CCD5AE #E9EDC9 #FEFAE0 #FAEDCD #D4A373
+#FFD6FF #E7C6FF #C8B6FF #B8C0FF #BBD0FF
+#FFA69E #FAF3DD #B8F2E6 #AED9E0 #5E6472
+#EDAFB8 #F7E1D7 #DEDBD2 #B0C4B1 #4A5759
+#555B6E #89B0AE #BEE3DB #FAF9F9 #FFD6BA
+#006D77 #83C5BE #EDF6F9 #FFDDD2 #E29578
+#0081A7 #00AFB9 #FDFCDC #FED9B7 #F07167
+```
+AGENT_LAZYPACK_HYPERFRAMES_PALETTES_PASTEL_SOFT_MD_377A67CBF2
+
+# hyperframes/palettes/warm-editorial.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/palettes/warm-editorial.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/palettes/warm-editorial.md" <<'AGENT_LAZYPACK_HYPERFRAMES_PALETTES_WARM_EDITORIAL_MD_E55196A727'
+# Warm / Editorial
+
+Storytelling, documentaries, case studies, narrative content.
+
+```
+#264653 #2A9D8F #E9C46A #F4A261 #E76F51
+#335C67 #FFF3B0 #E09F3E #9E2A2B #540B0E
+#F4F1DE #E07A5F #3D405B #81B29A #F2CC8F
+#F6BD60 #F7EDE2 #F5CAC3 #84A59D #F28482
+#003049 #D62828 #F77F00 #FCBF49 #EAE2B7
+#588B8B #FFFFFF #FFD5C2 #F28F3B #C8553D
+#283D3B #197278 #EDDDD4 #C44536 #772E25
+#0D3B66 #FAF0CA #F4D35E #EE964B #F95738
+```
+AGENT_LAZYPACK_HYPERFRAMES_PALETTES_WARM_EDITORIAL_MD_E55196A727
 
 # hyperframes/references/audio-reactive.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/audio-reactive.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/audio-reactive.md" <<'CODEX_LAZYPACK_B9309B24639DA917729BA965BB8DFFA651556A9A'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/audio-reactive.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/audio-reactive.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_AUDIO_REACTIVE_MD_AB432B3678'
 # Audio-Reactive Animation
 
 Drive visuals from music, voice, or sound. Any GSAP-animatable property can respond to pre-extracted audio data.
@@ -2865,11 +3313,11 @@ Without per-frame sampling, the composition doesn't actually react to audio.
 - All audio data must be pre-extracted (use `extract-audio-data.py` from the gsap skill's scripts/)
 - No `Math.random()` or `Date.now()`
 - Audio reactivity runs on the same GSAP timeline as everything else
-CODEX_LAZYPACK_B9309B24639DA917729BA965BB8DFFA651556A9A
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_AUDIO_REACTIVE_MD_AB432B3678
 
 # hyperframes/references/beat-direction.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/beat-direction.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/beat-direction.md" <<'CODEX_LAZYPACK_4A96FD3E17EF848A61161A617615B1FF014960D3'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/beat-direction.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/beat-direction.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_BEAT_DIRECTION_MD_5AE098E78A'
 # Beat Direction
 
 How to plan and direct individual scenes (beats) in a multi-scene composition. Read before writing any multi-scene video.
@@ -3041,11 +3489,11 @@ A social ad that tries to hook in 2s, showcase 3 features, and end with a CTA in
 ## Velocity-Matched Transitions
 
 Exit the outgoing beat with an accelerating ease (power2.in or power3.in) plus a blur ramp. Enter the incoming beat with a decelerating ease (power2.out or power3.out) plus blur clear. The fastest point of both easing curves meets at the cut — the viewer perceives continuous camera motion, not two discrete animations. Match exit velocity to entry velocity within ~5% tolerance.
-CODEX_LAZYPACK_4A96FD3E17EF848A61161A617615B1FF014960D3
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_BEAT_DIRECTION_MD_5AE098E78A
 
 # hyperframes/references/captions.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/captions.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/captions.md" <<'CODEX_LAZYPACK_31086363095026B52679FAEF1764B99F697866DE'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/captions.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/captions.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_CAPTIONS_MD_DCFE7B7FD7'
 # Captions
 
 ## Language Rule (Non-Negotiable)
@@ -3209,11 +3657,11 @@ Caption components ship with transparent backgrounds — they're pure overlays. 
 - One group visible at a time.
 - Every group must have a hard `tl.set` kill at `group.end`.
 - The compiler embeds supported fonts automatically — just declare `font-family` in CSS.
-CODEX_LAZYPACK_31086363095026B52679FAEF1764B99F697866DE
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_CAPTIONS_MD_DCFE7B7FD7
 
 # hyperframes/references/css-patterns.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/css-patterns.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/css-patterns.md" <<'CODEX_LAZYPACK_81FB12D62F651513EC97D4759AFC03DC52AAF494'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/css-patterns.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/css-patterns.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_CSS_PATTERNS_MD_4D1CE697F1'
 # CSS Patterns for Marker Highlighting
 
 Pure CSS + GSAP implementations of all five MarkerHighlight.js drawing modes. Use these for deterministic rendering in HyperFrames compositions — no external library dependency, full GSAP timeline control.
@@ -3587,11 +4035,11 @@ GROUPS.forEach(function (group, gi) {
 ```
 
 Cycle every 2-3 groups for high energy, every 3-4 for medium, every 4-5 for low.
-CODEX_LAZYPACK_81FB12D62F651513EC97D4759AFC03DC52AAF494
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_CSS_PATTERNS_MD_4D1CE697F1
 
 # hyperframes/references/design-picker.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/design-picker.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/design-picker.md" <<'CODEX_LAZYPACK_6F030C571035F8AC2C65631F14E88718D133A058'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/design-picker.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/design-picker.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_DESIGN_PICKER_MD_4D68E25552'
 # Design Picker
 
 Two-phase visual picker: mood boards first (pick a complete direction), then fine-tune individual categories.
@@ -3709,11 +4157,11 @@ This makes previews contextual — the user sees their own content styled, not g
 5. Once the user picks, tell them: "Copy the design.md from the picker and paste it here." The user pastes the markdown back into the conversation. Save it verbatim to `design.md` in the project root — it's already in spec format (YAML frontmatter + prose sections). After the user pastes, kill the background server: `kill %1` or `kill $(lsof -ti:8723)`. Then proceed with construction.
 
 The picker outputs a [google-labs-code/design.md](https://github.com/google-labs-code/design.md) spec-compliant file: YAML frontmatter with `colors`, `typography`, `rounded`, and `spacing` tokens, followed by `## Overview`, `## Colors`, `## Typography`, `## Layout`, `## Elevation`, `## Components`, and `## Do's and Don'ts` prose sections.
-CODEX_LAZYPACK_6F030C571035F8AC2C65631F14E88718D133A058
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_DESIGN_PICKER_MD_4D68E25552
 
 # hyperframes/references/dynamic-techniques.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/dynamic-techniques.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/dynamic-techniques.md" <<'CODEX_LAZYPACK_6FC055F3F9FD0023DAF978BC8798DE2298408BDE'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/dynamic-techniques.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/dynamic-techniques.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_DYNAMIC_TECHNIQUES_MD_6B5AF63E51'
 # Dynamic Caption Techniques
 
 You are here because SKILL.md told you to read this file before writing animation code. Pick your technique combination from the table below based on the energy level you detected from the transcript, then implement using standard GSAP patterns.
@@ -3816,11 +4264,11 @@ These tools are available in the HyperFrames runtime. Use them when they solve a
 | **fitTextFontSize** | Finds the largest font size that fits text on one line. Built on pretext. | `window.__hyperframes.fitTextFontSize(text, { maxWidth, fontFamily, fontWeight })`             | Overflow prevention for long phrases, portrait mode, large base sizes        |
 | **audio data**      | Pre-extracted per-frame RMS energy and frequency bands.                   | Extract with `extract-audio-data.py`, load inline or via `fetch("audio-data.json")`            | Audio-reactive visuals — modulate intensity based on the music               |
 | **GSAP**            | Animation timeline with tweens and callbacks.                             | `gsap.to()`, `gsap.set()`, `tl.to()`, `tl.set()`                                               | All caption animation                                                        |
-CODEX_LAZYPACK_6FC055F3F9FD0023DAF978BC8798DE2298408BDE
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_DYNAMIC_TECHNIQUES_MD_6B5AF63E51
 
 # hyperframes/references/html-in-canvas-patterns.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/html-in-canvas-patterns.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/html-in-canvas-patterns.md" <<'CODEX_LAZYPACK_FEADA7529B666E0113B027903A988AA82DE2D7EA'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/html-in-canvas-patterns.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/html-in-canvas-patterns.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_HTML_IN_CANVAS_PATTERNS_MD_E205D77F97'
 # HTML-in-Canvas Patterns
 
 HyperFrames' most powerful visual capability. Capture ANY live HTML/CSS as a GPU texture, then render it through WebGL shaders, Three.js 3D scenes, or post-processing effects — at 60fps, pixel-perfect, with every CSS feature supported.
@@ -4328,11 +4776,11 @@ Any GLSL effect from ShaderToy, The Book of Shaders, CodePen, or anywhere else c
 - Multiple passes stack — add as many as you want
 
 **You are not limited to the effects listed here.** If you can imagine a visual treatment, you can build it. The HTML-in-Canvas API gives you the source material (any HTML rendered as a texture), and WebGL/Three.js gives you unlimited creative control over how that material is presented.
-CODEX_LAZYPACK_FEADA7529B666E0113B027903A988AA82DE2D7EA
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_HTML_IN_CANVAS_PATTERNS_MD_E205D77F97
 
 # hyperframes/references/motion-principles.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/motion-principles.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/motion-principles.md" <<'CODEX_LAZYPACK_3A73DD77C2A82750D6F9786C2F901813EDF5C55B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/motion-principles.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/motion-principles.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_MOTION_PRINCIPLES_MD_719593464E'
 # Motion Principles
 
 ## Common defaults that produce monoculture
@@ -4483,11 +4931,11 @@ Rules below came out of two independent website-to-hyperframes builds (2026-04-2
   ```
 
 These are the exact rules with the exact code examples — don't summarize or shorten them. They exist because compositions that lint clean still ship broken without them.
-CODEX_LAZYPACK_3A73DD77C2A82750D6F9786C2F901813EDF5C55B
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_MOTION_PRINCIPLES_MD_719593464E
 
 # hyperframes/references/narration.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/narration.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/narration.md" <<'CODEX_LAZYPACK_0467DDE8D2020155088DACD36D6C66BD17CF788D'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/narration.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/narration.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_NARRATION_MD_DB05BD5B9C'
 # Narration & Script
 
 How to write narration scripts for video compositions. Read when the composition includes voiceover or TTS.
@@ -4580,11 +5028,11 @@ Hyperframes. Go make something.
 ```
 
 Note: ~140 words for 62 seconds — that's 2.3 words/sec, leaving room for pauses and visual breathing.
-CODEX_LAZYPACK_0467DDE8D2020155088DACD36D6C66BD17CF788D
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_NARRATION_MD_DB05BD5B9C
 
 # hyperframes/references/prompt-expansion.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/prompt-expansion.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/prompt-expansion.md" <<'CODEX_LAZYPACK_2460A1327ED57F5AA855F25F40DE23494A8899AC'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/prompt-expansion.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/prompt-expansion.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_PROMPT_EXPANSION_MD_B071443EB7'
 # Prompt Expansion
 
 Run on every composition. Expansion is not about lengthening a short prompt — it's about grounding the user's intent against `design.md` and `house-style.md` and producing a consistent intermediate that every downstream agent reads the same way.
@@ -4653,11 +5101,11 @@ Tell the user:
 > It has [N] scenes across [duration] seconds with specific visual elements, transitions, and pacing. Edit anything you want, then let me know when you're ready to proceed."
 
 Only move to construction after the user approves or says to continue.
-CODEX_LAZYPACK_2460A1327ED57F5AA855F25F40DE23494A8899AC
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_PROMPT_EXPANSION_MD_B071443EB7
 
 # hyperframes/references/techniques.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/techniques.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/techniques.md" <<'CODEX_LAZYPACK_99688406EF20ECBE7F617D3F5E6347A51DC08870'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/techniques.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/techniques.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TECHNIQUES_MD_D9D1D36D4F'
 # Visual Techniques Reference
 
 13 primitive animation techniques from production HyperFrames videos — SVG drawing, kinetic typography, variable fonts, WebGL shaders, motion-path, etc. Compose these into beats; they are the building blocks, not finished recipes. Each entry includes a minimal code pattern you can adapt.
@@ -5183,11 +5631,11 @@ GSAP offers a deep easing library. Every composition should use at least 3 diffe
 Don't match techniques to video type on autopilot — match them to the **concept of the specific beat**. Ask: what visual treatment makes this exact idea land? A beat about speed needs motion that communicates speed; a beat about precision needs geometry and structure; a beat about warmth needs texture and organic drift.
 
 Read the storyboard beat's concept and mood, then scan this list for techniques whose _visual character_ serves that concept. Any technique can appear in any video type — the question is whether it earns its place in this beat.
-CODEX_LAZYPACK_99688406EF20ECBE7F617D3F5E6347A51DC08870
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TECHNIQUES_MD_D9D1D36D4F
 
 # hyperframes/references/text-effects.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/text-effects.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/text-effects.md" <<'CODEX_LAZYPACK_7A39B94A5C9D82D9364B5A061C1092FE2092BA32'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/text-effects.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/text-effects.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TEXT_EFFECTS_MD_E1AF2F5645'
 # Text Effects — Reference
 
 For deterministic text-animation specs (e.g., `typewriter` at exact `240ms / 46ms stagger / steps(1, end) easing`), this skill defers to the separate **`animate-text`** skill maintained by Pixel Point at [github.com/pixel-pointanimate-text](https://github.com/pixel-pointanimate-text). It provides a catalog of 24 named text effects with portable contracts and per-library implementation recipes (GSAP, Anime.js, WAAPI).
@@ -5252,11 +5700,11 @@ Every text element in every beat can name an effect by ID, e.g.:
 Parallel build passes implementing the beat will load `animate-text` if it's not already loaded, then read the spec for each named effect from the upstream skill's files.
 
 If the upstream skill isn't available (offline build, network restrictions, agent runtime that doesn't support skill loading), parallel build passes fall back to implementing the effect from the description alone — using GSAP knowledge plus the effect ID as a description of intent (e.g., "typewriter" = per-character stepped reveal with no interpolation).
-CODEX_LAZYPACK_7A39B94A5C9D82D9364B5A061C1092FE2092BA32
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TEXT_EFFECTS_MD_E1AF2F5645
 
 # hyperframes/references/transcript-guide.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transcript-guide.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transcript-guide.md" <<'CODEX_LAZYPACK_D48BDDA99281CF3F1B5E7CC3C2AB2E9A58E3492E'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transcript-guide.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transcript-guide.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSCRIPT_GUIDE_MD_7B8E89F08C'
 # Transcript Guide
 
 For the `transcribe` CLI invocation, the `.en`-translates-non-English rule, and whisper model selection, see the `hyperframes-media` skill. This file covers what to do with the resulting transcript when authoring captions: input formats, mandatory quality checks, cleaning code, external-API fallbacks.
@@ -5364,726 +5812,11 @@ npx hyperframes transcribe transcript-groq.json
    npx hyperframes transcribe <audio-or-video-file> --model medium.en
    ```
 3. **Read the transcript and run the quality check** (see above). If it fails, retry with a larger model or suggest manual lyrics.
-CODEX_LAZYPACK_D48BDDA99281CF3F1B5E7CC3C2AB2E9A58E3492E
-
-# hyperframes/references/transitions/catalog.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/catalog.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/catalog.md" <<'CODEX_LAZYPACK_C9E66C988617A3CA8408CC2101E01E404EB9F871'
-# Transition Catalog
-
-Hard rules, scene template, and routing to implementation code. Read the reference file for the transition type you need — don't load all of them.
-
-## Hard Rules (CSS)
-
-These cause real bugs if violated.
-
-**Scene visibility:** Scene 1 visible by default (no `opacity: 0`). Scenes 2+ have `opacity: 0` on the CONTAINER div. GSAP reveals them. No visibility shim (`timedEls`).
-
-**Fonts:** Just write the `font-family` you want — the compiler embeds supported fonts automatically via `@font-face` with inline data URIs. No need for `<link>` tags or `@import`. Works in all contexts including sandboxed iframes.
-
-**Element structure:** No `class="clip"` on scene divs in standalone compositions. Only the root div gets `data-composition-id`/`data-start`/`data-duration`.
-
-**Overlay elements:** Staggered blocks = full-screen 1920x1080, NOT thin strips. Glitch RGB overlays = normal blending at 35% opacity, NOT `mix-blend-mode: multiply` (invisible on dark backgrounds). Light leak overlays = larger than the frame (2400px+), never a visible shape. Overexposure = use `filter: brightness()` on the scene, not just a white overlay.
-
-**VHS tape:** Clone actual scene content with `cloneNode(true)`, NOT colored bars. Each strip: wider than frame (2020px at left:-50px). Red+blue chromatic copies at z-index above main strip. Seeded PRNG for deterministic random offsets.
-
-**Z-index:** Gravity drop, zoom out, diagonal split need outgoing scene ON TOP (`zIndex: 10`) so it exits while revealing the new scene behind (`zIndex: 1`).
-
-**Page burn:** Content burns with the page — no falling debris. Hide scene1 via `tl.set` at burn end, NEVER `onComplete` (not reversible). `onUpdate` must restore `clipPath: "none"` when `wp <= 0` for rewind support. Incoming scene fades from black at 90% through burn.
-
-**Clock wipe:** 9-point polygon with intermediate edge positions. Step through 4 quadrants with separate tweens.
-
-**Grid dissolve:** Cycle 5 palette colors per cell, not monochrome.
-
-**Blinds count by energy:** Calm: 4h/6v. Medium: 6-8h/8v. High: 12-16h/16v.
-
-**Don't use:** Star iris (polygon interpolation broken), tilt-shift (no selective CSS blur), lens flare (visible shape, not optical), hinge/door (distorts too fast).
-
-## Shader Transitions
-
-Shader setup, WebGL init, capture, and fragment shaders are handled by `@hyperframes/shader-transitions` (`packages/shader-transitions/`). Read the package source for API details. Compositions using shaders must follow the CSS rules in [transitions.md](../transitions.md) § "Shader-Compatible CSS Rules".
-
-## Scene Template
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
-    <style>
-      body {
-        margin: 0;
-        width: 1920px;
-        height: 1080px;
-        overflow: hidden;
-        background: #000;
-        font-family: "YOUR FONT", sans-serif; /* compiler embeds supported fonts automatically */
-      }
-      .scene {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 1920px;
-        height: 1080px;
-        overflow: hidden;
-      }
-      #scene1 {
-        z-index: 1;
-        background: #color;
-      }
-      #scene2 {
-        z-index: 2;
-        background: #color;
-        opacity: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div
-      id="root"
-      data-composition-id="main"
-      data-width="1920"
-      data-height="1080"
-      data-start="0"
-      data-duration="TOTAL"
-    >
-      <div id="scene1" class="scene"><!-- visible --></div>
-      <div id="scene2" class="scene"><!-- hidden --></div>
-    </div>
-    <script>
-      window.__timelines = window.__timelines || {};
-      var tl = gsap.timeline({ paused: true });
-      // Transition code here
-      window.__timelines["main"] = tl;
-    </script>
-  </body>
-</html>
-```
-
-Every transition follows: position new scene → animate outgoing → swap → animate incoming → clean up overlays.
-
-## CSS Transitions
-
-All code examples use `old` for the outgoing scene-inner selector and `new` for the incoming, with `T` as the transition start time. Read the reference file for the type you need.
-
-| Type           | Transitions                                          | Reference                                  |
-| -------------- | ---------------------------------------------------- | ------------------------------------------ |
-| Push           | Push slide, vertical push, elastic push, squeeze     | [css-push.md](./css-push.md)               |
-| Radial / Shape | Circle iris, diamond iris, diagonal split            | [css-radial.md](./css-radial.md)           |
-| 3D             | 3D card flip                                         | [css-3d.md](./css-3d.md)                   |
-| Scale / Zoom   | Zoom through, zoom out                               | [css-scale.md](./css-scale.md)             |
-| Dissolve       | Crossfade, blur crossfade, focus pull, color dip     | [css-dissolve.md](./css-dissolve.md)       |
-| Cover          | Staggered blocks, horizontal blinds, vertical blinds | [css-cover.md](./css-cover.md)             |
-| Light          | Light leak, overexposure burn, film burn             | [css-light.md](./css-light.md)             |
-| Distortion     | Glitch, chromatic aberration, ripple, VHS tape       | [css-distortion.md](./css-distortion.md)   |
-| Mechanical     | Shutter, clock wipe                                  | [css-mechanical.md](./css-mechanical.md)   |
-| Grid           | Grid dissolve                                        | [css-grid.md](./css-grid.md)               |
-| Other          | Gravity drop, morph circle                           | [css-other.md](./css-other.md)             |
-| Blur           | Blur through, directional blur                       | [css-blur.md](./css-blur.md)               |
-| Destruction    | Page burn                                            | [css-destruction.md](./css-destruction.md) |
-
-## Shader Transitions
-
-WebGL shader transitions are provided by `@hyperframes/shader-transitions` (`packages/shader-transitions/`). The package handles setup, capture, WebGL init, render loop, and GSAP integration. Read the package source for available shaders and API — do not copy raw GLSL manually.
-CODEX_LAZYPACK_C9E66C988617A3CA8408CC2101E01E404EB9F871
-
-# hyperframes/references/transitions/css-3d.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-3d.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-3d.md" <<'CODEX_LAZYPACK_8EA4AC7D2E9A808501729C95DB84B2ADDE3D190B'
-## 3D
-
-### 3D Card Flip
-
-180° Y-axis rotation. Requires CSS: `backface-visibility: hidden; transform-style: preserve-3d;` on both scene-inners. Parent needs `perspective: 1200px`.
-
-```js
-tl.set(new, { rotationY: -180, opacity: 1 }, T);
-tl.to(old, { rotationY: 180, duration: 0.6, ease: "power2.inOut" }, T);
-tl.to(new, { rotationY: 0, duration: 0.6, ease: "power2.inOut" }, T);
-tl.set(old, { opacity: 0 }, T + 0.6);
-```
-CODEX_LAZYPACK_8EA4AC7D2E9A808501729C95DB84B2ADDE3D190B
-
-# hyperframes/references/transitions/css-blur.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-blur.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-blur.md" <<'CODEX_LAZYPACK_BA5AC38BC36D078AE979079A7A091BD12B610084'
-## Blur
-
-All blur transitions scale with energy. See SKILL.md "Blur Intensity by Energy" for the full table.
-
-### Blur Through
-
-Content becomes fully abstract before resolving. The heaviest blur transition.
-
-**Calm (default for this type — it's inherently heavy):**
-
-```js
-tl.to(old, { filter: "blur(30px)", scale: 1.08, duration: 0.5, ease: "power1.in" }, T);
-tl.to(old, { opacity: 0, duration: 0.3, ease: "power1.in" }, T + 0.3);
-// Hold: both scenes in abstract blur state
-tl.fromTo(new,
-  { filter: "blur(30px)", scale: 0.92, opacity: 0 },
-  { filter: "blur(30px)", scale: 0.92, opacity: 1, duration: 0.2, ease: "none" }, T + 0.5);
-// Slow resolve
-tl.to(new, { filter: "blur(0px)", scale: 1, duration: 0.7, ease: "power1.out" }, T + 0.7);
-```
-
-**Medium:**
-
-```js
-tl.to(old, { filter: "blur(15px)", scale: 1.05, opacity: 0, duration: 0.4, ease: "power2.in" }, T);
-tl.fromTo(new,
-  { filter: "blur(15px)", scale: 0.95, opacity: 0 },
-  { filter: "blur(0px)", scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" }, T + 0.2);
-```
-
-### Directional Blur
-
-Blur + skew simulating motion in one direction. Scale blur and skew with energy.
-
-**Medium (default):**
-
-```js
-tl.to(old, { filter: "blur(12px)", skewX: -8, x: -200, opacity: 0, duration: 0.4, ease: "power3.in" }, T);
-tl.fromTo(new,
-  { filter: "blur(12px)", skewX: 8, x: 200, opacity: 0 },
-  { filter: "blur(0px)", skewX: 0, x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T + 0.15);
-```
-
-**Calm (heavier blur, gentler motion):**
-
-```js
-tl.to(old, { filter: "blur(20px)", skewX: -4, x: -100, opacity: 0, duration: 0.6, ease: "power1.in" }, T);
-tl.fromTo(new,
-  { filter: "blur(20px)", skewX: 4, x: 100, opacity: 0 },
-  { filter: "blur(0px)", skewX: 0, x: 0, opacity: 1, duration: 0.6, ease: "power1.out" }, T + 0.3);
-```
-CODEX_LAZYPACK_BA5AC38BC36D078AE979079A7A091BD12B610084
-
-# hyperframes/references/transitions/css-cover.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-cover.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-cover.md" <<'CODEX_LAZYPACK_13590F176586C3927E6AE9BA05EA5A9FE6250D01'
-## Cover
-
-### Staggered Color Blocks
-
-Full-screen (1920x1080) colored divs slide across staggered. Scene swaps while covered.
-
-**2-block** (standard):
-
-```js
-tl.set("#wipe-a", { x: -1920 }, T - 0.01);
-tl.set("#wipe-b", { x: -1920 }, T - 0.01);
-tl.to("#wipe-a", { x: 0, duration: 0.25, ease: "power3.inOut" }, T);
-tl.to("#wipe-b", { x: 0, duration: 0.25, ease: "power3.inOut" }, T + 0.06);
-tl.set(old, { opacity: 0 }, T + 0.2);
-tl.set(new, { opacity: 1 }, T + 0.2);
-tl.to("#wipe-a", { x: 1920, duration: 0.25, ease: "power3.inOut" }, T + 0.28);
-tl.to("#wipe-b", { x: 1920, duration: 0.25, ease: "power3.inOut" }, T + 0.34);
-```
-
-**5-block** (dense variant): same pattern with 5 blocks at 0.04s stagger. Use composition palette colors.
-
-### Horizontal Blinds
-
-Full-width strips slide across staggered. Each strip: `width: 1920px; height: Xpx`.
-
-**6 strips** (180px each): `0.03s` stagger
-**12 strips** (90px each): `0.018s` stagger
-
-```js
-for (var i = 0; i < N; i++) {
-  tl.set("#blind-h-" + i, { x: -1920 }, T - 0.01);
-  tl.fromTo("#blind-h-" + i, { x: -1920 }, { x: 0, duration: 0.2, ease: "power3.inOut" }, T + i * stagger);
-}
-tl.set(old, { opacity: 0 }, T + coverTime);
-tl.set(new, { opacity: 1 }, T + coverTime);
-for (var i = 0; i < N; i++) {
-  tl.to("#blind-h-" + i, { x: 1920, duration: 0.2, ease: "power3.inOut" }, T + exitStart + i * stagger);
-}
-```
-
-### Vertical Blinds
-
-Same as horizontal but strips are tall and narrow, moving on Y axis.
-CODEX_LAZYPACK_13590F176586C3927E6AE9BA05EA5A9FE6250D01
-
-# hyperframes/references/transitions/css-destruction.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-destruction.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-destruction.md" <<'CODEX_LAZYPACK_1B9AFFAFB3224B779AFC76DF1FA3097DD19341E6'
-## Destruction
-
-### Page Burn
-
-The outgoing scene literally burns away from a corner. A fire front expands with noise-based irregular edges, a canvas draws the scorched char line at the burn boundary, and individual text characters/elements chip off and fall with gravity as the fire reaches them. The incoming scene reveals behind the burn.
-
-This transition has three systems working together:
-
-1. **Fire geometry** — a radial front expanding from a corner (e.g., bottom-right) with noise-based irregularity for organic edges
-2. **Scene clipping** — the outgoing scene uses an SVG clip-path (with `fill-rule: evenodd`) that cuts a hole matching the fire front. As the fire expands, more of the scene is clipped away. All content (text, images, lines) burns with the page — no separate debris.
-3. **Scorched edge** — a `<canvas>` overlay draws a radial gradient fringe at the fire boundary to simulate charring
-
-**When to use:** Dramatic reveals, edgy/destructive mood, gaming, cyberpunk. This is the most dramatic transition in the catalog — reserve it for hero moments.
-
-**Requirements:**
-
-- A `<canvas>` element for the burn edge overlay
-- A noise function for organic fire edge geometry
-- SVG clip-path with evenodd fill-rule for the inverted clip
-
-**Fire geometry (deterministic noise):**
-
-```js
-function noise(x) {
-  var ix = Math.floor(x),
-    fx = x - ix;
-  var a = Math.sin(ix * 127.1 + 311.7) * 43758.5453;
-  var b = Math.sin((ix + 1) * 127.1 + 311.7) * 43758.5453;
-  var t = fx * fx * (3 - 2 * fx);
-  return a - Math.floor(a) + (b - Math.floor(b) - (a - Math.floor(a))) * t;
-}
-
-function fireRadiusAtAngle(angle, progress) {
-  var base = progress * maxRadius;
-  return (
-    base +
-    noise(angle * 3 + progress * 4) * 50 +
-    noise(angle * 8 + progress * 9) * 20 +
-    noise(angle * 15 + progress * 15) * 8
-  );
-}
-```
-
-**Incoming scene timing:** The incoming scene should NOT be visible during the burn. As the fire consumes the outgoing scene, **black shows through the holes** — this is the dramatic part. The viewer watches content being destroyed against blackness.
-
-At ~90% through the burn, the incoming scene fades in SLOWLY from black — the background first, then content staggered. Use long, gentle fades (`power1.out`, 0.8-1.2s durations) so it feels like the new scene materializes from darkness, not a hard swap.
-
-```js
-// Scene 2 stays at opacity: 0 during the burn — black behind the fire
-tl.set("#s2-title", { opacity: 0 }, T);
-tl.set("#s2-subtitle", { opacity: 0 }, T);
-
-// At 90% through, scene bg fades in slowly from black
-var contentReveal = T + BURN_DURATION * 0.9;
-tl.to("#scene2", { opacity: 1, duration: 1.2, ease: "power1.out" }, contentReveal);
-
-// Content fades in staggered on top, even slower
-tl.to("#s2-title", { opacity: 1, duration: 1.0, ease: "power1.out" }, contentReveal + 0.5);
-tl.to("#s2-subtitle", { opacity: 1, duration: 0.8, ease: "power1.out" }, contentReveal + 0.7);
-```
-
-**Content burns with the page — no falling debris.** The clip-path on scene1 IS the effect — as the fire shape expands, everything behind the fire edge (text, images, lines) disappears naturally. Don't clone elements, don't create falling debris. The content is part of the page being consumed. The scorched canvas edge provides the visual char line at the burn boundary.
-
-**Hide scene1 via `tl.set` at burn end — NEVER in `onComplete`.** Using `onComplete` to hide scene1 is not reversible when scrubbing. Instead, use a `tl.set` at the exact burn end time:
-
-```js
-tl.to(
-  burnState,
-  {
-    progress: 1,
-    duration: BURN_DURATION,
-    ease: "none",
-    onUpdate: function () {
-      var wp = burnState.progress;
-      var scene1 = document.getElementById("scene1");
-      if (wp <= 0) {
-        scene1.style.clipPath = "none"; // fully visible when rewound
-      } else if (wp < 1) {
-        scene1.style.clipPath = buildClipPath(wp);
-      }
-      drawEdge(wp);
-    },
-    // NO onComplete — use tl.set instead
-  },
-  T,
-);
-
-// Hide scene1 at exact burn end — reversible via timeline
-tl.set("#scene1", { opacity: 0 }, T + BURN_DURATION);
-tl.set("#scene1", { clipPath: "none" }, T + BURN_DURATION);
-```
-
-The `onUpdate` handles clip-path and canvas edge per-frame. The `tl.set` handles the final hide — and GSAP automatically reverses it when scrubbing backward, restoring scene1 to `opacity: 1`.
-
-The `onUpdate` callback is the key — it runs every frame to advance the clip-path and canvas edge in sync with the timeline.
-CODEX_LAZYPACK_1B9AFFAFB3224B779AFC76DF1FA3097DD19341E6
-
-# hyperframes/references/transitions/css-dissolve.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-dissolve.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-dissolve.md" <<'CODEX_LAZYPACK_A3B67EAC565824BCDA73C570326CB6C04601312B'
-## Dissolve
-
-### Crossfade
-
-Simple opacity swap. The baseline.
-
-```js
-tl.to(old, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, T);
-tl.fromTo(new, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.inOut" }, T);
-```
-
-### Blur Crossfade
-
-Dissolve with blur + scale shift. **Scale blur amount by energy** — see SKILL.md "Blur Intensity by Energy" section. The examples below show the medium (default) version. For calm compositions, increase to 20-30px with a 0.3-0.5s hold at peak blur. For high-energy, decrease to 3-6px with no hold.
-
-**Medium (default):**
-
-```js
-tl.to(old, { filter: "blur(10px)", scale: 1.03, opacity: 0, duration: 0.5, ease: "power2.inOut" }, T);
-tl.fromTo(new,
-  { filter: "blur(10px)", scale: 0.97, opacity: 0 },
-  { filter: "blur(0px)", scale: 1, opacity: 1, duration: 0.5, ease: "power2.inOut" }, T + 0.1);
-```
-
-**Calm (wellness, luxury) — heavy blur, holds at abstract color:**
-
-```js
-tl.to(old, { filter: "blur(25px)", scale: 1.05, duration: 0.6, ease: "power1.in" }, T);
-tl.to(old, { opacity: 0, duration: 0.4, ease: "power1.in" }, T + 0.4);
-tl.fromTo(new,
-  { filter: "blur(25px)", scale: 0.95, opacity: 0 },
-  { filter: "blur(25px)", scale: 0.95, opacity: 1, duration: 0.3, ease: "power1.inOut" }, T + 0.5);
-tl.to(new, { filter: "blur(0px)", scale: 1, duration: 0.6, ease: "power1.out" }, T + 0.8);
-```
-
-### Focus Pull
-
-Outgoing slowly blurs while incoming fades in sharp. Depth-of-field feel. **Scale blur amount and hold duration by energy.**
-
-**Medium:**
-
-```js
-tl.to(old, { filter: "blur(15px)", duration: 0.5, ease: "power1.in" }, T);
-tl.to(old, { opacity: 0, duration: 0.3, ease: "power2.in" }, T + 0.25);
-tl.fromTo(new, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, T + 0.25);
-```
-
-**Calm — slow rack focus with long hold at peak defocus:**
-
-```js
-tl.to(old, { filter: "blur(30px)", duration: 0.8, ease: "power1.in" }, T);
-tl.to(old, { opacity: 0, duration: 0.5, ease: "power1.in" }, T + 0.6);
-tl.fromTo(new, { opacity: 0, filter: "blur(20px)" },
-  { opacity: 1, filter: "blur(20px)", duration: 0.3, ease: "power1.inOut" }, T + 0.7);
-tl.to(new, { filter: "blur(0px)", duration: 0.6, ease: "power1.out" }, T + 1.0);
-```
-
-### Color Dip
-
-Fade to solid color, hold, fade up new scene.
-
-```js
-tl.to(old, { opacity: 0, duration: 0.2, ease: "power2.in" }, T);
-// Background color shows through
-tl.fromTo(new, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, T + 0.25);
-```
-CODEX_LAZYPACK_A3B67EAC565824BCDA73C570326CB6C04601312B
-
-# hyperframes/references/transitions/css-distortion.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-distortion.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-distortion.md" <<'CODEX_LAZYPACK_7049781D46138FE9BAD42AA7631FF52163721324'
-## Distortion
-
-### Glitch
-
-RGB-tinted overlays (NOT multiply blend — use normal blending at 35% opacity) jitter with large offsets. Scene itself also jitters.
-
-```js
-tl.set("#glitch-r", { opacity: 1, x: 40, y: -8 }, T);
-tl.set("#glitch-g", { opacity: 1, x: -30, y: 12 }, T);
-tl.set("#glitch-b", { opacity: 1, x: 15, y: -20 }, T);
-tl.set(old, { x: -15 }, T);
-// 6 jitter frames at 0.03s intervals with big offsets (±30-60px)
-// ... swap and clear at T + 0.2
-```
-
-### Chromatic Aberration
-
-RGB overlays start aligned then spread apart (±80px), scene fades, converge on new scene.
-
-```js
-tl.set("#glitch-r", { opacity: 0.6, x: 0 }, T);
-tl.set("#glitch-g", { opacity: 0.6, x: 0 }, T);
-tl.set("#glitch-b", { opacity: 0.6, x: 0 }, T);
-tl.to("#glitch-r", { x: -80, opacity: 0.8, duration: 0.3, ease: "power2.in" }, T);
-tl.to("#glitch-b", { x: 80, opacity: 0.8, duration: 0.3, ease: "power2.in" }, T);
-tl.to("#glitch-g", { y: 30, duration: 0.3, ease: "power2.in" }, T);
-// Swap at T + 0.3, converge back at T + 0.3
-```
-
-### Ripple
-
-Rapid oscillation (±30px) + scale distortion (0.97-1.03) + increasing blur. Swap at peak distortion.
-
-```js
-tl.to(old, { x: 30, scale: 1.02, duration: 0.04, ease: "none" }, T);
-tl.to(old, { x: -25, scale: 0.98, filter: "blur(4px)", duration: 0.04, ease: "none" }, T + 0.04);
-// ... more oscillations with increasing blur
-// Swap at peak, incoming stabilizes with decreasing wobble
-```
-
-### VHS Tape
-
-Clone scene into 20 horizontal strips (each 54px, clip-path'd). Each strip shifts x independently with seeded pseudo-random offsets at per-bar random intervals. Add red+blue chromatic offset copies on each strip (z-index above main, 35% opacity). Make strips wider than frame (2020px at left:-50px) so edges never show.
-
-See SKILL.md for clone-based implementation pattern.
-CODEX_LAZYPACK_7049781D46138FE9BAD42AA7631FF52163721324
-
-# hyperframes/references/transitions/css-grid.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-grid.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-grid.md" <<'CODEX_LAZYPACK_D70CD660A903985A255629C2204064310946E6DA'
-## Grid
-
-### Grid Dissolve
-
-Grid of colored cells covers the frame in a ripple from center. Scene swaps at 50% coverage. Cells fade out in ripple.
-
-**12-cell** (4x3, each 480x270): standard
-**120-cell** (12x10, each 160x108): dense variant — lower opacity (0.75), tighter ripple
-
-Cells are created dynamically in JS, sorted by distance from center for ripple stagger.
-CODEX_LAZYPACK_D70CD660A903985A255629C2204064310946E6DA
-
-# hyperframes/references/transitions/css-light.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-light.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-light.md" <<'CODEX_LAZYPACK_8744C7C3FE80C7E4769CD4400DC811D48D647659'
-## Light
-
-### Light Leak
-
-Multiple warm-colored overlays wash across frame. Needs: a flat warm tint layer + 2-3 bright radial gradient divs, all larger than the frame so edges are never visible.
-
-```js
-// Warm tint washes over entire frame
-tl.to("#leak-warm", { opacity: 0.4, duration: 0.3, ease: "power1.in" }, T);
-// Bright leak elements drift in
-tl.to("#leak-1", { opacity: 0.9, x: 300, duration: 0.5, ease: "sine.inOut" }, T + 0.05);
-tl.to("#leak-2", { opacity: 0.8, x: 200, duration: 0.6, ease: "sine.inOut" }, T + 0.1);
-// Peak warmth then swap
-tl.to("#leak-warm", { opacity: 0.6, duration: 0.15, ease: "power2.in" }, T + 0.35);
-tl.set(old, { opacity: 0 }, T + 0.45);
-tl.set(new, { opacity: 1 }, T + 0.45);
-// Leak fades
-tl.to("#leak-warm", { opacity: 0, duration: 0.4, ease: "power2.out" }, T + 0.5);
-tl.to("#leak-1", { opacity: 0, x: 600, duration: 0.35, ease: "power1.out" }, T + 0.5);
-```
-
-### Overexposure Burn
-
-Scene progressively blows out to white using CSS `filter: brightness()`, then white overlay fades in. Swap at peak white. White recedes to reveal new scene.
-
-```js
-tl.to(old, { filter: "brightness(1.5)", scale: 1.03, duration: 0.2, ease: "power1.in" }, T);
-tl.to(old, { filter: "brightness(3)", scale: 1.06, duration: 0.2, ease: "power2.in" }, T + 0.2);
-tl.to("#flash-overlay", { opacity: 0.5, duration: 0.25, ease: "power1.in" }, T + 0.15);
-tl.to("#flash-overlay", { opacity: 1, duration: 0.15, ease: "power2.in" }, T + 0.4);
-tl.set(old, { opacity: 0, filter: "brightness(1)", scale: 1 }, T + 0.55);
-tl.set(new, { opacity: 1 }, T + 0.55);
-tl.to("#flash-overlay", { opacity: 0, duration: 0.35, ease: "power2.out" }, T + 0.55);
-```
-
-### Film Burn
-
-Staggered warm overlays (amber, orange, red) bleed from one edge. Each overlay is a large radial gradient div at high z-index.
-
-```js
-tl.to("#burn-a", { opacity: 1, x: -300, duration: 0.4, ease: "power1.in" }, T);
-tl.to("#burn-b", { opacity: 1, x: -500, duration: 0.5, ease: "power1.in" }, T + 0.05);
-tl.to("#burn-c", { opacity: 1, x: -200, duration: 0.45, ease: "power1.in" }, T + 0.1);
-tl.set(old, { opacity: 0 }, T + 0.35);
-tl.set(new, { opacity: 1 }, T + 0.35);
-tl.to("#burn-a", { opacity: 0, duration: 0.3, ease: "power2.out" }, T + 0.45);
-tl.to("#burn-b", { opacity: 0, duration: 0.3, ease: "power2.out" }, T + 0.5);
-tl.to("#burn-c", { opacity: 0, duration: 0.3, ease: "power2.out" }, T + 0.55);
-```
-CODEX_LAZYPACK_8744C7C3FE80C7E4769CD4400DC811D48D647659
-
-# hyperframes/references/transitions/css-mechanical.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-mechanical.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-mechanical.md" <<'CODEX_LAZYPACK_34D5CCA77FE7CE05310AE3BD9BA03A2E345C03CF'
-## Mechanical
-
-### Shutter
-
-Two full-screen halves close from top and bottom, meet in the middle. Swap while closed. Open again.
-
-```js
-tl.to("#shutter-top", { y: 0, duration: 0.25, ease: "power3.in" }, T);
-tl.to("#shutter-bot", { y: 0, duration: 0.25, ease: "power3.in" }, T);
-tl.set(old, { opacity: 0 }, T + 0.25);
-tl.set(new, { opacity: 1 }, T + 0.25);
-tl.to("#shutter-top", { y: -540, duration: 0.25, ease: "power3.out" }, T + 0.3);
-tl.to("#shutter-bot", { y: 540, duration: 0.25, ease: "power3.out" }, T + 0.3);
-```
-
-### Clock Wipe
-
-Radial polygon sweep stepping through quadrants. Use 9-point polygon with intermediate edge positions for smooth sweep.
-
-```js
-tl.set(new, { opacity: 1, zIndex: 10 }, T);
-var d = 0.1; // duration per quadrant
-tl.set(new, { clipPath: "polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%)" }, T);
-tl.to(new, { clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%, 100% 50%, 100% 50%, 100% 50%, 100% 50%, 100% 50%)", duration: d, ease: "none" }, T);
-tl.to(new, { clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%, 100% 100%, 50% 100%, 50% 100%, 50% 100%, 50% 100%)", duration: d, ease: "none" }, T + d);
-tl.to(new, { clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%, 100% 100%, 50% 100%, 0% 100%, 0% 50%, 0% 50%)", duration: d, ease: "none" }, T + d*2);
-tl.to(new, { clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%, 100% 100%, 50% 100%, 0% 100%, 0% 50%, 0% 0%)", duration: d, ease: "none" }, T + d*3);
-tl.set(new, { clipPath: "none", zIndex: "auto" }, T + d*4 + 0.02);
-tl.set(old, { opacity: 0, zIndex: "auto" }, T + d*4 + 0.02);
-```
-CODEX_LAZYPACK_34D5CCA77FE7CE05310AE3BD9BA03A2E345C03CF
-
-# hyperframes/references/transitions/css-other.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-other.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-other.md" <<'CODEX_LAZYPACK_4FF120BA7069247D2081E0D6C276E059FB058F25'
-## Other
-
-### Gravity Drop
-
-Old scene falls down with slight rotation. New scene was behind it. Needs z-index.
-
-```js
-tl.set(new, { opacity: 1, zIndex: 1 }, T);
-tl.set(old, { zIndex: 10 }, T);
-tl.to(old, { y: 1200, rotation: 4, duration: 0.5, ease: "power3.in" }, T);
-tl.set(old, { opacity: 0, zIndex: "auto" }, T + 0.5);
-tl.set(new, { zIndex: "auto" }, T + 0.5);
-```
-
-### Morph Circle
-
-A circle scales up from center to fill frame (becoming the new scene's background color). New scene content fades in on top.
-
-```js
-tl.set("#morph-circle", { background: newBgColor, opacity: 1, scale: 0 }, T);
-tl.to("#morph-circle", { scale: 30, duration: 0.5, ease: "power3.in" }, T);
-tl.set(old, { opacity: 0 }, T + 0.4);
-tl.set(new, { opacity: 1 }, T + 0.4);
-tl.to("#morph-circle", { opacity: 0, duration: 0.15, ease: "power2.out" }, T + 0.5);
-```
-CODEX_LAZYPACK_4FF120BA7069247D2081E0D6C276E059FB058F25
-
-# hyperframes/references/transitions/css-push.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-push.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-push.md" <<'CODEX_LAZYPACK_596938C992F9036A68269CB40B381379B08A1E1A'
-## Linear / Push
-
-### Push Slide
-
-Both scenes move together — new pushes old out.
-
-```js
-tl.to(old, { x: -1920, duration: 0.5, ease: "power3.inOut" }, T);
-tl.fromTo(new, { x: 1920, opacity: 1 }, { x: 0, duration: 0.5, ease: "power3.inOut" }, T);
-```
-
-### Vertical Push
-
-Same as push slide but vertical.
-
-```js
-tl.to(old, { y: -1080, duration: 0.5, ease: "power3.inOut" }, T);
-tl.fromTo(new, { y: 1080, opacity: 1 }, { y: 0, duration: 0.5, ease: "power3.inOut" }, T);
-```
-
-### Elastic Push
-
-Push with overshoot bounce on the incoming scene.
-
-```js
-tl.to(old, { x: -1920, duration: 0.5, ease: "power3.in" }, T);
-tl.fromTo(new, { x: 1920, opacity: 1 }, { x: 30, duration: 0.4, ease: "power4.out" }, T + 0.1);
-tl.to(new, { x: -15, duration: 0.15, ease: "sine.inOut" }, T + 0.5);
-tl.to(new, { x: 0, duration: 0.1, ease: "sine.out" }, T + 0.65);
-```
-
-### Squeeze
-
-Old compresses, new expands from opposite side.
-
-```js
-tl.to(old, { scaleX: 0, transformOrigin: "left center", duration: 0.4, ease: "power3.inOut" }, T);
-tl.fromTo(new, { scaleX: 0, transformOrigin: "right center", opacity: 1 },
-  { scaleX: 1, duration: 0.4, ease: "power3.inOut" }, T + 0.1);
-tl.set(old, { opacity: 0 }, T + 0.5);
-```
-CODEX_LAZYPACK_596938C992F9036A68269CB40B381379B08A1E1A
-
-# hyperframes/references/transitions/css-radial.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-radial.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-radial.md" <<'CODEX_LAZYPACK_C3F3B1C14834056E9CFAB4CCCAD88D754F536134'
-## Radial / Shape
-
-### Circle Iris
-
-Expanding circle from center reveals new scene.
-
-```js
-tl.set(new, { opacity: 1 }, T);
-tl.fromTo(new,
-  { clipPath: "circle(0% at 50% 50%)" },
-  { clipPath: "circle(75% at 50% 50%)", duration: 0.5, ease: "power2.out" }, T);
-tl.set(old, { opacity: 0 }, T + 0.5);
-```
-
-### Diamond Iris
-
-Expanding diamond shape from center.
-
-```js
-tl.set(new, { opacity: 1 }, T);
-tl.fromTo(new,
-  { clipPath: "polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)" },
-  { clipPath: "polygon(50% -20%, 120% 50%, 50% 120%, -20% 50%)", duration: 0.5, ease: "power2.out" }, T);
-tl.set(old, { opacity: 0 }, T + 0.5);
-```
-
-### Diagonal Split
-
-Old scene shrinks to a triangle in one corner.
-
-```js
-tl.set(new, { opacity: 1, zIndex: 1 }, T);
-tl.set(old, { zIndex: 10, clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" }, T);
-tl.to(old, { clipPath: "polygon(60% 0%, 100% 0%, 100% 40%, 60% 0%)", duration: 0.5, ease: "power3.inOut" }, T);
-tl.set(old, { opacity: 0, zIndex: "auto", clipPath: "none" }, T + 0.5);
-tl.set(new, { zIndex: "auto" }, T + 0.5);
-```
-CODEX_LAZYPACK_C3F3B1C14834056E9CFAB4CCCAD88D754F536134
-
-# hyperframes/references/transitions/css-scale.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-scale.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions/css-scale.md" <<'CODEX_LAZYPACK_44DEA1E6209367A855CF1CF28B471598B93AA98A'
-## Scale / Zoom
-
-### Zoom Through
-
-Old zooms past camera + blurs, new zooms in from behind.
-
-```js
-tl.to(old, { scale: 2.5, opacity: 0, filter: "blur(8px)", duration: 0.4, ease: "power3.in" }, T);
-tl.fromTo(new,
-  { scale: 0.5, opacity: 0, filter: "blur(8px)" },
-  { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, T + 0.15);
-```
-
-### Zoom Out
-
-Old shrinks away, new was behind it. Needs z-index management.
-
-```js
-tl.set(new, { opacity: 1, zIndex: 1 }, T);
-tl.set(old, { zIndex: 10, transformOrigin: "50% 50%" }, T);
-tl.to(old, { scale: 0.3, opacity: 0, duration: 0.4, ease: "power3.in" }, T);
-tl.set(old, { zIndex: "auto" }, T + 0.4);
-tl.set(new, { zIndex: "auto" }, T + 0.4);
-```
-CODEX_LAZYPACK_44DEA1E6209367A855CF1CF28B471598B93AA98A
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSCRIPT_GUIDE_MD_7B8E89F08C
 
 # hyperframes/references/transitions.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/transitions.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/transitions.md" <<'CODEX_LAZYPACK_5FF5D4B76E904183023738E3C341878BFC40622F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_MD_53E39E8A21'
 # Scene Transitions
 
 A transition tells the viewer how two scenes relate. A crossfade says "this continues." A push slide says "next point." A blur crossfade says "drift with me." Choose transitions that match what the content is doing emotionally, not just technically.
@@ -6222,11 +5955,11 @@ These rules only apply to shader transition compositions. CSS-only compositions 
 ## Visual Pattern Warning
 
 Avoid transitions that create visible repeating geometric patterns — grids of tiles, hexagonal cells, uniform dot arrays, evenly-spaced blob circles. These look cheap and artificial regardless of the math behind them. Organic noise (FBM, domain warping) is good because it's irregular. Geometric repetition is bad because the eye instantly sees the grid.
-CODEX_LAZYPACK_5FF5D4B76E904183023738E3C341878BFC40622F
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_MD_53E39E8A21
 
 # hyperframes/references/typography.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/typography.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/typography.md" <<'CODEX_LAZYPACK_174148835346FE3F7F2950C608328BC0161F843A'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/typography.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/typography.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TYPOGRAPHY_MD_4A5E609848'
 # Typography
 
 The compiler embeds supported fonts — just write `font-family` in CSS.
@@ -6402,11 +6135,11 @@ code,
 ```
 
 `tabular-nums` is essential any time numbers are stacked vertically — stat callouts, timers, scoreboards, data tables. Without it, digits have proportional widths and columns don't align.
-CODEX_LAZYPACK_174148835346FE3F7F2950C608328BC0161F843A
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TYPOGRAPHY_MD_4A5E609848
 
 # hyperframes/references/video-composition.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/references/video-composition.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/references/video-composition.md" <<'CODEX_LAZYPACK_23DCEE1722121EB1216B0BD66D837472703B1F8A'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/video-composition.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/video-composition.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_VIDEO_COMPOSITION_MD_5F56D2B1E9'
 # Video Composition
 
 Video frames are not web pages. These rules apply to every composition regardless of brand, style, or design.md.
@@ -6469,11 +6202,726 @@ Subtle reads as static at 30fps. Err toward more movement than feels safe.
 - **Anchor to edges.** Pin content to left/top or right/bottom. Centered-and-floating is a web layout pattern.
 - **Split frames.** Data panel left, content right. Top bar with metadata, full-width below. Zone-based layouts over centered stacks.
 - **Structural elements.** Rules, dividers, border panels. They create visual paths and animate well (`scaleX: 0` → `1`).
-CODEX_LAZYPACK_23DCEE1722121EB1216B0BD66D837472703B1F8A
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_VIDEO_COMPOSITION_MD_5F56D2B1E9
+
+# hyperframes/references/transitions/catalog.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/catalog.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/catalog.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CATALOG_MD_8B3D648A44'
+# Transition Catalog
+
+Hard rules, scene template, and routing to implementation code. Read the reference file for the transition type you need — don't load all of them.
+
+## Hard Rules (CSS)
+
+These cause real bugs if violated.
+
+**Scene visibility:** Scene 1 visible by default (no `opacity: 0`). Scenes 2+ have `opacity: 0` on the CONTAINER div. GSAP reveals them. No visibility shim (`timedEls`).
+
+**Fonts:** Just write the `font-family` you want — the compiler embeds supported fonts automatically via `@font-face` with inline data URIs. No need for `<link>` tags or `@import`. Works in all contexts including sandboxed iframes.
+
+**Element structure:** No `class="clip"` on scene divs in standalone compositions. Only the root div gets `data-composition-id`/`data-start`/`data-duration`.
+
+**Overlay elements:** Staggered blocks = full-screen 1920x1080, NOT thin strips. Glitch RGB overlays = normal blending at 35% opacity, NOT `mix-blend-mode: multiply` (invisible on dark backgrounds). Light leak overlays = larger than the frame (2400px+), never a visible shape. Overexposure = use `filter: brightness()` on the scene, not just a white overlay.
+
+**VHS tape:** Clone actual scene content with `cloneNode(true)`, NOT colored bars. Each strip: wider than frame (2020px at left:-50px). Red+blue chromatic copies at z-index above main strip. Seeded PRNG for deterministic random offsets.
+
+**Z-index:** Gravity drop, zoom out, diagonal split need outgoing scene ON TOP (`zIndex: 10`) so it exits while revealing the new scene behind (`zIndex: 1`).
+
+**Page burn:** Content burns with the page — no falling debris. Hide scene1 via `tl.set` at burn end, NEVER `onComplete` (not reversible). `onUpdate` must restore `clipPath: "none"` when `wp <= 0` for rewind support. Incoming scene fades from black at 90% through burn.
+
+**Clock wipe:** 9-point polygon with intermediate edge positions. Step through 4 quadrants with separate tweens.
+
+**Grid dissolve:** Cycle 5 palette colors per cell, not monochrome.
+
+**Blinds count by energy:** Calm: 4h/6v. Medium: 6-8h/8v. High: 12-16h/16v.
+
+**Don't use:** Star iris (polygon interpolation broken), tilt-shift (no selective CSS blur), lens flare (visible shape, not optical), hinge/door (distorts too fast).
+
+## Shader Transitions
+
+Shader setup, WebGL init, capture, and fragment shaders are handled by `@hyperframes/shader-transitions` (`packages/shader-transitions/`). Read the package source for API details. Compositions using shaders must follow the CSS rules in [transitions.md](../transitions.md) § "Shader-Compatible CSS Rules".
+
+## Scene Template
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000;
+        font-family: "YOUR FONT", sans-serif; /* compiler embeds supported fonts automatically */
+      }
+      .scene {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      #scene1 {
+        z-index: 1;
+        background: #color;
+      }
+      #scene2 {
+        z-index: 2;
+        background: #color;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-width="1920"
+      data-height="1080"
+      data-start="0"
+      data-duration="TOTAL"
+    >
+      <div id="scene1" class="scene"><!-- visible --></div>
+      <div id="scene2" class="scene"><!-- hidden --></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      // Transition code here
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
+```
+
+Every transition follows: position new scene → animate outgoing → swap → animate incoming → clean up overlays.
+
+## CSS Transitions
+
+All code examples use `old` for the outgoing scene-inner selector and `new` for the incoming, with `T` as the transition start time. Read the reference file for the type you need.
+
+| Type           | Transitions                                          | Reference                                  |
+| -------------- | ---------------------------------------------------- | ------------------------------------------ |
+| Push           | Push slide, vertical push, elastic push, squeeze     | [css-push.md](./css-push.md)               |
+| Radial / Shape | Circle iris, diamond iris, diagonal split            | [css-radial.md](./css-radial.md)           |
+| 3D             | 3D card flip                                         | [css-3d.md](./css-3d.md)                   |
+| Scale / Zoom   | Zoom through, zoom out                               | [css-scale.md](./css-scale.md)             |
+| Dissolve       | Crossfade, blur crossfade, focus pull, color dip     | [css-dissolve.md](./css-dissolve.md)       |
+| Cover          | Staggered blocks, horizontal blinds, vertical blinds | [css-cover.md](./css-cover.md)             |
+| Light          | Light leak, overexposure burn, film burn             | [css-light.md](./css-light.md)             |
+| Distortion     | Glitch, chromatic aberration, ripple, VHS tape       | [css-distortion.md](./css-distortion.md)   |
+| Mechanical     | Shutter, clock wipe                                  | [css-mechanical.md](./css-mechanical.md)   |
+| Grid           | Grid dissolve                                        | [css-grid.md](./css-grid.md)               |
+| Other          | Gravity drop, morph circle                           | [css-other.md](./css-other.md)             |
+| Blur           | Blur through, directional blur                       | [css-blur.md](./css-blur.md)               |
+| Destruction    | Page burn                                            | [css-destruction.md](./css-destruction.md) |
+
+## Shader Transitions
+
+WebGL shader transitions are provided by `@hyperframes/shader-transitions` (`packages/shader-transitions/`). The package handles setup, capture, WebGL init, render loop, and GSAP integration. Read the package source for available shaders and API — do not copy raw GLSL manually.
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CATALOG_MD_8B3D648A44
+
+# hyperframes/references/transitions/css-3d.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-3d.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-3d.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_3D_MD_41737C4220'
+## 3D
+
+### 3D Card Flip
+
+180° Y-axis rotation. Requires CSS: `backface-visibility: hidden; transform-style: preserve-3d;` on both scene-inners. Parent needs `perspective: 1200px`.
+
+```js
+tl.set(new, { rotationY: -180, opacity: 1 }, T);
+tl.to(old, { rotationY: 180, duration: 0.6, ease: "power2.inOut" }, T);
+tl.to(new, { rotationY: 0, duration: 0.6, ease: "power2.inOut" }, T);
+tl.set(old, { opacity: 0 }, T + 0.6);
+```
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_3D_MD_41737C4220
+
+# hyperframes/references/transitions/css-blur.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-blur.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-blur.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_BLUR_MD_9CC6FDDE5B'
+## Blur
+
+All blur transitions scale with energy. See SKILL.md "Blur Intensity by Energy" for the full table.
+
+### Blur Through
+
+Content becomes fully abstract before resolving. The heaviest blur transition.
+
+**Calm (default for this type — it's inherently heavy):**
+
+```js
+tl.to(old, { filter: "blur(30px)", scale: 1.08, duration: 0.5, ease: "power1.in" }, T);
+tl.to(old, { opacity: 0, duration: 0.3, ease: "power1.in" }, T + 0.3);
+// Hold: both scenes in abstract blur state
+tl.fromTo(new,
+  { filter: "blur(30px)", scale: 0.92, opacity: 0 },
+  { filter: "blur(30px)", scale: 0.92, opacity: 1, duration: 0.2, ease: "none" }, T + 0.5);
+// Slow resolve
+tl.to(new, { filter: "blur(0px)", scale: 1, duration: 0.7, ease: "power1.out" }, T + 0.7);
+```
+
+**Medium:**
+
+```js
+tl.to(old, { filter: "blur(15px)", scale: 1.05, opacity: 0, duration: 0.4, ease: "power2.in" }, T);
+tl.fromTo(new,
+  { filter: "blur(15px)", scale: 0.95, opacity: 0 },
+  { filter: "blur(0px)", scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" }, T + 0.2);
+```
+
+### Directional Blur
+
+Blur + skew simulating motion in one direction. Scale blur and skew with energy.
+
+**Medium (default):**
+
+```js
+tl.to(old, { filter: "blur(12px)", skewX: -8, x: -200, opacity: 0, duration: 0.4, ease: "power3.in" }, T);
+tl.fromTo(new,
+  { filter: "blur(12px)", skewX: 8, x: 200, opacity: 0 },
+  { filter: "blur(0px)", skewX: 0, x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T + 0.15);
+```
+
+**Calm (heavier blur, gentler motion):**
+
+```js
+tl.to(old, { filter: "blur(20px)", skewX: -4, x: -100, opacity: 0, duration: 0.6, ease: "power1.in" }, T);
+tl.fromTo(new,
+  { filter: "blur(20px)", skewX: 4, x: 100, opacity: 0 },
+  { filter: "blur(0px)", skewX: 0, x: 0, opacity: 1, duration: 0.6, ease: "power1.out" }, T + 0.3);
+```
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_BLUR_MD_9CC6FDDE5B
+
+# hyperframes/references/transitions/css-cover.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-cover.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-cover.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_COVER_MD_BDB8A4DDAA'
+## Cover
+
+### Staggered Color Blocks
+
+Full-screen (1920x1080) colored divs slide across staggered. Scene swaps while covered.
+
+**2-block** (standard):
+
+```js
+tl.set("#wipe-a", { x: -1920 }, T - 0.01);
+tl.set("#wipe-b", { x: -1920 }, T - 0.01);
+tl.to("#wipe-a", { x: 0, duration: 0.25, ease: "power3.inOut" }, T);
+tl.to("#wipe-b", { x: 0, duration: 0.25, ease: "power3.inOut" }, T + 0.06);
+tl.set(old, { opacity: 0 }, T + 0.2);
+tl.set(new, { opacity: 1 }, T + 0.2);
+tl.to("#wipe-a", { x: 1920, duration: 0.25, ease: "power3.inOut" }, T + 0.28);
+tl.to("#wipe-b", { x: 1920, duration: 0.25, ease: "power3.inOut" }, T + 0.34);
+```
+
+**5-block** (dense variant): same pattern with 5 blocks at 0.04s stagger. Use composition palette colors.
+
+### Horizontal Blinds
+
+Full-width strips slide across staggered. Each strip: `width: 1920px; height: Xpx`.
+
+**6 strips** (180px each): `0.03s` stagger
+**12 strips** (90px each): `0.018s` stagger
+
+```js
+for (var i = 0; i < N; i++) {
+  tl.set("#blind-h-" + i, { x: -1920 }, T - 0.01);
+  tl.fromTo("#blind-h-" + i, { x: -1920 }, { x: 0, duration: 0.2, ease: "power3.inOut" }, T + i * stagger);
+}
+tl.set(old, { opacity: 0 }, T + coverTime);
+tl.set(new, { opacity: 1 }, T + coverTime);
+for (var i = 0; i < N; i++) {
+  tl.to("#blind-h-" + i, { x: 1920, duration: 0.2, ease: "power3.inOut" }, T + exitStart + i * stagger);
+}
+```
+
+### Vertical Blinds
+
+Same as horizontal but strips are tall and narrow, moving on Y axis.
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_COVER_MD_BDB8A4DDAA
+
+# hyperframes/references/transitions/css-destruction.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-destruction.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-destruction.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_DESTRUCTION_MD_D813343A78'
+## Destruction
+
+### Page Burn
+
+The outgoing scene literally burns away from a corner. A fire front expands with noise-based irregular edges, a canvas draws the scorched char line at the burn boundary, and individual text characters/elements chip off and fall with gravity as the fire reaches them. The incoming scene reveals behind the burn.
+
+This transition has three systems working together:
+
+1. **Fire geometry** — a radial front expanding from a corner (e.g., bottom-right) with noise-based irregularity for organic edges
+2. **Scene clipping** — the outgoing scene uses an SVG clip-path (with `fill-rule: evenodd`) that cuts a hole matching the fire front. As the fire expands, more of the scene is clipped away. All content (text, images, lines) burns with the page — no separate debris.
+3. **Scorched edge** — a `<canvas>` overlay draws a radial gradient fringe at the fire boundary to simulate charring
+
+**When to use:** Dramatic reveals, edgy/destructive mood, gaming, cyberpunk. This is the most dramatic transition in the catalog — reserve it for hero moments.
+
+**Requirements:**
+
+- A `<canvas>` element for the burn edge overlay
+- A noise function for organic fire edge geometry
+- SVG clip-path with evenodd fill-rule for the inverted clip
+
+**Fire geometry (deterministic noise):**
+
+```js
+function noise(x) {
+  var ix = Math.floor(x),
+    fx = x - ix;
+  var a = Math.sin(ix * 127.1 + 311.7) * 43758.5453;
+  var b = Math.sin((ix + 1) * 127.1 + 311.7) * 43758.5453;
+  var t = fx * fx * (3 - 2 * fx);
+  return a - Math.floor(a) + (b - Math.floor(b) - (a - Math.floor(a))) * t;
+}
+
+function fireRadiusAtAngle(angle, progress) {
+  var base = progress * maxRadius;
+  return (
+    base +
+    noise(angle * 3 + progress * 4) * 50 +
+    noise(angle * 8 + progress * 9) * 20 +
+    noise(angle * 15 + progress * 15) * 8
+  );
+}
+```
+
+**Incoming scene timing:** The incoming scene should NOT be visible during the burn. As the fire consumes the outgoing scene, **black shows through the holes** — this is the dramatic part. The viewer watches content being destroyed against blackness.
+
+At ~90% through the burn, the incoming scene fades in SLOWLY from black — the background first, then content staggered. Use long, gentle fades (`power1.out`, 0.8-1.2s durations) so it feels like the new scene materializes from darkness, not a hard swap.
+
+```js
+// Scene 2 stays at opacity: 0 during the burn — black behind the fire
+tl.set("#s2-title", { opacity: 0 }, T);
+tl.set("#s2-subtitle", { opacity: 0 }, T);
+
+// At 90% through, scene bg fades in slowly from black
+var contentReveal = T + BURN_DURATION * 0.9;
+tl.to("#scene2", { opacity: 1, duration: 1.2, ease: "power1.out" }, contentReveal);
+
+// Content fades in staggered on top, even slower
+tl.to("#s2-title", { opacity: 1, duration: 1.0, ease: "power1.out" }, contentReveal + 0.5);
+tl.to("#s2-subtitle", { opacity: 1, duration: 0.8, ease: "power1.out" }, contentReveal + 0.7);
+```
+
+**Content burns with the page — no falling debris.** The clip-path on scene1 IS the effect — as the fire shape expands, everything behind the fire edge (text, images, lines) disappears naturally. Don't clone elements, don't create falling debris. The content is part of the page being consumed. The scorched canvas edge provides the visual char line at the burn boundary.
+
+**Hide scene1 via `tl.set` at burn end — NEVER in `onComplete`.** Using `onComplete` to hide scene1 is not reversible when scrubbing. Instead, use a `tl.set` at the exact burn end time:
+
+```js
+tl.to(
+  burnState,
+  {
+    progress: 1,
+    duration: BURN_DURATION,
+    ease: "none",
+    onUpdate: function () {
+      var wp = burnState.progress;
+      var scene1 = document.getElementById("scene1");
+      if (wp <= 0) {
+        scene1.style.clipPath = "none"; // fully visible when rewound
+      } else if (wp < 1) {
+        scene1.style.clipPath = buildClipPath(wp);
+      }
+      drawEdge(wp);
+    },
+    // NO onComplete — use tl.set instead
+  },
+  T,
+);
+
+// Hide scene1 at exact burn end — reversible via timeline
+tl.set("#scene1", { opacity: 0 }, T + BURN_DURATION);
+tl.set("#scene1", { clipPath: "none" }, T + BURN_DURATION);
+```
+
+The `onUpdate` handles clip-path and canvas edge per-frame. The `tl.set` handles the final hide — and GSAP automatically reverses it when scrubbing backward, restoring scene1 to `opacity: 1`.
+
+The `onUpdate` callback is the key — it runs every frame to advance the clip-path and canvas edge in sync with the timeline.
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_DESTRUCTION_MD_D813343A78
+
+# hyperframes/references/transitions/css-dissolve.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-dissolve.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-dissolve.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_DISSOLVE_MD_E36B4B8C36'
+## Dissolve
+
+### Crossfade
+
+Simple opacity swap. The baseline.
+
+```js
+tl.to(old, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, T);
+tl.fromTo(new, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.inOut" }, T);
+```
+
+### Blur Crossfade
+
+Dissolve with blur + scale shift. **Scale blur amount by energy** — see SKILL.md "Blur Intensity by Energy" section. The examples below show the medium (default) version. For calm compositions, increase to 20-30px with a 0.3-0.5s hold at peak blur. For high-energy, decrease to 3-6px with no hold.
+
+**Medium (default):**
+
+```js
+tl.to(old, { filter: "blur(10px)", scale: 1.03, opacity: 0, duration: 0.5, ease: "power2.inOut" }, T);
+tl.fromTo(new,
+  { filter: "blur(10px)", scale: 0.97, opacity: 0 },
+  { filter: "blur(0px)", scale: 1, opacity: 1, duration: 0.5, ease: "power2.inOut" }, T + 0.1);
+```
+
+**Calm (wellness, luxury) — heavy blur, holds at abstract color:**
+
+```js
+tl.to(old, { filter: "blur(25px)", scale: 1.05, duration: 0.6, ease: "power1.in" }, T);
+tl.to(old, { opacity: 0, duration: 0.4, ease: "power1.in" }, T + 0.4);
+tl.fromTo(new,
+  { filter: "blur(25px)", scale: 0.95, opacity: 0 },
+  { filter: "blur(25px)", scale: 0.95, opacity: 1, duration: 0.3, ease: "power1.inOut" }, T + 0.5);
+tl.to(new, { filter: "blur(0px)", scale: 1, duration: 0.6, ease: "power1.out" }, T + 0.8);
+```
+
+### Focus Pull
+
+Outgoing slowly blurs while incoming fades in sharp. Depth-of-field feel. **Scale blur amount and hold duration by energy.**
+
+**Medium:**
+
+```js
+tl.to(old, { filter: "blur(15px)", duration: 0.5, ease: "power1.in" }, T);
+tl.to(old, { opacity: 0, duration: 0.3, ease: "power2.in" }, T + 0.25);
+tl.fromTo(new, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, T + 0.25);
+```
+
+**Calm — slow rack focus with long hold at peak defocus:**
+
+```js
+tl.to(old, { filter: "blur(30px)", duration: 0.8, ease: "power1.in" }, T);
+tl.to(old, { opacity: 0, duration: 0.5, ease: "power1.in" }, T + 0.6);
+tl.fromTo(new, { opacity: 0, filter: "blur(20px)" },
+  { opacity: 1, filter: "blur(20px)", duration: 0.3, ease: "power1.inOut" }, T + 0.7);
+tl.to(new, { filter: "blur(0px)", duration: 0.6, ease: "power1.out" }, T + 1.0);
+```
+
+### Color Dip
+
+Fade to solid color, hold, fade up new scene.
+
+```js
+tl.to(old, { opacity: 0, duration: 0.2, ease: "power2.in" }, T);
+// Background color shows through
+tl.fromTo(new, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, T + 0.25);
+```
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_DISSOLVE_MD_E36B4B8C36
+
+# hyperframes/references/transitions/css-distortion.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-distortion.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-distortion.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_DISTORTION_MD_9ABF7EAF59'
+## Distortion
+
+### Glitch
+
+RGB-tinted overlays (NOT multiply blend — use normal blending at 35% opacity) jitter with large offsets. Scene itself also jitters.
+
+```js
+tl.set("#glitch-r", { opacity: 1, x: 40, y: -8 }, T);
+tl.set("#glitch-g", { opacity: 1, x: -30, y: 12 }, T);
+tl.set("#glitch-b", { opacity: 1, x: 15, y: -20 }, T);
+tl.set(old, { x: -15 }, T);
+// 6 jitter frames at 0.03s intervals with big offsets (±30-60px)
+// ... swap and clear at T + 0.2
+```
+
+### Chromatic Aberration
+
+RGB overlays start aligned then spread apart (±80px), scene fades, converge on new scene.
+
+```js
+tl.set("#glitch-r", { opacity: 0.6, x: 0 }, T);
+tl.set("#glitch-g", { opacity: 0.6, x: 0 }, T);
+tl.set("#glitch-b", { opacity: 0.6, x: 0 }, T);
+tl.to("#glitch-r", { x: -80, opacity: 0.8, duration: 0.3, ease: "power2.in" }, T);
+tl.to("#glitch-b", { x: 80, opacity: 0.8, duration: 0.3, ease: "power2.in" }, T);
+tl.to("#glitch-g", { y: 30, duration: 0.3, ease: "power2.in" }, T);
+// Swap at T + 0.3, converge back at T + 0.3
+```
+
+### Ripple
+
+Rapid oscillation (±30px) + scale distortion (0.97-1.03) + increasing blur. Swap at peak distortion.
+
+```js
+tl.to(old, { x: 30, scale: 1.02, duration: 0.04, ease: "none" }, T);
+tl.to(old, { x: -25, scale: 0.98, filter: "blur(4px)", duration: 0.04, ease: "none" }, T + 0.04);
+// ... more oscillations with increasing blur
+// Swap at peak, incoming stabilizes with decreasing wobble
+```
+
+### VHS Tape
+
+Clone scene into 20 horizontal strips (each 54px, clip-path'd). Each strip shifts x independently with seeded pseudo-random offsets at per-bar random intervals. Add red+blue chromatic offset copies on each strip (z-index above main, 35% opacity). Make strips wider than frame (2020px at left:-50px) so edges never show.
+
+See SKILL.md for clone-based implementation pattern.
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_DISTORTION_MD_9ABF7EAF59
+
+# hyperframes/references/transitions/css-grid.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-grid.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-grid.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_GRID_MD_59594DE626'
+## Grid
+
+### Grid Dissolve
+
+Grid of colored cells covers the frame in a ripple from center. Scene swaps at 50% coverage. Cells fade out in ripple.
+
+**12-cell** (4x3, each 480x270): standard
+**120-cell** (12x10, each 160x108): dense variant — lower opacity (0.75), tighter ripple
+
+Cells are created dynamically in JS, sorted by distance from center for ripple stagger.
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_GRID_MD_59594DE626
+
+# hyperframes/references/transitions/css-light.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-light.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-light.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_LIGHT_MD_3B508B0EAC'
+## Light
+
+### Light Leak
+
+Multiple warm-colored overlays wash across frame. Needs: a flat warm tint layer + 2-3 bright radial gradient divs, all larger than the frame so edges are never visible.
+
+```js
+// Warm tint washes over entire frame
+tl.to("#leak-warm", { opacity: 0.4, duration: 0.3, ease: "power1.in" }, T);
+// Bright leak elements drift in
+tl.to("#leak-1", { opacity: 0.9, x: 300, duration: 0.5, ease: "sine.inOut" }, T + 0.05);
+tl.to("#leak-2", { opacity: 0.8, x: 200, duration: 0.6, ease: "sine.inOut" }, T + 0.1);
+// Peak warmth then swap
+tl.to("#leak-warm", { opacity: 0.6, duration: 0.15, ease: "power2.in" }, T + 0.35);
+tl.set(old, { opacity: 0 }, T + 0.45);
+tl.set(new, { opacity: 1 }, T + 0.45);
+// Leak fades
+tl.to("#leak-warm", { opacity: 0, duration: 0.4, ease: "power2.out" }, T + 0.5);
+tl.to("#leak-1", { opacity: 0, x: 600, duration: 0.35, ease: "power1.out" }, T + 0.5);
+```
+
+### Overexposure Burn
+
+Scene progressively blows out to white using CSS `filter: brightness()`, then white overlay fades in. Swap at peak white. White recedes to reveal new scene.
+
+```js
+tl.to(old, { filter: "brightness(1.5)", scale: 1.03, duration: 0.2, ease: "power1.in" }, T);
+tl.to(old, { filter: "brightness(3)", scale: 1.06, duration: 0.2, ease: "power2.in" }, T + 0.2);
+tl.to("#flash-overlay", { opacity: 0.5, duration: 0.25, ease: "power1.in" }, T + 0.15);
+tl.to("#flash-overlay", { opacity: 1, duration: 0.15, ease: "power2.in" }, T + 0.4);
+tl.set(old, { opacity: 0, filter: "brightness(1)", scale: 1 }, T + 0.55);
+tl.set(new, { opacity: 1 }, T + 0.55);
+tl.to("#flash-overlay", { opacity: 0, duration: 0.35, ease: "power2.out" }, T + 0.55);
+```
+
+### Film Burn
+
+Staggered warm overlays (amber, orange, red) bleed from one edge. Each overlay is a large radial gradient div at high z-index.
+
+```js
+tl.to("#burn-a", { opacity: 1, x: -300, duration: 0.4, ease: "power1.in" }, T);
+tl.to("#burn-b", { opacity: 1, x: -500, duration: 0.5, ease: "power1.in" }, T + 0.05);
+tl.to("#burn-c", { opacity: 1, x: -200, duration: 0.45, ease: "power1.in" }, T + 0.1);
+tl.set(old, { opacity: 0 }, T + 0.35);
+tl.set(new, { opacity: 1 }, T + 0.35);
+tl.to("#burn-a", { opacity: 0, duration: 0.3, ease: "power2.out" }, T + 0.45);
+tl.to("#burn-b", { opacity: 0, duration: 0.3, ease: "power2.out" }, T + 0.5);
+tl.to("#burn-c", { opacity: 0, duration: 0.3, ease: "power2.out" }, T + 0.55);
+```
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_LIGHT_MD_3B508B0EAC
+
+# hyperframes/references/transitions/css-mechanical.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-mechanical.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-mechanical.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_MECHANICAL_MD_743C8A3B8B'
+## Mechanical
+
+### Shutter
+
+Two full-screen halves close from top and bottom, meet in the middle. Swap while closed. Open again.
+
+```js
+tl.to("#shutter-top", { y: 0, duration: 0.25, ease: "power3.in" }, T);
+tl.to("#shutter-bot", { y: 0, duration: 0.25, ease: "power3.in" }, T);
+tl.set(old, { opacity: 0 }, T + 0.25);
+tl.set(new, { opacity: 1 }, T + 0.25);
+tl.to("#shutter-top", { y: -540, duration: 0.25, ease: "power3.out" }, T + 0.3);
+tl.to("#shutter-bot", { y: 540, duration: 0.25, ease: "power3.out" }, T + 0.3);
+```
+
+### Clock Wipe
+
+Radial polygon sweep stepping through quadrants. Use 9-point polygon with intermediate edge positions for smooth sweep.
+
+```js
+tl.set(new, { opacity: 1, zIndex: 10 }, T);
+var d = 0.1; // duration per quadrant
+tl.set(new, { clipPath: "polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%)" }, T);
+tl.to(new, { clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%, 100% 50%, 100% 50%, 100% 50%, 100% 50%, 100% 50%)", duration: d, ease: "none" }, T);
+tl.to(new, { clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%, 100% 100%, 50% 100%, 50% 100%, 50% 100%, 50% 100%)", duration: d, ease: "none" }, T + d);
+tl.to(new, { clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%, 100% 100%, 50% 100%, 0% 100%, 0% 50%, 0% 50%)", duration: d, ease: "none" }, T + d*2);
+tl.to(new, { clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%, 100% 100%, 50% 100%, 0% 100%, 0% 50%, 0% 0%)", duration: d, ease: "none" }, T + d*3);
+tl.set(new, { clipPath: "none", zIndex: "auto" }, T + d*4 + 0.02);
+tl.set(old, { opacity: 0, zIndex: "auto" }, T + d*4 + 0.02);
+```
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_MECHANICAL_MD_743C8A3B8B
+
+# hyperframes/references/transitions/css-other.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-other.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-other.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_OTHER_MD_E249EF0235'
+## Other
+
+### Gravity Drop
+
+Old scene falls down with slight rotation. New scene was behind it. Needs z-index.
+
+```js
+tl.set(new, { opacity: 1, zIndex: 1 }, T);
+tl.set(old, { zIndex: 10 }, T);
+tl.to(old, { y: 1200, rotation: 4, duration: 0.5, ease: "power3.in" }, T);
+tl.set(old, { opacity: 0, zIndex: "auto" }, T + 0.5);
+tl.set(new, { zIndex: "auto" }, T + 0.5);
+```
+
+### Morph Circle
+
+A circle scales up from center to fill frame (becoming the new scene's background color). New scene content fades in on top.
+
+```js
+tl.set("#morph-circle", { background: newBgColor, opacity: 1, scale: 0 }, T);
+tl.to("#morph-circle", { scale: 30, duration: 0.5, ease: "power3.in" }, T);
+tl.set(old, { opacity: 0 }, T + 0.4);
+tl.set(new, { opacity: 1 }, T + 0.4);
+tl.to("#morph-circle", { opacity: 0, duration: 0.15, ease: "power2.out" }, T + 0.5);
+```
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_OTHER_MD_E249EF0235
+
+# hyperframes/references/transitions/css-push.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-push.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-push.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_PUSH_MD_37773B4069'
+## Linear / Push
+
+### Push Slide
+
+Both scenes move together — new pushes old out.
+
+```js
+tl.to(old, { x: -1920, duration: 0.5, ease: "power3.inOut" }, T);
+tl.fromTo(new, { x: 1920, opacity: 1 }, { x: 0, duration: 0.5, ease: "power3.inOut" }, T);
+```
+
+### Vertical Push
+
+Same as push slide but vertical.
+
+```js
+tl.to(old, { y: -1080, duration: 0.5, ease: "power3.inOut" }, T);
+tl.fromTo(new, { y: 1080, opacity: 1 }, { y: 0, duration: 0.5, ease: "power3.inOut" }, T);
+```
+
+### Elastic Push
+
+Push with overshoot bounce on the incoming scene.
+
+```js
+tl.to(old, { x: -1920, duration: 0.5, ease: "power3.in" }, T);
+tl.fromTo(new, { x: 1920, opacity: 1 }, { x: 30, duration: 0.4, ease: "power4.out" }, T + 0.1);
+tl.to(new, { x: -15, duration: 0.15, ease: "sine.inOut" }, T + 0.5);
+tl.to(new, { x: 0, duration: 0.1, ease: "sine.out" }, T + 0.65);
+```
+
+### Squeeze
+
+Old compresses, new expands from opposite side.
+
+```js
+tl.to(old, { scaleX: 0, transformOrigin: "left center", duration: 0.4, ease: "power3.inOut" }, T);
+tl.fromTo(new, { scaleX: 0, transformOrigin: "right center", opacity: 1 },
+  { scaleX: 1, duration: 0.4, ease: "power3.inOut" }, T + 0.1);
+tl.set(old, { opacity: 0 }, T + 0.5);
+```
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_PUSH_MD_37773B4069
+
+# hyperframes/references/transitions/css-radial.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-radial.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-radial.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_RADIAL_MD_C6A75ECE32'
+## Radial / Shape
+
+### Circle Iris
+
+Expanding circle from center reveals new scene.
+
+```js
+tl.set(new, { opacity: 1 }, T);
+tl.fromTo(new,
+  { clipPath: "circle(0% at 50% 50%)" },
+  { clipPath: "circle(75% at 50% 50%)", duration: 0.5, ease: "power2.out" }, T);
+tl.set(old, { opacity: 0 }, T + 0.5);
+```
+
+### Diamond Iris
+
+Expanding diamond shape from center.
+
+```js
+tl.set(new, { opacity: 1 }, T);
+tl.fromTo(new,
+  { clipPath: "polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)" },
+  { clipPath: "polygon(50% -20%, 120% 50%, 50% 120%, -20% 50%)", duration: 0.5, ease: "power2.out" }, T);
+tl.set(old, { opacity: 0 }, T + 0.5);
+```
+
+### Diagonal Split
+
+Old scene shrinks to a triangle in one corner.
+
+```js
+tl.set(new, { opacity: 1, zIndex: 1 }, T);
+tl.set(old, { zIndex: 10, clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" }, T);
+tl.to(old, { clipPath: "polygon(60% 0%, 100% 0%, 100% 40%, 60% 0%)", duration: 0.5, ease: "power3.inOut" }, T);
+tl.set(old, { opacity: 0, zIndex: "auto", clipPath: "none" }, T + 0.5);
+tl.set(new, { zIndex: "auto" }, T + 0.5);
+```
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_RADIAL_MD_C6A75ECE32
+
+# hyperframes/references/transitions/css-scale.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-scale.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/references/transitions/css-scale.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_SCALE_MD_86811B8F9D'
+## Scale / Zoom
+
+### Zoom Through
+
+Old zooms past camera + blurs, new zooms in from behind.
+
+```js
+tl.to(old, { scale: 2.5, opacity: 0, filter: "blur(8px)", duration: 0.4, ease: "power3.in" }, T);
+tl.fromTo(new,
+  { scale: 0.5, opacity: 0, filter: "blur(8px)" },
+  { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, T + 0.15);
+```
+
+### Zoom Out
+
+Old shrinks away, new was behind it. Needs z-index management.
+
+```js
+tl.set(new, { opacity: 1, zIndex: 1 }, T);
+tl.set(old, { zIndex: 10, transformOrigin: "50% 50%" }, T);
+tl.to(old, { scale: 0.3, opacity: 0, duration: 0.4, ease: "power3.in" }, T);
+tl.set(old, { zIndex: "auto" }, T + 0.4);
+tl.set(new, { zIndex: "auto" }, T + 0.4);
+```
+AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSITIONS_CSS_SCALE_MD_86811B8F9D
 
 # hyperframes/scripts/animation-map.mjs
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/scripts/animation-map.mjs")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/scripts/animation-map.mjs" <<'CODEX_LAZYPACK_97F169409C32A9ED1238C2564A84A4F746D38542'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/scripts/animation-map.mjs")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/scripts/animation-map.mjs" <<'AGENT_LAZYPACK_HYPERFRAMES_SCRIPTS_ANIMATION_MAP_MJS_53F64C7C88'
 #!/usr/bin/env node
 // animation-map.mjs — HyperFrames animation map for agents
 //
@@ -7075,11 +7523,11 @@ function die(msg) {
   console.error(`animation-map: ${msg}`);
   process.exit(2);
 }
-CODEX_LAZYPACK_97F169409C32A9ED1238C2564A84A4F746D38542
+AGENT_LAZYPACK_HYPERFRAMES_SCRIPTS_ANIMATION_MAP_MJS_53F64C7C88
 
 # hyperframes/scripts/contrast-report.mjs
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/scripts/contrast-report.mjs")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/scripts/contrast-report.mjs" <<'CODEX_LAZYPACK_D3C76BD0F489A898E0731D1D213B082AC400D86D'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/scripts/contrast-report.mjs")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/scripts/contrast-report.mjs" <<'AGENT_LAZYPACK_HYPERFRAMES_SCRIPTS_CONTRAST_REPORT_MJS_E08BE9F81C'
 #!/usr/bin/env node
 // contrast-report.mjs — HyperFrames contrast audit
 //
@@ -7428,11 +7876,11 @@ function die(msg) {
   console.error(`contrast-report: ${msg}`);
   process.exit(2);
 }
-CODEX_LAZYPACK_D3C76BD0F489A898E0731D1D213B082AC400D86D
+AGENT_LAZYPACK_HYPERFRAMES_SCRIPTS_CONTRAST_REPORT_MJS_E08BE9F81C
 
 # hyperframes/scripts/package-loader.mjs
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/scripts/package-loader.mjs")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/scripts/package-loader.mjs" <<'CODEX_LAZYPACK_6EE891FAB1ED875C55784C8F663BCFBDC06C6A0A'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/scripts/package-loader.mjs")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/scripts/package-loader.mjs" <<'AGENT_LAZYPACK_HYPERFRAMES_SCRIPTS_PACKAGE_LOADER_MJS_C45DAA93AD'
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -7702,11 +8150,11 @@ function shellQuote(value) {
   if (/^[A-Za-z0-9_./:@=-]+$/.test(value)) return value;
   return `'${value.replace(/'/g, "'\\''")}'`;
 }
-CODEX_LAZYPACK_6EE891FAB1ED875C55784C8F663BCFBDC06C6A0A
+AGENT_LAZYPACK_HYPERFRAMES_SCRIPTS_PACKAGE_LOADER_MJS_C45DAA93AD
 
 # hyperframes/templates/design-picker.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/templates/design-picker.html")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/templates/design-picker.html" <<'CODEX_LAZYPACK_F45F35FE1706E9BF86BD24CB0A93ABD766EFFEBD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/templates/design-picker.html")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes/templates/design-picker.html" <<'AGENT_LAZYPACK_HYPERFRAMES_TEMPLATES_DESIGN_PICKER_HTML_A9B1FE5352'
 <!doctype html>
 <html lang="en">
   <head>
@@ -9139,461 +9587,15 @@ cat > "{{CODEX_HOME}}/skills/hyperframes/templates/design-picker.html" <<'CODEX_
     </script>
   </body>
 </html>
-CODEX_LAZYPACK_F45F35FE1706E9BF86BD24CB0A93ABD766EFFEBD
+AGENT_LAZYPACK_HYPERFRAMES_TEMPLATES_DESIGN_PICKER_HTML_A9B1FE5352
 
-# hyperframes/visual-styles.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes/visual-styles.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes/visual-styles.md" <<'CODEX_LAZYPACK_9BFAFB68AE73F38BE1DC96604A39ECB33ABECBCC'
-# Visual Style Library
-
-Named visual identities for HyperFrames videos. Each style is grounded in a real graphic design tradition and expressed as a DESIGN.md-compatible token block. Use them as starters — copy the YAML into your project's `design.md` front matter, then customize.
-
-**How to pick:** Match mood first, content second. Ask: _"What should the viewer FEEL?"_
-
-**How to use:** Copy the style's YAML token block into `design.md` front matter. Add `## Overview`, `## Colors`, `## Typography`, `## Elevation`, `## Components`, `## Do's and Don'ts` prose sections to complete the file.
-
-## Quick Reference
-
-| Style           | Mood                  | Best for                           | Transition shader                 |
-| --------------- | --------------------- | ---------------------------------- | --------------------------------- |
-| Swiss Pulse     | Clinical, precise     | SaaS, data, dev tools, metrics     | Cinematic Zoom or SDF Iris        |
-| Velvet Standard | Premium, timeless     | Luxury, enterprise, keynotes       | Cross-Warp Morph                  |
-| Deconstructed   | Industrial, raw       | Tech launches, security, punk      | Glitch or Whip Pan                |
-| Maximalist Type | Loud, kinetic         | Big announcements, launches        | Ridged Burn                       |
-| Data Drift      | Futuristic, immersive | AI, ML, cutting-edge tech          | Gravitational Lens or Domain Warp |
-| Soft Signal     | Intimate, warm        | Wellness, personal stories, brand  | Thermal Distortion                |
-| Folk Frequency  | Cultural, vivid       | Consumer apps, food, communities   | Swirl Vortex or Ripple Waves      |
-| Shadow Cut      | Dark, cinematic       | Dramatic reveals, security, exposé | Domain Warp                       |
-
----
-
-## 1. Swiss Pulse — Josef Müller-Brockmann
-
-**Mood:** Clinical, precise | **Best for:** SaaS dashboards, developer tools, APIs, metrics
-
-```yaml
-name: Swiss Pulse
-colors:
-  primary: "#1a1a1a"
-  on-primary: "#ffffff"
-  accent: "#0066FF"
-typography:
-  headline:
-    fontFamily: Helvetica Neue
-    fontSize: 5rem
-    fontWeight: 700
-  label:
-    fontFamily: Inter
-    fontSize: 0.875rem
-    fontWeight: 400
-  stat:
-    fontFamily: Helvetica Neue
-    fontSize: 7rem
-    fontWeight: 700
-rounded:
-  none: 0px
-  sm: 2px
-spacing:
-  sm: 8px
-  md: 16px
-  lg: 32px
-motion:
-  energy: high
-  easing:
-    entry: "expo.out"
-    exit: "power4.in"
-    ambient: "none"
-  duration:
-    entrance: 0.4
-    hold: 1.5
-    transition: 0.6
-  atmosphere:
-    - grid-lines
-    - registration-marks
-  transition: cinematic-zoom
-```
-
-Grid-locked compositions. Every element snaps to an invisible 12-column grid. Numbers dominate the frame at 80–120px. Animated counters count up from 0. Hard cuts, no decorative transitions. Nothing floats.
-
----
-
-## 2. Velvet Standard — Massimo Vignelli
-
-**Mood:** Premium, timeless | **Best for:** Luxury products, enterprise software, keynotes, investor decks
-
-```yaml
-name: Velvet Standard
-colors:
-  primary: "#0a0a0a"
-  on-primary: "#ffffff"
-  accent: "#1a237e"
-typography:
-  headline:
-    fontFamily: Inter
-    fontSize: 3rem
-    fontWeight: 300
-    letterSpacing: 0.15em
-    textTransform: uppercase
-  body:
-    fontFamily: Inter
-    fontSize: 1rem
-    fontWeight: 300
-    lineHeight: 1.6
-rounded:
-  sm: 0px
-  md: 2px
-spacing:
-  sm: 16px
-  md: 32px
-  lg: 64px
-motion:
-  energy: calm
-  easing:
-    entry: "sine.inOut"
-    exit: "power1.in"
-    ambient: "sine.inOut"
-  duration:
-    entrance: 1.2
-    hold: 3.0
-    transition: 1.5
-  atmosphere:
-    - subtle-grain
-    - hairline-rules
-  transition: cross-warp-morph
-```
-
-Generous negative space. Symmetrical, centered, architectural precision. Thin sans-serif, ALL CAPS, wide letter-spacing. Sequential reveals with long holds. Nothing snaps — everything glides with intention. Luxury takes its time.
-
----
-
-## 3. Deconstructed — Neville Brody
-
-**Mood:** Industrial, raw | **Best for:** Tech news, developer launches, security products, punk-energy reveals
-
-```yaml
-name: Deconstructed
-colors:
-  primary: "#1a1a1a"
-  on-primary: "#f0f0f0"
-  accent: "#D4501E"
-typography:
-  headline:
-    fontFamily: Space Grotesk
-    fontSize: 4rem
-    fontWeight: 700
-  label:
-    fontFamily: Space Mono
-    fontSize: 0.75rem
-    fontWeight: 700
-    textTransform: uppercase
-rounded:
-  none: 0px
-spacing:
-  sm: 4px
-  md: 12px
-  lg: 24px
-motion:
-  energy: high
-  easing:
-    entry: "back.out(2.5)"
-    exit: "steps(8)"
-    ambient: "elastic.out(1.2, 0.4)"
-  duration:
-    entrance: 0.3
-    hold: 1.0
-    transition: 0.5
-  atmosphere:
-    - scan-lines
-    - glitch-artifacts
-    - grain-overlay
-  transition: glitch
-```
-
-Type at angles, overlapping edges, escaping frames. Bold industrial weight. Gritty textures: scan-line effects, glitch artifacts baked into design. Text SLAMS and SHATTERS. Letters scramble then snap to final position. Intentional irregularity — nothing should feel polished.
-
----
-
-## 4. Maximalist Type — Paula Scher
-
-**Mood:** Loud, kinetic | **Best for:** Big product launches, milestone announcements, high-energy hype videos
-
-```yaml
-name: Maximalist Type
-colors:
-  primary: "#0a0a0a"
-  on-primary: "#ffffff"
-  accent-red: "#E63946"
-  accent-yellow: "#FFD60A"
-typography:
-  headline:
-    fontFamily: Anton
-    fontSize: 8rem
-    fontWeight: 400
-    textTransform: uppercase
-  subhead:
-    fontFamily: Space Grotesk
-    fontSize: 3rem
-    fontWeight: 700
-rounded:
-  none: 0px
-spacing:
-  sm: 0px
-  md: 8px
-motion:
-  energy: high
-  easing:
-    entry: "expo.out"
-    exit: "back.out(1.8)"
-    ambient: "power3.out"
-  duration:
-    entrance: 0.3
-    hold: 0.8
-    transition: 0.4
-  atmosphere:
-    - type-layers
-    - color-blocks
-  transition: ridged-burn
-```
-
-Text IS the visual. Overlapping type layers at different scales and angles, filling 50–80% of frame. Bold saturated colors — maximum contrast. Everything kinetic: slamming, sliding, scaling. 2–3 second rapid-fire scenes. No static moments. Fast arrivals, hard stops.
-
----
-
-## 5. Data Drift — Refik Anadol
-
-**Mood:** Futuristic, immersive | **Best for:** AI products, ML platforms, data companies, speculative tech
-
-```yaml
-name: Data Drift
-colors:
-  primary: "#0a0a0a"
-  on-primary: "#e0e0e0"
-  accent-purple: "#7c3aed"
-  accent-cyan: "#06b6d4"
-typography:
-  headline:
-    fontFamily: Inter
-    fontSize: 2.5rem
-    fontWeight: 200
-    letterSpacing: 0.05em
-  body:
-    fontFamily: Inter
-    fontSize: 0.875rem
-    fontWeight: 300
-rounded:
-  sm: 4px
-  md: 12px
-  full: 9999px
-spacing:
-  sm: 16px
-  md: 32px
-  lg: 64px
-motion:
-  energy: moderate
-  easing:
-    entry: "sine.inOut"
-    exit: "power2.out"
-    ambient: "sine.inOut"
-  duration:
-    entrance: 1.0
-    hold: 2.5
-    transition: 1.5
-  atmosphere:
-    - particle-field
-    - light-traces
-    - radial-glow
-  transition: gravitational-lens
-```
-
-Thin futuristic sans-serif — floating, weightless, minimal. Fluid morphing compositions. Extreme scale shifts (micro → macro). Particles coalesce into numbers. Light traces data paths through the frame. Smooth, continuous, organic. Nothing hard.
-
----
-
-## 6. Soft Signal — Stefan Sagmeister
-
-**Mood:** Intimate, warm | **Best for:** Wellness brands, personal stories, lifestyle products, human-centered apps
-
-```yaml
-name: Soft Signal
-colors:
-  primary: "#FFF8EC"
-  on-primary: "#2a2a2a"
-  accent-amber: "#F5A623"
-  accent-rose: "#C4A3A3"
-  accent-sage: "#8FAF8C"
-typography:
-  headline:
-    fontFamily: Playfair Display
-    fontSize: 3rem
-    fontWeight: 400
-    fontStyle: italic
-  body:
-    fontFamily: Inter
-    fontSize: 1rem
-    fontWeight: 300
-    lineHeight: 1.7
-rounded:
-  sm: 8px
-  md: 16px
-  lg: 24px
-  full: 9999px
-spacing:
-  sm: 12px
-  md: 24px
-  lg: 48px
-motion:
-  energy: calm
-  easing:
-    entry: "sine.inOut"
-    exit: "power1.inOut"
-    ambient: "sine.inOut"
-  duration:
-    entrance: 1.0
-    hold: 3.0
-    transition: 1.5
-  atmosphere:
-    - soft-gradient
-    - warm-grain
-  transition: thermal-distortion
-```
-
-Handwritten-style or humanist serif fonts. Personal, lowercase, delicate. Close-up framing: single element fills the frame. Slow drifts and floats, never snaps. Soft organic motion. Nothing should feel hurried or polished. Intimate, never corporate.
-
----
-
-## 7. Folk Frequency — Eduardo Terrazas
-
-**Mood:** Cultural, vivid | **Best for:** Consumer apps, food platforms, community products, festive launches
-
-```yaml
-name: Folk Frequency
-colors:
-  primary: "#ffffff"
-  on-primary: "#1a1a1a"
-  accent-pink: "#FF1493"
-  accent-blue: "#0047AB"
-  accent-yellow: "#FFE000"
-  accent-green: "#009B77"
-typography:
-  headline:
-    fontFamily: Fredoka One
-    fontSize: 4rem
-    fontWeight: 400
-  body:
-    fontFamily: Nunito
-    fontSize: 1rem
-    fontWeight: 600
-rounded:
-  sm: 8px
-  md: 16px
-  lg: 32px
-  full: 9999px
-spacing:
-  sm: 8px
-  md: 16px
-  lg: 32px
-motion:
-  energy: high
-  easing:
-    entry: "back.out(1.6)"
-    exit: "elastic.out(1, 0.5)"
-    ambient: "sine.inOut"
-  duration:
-    entrance: 0.5
-    hold: 1.5
-    transition: 0.8
-  atmosphere:
-    - pattern-tiles
-    - confetti-burst
-    - color-blocks
-  transition: swirl-vortex
-```
-
-Bold warm rounded type. Pattern and repetition — folk art rhythm and density. Layered compositions with rich visual texture. Every frame feels handcrafted. Colorful motion: elements bounce, pop, spin into place with joy. Overshoots feel intentional. Celebratory energy.
-
----
-
-## 8. Shadow Cut — Hans Hillmann
-
-**Mood:** Dark, cinematic | **Best for:** Security products, dramatic reveals, investigative content, intense launches
-
-```yaml
-name: Shadow Cut
-colors:
-  primary: "#0a0a0a"
-  on-primary: "#f0f0f0"
-  surface: "#3a3a3a"
-  accent: "#C1121F"
-typography:
-  headline:
-    fontFamily: Oswald
-    fontSize: 4rem
-    fontWeight: 700
-    textTransform: uppercase
-  body:
-    fontFamily: Inter
-    fontSize: 0.875rem
-    fontWeight: 400
-rounded:
-  none: 0px
-  sm: 2px
-spacing:
-  sm: 8px
-  md: 16px
-  lg: 48px
-motion:
-  energy: moderate
-  easing:
-    entry: "power3.out"
-    exit: "power4.in"
-    ambient: "sine.inOut"
-  duration:
-    entrance: 0.8
-    hold: 2.5
-    transition: 1.2
-  atmosphere:
-    - deep-shadow
-    - vignette
-    - grain-overlay
-  transition: domain-warp
-```
-
-Near-monochrome: deep blacks, cold greys, stark white + one blood accent. Sharp angular text like film noir title cards. Heavy contrast, no softness. Elements emerge from darkness — reveal is the narrative. Slow creeping push-ins, dramatic scale reveals. The pause before the hit matters. Domain Warp dissolves reality before the next scene.
-
----
-
-## Mood → Style Guide
-
-| If the content feels...            | Use...          |
-| ---------------------------------- | --------------- |
-| Data-driven, analytical, technical | Swiss Pulse     |
-| Premium, enterprise, luxury        | Velvet Standard |
-| Raw, punk, aggressive, rebellious  | Deconstructed   |
-| Hype, loud, high-energy launch     | Maximalist Type |
-| AI, ML, speculative, futuristic    | Data Drift      |
-| Human, warm, personal, wellness    | Soft Signal     |
-| Cultural, fun, consumer, festive   | Folk Frequency  |
-| Dark, dramatic, intense, cinematic | Shadow Cut      |
-
----
-
-## Creating Custom Styles
-
-These 8 styles are starters — not constraints. Create your own:
-
-1. **Name it** after a designer, art movement, or cultural reference
-2. **Write YAML tokens** — `colors` (2–5 tokens), `typography` (2–3 scales), `rounded`, `spacing`, `motion` (energy + easing + duration + atmosphere + transition)
-3. **Add prose** — one paragraph describing the feel, what to do, what to avoid
-4. **Token references** — use `{colors.accent}`, `{typography.headline}` in component definitions
-
-The pattern: **YAML tokens (what) → prose rationale (why) → components (how they combine).**
-CODEX_LAZYPACK_9BFAFB68AE73F38BE1DC96604A39ECB33ABECBCC
+test -f "{{SYNC_ROOT}}/skills/hyperframes/SKILL.md" && echo "hyperframes installed for Codex, Claude, and AntiGravity"
 
 # ---- hyperframes-cli ----
-mkdir -p "{{CODEX_HOME}}/skills/hyperframes-cli"
+mkdir -p "{{SYNC_ROOT}}/skills/hyperframes-cli"
 # hyperframes-cli/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-cli/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-cli/SKILL.md" <<'CODEX_LAZYPACK_4DF5947D7722183D1A3C4A940FEA790B6ABED18A'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-cli/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-cli/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_CLI_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes-cli
 description: HyperFrames CLI dev loop — `npx hyperframes` for scaffolding (init), validation (lint, inspect), preview, render, and environment troubleshooting (doctor, browser, info, upgrade). Use when running any of these commands or troubleshooting the HyperFrames build/render environment. For asset preprocessing commands (`tts`, `transcribe`, `remove-background`), invoke the `hyperframes-media` skill instead.
@@ -9738,13 +9740,15 @@ npx hyperframes compositions   # list compositions in project
 npx hyperframes docs           # open documentation
 npx hyperframes benchmark .    # benchmark render performance
 ```
-CODEX_LAZYPACK_4DF5947D7722183D1A3C4A940FEA790B6ABED18A
+AGENT_LAZYPACK_HYPERFRAMES_CLI_SKILL_MD_0E95F5A366
+
+test -f "{{SYNC_ROOT}}/skills/hyperframes-cli/SKILL.md" && echo "hyperframes-cli installed for Codex, Claude, and AntiGravity"
 
 # ---- hyperframes-media ----
-mkdir -p "{{CODEX_HOME}}/skills/hyperframes-media"
+mkdir -p "{{SYNC_ROOT}}/skills/hyperframes-media"
 # hyperframes-media/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-media/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-media/SKILL.md" <<'CODEX_LAZYPACK_D736C47BE78F7376612AA9B78D6B2C6C2752D1F6'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_MEDIA_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes-media
 description: Asset preprocessing for HyperFrames compositions — text-to-speech narration (Kokoro), audio/video transcription (Whisper), and background removal for transparent overlays (u2net). Use when generating voiceover from text, transcribing speech for captions, removing the background from a video or image to use as a transparent overlay, choosing a TTS voice or whisper model, or chaining these (TTS → transcribe → captions). Each command downloads its own model on first run.
@@ -9818,11 +9822,13 @@ Python 3.8+ with `kokoro-onnx` and `soundfile` (`pip install kokoro-onnx soundfi
   ```
   若在沙盒中無權限調用 `brew`，可使用 Python 補丁套件：`pip3 install --break-system-packages espeakng-loader`。
 
-#### ⚠️ Codex 與 AntiGravity 執行環境差異
-* **Codex App**: 運行於獨立的 Sandbox 工作區，其內建 Terminal 執行的 Python 與系統全域 Python 可能隔離。在 Codex 中如遇到 Python 庫缺失，請直接在沙盒終端執行 `pip install`，並確保 Codex 專案設定中的 Python 解譯器路徑與 MCP 執行環境一致。
-* **AntiGravity**: 直接在 macOS 使用者的 Shell（本機環境）中執行，會繼承您本機的 `zsh` 環境、Homebrew 路徑與系統配置。
+#### ⚠️ Agent Execution Notes
+* **Shared steps**: 三個 Agent 都呼叫相同的 HyperFrames media scripts、輸入輸出格式與驗證指令。
+* **Codex adapter**: 若運行於獨立 Sandbox，內建 Terminal 的 Python 可能與系統 Python 隔離；在可寫 runtime 補依賴，並確認專案 Python 解譯器與 MCP 環境一致。
+* **Claude adapter**: 依 Claude 當前 terminal／container 權限呼叫同一腳本；若無本機 shell，改由使用者在專案終端執行並回傳產物。
+* **AntiGravity adapter**: 通常直接繼承 macOS `zsh`、Homebrew 路徑與系統配置，但仍需先驗證 Python 與模型快取位置。
   - 您可以直接在本機執行 `pip3 install --break-system-packages` 或 `brew` 安裝依賴。
-  - **macOS Say 離線替代方案**: 在網絡不佳、無法順利從 Hugging Face 下載 Kokoro 模型時，在 AntiGravity 本機環境下可完美調用 Mac 內建的語音引擎：
+  - **macOS Say 離線替代方案**: 在網絡不佳、無法順利從 Hugging Face 下載 Kokoro 模型時，Codex、Claude、AntiGravity 只要能使用 macOS shell，都可呼叫 Mac 內建語音引擎：
     ```bash
     say -v Meijia -f narration.txt -o narration.aiff && ffmpeg -y -i narration.aiff -ar 44100 narration.wav && rm narration.aiff
     ```
@@ -10014,13 +10020,15 @@ npx hyperframes transcribe narration.wav   # → transcript.json
 ```
 
 Whisper extracts precise word boundaries from the generated audio, so caption timing matches delivery without hand-tuning.
-CODEX_LAZYPACK_D736C47BE78F7376612AA9B78D6B2C6C2752D1F6
+AGENT_LAZYPACK_HYPERFRAMES_MEDIA_SKILL_MD_0E95F5A366
+
+test -f "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md" && echo "hyperframes-media installed for Codex, Claude, and AntiGravity"
 
 # ---- hyperframes-registry ----
-mkdir -p "{{CODEX_HOME}}/skills/hyperframes-registry"
+mkdir -p "{{SYNC_ROOT}}/skills/hyperframes-registry"
 # hyperframes-registry/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-registry/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-registry/SKILL.md" <<'CODEX_LAZYPACK_9C3AA5F3034CA99B92110142DA9916ECF40D4B97'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-registry/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-registry/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes-registry
 description: Install and wire registry blocks and components into HyperFrames compositions. Use when running hyperframes add, installing a block or component, wiring an installed item into index.html, or working with hyperframes.json. Covers the add command, install locations, block sub-composition wiring, component snippet merging, and registry discovery.
@@ -10125,11 +10133,11 @@ curl -s https://raw.githubusercontent.com/heygen-comhyperframes/main/registry/re
 Each item's `registry-item.json` contains: name, type, title, description, tags, dimensions (blocks only), duration (blocks only), and file list.
 
 See [discovery.md](./references/discovery.md) for details on filtering by type and tags.
-CODEX_LAZYPACK_9C3AA5F3034CA99B92110142DA9916ECF40D4B97
+AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_SKILL_MD_0E95F5A366
 
 # hyperframes-registry/examples/add-block.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-registry/examples/add-block.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-registry/examples/add-block.md" <<'CODEX_LAZYPACK_65C761CD8890FF9D24D296ED2B651FEA0D36B69B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-registry/examples/add-block.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-registry/examples/add-block.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_EXAMPLES_ADD_BLOCK_MD_6676D47A4B'
 # Worked Example: Adding a Block
 
 ## Scenario
@@ -10181,11 +10189,11 @@ hyperframes preview
 ### 4. Customize (optional)
 
 Edit `compositions/data-chart.html` — data arrays are at the top of the script, colors are in the CSS rules scoped under `[data-composition-id="data-chart"]`.
-CODEX_LAZYPACK_65C761CD8890FF9D24D296ED2B651FEA0D36B69B
+AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_EXAMPLES_ADD_BLOCK_MD_6676D47A4B
 
 # hyperframes-registry/examples/add-component.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-registry/examples/add-component.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-registry/examples/add-component.md" <<'CODEX_LAZYPACK_413D1B2524985039B6D2E047F8611FFABF9EEB02'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-registry/examples/add-component.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-registry/examples/add-component.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_EXAMPLES_ADD_COMPONENT_MD_AF7AB407D3'
 # Worked Example: Adding a Component
 
 ## Scenario
@@ -10259,11 +10267,11 @@ hyperframes preview
 - `--shimmer-width`: light band width (default 20%)
 - `--shimmer-angle`: sweep direction (default 120deg)
 - Timeline `duration`, `ease`, `stagger`: control speed and feel
-CODEX_LAZYPACK_413D1B2524985039B6D2E047F8611FFABF9EEB02
+AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_EXAMPLES_ADD_COMPONENT_MD_AF7AB407D3
 
 # hyperframes-registry/references/demo-html-pattern.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-registry/references/demo-html-pattern.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-registry/references/demo-html-pattern.md" <<'CODEX_LAZYPACK_53A8FCAB5D8819EBD51C7CB51B6D259F3AE1D604'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-registry/references/demo-html-pattern.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-registry/references/demo-html-pattern.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_DEMO_HTML_PATTERN_MD_1BEBE71E49'
 # The demo.html Convention
 
 ## Why components ship demo.html
@@ -10318,11 +10326,11 @@ Blocks are already standalone compositions that can be rendered directly. Only c
 ## Demos are not installed
 
 The `demo.html` is NOT installed by `hyperframes add` — it exists only in the registry for preview generation and as a reference.
-CODEX_LAZYPACK_53A8FCAB5D8819EBD51C7CB51B6D259F3AE1D604
+AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_DEMO_HTML_PATTERN_MD_1BEBE71E49
 
 # hyperframes-registry/references/discovery.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-registry/references/discovery.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-registry/references/discovery.md" <<'CODEX_LAZYPACK_B09F27034B635E32C115BE97A5C80C46A0596FAA'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-registry/references/discovery.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-registry/references/discovery.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_DISCOVERY_MD_87119D7D42'
 # Registry Discovery
 
 ## Reading the registry manifest
@@ -10376,11 +10384,11 @@ Where `<type-dir>` is `examples`, `blocks`, or `components`.
 | `grain-overlay`      | Animated film grain texture overlay     | texture, grain, overlay, film    |
 | `shimmer-sweep`      | CSS gradient light sweep for AI accents | text, shimmer, highlight, effect |
 | `grid-pixelate-wipe` | Grid dissolve transition between scenes | transition, wipe, grid, pixelate |
-CODEX_LAZYPACK_B09F27034B635E32C115BE97A5C80C46A0596FAA
+AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_DISCOVERY_MD_87119D7D42
 
 # hyperframes-registry/references/install-locations.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-registry/references/install-locations.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-registry/references/install-locations.md" <<'CODEX_LAZYPACK_0175825BA81775BD9DE66627218236078C434C2F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-registry/references/install-locations.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-registry/references/install-locations.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_INSTALL_LOCATIONS_MD_CAAEBFE254'
 # Install Locations
 
 ## Default paths
@@ -10426,11 +10434,11 @@ To install blocks into a `scenes/` directory instead of `compositions/`:
 ```
 
 Then `hyperframes add data-chart` writes to `scenes/data-chart.html` instead of `compositions/data-chart.html`. The snippet output reflects the remapped path.
-CODEX_LAZYPACK_0175825BA81775BD9DE66627218236078C434C2F
+AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_INSTALL_LOCATIONS_MD_CAAEBFE254
 
 # hyperframes-registry/references/wiring-blocks.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-registry/references/wiring-blocks.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-registry/references/wiring-blocks.md" <<'CODEX_LAZYPACK_4340CB9B05092CCD705425592EFA7FD183257298'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-registry/references/wiring-blocks.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-registry/references/wiring-blocks.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_WIRING_BLOCKS_MD_9F26CED56D'
 # Wiring Blocks
 
 Blocks are standalone compositions with their own `data-composition-id`, dimensions, duration, and GSAP timeline. Include them in a host composition using `data-composition-src` on a `<div>`.
@@ -10522,11 +10530,11 @@ Include multiple blocks sequentially or overlapping:
   data-height="1080"
 ></div>
 ```
-CODEX_LAZYPACK_4340CB9B05092CCD705425592EFA7FD183257298
+AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_WIRING_BLOCKS_MD_9F26CED56D
 
 # hyperframes-registry/references/wiring-components.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/hyperframes-registry/references/wiring-components.md")"
-cat > "{{CODEX_HOME}}/skills/hyperframes-registry/references/wiring-components.md" <<'CODEX_LAZYPACK_22ABB5DCA69F7BF1F62427276D65C0DB45B08D98'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-registry/references/wiring-components.md")"
+cat > "{{SYNC_ROOT}}/skills/hyperframes-registry/references/wiring-components.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_WIRING_COMPONENTS_MD_DDE4ECBB4E'
 # Wiring Components
 
 Components are effect snippets — HTML, CSS, and optionally JS that you merge directly into an existing composition. Unlike blocks, components have no standalone timeline; they participate in the host composition's timeline.
@@ -10604,13 +10612,15 @@ tl.to(
 - Place component HTML at the appropriate z-index relative to your content
 - Read the comment header in each snippet for customizable values
 - Run `hyperframes lint` after wiring to catch structural issues
-CODEX_LAZYPACK_22ABB5DCA69F7BF1F62427276D65C0DB45B08D98
+AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_REFERENCES_WIRING_COMPONENTS_MD_DDE4ECBB4E
+
+test -f "{{SYNC_ROOT}}/skills/hyperframes-registry/SKILL.md" && echo "hyperframes-registry installed for Codex, Claude, and AntiGravity"
 
 # ---- lottie ----
-mkdir -p "{{CODEX_HOME}}/skills/lottie"
+mkdir -p "{{SYNC_ROOT}}/skills/lottie"
 # lottie/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/lottie/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/lottie/SKILL.md" <<'CODEX_LAZYPACK_4E2FD3B5E374598D8A0C8349CEB8C8BE67C32686'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/lottie/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/lottie/SKILL.md" <<'AGENT_LAZYPACK_LOTTIE_SKILL_MD_0E95F5A366'
 ---
 name: lottie
 description: Lottie and dotLottie adapter patterns for HyperFrames. Use when embedding lottie-web JSON animations, .lottie files, @lottiefiles/dotlottie-web players, registering instances on window.__hfLottie, or making After Effects exports deterministic in HyperFrames.
@@ -10723,13 +10733,15 @@ npx hyperframes validate
 - lottie-web by Airbnb: https://github.com/airbnb/lottie-web
 - lottie-web `loadAnimation` options: https://github.com/airbnb/lottie-web/wiki/loadAnimation-options
 - dotLottie web player methods by LottieFiles: https://developers.lottiefiles.com/docs/dotlottie-player/dotlottie-web/methods
-CODEX_LAZYPACK_4E2FD3B5E374598D8A0C8349CEB8C8BE67C32686
+AGENT_LAZYPACK_LOTTIE_SKILL_MD_0E95F5A366
+
+test -f "{{SYNC_ROOT}}/skills/lottie/SKILL.md" && echo "lottie installed for Codex, Claude, and AntiGravity"
 
 # ---- remotion-to-hyperframes ----
-mkdir -p "{{CODEX_HOME}}/skills/remotion-to-hyperframes"
+mkdir -p "{{SYNC_ROOT}}/skills/remotion-to-hyperframes"
 # remotion-to-hyperframes/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/SKILL.md" <<'CODEX_LAZYPACK_4A5327D3A5D11FC2F68FC0910A0422E29771B1FE'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/SKILL.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SKILL_MD_0E95F5A366'
 ---
 name: remotion-to-hyperframes
 description: Translate an existing Remotion (React-based) video composition into a HyperFrames HTML composition. Use ONLY when the user explicitly asks to port, convert, migrate, translate, or rewrite a Remotion composition as HyperFrames (e.g. "port my Remotion project to HyperFrames"). Do NOT use when (a) authoring a NEW HyperFrames composition (even if A/B-testing a Remotion video); (b) Remotion is mentioned in passing; (c) Remotion code is shared as reference, not for translation; (d) the user wants "the same video as my Remotion one" without explicitly asking to migrate the source — treat as a fresh HyperFrames build. When in doubt, default to the `hyperframes` skill. Detects unsupported patterns (useState, useEffect side effects, async calculateMetadata, third-party React component libraries, `@remotion/lambda`) and recommends the runtime interop escape hatch instead of a lossy translation.
@@ -10850,21 +10862,17 @@ Validated baseline (as of 2026-04-27):
 | T2   | multi-scene + spring + audio + image        | 0.985     | 0.95      |
 | T3   | data-driven, custom subcomponents, count-up | 0.953     | 0.90      |
 | T4   | escape-hatch (8 lint cases)                 | 8/8 pass  | n/a       |
-CODEX_LAZYPACK_4A5327D3A5D11FC2F68FC0910A0422E29771B1FE
-
-# remotion-to-hyperframes/assets/.gitkeep
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/.gitkeep")"
-: > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/.gitkeep"
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SKILL_MD_0E95F5A366
 
 # remotion-to-hyperframes/assets/test-corpus/.gitignore
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/.gitignore")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/.gitignore" <<'CODEX_LAZYPACK_1FA6E067EF9EEC7B1A247799400F90C58832FB62'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/.gitignore")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/.gitignore" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_GITIGNORE_417D63E8B2'
 run-report.json
-CODEX_LAZYPACK_1FA6E067EF9EEC7B1A247799400F90C58832FB62
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_GITIGNORE_417D63E8B2
 
 # remotion-to-hyperframes/assets/test-corpus/run.sh
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/run.sh")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/run.sh" <<'CODEX_LAZYPACK_F4862154C30E529E25E8CEF96A4739347CC6AD47'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/run.sh")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/run.sh" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_RUN_SH_48697195D8'
 #!/usr/bin/env bash
 # run.sh — corpus orchestrator. Runs every tier and prints a pass/fail summary.
 #
@@ -11114,12 +11122,12 @@ if skipped > 0:
 print("=" * 50)
 sys.exit(0 if failed == 0 and skipped == 0 else 1)
 PY
-CODEX_LAZYPACK_F4862154C30E529E25E8CEF96A4739347CC6AD47
-chmod +x "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/run.sh"
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_RUN_SH_48697195D8
+chmod +x "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/run.sh"
 
 # remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/.gitignore
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/.gitignore")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/.gitignore" <<'CODEX_LAZYPACK_E8F41B286D5D2B9BCF97870E54B294622C498874'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/.gitignore")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/.gitignore" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_GITIGNORE_E7E1DC59AC'
 # Render output
 remotion-src/out/
 hf-src/out/
@@ -11130,11 +11138,11 @@ strip/
 # Remotion / HF dependencies
 node_modules/
 package-lock.json
-CODEX_LAZYPACK_E8F41B286D5D2B9BCF97870E54B294622C498874
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_GITIGNORE_E7E1DC59AC
 
 # remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/README.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/README.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/README.md" <<'CODEX_LAZYPACK_8AA9378726859BF1184C0EB61B3515A81C4C21D8'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/README.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/README.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_README_MD_5C0D6B86C2'
 # Tier 1 — title-card-fade
 
 ## What it tests
@@ -11176,11 +11184,11 @@ cd ../hf-src && npx hyperframes render --output ../hf.mp4
 
 `expected.json` documents the SSIM threshold (0.95) for this fixture; the
 calibrated mean against Remotion @ 4.0 with PNG/BT.709 output is 0.974.
-CODEX_LAZYPACK_8AA9378726859BF1184C0EB61B3515A81C4C21D8
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_README_MD_5C0D6B86C2
 
 # remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/expected.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/expected.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/expected.json" <<'CODEX_LAZYPACK_3849C55C409731E2B0512D036E50936E27410384'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/expected.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/expected.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_EXPECTED_JSON_A7F878D328'
 {
   "tier": 1,
   "name": "title-card-fade",
@@ -11207,11 +11215,11 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-t
   ],
   "rationale": "Threshold 0.95 sits ~0.02 below measured p05. A real translation regression (wrong easing, wrong durations) drops mean SSIM by 0.05+. Encoder/font drift between CI runs is bounded at ~0.01."
 }
-CODEX_LAZYPACK_3849C55C409731E2B0512D036E50936E27410384
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_EXPECTED_JSON_A7F878D328
 
 # remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/hf-src/index.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/hf-src/index.html")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/hf-src/index.html" <<'CODEX_LAZYPACK_C8DBBF11469821ACC31AC2765B2EE394EDC01720'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/hf-src/index.html")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/hf-src/index.html" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_HF_SRC_INDEX_HTML_2A55190A9E'
 <!doctype html>
 <html lang="en">
   <head>
@@ -11273,11 +11281,11 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-t
     </div>
   </body>
 </html>
-CODEX_LAZYPACK_C8DBBF11469821ACC31AC2765B2EE394EDC01720
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_HF_SRC_INDEX_HTML_2A55190A9E
 
 # remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/package.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/package.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/package.json" <<'CODEX_LAZYPACK_DA6A38D15AD72316B243D31D9BDF87552BD0093B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/package.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/package.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_PACKAGE_JSON_B2F169BE83'
 {
   "name": "tier-1-title-card-remotion",
   "version": "0.0.0",
@@ -11292,11 +11300,11 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-t
     "remotion": "^4.0.0"
   }
 }
-CODEX_LAZYPACK_DA6A38D15AD72316B243D31D9BDF87552BD0093B
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_PACKAGE_JSON_B2F169BE83
 
 # remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/remotion.config.ts
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/remotion.config.ts")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/remotion.config.ts" <<'CODEX_LAZYPACK_7DAE9A1659A9E1595D1533406AE238115DFAB351'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/remotion.config.ts")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/remotion.config.ts" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_REMOTION_CONFIG_TS_126B8C3D65'
 import { Config } from "@remotion/cli/config";
 
 // Match HyperFrames' default render so SSIM diffs measure translation
@@ -11310,11 +11318,31 @@ Config.setVideoImageFormat("png");
 Config.setColorSpace("bt709");
 Config.setOverwriteOutput(true);
 Config.setConcurrency(1);
-CODEX_LAZYPACK_7DAE9A1659A9E1595D1533406AE238115DFAB351
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_REMOTION_CONFIG_TS_126B8C3D65
+
+# remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/tsconfig.json
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/tsconfig.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/tsconfig.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_TSCONFIG_JSON_3F99F3B7EE'
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": ["src"]
+}
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_TSCONFIG_JSON_3F99F3B7EE
 
 # remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/Root.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/Root.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/Root.tsx" <<'CODEX_LAZYPACK_9E91CBFE7257C95F30F76822635AAA1C157082C1'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/Root.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/Root.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_SRC_ROOT_TSX_74D33131A4'
 import { Composition } from "remotion";
 import { TitleCard } from "./TitleCard";
 
@@ -11328,11 +11356,11 @@ export const RemotionRoot = () => (
     height={720}
   />
 );
-CODEX_LAZYPACK_9E91CBFE7257C95F30F76822635AAA1C157082C1
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_SRC_ROOT_TSX_74D33131A4
 
 # remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/TitleCard.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/TitleCard.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/TitleCard.tsx" <<'CODEX_LAZYPACK_42CC7DD80F63FD5444AFCBE6E02C943F51607CC9'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/TitleCard.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/TitleCard.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_SRC_TITLECARD_TSX_0D090A11B3'
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 
 export const TitleCard = () => {
@@ -11367,40 +11395,20 @@ export const TitleCard = () => {
     </AbsoluteFill>
   );
 };
-CODEX_LAZYPACK_42CC7DD80F63FD5444AFCBE6E02C943F51607CC9
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_SRC_TITLECARD_TSX_0D090A11B3
 
 # remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/index.ts
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/index.ts")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/index.ts" <<'CODEX_LAZYPACK_532AB48E13C5D274A5EB5F3F74209EDDC06590A5'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/index.ts")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/src/index.ts" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_SRC_INDEX_TS_9B5B0B7A8D'
 import { registerRoot } from "remotion";
 import { RemotionRoot } from "./Root";
 
 registerRoot(RemotionRoot);
-CODEX_LAZYPACK_532AB48E13C5D274A5EB5F3F74209EDDC06590A5
-
-# remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/tsconfig.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/tsconfig.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-1-title-card/remotion-src/tsconfig.json" <<'CODEX_LAZYPACK_E2CDE81A11D4DCC83B7576997CB2851E796C6C2A'
-{
-  "compilerOptions": {
-    "target": "ES2018",
-    "module": "ESNext",
-    "jsx": "react-jsx",
-    "strict": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true
-  },
-  "include": ["src"]
-}
-CODEX_LAZYPACK_E2CDE81A11D4DCC83B7576997CB2851E796C6C2A
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_1_TITLE_CARD_REMOTION_SRC_SRC_INDEX_TS_9B5B0B7A8D
 
 # remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/.gitignore
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/.gitignore")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/.gitignore" <<'CODEX_LAZYPACK_E0B61FAF97CECAE0B73678E5A316E3211E3DAE17'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/.gitignore")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/.gitignore" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_GITIGNORE_715BD0E719'
 # Generated by setup.sh
 remotion-src/public/
 hf-src/assets/
@@ -11415,11 +11423,11 @@ hf-src/out/
 hf.mp4
 diff/
 strip/
-CODEX_LAZYPACK_E0B61FAF97CECAE0B73678E5A316E3211E3DAE17
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_GITIGNORE_715BD0E719
 
 # remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/README.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/README.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/README.md" <<'CODEX_LAZYPACK_954A46539A970B410AE108498D1758112D7D6C5F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/README.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/README.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_README_MD_9324DD3DAB'
 # Tier 2 — title-image-outro
 
 ## What it tests
@@ -11474,11 +11482,11 @@ Same threshold as T1 (`expected.json` codifies it for the orchestrator). Spring 
 came in cleaner than predicted during calibration — the validated mean is 0.985 against the
 0.95 gate. If the translation breaks anything else (spring overshoot wrong, stagger off,
 asset path drift), mean SSIM will fall well below 0.95 — that's the failure signal.
-CODEX_LAZYPACK_954A46539A970B410AE108498D1758112D7D6C5F
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_README_MD_9324DD3DAB
 
 # remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/expected.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/expected.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/expected.json" <<'CODEX_LAZYPACK_CB22722ECEAA54ABB41F3BD8D88AFBE77834EFC2'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/expected.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/expected.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_EXPECTED_JSON_CC6179ABB6'
 {
   "tier": 2,
   "name": "title-image-outro",
@@ -11508,11 +11516,51 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-m
   ],
   "rationale": "Threshold 0.95 sits ~0.015 below measured p05 (0.966). T2 actually validated cleaner than T1 because the lower title fontWeight (140px vs T1's 160px) shows less of the system-font fallback divergence."
 }
-CODEX_LAZYPACK_CB22722ECEAA54ABB41F3BD8D88AFBE77834EFC2
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_EXPECTED_JSON_CC6179ABB6
+
+# remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/setup.sh
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/setup.sh")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/setup.sh" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_SETUP_SH_5611099160'
+#!/usr/bin/env bash
+# setup.sh — generate the binary assets this fixture needs.
+#
+# Both Remotion and HyperFrames variants need a 200x200 blue PNG and a
+# 6-second silent WAV. Generating them via ffmpeg keeps binaries out of
+# the repo while still letting the fixture render reproducibly.
+#
+# Run from the fixture root: ./setup.sh
+
+set -euo pipefail
+
+THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "error: ffmpeg not on PATH" >&2
+  exit 2
+fi
+
+mkdir -p "$THIS_DIR/remotion-src/public" "$THIS_DIR/hf-src/assets"
+
+# 200x200 solid blue PNG, ~200 bytes.
+ffmpeg -y -hide_banner -loglevel error \
+  -f lavfi -i "color=color=#3066be:size=200x200" -frames:v 1 \
+  "$THIS_DIR/remotion-src/public/square.png"
+cp "$THIS_DIR/remotion-src/public/square.png" "$THIS_DIR/hf-src/assets/square.png"
+
+# 6-second silent WAV at 8 kHz mono. ~96 KB if checked in, but it is generated.
+ffmpeg -y -hide_banner -loglevel error \
+  -f lavfi -i "anullsrc=cl=mono:r=8000" -t 6 -acodec pcm_s16le \
+  "$THIS_DIR/remotion-src/public/music.wav"
+cp "$THIS_DIR/remotion-src/public/music.wav" "$THIS_DIR/hf-src/assets/music.wav"
+
+echo "generated:"
+ls -la "$THIS_DIR/remotion-src/public/" "$THIS_DIR/hf-src/assets/"
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_SETUP_SH_5611099160
+chmod +x "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/setup.sh"
 
 # remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/hf-src/index.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/hf-src/index.html")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/hf-src/index.html" <<'CODEX_LAZYPACK_787B4FAE67941E3C61734CF44868B17350163945'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/hf-src/index.html")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/hf-src/index.html" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_HF_SRC_INDEX_HTML_D84879F8AE'
 <!doctype html>
 <html lang="en">
   <head>
@@ -11631,11 +11679,11 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-m
     </div>
   </body>
 </html>
-CODEX_LAZYPACK_787B4FAE67941E3C61734CF44868B17350163945
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_HF_SRC_INDEX_HTML_D84879F8AE
 
 # remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/package.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/package.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/package.json" <<'CODEX_LAZYPACK_BFE1587A02EDEB5DE939C8A0D8195271D46CA144'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/package.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/package.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_PACKAGE_JSON_72E7A4C9A3'
 {
   "name": "tier-2-multi-scene-remotion",
   "version": "0.0.0",
@@ -11650,11 +11698,11 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-m
     "remotion": "^4.0.0"
   }
 }
-CODEX_LAZYPACK_BFE1587A02EDEB5DE939C8A0D8195271D46CA144
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_PACKAGE_JSON_72E7A4C9A3
 
 # remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/remotion.config.ts
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/remotion.config.ts")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/remotion.config.ts" <<'CODEX_LAZYPACK_057DD0DFCD38344938D57CECB3FEC2D46DE581C9'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/remotion.config.ts")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/remotion.config.ts" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_REMOTION_CONFIG_TS_5F8DA59FB8'
 import { Config } from "@remotion/cli/config";
 
 // Match HyperFrames' default render so SSIM diffs measure translation
@@ -11668,11 +11716,31 @@ Config.setVideoImageFormat("png");
 Config.setColorSpace("bt709");
 Config.setOverwriteOutput(true);
 Config.setConcurrency(1);
-CODEX_LAZYPACK_057DD0DFCD38344938D57CECB3FEC2D46DE581C9
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_REMOTION_CONFIG_TS_5F8DA59FB8
+
+# remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/tsconfig.json
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/tsconfig.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/tsconfig.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_TSCONFIG_JSON_45C1B013DC'
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": ["src"]
+}
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_TSCONFIG_JSON_45C1B013DC
 
 # remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/MultiScene.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/MultiScene.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/MultiScene.tsx" <<'CODEX_LAZYPACK_D8AB73CF572CA988871E19FCD4E72F1D86A7C893'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/MultiScene.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/MultiScene.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_SRC_MULTISCENE_TSX_0C5607BA24'
 import {
   AbsoluteFill,
   Audio,
@@ -11778,11 +11846,11 @@ export const MultiScene = () => (
     <Audio src={staticFile("music.wav")} volume={0.5} />
   </AbsoluteFill>
 );
-CODEX_LAZYPACK_D8AB73CF572CA988871E19FCD4E72F1D86A7C893
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_SRC_MULTISCENE_TSX_0C5607BA24
 
 # remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/Root.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/Root.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/Root.tsx" <<'CODEX_LAZYPACK_77A408A4ED9C9486071849990604424CFDEBBE29'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/Root.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/Root.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_SRC_ROOT_TSX_BA64FA1614'
 import { Composition } from "remotion";
 import { MultiScene } from "./MultiScene";
 
@@ -11796,80 +11864,20 @@ export const RemotionRoot = () => (
     height={720}
   />
 );
-CODEX_LAZYPACK_77A408A4ED9C9486071849990604424CFDEBBE29
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_SRC_ROOT_TSX_BA64FA1614
 
 # remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/index.ts
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/index.ts")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/index.ts" <<'CODEX_LAZYPACK_005A1EA31A325DF03BED225B0E24F58485B3AA0B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/index.ts")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/src/index.ts" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_SRC_INDEX_TS_E1BC5A6275'
 import { registerRoot } from "remotion";
 import { RemotionRoot } from "./Root";
 
 registerRoot(RemotionRoot);
-CODEX_LAZYPACK_005A1EA31A325DF03BED225B0E24F58485B3AA0B
-
-# remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/tsconfig.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/tsconfig.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/remotion-src/tsconfig.json" <<'CODEX_LAZYPACK_BC839506CC08F2E15923168CF17477D1DA650AAE'
-{
-  "compilerOptions": {
-    "target": "ES2018",
-    "module": "ESNext",
-    "jsx": "react-jsx",
-    "strict": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true
-  },
-  "include": ["src"]
-}
-CODEX_LAZYPACK_BC839506CC08F2E15923168CF17477D1DA650AAE
-
-# remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/setup.sh
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/setup.sh")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/setup.sh" <<'CODEX_LAZYPACK_8FDBFCD8378AB40926BFD297F724A7DA394175A8'
-#!/usr/bin/env bash
-# setup.sh — generate the binary assets this fixture needs.
-#
-# Both Remotion and HyperFrames variants need a 200x200 blue PNG and a
-# 6-second silent WAV. Generating them via ffmpeg keeps binaries out of
-# the repo while still letting the fixture render reproducibly.
-#
-# Run from the fixture root: ./setup.sh
-
-set -euo pipefail
-
-THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-if ! command -v ffmpeg >/dev/null 2>&1; then
-  echo "error: ffmpeg not on PATH" >&2
-  exit 2
-fi
-
-mkdir -p "$THIS_DIR/remotion-src/public" "$THIS_DIR/hf-src/assets"
-
-# 200x200 solid blue PNG, ~200 bytes.
-ffmpeg -y -hide_banner -loglevel error \
-  -f lavfi -i "color=color=#3066be:size=200x200" -frames:v 1 \
-  "$THIS_DIR/remotion-src/public/square.png"
-cp "$THIS_DIR/remotion-src/public/square.png" "$THIS_DIR/hf-src/assets/square.png"
-
-# 6-second silent WAV at 8 kHz mono. ~96 KB if checked in, but it is generated.
-ffmpeg -y -hide_banner -loglevel error \
-  -f lavfi -i "anullsrc=cl=mono:r=8000" -t 6 -acodec pcm_s16le \
-  "$THIS_DIR/remotion-src/public/music.wav"
-cp "$THIS_DIR/remotion-src/public/music.wav" "$THIS_DIR/hf-src/assets/music.wav"
-
-echo "generated:"
-ls -la "$THIS_DIR/remotion-src/public/" "$THIS_DIR/hf-src/assets/"
-CODEX_LAZYPACK_8FDBFCD8378AB40926BFD297F724A7DA394175A8
-chmod +x "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-2-multi-scene/setup.sh"
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_2_MULTI_SCENE_REMOTION_SRC_SRC_INDEX_TS_E1BC5A6275
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/.gitignore
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/.gitignore")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/.gitignore" <<'CODEX_LAZYPACK_3F16A5C94797C23C7CC4286CE88EA4C3B95B10E1'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/.gitignore")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/.gitignore" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_GITIGNORE_8A7234BAF2'
 # Render output
 remotion-src/out/
 hf-src/out/
@@ -11880,11 +11888,11 @@ strip/
 # Remotion / HF dependencies
 node_modules/
 package-lock.json
-CODEX_LAZYPACK_3F16A5C94797C23C7CC4286CE88EA4C3B95B10E1
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_GITIGNORE_8A7234BAF2
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/README.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/README.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/README.md" <<'CODEX_LAZYPACK_9E174B8FE3C13813FF7E07A0E1DD0D766483DF1B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/README.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/README.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_README_MD_072AB6C30E'
 # Tier 3 — stargazed-data-driven
 
 ## What it tests
@@ -11970,11 +11978,11 @@ cd ../hf-src && npx hyperframes render --output ../hf.mp4
 # Compare
 ../../../scripts/render_diff.sh ./remotion-src/out/baseline.mp4 ./hf.mp4 ./diff
 ```
-CODEX_LAZYPACK_9E174B8FE3C13813FF7E07A0E1DD0D766483DF1B
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_README_MD_072AB6C30E
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/expected.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/expected.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/expected.json" <<'CODEX_LAZYPACK_185E38E18C48059CC2240A02449185070AA34C26'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/expected.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/expected.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_EXPECTED_JSON_7EF1577A26'
 {
   "tier": 3,
   "name": "stargazed-data-driven",
@@ -12016,11 +12024,11 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-d
   ],
   "rationale": "Threshold 0.90 sits ~0.04 below measured p05 (0.938). The wider gap vs T1/T2 reflects T3's bigger approximation budget (2 spring instances + count-up timing + font fallback on multiple text sizes). Mean SSIM below 0.90 = structural mismatch (wrong durations, wrong stagger, missing prop wiring), not approximation drift."
 }
-CODEX_LAZYPACK_185E38E18C48059CC2240A02449185070AA34C26
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_EXPECTED_JSON_7EF1577A26
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/hf-src/index.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/hf-src/index.html")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/hf-src/index.html" <<'CODEX_LAZYPACK_4DBED4F2C8341C856F1004791E73CE3CBC7D952E'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/hf-src/index.html")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/hf-src/index.html" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_HF_SRC_INDEX_HTML_CEFF6CCEBF'
 <!doctype html>
 <html lang="en">
   <head>
@@ -12290,11 +12298,11 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-d
     </div>
   </body>
 </html>
-CODEX_LAZYPACK_4DBED4F2C8341C856F1004791E73CE3CBC7D952E
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_HF_SRC_INDEX_HTML_CEFF6CCEBF
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/package.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/package.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/package.json" <<'CODEX_LAZYPACK_8D137212F7223780C865769050255CDD64DB2034'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/package.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/package.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_PACKAGE_JSON_7C91647A31'
 {
   "name": "tier-3-data-driven-remotion",
   "version": "0.0.0",
@@ -12310,11 +12318,11 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-d
     "zod": "^3.22.0"
   }
 }
-CODEX_LAZYPACK_8D137212F7223780C865769050255CDD64DB2034
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_PACKAGE_JSON_7C91647A31
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/remotion.config.ts
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/remotion.config.ts")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/remotion.config.ts" <<'CODEX_LAZYPACK_56E852AE5D92C32435477B165F4D44A1892C6C3E'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/remotion.config.ts")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/remotion.config.ts" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_REMOTION_CONFIG_TS_D721E0599C'
 import { Config } from "@remotion/cli/config";
 
 // Match HyperFrames' default render so SSIM diffs measure translation
@@ -12328,11 +12336,31 @@ Config.setVideoImageFormat("png");
 Config.setColorSpace("bt709");
 Config.setOverwriteOutput(true);
 Config.setConcurrency(1);
-CODEX_LAZYPACK_56E852AE5D92C32435477B165F4D44A1892C6C3E
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_REMOTION_CONFIG_TS_D721E0599C
+
+# remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/tsconfig.json
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/tsconfig.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/tsconfig.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_TSCONFIG_JSON_4C16D4CE50'
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": ["src"]
+}
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_TSCONFIG_JSON_4C16D4CE50
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Root.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Root.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Root.tsx" <<'CODEX_LAZYPACK_4A1362FE909BF903E9DF84A4AB9113139081B9A5'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Root.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Root.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_ROOT_TSX_58062D0904'
 import { Composition } from "remotion";
 import { z } from "zod";
 import { Stargazed, stargazedSchema } from "./Stargazed";
@@ -12360,11 +12388,11 @@ export const RemotionRoot = () => (
     defaultProps={defaultProps}
   />
 );
-CODEX_LAZYPACK_4A1362FE909BF903E9DF84A4AB9113139081B9A5
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_ROOT_TSX_58062D0904
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Stargazed.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Stargazed.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Stargazed.tsx" <<'CODEX_LAZYPACK_A51E84593C831F3616EDBDB8379135DA8B8DBFF2'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Stargazed.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/Stargazed.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_STARGAZED_TSX_9FB4B51F4F'
 import { AbsoluteFill, Sequence } from "remotion";
 import { z } from "zod";
 import { TitleScene } from "./scenes/TitleScene";
@@ -12402,11 +12430,20 @@ export const Stargazed: React.FC<z.infer<typeof stargazedSchema>> = ({
     </Sequence>
   </AbsoluteFill>
 );
-CODEX_LAZYPACK_A51E84593C831F3616EDBDB8379135DA8B8DBFF2
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_STARGAZED_TSX_9FB4B51F4F
+
+# remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/index.ts
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/index.ts")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/index.ts" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_INDEX_TS_93C03CA5C4'
+import { registerRoot } from "remotion";
+import { RemotionRoot } from "./Root";
+
+registerRoot(RemotionRoot);
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_INDEX_TS_93C03CA5C4
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/AnimatedNumber.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/AnimatedNumber.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/AnimatedNumber.tsx" <<'CODEX_LAZYPACK_F033C43E25A2A791E0DE9E042B1DB645CC24F0C3'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/AnimatedNumber.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/AnimatedNumber.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_COMPONENTS_ANIMATEDNUMBER_TSX_DD16075E50'
 import { interpolate, useCurrentFrame } from "remotion";
 
 interface Props {
@@ -12430,11 +12467,11 @@ export const AnimatedNumber: React.FC<Props> = ({ from, to, durationInFrames }) 
   const value = Math.round(from + (to - from) * eased);
   return <>{value.toLocaleString()}</>;
 };
-CODEX_LAZYPACK_F033C43E25A2A791E0DE9E042B1DB645CC24F0C3
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_COMPONENTS_ANIMATEDNUMBER_TSX_DD16075E50
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/StatCard.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/StatCard.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/StatCard.tsx" <<'CODEX_LAZYPACK_38E886D11B1FCFE653EF2B0D19E71480C9E4B2F0'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/StatCard.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/StatCard.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_COMPONENTS_STATCARD_TSX_EB9737C65C'
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { AnimatedNumber } from "./AnimatedNumber";
 
@@ -12494,11 +12531,11 @@ export const StatCard: React.FC<Props> = ({ label, value, color, delayInFrames }
     </div>
   );
 };
-CODEX_LAZYPACK_38E886D11B1FCFE653EF2B0D19E71480C9E4B2F0
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_COMPONENTS_STATCARD_TSX_EB9737C65C
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/UnderlinedText.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/UnderlinedText.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/UnderlinedText.tsx" <<'CODEX_LAZYPACK_A82DA4794FDFDE64C8F85877A0A7F5E109024427'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/UnderlinedText.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/components/UnderlinedText.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_COMPONENTS_UNDERLINEDTEXT_TSX_F0021D9910'
 import { interpolate, useCurrentFrame } from "remotion";
 
 interface Props {
@@ -12546,20 +12583,11 @@ export const UnderlinedText: React.FC<Props> = ({ text, color }) => {
     </div>
   );
 };
-CODEX_LAZYPACK_A82DA4794FDFDE64C8F85877A0A7F5E109024427
-
-# remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/index.ts
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/index.ts")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/index.ts" <<'CODEX_LAZYPACK_F41E35BBFC859638C91229FD62AF7DB0C301EFB3'
-import { registerRoot } from "remotion";
-import { RemotionRoot } from "./Root";
-
-registerRoot(RemotionRoot);
-CODEX_LAZYPACK_F41E35BBFC859638C91229FD62AF7DB0C301EFB3
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_COMPONENTS_UNDERLINEDTEXT_TSX_F0021D9910
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/OutroScene.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/OutroScene.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/OutroScene.tsx" <<'CODEX_LAZYPACK_EE0B500F058151D516F6CB897D9D2634BAFC1248'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/OutroScene.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/OutroScene.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_SCENES_OUTROSCENE_TSX_7B1F5C3DFE'
 import { AbsoluteFill } from "remotion";
 import { UnderlinedText } from "../components/UnderlinedText";
 
@@ -12578,11 +12606,11 @@ export const OutroScene: React.FC<Props> = ({ text }) => (
     <UnderlinedText text={text} color="#fbbf24" />
   </AbsoluteFill>
 );
-CODEX_LAZYPACK_EE0B500F058151D516F6CB897D9D2634BAFC1248
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_SCENES_OUTROSCENE_TSX_7B1F5C3DFE
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/StatsScene.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/StatsScene.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/StatsScene.tsx" <<'CODEX_LAZYPACK_9E61E3A86D960E231AA12D2CA0609D4E510E033F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/StatsScene.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/StatsScene.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_SCENES_STATSSCENE_TSX_EEEDED7070'
 import { AbsoluteFill } from "remotion";
 import { StatCard } from "../components/StatCard";
 
@@ -12617,11 +12645,11 @@ export const StatsScene: React.FC<Props> = ({ stats }) => (
     ))}
   </AbsoluteFill>
 );
-CODEX_LAZYPACK_9E61E3A86D960E231AA12D2CA0609D4E510E033F
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_SCENES_STATSSCENE_TSX_EEEDED7070
 
 # remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/TitleScene.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/TitleScene.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/TitleScene.tsx" <<'CODEX_LAZYPACK_084A5EA9349EB0E12A7D72FC02681917C7ED6DA6'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/TitleScene.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/src/scenes/TitleScene.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_SCENES_TITLESCENE_TSX_299291FE78'
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 
 interface Props {
@@ -12677,31 +12705,11 @@ export const TitleScene: React.FC<Props> = ({ title, subtitle }) => {
     </AbsoluteFill>
   );
 };
-CODEX_LAZYPACK_084A5EA9349EB0E12A7D72FC02681917C7ED6DA6
-
-# remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/tsconfig.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/tsconfig.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-3-data-driven/remotion-src/tsconfig.json" <<'CODEX_LAZYPACK_00AEAFFB78B1806139995EEDCE8E7276B027EA8F'
-{
-  "compilerOptions": {
-    "target": "ES2018",
-    "module": "ESNext",
-    "jsx": "react-jsx",
-    "strict": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true
-  },
-  "include": ["src"]
-}
-CODEX_LAZYPACK_00AEAFFB78B1806139995EEDCE8E7276B027EA8F
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_3_DATA_DRIVEN_REMOTION_SRC_SRC_SCENES_TITLESCENE_TSX_299291FE78
 
 # remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/README.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/README.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/README.md" <<'CODEX_LAZYPACK_0A08C84469890819B3660273A677B29460E9F4F2'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/README.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/README.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_README_MD_D69CB7D520'
 # Tier 4 — escape-hatch
 
 ## What it tests
@@ -12753,321 +12761,11 @@ The script runs `lint_source.py` against each case and asserts:
 - `lint_source.py`'s exit code is 1 when blockers are expected, 0 otherwise.
 
 T4 passes when every case matches its expected output. No renders involved.
-CODEX_LAZYPACK_0A08C84469890819B3660273A677B29460E9F4F2
-
-# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/01-use-state.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/01-use-state.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/01-use-state.tsx" <<'CODEX_LAZYPACK_0926E029E7540CEB1FFAEEBDEF86E6C35637D2EB'
-// T4 case 01 — useState drives animation.
-//
-// Should be detected by lint_source.py as blocker r2hf/use-state.
-// The skill should refuse to translate and recommend the runtime interop
-// pattern from PR #214.
-//
-// Why this is a blocker: useState is React's component-local mutable state.
-// HF's seek-driven model produces deterministic frames from a single time
-// value — there's no per-frame React render cycle to update state on.
-
-import React, { useState } from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
-
-export const StateDriven: React.FC = () => {
-  const frame = useCurrentFrame();
-  const [hue, setHue] = useState(0);
-
-  // Even if this looks innocuous, the setHue call breaks determinism: HF
-  // can't reproduce React state mutations across seeks.
-  if (frame % 30 === 0 && hue < 360) {
-    setHue((h) => h + 30);
-  }
-
-  return (
-    <AbsoluteFill style={{ background: `hsl(${hue}, 80%, 50%)` }}>
-      <div>frame {frame}</div>
-    </AbsoluteFill>
-  );
-};
-CODEX_LAZYPACK_0926E029E7540CEB1FFAEEBDEF86E6C35637D2EB
-
-# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/02-use-effect-deps.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/02-use-effect-deps.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/02-use-effect-deps.tsx" <<'CODEX_LAZYPACK_C9B32EF96B55988FEACBAF50A3A8584A41D017A7'
-// T4 case 02 — useEffect with non-empty deps performs side effects per render.
-//
-// Should be detected by lint_source.py as blocker r2hf/use-effect-deps.
-// The skill should refuse to translate.
-//
-// Why this is a blocker: side effects (network, DOM mutation outside the
-// rendered tree, timers) don't translate to a seek-driven model. HF assumes
-// the page is fully rendered and pure between seeks.
-
-import React, { useEffect, useRef } from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
-
-export const SideEffectDriven: React.FC = () => {
-  const frame = useCurrentFrame();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    ctx?.fillRect(frame, frame, 10, 10);
-  }, [frame]);
-
-  return (
-    <AbsoluteFill>
-      <canvas ref={canvasRef} width={1280} height={720} />
-    </AbsoluteFill>
-  );
-};
-CODEX_LAZYPACK_C9B32EF96B55988FEACBAF50A3A8584A41D017A7
-
-# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/03-async-metadata.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/03-async-metadata.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/03-async-metadata.tsx" <<'CODEX_LAZYPACK_CFC7AFC2FAA046921364FD962768EEFF84A17684'
-// T4 case 03 — calculateMetadata returns a Promise.
-//
-// Should be detected by lint_source.py as blocker r2hf/async-metadata.
-// The skill should refuse to translate.
-//
-// Why this is a blocker: HF needs the composition's duration, dimensions,
-// and props known up-front to produce HTML and seed the timeline. Async
-// metadata fetched from a server at render time has no equivalent in HF —
-// the metadata would need to be resolved at build time before the HTML is
-// authored.
-
-import React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
-
-interface Props {
-  text: string;
-}
-
-export const AsyncMetadataDriven: React.FC<Props> = ({ text }) => {
-  const frame = useCurrentFrame();
-  return (
-    <AbsoluteFill>
-      <div>
-        {text} · frame {frame}
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-export const calculateMetadata = async ({ props }: { props: Props }) => {
-  const response = await fetch(
-    `https://api.example.com/duration?text=${encodeURIComponent(props.text)}`,
-  );
-  const { durationInFrames } = await response.json();
-  return {
-    durationInFrames,
-    fps: 30,
-  };
-};
-CODEX_LAZYPACK_CFC7AFC2FAA046921364FD962768EEFF84A17684
-
-# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/04-third-party-react.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/04-third-party-react.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/04-third-party-react.tsx" <<'CODEX_LAZYPACK_ECB91E067111645FC9C210FA128B7BA18C492106'
-// T4 case 04 — Imports from a third-party React UI library.
-//
-// Should be detected by lint_source.py as blocker r2hf/third-party-react-ui.
-// The skill should refuse to translate.
-//
-// Why this is a blocker: a Material-UI Button (or any React UI library
-// component) is a React-only abstraction with internal hooks, refs, and
-// theme provider context. Translating it to HTML+CSS would require
-// re-implementing the design system, which is out of scope for a video
-// translation skill. Use the runtime interop pattern from PR #214 to keep
-// these components rendering through Remotion's React tree.
-
-import React from "react";
-import { Button } from "@mui/material";
-import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
-
-export const MuiDriven: React.FC = () => {
-  const frame = useCurrentFrame();
-  const opacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: "clamp" });
-
-  return (
-    <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
-      <div style={{ opacity }}>
-        <Button variant="contained" color="primary">
-          Click me · frame {frame}
-        </Button>
-      </div>
-    </AbsoluteFill>
-  );
-};
-CODEX_LAZYPACK_ECB91E067111645FC9C210FA128B7BA18C492106
-
-# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/05-lambda-config.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/05-lambda-config.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/05-lambda-config.tsx" <<'CODEX_LAZYPACK_B9C1AB5B6A2BB0D240B50A5E224C0B747B00619E'
-// T4 case 05 — Imports @remotion/lambda for distributed rendering config.
-//
-// Should be detected by lint_source.py as warning r2hf/lambda-import.
-// The skill drops the Lambda code with a note (HF runs single-machine
-// today) and translates the rest of the composition.
-//
-// Why this is a warning, not a blocker: @remotion/lambda config is
-// orthogonal to the rendered composition — it's deployment configuration,
-// not animation logic. Treating it as a hard blocker would refuse
-// translation for compositions that are otherwise clean. The skill drops
-// the Lambda calls in step 3 (Generate) and writes a TRANSLATION_NOTES.md
-// entry so the user knows to set up HF rendering separately.
-
-import React from "react";
-import { renderMediaOnLambda } from "@remotion/lambda";
-import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
-
-export const LambdaConfigured: React.FC = () => {
-  const frame = useCurrentFrame();
-  const opacity = interpolate(frame, [0, 30], [0, 1]);
-  return (
-    <AbsoluteFill style={{ opacity }}>
-      <div>frame {frame}</div>
-    </AbsoluteFill>
-  );
-};
-
-// Rendered at scale via Lambda — no HF equivalent.
-export async function renderViaLambda() {
-  return renderMediaOnLambda({
-    region: "us-east-1",
-    functionName: "remotion-render",
-    composition: "LambdaConfigured",
-    serveUrl: "https://example.com/bundle",
-    inputProps: {},
-    codec: "h264",
-  });
-}
-CODEX_LAZYPACK_B9C1AB5B6A2BB0D240B50A5E224C0B747B00619E
-
-# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/06-warnings-only.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/06-warnings-only.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/06-warnings-only.tsx" <<'CODEX_LAZYPACK_13C650F2B289502A71D9EE5A9AD683F51F17C156'
-// T4 case 06 — Patterns that warn but don't block.
-//
-// Should be detected by lint_source.py with:
-//   - r2hf/delay-render (warning) — drop the call; HF handles asset readiness
-//   - r2hf/use-callback (warning) — decorative, drop the wrapper
-//   - r2hf/use-memo    (warning) — decorative, drop the wrapper
-//
-// 0 blockers expected — the skill should still translate this composition
-// after dropping the wrappers. delayRender is paired with continueRender via
-// an empty-deps useEffect (mount-once side effect), which doesn't trip the
-// use-effect-deps blocker.
-
-import React, { useCallback, useMemo } from "react";
-import { AbsoluteFill, delayRender, continueRender, useCurrentFrame, interpolate } from "remotion";
-
-const handle = delayRender();
-// Resolve the handle once at module load — no per-frame side effects.
-queueMicrotask(() => continueRender(handle));
-
-export const WarningsOnly: React.FC = () => {
-  const frame = useCurrentFrame();
-
-  // useCallback / useMemo — decorative for render-perf in React, no equivalent
-  // needed in the seek-driven HF model.
-  const opacity = useMemo(
-    () => interpolate(frame, [0, 30], [0, 1], { extrapolateRight: "clamp" }),
-    [frame],
-  );
-  const onMount = useCallback(() => {}, []);
-
-  return (
-    <AbsoluteFill style={{ opacity }} onClick={onMount}>
-      <div>frame {frame}</div>
-    </AbsoluteFill>
-  );
-};
-CODEX_LAZYPACK_13C650F2B289502A71D9EE5A9AD683F51F17C156
-
-# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/07-custom-hook.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/07-custom-hook.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/07-custom-hook.tsx" <<'CODEX_LAZYPACK_F08630480FA3B1FACE2FB2093D29D196130A6FF4'
-// T4 case 07 — Locally-defined custom hook.
-//
-// Should be detected by lint_source.py as warning r2hf/custom-hook.
-// 0 blockers expected — the skill can attempt translation if the hook body
-// is pure (derives from props/frame alone).
-//
-// Why this is a warning: custom hooks vary widely in what they do. Some are
-// pure derivations of useCurrentFrame (translatable — inline the body); some
-// wrap useState/useEffect (blocker — but those will be caught by the other
-// rules independently). The warning prompts the agent to inspect the body.
-
-import React from "react";
-import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
-
-// Custom hook — pure derivation from frame, no state. Translates fine.
-function useFadeIn(durationInFrames: number) {
-  const frame = useCurrentFrame();
-  return interpolate(frame, [0, durationInFrames], [0, 1], { extrapolateRight: "clamp" });
-}
-
-export const CustomHookDriven: React.FC = () => {
-  const opacity = useFadeIn(30);
-  return (
-    <AbsoluteFill style={{ opacity }}>
-      <div>fading in</div>
-    </AbsoluteFill>
-  );
-};
-CODEX_LAZYPACK_F08630480FA3B1FACE2FB2093D29D196130A6FF4
-
-# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/08-mixed.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/08-mixed.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/08-mixed.tsx" <<'CODEX_LAZYPACK_0BE0AD0DE55B5F05FFF09EDA7FA80EA8A21A251B'
-// T4 case 08 — Multiple blockers + multiple warnings in one file.
-//
-// Should report:
-//   blockers: r2hf/use-state, r2hf/use-effect-deps, r2hf/third-party-react-ui
-//   warnings: r2hf/use-callback (also r2hf/delay-render via the import chain
-//             would only fire if delayRender is actually called)
-//
-// Tests that the linter aggregates findings correctly and does not stop at
-// the first blocker.
-
-import React, { useState, useEffect, useCallback } from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { Card } from "@chakra-ui/react";
-
-interface Item {
-  id: string;
-  label: string;
-}
-
-export const MixedBlockers: React.FC = () => {
-  const frame = useCurrentFrame();
-  const [items, setItems] = useState<Item[]>([]);
-
-  useEffect(() => {
-    fetch("/api/items")
-      .then((r) => r.json())
-      .then(setItems);
-  }, [frame]);
-
-  const onClick = useCallback(() => {
-    setItems((prev) => [...prev, { id: String(prev.length), label: "new" }]);
-  }, []);
-
-  return (
-    <AbsoluteFill onClick={onClick}>
-      {items.map((item) => (
-        <Card key={item.id}>{item.label}</Card>
-      ))}
-    </AbsoluteFill>
-  );
-};
-CODEX_LAZYPACK_0BE0AD0DE55B5F05FFF09EDA7FA80EA8A21A251B
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_README_MD_D69CB7D520
 
 # remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/expected.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/expected.json")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/expected.json" <<'CODEX_LAZYPACK_85B36864E5D1A21B3635233CEF0294411B7A3225'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/expected.json")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/expected.json" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_EXPECTED_JSON_70B2BCE18D'
 {
   "tier": 4,
   "name": "escape-hatch",
@@ -13153,11 +12851,11 @@ cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-e
     "expected_total_warning_findings_min": 6
   }
 }
-CODEX_LAZYPACK_85B36864E5D1A21B3635233CEF0294411B7A3225
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_EXPECTED_JSON_70B2BCE18D
 
 # remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/validate.sh
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/validate.sh")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/validate.sh" <<'CODEX_LAZYPACK_748AAAA73A836DE1E2F4140BAB4A5EFF2BC2BDB0'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/validate.sh")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/validate.sh" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_VALIDATE_SH_37590D2E3B'
 #!/usr/bin/env bash
 # validate.sh — assert lint_source.py output matches expected.json for every T4 case.
 #
@@ -13268,12 +12966,322 @@ if fails:
     sys.exit(1)
 sys.exit(0)
 PY
-CODEX_LAZYPACK_748AAAA73A836DE1E2F4140BAB4A5EFF2BC2BDB0
-chmod +x "{{CODEX_HOME}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/validate.sh"
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_VALIDATE_SH_37590D2E3B
+chmod +x "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/validate.sh"
+
+# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/01-use-state.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/01-use-state.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/01-use-state.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_01_USE_STATE_TSX_AC59F994E0'
+// T4 case 01 — useState drives animation.
+//
+// Should be detected by lint_source.py as blocker r2hf/use-state.
+// The skill should refuse to translate and recommend the runtime interop
+// pattern from PR #214.
+//
+// Why this is a blocker: useState is React's component-local mutable state.
+// HF's seek-driven model produces deterministic frames from a single time
+// value — there's no per-frame React render cycle to update state on.
+
+import React, { useState } from "react";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
+
+export const StateDriven: React.FC = () => {
+  const frame = useCurrentFrame();
+  const [hue, setHue] = useState(0);
+
+  // Even if this looks innocuous, the setHue call breaks determinism: HF
+  // can't reproduce React state mutations across seeks.
+  if (frame % 30 === 0 && hue < 360) {
+    setHue((h) => h + 30);
+  }
+
+  return (
+    <AbsoluteFill style={{ background: `hsl(${hue}, 80%, 50%)` }}>
+      <div>frame {frame}</div>
+    </AbsoluteFill>
+  );
+};
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_01_USE_STATE_TSX_AC59F994E0
+
+# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/02-use-effect-deps.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/02-use-effect-deps.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/02-use-effect-deps.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_02_USE_EFFECT_DEPS_TSX_B5B2A5C495'
+// T4 case 02 — useEffect with non-empty deps performs side effects per render.
+//
+// Should be detected by lint_source.py as blocker r2hf/use-effect-deps.
+// The skill should refuse to translate.
+//
+// Why this is a blocker: side effects (network, DOM mutation outside the
+// rendered tree, timers) don't translate to a seek-driven model. HF assumes
+// the page is fully rendered and pure between seeks.
+
+import React, { useEffect, useRef } from "react";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
+
+export const SideEffectDriven: React.FC = () => {
+  const frame = useCurrentFrame();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx?.fillRect(frame, frame, 10, 10);
+  }, [frame]);
+
+  return (
+    <AbsoluteFill>
+      <canvas ref={canvasRef} width={1280} height={720} />
+    </AbsoluteFill>
+  );
+};
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_02_USE_EFFECT_DEPS_TSX_B5B2A5C495
+
+# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/03-async-metadata.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/03-async-metadata.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/03-async-metadata.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_03_ASYNC_METADATA_TSX_7F4A6710B6'
+// T4 case 03 — calculateMetadata returns a Promise.
+//
+// Should be detected by lint_source.py as blocker r2hf/async-metadata.
+// The skill should refuse to translate.
+//
+// Why this is a blocker: HF needs the composition's duration, dimensions,
+// and props known up-front to produce HTML and seed the timeline. Async
+// metadata fetched from a server at render time has no equivalent in HF —
+// the metadata would need to be resolved at build time before the HTML is
+// authored.
+
+import React from "react";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
+
+interface Props {
+  text: string;
+}
+
+export const AsyncMetadataDriven: React.FC<Props> = ({ text }) => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill>
+      <div>
+        {text} · frame {frame}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+export const calculateMetadata = async ({ props }: { props: Props }) => {
+  const response = await fetch(
+    `https://api.example.com/duration?text=${encodeURIComponent(props.text)}`,
+  );
+  const { durationInFrames } = await response.json();
+  return {
+    durationInFrames,
+    fps: 30,
+  };
+};
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_03_ASYNC_METADATA_TSX_7F4A6710B6
+
+# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/04-third-party-react.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/04-third-party-react.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/04-third-party-react.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_04_THIRD_PARTY_REACT_TSX_D98445821D'
+// T4 case 04 — Imports from a third-party React UI library.
+//
+// Should be detected by lint_source.py as blocker r2hf/third-party-react-ui.
+// The skill should refuse to translate.
+//
+// Why this is a blocker: a Material-UI Button (or any React UI library
+// component) is a React-only abstraction with internal hooks, refs, and
+// theme provider context. Translating it to HTML+CSS would require
+// re-implementing the design system, which is out of scope for a video
+// translation skill. Use the runtime interop pattern from PR #214 to keep
+// these components rendering through Remotion's React tree.
+
+import React from "react";
+import { Button } from "@mui/material";
+import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
+
+export const MuiDriven: React.FC = () => {
+  const frame = useCurrentFrame();
+  const opacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: "clamp" });
+
+  return (
+    <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
+      <div style={{ opacity }}>
+        <Button variant="contained" color="primary">
+          Click me · frame {frame}
+        </Button>
+      </div>
+    </AbsoluteFill>
+  );
+};
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_04_THIRD_PARTY_REACT_TSX_D98445821D
+
+# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/05-lambda-config.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/05-lambda-config.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/05-lambda-config.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_05_LAMBDA_CONFIG_TSX_AACEE3035F'
+// T4 case 05 — Imports @remotion/lambda for distributed rendering config.
+//
+// Should be detected by lint_source.py as warning r2hf/lambda-import.
+// The skill drops the Lambda code with a note (HF runs single-machine
+// today) and translates the rest of the composition.
+//
+// Why this is a warning, not a blocker: @remotion/lambda config is
+// orthogonal to the rendered composition — it's deployment configuration,
+// not animation logic. Treating it as a hard blocker would refuse
+// translation for compositions that are otherwise clean. The skill drops
+// the Lambda calls in step 3 (Generate) and writes a TRANSLATION_NOTES.md
+// entry so the user knows to set up HF rendering separately.
+
+import React from "react";
+import { renderMediaOnLambda } from "@remotion/lambda";
+import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
+
+export const LambdaConfigured: React.FC = () => {
+  const frame = useCurrentFrame();
+  const opacity = interpolate(frame, [0, 30], [0, 1]);
+  return (
+    <AbsoluteFill style={{ opacity }}>
+      <div>frame {frame}</div>
+    </AbsoluteFill>
+  );
+};
+
+// Rendered at scale via Lambda — no HF equivalent.
+export async function renderViaLambda() {
+  return renderMediaOnLambda({
+    region: "us-east-1",
+    functionName: "remotion-render",
+    composition: "LambdaConfigured",
+    serveUrl: "https://example.com/bundle",
+    inputProps: {},
+    codec: "h264",
+  });
+}
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_05_LAMBDA_CONFIG_TSX_AACEE3035F
+
+# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/06-warnings-only.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/06-warnings-only.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/06-warnings-only.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_06_WARNINGS_ONLY_TSX_837B4ACE1A'
+// T4 case 06 — Patterns that warn but don't block.
+//
+// Should be detected by lint_source.py with:
+//   - r2hf/delay-render (warning) — drop the call; HF handles asset readiness
+//   - r2hf/use-callback (warning) — decorative, drop the wrapper
+//   - r2hf/use-memo    (warning) — decorative, drop the wrapper
+//
+// 0 blockers expected — the skill should still translate this composition
+// after dropping the wrappers. delayRender is paired with continueRender via
+// an empty-deps useEffect (mount-once side effect), which doesn't trip the
+// use-effect-deps blocker.
+
+import React, { useCallback, useMemo } from "react";
+import { AbsoluteFill, delayRender, continueRender, useCurrentFrame, interpolate } from "remotion";
+
+const handle = delayRender();
+// Resolve the handle once at module load — no per-frame side effects.
+queueMicrotask(() => continueRender(handle));
+
+export const WarningsOnly: React.FC = () => {
+  const frame = useCurrentFrame();
+
+  // useCallback / useMemo — decorative for render-perf in React, no equivalent
+  // needed in the seek-driven HF model.
+  const opacity = useMemo(
+    () => interpolate(frame, [0, 30], [0, 1], { extrapolateRight: "clamp" }),
+    [frame],
+  );
+  const onMount = useCallback(() => {}, []);
+
+  return (
+    <AbsoluteFill style={{ opacity }} onClick={onMount}>
+      <div>frame {frame}</div>
+    </AbsoluteFill>
+  );
+};
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_06_WARNINGS_ONLY_TSX_837B4ACE1A
+
+# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/07-custom-hook.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/07-custom-hook.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/07-custom-hook.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_07_CUSTOM_HOOK_TSX_3EADC9CEF6'
+// T4 case 07 — Locally-defined custom hook.
+//
+// Should be detected by lint_source.py as warning r2hf/custom-hook.
+// 0 blockers expected — the skill can attempt translation if the hook body
+// is pure (derives from props/frame alone).
+//
+// Why this is a warning: custom hooks vary widely in what they do. Some are
+// pure derivations of useCurrentFrame (translatable — inline the body); some
+// wrap useState/useEffect (blocker — but those will be caught by the other
+// rules independently). The warning prompts the agent to inspect the body.
+
+import React from "react";
+import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
+
+// Custom hook — pure derivation from frame, no state. Translates fine.
+function useFadeIn(durationInFrames: number) {
+  const frame = useCurrentFrame();
+  return interpolate(frame, [0, durationInFrames], [0, 1], { extrapolateRight: "clamp" });
+}
+
+export const CustomHookDriven: React.FC = () => {
+  const opacity = useFadeIn(30);
+  return (
+    <AbsoluteFill style={{ opacity }}>
+      <div>fading in</div>
+    </AbsoluteFill>
+  );
+};
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_07_CUSTOM_HOOK_TSX_3EADC9CEF6
+
+# remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/08-mixed.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/08-mixed.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/assets/test-corpus/tier-4-escape-hatch/cases/08-mixed.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_08_MIXED_TSX_8C105A2B23'
+// T4 case 08 — Multiple blockers + multiple warnings in one file.
+//
+// Should report:
+//   blockers: r2hf/use-state, r2hf/use-effect-deps, r2hf/third-party-react-ui
+//   warnings: r2hf/use-callback (also r2hf/delay-render via the import chain
+//             would only fire if delayRender is actually called)
+//
+// Tests that the linter aggregates findings correctly and does not stop at
+// the first blocker.
+
+import React, { useState, useEffect, useCallback } from "react";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { Card } from "@chakra-ui/react";
+
+interface Item {
+  id: string;
+  label: string;
+}
+
+export const MixedBlockers: React.FC = () => {
+  const frame = useCurrentFrame();
+  const [items, setItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    fetch("/api/items")
+      .then((r) => r.json())
+      .then(setItems);
+  }, [frame]);
+
+  const onClick = useCallback(() => {
+    setItems((prev) => [...prev, { id: String(prev.length), label: "new" }]);
+  }, []);
+
+  return (
+    <AbsoluteFill onClick={onClick}>
+      {items.map((item) => (
+        <Card key={item.id}>{item.label}</Card>
+      ))}
+    </AbsoluteFill>
+  );
+};
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_ASSETS_TEST_CORPUS_TIER_4_ESCAPE_HATCH_CASES_08_MIXED_TSX_8C105A2B23
 
 # remotion-to-hyperframes/references/api-map.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/api-map.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/api-map.md" <<'CODEX_LAZYPACK_EBDD3FD15EBCA12EC7E1D1883712354B05F987C9'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/api-map.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/api-map.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_API_MAP_MD_3297054FFC'
 # Remotion → HyperFrames API Map
 
 Authoritative translation table. Load this reference when starting a translation
@@ -13416,11 +13424,11 @@ attempting translation. See [escape-hatch.md](escape-hatch.md).
 
 The blockers are documented in [`scripts/lint_source.py`](../scripts/lint_source.py)
 and tested by [tier-4-escape-hatch](../assets/test-corpus/tier-4-escape-hatch/).
-CODEX_LAZYPACK_EBDD3FD15EBCA12EC7E1D1883712354B05F987C9
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_API_MAP_MD_3297054FFC
 
 # remotion-to-hyperframes/references/escape-hatch.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/escape-hatch.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/escape-hatch.md" <<'CODEX_LAZYPACK_23B4CCBA7B63F892FEB2518D3046E123F6940F93'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/escape-hatch.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/escape-hatch.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_ESCAPE_HATCH_MD_1C47AB3564'
 # When to bow out: the runtime interop pattern
 
 Some Remotion compositions can't be translated cleanly. The skill should
@@ -13536,11 +13544,11 @@ Bow out. The presence of a single blocker means the skill shouldn't
 attempt translation — even if the rest of the composition is clean.
 The user should use interop for the whole thing OR refactor the
 blocker patterns out of their Remotion source first.
-CODEX_LAZYPACK_23B4CCBA7B63F892FEB2518D3046E123F6940F93
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_ESCAPE_HATCH_MD_1C47AB3564
 
 # remotion-to-hyperframes/references/eval.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/eval.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/eval.md" <<'CODEX_LAZYPACK_23BC5E30F949AA3FD6B44AEC154C8CCA46CBE84F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/eval.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/eval.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_EVAL_MD_38089E0DE9'
 # Eval: how to validate a translation end-to-end
 
 Every translation should be measured. The skill ships three scripts and
@@ -13681,11 +13689,11 @@ The fixtures are not yet wired into CI (`packages/producer/tests/` runs
 inside Docker; the skill corpus needs the same). PR 7 of the stack adds
 the orchestrator that runs all four tiers and emits an aggregated pass
 report. For now, evaluate by hand per fixture.
-CODEX_LAZYPACK_23BC5E30F949AA3FD6B44AEC154C8CCA46CBE84F
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_EVAL_MD_38089E0DE9
 
 # remotion-to-hyperframes/references/fonts.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/fonts.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/fonts.md" <<'CODEX_LAZYPACK_C6AA90EF1DB8692B9354DEF9FF4581410E3CD801'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/fonts.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/fonts.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_FONTS_MD_89773AE7FF'
 # Font translation
 
 Fonts are the dominant non-translation noise floor. Same `font-weight: 800`
@@ -13798,11 +13806,11 @@ that aren't actually used, drop them.
 Remotion's `loadFont` doesn't subset; HF's compiler doesn't either
 (yet). Don't try to optimize this in translation — it's lossless to
 keep the same weight set as the Remotion source.
-CODEX_LAZYPACK_C6AA90EF1DB8692B9354DEF9FF4581410E3CD801
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_FONTS_MD_89773AE7FF
 
 # remotion-to-hyperframes/references/limitations.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/limitations.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/limitations.md" <<'CODEX_LAZYPACK_2CB739B32FFC845379D333A3DD55443918867F70'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/limitations.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/limitations.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_LIMITATIONS_MD_07061D2FFF'
 # Translation limitations
 
 What the skill explicitly cannot translate, separated from the
@@ -13939,11 +13947,11 @@ instead.
 
 This file is also generated by the skill alongside the HF output, not
 held in the corpus.
-CODEX_LAZYPACK_2CB739B32FFC845379D333A3DD55443918867F70
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_LIMITATIONS_MD_07061D2FFF
 
 # remotion-to-hyperframes/references/lottie.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/lottie.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/lottie.md" <<'CODEX_LAZYPACK_3A9A56D49333016CD467957ADED36226158C5DEA'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/lottie.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/lottie.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_LOTTIE_MD_31A8721529'
 # Lottie translation: @remotion/lottie → HF lottie adapter
 
 Lottie animations are a clean translation case — HF has a built-in
@@ -14065,11 +14073,11 @@ docs: lottie-web's `goToAndStop(time, isFrame=false)` takes time in ms;
 the adapter passes `time * 1000` for precision. This is more accurate
 than passing frame numbers (especially for animations whose internal
 fps doesn't match the HF render fps).
-CODEX_LAZYPACK_3A9A56D49333016CD467957ADED36226158C5DEA
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_LOTTIE_MD_31A8721529
 
 # remotion-to-hyperframes/references/media.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/media.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/media.md" <<'CODEX_LAZYPACK_041004A86C1ADD3D97292204B7D205B88462947E'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/media.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/media.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_MEDIA_MD_F2D48C85B1'
 # Media translation: Audio, Video, Img, IFrame, staticFile
 
 ## Asset paths
@@ -14219,11 +14227,11 @@ options:
 
 For audio/video Buffers, option 1 is preferred — base64-encoded media
 bloats the HTML and slows the renderer.
-CODEX_LAZYPACK_041004A86C1ADD3D97292204B7D205B88462947E
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_MEDIA_MD_F2D48C85B1
 
 # remotion-to-hyperframes/references/parameters.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/parameters.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/parameters.md" <<'CODEX_LAZYPACK_C239F89AE5CCA350569F0AC894EC428E3B7D40D1'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/parameters.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/parameters.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_PARAMETERS_MD_0C581443F8'
 # Parameter translation: Zod schemas, defaultProps, calculateMetadata
 
 How a typed Remotion `<Composition schema={...} defaultProps={...} />`
@@ -14391,11 +14399,11 @@ in ways that complicate human editing.
 
 If the derivation is non-trivial (involves the array itself, not just
 scalars), materialize it as static text in the HTML.
-CODEX_LAZYPACK_C239F89AE5CCA350569F0AC894EC428E3B7D40D1
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_PARAMETERS_MD_0C581443F8
 
 # remotion-to-hyperframes/references/sequencing.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/sequencing.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/sequencing.md" <<'CODEX_LAZYPACK_62231FB42996AACEA32DF91D1A07E5E9D54CE962'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/sequencing.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/sequencing.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_SEQUENCING_MD_6F8EC5F497'
 # Sequencing translation: Sequence, Series, Composition root
 
 How Remotion's nested `Sequence` tree maps to HF's flat `data-start` /
@@ -14591,11 +14599,11 @@ simultaneously, use distinct `data-track-index` values:
 
 The runtime picks track ordering from the index. See [media.md](media.md)
 for media-specific track conventions.
-CODEX_LAZYPACK_62231FB42996AACEA32DF91D1A07E5E9D54CE962
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_SEQUENCING_MD_6F8EC5F497
 
 # remotion-to-hyperframes/references/timing.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/timing.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/timing.md" <<'CODEX_LAZYPACK_8BA2B4BEC28B45BF00262C2B4DE1B64A767431C9'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/timing.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/timing.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_TIMING_MD_70256BF4B8'
 # Timing translation: interpolate, spring, easing
 
 The single highest-leverage reference. Easings and timings are what readers
@@ -14761,11 +14769,11 @@ cards.forEach((card, i) => {
 ```
 
 Validated in T3 — three StatCards staggered at 0.0/0.4/0.8 s.
-CODEX_LAZYPACK_8BA2B4BEC28B45BF00262C2B4DE1B64A767431C9
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_TIMING_MD_70256BF4B8
 
 # remotion-to-hyperframes/references/transitions.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/transitions.md")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/references/transitions.md" <<'CODEX_LAZYPACK_3FBD430F06BFF5EE7BBBE722B9880E65C89AAD5C'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/transitions.md")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/references/transitions.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_TRANSITIONS_MD_53E39E8A21'
 # Transitions translation: @remotion/transitions → HF crossfades / shader-transitions
 
 The `@remotion/transitions` package is Remotion's library of pre-built
@@ -14880,15 +14888,11 @@ If the custom presentation uses `useCurrentFrame()` internally to
 animate something _outside_ the simple progress curve, treat the source
 as untranslatable and bow out to the runtime interop pattern (see
 [escape-hatch.md](escape-hatch.md)).
-CODEX_LAZYPACK_3FBD430F06BFF5EE7BBBE722B9880E65C89AAD5C
-
-# remotion-to-hyperframes/scripts/.gitkeep
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/.gitkeep")"
-: > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/.gitkeep"
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_REFERENCES_TRANSITIONS_MD_53E39E8A21
 
 # remotion-to-hyperframes/scripts/frame_strip.sh
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/frame_strip.sh")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/frame_strip.sh" <<'CODEX_LAZYPACK_1F6095B5AE21222D75B37D4BCC6347B7BABFCB2D'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/frame_strip.sh")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/frame_strip.sh" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_FRAME_STRIP_SH_7DA9BA5664'
 #!/usr/bin/env bash
 # frame_strip.sh — produce a side-by-side comparison strip from two videos.
 #
@@ -14996,12 +15000,12 @@ cmd = [
 subprocess.run(cmd, check=True)
 print(f"wrote {outdir / 'strip.png'} ({n} samples)")
 PY
-CODEX_LAZYPACK_1F6095B5AE21222D75B37D4BCC6347B7BABFCB2D
-chmod +x "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/frame_strip.sh"
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_FRAME_STRIP_SH_7DA9BA5664
+chmod +x "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/frame_strip.sh"
 
 # remotion-to-hyperframes/scripts/lint_source.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/lint_source.py")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/lint_source.py" <<'CODEX_LAZYPACK_5A2763674EFBA5CE504DE9C584EDBB0BC15C4718'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/lint_source.py")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/lint_source.py" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_LINT_SOURCE_PY_FA7776E84B'
 #!/usr/bin/env python3
 """Lint a Remotion project for patterns that don't translate cleanly to HyperFrames.
 
@@ -15360,12 +15364,12 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_5A2763674EFBA5CE504DE9C584EDBB0BC15C4718
-chmod +x "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/lint_source.py"
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_LINT_SOURCE_PY_FA7776E84B
+chmod +x "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/lint_source.py"
 
 # remotion-to-hyperframes/scripts/render_diff.sh
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/render_diff.sh")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/render_diff.sh" <<'CODEX_LAZYPACK_ADC3A9D0D85A7E140A1AB8D167DACAC61CAE3BFF'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/render_diff.sh")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/render_diff.sh" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_RENDER_DIFF_SH_9181783589'
 #!/usr/bin/env bash
 # render_diff.sh — compute per-frame SSIM between two video files.
 #
@@ -15469,118 +15473,12 @@ out_path.write_text(json.dumps(summary, indent=2) + "\n")
 print(json.dumps(summary, indent=2))
 sys.exit(0 if summary["pass"] else 1)
 PY
-CODEX_LAZYPACK_ADC3A9D0D85A7E140A1AB8D167DACAC61CAE3BFF
-chmod +x "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/render_diff.sh"
-
-# remotion-to-hyperframes/scripts/tests/fixtures/blocker.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/tests/fixtures/blocker.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/tests/fixtures/blocker.tsx" <<'CODEX_LAZYPACK_71B1552DC9701EBA432ED22E773EC73602D81344'
-import React, { useState, useEffect, useLayoutEffect } from "react";
-import { useCurrentFrame, AbsoluteFill, delayRender, continueRender } from "remotion";
-import { Button } from "@mui/material";
-
-// Custom hook in `export const useFoo = ...` form — earlier custom-hook
-// regex anchored to `^\s*(?:function|const|let)` and missed the `export`
-// prefix. This covers the regression.
-export const useFadeMixed = (n: number) => {
-  const f = useCurrentFrame();
-  return f / n;
-};
-
-export const BadComposition: React.FC = () => {
-  const frame = useCurrentFrame();
-  const [data, setData] = useState<string | null>(null);
-  const [handle] = useState(() => delayRender());
-
-  // Multi-line useEffect body with commas inside (fillRect args) — regression
-  // coverage for r2hf/use-effect-deps. An earlier regex `[^,]+` would stop at
-  // the first comma inside the body and miss the deps array entirely.
-  useEffect(() => {
-    fetch("/api/data")
-      .then((r) => r.json())
-      .then((d) => {
-        const ctx = document.createElement("canvas").getContext("2d");
-        ctx?.fillRect(0, 0, 100, 100);
-        setData(d.text);
-        continueRender(handle);
-      });
-  }, [handle]);
-
-  // Expression-bodied useEffect — the form `useEffect(() => fetch(...), [deps])`
-  // has no closing `}`, which an earlier regex anchored on. This and the
-  // useLayoutEffect below cover the false-negative cases Miguel surfaced.
-  useEffect(() => fetch("/api/heartbeat"), [frame]);
-  useLayoutEffect(() => (document.title = `frame ${frame}`), [frame]);
-
-  return (
-    <AbsoluteFill>
-      <Button>{data ?? "loading"}</Button>
-      <span>{frame}</span>
-    </AbsoluteFill>
-  );
-};
-
-export const calculateMetadata = async () => {
-  const res = await fetch("/api/duration");
-  const { duration } = await res.json();
-  return { durationInFrames: duration };
-};
-CODEX_LAZYPACK_71B1552DC9701EBA432ED22E773EC73602D81344
-
-# remotion-to-hyperframes/scripts/tests/fixtures/clean.tsx
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/tests/fixtures/clean.tsx")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/tests/fixtures/clean.tsx" <<'CODEX_LAZYPACK_C29B9249BC6AF72BB4CE4124403F14F9194A1DAB'
-import React, { useEffect } from "react";
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  AbsoluteFill,
-  interpolate,
-  spring,
-  Sequence,
-  staticFile,
-  Audio,
-  Img,
-} from "remotion";
-
-// Mount-only useEffect with empty deps + a later expression containing a
-// non-empty array — regression coverage for the over-match Miguel reported:
-// the earlier regex spanned past `[]` and matched `[frame]` from `pick(...)`,
-// falsely flagging this clean fixture as having a blocker.
-function pick<T>(_key: string, items: T[]): T {
-  return items[0];
-}
-
-const TitleCard: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  useEffect(() => {
-    console.log("mounted");
-  }, []);
-  const _picked = pick("x", [frame]);
-  const opacity = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
-  const scale = spring({ frame, fps, config: { damping: 12 } });
-  return (
-    <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
-      <div style={{ fontSize: 72, opacity, transform: `scale(${scale})` }}>Hello</div>
-      <Img src={staticFile("logo.png")} />
-    </AbsoluteFill>
-  );
-};
-
-export const MyComposition: React.FC = () => (
-  <AbsoluteFill>
-    <Sequence from={0} durationInFrames={90}>
-      <TitleCard />
-    </Sequence>
-    <Audio src={staticFile("music.mp3")} volume={0.5} />
-  </AbsoluteFill>
-);
-CODEX_LAZYPACK_C29B9249BC6AF72BB4CE4124403F14F9194A1DAB
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_RENDER_DIFF_SH_9181783589
+chmod +x "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/render_diff.sh"
 
 # remotion-to-hyperframes/scripts/tests/smoke.sh
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/tests/smoke.sh")"
-cat > "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/tests/smoke.sh" <<'CODEX_LAZYPACK_CDCF30DD84B80876F8E9257C9FA4A27660DF5EE0'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/tests/smoke.sh")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/tests/smoke.sh" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_TESTS_SMOKE_SH_0A00C7B54D'
 #!/usr/bin/env bash
 # smoke.sh — exercise the eval harness scripts against synthetic inputs.
 #
@@ -15671,14 +15569,122 @@ echo "    blocker.tsx → $BLOCKERS blockers detected (correctly refused)"
 
 echo
 echo "✅ smoke tests passed"
-CODEX_LAZYPACK_CDCF30DD84B80876F8E9257C9FA4A27660DF5EE0
-chmod +x "{{CODEX_HOME}}/skills/remotion-to-hyperframes/scripts/tests/smoke.sh"
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_TESTS_SMOKE_SH_0A00C7B54D
+chmod +x "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/tests/smoke.sh"
+
+# remotion-to-hyperframes/scripts/tests/fixtures/blocker.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/tests/fixtures/blocker.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/tests/fixtures/blocker.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_TESTS_FIXTURES_BLOCKER_TSX_45CC2CB436'
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import { useCurrentFrame, AbsoluteFill, delayRender, continueRender } from "remotion";
+import { Button } from "@mui/material";
+
+// Custom hook in `export const useFoo = ...` form — earlier custom-hook
+// regex anchored to `^\s*(?:function|const|let)` and missed the `export`
+// prefix. This covers the regression.
+export const useFadeMixed = (n: number) => {
+  const f = useCurrentFrame();
+  return f / n;
+};
+
+export const BadComposition: React.FC = () => {
+  const frame = useCurrentFrame();
+  const [data, setData] = useState<string | null>(null);
+  const [handle] = useState(() => delayRender());
+
+  // Multi-line useEffect body with commas inside (fillRect args) — regression
+  // coverage for r2hf/use-effect-deps. An earlier regex `[^,]+` would stop at
+  // the first comma inside the body and miss the deps array entirely.
+  useEffect(() => {
+    fetch("/api/data")
+      .then((r) => r.json())
+      .then((d) => {
+        const ctx = document.createElement("canvas").getContext("2d");
+        ctx?.fillRect(0, 0, 100, 100);
+        setData(d.text);
+        continueRender(handle);
+      });
+  }, [handle]);
+
+  // Expression-bodied useEffect — the form `useEffect(() => fetch(...), [deps])`
+  // has no closing `}`, which an earlier regex anchored on. This and the
+  // useLayoutEffect below cover the false-negative cases Miguel surfaced.
+  useEffect(() => fetch("/api/heartbeat"), [frame]);
+  useLayoutEffect(() => (document.title = `frame ${frame}`), [frame]);
+
+  return (
+    <AbsoluteFill>
+      <Button>{data ?? "loading"}</Button>
+      <span>{frame}</span>
+    </AbsoluteFill>
+  );
+};
+
+export const calculateMetadata = async () => {
+  const res = await fetch("/api/duration");
+  const { duration } = await res.json();
+  return { durationInFrames: duration };
+};
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_TESTS_FIXTURES_BLOCKER_TSX_45CC2CB436
+
+# remotion-to-hyperframes/scripts/tests/fixtures/clean.tsx
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/tests/fixtures/clean.tsx")"
+cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/scripts/tests/fixtures/clean.tsx" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_TESTS_FIXTURES_CLEAN_TSX_2B4859AEFA'
+import React, { useEffect } from "react";
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  AbsoluteFill,
+  interpolate,
+  spring,
+  Sequence,
+  staticFile,
+  Audio,
+  Img,
+} from "remotion";
+
+// Mount-only useEffect with empty deps + a later expression containing a
+// non-empty array — regression coverage for the over-match Miguel reported:
+// the earlier regex spanned past `[]` and matched `[frame]` from `pick(...)`,
+// falsely flagging this clean fixture as having a blocker.
+function pick<T>(_key: string, items: T[]): T {
+  return items[0];
+}
+
+const TitleCard: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  useEffect(() => {
+    console.log("mounted");
+  }, []);
+  const _picked = pick("x", [frame]);
+  const opacity = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
+  const scale = spring({ frame, fps, config: { damping: 12 } });
+  return (
+    <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+      <div style={{ fontSize: 72, opacity, transform: `scale(${scale})` }}>Hello</div>
+      <Img src={staticFile("logo.png")} />
+    </AbsoluteFill>
+  );
+};
+
+export const MyComposition: React.FC = () => (
+  <AbsoluteFill>
+    <Sequence from={0} durationInFrames={90}>
+      <TitleCard />
+    </Sequence>
+    <Audio src={staticFile("music.mp3")} volume={0.5} />
+  </AbsoluteFill>
+);
+AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SCRIPTS_TESTS_FIXTURES_CLEAN_TSX_2B4859AEFA
+
+test -f "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/SKILL.md" && echo "remotion-to-hyperframes installed for Codex, Claude, and AntiGravity"
 
 # ---- tailwind ----
-mkdir -p "{{CODEX_HOME}}/skills/tailwind"
+mkdir -p "{{SYNC_ROOT}}/skills/tailwind"
 # tailwind/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/tailwind/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/tailwind/SKILL.md" <<'CODEX_LAZYPACK_9AA5358C8CB5181DFFC9DBD07CFA55A051783CFE'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/tailwind/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/tailwind/SKILL.md" <<'AGENT_LAZYPACK_TAILWIND_SKILL_MD_0E95F5A366'
 ---
 name: tailwind
 description: Tailwind CSS v4.2 browser-runtime patterns for HyperFrames compositions. Use when scaffolding or editing projects created with `hyperframes init --tailwind`, writing Tailwind utility classes in composition HTML, adding CSS-first Tailwind v4 theme tokens, debugging v3 vs v4 syntax, or deciding when to compile Tailwind to CSS instead of using the browser runtime.
@@ -15827,13 +15833,15 @@ The validation path should show no missing-style flashes on frame 0. If styles a
 - Tailwind CSS official v4 installation, upgrade, and compatibility docs: https://tailwindcss.com/docs
 - Tailwind CSS v4 release notes: https://tailwindcss.com/blog/tailwindcss-v4
 - Community Tailwind skills were reviewed for v4 gotchas and skill shape, but this skill keeps the durable contract in-repo and HyperFrames-specific.
-CODEX_LAZYPACK_9AA5358C8CB5181DFFC9DBD07CFA55A051783CFE
+AGENT_LAZYPACK_TAILWIND_SKILL_MD_0E95F5A366
+
+test -f "{{SYNC_ROOT}}/skills/tailwind/SKILL.md" && echo "tailwind installed for Codex, Claude, and AntiGravity"
 
 # ---- three ----
-mkdir -p "{{CODEX_HOME}}/skills/three"
+mkdir -p "{{SYNC_ROOT}}/skills/three"
 # three/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/three/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/three/SKILL.md" <<'CODEX_LAZYPACK_14531BDA763CC85F6981519F8288502F6FD31480'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/three/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/three/SKILL.md" <<'AGENT_LAZYPACK_THREE_SKILL_MD_0E95F5A366'
 ---
 name: three
 description: Three.js and WebGL adapter patterns for HyperFrames. Use when creating deterministic Three.js scenes, WebGL canvas layers, AnimationMixer timelines, camera motion, shader-driven visuals, or canvas renders that respond to HyperFrames hf-seek events.
@@ -15940,13 +15948,15 @@ npx hyperframes validate
 - HyperFrames adapter source: `packages/core/src/runtime/adapters/three.ts`.
 - Three.js `WebGLRenderer` docs: https://threejs.org/docs/pages/WebGLRenderer.html
 - Three.js `AnimationMixer.setTime()` docs: https://threejs.org/docs/pages/AnimationMixer.html
-CODEX_LAZYPACK_14531BDA763CC85F6981519F8288502F6FD31480
+AGENT_LAZYPACK_THREE_SKILL_MD_0E95F5A366
+
+test -f "{{SYNC_ROOT}}/skills/three/SKILL.md" && echo "three installed for Codex, Claude, and AntiGravity"
 
 # ---- typegpu ----
-mkdir -p "{{CODEX_HOME}}/skills/typegpu"
+mkdir -p "{{SYNC_ROOT}}/skills/typegpu"
 # typegpu/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/typegpu/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/typegpu/SKILL.md" <<'CODEX_LAZYPACK_C12676BBDDC4A0E75FEAB0B8BC11E932FD8A2093'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/typegpu/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/typegpu/SKILL.md" <<'AGENT_LAZYPACK_TYPEGPU_SKILL_MD_0E95F5A366'
 ---
 name: typegpu
 description: TypeGPU and raw WebGPU adapter patterns for HyperFrames. Use when creating GPU-rendered compositions with TypeGPU, raw WebGPU, WGSL fragment shaders, compute pipelines, liquid glass effects, particle systems, or any canvas layer driven by navigator.gpu that responds to HyperFrames hf-seek events.
@@ -16121,13 +16131,15 @@ Use this to define inside/ring/outside zones for glass effects. Negative values 
 - No `requestAnimationFrame` for the render loop — render only in response to `hf-seek`.
 - No `performance.now()` for animation time — read `window.__hfTypegpuTime` or `e.detail.time`.
 - After GPU submit, call `await device.queue.onSubmittedWorkDone()` for render-mode frame capture.
-CODEX_LAZYPACK_C12676BBDDC4A0E75FEAB0B8BC11E932FD8A2093
+AGENT_LAZYPACK_TYPEGPU_SKILL_MD_0E95F5A366
+
+test -f "{{SYNC_ROOT}}/skills/typegpu/SKILL.md" && echo "typegpu installed for Codex, Claude, and AntiGravity"
 
 # ---- waapi ----
-mkdir -p "{{CODEX_HOME}}/skills/waapi"
+mkdir -p "{{SYNC_ROOT}}/skills/waapi"
 # waapi/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/waapi/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/waapi/SKILL.md" <<'CODEX_LAZYPACK_D2FD7415C8941C4E164EFE1EDDF2C141994FD922'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/waapi/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/waapi/SKILL.md" <<'AGENT_LAZYPACK_WAAPI_SKILL_MD_0E95F5A366'
 ---
 name: waapi
 description: Web Animations API adapter patterns for HyperFrames. Use when authoring element.animate() motion, Animation currentTime seeking, document.getAnimations(), KeyframeEffect timing, fill modes, or native browser animations that must render deterministically in HyperFrames.
@@ -16222,13 +16234,15 @@ npx hyperframes validate
 - HyperFrames adapter source: `packages/core/src/runtime/adapters/waapi.ts`.
 - MDN Web Animations API guide: https://developer.mozilla.org/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API
 - MDN `Animation.currentTime`: https://developer.mozilla.org/en-US/docs/Web/API/Animation/currentTime
-CODEX_LAZYPACK_D2FD7415C8941C4E164EFE1EDDF2C141994FD922
+AGENT_LAZYPACK_WAAPI_SKILL_MD_0E95F5A366
+
+test -f "{{SYNC_ROOT}}/skills/waapi/SKILL.md" && echo "waapi installed for Codex, Claude, and AntiGravity"
 
 # ---- website-to-hyperframes ----
-mkdir -p "{{CODEX_HOME}}/skills/website-to-hyperframes"
+mkdir -p "{{SYNC_ROOT}}/skills/website-to-hyperframes"
 # website-to-hyperframes/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/SKILL.md" <<'CODEX_LAZYPACK_89B449AE9AD88E34F9295B7DC0F574E9A8A11937'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/SKILL.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_SKILL_MD_0E95F5A366'
 ---
 name: website-to-hyperframes
 description: |
@@ -16369,11 +16383,11 @@ Beat count is not in this table intentionally — it should come from the storyb
 | [step-6-validate.md](references/step-6-validate.md)                                | Step 6 — lint, validate, snapshots (scaled to video length), preview                                                                           |
 | [techniques.md](..hyperframes/references/techniques.md)                           | Steps 3 & 5 — 13 primitive animation techniques with code patterns (adapt, don't copy-paste)                                                   |
 | [html-in-canvas-patterns.md](..hyperframes/references/html-in-canvas-patterns.md) | Step 5 — complete code patterns for HTML-in-Canvas effects (lives in the hyperframes skill)                                                    |
-CODEX_LAZYPACK_89B449AE9AD88E34F9295B7DC0F574E9A8A11937
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_SKILL_MD_0E95F5A366
 
 # website-to-hyperframes/assets/sfx/CREDITS.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/CREDITS.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/CREDITS.md" <<'CODEX_LAZYPACK_F0A0C5C49F6FDC5488F2C611D9E33617C3C85221'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/CREDITS.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/CREDITS.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_CREDITS_MD_664D946191'
 # SFX Credits
 
 All sound effects in this directory are sourced from [Pixabay](https://pixabay.com/sound-effects/) and used under the [Pixabay Content License](https://pixabay.com/service/license-summary/).
@@ -16409,12 +16423,15 @@ All files are distributed under the [Pixabay Content License](https://pixabay.co
 - Redistribution as part of derivative works (such as videos rendered with HyperFrames)
 
 without any attribution requirement.
-CODEX_LAZYPACK_F0A0C5C49F6FDC5488F2C611D9E33617C3C85221
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_CREDITS_MD_664D946191
 
 # website-to-hyperframes/assets/sfx/chime.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/chime.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/chime.mp3" <<'CODEX_LAZYPACK_CB572BAC73640F2D86057E149178087ADEDAF33E'
-SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjEwMAAAAAAAAAAAAAAA//tUwAAAAAAAAAAA
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/chime.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/chime.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_CHIME_MP3_4A2D812B06'
+import base64
+from pathlib import Path
+import sys
+payload = """SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjEwMAAAAAAAAAAAAAAA//tUwAAAAAAAAAAA
 AAAAAAAAAAAAWGluZwAAAA8AAABqAABqgAAJDA8RExYYGx0gIiQnKSwuNTg7PkFERklLTVBSVVhb
 XWBkZ2psb3Fzdnh7fX+ChIaJjZCSlZeZnJ6ho6Woqq2vsrS5u73AwsTHyczO0NLV19rc3uPl5+ns
 7vDy9Pb4+vz9/v8AAAAATGF2YzYyLjI4AAAAAAAAAAAAAAAAJAYAAAAAAAAAaoCAXQ33AAAAAAAA
@@ -16893,13 +16910,17 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//sUxOcBQlRjIagBR8Ab
 i2LUEBT6qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//sUxNoDwAAB/gAAACAAADSAAAAEqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqqq
-CODEX_LAZYPACK_CB572BAC73640F2D86057E149178087ADEDAF33E
+qqqqqqqq"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_CHIME_MP3_4A2D812B06
 
 # website-to-hyperframes/assets/sfx/click-soft.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/click-soft.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/click-soft.mp3" <<'CODEX_LAZYPACK_EB5DCBCE726966EC63896B3A6A27F4EE1D6D6517'
-//vQZAAABzViF40x4ABwqHMhpLAAIPGWyNnfAAIippZDLXAAAQCYEwJgfEcnr168wEgSDBZ13/v/
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/click-soft.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/click-soft.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_CLICK_SOFT_MP3_21F8D4F05C'
+import base64
+from pathlib import Path
+import sys
+payload = """//vQZAAABzViF40x4ABwqHMhpLAAIPGWyNnfAAIippZDLXAAAQCYEwJgfEcnr168wEgSDBZ13/v/
 DT5pk7J2XMuBbCcE4OhQTKct4mgagNQJoLgQg6GSGchoGgaBBBbBNCEKi1Pe92M/ydiaBqA1AuBc
 HSnLeTsTQTQQwTQTQTQhCwc4RwHIEgHAsH+LeEfCRgLABAAQAYB+MJKx6yFk4JwPQLYJoGoEMLA1
 kEFwIQXBQPMsavNA0B6B6BbBNBNAjgKgAVgAcAFgYyTpAegsCLBSAZAkAhguBCDoenOQQeghBcDo
@@ -17104,13 +17125,17 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-VVVVVVVVVVVVVVVVVVVVVVU=
-CODEX_LAZYPACK_EB5DCBCE726966EC63896B3A6A27F4EE1D6D6517
+VVVVVVVVVVVVVVVVVVVVVVU="""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_CLICK_SOFT_MP3_21F8D4F05C
 
 # website-to-hyperframes/assets/sfx/click.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/click.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/click.mp3" <<'CODEX_LAZYPACK_792D7C06E188CC02F11366F1BF947113A1F3242D'
-//vQZAAABzViF40x4ABwqHMhpLAAIPGWyNnfAAIippZDLXAAAQCYEwJgfEcnr168wEgSDBZ13/v/
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/click.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/click.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_CLICK_MP3_A2B90BB037'
+import base64
+from pathlib import Path
+import sys
+payload = """//vQZAAABzViF40x4ABwqHMhpLAAIPGWyNnfAAIippZDLXAAAQCYEwJgfEcnr168wEgSDBZ13/v/
 DT5pk7J2XMuBbCcE4OhQTKct4mgagNQJoLgQg6GSGchoGgaBBBbBNCEKi1Pe92M/ydiaBqA1AuBc
 HSnLeTsTQTQQwTQTQTQhCwc4RwHIEgHAsH+LeEfCRgLABAAQAYB+MJKx6yFk4JwPQLYJoGoEMLA1
 kEFwIQXBQPMsavNA0B6B6BbBNBNAjgKgAVgAcAFgYyTpAegsCLBSAZAkAhguBCDoenOQQeghBcDo
@@ -17315,13 +17340,17 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-VVVVVVVVVVVVVVVVVVVVVVU=
-CODEX_LAZYPACK_792D7C06E188CC02F11366F1BF947113A1F3242D
+VVVVVVVVVVVVVVVVVVVVVVU="""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_CLICK_MP3_A2B90BB037
 
 # website-to-hyperframes/assets/sfx/error.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/error.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/error.mp3" <<'CODEX_LAZYPACK_C281E0A118543825C3ACD4B96D72C6C363E57670'
-//vQZAAP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVV
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/error.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/error.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_ERROR_MP3_00F7836AE3'
+import base64
+from pathlib import Path
+import sys
+payload = """//vQZAAP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -18230,13 +18259,17 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-VVVVVVVVVVVVVVVVVVU=
-CODEX_LAZYPACK_C281E0A118543825C3ACD4B96D72C6C363E57670
+VVVVVVVVVVVVVVVVVVU="""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_ERROR_MP3_00F7836AE3
 
 # website-to-hyperframes/assets/sfx/glitch-1.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/glitch-1.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/glitch-1.mp3" <<'CODEX_LAZYPACK_977C4A98CC2823FAD81DDCD3B3A6C7C262E6CE1D'
-//vQZAAN9xd+uAEhYIIAAA0gAAABJ0n+5iex6EAAADSAAAAEHAuJ4LCZq6LKn9nKcSwGIvKgNDxg
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/glitch-1.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/glitch-1.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_GLITCH_1_MP3_EC2DBA9CE3'
+import base64
+from pathlib import Path
+import sys
+payload = """//vQZAAN9xd+uAEhYIIAAA0gAAABJ0n+5iex6EAAADSAAAAEHAuJ4LCZq6LKn9nKcSwGIvKgNDxg
 wPF79G4+scHjZmvXtMiGbuNn5xFAoJaNYZk9+/wiGW2zQllI084QwblurQgEwwEg8OCxQ7Xr7OSs
 ddJa4mJyfY4PPYPDtVEvKhYbEtHROE4BzY8YOBIdjhM32zySoIhIJic+EgzfOGT+A8bjuxW6Qwqk
 PKN2iJaCEg+WM/TiGDcnv3XmBIPNXnb6ypIJiwkKTNCEiKlHG7OHb9GHICQeMHCw4RrC+I7QkHnY
@@ -19717,13 +19750,17 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqqqqqqqqg==
-CODEX_LAZYPACK_977C4A98CC2823FAD81DDCD3B3A6C7C262E6CE1D
+qqqqqqqqqqqqqg=="""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_GLITCH_1_MP3_EC2DBA9CE3
 
 # website-to-hyperframes/assets/sfx/glitch-2.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/glitch-2.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/glitch-2.mp3" <<'CODEX_LAZYPACK_63483525435282F580833A91651C41DE80E9943B'
-//vUZAAABk5t1YU9gABlpzo5oKQAI84Rc9msAAmcnatTHrAADUDgVCnNM0zTLeTsXAeghBOCcE4J
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/glitch-2.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/glitch-2.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_GLITCH_2_MP3_B73F5A0DA7'
+import base64
+from pathlib import Path
+import sys
+payload = """//vUZAAABk5t1YU9gABlpzo5oKQAI84Rc9msAAmcnatTHrAADUDgVCnNM0zTLeTsXAeghBOCcE4J
 wTguAEwJgTA+DcSyefr3KdjCwwJAkA3BuJZm/hwIANAAwAwAwAwDgTEcn+2/7CxY5CZg0EQmHlOm
 ZpLZLEMCYExHV39YYHjm4YA3EcnvsHBgYHh+/ixYsWLDASyefv4sODBYvXr17/0YpdeZiWDcG4lm
 b+trzMzMzNe/SWzszMz9fecpSna2vMDBY5SlOmZpSnTiwzP/pTtxYZmZ/fFizjsGgiGDnTNFhPM1
@@ -21690,13 +21727,17 @@ qdlT/P9LrW6tLTU1NTWtyl/X9tVaWls6po1GpTGYzGZbS0uPKsMv6/sOy2lpaXtWlpcfyyyq0tLS
 T5Di3E6LaIaQkhJooanS2lxfiugA1DUNOlDXtbf/2hPnz17WtavVa9tV69rrFrVrWusWfPtWhRre
 sF6+fPnz61v7Qnz59a1rfFrW/rW1rWt/7VrXWIT58+e1rWsF69evo1rWta1viz628wXu6vXtde1q
 //+ta2ta1t///+ta1rvNYL0FFdBRX2/4oLVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-VVVVVVVVVVVV
-CODEX_LAZYPACK_63483525435282F580833A91651C41DE80E9943B
+VVVVVVVVVVVV"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_GLITCH_2_MP3_B73F5A0DA7
 
 # website-to-hyperframes/assets/sfx/glitch-3.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/glitch-3.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/glitch-3.mp3" <<'CODEX_LAZYPACK_332CC4223C4666AF3BD247AEBEA30B8AFF627F4B'
-//vURAAP9KpuOQAgNIKdDnZgJSbOU/nU8AMk3oJOuR4AYRtBBzGMY1+MfkBNEGIQne+DCBAgTJ3s
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/glitch-3.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/glitch-3.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_GLITCH_3_MP3_F2AED5B754'
+import base64
+from pathlib import Path
+import sys
+payload = """//vURAAP9KpuOQAgNIKdDnZgJSbOU/nU8AMk3oJOuR4AYRtBBzGMY1+MfkBNEGIQne+DCBAgTJ3s
 GECBALJp6xhAgQAZMnbGECBAmTJ20ECBALJ32ggQIE77GECCEb4gwgQQjYIEAAEEEMYgQIAAABCE
 MQIAAAAAIIIQYQAAAAAAIRRhAEAAAIEEPBAgQIEI7REREZ4iIiO9oREZ7tMgQiM9kyZAgQQj2eTI
 AAgQjHuyBAhAB0MAAAAegXaQIFSeGbm5TE/9goSRUZJ1DFKk5G0ZPj5IjtHBJhYfQT81M+zr3NJ2
@@ -23434,13 +23475,17 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqqq
-CODEX_LAZYPACK_332CC4223C4666AF3BD247AEBEA30B8AFF627F4B
+qqqqqqqq"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_GLITCH_3_MP3_F2AED5B754
 
 # website-to-hyperframes/assets/sfx/impact-bass-1.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/impact-bass-1.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/impact-bass-1.mp3" <<'CODEX_LAZYPACK_F108A3410F33BC84990E51013ACB222D0EEB48CA'
-//vQZAAABuBgsL1h4AJxCWMwrCwAZv2PFZm9gAGgppnbNUAAAIAAAAK4kyuddcBFuDEQMAoebHGo
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/impact-bass-1.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/impact-bass-1.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_IMPACT_BASS_1_MP3_945D801608'
+import base64
+from pathlib import Path
+import sys
+payload = """//vQZAAABuBgsL1h4AJxCWMwrCwAZv2PFZm9gAGgppnbNUAAAIAAAAK4kyuddcBFuDEQMAoebHGo
 S3FppFtPkjkTicUDJEhq9D2dsNNR2YHkqfZ2w02k/DoYQ4wHcK8zAAOAZl7RAtgmhCGgv4agcCwn
 zTOtzprTGh6rXA3AcgxC7gEAJxNHOabkch0NY9BLHBvV7PvGYmob/bAhjIpx6EYpzTZh8ApA6DDA
 CAHBAF/J2q1IoIJoHREhv398Ufx94pr+8SVXs7UWwegsCLCOCYNCfOtngKyZ5Ehv7MCGMjeaB0RI
@@ -24627,13 +24672,17 @@ DRqDtExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqo=
-CODEX_LAZYPACK_F108A3410F33BC84990E51013ACB222D0EEB48CA
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqo="""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_IMPACT_BASS_1_MP3_945D801608
 
 # website-to-hyperframes/assets/sfx/impact-bass-2.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/impact-bass-2.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/impact-bass-2.mp3" <<'CODEX_LAZYPACK_C04B54AE6CAED1C1FE991C9D7331076E45314742'
-//vUZAAABlNTVIVhgAJboWqCpIwAX8mZOjntAAHrMyfLNtAAM5QEdBd530UwRURUSIRTTHVOu9ib
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/impact-bass-2.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/impact-bass-2.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_IMPACT_BASS_2_MP3_E5F6D2FCEA'
+import base64
+from pathlib import Path
+import sys
+payload = """//vUZAAABlNTVIVhgAJboWqCpIwAX8mZOjntAAHrMyfLNtAAM5QEdBd530UwRURUSIRTTHVOu9ib
 O2ds7YmAABACANAaA0BoDQRAPg3EcSxLEsSxLEsRBIEgSCYYGBgTBLEszMzMzMzMzJhgYGBgYGBg
 YGZmZmZmZmZmfmBgYLFixYsWH69evXr169esWLFixYsWLF69evXr169esWLFixYsWLF69evXr169
 esWLFixYsWOL169evXr176xYsWLFixY4vXr169e/e7jCxYAAAGHh4eHgAAAAAGHh4eHgAAAAAGHh
@@ -26088,13 +26137,17 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-VVVVVVVVVVVV
-CODEX_LAZYPACK_C04B54AE6CAED1C1FE991C9D7331076E45314742
+VVVVVVVVVVVV"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_IMPACT_BASS_2_MP3_E5F6D2FCEA
 
 # website-to-hyperframes/assets/sfx/key-press.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/key-press.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/key-press.mp3" <<'CODEX_LAZYPACK_ACABDD41CF56970B758A885EA2BEF4D706C2203A'
-SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjEwMAAAAAAAAAAAAAAA//tUwAAAAAAAAAAA
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/key-press.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/key-press.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_KEY_PRESS_MP3_7FD2FC5DF1'
+import base64
+from pathlib import Path
+import sys
+payload = """SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjEwMAAAAAAAAAAAAAAA//tUwAAAAAAAAAAA
 AAAAAAAAAAAAWGluZwAAAA8AAAASAAAPGAAsLCwsLDY2NjY2Njw8PDw8YmJiYmJidXV1dXWPj4+P
 j4+oqKioqLu7u7u7u8bGxsbGzc3Nzc3N09PT09PT2dnZ2dng4ODg4ODm5ubm5uzs7Ozs7PPz8/Pz
 +fn5+fn5//////8AAAAATGF2YzYyLjI4AAAAAAAAAAAAAAAAJAPAAAAAAAAADxi9EsS6AAAAAAAA
@@ -26162,12 +26215,13 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqq//sUxNoDwAABpAAAACAAADSAAAAEqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//sUxNoD
 wAABpAAAACAAADSAAAAEqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-CODEX_LAZYPACK_ACABDD41CF56970B758A885EA2BEF4D706C2203A
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_KEY_PRESS_MP3_7FD2FC5DF1
 
 # website-to-hyperframes/assets/sfx/manifest.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/manifest.json")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/manifest.json" <<'CODEX_LAZYPACK_EBC60CE1A21911DEFB2976F85568559164F96B80'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/manifest.json")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/manifest.json" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_MANIFEST_JSON_2FEFE38486'
 {
   "chime": {
     "file": "chime.mp3",
@@ -26265,12 +26319,15 @@ cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/manifest.json" <<
     "description": "This is a hard, metallic impact sound effect that works well for a sudden reveal or a punchy transition."
   }
 }
-CODEX_LAZYPACK_EBC60CE1A21911DEFB2976F85568559164F96B80
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_MANIFEST_JSON_2FEFE38486
 
 # website-to-hyperframes/assets/sfx/notification.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/notification.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/notification.mp3" <<'CODEX_LAZYPACK_BC73BF10610ADD7440FE2BD8DD448BD33A73FA41'
-//vQZAAP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVV
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/notification.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/notification.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_NOTIFICATION_MP3_D14B2F0629'
+import base64
+from pathlib import Path
+import sys
+payload = """//vQZAAP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -27648,13 +27705,17 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-CODEX_LAZYPACK_BC73BF10610ADD7440FE2BD8DD448BD33A73FA41
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_NOTIFICATION_MP3_D14B2F0629
 
 # website-to-hyperframes/assets/sfx/ping.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/ping.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/ping.mp3" <<'CODEX_LAZYPACK_3EE6CFFE702DBE6140CC9B42795A73D22510026D'
-//PkZAAUfdjQG2HmBIAAA0gAAAAACk7hdMRhoBasK8g5czTQ9RqBWKwAAAgQIECZMmTJkyZNMgQi
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/ping.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/ping.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_PING_MP3_429B29162F'
+import base64
+from pathlib import Path
+import sys
+payload = """//PkZAAUfdjQG2HmBIAAA0gAAAAACk7hdMRhoBasK8g5czTQ9RqBWKwAAAgQIECZMmTJkyZNMgQi
 IiIi7uyZO7tCIiIiIu7u7u7iIiIiITu7u7u4iIiIiLu7u7JpkIiIiIhO7u7u7iIiIiIu7u7u7iIg
 gQIEECZMmTJkyZNNCIiIiITu7u7vYiIiIjLu7u7vYiIiI8Xd3d3dxEREREXd3d3dxEREREJ2Hh4e
 GAAAAAAeHh4eGAAAAACYgpqKZlxiYGCqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFN
@@ -28117,13 +28178,17 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqqqqqqq
-CODEX_LAZYPACK_3EE6CFFE702DBE6140CC9B42795A73D22510026D
+qqqqqqqqqqqq"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_PING_MP3_429B29162F
 
 # website-to-hyperframes/assets/sfx/pop.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/pop.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/pop.mp3" <<'CODEX_LAZYPACK_5C78BD79F4C46F63891C1706A727FE5807A81912'
-//vURAAM5IMuSQsPMjKX6EjBYYZcUhSNGkzsxYqDouLJp6H5DBBd32VrvXeXXQHigAMhDcQshZpm
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/pop.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/pop.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_POP_MP3_E6D08D9CCD'
+import base64
+from pathlib import Path
+import sys
+payload = """//vURAAM5IMuSQsPMjKX6EjBYYZcUhSNGkzsxYqDouLJp6H5DBBd32VrvXeXXQHigAMhDcQshZpm
 mh6Hoeo1ArFYAAAAAAAAgBgMmTJkyZMmQIECBAgQIECZMmTJkyZNMgQiIiIhMmTJkyZMmmQIECBA
 gQIIE7uyd3doQAAAABh4eHh4AAAAABh4eHh4AAAAABh4eHh4AAAAABh4eHh4AAAAABh4eHh4AAAA
 AjDw8PHu4AACoGHUMFWZQzMu+n2IAAZBfNMdQcA4NxHEsQxHEgRCYJBgsOCQTDMzPzszMzM/XmB4
@@ -28527,13 +28592,17 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-VVVVVVVVVVVVVVVV
-CODEX_LAZYPACK_5C78BD79F4C46F63891C1706A727FE5807A81912
+VVVVVVVVVVVVVVVV"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_POP_MP3_E6D08D9CCD
 
 # website-to-hyperframes/assets/sfx/riser.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/riser.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/riser.mp3" <<'CODEX_LAZYPACK_1E6BB669149B97E1A51980841F80DA22A52878F5'
-//vUZAABdiE/kyuawCAkAKAAf94DD8BmOW/vJWBnggNh/vAEgAqh9KJGAVCemKcGOb1eatWadCZ8
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/riser.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/riser.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_RISER_MP3_06D9AF8841'
+import base64
+from pathlib import Path
+import sys
+payload = """//vUZAABdiE/kyuawCAkAKAAf94DD8BmOW/vJWBnggNh/vAEgAqh9KJGAVCemKcGOb1eatWadCZ8
 +fZnyx0kcHGxRqQaDGYxkIZAGcZjCYQlkyyZactOWnLjloC5BeBAIgEQCIBEAiKAGGWnLTlyy5Zc
 suWXLUHSITEUEVIqRUipFSIoIPorororororororphpELsXYuxdi7F2LsYgu9d7O2ds7Z2qdU6x1
 BFSKkVIqRUipFSLEVOsdd6713s7Z2ztr7XHIchyHIchyHIchr7luW5bluW5a72JsQZwzhnDOGcM4
@@ -29147,7 +29216,7 @@ PeepdW1UMxqLJRL5qmKLOBBsnhz7wxM5Al4jomy8XmKhE9OYQR8sRxZrfzPRLQi633RzfCk5ps1t
 iDbM12TB1QEAhJpzGNLEcEAxmxAjSRMmuOiSP8FMIUMIREIM0gwMHJbGCAIWLhZmuVQGMOceDuAK
 TLI2DcSjVALw8LC9cir7A2gJ6SBszfTFov0WldSWTkSjhqxpQkjfdW2JL7SqqGekI6KjhedK6w7V
 kwoks5MoykcLaITrmwv3Ob37ncXWq7e9VirX2+t+v5RCx9lbD1uibvMVHMYv6Gtve+Oe/16THbV/
-W9Bodrdfu1Exd6F07fqsnWmgAAAVAoupxez5t+bZjqlxkIRph6OBhgMRjiAI_REDACTED_KEYLIKE_FRAGMENT
+W9Bodrdfu1Exd6F07fqsnWmgAAAVAoupxez5t+bZjqlxkIRph6OBhgMRjiAIzaKKoAXlkUJoUDkQ
 svWw4SJkoJWp4WvpPPW0hj6Qq8VqrnbBpc7sv/seC1IQicRDEczAqhGtfDkjLSqrWpTGh7CeMHN2
 xlAgG7xX4SzlYu6F0proykVaGFDBdhVfUMPYnlpFQ2+qLvR3+NmPMgRXgS9TlDORXb3l7VLr8d7o
 OmGBpxEwt5ZV7YumCKky9Z95Ktxs4irahyYXa7e59+k5ACpuQ6QQQQW3Ttfg3swBT2SChpdAD00w
@@ -34164,13 +34233,17 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-CODEX_LAZYPACK_1E6BB669149B97E1A51980841F80DA22A52878F5
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_RISER_MP3_06D9AF8841
 
 # website-to-hyperframes/assets/sfx/sparkle.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/sparkle.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/sparkle.mp3" <<'CODEX_LAZYPACK_83D8B163EACC9B066B07E1E6BD8709C2801E6AF6'
-//vQZAAABuBfVD0/AAJwKdowoyQAIRF1VRmdgAJCqOnTHzAAEAAAAC4hhyFsJwXA6HBTmmJoLgQg
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/sparkle.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/sparkle.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_SPARKLE_MP3_B90C1F7C26'
+import base64
+from pathlib import Path
+import sys
+payload = """//vQZAAABuBfVD0/AAJwKdowoyQAIRF1VRmdgAJCqOnTHzAAEAAAAC4hhyFsJwXA6HBTmmJoLgQg
 uBoGgTgWwHIWbLboPqbtfh+ncNIcwALQLUmWVrvZ25bltcch/IxSc/8Kenzp6enp9RhrbD13rvXe
 xN+5prCY6g7E3ft/Nq3lszQg0IMxjIQyEMQCzCDi6GXz8QYYqRdjXJZykjEssbp4bdty12M4a47k
 ORiksc/Dn16eNw2/7kOQ1x3H8jFJhvDDn/hhSWKenzzzzz/+6lD+P4/kOSyx///6w5+GH/+sKlI/
@@ -35181,13 +35254,17 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-CODEX_LAZYPACK_83D8B163EACC9B066B07E1E6BD8709C2801E6AF6
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_SPARKLE_MP3_B90C1F7C26
 
 # website-to-hyperframes/assets/sfx/typing.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/typing.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/typing.mp3" <<'CODEX_LAZYPACK_E28FD0A766B4DEFE11DA66EF377618D492177570'
-SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAA
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/typing.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/typing.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_TYPING_MP3_27B3D54521'
+import base64
+from pathlib import Path
+import sys
+payload = """SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAA7AABotwACBwcNDREUFBgYHB8fIyMm
 KiotLTAwNDg4Ozs+RERISExQUFVVWV9fZmZra290dHh4fH9/hYWJjIyQkJWVm6GhpaWqrq6ysra6
 ur6+xMfHy8vR0dXZ2d3d5Ozs8PDz+Pj+/v8AAAAATGF2YzYyLjI4AAAAAAAAAAAAAAAAJATaAAAA
@@ -35658,13 +35735,17 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqr/+zBk5g/yKx3H7zEgAAAAD/DgAAEAAAGkAAAAIAAANIAAAASq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
-qqqqqqo=
-CODEX_LAZYPACK_E28FD0A766B4DEFE11DA66EF377618D492177570
+qqqqqqo="""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_TYPING_MP3_27B3D54521
 
 # website-to-hyperframes/assets/sfx/whoosh-cinematic.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/whoosh-cinematic.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/whoosh-cinematic.mp3" <<'CODEX_LAZYPACK_9DD5E11D80DA87E026D059273D922134C8C93353'
-//vURAACxGBfOhnsMvCHJgaiYekiVSF8/wwweUHFjZrNvLAxAAJScVplnYXBkimmdw/FIrDQMSev
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/whoosh-cinematic.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/whoosh-cinematic.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_WHOOSH_CINEMATIC_MP3_DC449FDD04'
+import base64
+from pathlib import Path
+import sys
+payload = """//vURAACxGBfOhnsMvCHJgaiYekiVSF8/wwweUHFjZrNvLAxAAJScVplnYXBkimmdw/FIrDQMSev
 FAQATEQ0Et5kS7LHKbYkOr15SPQMBOb7jjdmSY2vXyvaPMdMwhJO/8dsspBsUT7Qen43vrIO2QTO
 CH0sLa9e45iH/vfsd8bEzMYhKB+5/45mbCEk6QvUCdQ97dtEOT0wndsQlNnIOmxB09MC9e4spROQ
 Ir/795QGsWMyh5gBKgPVO09nJ+ONUChggBAUOSBANk80aOaNGjQIEEFECCEEc5znOc24IECCCjEE
@@ -38776,13 +38857,17 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-CODEX_LAZYPACK_9DD5E11D80DA87E026D059273D922134C8C93353
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_WHOOSH_CINEMATIC_MP3_DC449FDD04
 
 # website-to-hyperframes/assets/sfx/whoosh-short.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/whoosh-short.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/whoosh-short.mp3" <<'CODEX_LAZYPACK_AC938CD8D9A6D631B4936B58FCAD97033A3E532E'
-//vQZAAEpqVpLTAseCJui3VlPQeqZoWk2jWsgAGnrNwCkqAAEAAlFkbS1GTAXAUWEfozhaB/mQo1
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/whoosh-short.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/whoosh-short.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_WHOOSH_SHORT_MP3_933473B4F0'
+import base64
+from pathlib import Path
+import sys
+payload = """//vQZAAEpqVpLTAseCJui3VlPQeqZoWk2jWsgAGnrNwCkqAAEAAlFkbS1GTAXAUWEfozhaB/mQo1
 QtoQdB/rzCxKU3icitC7FgQ+JGZVEeJjljOhjxqGvHKbZNzoZ6Wgq5CTHLGXBTyazOyP63eKdeSJ
 vEJGeIGOA/1w1tTark0PwnaIXLE4s7BBixpo9MQWZYWHOJHeKdIG6axNyWHOkGFmcXOJq1bQYS5O
 Y2iSFzUjbCrGmj31vW6Q7TOE8SPAvjP/zS7YkzeMUhhY0IV7x/NGWEIUbyWSVqUqbONOS7+r4lgv
@@ -39104,13 +39189,17 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-CODEX_LAZYPACK_AC938CD8D9A6D631B4936B58FCAD97033A3E532E
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_WHOOSH_SHORT_MP3_933473B4F0
 
 # website-to-hyperframes/assets/sfx/whoosh.mp3
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/whoosh.mp3")"
-decode_base64 > "{{CODEX_HOME}}/skills/website-to-hyperframes/assets/sfx/whoosh.mp3" <<'CODEX_LAZYPACK_4E40C8C724118892C84E1CD1BEFF9FFAC0791632'
-//vQZAAEpqVpLTAseCJui3VlPQeqZoWk2jWsgAGnrNwCkqAAEAAlFkbS1GTAXAUWEfozhaB/mQo1
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/whoosh.mp3")"
+python3 - "{{SYNC_ROOT}}/skills/website-to-hyperframes/assets/sfx/whoosh.mp3" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_WHOOSH_MP3_35665093AC'
+import base64
+from pathlib import Path
+import sys
+payload = """//vQZAAEpqVpLTAseCJui3VlPQeqZoWk2jWsgAGnrNwCkqAAEAAlFkbS1GTAXAUWEfozhaB/mQo1
 QtoQdB/rzCxKU3icitC7FgQ+JGZVEeJjljOhjxqGvHKbZNzoZ6Wgq5CTHLGXBTyazOyP63eKdeSJ
 vEJGeIGOA/1w1tTark0PwnaIXLE4s7BBixpo9MQWZYWHOJHeKdIG6axNyWHOkGFmcXOJq1bQYS5O
 Y2iSFzUjbCrGmj31vW6Q7TOE8SPAvjP/zS7YkzeMUhhY0IV7x/NGWEIUbyWSVqUqbONOS7+r4lgv
@@ -39432,12 +39521,13 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-CODEX_LAZYPACK_4E40C8C724118892C84E1CD1BEFF9FFAC0791632
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"""
+Path(sys.argv[1]).write_bytes(base64.b64decode(payload))
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_ASSETS_SFX_WHOOSH_MP3_35665093AC
 
 # website-to-hyperframes/references/beat-builder-guide.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/references/beat-builder-guide.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/references/beat-builder-guide.md" <<'CODEX_LAZYPACK_B3C62D9E7E5E25C4D65AD748D2092CE19B104C8B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/beat-builder-guide.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/beat-builder-guide.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_BEAT_BUILDER_GUIDE_MD_3E05DE80FE'
 # Beat Builder Guide
 
 You are building ONE beat of a multi-beat video composition. This file tells you what to read, how to build, how to verify, and how to report back.
@@ -39701,11 +39791,11 @@ Do NOT default to `power2.out` on everything.
 | Drift           | `"none"`              | Parallax, Ken Burns, camera drift    |
 
 Staggered items: `power4.out` with `stagger: 0.08` to `0.15`.
-CODEX_LAZYPACK_B3C62D9E7E5E25C4D65AD748D2092CE19B104C8B
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_BEAT_BUILDER_GUIDE_MD_3E05DE80FE
 
 # website-to-hyperframes/references/capabilities.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/references/capabilities.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/references/capabilities.md" <<'CODEX_LAZYPACK_F567F39CB9A7ADA4F17F02794C323E5E72F9586D'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/capabilities.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/capabilities.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_CAPABILITIES_MD_0B2AE73D4B'
 # HyperFrames — Complete Capabilities Inventory
 
 Everything possible in HyperFrames as of today's workspace, synthesized from direct source reads of all 7 packages, 16 skills, and the full registry.
@@ -40419,11 +40509,11 @@ Control bridge actions: play, pause, seek, set-muted, set-playback-rate, enable-
 **Guides:** 4k-rendering, codex-design, common-mistakes, deploy, gsap-animation, hdr, html-in-canvas, hyperframes-vs-remotion, open-design, performance, prompting, remove-background, rendering, timeline-editing, troubleshooting, video-editor-cheatsheet, website-to-video, etc.
 
 **Packages:** cli.mdx, core.mdx, engine.mdx, player.mdx, producer.mdx, studio.mdx
-CODEX_LAZYPACK_F567F39CB9A7ADA4F17F02794C323E5E72F9586D
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_CAPABILITIES_MD_0B2AE73D4B
 
 # website-to-hyperframes/references/step-0-capture.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-0-capture.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-0-capture.md" <<'CODEX_LAZYPACK_DA716965DB1055FCC56A4C9C8E37FFE33D68BCB7'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-0-capture.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-0-capture.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_0_CAPTURE_MD_E3DE7E31B6'
 # Step 0: Capture
 
 The capture pipeline downloads the site and extracts structured data for the rest of the workflow to read. Step 0 is a single command plus a sanity check. **All analysis (reading files, viewing contact sheets, deriving brand voice, picking assets) happens in Steps 1–3, not here.**
@@ -40432,7 +40522,7 @@ The capture pipeline downloads the site and extracts structured data for the res
 
 No API keys required for the base capture. However, before running, ask the user:
 
-> "For the best results, it is recommended to set a Gemini API key — it gives me AI-powered descriptions of every captured image, which helps me choose the right assets for each scene. It costs about $0.001 per image. You can skip this if you want, but the video quality will be better with it. To set it up safely: store the key locally at `{{SECRETS_DIR}}/gemini_api_key` with file mode `600`, then export `GEMINI_API_KEY` from that file only for the capture command. You can get a free key at ai.google.dev."
+> "For the best results, it is recommended to set a Gemini API key — it gives me AI-powered descriptions of every captured image, which helps me choose the right assets for each scene. It costs about $0.001 per image. You can skip this if you want, but the video quality will be better with it. To set it up safely: store the key locally at `~/.codex/secrets/gemini_api_key` with file mode `600`, then export `GEMINI_API_KEY` from that file only for the capture command. You can get a free key at ai.google.dev."
 
 If the user provides the key or already has one set, proceed. If they skip it, proceed anyway — the capture works without it, but `asset-descriptions.md` will have DOM-context descriptions only (position, size, alt text) instead of AI vision descriptions.
 
@@ -40479,11 +40569,11 @@ Each downstream step reads only what it needs. Don't pre-fetch everything in Ste
 ## Gate
 
 Capture exits 0. Asset / screenshot / font counts non-zero. Proceed to Step 1.
-CODEX_LAZYPACK_DA716965DB1055FCC56A4C9C8E37FFE33D68BCB7
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_0_CAPTURE_MD_E3DE7E31B6
 
 # website-to-hyperframes/references/step-1-design.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-1-design.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-1-design.md" <<'CODEX_LAZYPACK_9EBACDFC3E71709FD4613B514A50E4DCEF164DD2'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-1-design.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-1-design.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_1_DESIGN_MD_2D4301520A'
 # Step 1: Write DESIGN.md (the brand-truth cheat sheet)
 
 DESIGN.md is a **brand-truth cheat sheet** — colors and fonts you'll **weave into your composed builds**. It is NOT a layout spec, not a moodboard, not a 400-line design system audit.
@@ -40817,11 +40907,11 @@ A build pass reading just your Quick Reference + Iteration Guide should be able 
 3. Know which 2-3 rules they cannot break without losing the brand
 
 That's the test. If they can answer those three questions from a 60–120 line doc, you've nailed it. If they need to read 400 lines of mood-board prose to find a color, you've buried the signal.
-CODEX_LAZYPACK_9EBACDFC3E71709FD4613B514A50E4DCEF164DD2
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_1_DESIGN_MD_2D4301520A
 
 # website-to-hyperframes/references/step-2-brief.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-2-brief.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-2-brief.md" <<'CODEX_LAZYPACK_9F7B15023C0BABF7450B66C3FDE86F1AB7AE304B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-2-brief.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-2-brief.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_2_BRIEF_MD_9A345FE67E'
 # Step 2: Strategy & Messaging
 
 **First, scan the Table of Contents in [capabilities.md](capabilities.md)** — the 24-row TOC tells you everything HyperFrames can do. You need this to tell users what's possible. Deep-dive specific sections only if a beat needs them.
@@ -41000,11 +41090,11 @@ Lock all of these before moving to Step 3. The first three are the strategic fra
 9. **Format** — landscape unless specified otherwise.
 
 **Do not ask the user to confirm what they already said.** If the prompt was "make a product demo for huly.io, show the kanban board, dark cinematic feel, full narration" — you already have type (demo), style (dark cinematic), specific requests (kanban board), and narration (full). Still need to derive or ask: the **message** ("the everything app for teams that hate context switches"), the **arc** (Demonstration), and the **audience** (small teams / fast-moving orgs). Proceed to Step 3 only when all 9 are locked.
-CODEX_LAZYPACK_9F7B15023C0BABF7450B66C3FDE86F1AB7AE304B
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_2_BRIEF_MD_9A345FE67E
 
 # website-to-hyperframes/references/step-3-storyboard.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-3-storyboard.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-3-storyboard.md" <<'CODEX_LAZYPACK_8FC4DCE63E3C8E6619C5ABC0A7FED5A1F46FBFBF'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-3-storyboard.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-3-storyboard.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_3_STORYBOARD_MD_21C4EE26B9'
 # Step 3: Storyboard + Script
 
 Marketing videos are made concept-first. **The order is: message → narrative arc → beats that serve the arc → which assets and techniques bring each beat to life.** Captured assets (SVG logos, brand illustrations, hero art, gradients) are first-class beat content alongside composed beats — many of them will carry their own beats. The constraint is only that you shouldn't _start_ from the asset inventory ("we have these screenshots, let's build a slideshow"). Start from the message, then weave in the right captured assets and the right composed elements per beat.
@@ -41577,11 +41667,11 @@ Summarize the plan clearly. Don't dump the full STORYBOARD.md — give the user 
 Both STORYBOARD.md and SCRIPT.md exist AND the user has explicitly approved the plan.
 
 **Autonomous mode exception:** if the user signaled autonomous mode in Step 2 ("surprise me" / "decide for me" / "just build it"), skip the approval wait. Present the storyboard summary inline as a heads-up and proceed straight to Step 4.
-CODEX_LAZYPACK_8FC4DCE63E3C8E6619C5ABC0A7FED5A1F46FBFBF
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_3_STORYBOARD_MD_21C4EE26B9
 
 # website-to-hyperframes/references/step-4-vo.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-4-vo.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-4-vo.md" <<'CODEX_LAZYPACK_87E176376F67EC0A972C9DACABB21820B3A388C9'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-4-vo.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-4-vo.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_4_VO_MD_431063CBBB'
 # Step 4: VO, Timing + Captions
 
 ## If Step 2 said "no narration"
@@ -41812,11 +41902,11 @@ If yes, captions are built as a separate composition (`compositions/captions.htm
 ## Save timing data for Step 5
 
 Record the final beat timings (start, duration) so Step 5 (Build) can use them when building `index.html`. The storyboard now has real timestamps — these become `data-start` and `data-duration` values on each scene slot when the root composition is assembled in Step 5.
-CODEX_LAZYPACK_87E176376F67EC0A972C9DACABB21820B3A388C9
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_4_VO_MD_431063CBBB
 
 # website-to-hyperframes/references/step-5-build.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-5-build.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-5-build.md" <<'CODEX_LAZYPACK_49E344924EAD4C46E9C18D27FDB69D2F1A5E363E'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-5-build.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-5-build.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_5_BUILD_MD_105D65CF35'
 # Step 5: Build Compositions
 
 **Captions rule — read before building anything:** Never create `compositions/captions.html` with an empty transcript (`const script = []`). If the VO/transcript step was skipped or failed, do not create a captions composition at all. An empty captions file silently does nothing and wastes a track slot. Only create it when `transcript.json` has real word timestamps.
@@ -42300,11 +42390,11 @@ These are defaults for most brand videos, not hard requirements:
 If any are missing, check the storyboard — if STORYBOARD.md deliberately delays brand reveal or omits the signature visual for a concept reason, that's fine. If the omission was unintentional, fix it (or ask the main agent / user before adding).
 
 Once every beat reads clean, move to Step 6 (Validate & Deliver) for lint, validate, snapshots, and visual review.
-CODEX_LAZYPACK_49E344924EAD4C46E9C18D27FDB69D2F1A5E363E
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_5_BUILD_MD_105D65CF35
 
 # website-to-hyperframes/references/step-6-validate.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-6-validate.md")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/references/step-6-validate.md" <<'CODEX_LAZYPACK_EED360F14C7CFE7977EBCBE5B039CD26EF728D7B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-6-validate.md")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-6-validate.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_6_VALIDATE_MD_63859B129E'
 # Step 6: Validate & Deliver
 
 This is the quality gate. Before the user sees anything, YOU verify that the video matches the storyboard, the creative direction from Step 2, and DESIGN.md. Deliver something you'd be proud to post with your name on it.
@@ -42646,11 +42736,11 @@ npx hyperframes render --output 01_Final_Output/<name>.mp4 --quality high --fps 
 | `--video-bitrate` | e.g. `10M`                                                                                 | Target bitrate (mutually exclusive with --crf)                                     |
 
 Tell the user what you're rendering and why: "Rendering at standard quality, 1080p landscape, 30fps — this gives good quality with reasonable render time. Want me to use high quality or 4K instead?"
-CODEX_LAZYPACK_EED360F14C7CFE7977EBCBE5B039CD26EF728D7B
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_6_VALIDATE_MD_63859B129E
 
 # website-to-hyperframes/scripts/w2h-verify.mjs
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/website-to-hyperframes/scripts/w2h-verify.mjs")"
-cat > "{{CODEX_HOME}}/skills/website-to-hyperframes/scripts/w2h-verify.mjs" <<'CODEX_LAZYPACK_D55F16D558434189B04C7F8D608539836025A160'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/scripts/w2h-verify.mjs")"
+cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/scripts/w2h-verify.mjs" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_SCRIPTS_W2H_VERIFY_MJS_C8B3E7D33D'
 #!/usr/bin/env node
 // w2h-verify.mjs — verification report for a website-to-hyperframes project.
 //
@@ -43410,24 +43500,11 @@ main().catch((e) => {
   console.error("w2h-verify script error:", e);
   process.exit(2);
 });
-CODEX_LAZYPACK_D55F16D558434189B04C7F8D608539836025A160
+AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_SCRIPTS_W2H_VERIFY_MJS_C8B3E7D33D
 
-echo "HyperFrames skills installed:"
-test -f "{{CODEX_HOME}}/skills/animejs/SKILL.md" && echo "- animejs"
-test -f "{{CODEX_HOME}}/skills/contribute-catalog/SKILL.md" && echo "- contribute-catalog"
-test -f "{{CODEX_HOME}}/skills/css-animations/SKILL.md" && echo "- css-animations"
-test -f "{{CODEX_HOME}}/skills/gsap/SKILL.md" && echo "- gsap"
-test -f "{{CODEX_HOME}}/skills/hyperframes/SKILL.md" && echo "- hyperframes"
-test -f "{{CODEX_HOME}}/skills/hyperframes-cli/SKILL.md" && echo "- hyperframes-cli"
-test -f "{{CODEX_HOME}}/skills/hyperframes-media/SKILL.md" && echo "- hyperframes-media"
-test -f "{{CODEX_HOME}}/skills/hyperframes-registry/SKILL.md" && echo "- hyperframes-registry"
-test -f "{{CODEX_HOME}}/skills/lottie/SKILL.md" && echo "- lottie"
-test -f "{{CODEX_HOME}}/skills/remotion-to-hyperframes/SKILL.md" && echo "- remotion-to-hyperframes"
-test -f "{{CODEX_HOME}}/skills/tailwind/SKILL.md" && echo "- tailwind"
-test -f "{{CODEX_HOME}}/skills/three/SKILL.md" && echo "- three"
-test -f "{{CODEX_HOME}}/skills/typegpu/SKILL.md" && echo "- typegpu"
-test -f "{{CODEX_HOME}}/skills/waapi/SKILL.md" && echo "- waapi"
-test -f "{{CODEX_HOME}}/skills/website-to-hyperframes/SKILL.md" && echo "- website-to-hyperframes"
+test -f "{{SYNC_ROOT}}/skills/website-to-hyperframes/SKILL.md" && echo "website-to-hyperframes installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

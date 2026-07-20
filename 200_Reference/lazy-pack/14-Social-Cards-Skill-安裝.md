@@ -3,9 +3,9 @@
 > 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不需要額外的舊版獨立 skills 子目錄。
 
 
-> 版本：2026-05-25 Codex App 版
-> 用途：把 Raymond Hou / 雷蒙的 `skills/social-cards` 來源工具 安裝劇本，轉成可直接安裝到 Codex App 的全域 Skill。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/social-cards/`，再安裝 Playwright 依賴後使用。
+> 版本：2026-05-25 三 Agent 共用版
+> 用途：把 Raymond Hou／雷蒙的 `skills/social-cards` 來源工具安裝劇本，改寫為 Codex、Claude、AntiGravity 共用全域 Skill。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/social-cards/`，再安裝 Playwright 依賴後使用。
 
 > 本機特例：使用者指定 `social-cards/node_modules/` 保留為可攜式執行依賴，避免未來每次使用本 skill 都重新安裝 Playwright / Chromium 相關依賴。全域相容性掃描可排除這個第三方依賴目錄；若要分享給其他使用者，仍可只帶 `package.json` / `package-lock.json` 並在新環境重建。
 
@@ -17,16 +17,16 @@
 - 原作者：Raymond Hou / 雷蒙
 - 原始授權：CC BY-NC-SA 4.0，個人使用、學習、分享自由，禁止商業用途。
 
-本文件只做 Codex App 相容改寫。若要商業使用，請先確認原始授權與作者授權。
+本文件只做 三 Agent 相容改寫。若要商業使用，請先確認原始授權與作者授權。
 
 ## 這版和原始 來源工具 文件的差異
 
-| 原始文件 | Codex 版 |
+| 原始文件 | 三 Agent 共用版 |
 |---|---|
-| 安裝到 來源工具的全域 skills 路徑 | 安裝到 `{{CODEX_HOME}}/skills/social-cards` |
+| 安裝到 來源工具的全域 skills 路徑 | 安裝到 `{{SYNC_ROOT}}/skills/social-cards` |
 | 安裝到 `000_Agent/skills` | 只在它是單一專案或個人助手本地卡片流程時使用，不作為全域安裝 |
 | skill 名稱為 `cards` | skill id 為 `social-cards`，顯示名稱為 Social Cards |
-| `/cards` 是 slash command | `/cards` 只是觸發語；Codex 依 `SKILL.md` metadata 觸發 |
+| `/cards` 是 slash command | `/cards` 只是可選顯式觸發 adapter；共用核心依 `SKILL.md` description 與自然語意觸發 |
 | `blue-dark` / `orange-light` | 已同步保留為上游模板 |
 | Pantone 285C 本機品牌版 | 保留 `brand-dark` / `brand-light` 作為相容模板 |
 | 原始 sample handle 是 `@raymond0917` | 依模板來源保留或在生成時要求使用者確認 handle |
@@ -36,9 +36,9 @@
 這是最穩的方式。下載本懶人包後，讓 Codex 在你的設定專案根目錄執行：
 
 ```bash
-mkdir -p "{{CODEX_HOME}}/skills/social-cards"
+mkdir -p "{{SYNC_ROOT}}/skills/social-cards"
 # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
-cd "{{CODEX_HOME}}/skills/social-cards"
+cd "{{SYNC_ROOT}}/skills/social-cards"
 NPM_CONFIG_CACHE=/private/tmp/npm-cache npm install
 NPM_CONFIG_CACHE=/private/tmp/npm-cache PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
 ```
@@ -60,8 +60,8 @@ git -C "$TMPDIR_CARDS" pull --depth 1 origin master
 
 接著不要直接照原始 `SKILL.md` 安裝。要做 Codex 轉換：
 
-1. 安裝路徑改成 `{{CODEX_HOME}}/skills/social-cards`。
-2. `SKILL.md` frontmatter 只保留 Codex 可用欄位：`name`、`description`、`metadata.short-description`。
+1. 安裝路徑改成 `{{SYNC_ROOT}}/skills/social-cards`。
+2. `SKILL.md` frontmatter 保留三 Agent 都可理解的基礎欄位：`name`、`description`、`metadata.short-description`；單一 Agent metadata 放 adapter。
 3. 移除 來源工具專用欄位與 slash command 假設。
 4. 若要沿用本懶人包品牌版，把模板資料夾改為 `brand-dark` / `brand-light`，並把主色改成 `#0072CE`。
 5. 把原始 sample handle 改成 `@yourhandle`。
@@ -70,22 +70,22 @@ git -C "$TMPDIR_CARDS" pull --depth 1 origin master
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/social-cards/SKILL.md" && echo "SKILL.md ok"
-test -d "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark" && echo "blue-dark ok"
-test -d "{{CODEX_HOME}}/skills/social-cards/assets/orange-light" && echo "orange-light ok"
-test -d "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark" && echo "brand-dark ok"
-test -d "{{CODEX_HOME}}/skills/social-cards/assets/brand-light" && echo "brand-light ok"
-test -f "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs" && echo "screenshot script ok"
-test -d "{{CODEX_HOME}}/skills/social-cards/node_modules/playwright" && echo "Playwright ok"
+test -f "{{SYNC_ROOT}}/skills/social-cards/SKILL.md" && echo "SKILL.md ok"
+test -d "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark" && echo "blue-dark ok"
+test -d "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light" && echo "orange-light ok"
+test -d "{{SYNC_ROOT}}/skills/social-cards/assets/brand-dark" && echo "brand-dark ok"
+test -d "{{SYNC_ROOT}}/skills/social-cards/assets/brand-light" && echo "brand-light ok"
+test -f "{{SYNC_ROOT}}/skills/social-cards/scripts/screenshot.mjs" && echo "screenshot script ok"
+test -d "{{SYNC_ROOT}}/skills/social-cards/node_modules/playwright" && echo "Playwright ok"
 ```
 
 再做一次實際匯出測試：
 
 ```bash
 mkdir -p /tmp/social-cards-test
-cp "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html" /tmp/social-cards-test/01-cover.html
-cp "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html" /tmp/social-cards-test/02-content.html
-cd "{{CODEX_HOME}}/skills/social-cards"
+cp "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/cover.html" /tmp/social-cards-test/01-cover.html
+cp "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/content-text.html" /tmp/social-cards-test/02-content.html
+cd "{{SYNC_ROOT}}/skills/social-cards"
 PLAYWRIGHT_BROWSERS_PATH=0 node scripts/screenshot.mjs /tmp/social-cards-test
 find /tmp/social-cards-test -maxdepth 1 -name "*.png" -print
 ```
@@ -94,7 +94,7 @@ find /tmp/social-cards-test -maxdepth 1 -name "*.png" -print
 
 ## 使用方式
 
-安裝後開新 Codex 對話或重啟 Codex App，然後用下列任一方式觸發：
+安裝後對 Codex、Claude、AntiGravity 分別重載 skill 清單，然後用下列任一方式觸發：
 
 - `$social-cards`
 - 「Social Cards」
@@ -108,9 +108,9 @@ Codex 會依 Skill 流程：收集內容、確認尺寸、確認 handle、拆卡
 
 ## 踩坑紀錄
 
-### 1. 不要把來源工具路徑照搬到 Codex
+### 1. 不要把來源工具路徑照搬到共用核心
 
-原始文件會偵測 `000_Agent/skills` 和 來源工具的 skills 路徑。Codex App 的全域 skill 位置是：
+原始文件會偵測 `000_Agent/skills` 和來源工具的 skills 路徑。三 Agent 共用的全域 skill 主版本是：
 
 ```text
 {{CODEX_HOME}}/skills
@@ -122,11 +122,11 @@ Codex 會依 Skill 流程：收集內容、確認尺寸、確認 handle、拆卡
 {{CODEX_HOME}}/skills
 ```
 
-如果這套卡片流程只服務某一個專案或個人助手資料層，不需要全域觸發，才放在該專案或助手的 `000_Agent/skills/social-cards`。不要把 `000_Agent/skills` symlink 到 `{{CODEX_HOME}}/skills`。
+如果這套卡片流程只服務某一個專案或個人助手資料層，不需要全域觸發，才放在該專案或助手的 `000_Agent/skills/social-cards`。不要把 `000_Agent/skills` symlink 到 `{{SYNC_ROOT}}/skills`。
 
 ### 2. `cards` 和 Social Cards 的命名要分清楚
 
-Codex skill id 建議用無空格資料夾名稱，所以本版使用：
+跨 Agent skill id 建議用無空格資料夾名稱，所以本版使用：
 
 ```text
 social-cards
@@ -164,27 +164,27 @@ PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
 
 ### 6. node_modules 內可能帶有上游範例 `SKILL.md`
 
-Playwright 依賴內曾出現上游工具範例 `SKILL.md`，可能含有非 Codex 欄位。安裝後可檢查：
+Playwright 依賴內曾出現上游工具範例 `SKILL.md`，可能含有單一來源工具欄位。安裝後可檢查：
 
 ```bash
-find "{{CODEX_HOME}}/skills/social-cards" -path "*/SKILL.md" -print
+find "{{SYNC_ROOT}}/skills/social-cards" -path "*/SKILL.md" -print
 ```
 
 合理結果應只看到：
 
 ```text
-{{CODEX_HOME}}/skills/social-cards/SKILL.md
+{{SYNC_ROOT}}/skills/social-cards/SKILL.md
 ```
 
 若看到 `node_modules` 裡還有其他 `SKILL.md`，可以刪除那些上游範例檔，不影響 Playwright 執行。
 
 ### 7. 修改全域 skill 後要重啟或開新對話
 
-Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安裝或改名後，開新對話或重啟 Codex App 再測試。
+三 Agent 都不一定會在同一個對話立刻載入新的 skill metadata。安裝或改名後，對三者分別開新對話或重載入口再測試。
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/social-cards/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/social-cards/SKILL.md` 存在。
 - [ ] `SKILL.md` 的 `name` 是 `social-cards`。
 - [ ] `metadata.short-description` 是 `Social Cards`。
 - [ ] `assets/blue-dark/` 有 4 個 HTML 模板。
@@ -194,7 +194,7 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 - [ ] `scripts/screenshot.mjs` 存在。
 - [ ] `node_modules/playwright` 存在。
 - [ ] 實測匯出 PNG 成功。
-- [ ] 開新 Codex 對話後，用 `$social-cards`、「Social Cards」或「做圖卡」可觸發。
+- [ ] Codex、Claude、AntiGravity 重載後，用 `social-cards`、「Social Cards」或「做圖卡」都可觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
@@ -202,24 +202,16 @@ Codex App 不一定會在同一個對話立刻載入新的 skill metadata。安�
 
 本節是自含式安裝區塊。這個序號項目會安裝：`social-cards`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-decode_base64() {
-  if base64 --help 2>/dev/null | grep -q -- '-d'; then
-    base64 -d
-  else
-    base64 -D
-  fi
-}
-
 # ---- social-cards ----
-mkdir -p "{{CODEX_HOME}}/skills/social-cards"
+mkdir -p "{{SYNC_ROOT}}/skills/social-cards"
 # social-cards/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/social-cards/SKILL.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD_9F368C966F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/SKILL.md" <<'AGENT_LAZYPACK_SOCIAL_CARDS_SKILL_MD_0E95F5A366'
 ---
 name: social-cards
 description: Use when the user asks to use Social Cards, $social-cards, make IG cards, social cards, carousel posts, "/cards", "做圖卡", "幫我做 IG 圖", or turn an article, note, URL, Markdown file, or pasted text into branded social-media PNG cards using bundled blue-dark, orange-light, or Pantone 285C brand templates.
@@ -323,11 +315,201 @@ Only apply this preset when the user explicitly says `手寫混搭數位風格`.
 - `node_modules/` 是本使用者保留的可攜式執行依賴特例；本機全域 skill 可保留並同步它，避免每次使用 Social Cards 都重新安裝 Playwright / Chromium 依賴。
 - 若複製給其他使用者或其他電腦時不想攜帶大型依賴，仍可只保留 `package.json` 與 `package-lock.json`，在新環境重新安裝依賴。
 - 匯出後可刪除中間 HTML，保留 PNG；除非使用者要求保留可編輯 HTML。
-CODEX_LAZYPACK_SOCIAL_CARDS_SKILL_MD_9F368C966F
+AGENT_LAZYPACK_SOCIAL_CARDS_SKILL_MD_0E95F5A366
+
+# social-cards/package-lock.json
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/package-lock.json")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/package-lock.json" <<'AGENT_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON_053150B640'
+{
+  "name": "social-cards",
+  "version": "1.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "social-cards",
+      "version": "1.0.0",
+      "license": "CC-BY-NC-SA-4.0",
+      "dependencies": {
+        "playwright": "^1.60.0"
+      }
+    },
+    "node_modules/fsevents": {
+      "version": "2.3.2",
+      "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz",
+      "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==",
+      "hasInstallScript": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "darwin"
+      ],
+      "engines": {
+        "node": "^8.16.0 || ^10.6.0 || >=11.0.0"
+      }
+    },
+    "node_modules/playwright": {
+      "version": "1.60.0",
+      "resolved": "https://registry.npmjs.org/playwright/-/playwright-1.60.0.tgz",
+      "integrity": "sha512-hheHdokM8cdqCb0lcE3s+zT4t4W+vvjpGxsZlDnikarzx8tSzMebh3UiFtgqwFwnTnjYQcsyMF8ei2mCO/tpeA==",
+      "license": "Apache-2.0",
+      "dependencies": {
+        "playwright-core": "1.60.0"
+      },
+      "bin": {
+        "playwright": "cli.js"
+      },
+      "engines": {
+        "node": ">=18"
+      },
+      "optionalDependencies": {
+        "fsevents": "2.3.2"
+      }
+    },
+    "node_modules/playwright-core": {
+      "version": "1.60.0",
+      "resolved": "https://registry.npmjs.org/playwright-core/-/playwright-core-1.60.0.tgz",
+      "integrity": "sha512-9bW6zvX/m0lEbgTKJ6YppOKx8H3VOPBMOCFh2irXFOT4BbHgrx5hPjwJYLT40Lu+4qtD36qKc/Hn56StUW57IA==",
+      "license": "Apache-2.0",
+      "bin": {
+        "playwright-core": "cli.js"
+      },
+      "engines": {
+        "node": ">=18"
+      }
+    }
+  }
+}
+AGENT_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON_053150B640
+
+# social-cards/package.json
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/package.json")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/package.json" <<'AGENT_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON_7AE45AD102'
+{
+  "name": "social-cards",
+  "version": "1.0.0",
+  "description": "Shared Codex, Claude, and AntiGravity skill for generating Pantone 285C branded social cards.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "CC-BY-NC-SA-4.0",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
+AGENT_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON_7AE45AD102
+
+# social-cards/preview-all.html
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/preview-all.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/preview-all.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML_34E6FE3646'
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Social Cards — 全版型預覽</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0f0f0; font-family: 'Inter', -apple-system, sans-serif; padding: 40px; }
+  .row { margin-bottom: 60px; }
+  .row-label {
+    font-size: 14px; font-weight: 600; color: #999;
+    letter-spacing: 2px; margin-bottom: 16px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  .cell { display: flex; flex-direction: column; gap: 8px; }
+  .cell-label {
+    font-size: 12px; font-weight: 600; color: #aaa;
+    letter-spacing: 1px;
+  }
+  .frame-wrap {
+    width: 100%;
+    aspect-ratio: 1080 / 1350;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  }
+  .frame-wrap iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1080px;
+    height: 1350px;
+    transform-origin: top left;
+    border: none;
+  }
+</style>
+<script>
+  function scaleFrames() {
+    document.querySelectorAll('.frame-wrap').forEach(wrap => {
+      const scale = wrap.offsetWidth / 1080;
+      wrap.querySelector('iframe').style.transform = `scale(${scale})`;
+    });
+  }
+  window.addEventListener('load', scaleFrames);
+  window.addEventListener('resize', scaleFrames);
+</script>
+</head>
+<body>
+
+<div class="row">
+  <div class="row-label">ORANGE LIGHT</div>
+  <div class="grid">
+    <div class="cell">
+      <div class="cell-label">orange-cover</div>
+      <div class="frame-wrap"><iframe src="assets/orange-light/cover.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">orange-img</div>
+      <div class="frame-wrap"><iframe src="assets/orange-light/content-image.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">orange-text</div>
+      <div class="frame-wrap"><iframe src="assets/orange-light/content-text.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">orange-cta</div>
+      <div class="frame-wrap"><iframe src="assets/orange-light/cta.html"></iframe></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="row-label">BLUE DARK</div>
+  <div class="grid">
+    <div class="cell">
+      <div class="cell-label">dark-cover</div>
+      <div class="frame-wrap"><iframe src="assets/blue-dark/cover.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">dark-img</div>
+      <div class="frame-wrap"><iframe src="assets/blue-dark/content-image.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">dark-text</div>
+      <div class="frame-wrap"><iframe src="assets/blue-dark/content-text.html"></iframe></div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">dark-cta</div>
+      <div class="frame-wrap"><iframe src="assets/blue-dark/cta.html"></iframe></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+AGENT_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML_34E6FE3646
 
 # social-cards/assets/blue-dark/content-image.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-image.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML_2ACC86ED36'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/content-image.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/content-image.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML_35BF438C30'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -400,11 +582,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-image.html" <
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML_2ACC86ED36
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_IMAGE_HTML_35BF438C30
 
 # social-cards/assets/blue-dark/content-text.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML_7B091A348C'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/content-text.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/content-text.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML_32537A7530'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -500,11 +682,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/content-text.html" <<
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML_7B091A348C
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CONTENT_TEXT_HTML_32537A7530
 
 # social-cards/assets/blue-dark/cover.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cover.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML_26E67BC8C5'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/cover.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/cover.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML_E1D611B68C'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -565,11 +747,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cover.html" <<'CODEX_
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML_26E67BC8C5
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_COVER_HTML_E1D611B68C
 
 # social-cards/assets/blue-dark/cta.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cta.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML_8E7C505029'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/cta.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/cta.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML_2E99AAC48C'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -674,11 +856,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/blue-dark/cta.html" <<'CODEX_LA
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML_8E7C505029
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BLUE_DARK_CTA_HTML_2E99AAC48C
 
 # social-cards/assets/brand-dark/content-image.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML_40C705E7C3'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/brand-dark/content-image.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/brand-dark/content-image.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML_03D2EC76BA'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -751,11 +933,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-image.html" 
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML_40C705E7C3
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_IMAGE_HTML_03D2EC76BA
 
 # social-cards/assets/brand-dark/content-text.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML_57DE1CECF1'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/brand-dark/content-text.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/brand-dark/content-text.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML_4DC359E04E'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -851,11 +1033,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/content-text.html" <
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML_57DE1CECF1
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CONTENT_TEXT_HTML_4DC359E04E
 
 # social-cards/assets/brand-dark/cover.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cover.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML_03834D2DBA'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/brand-dark/cover.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/brand-dark/cover.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML_4782B780FC'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -916,11 +1098,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cover.html" <<'CODEX
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML_03834D2DBA
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_COVER_HTML_4782B780FC
 
 # social-cards/assets/brand-dark/cta.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cta.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML_BAA74CACE1'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/brand-dark/cta.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/brand-dark/cta.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML_9BDC352260'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1025,11 +1207,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-dark/cta.html" <<'CODEX_L
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML_BAA74CACE1
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_DARK_CTA_HTML_9BDC352260
 
 # social-cards/assets/brand-light/content-image.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-image.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML_D563E7B43B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/brand-light/content-image.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/brand-light/content-image.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML_AE5E06CD01'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1117,11 +1299,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-image.html"
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML_D563E7B43B
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_IMAGE_HTML_AE5E06CD01
 
 # social-cards/assets/brand-light/content-text.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-text.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML_B3C5BCF773'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/brand-light/content-text.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/brand-light/content-text.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML_37DD4DFAC4'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1215,11 +1397,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/content-text.html" 
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML_B3C5BCF773
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CONTENT_TEXT_HTML_37DD4DFAC4
 
 # social-cards/assets/brand-light/cover.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML_47ECBFCE81'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/brand-light/cover.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/brand-light/cover.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML_B692C799FE'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1309,11 +1491,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cover.html" <<'CODE
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML_47ECBFCE81
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_COVER_HTML_B692C799FE
 
 # social-cards/assets/brand-light/cta.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML_1CC1A77B52'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/brand-light/cta.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/brand-light/cta.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML_2A00EB1A7D'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1413,11 +1595,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/brand-light/cta.html" <<'CODEX_
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML_1CC1A77B52
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_BRAND_LIGHT_CTA_HTML_2A00EB1A7D
 
 # social-cards/assets/orange-light/content-image.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-image.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-image.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML_0F3D82214C'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/content-image.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/content-image.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML_CBCBC086D1'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1505,11 +1687,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-image.html
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML_0F3D82214C
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_IMAGE_HTML_CBCBC086D1
 
 # social-cards/assets/orange-light/content-text.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-text.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-text.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML_7E895985BD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/content-text.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/content-text.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML_D8B7B49F3E'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1603,11 +1785,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/content-text.html"
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML_7E895985BD
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CONTENT_TEXT_HTML_D8B7B49F3E
 
 # social-cards/assets/orange-light/cover.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML_DA49C1F09F'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/cover.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/cover.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML_E833B0F886'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1697,11 +1879,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cover.html" <<'COD
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML_DA49C1F09F
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_COVER_HTML_E833B0F886
 
 # social-cards/assets/orange-light/cta.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cta.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cta.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML_09CC812819'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/cta.html")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/cta.html" <<'AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML_B487BC5599'
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1801,201 +1983,11 @@ cat > "{{CODEX_HOME}}/skills/social-cards/assets/orange-light/cta.html" <<'CODEX
 </div>
 </body>
 </html>
-CODEX_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML_09CC812819
-
-# social-cards/package-lock.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/package-lock.json")"
-cat > "{{CODEX_HOME}}/skills/social-cards/package-lock.json" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON_1C2F5418D2'
-{
-  "name": "social-cards",
-  "version": "1.0.0",
-  "lockfileVersion": 3,
-  "requires": true,
-  "packages": {
-    "": {
-      "name": "social-cards",
-      "version": "1.0.0",
-      "license": "CC-BY-NC-SA-4.0",
-      "dependencies": {
-        "playwright": "^1.60.0"
-      }
-    },
-    "node_modules/fsevents": {
-      "version": "2.3.2",
-      "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz",
-      "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==",
-      "hasInstallScript": true,
-      "license": "MIT",
-      "optional": true,
-      "os": [
-        "darwin"
-      ],
-      "engines": {
-        "node": "^8.16.0 || ^10.6.0 || >=11.0.0"
-      }
-    },
-    "node_modules/playwright": {
-      "version": "1.60.0",
-      "resolved": "https://registry.npmjs.org/playwright/-/playwright-1.60.0.tgz",
-      "integrity": "sha512-hheHdokM8cdqCb0lcE3s+zT4t4W+vvjpGxsZlDnikarzx8tSzMebh3UiFtgqwFwnTnjYQcsyMF8ei2mCO/tpeA==",
-      "license": "Apache-2.0",
-      "dependencies": {
-        "playwright-core": "1.60.0"
-      },
-      "bin": {
-        "playwright": "cli.js"
-      },
-      "engines": {
-        "node": ">=18"
-      },
-      "optionalDependencies": {
-        "fsevents": "2.3.2"
-      }
-    },
-    "node_modules/playwright-core": {
-      "version": "1.60.0",
-      "resolved": "https://registry.npmjs.org/playwright-core/-/playwright-core-1.60.0.tgz",
-      "integrity": "sha512-9bW6zvX/m0lEbgTKJ6YppOKx8H3VOPBMOCFh2irXFOT4BbHgrx5hPjwJYLT40Lu+4qtD36qKc/Hn56StUW57IA==",
-      "license": "Apache-2.0",
-      "bin": {
-        "playwright-core": "cli.js"
-      },
-      "engines": {
-        "node": ">=18"
-      }
-    }
-  }
-}
-CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_LOCK_JSON_1C2F5418D2
-
-# social-cards/package.json
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/package.json")"
-cat > "{{CODEX_HOME}}/skills/social-cards/package.json" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON_43EBCF39E2'
-{
-  "name": "social-cards",
-  "version": "1.0.0",
-  "description": "Codex skill for generating Pantone 285C branded social cards.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "CC-BY-NC-SA-4.0",
-  "type": "commonjs",
-  "dependencies": {
-    "playwright": "^1.60.0"
-  }
-}
-CODEX_LAZYPACK_SOCIAL_CARDS_PACKAGE_JSON_43EBCF39E2
-
-# social-cards/preview-all.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/preview-all.html")"
-cat > "{{CODEX_HOME}}/skills/social-cards/preview-all.html" <<'CODEX_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML_B663405130'
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<title>Social Cards — 全版型預覽</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #f0f0f0; font-family: 'Inter', -apple-system, sans-serif; padding: 40px; }
-  .row { margin-bottom: 60px; }
-  .row-label {
-    font-size: 14px; font-weight: 600; color: #999;
-    letter-spacing: 2px; margin-bottom: 16px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-  }
-  .cell { display: flex; flex-direction: column; gap: 8px; }
-  .cell-label {
-    font-size: 12px; font-weight: 600; color: #aaa;
-    letter-spacing: 1px;
-  }
-  .frame-wrap {
-    width: 100%;
-    aspect-ratio: 1080 / 1350;
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-  }
-  .frame-wrap iframe {
-    position: absolute;
-    top: 0; left: 0;
-    width: 1080px;
-    height: 1350px;
-    transform-origin: top left;
-    border: none;
-  }
-</style>
-<script>
-  function scaleFrames() {
-    document.querySelectorAll('.frame-wrap').forEach(wrap => {
-      const scale = wrap.offsetWidth / 1080;
-      wrap.querySelector('iframe').style.transform = `scale(${scale})`;
-    });
-  }
-  window.addEventListener('load', scaleFrames);
-  window.addEventListener('resize', scaleFrames);
-</script>
-</head>
-<body>
-
-<div class="row">
-  <div class="row-label">ORANGE LIGHT</div>
-  <div class="grid">
-    <div class="cell">
-      <div class="cell-label">orange-cover</div>
-      <div class="frame-wrap"><iframe src="assets/orange-light/cover.html"></iframe></div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">orange-img</div>
-      <div class="frame-wrap"><iframe src="assets/orange-light/content-image.html"></iframe></div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">orange-text</div>
-      <div class="frame-wrap"><iframe src="assets/orange-light/content-text.html"></iframe></div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">orange-cta</div>
-      <div class="frame-wrap"><iframe src="assets/orange-light/cta.html"></iframe></div>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="row-label">BLUE DARK</div>
-  <div class="grid">
-    <div class="cell">
-      <div class="cell-label">dark-cover</div>
-      <div class="frame-wrap"><iframe src="assets/blue-dark/cover.html"></iframe></div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">dark-img</div>
-      <div class="frame-wrap"><iframe src="assets/blue-dark/content-image.html"></iframe></div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">dark-text</div>
-      <div class="frame-wrap"><iframe src="assets/blue-dark/content-text.html"></iframe></div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">dark-cta</div>
-      <div class="frame-wrap"><iframe src="assets/blue-dark/cta.html"></iframe></div>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
-CODEX_LAZYPACK_SOCIAL_CARDS_PREVIEW_ALL_HTML_B663405130
+AGENT_LAZYPACK_SOCIAL_CARDS_ASSETS_ORANGE_LIGHT_CTA_HTML_B487BC5599
 
 # social-cards/references/source-adaptation.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/references/source-adaptation.md")"
-cat > "{{CODEX_HOME}}/skills/social-cards/references/source-adaptation.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD_C6BB17ACE0'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/references/source-adaptation.md")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/references/source-adaptation.md" <<'AGENT_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40'
 ---
 title: Social Cards Source Adaptation
 date: 2026-05-25
@@ -2023,7 +2015,7 @@ This skill adapts the third-party `skills/social-cards` package from:
 
 ## Codex Conversion
 
-- Target Codex global skill path: `{{CODEX_HOME}}/skills/social-cards`.
+- Target Codex global skill path: `{{SYNC_ROOT}}/skills/social-cards`.
 - Project-local option: if this card workflow is only for one project, use `<project-root>/000_Agent/skills/social-cards` instead and keep it as that project's portable skill package.
 - Display name requested by user: Social Cards.
 - Previous temporary package path: `codex_installation/converted-skills/cards`（已清理）。
@@ -2036,9 +2028,9 @@ This skill adapts the third-party `skills/social-cards` package from:
 
 ## Original Install Script Conversion Checklist
 
-| Source instruction | Codex-compatible result |
+| Source instruction | Shared package and native adapters |
 |---|---|
-| Install into 來源工具 global skills path | Installed into `{{CODEX_HOME}}/skills/social-cards` |
+| Install into source-specific global skills path | Installed into `{{SYNC_ROOT}}/skills/social-cards` and exposed through all three native skills entrypoints |
 | Install into `000_Agent/skills` | Valid only for a project-local or assistant-local workflow; do not symlink it into global skills |
 | Rename install folder to `cards` | Renamed to `social-cards`; display name is Social Cards |
 | Use `/cards` as a slash command | Kept `/cards` as a trigger phrase only; Codex uses skill metadata |
@@ -2054,11 +2046,11 @@ This skill adapts the third-party `skills/social-cards` package from:
 - RGB: `0, 114, 206`
 
 Use `#0072CE` as the main accent when the user selects the Pantone 285C brand templates. Use the upstream colors when the user selects `blue-dark` or `orange-light`.
-CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD_C6BB17ACE0
+AGENT_LAZYPACK_SOCIAL_CARDS_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40
 
 # social-cards/references/upstream-readme.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/references/upstream-readme.md")"
-cat > "{{CODEX_HOME}}/skills/social-cards/references/upstream-readme.md" <<'CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD_6135338F7B'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/references/upstream-readme.md")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/references/upstream-readme.md" <<'AGENT_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD_7C2DACA41D'
 # 社群圖卡產生器 by 雷小蒙：不會設計也能一句話出 IG 圖卡
 
 > **ver. 1.0** ｜ **Last edited: 2026-04-18**
@@ -2199,11 +2191,11 @@ AI 會帶你走完整個流程：選配色 → 選尺寸 → 確認帳號 → �
 - **License**：CC BY-NC-SA 4.0 · 個人使用、學習、分享自由；禁止商業用途
 - 出自 雷蒙三十 Starter Kit — cc.lifehacker.tw | CC BY-NC-SA 4.0
 - [迷你課](https://lifehacker.tw/courses/source-tool-tutorial) · [週報](https://raymondhouch.com/subscribe) · [Threads @raymond0917](https://www.threads.com/@raymond0917)
-CODEX_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD_6135338F7B
+AGENT_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD_7C2DACA41D
 
 # social-cards/scripts/screenshot.mjs
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs")"
-cat > "{{CODEX_HOME}}/skills/social-cards/scripts/screenshot.mjs" <<'CODEX_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS_DADCEF1A47'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/scripts/screenshot.mjs")"
+cat > "{{SYNC_ROOT}}/skills/social-cards/scripts/screenshot.mjs" <<'AGENT_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS_8817456FDC'
 // 社群圖卡截圖腳本（by 雷小蒙）
 // 用法：node scripts/screenshot.mjs <output-folder>
 // 會把資料夾內所有 .html（除了 preview.html）截成 2x PNG，最後刪除 HTML 只留 PNG
@@ -2239,11 +2231,11 @@ for (const file of [...files, 'preview.html']) {
 }
 
 console.log(`\n全部匯出完成！${files.length} 張 2x PNG 在 ${dir}/`);
-CODEX_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS_DADCEF1A47
+AGENT_LAZYPACK_SOCIAL_CARDS_SCRIPTS_SCREENSHOT_MJS_8817456FDC
 
-test -f "{{CODEX_HOME}}/skills/social-cards/SKILL.md" && echo "social-cards installed"
-
-echo "embedded skills installed: social-cards"
+test -f "{{SYNC_ROOT}}/skills/social-cards/SKILL.md" && echo "social-cards installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

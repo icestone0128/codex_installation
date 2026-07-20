@@ -5,14 +5,14 @@
 
 ## 目標
 
-把 來源工具 取向的 `/brainstorm` 規劃流程，轉成 Codex App 可用的全域 skill。
+把來源工具取向的 `/brainstorm` 規劃流程，改寫為三 Agent 共用的全域 skill，同時支援 Codex、Claude、AntiGravity。
 
-這個 skill 用在「先想清楚再動手」的情境：當使用者只有模糊想法、怕 AI 直接開工做錯方向，或想先得到一份計劃書時，Codex 會先釐清需求、列假設、比較方案，直到使用者確認計劃後才開始實作。
+這個 skill 用在「先想清楚再動手」的情境：當使用者只有模糊想法、怕 AI 直接開工做錯方向，或想先得到一份計劃書時，當前 Agent 會先釐清需求、列假設、比較方案，直到使用者確認計劃後才開始實作。三 Agent 使用同一輸入／輸出契約，只有提問 UI 與工具呼叫可以不同。
 
 ## 前置條件
 
 - 已完成 `README.md` 的設定表。
-- 已知道 Codex skills 位置：`{{CODEX_HOME}}/skills`。
+- 已知道三 Agent 共用 skills 主版本：`{{SYNC_ROOT}}/skills`。
 - 已完成或讀過 `11-Codex-Skill-Creator-工作流.md`。
 - 若使用 Obsidian 全域 skill 索引，已知道位置：
 
@@ -26,7 +26,7 @@
 - 正式安裝位置：
 
 ```text
-{{CODEX_HOME}}/skills/brainstorm/
+{{SYNC_ROOT}}/skills/brainstorm/
 ```
 
 - 本文件已內嵌可直接建立的 skill 原始檔：
@@ -36,7 +36,7 @@
 本文件文末內嵌內容：brainstorm/references/source-adaptation.md
 ```
 
-- Codex 版觸發方式不是 來源工具 slash command，而是靠 skill metadata 與自然語意觸發，例如：
+- 共用觸發方式是 skill metadata 與自然語意；當前 Agent 若支援顯式 skill 呼叫可作為 adapter，例如：
   - `$brainstorm`
   - `brainstorm 我想做一個記帳 App`
   - `/brainstorm 我想改善目前的工作流程`
@@ -45,17 +45,17 @@
 
 ## 直接安裝
 
-下載本 repo 後，直接使用本文文末的內建安裝腳本建立到自己的 Codex skills 位置：
+下載本 repo 後，直接使用本文文末的內建安裝腳本建立到 `{{SYNC_ROOT}}/skills`：
 
 ```bash
-mkdir -p "{{CODEX_HOME}}/skills/brainstorm"
+mkdir -p "{{SYNC_ROOT}}/skills/brainstorm"
 # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
 ```
 
 如果你已經有同名 skill，先備份再覆蓋：
 
 ```bash
-cp -R "{{CODEX_HOME}}/skills/brainstorm" "{{CODEX_HOME}}/skills/brainstorm.backup.$(date +%Y%m%d-%H%M%S)"
+cp -R "{{SYNC_ROOT}}/skills/brainstorm" "{{SYNC_ROOT}}/skills/brainstorm.backup.$(date +%Y%m%d-%H%M%S)"
 # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
 ```
 
@@ -64,20 +64,20 @@ cp -R "{{CODEX_HOME}}/skills/brainstorm" "{{CODEX_HOME}}/skills/brainstorm.backu
 檢查檔案存在：
 
 ```bash
-find "{{CODEX_HOME}}/skills/brainstorm" -maxdepth 3 -type f -print
+find "{{SYNC_ROOT}}/skills/brainstorm" -maxdepth 3 -type f -print
 ```
 
 應看到：
 
 ```text
-{{CODEX_HOME}}/skills/brainstorm/SKILL.md
-{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md
+{{SYNC_ROOT}}/skills/brainstorm/SKILL.md
+{{SYNC_ROOT}}/skills/brainstorm/references/source-adaptation.md
 ```
 
 檢查 frontmatter：
 
 ```bash
-sed -n '1,12p' "{{CODEX_HOME}}/skills/brainstorm/SKILL.md"
+sed -n '1,12p' "{{SYNC_ROOT}}/skills/brainstorm/SKILL.md"
 ```
 
 應包含：
@@ -91,7 +91,7 @@ metadata:
 ---
 ```
 
-安裝後，開新 Codex 對話或重啟 Codex App，讓 skill 清單重新載入。
+安裝後，對 Codex、Claude、AntiGravity 分別開新對話或重載 skill 清單。
 
 ## 何時會觸發
 
@@ -112,7 +112,7 @@ metadata:
 
 ## 工作流程
 
-1. 先確認溝通深度：小白、半技術、工程師或由 Codex 判斷。
+1. 先確認溝通深度：小白、半技術、工程師或由當前 Agent 判斷。
 2. 確認主題與任務類型：新東西、解決問題、改善現有東西或還不確定。
 3. 輕量讀取上下文，例如 `AGENTS.md`、Git 狀態、根目錄主要檔案與使用者指定檔案。
 4. 列出 3-6 個假設，請使用者修正。
@@ -140,7 +140,7 @@ metadata:
 
 ## 計劃書位置
 
-Codex 版不在安裝時固定 `PLANS_DIR`。使用 skill 時才依專案狀況決定：
+三 Agent 共用版不在安裝時固定 `PLANS_DIR`。使用 skill 時才依專案狀況決定：
 
 1. 若目前專案有 `100_Todo/`，預設放在 `100_Todo/projects/brainstorm/`。
 2. 若目前專案已有明確規劃目錄且使用者要求沿用，可放在該既有目錄。
@@ -170,12 +170,12 @@ YYYY-MM-DD-[主題關鍵字].md
 範例表格列：
 
 ```markdown
-| `brainstorm` | `{{CODEX_HOME}}/skills/brainstorm/SKILL.md` | Brainstorm 規劃模式；用引導式問答把模糊想法轉成可執行計劃，確認前不實作 | 已同步 |
+| `brainstorm` | `{{SYNC_ROOT}}/skills/brainstorm/SKILL.md` | Brainstorm 規劃模式；用引導式問答把模糊想法轉成可執行計劃，確認前不實作 | 已同步 |
 ```
 
 ## 來源工具 轉換重點
 
-| 來源工具 原流程 | Codex App 相容做法 |
+| 來源工具 原流程 | 三 Agent 相容做法 |
 | --- | --- |
 | `/brainstorm` slash command | 可保留為觸發語；顯式呼叫使用實際名稱 `$brainstorm` |
 | 來源工具的全域 skills 路徑 | 需要全域觸發時改用 `{{CODEX_HOME}}/skills` |
@@ -189,8 +189,8 @@ YYYY-MM-DD-[主題關鍵字].md
 
 - 不要把原始 來源工具 安裝段落直接照貼到 Codex。
 - 不要建立 來源工具的 skills 路徑或 command shim；專案級 skill 只放該專案 `000_Agent/skills`。
-- Codex 不保證 `/brainstorm` 會像 來源工具 slash command 一樣被 UI 特別處理；要在 `description` 寫清楚自然語意觸發。
-- 安裝後通常要開新 Codex 對話或重啟 Codex App。
+- 共用核心不假設 `/brainstorm` 會被任一 UI 特別處理；要在 `description` 寫清楚自然語意觸發，各 Agent 顯式呼叫另記 adapter。
+- 安裝後通常要對三 Agent 分別開新對話或重載入口。
 - 這個 skill 是規劃閘門，不是自動執行工具；使用者確認前不要動檔案。
 
 ## 設定範例
@@ -198,11 +198,11 @@ YYYY-MM-DD-[主題關鍵字].md
 本機曾建立：
 
 ```text
-{{CODEX_HOME}}/skills/brainstorm/SKILL.md
-{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md
+{{SYNC_ROOT}}/skills/brainstorm/SKILL.md
+{{SYNC_ROOT}}/skills/brainstorm/references/source-adaptation.md
 ```
 
-並已把原始 來源工具 `/brainstorm` 安裝劇本轉成 Codex App 相容流程。下載者應使用自己的 `{{CODEX_HOME}}` 與自己的專案位置。
+並已把原始 來源工具 `/brainstorm` 安裝劇本轉成 三 Agent 相容流程。下載者應使用自己的 `{{CODEX_HOME}}` 與自己的專案位置。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
@@ -210,24 +210,16 @@ YYYY-MM-DD-[主題關鍵字].md
 
 本節是自含式安裝區塊。這個序號項目會安裝：`brainstorm`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-decode_base64() {
-  if base64 --help 2>/dev/null | grep -q -- '-d'; then
-    base64 -d
-  else
-    base64 -D
-  fi
-}
-
 # ---- brainstorm ----
-mkdir -p "{{CODEX_HOME}}/skills/brainstorm"
+mkdir -p "{{SYNC_ROOT}}/skills/brainstorm"
 # brainstorm/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/brainstorm/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/brainstorm/SKILL.md" <<'CODEX_LAZYPACK_BRAINSTORM_SKILL_MD_7372A3995C'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/brainstorm/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/brainstorm/SKILL.md" <<'AGENT_LAZYPACK_BRAINSTORM_SKILL_MD_0E95F5A366'
 ---
 name: brainstorm
 description: Use when the user says brainstorm, $brainstorm, /brainstorm, 規劃模式, 先想清楚再動手, or asks to turn a vague idea into a concrete plan before implementation. Guides the user through concise Traditional Chinese planning questions, compares options, writes a plan, and does not implement until the user confirms.
@@ -237,9 +229,9 @@ metadata:
 
 # Brainstorm 規劃模式
 
-把模糊想法變成可執行計劃。這是 Codex App 版的規劃流程：不依賴其他工具的 command 或專用互動機制；使用者可以用 `$brainstorm`、「brainstorm」、「/brainstorm」或「先幫我規劃」觸發。
+把模糊想法變成可執行計劃。這是 Codex、Claude 與 AntiGravity 共用的規劃流程；使用者可以用 `$brainstorm`、「brainstorm」、「/brainstorm」或「先幫我規劃」觸發，實際呼叫語法依當前 Agent 的原生觸發機制。
 
-> 來源改編：核心理念來自「AI 規劃模式 by 雷小蒙」與 obra/superpowers brainstorming skill。來源工具 專用安裝、路徑、slash command 與工具名稱已轉成 Codex App 可用規則。
+> 來源改編：核心理念來自「AI 規劃模式 by 雷小蒙」與 obra/superpowers brainstorming skill。來源工具專屬安裝、路徑、slash command 與工具名稱已抽象為共用規則與原生 Agent adapter。
 
 ## 硬性閘門
 
@@ -428,35 +420,35 @@ metadata:
 - 沒有 `TBD`、`待確認` 卻沒標出需要使用者決策的地方。
 - 步驟沒有互相矛盾。
 - 步驟數量合理，通常 3-8 步。
-- 每一步都具體到下一位 Codex 看了也知道要做什麼。
+- 每一步都具體到下一位 Codex、Claude 或 AntiGravity Agent 看了也知道要做什麼。
 - 有清楚列出不包含範圍。
 - 回覆語氣符合 Phase 0 的溝通深度。
-CODEX_LAZYPACK_BRAINSTORM_SKILL_MD_7372A3995C
+AGENT_LAZYPACK_BRAINSTORM_SKILL_MD_0E95F5A366
 
 # brainstorm/references/source-adaptation.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md")"
-cat > "{{CODEX_HOME}}/skills/brainstorm/references/source-adaptation.md" <<'CODEX_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD_97DFD86D17'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/brainstorm/references/source-adaptation.md")"
+cat > "{{SYNC_ROOT}}/skills/brainstorm/references/source-adaptation.md" <<'AGENT_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40'
 # Brainstorm 來源轉換說明
 
 來源檔：`04-brainstorm.md`
 
-原始來源是 來源工具 的 `/brainstorm` 安裝劇本，包含 `來源工具的舊 skills 路徑`、`AskUserQuestion`、slash command 與 來源工具 Plan Mode 比較。安裝到 Codex App 時已做以下轉換：
+原始來源是來源工具的 `/brainstorm` 安裝劇本，包含舊 skills 路徑、`AskUserQuestion`、slash command 與來源工具 Plan Mode 比較。現行版已整理為三 Agent 共用流程：
 
-- 安裝位置改為 `{{CODEX_HOME}}/skills/brainstorm/`。
-- 觸發方式改為 `$brainstorm`、Codex skill metadata 與自然語意，例如「brainstorm」、「/brainstorm」、「先想清楚再動手」。
+- 安裝位置改為 `{{SYNC_ROOT}}/skills/brainstorm/`。
+- 觸發方式使用各 Agent 原生 skill metadata 或自然語意，例如 `$brainstorm`、「brainstorm」、「/brainstorm」、「先想清楚再動手」。
 - 移除 來源工具 專用路徑：`來源工具的舊 skills 路徑`、專案 `000_Agent/skills` symlink、來源工具 command shim。
-- 移除 來源工具 專用工具名稱 `AskUserQuestion`，改為 Codex 對話中的單題引導；若未來 Codex App 提供可用選項 UI，可用該 UI 呈現選項。
+- `AskUserQuestion` 不是共用依賴；Codex、Claude、AntiGravity 都以當前對話可用的單題提問機制執行，有原生選項 UI 時可以使用。
 - 保留硬性閘門：使用者確認計劃前不實作、不 scaffold、不修改檔案。
 - 保留四種溝通模式：小白、半技術、工程師、AI 判斷。
 - 保留核心階段：確認主題、掃描上下文、列假設、深度釐清、方案比較、計劃書、下一步確認。
-- 保存計劃書的預設位置改成 Codex 四盒專案慣例：有 `100_Todo/` 時使用 `100_Todo/projects/brainstorm/`；若專案已有其他明確規劃目錄或使用者指定路徑，改用該位置；不要在專案根目錄建立 `plans/`。
+- 保存計劃書的預設位置採三 Agent 共用四盒專案慣例：有 `100_Todo/` 時使用 `100_Todo/projects/brainstorm/`；若專案已有其他明確規劃目錄或使用者指定路徑，改用該位置；不要在專案根目錄建立 `plans/`。
 
-授權與致謝：原文標示「AI 規劃模式 by 雷小蒙」採 CC BY-NC-SA 4.0 個人使用自由、禁止商業用途；核心理念參考 obra/superpowers brainstorming skill（MIT License）。本檔只保存 Codex 相容改編摘要，不複製原始全文。
-CODEX_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD_97DFD86D17
+授權與致謝：原文標示「AI 規劃模式 by 雷小蒙」採 CC BY-NC-SA 4.0 個人使用自由、禁止商業用途；核心理念參考 obra/superpowers brainstorming skill（MIT License）。本檔只保存三 Agent 共用改編摘要，不複製原始全文。
+AGENT_LAZYPACK_BRAINSTORM_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40
 
-test -f "{{CODEX_HOME}}/skills/brainstorm/SKILL.md" && echo "brainstorm installed"
-
-echo "embedded skills installed: brainstorm"
+test -f "{{SYNC_ROOT}}/skills/brainstorm/SKILL.md" && echo "brainstorm installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

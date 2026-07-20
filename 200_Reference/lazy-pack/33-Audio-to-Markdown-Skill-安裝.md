@@ -54,7 +54,7 @@ Groq 路線使用 Skill package 內的 `scripts/audio_to_md_groq.py`，不取代
 Groq 雲端 STT：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" "/path/to/audio-or-video.mp4" -o "/path/to/output" --language zh
+python3 "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py" "/path/to/audio-or-video.mp4" -o "/path/to/output" --language zh
 ```
 
 拿到 Markdown 後，再交給 Codex 使用 `audio-to-md` skill 做 Phase 2：校稿、段落摘要、全篇重點與自檢。這部分不分本機 Whisper 或 Groq。
@@ -64,7 +64,7 @@ python3 "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" "/path/t
 安裝完成後請閱讀：
 
 ```text
-{{CODEX_HOME}}/skills/audio-to-md/references/execution-notes.md
+{{SYNC_ROOT}}/skills/audio-to-md/references/execution-notes.md
 ```
 
 其中保存：
@@ -82,7 +82,7 @@ python3 "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" "/path/t
 - Phase 2 校稿不得刪除、合併或改寫逐字主體；只能做簡繁、確證錯字、標點、斷句與專名查證留痕。
 - 長稿一次只處理一個 part 或一個時間段，避免輸出上限造成摘要化。
 
-## 安裝 Codex Skill
+## 安裝三 Agent 共用 Skill
 
 先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾；預設通常是 `{{HOME}}/.codex`。
 
@@ -90,33 +90,36 @@ python3 "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" "/path/t
 
 ## 內建 Skill 完整安裝內容
 
-本節是自含式安裝區塊，會安裝 `audio-to-md` Skill package；不會安裝本機 Whisper runtime 或模型。若尚未安裝本機引擎，需另外執行安裝包內的 `install.sh`。
+本節是自含式安裝區塊。這個序號項目會安裝：`audio-to-md`。
+
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-mkdir -p "{{CODEX_HOME}}/skills/audio-to-md"
+# ---- audio-to-md ----
+mkdir -p "{{SYNC_ROOT}}/skills/audio-to-md"
 # audio-to-md/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/SKILL.md" <<'CODEX_LAZYPACK_AUDIO_TO_MD_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SKILL_MD_0E95F5A366'
 ---
 name: audio-to-md
-description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉成帶時間戳的逐字稿 Markdown 知識庫。當需要：(1) 把錄音／podcast／會議／訪談音檔轉成逐字稿 (2) 把影片（演講、課程、Zoom 錄影）抽音軌轉逐字稿 (3) 比較本機 Whisper 與 Groq 轉錄品質 (4) 把逐字稿整理成可檢索、含段落摘要與重點的知識庫 (5) 為 RAG 補上「聲音」這一塊時使用。Phase 1 執行前必須先詢問使用者選擇「本機 Whisper」或「Groq 雲端 STT」，兩者是平行選項，沒有預設引擎。Groq 需要使用者明確接受雲端上傳且有 GROQ_API_KEY 或 {{SECRETS_DIR}}/groq_api_key。Phase 2 由 Codex 校稿（簡繁/錯字/斷句）＋寫摘要與重點，兩種引擎產出文字後的後續流程完全相同。
+description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉成帶時間戳的逐字稿 Markdown 知識庫。當需要：(1) 把錄音／podcast／會議／訪談音檔轉成逐字稿 (2) 把影片（演講、課程、Zoom 錄影）抽音軌轉逐字稿 (3) 比較本機 Whisper 與 Groq 轉錄品質 (4) 把逐字稿整理成可檢索、含段落摘要與重點的知識庫 (5) 為 RAG 補上「聲音」這一塊時使用。Phase 1 執行前必須先詢問使用者選擇「本機 Whisper」或「Groq 雲端 STT」，兩者是平行選項，沒有預設引擎。Groq 需要使用者明確接受雲端上傳且有 GROQ_API_KEY 或 ~/.codex/secrets/groq_api_key。Phase 2 由當前 Agent 校稿（簡繁／錯字／斷句）＋寫摘要與重點，Codex、Claude、AntiGravity 使用同一套契約。
 ---
 
 # audio-to-md Skill
 
 把「影音的聲音」變成「可檢索、整理好的文字知識庫」。
 **核心理念（指揮 AI 的分工）**：聽打＝機械活 → 執行前先問使用者要用 **本地 Whisper（免費、0 token、不上傳）** 或 **Groq Whisper（通常較快、繁中與標點可能較好、但會上傳音檔且需要 API key）**；兩者是平行選項，沒有預設引擎；
-校稿、理解、抓重點＝判斷活 → 交給 **Claude（Phase 2，花少量 token）**。把對的工序派給對的工具。
+校稿、理解、抓重點＝判斷活 → 交給 **當前 Agent（Phase 2，花少量 token）**。把對的工序派給對的工具。
 
 **和家族的分工：**
 - `doc-to-md` → 文字檔的文字 ｜ `vlm-to-md` → 圖的視覺 ｜ **`audio-to-md` → 影音的聲音**
 
 **兩階段架構（與家族一致）：**
 - **Phase 1A（本地 Whisper）**：`audio_to_md.py` 用 faster-whisper 把音訊／影片（影片自動抽音軌）轉成**帶時間戳的逐字稿骨架**，留好「校稿、段落摘要、重點」空格。優點是免費、0 token、0 API key、不上傳。
-- **Phase 1B（Groq 雲端 STT）**：`audio_to_md_groq.py` 使用 Groq `whisper-large-v3-turbo` 產生同樣的 Markdown 骨架與原始 JSON。只有在使用者接受雲端轉錄、且已設定 `GROQ_API_KEY` 或 `{{SECRETS_DIR}}/groq_api_key` 時可選。
-- **Phase 2（Claude、花少量 token）**：校稿（簡繁→繁中、錯字、標點、斷句）＋填段落摘要＋抓全篇重點/待辦/金句。**不需要付費 ASR、不需要 API key。**
+- **Phase 1B（Groq 雲端 STT）**：`audio_to_md_groq.py` 使用 Groq `whisper-large-v3-turbo` 產生同樣的 Markdown 骨架與原始 JSON。只有在使用者接受雲端轉錄、且已設定 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key` 時可選。
+- **Phase 2（當前 Agent、花少量 token）**：校稿（簡繁→繁中、錯字、標點、斷句）＋填段落摘要＋抓全篇重點／待辦／金句。Codex、Claude、AntiGravity 都使用同一套驗收契約；**不需要付費 ASR、不需要 API key。**
 
 > **⚠️ 比 doc-to-md 多一步：要先下載 Whisper turbo 模型（約 1.5GB）。** 安裝程式會幫忙預先下載。
 > **中文一律用 `large-v3-turbo`，不要降級成 small/base**——小模型中文會糙到連校稿都救不回（這是品質底線）。弱機只是慢一點，照樣用 turbo。
@@ -137,7 +140,7 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 只有使用者選擇 Groq，且符合下列條件，才使用 Groq：
 
 - 使用者明確接受把音訊/影片上傳到 Groq 做雲端 STT。
-- 本機已存在 `GROQ_API_KEY` 或 `{{SECRETS_DIR}}/groq_api_key`。
+- 本機已存在 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key`。
 - 使用者重視速度、繁中輸出、標點品質，或想和本機 Whisper 做品質比較。
 
 不要在下列情況使用 Groq；若使用者仍要轉錄，重新詢問是否改選本機 Whisper：
@@ -166,16 +169,16 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 
 ---
 
-## Phase 1 一定在「使用者自己的電腦」上跑（鐵則，先讀這段）
+## Agent Execution Notes：Phase 1 必須在可執行本機 runtime 的環境跑
 
-> **鐵則**：Phase 1 轉錄需要本地 Whisper turbo 模型（約 1.5GB）。**Claude Desktop／網頁的沙箱會封鎖 HuggingFace 模型下載**，所以在 Desktop／網頁裡**永遠**轉不了——**不論使用者是貼本機路徑、還是已經把檔案上傳到對話，答案都一樣：請他在自己的電腦跑 Phase 1。**
+> **鐵則**：Phase 1 轉錄需要本地 Whisper turbo 模型（約 1.5GB）。任一 Agent 如果目前處於不能下載模型、不能讀取本機路徑或不能執行 Terminal 的 Desktop／網頁／沙箱，就改用使用者電腦上的已安裝 launcher。上傳到對話不等於沙箱可執行 Phase 1。
 
 **絕對禁止的行為（會讓工具看起來壞掉、白繞一圈，正是 v1.0.3／v1.0.5 學員的鬼打牆）：**
 - ❌ 不要在沙箱裡 `pip install faster-whisper` ＋ 跑轉錄 ＋ 下載模型——**幾乎必然卡在 HuggingFace 被封、模型載不下來**。
 - ❌ 不要因為「使用者把檔案上傳了」就以為可以在沙箱轉。**上傳到對話 ≠ 能在沙箱做 Phase 1**，模型一樣下載不了。
 - ❌ 不要說「我幫你產生 audio_to_md.py」「我重寫一個腳本」——本機已用安裝包裝好引擎，別重造。
 
-**唯一例外**：若你確定當前是 **Claude Code CLI／本機終端環境且有外網**（不是 Desktop／網頁沙箱），才可跑下方「進階：bundled 腳本」。**只要是 Desktop／網頁，跳過這條，直接走下面的本機做法。**
+**可直接執行的條件**：當前 Codex、Claude Code 或 AntiGravity 環境可使用本機終端、可讀取素材路徑，且有充足網路與磁碟空間時，可直接跑下方 bundled 腳本。否則使用專案或桌面 launcher，不因 Agent 不同改變產出格式。
 
 ### 該回給使用者什麼（Windows，最重要）
 
@@ -207,7 +210,7 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 ```text
 這段轉錄要在你自己的 Mac 上跑（免費、不花 token）。
 最簡單：如果專案有 `200_Reference/scripts/轉逐字稿.command` 或 `200_Reference/scripts/transcribe.command`，先雙擊專案內啟動器，把影片拖進視窗按 Enter；否則雙擊桌面的「轉逐字稿.command」。
-或開 Terminal 貼：{{CODEX_HOME}}/audio-to-md/audio-to-md "{{HOME}}/Desktop/meeting.m4a"
+或開 Terminal 貼：~/.codex/audio-to-md/audio-to-md "/Users/你/Desktop/meeting.m4a"
 跑完把輸出的「*_逐字稿知識庫.md」傳回來給我做 Phase 2。
 桌面沒有那個檔 → 先跑安裝包的 install.sh 裝一次。
 ```
@@ -216,18 +219,18 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 
 ---
 
-## Step 1 — 找到本機啟動器（Desktop／網頁的唯一正解）
+## Step 1 — 找到本機啟動器（無 Terminal 權限時的共用 fallback）
 
 ### 本機啟動器（安裝包 install.bat / install.sh 已裝好）
 - **專案內 Mac 拖檔**：標準四盒專案可優先使用 `200_Reference/scripts/轉逐字稿.command` 或 `200_Reference/scripts/transcribe.command`
 - **Windows 拖檔圖示**：桌面「🎤 拖檔轉逐字稿.bat」（背後是 `%USERPROFILE%\.audio-to-md\轉逐字稿.bat`）
 - **Windows 指令啟動器**：`%USERPROFILE%\.audio-to-md\audio-to-md.bat`
 - **Mac 拖檔**：桌面「轉逐字稿.command」
-- **Mac 指令啟動器**：`{{CODEX_HOME}}/audio-to-md/audio-to-md`
+- **Mac 指令啟動器**：`~/.codex/audio-to-md/audio-to-md`
 
 都不存在 → 請使用者先跑安裝包的 `install.bat` / `install.sh`（只需一次），**不要在沙箱重新產生腳本**。
 
-### 進階：bundled 腳本（**僅限** Claude Code CLI／本機終端且有外網；Desktop／網頁請跳過）
+### 進階：bundled 腳本（Codex／Claude／AntiGravity 任一可用本機終端的環境）
 ```bash
 pip install -r scripts/requirements.txt          # 裝 faster-whisper
 python3 scripts/audio_to_md.py "<音訊或影片>" -o "<輸出資料夾>"
@@ -247,13 +250,13 @@ python3 scripts/audio_to_md.py "<音訊或影片>" -o "<輸出資料夾>"
 ```
 ```bash
 # Mac
-{{CODEX_HOME}}/audio-to-md/audio-to-md "<音訊或影片>"
+~/.codex/audio-to-md/audio-to-md "<音訊或影片>"
 ```
 
 Groq 雲端路線（執行前必須先詢問並取得使用者同意）：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" \
+python3 "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py" \
   "<音訊或影片>" \
   -o "<輸出資料夾>" \
   --language zh
@@ -293,13 +296,13 @@ Groq 輸出：
 **行為**：轉錄時長**超過 35 分鐘**（`--split-min`）時，Phase 1 會自動把骨架切成多個 **約 18 分鐘**（`--part-min`）的短檔：`*_逐字稿知識庫_part1ofN.md`、`part2ofN.md`…＋一份 `*_長稿校稿說明.txt`。短稿（≤35 分鐘）維持單檔、流程不變。關閉分檔：`--split-min 0`。
 
 **Phase 2 怎麼校（重點：一檔一次）**：
-- 一個 part 檔丟回 Claude 校稿一次（校稿鐵律仍適用），校完**換下一個 part**；**不要一次貼多個 part**。
+- 一個 part 檔一次交給當前 Agent 校稿（校稿鐵律仍適用），校完**換下一個 part**；**不要一次貼多個 part**。
 - 每個 part 都短到能在一則回覆裡完整吐完 → 結構上不會被摘要。
 - 全部校完後，依 part 順序首尾相接＝完整逐字稿（時間戳連續，直接接）。
 
-> 這對 Claude Desktop 學員尤其重要：Desktop 沒有 subagent／檔案分段寫入，唯一能做到「物理隔離」的點就是 Phase 1 把長稿切成短檔。
+> 這對任何缺少 subagent 或檔案分段寫入能力的 Agent UI 尤其重要：物理隔離由 Phase 1 把長稿切成短檔，不依賴某一 Agent 的 context 上限。
 
-## Step 3 — Claude 做 Phase 2（校稿 ＋ 摘要 ＋ 重點）
+## Step 3 — 當前 Agent 做 Phase 2（校稿＋摘要＋重點）
 
 > [!danger] 校稿鐵律（最重要，違反就是學員回報的「太長被 AI 摘要、掉時間戳、內文被改寫」）
 > 1. **逐字主體 100% 保留**：每個 `**[時間戳]**` 行都要留，內容一字不刪、不合併、不改寫、不潤飾。能動的只有：簡繁、確證錯字、補標點、合理斷句、（多人時）句首標講者。
@@ -360,86 +363,33 @@ Groq 輸出：
 | 問題 | 解法 |
 |------|------|
 | 沙箱裡 `pip install` / 下載模型失敗（HuggingFace 被封） | **預期內，別重試**。Desktop／網頁本來就轉不了。改請使用者在自己電腦用專案 `200_Reference/scripts/` 啟動器、桌面拖檔圖示或本機啟動器跑 Phase 1 |
-| 使用者貼了 `{{LOCAL_FILE_PATH}}` 本機路徑，或直接上傳了影音檔 | 兩種都一樣：請他優先用專案 `200_Reference/scripts/` 啟動器；沒有專案啟動器時，再用桌面「🎤 拖檔轉逐字稿.bat」圖示或本機啟動器產生 `*_逐字稿知識庫.md`，再傳回來做 Phase 2。**不要在沙箱嘗試轉錄** |
+| 使用者貼了 `C:\...` 或 `/Users/...` 本機路徑，或直接上傳了影音檔 | 兩種都一樣：請他優先用專案 `200_Reference/scripts/` 啟動器；沒有專案啟動器時，再用桌面「🎤 拖檔轉逐字稿.bat」圖示或本機啟動器產生 `*_逐字稿知識庫.md`，再傳回來做 Phase 2。**不要在沙箱嘗試轉錄** |
 | 桌面找不到「🎤 拖檔轉逐字稿」圖示 | 代表本機引擎還沒裝。請使用者到下載的安裝包資料夾雙擊 `install.bat`（Mac 跑 `install.sh`）裝一次 |
 | 安裝時提示 Python 不相容 | 請安裝 Python 3.12，關閉 Terminal/視窗後重跑 `install.sh` / `install.bat` |
 | 第一次很久 | 在下載 turbo 模型（~1.5GB）；之後就快。請耐心等，不要因此改用小模型 |
-| 轉錄字有點糙 | 正常，turbo 已是品質底線；剩下交 Phase 2 由 Claude 校稿修正 |
+| 轉錄字有點糙 | 正常，turbo 已是品質底線；剩下交由當前 Agent 依 Phase 2 契約校稿修正 |
 | 本機 Whisper 與 Groq 哪個比較好 | 短中文乾淨錄音常見 Groq 較好，尤其繁中與標點；敏感、離線、批量或不想用 API 時通常本機 Whisper 較合適。實際執行前仍要讓使用者選擇 |
-| Groq 找不到 API key | 檢查 `GROQ_API_KEY` 或 `{{SECRETS_DIR}}/groq_api_key`；不要把 key 寫進 repo、Obsidian 或聊天 |
+| Groq 找不到 API key | 檢查 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key`；不要把 key 寫進 repo、Obsidian 或聊天 |
 | Groq 不能用於這段音訊 | 若內容敏感、未授權或使用者不接受雲端上傳，不使用 Groq；重新詢問是否改選本機 Whisper |
 | 機器很慢/記憶體小 | 用 `--beam-size 1` 加速；`--compute-type int8` 已是預設。**仍維持 turbo 模型** |
 | 影片轉不出聲音 | 確認影片有音軌；faster-whisper 內含 PyAV 可直接抽，不需系統 ffmpeg |
-| 多人對話分不出講者 | Whisper 不做語者分離；Phase 2 由 Claude 依語氣/內容標講者 |
+| 多人對話分不出講者 | Whisper 不做語者分離；Phase 2 由當前 Agent 依語氣／內容標講者 |
 | 轉錄出的 MD 檔太短、只有十幾分鐘（或少於實際長度） | **檢查音訊下載的完整性**。這通常不是 Groq/Whisper 限制，而是下載腳本（如使用 `curl`）在下載大檔案時遇到網路中斷。但轉碼工具（如 `ffmpeg`）仍會成功將截斷後的檔案轉成 MP3 且不報錯。解法：在下載腳本中比對 `Content-Length` Headers 以確保檔案大小完全一致，或使用自動重試機制。 |
-CODEX_LAZYPACK_AUDIO_TO_MD_SKILL_MD
-
-# audio-to-md/references/usage-guide.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/references/usage-guide.md")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/references/usage-guide.md" <<'CODEX_LAZYPACK_AUDIO_TO_MD_USAGE_GUIDE_MD'
-# audio-to-md 參考：給 Claude 的 Phase 2 指引
-
-逐字稿骨架 `*_逐字稿知識庫.md` 可由本地 Whisper turbo 或 Groq 雲端 STT 產生（帶時間戳）。執行 Phase 1 前必須先詢問使用者要用哪個引擎；本機 Whisper 與 Groq 是平行選項，沒有預設值。Groq 會上傳音檔，必須取得使用者同意。
-
-不論 Phase 1 來源是哪一個，輸出 Markdown 後的 Phase 2 完全相同。Claude 在 Phase 2 做三件事：
-
-## 1. 校稿（兩層；最重要）
-### Layer 1 — 語感校稿（鐵律不變）
-對每段時間戳逐字做：
-- 簡體 → 繁體（台灣用語）。
-- 修 Whisper 錯字、加標點、合理斷句；校稿後可把零碎時間戳行整併成通順段落（保留段首時間戳）。
-- 多人對話：依語氣／內容標講者（如 **講者A：** / **講者B：**），Whisper 不做語者分離。
-- **鐵律**：只做上述。**禁止**憑空改寫語意或新增講者沒說的話；聽不清標「（聽不清）」，**絕不編造**。
-
-### Layer 2 — 專名查證（新增；解決「自信地把生僻專名聽成同音常見詞」）
-語感層抓不到「替換後通順但事實錯」的專名（企業重心→勤業眾信、串上閒絲→川上賢司、鬼舞者→鬼武者、Tina Selig→Seelig）。
-這是 ASR 機率特性：生僻人名/機構/譯名在模型候選裡沒有正確答案，機率集中到常見同音詞，信心反而很高（avg_logprob 看起來健康）——**不是不確定，是自信地選錯**，所以靠語感與信心分數都抓不到。
-做法：用**語法角色**篩候選（與信心分數無關）——
-- 句子主語且後接需要行為者的動詞；後接稱謂/類別詞（XX 教授・公司・遊戲・書）；前有「叫做」「就是」引介；你對其真實性沒高把握的人名/地名/品牌/書名/機構；標 🔸 的片段優先。
-篩出候選（通常 5-20 個）→ 逐一 **WebSearch 查證**：查到更可信版本→修正並留痕 `（查證：原「企業重心」→「勤業眾信」）`；查不到→保留原字＋標 `⚠️ 專名待查證`；無 WebSearch→全部標 `⚠️ 專名待查證`，不憑空猜改。
-**修正必須有外部依據＋留痕**（精細化鐵律而非放寬：使用者隨時看得到「改了什麼、為什麼」）。
-🔸 = Phase 1 低信心片段（avg_logprob 偏低），優先複核。
-
-## 2. 段落摘要
-每個 `## ⏱ 時間段` 下的 `段落摘要` 空格：填 2-3 句該段重點 ＋ 4-8 個檢索關鍵字。
-
-## 3. 全篇重點
-最後 `重點 / 待辦 / 金句` 空格：3-5 個重點、（若有）待辦／行動項、1-3 句可摘金句。
-
-## 規則
-- 引擎選擇只影響 Phase 1；文字輸出後不要切換成 video-processing 的字幕工作流。
-- 不要自行替使用者選擇引擎；即使其中一個引擎已安裝或曾在測試中較好，仍要在執行前詢問。
-- 只替換 placeholder 內容；時間戳、段落標題、frontmatter 不動。
-- 長逐字稿分段處理、可多輪。
-- 繁中（台灣用語）。
-- 校稿是「花少量 token 的判斷活」——轉錄（重活）已由本地 Whisper 免費做掉。
-
-## 引擎比較基準
-
-同一份音檔若需要比較本機 Whisper 與 Groq，依序看：
-
-- 完整性：是否漏字、多字、吞掉語助詞或時間戳行。
-- 正確性：是否有同音錯字、簡繁錯誤、專名錯誤。
-- 可讀性：標點、斷句、繁中輸出是否接近可校稿狀態。
-- 時間戳：segments 是否足夠細，是否適合後續逐段校稿。
-- 隱私與成本：是否可接受雲端上傳、API key 與服務成本。
-
-Arry `ref_voice.wav` 實測：本機 Whisper 完整但輸出簡體，且將「清楚發音」聽成「清除發音」；Groq 直接輸出繁中並正確辨識「清楚發音」。在這段短中文乾淨錄音上，Groq 品質較優。這是比較結果，不是預設路由；後續每次執行仍要先詢問使用者。
-CODEX_LAZYPACK_AUDIO_TO_MD_USAGE_GUIDE_MD
+AGENT_LAZYPACK_AUDIO_TO_MD_SKILL_MD_0E95F5A366
 
 # audio-to-md/references/execution-notes.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/references/execution-notes.md")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/references/execution-notes.md" <<'CODEX_LAZYPACK_AUDIO_TO_MD_EXECUTION_NOTES_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/references/execution-notes.md")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/references/execution-notes.md" <<'AGENT_LAZYPACK_AUDIO_TO_MD_REFERENCES_EXECUTION_NOTES_MD_F65D5054D2'
 # audio-to-md 執行紀錄、Python 內嵌與踩坑
 
-本文件記錄 `audio-to-md` v1.2.0 安裝包在 Codex App / LazyPack 中的實際整合方式。目標是讓其他人使用 `codex_installation` LazyPack repo 時，能重建相同效果：本機 Whisper 與 Groq 雲端 STT 作為 Phase 1 平行選項，產出 Markdown 後共用同一套 Phase 2 校稿流程。
+本文件記錄 `audio-to-md` v1.2.0 安裝包在 Codex、Claude、AntiGravity／LazyPack 中的實際整合方式。目標是讓其他人使用 `codex_installation` LazyPack repo 時，能重建相同效果：本機 Whisper 與 Groq 雲端 STT 作為 Phase 1 平行選項，產出 Markdown 後由當前 Agent 依同一套 Phase 2 校稿契約處理。
 
 ## 目前 Skill Package
 
 全域 skill 實體：
 
 ```text
-{{CODEX_HOME}}/skills/audio-to-md/
+{{SYNC_ROOT}}/skills/audio-to-md/
 ```
 
 必要檔案：
@@ -502,26 +452,26 @@ bash /private/tmp/audio-to-md-installer-check/audio-to-md-installer/install.sh
 安裝結果：
 
 ```text
-{{CODEX_HOME}}/audio-to-md/
-{{CODEX_HOME}}/audio-to-md/audio-to-md
+~/.codex/audio-to-md/
+~/.codex/audio-to-md/audio-to-md
 ~/Desktop/轉逐字稿.command
 ```
 
 安裝器完成事項：
 
 - 檢查 Python 版本。
-- 建立 `{{CODEX_HOME}}/audio-to-md/venv`。
+- 建立 `~/.codex/audio-to-md/venv`。
 - 安裝 `faster-whisper`、`av`、`ctranslate2` 等相依套件。
 - 複製 `audio_to_md.py` 與 launcher。
 - 建立桌面拖檔啟動器。
 - 預先下載 Whisper `large-v3-turbo` 模型。
 - 驗證 `faster_whisper`、`av`、`ctranslate2` 可 import。
-- 驗證 `{{CODEX_HOME}}/audio-to-md/audio-to-md --help` 可執行。
+- 驗證 `~/.codex/audio-to-md/audio-to-md --help` 可執行。
 
 本機驗證指令：
 
 ```bash
-{{CODEX_HOME}}/audio-to-md/audio-to-md --help
+~/.codex/audio-to-md/audio-to-md --help
 ```
 
 ## 本機 Whisper 實測
@@ -535,7 +485,7 @@ codex_symlink/knowledge/arry-voice-profiles/Arry/ref_voice.wav
 執行指令：
 
 ```bash
-{{CODEX_HOME}}/audio-to-md/audio-to-md \
+~/.codex/audio-to-md/audio-to-md \
   "{{SYNC_ROOT}}/knowledge/arry-voice-profiles/Arry/ref_voice.wav" \
   -o "{{PROJECT_ROOT}}/100_Todo/projects/audio-to-md-test" \
   --language zh \
@@ -584,14 +534,14 @@ scripts/audio_to_md_groq.py
 
 這支腳本做三件事：
 
-- 讀取 `GROQ_API_KEY` 或 `{{SECRETS_DIR}}/groq_api_key`。
+- 讀取 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key`。
 - 上傳音訊/影片到 Groq OpenAI-compatible transcription endpoint。
 - 直接輸出 audio-to-md 相同語意的 Markdown 骨架、Groq JSON 與 manifest。
 
 Groq key 規則：
 
 ```text
-{{SECRETS_DIR}}/groq_api_key
+~/.codex/secrets/groq_api_key
 ```
 
 權限應為：
@@ -605,7 +555,7 @@ Groq key 規則：
 Groq 執行指令：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" \
+python3 "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py" \
   "{{SYNC_ROOT}}/knowledge/arry-voice-profiles/Arry/ref_voice.wav" \
   -o "{{PROJECT_ROOT}}/100_Todo/projects/audio-to-md-test" \
   --language zh
@@ -708,328 +658,10 @@ scripts/audio_to_md_groq.py
 內嵌使用 Bash heredoc：
 
 ```bash
-mkdir -p "{{CODEX_HOME}}/skills/audio-to-md/scripts"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" <<'CODEX_LAZYPACK_AUDIO_TO_MD_GROQ_PY'
-#!/usr/bin/env python3
-"""
-audio_to_md_groq.py -- Groq cloud STT route for audio-to-md.
-
-This script uploads an audio/video file to Groq's OpenAI-compatible
-transcription endpoint and writes the same Markdown knowledge-base scaffold as
-the local Whisper route. Use it only when the user accepts cloud transcription.
-"""
-import argparse
-import datetime
-import json
-import os
-import re
-import shutil
-import subprocess
-import sys
-import tempfile
-import urllib.error
-import urllib.request
-from pathlib import Path
-
-GROQ_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
-DEFAULT_MODEL = "whisper-large-v3-turbo"
-DEFAULT_CHUNK_MIN = 6
-SIZE_LIMIT_MB = 24.0
-
-AUDIO_EXTS = {".mp3", ".m4a", ".wav", ".flac", ".aac", ".ogg", ".opus", ".wma", ".aiff"}
-VIDEO_EXTS = {".mp4", ".mov", ".mts", ".m2ts", ".mkv", ".webm", ".avi", ".flv", ".wmv", ".m4v"}
-
-for _stream in (sys.stdout, sys.stderr):
-    try:
-        _stream.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:
-        pass
-
-
-def log(msg: str) -> None:
-    print(msg, flush=True)
-
-
-def safe_stem(path: str) -> str:
-    stem = os.path.splitext(os.path.basename(path))[0]
-    stem = re.sub(r"[^\w一-鿿\-]+", "_", stem).strip("_")
-    return stem or "audio"
-
-
-def fmt_ts(sec: float, with_hour: bool) -> str:
-    sec = int(sec)
-    h, m, s = sec // 3600, (sec % 3600) // 60, sec % 60
-    return f"{h:02d}:{m:02d}:{s:02d}" if with_hour else f"{m:02d}:{s:02d}"
-
-
-def load_api_key() -> str:
-    env_key = os.environ.get("GROQ_API_KEY")
-    if env_key:
-        return env_key.strip()
-    key_file = Path.home() / ".codex" / "secrets" / "groq_api_key"
-    if key_file.exists():
-        return key_file.read_text(encoding="utf-8").strip()
-    sys.exit(
-        "[ERR] 找不到 Groq API key：請設定 GROQ_API_KEY，或把 key 存到 "
-        "{{SECRETS_DIR}}/groq_api_key 並設為 600 權限。"
-    )
-
-
-def compress_audio(src: Path) -> Path:
-    if not shutil.which("ffmpeg"):
-        sys.exit("[ERR] 檔案超過 Groq 上傳大小，需要 ffmpeg 壓縮，但找不到 ffmpeg。")
-    tmp = Path(tempfile.gettempdir()) / f"audio-to-md-groq-{os.getpid()}.mp3"
-    cmd = [
-        "ffmpeg", "-i", str(src),
-        "-vn", "-ac", "1", "-ar", "16000", "-b:a", "32k",
-        "-y", str(tmp),
-    ]
-    log("[INFO] 檔案較大，先壓成 16kHz mono 32kbps...")
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        sys.exit(f"[ERR] ffmpeg 壓縮失敗：\n{result.stderr[-800:]}")
-    size_mb = tmp.stat().st_size / 1024 / 1024
-    log(f"[INFO] 壓縮完成：{size_mb:.1f} MB")
-    return tmp
-
-
-def build_multipart(audio_path: Path, model: str, language: str, prompt: str) -> tuple[bytes, str]:
-    boundary = "----AudioToMdGroqBoundary7MA4YWxkTrZu0gW"
-    crlf = b"\r\n"
-    parts: list[bytes] = []
-
-    def add_field(name: str, value: str) -> None:
-        parts.append(f"--{boundary}".encode())
-        parts.append(f'Content-Disposition: form-data; name="{name}"'.encode())
-        parts.append(b"")
-        parts.append(value.encode("utf-8"))
-
-    add_field("model", model)
-    add_field("response_format", "verbose_json")
-    add_field("timestamp_granularities[]", "segment")
-    add_field("timestamp_granularities[]", "word")
-    if language and language != "auto":
-        add_field("language", language)
-    if prompt:
-        add_field("prompt", prompt)
-
-    safe_name = "audio" + audio_path.suffix.lower()
-    parts.append(f"--{boundary}".encode())
-    parts.append(
-        (
-            f'Content-Disposition: form-data; name="file"; '
-            f'filename="{safe_name}"'
-        ).encode("utf-8")
-    )
-    parts.append(b"Content-Type: application/octet-stream")
-    parts.append(b"")
-    parts.append(audio_path.read_bytes())
-    parts.append(f"--{boundary}--".encode())
-    parts.append(b"")
-
-    return crlf.join(parts), f"multipart/form-data; boundary={boundary}"
-
-
-def transcribe_groq(input_path: Path, model: str, language: str, prompt: str) -> tuple[dict, Path | None]:
-    api_key = load_api_key()
-    size_mb = input_path.stat().st_size / 1024 / 1024
-    upload_path = input_path
-    tmp_path = None
-    log(f"[INFO] Groq STT：{input_path.name}，{size_mb:.1f} MB，模型 {model}")
-    if size_mb > SIZE_LIMIT_MB:
-        tmp_path = compress_audio(input_path)
-        upload_path = tmp_path
-        if tmp_path.stat().st_size / 1024 / 1024 > SIZE_LIMIT_MB:
-            sys.exit("[ERR] 壓縮後仍超過上傳上限，請先手動切段。")
-
-    body, content_type = build_multipart(upload_path, model, language, prompt)
-    req = urllib.request.Request(
-        GROQ_URL,
-        data=body,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": content_type,
-            "User-Agent": "audio-to-md-groq/1.0",
-            "Accept": "application/json",
-        },
-        method="POST",
-    )
-    log("[INFO] 上傳到 Groq 轉錄中...")
-    try:
-        with urllib.request.urlopen(req, timeout=600) as resp:
-            return json.loads(resp.read().decode("utf-8")), tmp_path
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode("utf-8", errors="replace")
-        sys.exit(f"[ERR] Groq API 錯誤 {e.code}：{err_body}")
-    except urllib.error.URLError as e:
-        sys.exit(f"[ERR] 網路錯誤：{e}")
-
-
-def normalize_segments(data: dict) -> list[dict]:
-    segments = data.get("segments") or []
-    if segments:
-        return [
-            {
-                "start": float(s.get("start", 0)),
-                "end": float(s.get("end", 0)),
-                "text": str(s.get("text", "")).strip(),
-            }
-            for s in segments
-            if str(s.get("text", "")).strip()
-        ]
-    text = str(data.get("text", "")).strip()
-    duration = float(data.get("duration") or 0)
-    return [{"start": 0.0, "end": duration, "text": text}] if text else []
-
-
-def build_scaffold(
-    stem: str,
-    source: str,
-    model: str,
-    language: str,
-    duration: float,
-    segments: list[dict],
-    chunk_min: int,
-) -> str:
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    with_hour = duration >= 3600
-    dur_str = fmt_ts(duration, with_hour)
-    yaml = (
-        "---\n"
-        f'title: "{stem.replace("_", " ")}"\n'
-        f'source: "{source}"\n'
-        "type: AV-transcript-pending\n"
-        f"model: groq / {model}\n"
-        f"language: {language}\n"
-        f"duration: \"{dur_str}\"\n"
-        f"segments: {len(segments)}\n"
-        f'generated_at: "{now}"\n'
-        "lang_out: zh-TW\n"
-        "---\n\n"
-    )
-    head = (
-        f"# {stem.replace('_', ' ')}｜影音逐字稿知識庫\n\n"
-        "> [!danger] 校稿鐵律：逐字主體零刪改、禁摘要（最重要，先讀）\n"
-        "> Groq 已完成 Phase 1 雲端 STT。從這一刻開始，後續流程與本機 Whisper 產出的骨架完全相同：Phase 2 只做校稿、摘要欄與重點欄；不得用摘要取代時間戳逐字主體。\n"
-        "> 1. **逐字主體 100% 保留**：每一個 `**[時間戳]**` 行都必須留著，內容一字不刪、不合併、不改寫、不潤飾成書面語。校稿能動的只有：簡繁、確證錯字、標點、合理斷句、（多人時）句首標講者。\n"
-        "> 2. **禁止用摘要代替逐字**：摘要只能額外寫進每段的「段落摘要」欄，原始逐字照樣全留。\n"
-        "> 3. **分段處理**：一次只處理一個 `## ⏱ 時間段`，禁止一次重寫長稿全文。\n"
-        "> 4. **完工自檢**：校稿後 `**[` 行數必須 >= 原稿、且 >= YAML `segments`；校稿後中文字元數應 >= 原稿 ×0.95。\n"
-        "> 5. **不覆寫原檔**：校稿存到新檔 `_校稿.md`，保留原始骨架供自檢對拍。\n\n"
-        "> [!warning] 雲端 STT 邊界\n"
-        "> 這一路線會把音訊/影片上傳到 Groq。只有在使用者接受雲端轉錄時使用；"
-        "敏感、不可外傳、或不想使用 API key 的內容改用本機 Whisper 路線。\n\n"
-        "> [!info] 這份還沒完成——Groq 已把「聲音」轉成字，等 Codex 來「理解」\n"
-        "> 1) **校稿**：簡繁、修錯字、加標點、合理斷句（不要改變語意）。\n"
-        "> 2) 把每段的 `段落摘要` 空格填好。3) 最後補「全篇重點 / 待辦 / 金句」。\n\n"
-        "> [!tip] 兩層校稿（語感層 + 專名查證層）\n"
-        "> **Layer 1 語感校稿**：簡繁轉換、錯字、標點、斷句、（多人時）標講者。**禁止**憑空改寫或新增講者沒說的內容；聽不清標「（聽不清）」。\n"
-        "> **Layer 2 專名查證**：人名、地名、品牌、書名、機構、技術名詞等，若不確定就查證；查到更可信版本才修正並留痕，查不到就標 `⚠️ 專名待查證`。\n\n"
-    )
-    body = ""
-    chunk_sec = chunk_min * 60
-    cur_chunk = -1
-    placeholder = (
-        "> [!note] 段落摘要\n"
-        "> **摘要**：（Codex 將填入這段的 2-3 句重點）\n"
-        "> **關鍵字**：（Codex 將填入 4-8 個檢索關鍵字）"
-    )
-    for s in segments:
-        idx = int(s["start"] // chunk_sec)
-        if idx != cur_chunk:
-            cur_chunk = idx
-            cstart = fmt_ts(idx * chunk_sec, with_hour)
-            cend = fmt_ts(min((idx + 1) * chunk_sec, duration), with_hour)
-            body += f"\n## ⏱ {cstart}–{cend}\n\n{placeholder}\n\n"
-            body += "<!-- 原始逐字：逐行校稿，禁止刪句或跨時間戳搬移文字 -->\n\n"
-        body += f"**[{fmt_ts(s['start'], with_hour)}]** {s['text']}\n\n"
-    tail = (
-        "\n---\n\n"
-        "## 📌 全篇重點（Codex 填）\n\n"
-        "> [!note] 重點 / 待辦 / 金句\n"
-        "> **3-5 個重點**：（Codex 將填入）\n"
-        "> **待辦或行動項**：（若有）\n"
-        "> **可摘金句**：（1-3 句）\n"
-    )
-    return yaml + head + body + tail
-
-
-def process(args: argparse.Namespace) -> int:
-    input_path = Path(args.input).expanduser()
-    if not input_path.exists():
-        sys.exit(f"[ERR] 找不到輸入檔：{input_path}")
-    ext = input_path.suffix.lower()
-    if ext not in AUDIO_EXTS and ext not in VIDEO_EXTS:
-        sys.exit(f"[ERR] 不支援的格式：{ext}")
-    out_dir = Path(args.output).expanduser() if args.output else input_path.parent
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    data, tmp_path = transcribe_groq(input_path, args.model, args.language, args.prompt)
-    try:
-        stem = safe_stem(str(input_path))
-        segments = normalize_segments(data)
-        if not segments:
-            sys.exit("[ERR] Groq 沒有回傳可用轉錄內容。")
-        duration = float(data.get("duration") or max(s["end"] for s in segments))
-        lang = args.language if args.language != "auto" else data.get("language", "auto")
-        md = build_scaffold(stem, input_path.name, args.model, lang, duration, segments, args.chunk_min)
-
-        md_path = out_dir / f"{stem}_groq_逐字稿知識庫.md"
-        json_path = out_dir / f"{stem}_groq.json"
-        manifest_path = out_dir / f"{stem}_groq_manifest.json"
-        md_path.write_text(md, encoding="utf-8")
-        json_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-        manifest = {
-            "source": str(input_path),
-            "kind": "影片" if ext in VIDEO_EXTS else "音訊",
-            "engine": "groq",
-            "model": args.model,
-            "language": lang,
-            "duration_sec": round(duration, 1),
-            "segments": len(segments),
-            "words": len(data.get("words") or []),
-            "generated_at": datetime.datetime.now().isoformat(),
-            "outputs": [md_path.name, json_path.name],
-        }
-        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-        log("")
-        log("✅ Phase 1 完成（Groq 雲端 STT）")
-        log(f"   • 時長：{fmt_ts(duration, duration >= 3600)}　語言：{lang}　段落：{len(segments)}")
-        log(f"   • 逐字稿骨架：{md_path}")
-        log(f"   • Groq JSON：{json_path}")
-        return 0
-    finally:
-        if tmp_path is not None and tmp_path.exists():
-            try:
-                tmp_path.unlink()
-            except OSError:
-                pass
-
-
-def main() -> None:
-    ap = argparse.ArgumentParser(
-        description="audio-to-md Phase 1：Groq 雲端 STT 把影音轉成 Markdown 逐字稿骨架。"
-    )
-    ap.add_argument("input", help="音訊或影片檔")
-    ap.add_argument("-o", "--output", default=None, help="輸出資料夾（預設：輸入檔所在目錄）")
-    ap.add_argument("--model", default=DEFAULT_MODEL, help=f"Groq STT 模型（預設 {DEFAULT_MODEL}）")
-    ap.add_argument("--language", default="zh", help="語言代碼（中文建議 zh；也可 auto）")
-    ap.add_argument("--chunk-min", type=int, default=DEFAULT_CHUNK_MIN, help="每段約 N 分鐘")
-    ap.add_argument(
-        "--prompt",
-        default=(
-            "以下為繁體中文口語內容。專有名詞：Codex、ChatGPT、OpenAI、"
-            "NotebookLM、Gemini、Groq、Whisper、GitHub、Obsidian、"
-            "Firebase、Netlify、Python、JavaScript。"
-        ),
-        help="傳給 Groq Whisper 的詞彙提示。",
-    )
-    sys.exit(process(ap.parse_args()))
-
-
-if __name__ == "__main__":
-    main()
-CODEX_LAZYPACK_AUDIO_TO_MD_GROQ_PY
+mkdir -p "{{SYNC_ROOT}}/skills/audio-to-md/scripts"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py" <<'AGENT_LAZYPACK_AUDIO_TO_MD_GROQ_PY'
+# Python source here
+AGENT_LAZYPACK_AUDIO_TO_MD_GROQ_PY
 ```
 
 踩坑：
@@ -1055,7 +687,7 @@ CODEX_LAZYPACK_AUDIO_TO_MD_GROQ_PY
 
 ### 4. Desktop / Web 沙箱不是本機轉錄位置
 
-若使用者在 Claude Desktop 或網頁上傳影音檔，不代表可以在沙箱下載 Whisper 模型。除非是在本機終端環境且有外網，否則本機 Whisper 應由使用者電腦上的 launcher 執行。
+若使用者在任一 Agent Desktop／網頁／沙箱上傳影音檔，不代表當前環境可以下載 Whisper 模型或執行本機 runtime。除非當前 Codex、Claude 或 AntiGravity 環境可使用本機終端且有外網，否則本機 Whisper 應由使用者電腦上的 launcher 執行。
 
 ### 5. Groq 大檔案需要壓縮或切段
 
@@ -1072,44 +704,91 @@ Groq 上傳有大小限制。`audio_to_md_groq.py` 會在超過安全大小時�
 ## 安裝後驗證清單
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/audio-to-md/SKILL.md"
-test -f "{{CODEX_HOME}}/skills/audio-to-md/references/usage-guide.md"
-test -f "{{CODEX_HOME}}/skills/audio-to-md/references/execution-notes.md"
-test -f "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md.py"
-test -f "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
-python3 -m py_compile "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
-{{CODEX_HOME}}/audio-to-md/audio-to-md --help
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md"
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/references/usage-guide.md"
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/references/execution-notes.md"
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md.py"
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
+python3 -m py_compile "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
+~/.codex/audio-to-md/audio-to-md --help
 ```
 
 Groq route 驗證前先確認：
 
 ```bash
-test -f {{SECRETS_DIR}}/groq_api_key
-stat -f '%Sp %N' {{SECRETS_DIR}}/groq_api_key
+test -f ~/.codex/secrets/groq_api_key
+stat -f '%Sp %N' ~/.codex/secrets/groq_api_key
 ```
 
 權限應為 `-rw-------`。
-CODEX_LAZYPACK_AUDIO_TO_MD_EXECUTION_NOTES_MD
+AGENT_LAZYPACK_AUDIO_TO_MD_REFERENCES_EXECUTION_NOTES_MD_F65D5054D2
 
-# audio-to-md/scripts/requirements.txt
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/requirements.txt")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/requirements.txt" <<'CODEX_LAZYPACK_AUDIO_TO_MD_REQUIREMENTS_TXT'
-faster-whisper==1.2.1
-CODEX_LAZYPACK_AUDIO_TO_MD_REQUIREMENTS_TXT
+# audio-to-md/references/usage-guide.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/references/usage-guide.md")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/references/usage-guide.md" <<'AGENT_LAZYPACK_AUDIO_TO_MD_REFERENCES_USAGE_GUIDE_MD_08E0917ECC'
+# audio-to-md 參考：三 Agent 共用 Phase 2 指引
+
+逐字稿骨架 `*_逐字稿知識庫.md` 可由本地 Whisper turbo 或 Groq 雲端 STT 產生（帶時間戳）。執行 Phase 1 前必須先詢問使用者要用哪個引擎；本機 Whisper 與 Groq 是平行選項，沒有預設值。Groq 會上傳音檔，必須取得使用者同意。
+
+不論 Phase 1 來源是哪一個，輸出 Markdown 後的 Phase 2 完全相同。當前 Codex、Claude 或 AntiGravity 在 Phase 2 都做三件事：
+
+## 1. 校稿（兩層；最重要）
+### Layer 1 — 語感校稿（鐵律不變）
+對每段時間戳逐字做：
+- 簡體 → 繁體（台灣用語）。
+- 修 Whisper 錯字、加標點、合理斷句；校稿後可把零碎時間戳行整併成通順段落（保留段首時間戳）。
+- 多人對話：依語氣／內容標講者（如 **講者A：** / **講者B：**），Whisper 不做語者分離。
+- **鐵律**：只做上述。**禁止**憑空改寫語意或新增講者沒說的話；聽不清標「（聽不清）」，**絕不編造**。
+
+### Layer 2 — 專名查證（新增；解決「自信地把生僻專名聽成同音常見詞」）
+語感層抓不到「替換後通順但事實錯」的專名（企業重心→勤業眾信、串上閒絲→川上賢司、鬼舞者→鬼武者、Tina Selig→Seelig）。
+這是 ASR 機率特性：生僻人名/機構/譯名在模型候選裡沒有正確答案，機率集中到常見同音詞，信心反而很高（avg_logprob 看起來健康）——**不是不確定，是自信地選錯**，所以靠語感與信心分數都抓不到。
+做法：用**語法角色**篩候選（與信心分數無關）——
+- 句子主語且後接需要行為者的動詞；後接稱謂/類別詞（XX 教授・公司・遊戲・書）；前有「叫做」「就是」引介；你對其真實性沒高把握的人名/地名/品牌/書名/機構；標 🔸 的片段優先。
+篩出候選（通常 5-20 個）→ 逐一 **WebSearch 查證**：查到更可信版本→修正並留痕 `（查證：原「企業重心」→「勤業眾信」）`；查不到→保留原字＋標 `⚠️ 專名待查證`；無 WebSearch→全部標 `⚠️ 專名待查證`，不憑空猜改。
+**修正必須有外部依據＋留痕**（精細化鐵律而非放寬：使用者隨時看得到「改了什麼、為什麼」）。
+🔸 = Phase 1 低信心片段（avg_logprob 偏低），優先複核。
+
+## 2. 段落摘要
+每個 `## ⏱ 時間段` 下的 `段落摘要` 空格：填 2-3 句該段重點 ＋ 4-8 個檢索關鍵字。
+
+## 3. 全篇重點
+最後 `重點 / 待辦 / 金句` 空格：3-5 個重點、（若有）待辦／行動項、1-3 句可摘金句。
+
+## 規則
+- 引擎選擇只影響 Phase 1；文字輸出後不要切換成 video-processing 的字幕工作流。
+- 不要自行替使用者選擇引擎；即使其中一個引擎已安裝或曾在測試中較好，仍要在執行前詢問。
+- 只替換 placeholder 內容；時間戳、段落標題、frontmatter 不動。
+- 長逐字稿分段處理、可多輪。
+- 繁中（台灣用語）。
+- 校稿是「花少量 token 的判斷活」——轉錄（重活）已由本地 Whisper 免費做掉。
+
+## 引擎比較基準
+
+同一份音檔若需要比較本機 Whisper 與 Groq，依序看：
+
+- 完整性：是否漏字、多字、吞掉語助詞或時間戳行。
+- 正確性：是否有同音錯字、簡繁錯誤、專名錯誤。
+- 可讀性：標點、斷句、繁中輸出是否接近可校稿狀態。
+- 時間戳：segments 是否足夠細，是否適合後續逐段校稿。
+- 隱私與成本：是否可接受雲端上傳、API key 與服務成本。
+
+Arry `ref_voice.wav` 實測：本機 Whisper 完整但輸出簡體，且將「清楚發音」聽成「清除發音」；Groq 直接輸出繁中並正確辨識「清楚發音」。在這段短中文乾淨錄音上，Groq 品質較優。這是比較結果，不是預設路由；後續每次執行仍要先詢問使用者。
+AGENT_LAZYPACK_AUDIO_TO_MD_REFERENCES_USAGE_GUIDE_MD_08E0917ECC
 
 # audio-to-md/scripts/audio_to_md.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md.py")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md.py" <<'CODEX_LAZYPACK_AUDIO_TO_MD_AUDIO_TO_MD_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md.py")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md.py" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_AUDIO_TO_MD_PY_2FE9C8C130'
 #!/usr/bin/env python3
 """
 audio_to_md.py  v1.2.0 ── audio-to-md｜Phase 1：本地把「影音的聲音」轉成逐字稿骨架
 ─────────────────────────────────────────────────────────────────────────────
 把音訊或影片（直接讀，自動抽音軌）用**本地 Whisper** 轉成一份帶時間戳的
-Markdown 逐字稿骨架——留好「校稿、段落摘要、重點」空格，交給 Claude（Phase 2）填。
+Markdown 逐字稿骨架——留好「校稿、段落摘要、重點」空格，交給當前 Codex、Claude 或 AntiGravity（Phase 2）填。
 
 設計哲學（沿襲 doc-to-md / vlm-to-md 家族）＋ 指揮 AI 的分工：
   • 「聽打」這種機械重活 → 本地 Whisper（免費、離線、0 token、0 API key）
-  • 「校稿、理解、抓重點、寫摘要」→ 交給 Claude（Phase 2，花少量 token）
+  • 「校稿、理解、抓重點、寫摘要」→ 交給當前 Agent（Phase 2，花少量 token）
   把對的工序派給對的工具，就是最省 token 的 AI 指揮。
 
 引擎：faster-whisper（跨平台、CPU 友善、內含 PyAV 解碼，不需系統 ffmpeg）。
@@ -1167,8 +846,8 @@ def fmt_ts(sec: float, with_hour: bool) -> str:
 
 PLACEHOLDER_SUMMARY = (
     "> [!note] 段落摘要\n"
-    "> **摘要**：（Claude 將填入這段的 2-3 句重點）\n"
-    "> **關鍵字**：（Claude 將填入 4-8 個檢索關鍵字）"
+    "> **摘要**：（當前 Agent 將填入這段的 2-3 句重點）\n"
+    "> **關鍵字**：（當前 Agent 將填入 4-8 個檢索關鍵字）"
 )
 
 
@@ -1214,8 +893,8 @@ def build_scaffold(stem: str, source: str, model: str, language: str,
         "> 6. **不覆寫原檔**：校稿存到新檔 `_校稿.md`，保留原始骨架供自檢對拍。\n\n"
     )
     head += (
-        "> [!info] 這份還沒完成——本地 Whisper 已把「聲音」轉成字，等 Claude 來「理解」\n"
-        "> Phase 1（本地、0 token）已完成轉錄。請在 Claude 裡讓它做 Phase 2：\n"
+        "> [!info] 這份還沒完成——本地 Whisper 已把「聲音」轉成字，等當前 Agent 來「理解」\n"
+        "> Phase 1（本地、0 token）已完成轉錄。請在 Codex、Claude 或 AntiGravity 任一當前 Agent 裡做 Phase 2：\n"
         "> 1) **校稿**：簡體→繁體（台灣用語）、修錯字、加標點、合理斷句（**不要改變語意**）。\n"
         "> 2) 把每段的 `段落摘要` 空格填好。3) 最後補「全篇重點 / 待辦 / 金句」。\n"
         "> 這一步花的 token 很少——重活（聽打）本地免費做掉了。\n\n"
@@ -1248,9 +927,9 @@ def build_scaffold(stem: str, source: str, model: str, language: str,
 
     tail = (
         "\n---\n\n"
-        "## 📌 全篇重點（Claude 填）\n\n"
+        "## 📌 全篇重點（當前 Agent 填）\n\n"
         "> [!note] 重點 / 待辦 / 金句\n"
-        "> **3-5 個重點**：（Claude 將填入）\n"
+        "> **3-5 個重點**：（當前 Agent 將填入）\n"
         "> **待辦或行動項**：（若有）\n"
         "> **可摘金句**：（1-3 句）\n"
     )
@@ -1273,7 +952,7 @@ def build_guide(stem: str, duration: float, written: list) -> str:
     lines += [
         "",
         "怎麼做（重點：一個檔一次，不要一次貼多個 part）：",
-        "  1. 把 part1 檔丟回 Claude，說：",
+        "  1. 把 part1 檔交給當前 Agent，說：",
         "     「幫我校稿這份逐字稿，逐字不要摘要、保留每個時間戳：<part1 路徑>」",
         "  2. 校好後存成 part1 的 _校稿.md。",
         "  3. 換 part2，重複步驟 1–2……直到所有 part 都校完。",
@@ -1350,7 +1029,7 @@ def process(input_path: str, out_dir: str, model: str, language: str,
         return p
 
     # 長稿自動分檔：把「隔離」放在 Phase 1 輸出。每個短檔都能在一次校稿裡完整吐完，
-    # 不會撞輸出上限→被 AI 摘要；Desktop 也適用（不需 Claude Code / subagent / API）。
+    # 不會撞輸出上限而被摘要；任一 Agent Desktop 皆適用，不依賴 subagent 或 API。
     part_chunks = max(1, round(part_min / chunk_min)) if part_min > 0 else 1
     part_sec = part_chunks * chunk_min * 60
     do_split = split_min > 0 and duration > split_min * 60
@@ -1398,13 +1077,13 @@ def process(input_path: str, out_dir: str, model: str, language: str,
             log(f"     - {name}（{ps}–{pe}，{ns} 段）")
         log(f"   • 校稿說明：{stem}_長稿校稿說明.txt")
         log("")
-        log("👉 下一步（Phase 2）：一個 part 檔丟回 Claude 校稿一次，校完換下一個，最後依序接起來。")
+        log("👉 下一步（Phase 2）：一個 part 檔交給當前 Agent 校稿一次，校完換下一個，最後依序接起來。")
         log('   對每個檔說：「幫我校稿這份逐字稿，逐字不要摘要、保留每個時間戳：<part 路徑>」')
     else:
         out_path = os.path.join(out_dir, written[0][0])
         log(f"   • 逐字稿骨架：{out_path}")
         log("")
-        log("👉 下一步（Phase 2，花少量 token）：在 Claude 裡說")
+        log("👉 下一步（Phase 2，花少量 token）：在當前 Codex、Claude 或 AntiGravity 裡說")
         log(f'   「幫我校稿並完成這份逐字稿知識庫（逐字不要摘要、保留時間戳）：{out_path}」')
     log(f"[DONE] Phase 1 done. output dir: {out_dir}")
     return 0
@@ -1440,11 +1119,11 @@ def main():
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_AUDIO_TO_MD_AUDIO_TO_MD_PY
+AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_AUDIO_TO_MD_PY_2FE9C8C130
 
 # audio-to-md/scripts/audio_to_md_groq.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py" <<'CODEX_LAZYPACK_AUDIO_TO_MD_GROQ_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_AUDIO_TO_MD_GROQ_PY_F42408E099'
 #!/usr/bin/env python3
 """
 audio_to_md_groq.py -- Groq cloud STT route for audio-to-md.
@@ -1505,8 +1184,8 @@ def load_api_key() -> str:
     if key_file.exists():
         return key_file.read_text(encoding="utf-8").strip()
     sys.exit(
-        "[ERR] 找不到 Groq API key：請設定 GROQ_API_KEY，或把 key 存到 "
-        "{{SECRETS_DIR}}/groq_api_key 並設為 600 權限。"
+        "[ERR] 找不到 Groq 憑證：請設定 Groq 轉錄憑證，或存到 "
+        "~/.codex/secrets/groq_api_key 並設為 600 權限。"
     )
 
 
@@ -1653,8 +1332,8 @@ def build_scaffold(
         "> 5. **不覆寫原檔**：校稿存到新檔 `_校稿.md`，保留原始骨架供自檢對拍。\n\n"
         "> [!warning] 雲端 STT 邊界\n"
         "> 這一路線會把音訊/影片上傳到 Groq。只有在使用者接受雲端轉錄時使用；"
-        "敏感、不可外傳、或不想使用 API key 的內容改用本機 Whisper 路線。\n\n"
-        "> [!info] 這份還沒完成——Groq 已把「聲音」轉成字，等 Codex 來「理解」\n"
+        "不適合雲端處理的內容需改走本機轉錄流程。\n\n"
+        "> [!info] 這份還沒完成——Groq 已把「聲音」轉成字，等當前 Agent 來「理解」\n"
         "> 1) **校稿**：簡繁、修錯字、加標點、合理斷句（不要改變語意）。\n"
         "> 2) 把每段的 `段落摘要` 空格填好。3) 最後補「全篇重點 / 待辦 / 金句」。\n\n"
         "> [!tip] 兩層校稿（語感層 + 專名查證層）\n"
@@ -1666,8 +1345,8 @@ def build_scaffold(
     cur_chunk = -1
     placeholder = (
         "> [!note] 段落摘要\n"
-        "> **摘要**：（Codex 將填入這段的 2-3 句重點）\n"
-        "> **關鍵字**：（Codex 將填入 4-8 個檢索關鍵字）"
+        "> **摘要**：（當前 Agent 將填入這段的 2-3 句重點）\n"
+        "> **關鍵字**：（當前 Agent 將填入 4-8 個檢索關鍵字）"
     )
     for s in segments:
         idx = int(s["start"] // chunk_sec)
@@ -1680,9 +1359,9 @@ def build_scaffold(
         body += f"**[{fmt_ts(s['start'], with_hour)}]** {s['text']}\n\n"
     tail = (
         "\n---\n\n"
-        "## 📌 全篇重點（Codex 填）\n\n"
+        "## 📌 全篇重點（當前 Agent 填）\n\n"
         "> [!note] 重點 / 待辦 / 金句\n"
-        "> **3-5 個重點**：（Codex 將填入）\n"
+        "> **3-5 個重點**：（當前 Agent 將填入）\n"
         "> **待辦或行動項**：（若有）\n"
         "> **可摘金句**：（1-3 句）\n"
     )
@@ -1764,197 +1443,11 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_AUDIO_TO_MD_GROQ_PY
-
-# audio-to-md/scripts/install.sh
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/install.sh")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/install.sh" <<'CODEX_LAZYPACK_AUDIO_TO_MD_INSTALL_SH'
-#!/bin/bash
-# ╔════════════════════════════════════════════════╗
-# ║   audio-to-md 一鍵安裝器（Mac / Linux）          ║
-# ║   本地 Whisper：把影音的聲音轉成 Markdown 逐字稿 ║
-# ╚════════════════════════════════════════════════╝
-#
-# 使用方式：打開 Terminal → 輸入 bash 加空格 → 拖入此檔案 → 按 Enter
-
-set -e
-trap 'if [ -n "${EXTRACT_DIR:-}" ]; then rm -rf "$EXTRACT_DIR"; fi' EXIT
-
-INSTALL_DIR="${CODEX_HOME}/audio-to-md"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-EXTRACT_DIR=""
-WHISPER_MODEL="large-v3-turbo"
-
-# 支援自足安裝：偵測是否在技能資料夾中執行
-if [ -f "$(dirname "$SCRIPT_DIR")/SKILL.md" ]; then
-    SKILL_SRC="$(cd "$SCRIPT_DIR/.." && pwd)"
-else
-    # Fallback 舊安裝包或解壓縮模式
-    if [ ! -f "$SCRIPT_DIR/skill.zip" ] && [ -f "$SCRIPT_DIR/audio_to_md.py" ]; then
-        SKILL_SRC="$SCRIPT_DIR"
-    else
-        if [ ! -f "$SCRIPT_DIR/skill.zip" ]; then
-            echo "找不到 skill.zip，請確認安裝包已完整解壓縮。"; exit 1
-        fi
-        EXTRACT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/audio-to-md-skill.XXXXXX")"
-        echo "📦 解壓縮技能檔..."
-        unzip -q "$SCRIPT_DIR/skill.zip" -d "$EXTRACT_DIR"
-        SKILL_SRC="$EXTRACT_DIR/skill"
-    fi
-fi
-
-if [ ! -f "$SKILL_SRC/scripts/requirements.txt" ]; then
-    echo "找不到 $SKILL_SRC/scripts/requirements.txt，請確認安裝包完整。"; exit 1
-fi
-
-echo ""
-echo "╔════════════════════════════════════════════╗"
-echo "║   audio-to-md 安裝程式 v1.2.0              ║"
-echo "║   影音 → 逐字稿知識庫（本地 Whisper turbo）  ║"
-echo "╚════════════════════════════════════════════╝"
-echo ""
-
-# ── Step 1/4：Python ───────────────────────────────────────────────────────
-echo "🔍 Step 1/4：檢查 Python 版本..."
-PY=""
-
-OS_NAME="$(uname -s 2>/dev/null || echo unknown)"
-MAC_MAJOR=0
-if [ "$OS_NAME" = "Darwin" ] && command -v sw_vers >/dev/null 2>&1; then
-    MAC_MAJOR="$(sw_vers -productVersion 2>/dev/null | cut -d. -f1)"
-fi
-MAX_PY_MINOR=14
-if [ "$OS_NAME" = "Darwin" ] && [ "${MAC_MAJOR:-0}" -lt 14 ] 2>/dev/null; then
-    # onnxruntime/faster-whisper wheels are most reliable on older macOS with Python 3.9-3.12.
-    MAX_PY_MINOR=12
-fi
-
-supports_python_version() {
-    major="$1"
-    minor="$2"
-    [ "$major" -eq 3 ] 2>/dev/null && [ "$minor" -ge 9 ] 2>/dev/null && [ "$minor" -le "$MAX_PY_MINOR" ] 2>/dev/null
-}
-
-for cmd in python3.12 python3.11 python3.10 python3.9 python3.14 python3.13 python3; do
-    if command -v "$cmd" &>/dev/null; then
-        ver=$("$cmd" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
-        major=$(echo "$ver" | cut -d. -f1); minor=$(echo "$ver" | cut -d. -f2)
-        if supports_python_version "$major" "$minor"; then
-            PY="$cmd"; echo "   ✅ 找到 $cmd (Python $ver)"; break
-        else
-            echo "   ⏭️  $cmd 版本 $ver 不在本工具支援範圍，跳過"
-        fi
-    fi
-done
-if [ -z "$PY" ]; then
-    echo "   ❌ 找不到相容的 Python"
-    echo "   👉 前往 https://www.python.org/downloads/ 下載 Python 3.12，裝完重開 Terminal 再執行"
-    if [ "$OS_NAME" = "Darwin" ] && [ "${MAC_MAJOR:-0}" -lt 14 ] 2>/dev/null; then
-        echo "   ℹ️  你的 macOS 較舊，請使用 Python 3.12，避免 3.13+ 的 onnxruntime 相容性問題。"
-    fi
-    open "https://www.python.org/downloads/" 2>/dev/null || true; exit 1
-fi
-
-# ── Step 2/4：venv ─────────────────────────────────────────────────────────
-echo ""
-echo "📦 Step 2/4：建立虛擬環境..."
-mkdir -p "$INSTALL_DIR"
-if [ -x "$INSTALL_DIR/venv/bin/python3" ]; then
-    venv_ver=$("$INSTALL_DIR/venv/bin/python3" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null || echo "0.0")
-    venv_major=$(echo "$venv_ver" | cut -d. -f1); venv_minor=$(echo "$venv_ver" | cut -d. -f2)
-    if supports_python_version "$venv_major" "$venv_minor"; then
-        echo "   ⏭️  虛擬環境已存在，跳過"
-    else
-        echo "   ⚠ 舊虛擬環境 Python $venv_ver 不相容，重新建立..."
-        rm -rf "$INSTALL_DIR/venv"
-    fi
-elif [ -d "$INSTALL_DIR/venv" ]; then
-    echo "   ⚠ 舊虛擬環境不完整，重新建立..."
-    rm -rf "$INSTALL_DIR/venv"
-fi
-if [ ! -x "$INSTALL_DIR/venv/bin/python3" ]; then
-    "$PY" -m venv "$INSTALL_DIR/venv"
-    echo "   ✅ $INSTALL_DIR/venv"
-fi
-
-# ── Step 3/4：套件（faster-whisper，內含 PyAV 可直接解影音）──────────────────
-echo ""
-echo "📥 Step 3/4：安裝 faster-whisper（含影音解碼，可能 1-3 分鐘）..."
-"$INSTALL_DIR/venv/bin/pip" install --upgrade pip --quiet 2>/dev/null
-if ! "$INSTALL_DIR/venv/bin/pip" install -r "$SKILL_SRC/scripts/requirements.txt" --quiet; then
-    echo "   ❌ 套件安裝失敗。請確認 Python 版本為 3.12，或截圖回報老師。"
-    exit 1
-fi
-echo "   ✅ 套件安裝完成"
-
-cp "$SKILL_SRC/scripts/audio_to_md.py" "$INSTALL_DIR/"
-cp "$SKILL_SRC/scripts/requirements.txt" "$INSTALL_DIR/"
-cat > "$INSTALL_DIR/audio-to-md" << 'LAUNCHER'
-#!/bin/bash
-DIR="${CODEX_HOME}/audio-to-md"
-"$DIR/venv/bin/python3" "$DIR/audio_to_md.py" "$@"
-LAUNCHER
-chmod +x "$INSTALL_DIR/audio-to-md"
-
-# 確保技能目錄 scripts/ 下的 transcribe.command 擁有可執行權限
-if [ -f "$SKILL_SRC/scripts/transcribe.command" ]; then
-    chmod +x "$SKILL_SRC/scripts/transcribe.command"
-fi
-
-SHELL_RC=""
-if [ -f "$HOME/.zshrc" ]; then SHELL_RC="$HOME/.zshrc"
-elif [ -f "$HOME/.bash_profile" ]; then SHELL_RC="$HOME/.bash_profile"
-elif [ -f "$HOME/.bashrc" ]; then SHELL_RC="$HOME/.bashrc"; fi
-if [ -n "$SHELL_RC" ] && ! grep -q "audio-to-md" "$SHELL_RC" 2>/dev/null; then
-    { echo ""; echo '# audio-to-md'; echo 'export PATH="${CODEX_HOME}/audio-to-md:$PATH"'; } >> "$SHELL_RC"
-fi
-
-# ── Step 4/4：預先下載 Whisper turbo 模型（約 1.5GB）─────────────────────────
-echo ""
-echo "🧠 Step 4/4：下載 Whisper turbo 模型（large-v3-turbo，約 1.5GB）..."
-echo "   ⏳ 這是 audio-to-md 比文字工具多的一步，第一次需要幾分鐘，請耐心等。"
-echo "      （中文一律用 turbo＝品質底線，不降級成小模型）"
-set +e   # 模型下載失敗（網路中斷）不應中止整個安裝；第一次使用時會自動補下載
-"$INSTALL_DIR/venv/bin/python3" - "$WHISPER_MODEL" << 'PYDL'
-import sys
-from faster_whisper import WhisperModel
-WhisperModel(sys.argv[1], device="cpu", compute_type="int8")
-print("   ✅ 模型已就緒：" + sys.argv[1])
-PYDL
-DL_RC=$?
-set -e
-if [ "$DL_RC" -ne 0 ]; then
-    echo "   ⚠ 模型這次沒下載完（多半是網路）——不影響安裝，第一次轉檔時會自動補下載，或重跑本安裝程式。"
-fi
-
-# ── 驗證 ────────────────────────────────────────────────────────────────────
-echo ""
-echo "🧪 驗證安裝..."
-"$INSTALL_DIR/venv/bin/python3" -c "import faster_whisper, av, ctranslate2; print('   核心套件 OK')"
-"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/audio_to_md.py" --help >/dev/null 2>&1 && echo "   ✅ 驗證通過！"
-
-echo ""
-echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║                      🎉 安裝完成！                          ║"
-echo "╠══════════════════════════════════════════════════════════════╣"
-echo "║  在 Claude Desktop 加入技能：                                ║"
-echo "║  1. Customize → Skills → + 號 → Create Skill → Upload       ║"
-echo "║  2. 上傳此技能目錄即可使用                                   ║"
-echo "║                                                            ║"
-echo "║  最簡單用法：                                               ║"
-echo "║  直接在全域技能的 scripts/ 目錄下雙擊執行：                 ║"
-echo "║  👉 transcribe.command (轉逐字稿.command)                   ║"
-echo "║  把影音拖進視窗按 Enter 即可，成品會直接生成於原始檔旁。      ║"
-echo "╚══════════════════════════════════════════════════════════════╝"
-echo ""
-echo "  拿到 .md 後拖回 Claude，說「幫我校稿並完成這份逐字稿知識庫」。"
-echo "  🔧 也可手動：$INSTALL_DIR/audio-to-md ~/Desktop/錄音.m4a"
-echo ""
-CODEX_LAZYPACK_AUDIO_TO_MD_INSTALL_SH
+AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_AUDIO_TO_MD_GROQ_PY_F42408E099
 
 # audio-to-md/scripts/install.bat
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/install.bat")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/install.bat" <<'CODEX_LAZYPACK_AUDIO_TO_MD_INSTALL_BAT'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/install.bat")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/install.bat" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_INSTALL_BAT_63EC789819'
 @echo off
 chcp 65001 >nul 2>nul
 setlocal EnableExtensions EnableDelayedExpansion
@@ -2083,10 +1576,10 @@ echo    Directly double click the batch launcher in the skill directory:
 echo    👉 scripts\transcribe.bat
 echo    Then drag your video/audio file onto it and press Enter.
 echo.
-echo [Part 2 - Claude skill] Add it in Claude Desktop:
-echo    1. Customize - Skills - + - Create Skill - Upload a skill
-echo    2. upload this skill directory
-echo    3. confirm "audio-to-md" appears in Skills
+echo [Part 2 - three-agent shared skill]
+echo    1. Run LazyPack Item 16 to prepare Codex, Claude, and AntiGravity entrypoints.
+echo    2. Reload each installed Agent.
+echo    3. Confirm "audio-to-md" appears in each Agent's Skills list.
 echo.
 pause
 exit /b 0
@@ -2098,67 +1591,234 @@ for /f "usebackq tokens=1,2 delims=|" %%v in (`%* -c "import sys; exe=sys.execut
     set "PY_VER=%%v"
 )
 exit /b 0
-CODEX_LAZYPACK_AUDIO_TO_MD_INSTALL_BAT
+AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_INSTALL_BAT_63EC789819
 
-# audio-to-md/scripts/transcribe.command
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.command")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.command" <<'CODEX_LAZYPACK_AUDIO_TO_MD_TRANSCRIBE_COMMAND'
+# audio-to-md/scripts/install.sh
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/install.sh")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/install.sh" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_INSTALL_SH_E076E43CB8'
 #!/bin/bash
-# audio-to-md｜雙擊我，把影片/錄音檔拖進視窗按 Enter，就會轉成逐字稿知識庫。
-DIR="${CODEX_HOME}/audio-to-md"
+# ╔════════════════════════════════════════════════╗
+# ║   audio-to-md 一鍵安裝器（Mac / Linux）          ║
+# ║   本地 Whisper：把影音的聲音轉成 Markdown 逐字稿 ║
+# ╚════════════════════════════════════════════════╝
+#
+# 使用方式：打開 Terminal → 輸入 bash 加空格 → 拖入此檔案 → 按 Enter
 
-if [ ! -x "$DIR/venv/bin/python3" ] || [ ! -f "$DIR/audio_to_md.py" ]; then
-    echo "找不到本機引擎（$DIR）。"
-    echo "請先跑安裝包的 install.sh 安裝一次，再用這個檔。"
-    read -r -p "按 Enter 關閉..." _
+set -e
+trap 'if [ -n "${EXTRACT_DIR:-}" ]; then rm -rf "$EXTRACT_DIR"; fi' EXIT
+
+INSTALL_DIR="$HOME/.codex/audio-to-md"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+EXTRACT_DIR=""
+WHISPER_MODEL="large-v3-turbo"
+
+# 支援自足安裝：偵測是否在技能資料夾中執行
+if [ -f "$(dirname "$SCRIPT_DIR")/SKILL.md" ]; then
+    SKILL_SRC="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+    # Fallback 舊安裝包或解壓縮模式
+    if [ ! -f "$SCRIPT_DIR/skill.zip" ] && [ -f "$SCRIPT_DIR/audio_to_md.py" ]; then
+        SKILL_SRC="$SCRIPT_DIR"
+    else
+        if [ ! -f "$SCRIPT_DIR/skill.zip" ]; then
+            echo "找不到 skill.zip，請確認安裝包已完整解壓縮。"; exit 1
+        fi
+        EXTRACT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/audio-to-md-skill.XXXXXX")"
+        echo "📦 解壓縮技能檔..."
+        unzip -q "$SCRIPT_DIR/skill.zip" -d "$EXTRACT_DIR"
+        SKILL_SRC="$EXTRACT_DIR/skill"
+    fi
+fi
+
+if [ ! -f "$SKILL_SRC/scripts/requirements.txt" ]; then
+    echo "找不到 $SKILL_SRC/scripts/requirements.txt，請確認安裝包完整。"; exit 1
+fi
+
+echo ""
+echo "╔════════════════════════════════════════════╗"
+echo "║   audio-to-md 安裝程式 v1.2.0              ║"
+echo "║   影音 → 逐字稿知識庫（本地 Whisper turbo）  ║"
+echo "╚════════════════════════════════════════════╝"
+echo ""
+
+# ── Step 1/4：Python ───────────────────────────────────────────────────────
+echo "🔍 Step 1/4：檢查 Python 版本..."
+PY=""
+
+OS_NAME="$(uname -s 2>/dev/null || echo unknown)"
+MAC_MAJOR=0
+if [ "$OS_NAME" = "Darwin" ] && command -v sw_vers >/dev/null 2>&1; then
+    MAC_MAJOR="$(sw_vers -productVersion 2>/dev/null | cut -d. -f1)"
+fi
+MAX_PY_MINOR=14
+if [ "$OS_NAME" = "Darwin" ] && [ "${MAC_MAJOR:-0}" -lt 14 ] 2>/dev/null; then
+    # onnxruntime/faster-whisper wheels are most reliable on older macOS with Python 3.9-3.12.
+    MAX_PY_MINOR=12
+fi
+
+supports_python_version() {
+    major="$1"
+    minor="$2"
+    [ "$major" -eq 3 ] 2>/dev/null && [ "$minor" -ge 9 ] 2>/dev/null && [ "$minor" -le "$MAX_PY_MINOR" ] 2>/dev/null
+}
+
+for cmd in python3.12 python3.11 python3.10 python3.9 python3.14 python3.13 python3; do
+    if command -v "$cmd" &>/dev/null; then
+        ver=$("$cmd" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
+        major=$(echo "$ver" | cut -d. -f1); minor=$(echo "$ver" | cut -d. -f2)
+        if supports_python_version "$major" "$minor"; then
+            PY="$cmd"; echo "   ✅ 找到 $cmd (Python $ver)"; break
+        else
+            echo "   ⏭️  $cmd 版本 $ver 不在本工具支援範圍，跳過"
+        fi
+    fi
+done
+if [ -z "$PY" ]; then
+    echo "   ❌ 找不到相容的 Python"
+    echo "   👉 前往 https://www.python.org/downloads/ 下載 Python 3.12，裝完重開 Terminal 再執行"
+    if [ "$OS_NAME" = "Darwin" ] && [ "${MAC_MAJOR:-0}" -lt 14 ] 2>/dev/null; then
+        echo "   ℹ️  你的 macOS 較舊，請使用 Python 3.12，避免 3.13+ 的 onnxruntime 相容性問題。"
+    fi
+    open "https://www.python.org/downloads/" 2>/dev/null || true; exit 1
+fi
+
+# ── Step 2/4：venv ─────────────────────────────────────────────────────────
+echo ""
+echo "📦 Step 2/4：建立虛擬環境..."
+mkdir -p "$INSTALL_DIR"
+if [ -x "$INSTALL_DIR/venv/bin/python3" ]; then
+    venv_ver=$("$INSTALL_DIR/venv/bin/python3" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null || echo "0.0")
+    venv_major=$(echo "$venv_ver" | cut -d. -f1); venv_minor=$(echo "$venv_ver" | cut -d. -f2)
+    if supports_python_version "$venv_major" "$venv_minor"; then
+        echo "   ⏭️  虛擬環境已存在，跳過"
+    else
+        echo "   ⚠ 舊虛擬環境 Python $venv_ver 不相容，重新建立..."
+        rm -rf "$INSTALL_DIR/venv"
+    fi
+elif [ -d "$INSTALL_DIR/venv" ]; then
+    echo "   ⚠ 舊虛擬環境不完整，重新建立..."
+    rm -rf "$INSTALL_DIR/venv"
+fi
+if [ ! -x "$INSTALL_DIR/venv/bin/python3" ]; then
+    "$PY" -m venv "$INSTALL_DIR/venv"
+    echo "   ✅ $INSTALL_DIR/venv"
+fi
+
+# ── Step 3/4：套件（faster-whisper，內含 PyAV 可直接解影音）──────────────────
+echo ""
+echo "📥 Step 3/4：安裝 faster-whisper（含影音解碼，可能 1-3 分鐘）..."
+"$INSTALL_DIR/venv/bin/pip" install --upgrade pip --quiet 2>/dev/null
+if ! "$INSTALL_DIR/venv/bin/pip" install -r "$SKILL_SRC/scripts/requirements.txt" --quiet; then
+    echo "   ❌ 套件安裝失敗。請確認 Python 版本為 3.12，或截圖回報老師。"
     exit 1
 fi
+echo "   ✅ 套件安裝完成"
 
-echo "============================================================"
-echo " audio-to-md 拖檔轉逐字稿"
-echo "============================================================"
-echo "把影片或錄音檔『拖進這個視窗』，然後按 Enter："
-read -r -e f
+cp "$SKILL_SRC/scripts/audio_to_md.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/requirements.txt" "$INSTALL_DIR/"
+cat > "$INSTALL_DIR/audio-to-md" << 'LAUNCHER'
+#!/bin/bash
+DIR="$HOME/.codex/audio-to-md"
+"$DIR/venv/bin/python3" "$DIR/audio_to_md.py" "$@"
+LAUNCHER
+chmod +x "$INSTALL_DIR/audio-to-md"
 
-# 去掉拖檔可能帶上的外層引號；否則把反斜線跳脫（空格/括號/&/'…）還原
-f="${f# }"; f="${f% }"
-if [ "${f#\"}" != "$f" ] && [ "${f%\"}" != "$f" ]; then
-    f="${f#\"}"; f="${f%\"}"
-elif [ "${f#\'}" != "$f" ] && [ "${f%\'}" != "$f" ]; then
-    f="${f#\'}"; f="${f%\'}"
-else
-    # Terminal 拖檔會把空格、括號、&、單引號等用反斜線跳脫 → 一律還原
-    f="$(printf '%s' "$f" | sed -E 's/\\(.)/\1/g')"
+# 確保技能目錄 scripts/ 下的 transcribe.command 擁有可執行權限
+if [ -f "$SKILL_SRC/scripts/transcribe.command" ]; then
+    chmod +x "$SKILL_SRC/scripts/transcribe.command"
 fi
 
-if [ -z "$f" ] || [ ! -f "$f" ]; then
-    echo "沒有收到有效的檔案路徑。"
-    read -r -p "按 Enter 關閉..." _
-    exit 1
+SHELL_RC=""
+if [ -f "$HOME/.zshrc" ]; then SHELL_RC="$HOME/.zshrc"
+elif [ -f "$HOME/.bash_profile" ]; then SHELL_RC="$HOME/.bash_profile"
+elif [ -f "$HOME/.bashrc" ]; then SHELL_RC="$HOME/.bashrc"; fi
+if [ -n "$SHELL_RC" ] && ! grep -q "audio-to-md" "$SHELL_RC" 2>/dev/null; then
+    { echo ""; echo '# audio-to-md'; echo 'export PATH="$HOME/.codex/audio-to-md:$PATH"'; } >> "$SHELL_RC"
 fi
 
-outdir="$(dirname "$f")"
+# ── Step 4/4：預先下載 Whisper turbo 模型（約 1.5GB）─────────────────────────
 echo ""
-echo "轉錄中：$(basename "$f")"
-echo "（第一次會下載語音模型約 1.5GB，需幾分鐘，請耐心等；之後就快）"
-"$DIR/venv/bin/python3" "$DIR/audio_to_md.py" "$f" -o "$outdir"
-rc=$?
-echo ""
-if [ "$rc" -eq 0 ]; then
-    open "$outdir" 2>/dev/null
-    echo "✅ 完成。輸出的『*_逐字稿知識庫.md』就在原始檔旁邊。"
-    echo "下一步：把那個 .md 拖回 Claude，說"
-    echo "「幫我校稿並完成這份逐字稿知識庫（簡繁/錯字/斷句＋段落摘要＋重點）」"
-else
-    echo "⚠ 轉檔沒成功，請截圖這個視窗回報老師。"
+echo "🧠 Step 4/4：下載 Whisper turbo 模型（large-v3-turbo，約 1.5GB）..."
+echo "   ⏳ 這是 audio-to-md 比文字工具多的一步，第一次需要幾分鐘，請耐心等。"
+echo "      （中文一律用 turbo＝品質底線，不降級成小模型）"
+set +e   # 模型下載失敗（網路中斷）不應中止整個安裝；第一次使用時會自動補下載
+"$INSTALL_DIR/venv/bin/python3" - "$WHISPER_MODEL" << 'PYDL'
+import sys
+from faster_whisper import WhisperModel
+WhisperModel(sys.argv[1], device="cpu", compute_type="int8")
+print("   ✅ 模型已就緒：" + sys.argv[1])
+PYDL
+DL_RC=$?
+set -e
+if [ "$DL_RC" -ne 0 ]; then
+    echo "   ⚠ 模型這次沒下載完（多半是網路）——不影響安裝，第一次轉檔時會自動補下載，或重跑本安裝程式。"
 fi
+
+# ── 驗證 ────────────────────────────────────────────────────────────────────
 echo ""
-read -r -p "按 Enter 關閉..." _
-CODEX_LAZYPACK_AUDIO_TO_MD_TRANSCRIBE_COMMAND
+echo "🧪 驗證安裝..."
+"$INSTALL_DIR/venv/bin/python3" -c "import faster_whisper, av, ctranslate2; print('   核心套件 OK')"
+"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/audio_to_md.py" --help >/dev/null 2>&1 && echo "   ✅ 驗證通過！"
+
+echo ""
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║                      🎉 安裝完成！                          ║"
+echo "╠══════════════════════════════════════════════════════════════╣"
+echo "║  三 Agent 共用 Skill 已安裝到共用主版本。                 ║"
+echo "║  請依 LazyPack Item 16 確認 Codex / Claude / AntiGravity 入口。 ║"
+echo "║  各 Agent 重載後用同一份 Markdown 做 Phase 2。             ║"
+echo "║                                                            ║"
+echo "║  最簡單用法：                                               ║"
+echo "║  直接在全域技能的 scripts/ 目錄下雙擊執行：                 ║"
+echo "║  👉 transcribe.command (轉逐字稿.command)                   ║"
+echo "║  把影音拖進視窗按 Enter 即可，成品會直接生成於原始檔旁。      ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+echo "  拿到 .md 後交給當前 Codex、Claude 或 AntiGravity，說「幫我校稿並完成這份逐字稿知識庫」。"
+echo "  🔧 也可手動：$INSTALL_DIR/audio-to-md ~/Desktop/錄音.m4a"
+echo ""
+AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_INSTALL_SH_E076E43CB8
+
+# audio-to-md/scripts/place_desktop_launcher.ps1
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/place_desktop_launcher.ps1")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/place_desktop_launcher.ps1" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_PLACE_DESKTOP_LAUNCHER_PS1_AEB4369737'
+# 把拖檔啟動器「直接放到桌面」成一個可拖放的 .bat（不用捷徑 .lnk）。
+# 為什麼不用捷徑：把檔案拖到「.bat 本體」上，Windows 才會可靠地把它當 %1 參數傳入；
+# 拖到「指向 .bat 的捷徑」在實機上不一定會傳參數（學員回報：視窗一閃就關、沒輸出）。
+# 本檔以 UTF-8 (含 BOM) 儲存，讓 Windows PowerShell 5.1 也能正確讀中文/emoji。
+# 用 GetFolderPath('Desktop') 取正確桌面（含 OneDrive 重新導向）；Copy-Item 為 Unicode-safe。
+$ErrorActionPreference = 'Stop'
+$installDir = Join-Path $env:USERPROFILE '.audio-to-md'
+$src        = Join-Path $installDir 'transcribe.bat'
+try {
+    if (-not (Test-Path $src)) {
+        Write-Host "   找不到 $src，略過放桌面啟動器。"
+        exit 0
+    }
+    $desktop = [Environment]::GetFolderPath('Desktop')
+    if ([string]::IsNullOrEmpty($desktop)) { $desktop = Join-Path $env:USERPROFILE 'Desktop' }
+    # 清掉舊版留下的壞捷徑(.lnk)：否則桌面會同時有 .lnk 和 .bat，隱藏副檔名時看起來一樣、學員會點到壞的那個。
+    $oldLnk = Join-Path $desktop '🎤 拖檔轉逐字稿.lnk'
+    if (Test-Path -LiteralPath $oldLnk) { Remove-Item -LiteralPath $oldLnk -Force -ErrorAction SilentlyContinue; Write-Host "   （已移除舊版桌面捷徑 .lnk）" }
+    $dest = Join-Path $desktop '🎤 拖檔轉逐字稿.bat'
+    Copy-Item -LiteralPath $src -Destination $dest -Force
+    Write-Host "   ✅ 桌面已放可拖放啟動器：🎤 拖檔轉逐字稿.bat"
+} catch {
+    Write-Host "   （桌面啟動器沒放成功，不影響使用：$($_.Exception.Message)）"
+    Write-Host "   你仍可用：$src（把檔案拖上去）"
+    exit 0
+}
+AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_PLACE_DESKTOP_LAUNCHER_PS1_AEB4369737
+
+# audio-to-md/scripts/requirements.txt
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/requirements.txt")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/requirements.txt" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_REQUIREMENTS_TXT_7A3CE58E94'
+faster-whisper==1.2.1
+AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_REQUIREMENTS_TXT_7A3CE58E94
 
 # audio-to-md/scripts/transcribe.bat
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.bat")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/transcribe.bat" <<'CODEX_LAZYPACK_AUDIO_TO_MD_TRANSCRIBE_BAT'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/transcribe.bat")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/transcribe.bat" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_TRANSCRIBE_BAT_5D0AEA4413'
 @echo off
 chcp 65001 >nul 2>nul
 setlocal EnableExtensions
@@ -2234,7 +1894,7 @@ if %FAIL% gtr 0 (
     echo All done ^(%DONE% file^(s^)^).
 )
 echo The transcript .md is saved NEXT TO your original file.
-echo Next step: drag that .md back into Claude to proofread/summarize.
+echo Next step: give that .md to the current Codex, Claude, or AntiGravity Agent for Phase 2.
 echo ------------------------------------------------------------
 echo.
 pause
@@ -2253,53 +1913,80 @@ rem -- safe log append (caller quotes the name; safe even inside () blocks / nam
 :logf
 >>"%LOG%" echo %~1 %~2 2>nul
 goto :eof
-CODEX_LAZYPACK_AUDIO_TO_MD_TRANSCRIBE_BAT
+AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_TRANSCRIBE_BAT_5D0AEA4413
 
-# audio-to-md/scripts/place_desktop_launcher.ps1
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/audio-to-md/scripts/place_desktop_launcher.ps1")"
-cat > "{{CODEX_HOME}}/skills/audio-to-md/scripts/place_desktop_launcher.ps1" <<'CODEX_LAZYPACK_AUDIO_TO_MD_PLACE_DESKTOP_LAUNCHER_PS1'
-# 把拖檔啟動器「直接放到桌面」成一個可拖放的 .bat（不用捷徑 .lnk）。
-# 為什麼不用捷徑：把檔案拖到「.bat 本體」上，Windows 才會可靠地把它當 %1 參數傳入；
-# 拖到「指向 .bat 的捷徑」在實機上不一定會傳參數（學員回報：視窗一閃就關、沒輸出）。
-# 本檔以 UTF-8 (含 BOM) 儲存，讓 Windows PowerShell 5.1 也能正確讀中文/emoji。
-# 用 GetFolderPath('Desktop') 取正確桌面（含 OneDrive 重新導向）；Copy-Item 為 Unicode-safe。
-$ErrorActionPreference = 'Stop'
-$installDir = Join-Path $env:USERPROFILE '.audio-to-md'
-$src        = Join-Path $installDir 'transcribe.bat'
-try {
-    if (-not (Test-Path $src)) {
-        Write-Host "   找不到 $src，略過放桌面啟動器。"
-        exit 0
-    }
-    $desktop = [Environment]::GetFolderPath('Desktop')
-    if ([string]::IsNullOrEmpty($desktop)) { $desktop = Join-Path $env:USERPROFILE 'Desktop' }
-    # 清掉舊版留下的壞捷徑(.lnk)：否則桌面會同時有 .lnk 和 .bat，隱藏副檔名時看起來一樣、學員會點到壞的那個。
-    $oldLnk = Join-Path $desktop '🎤 拖檔轉逐字稿.lnk'
-    if (Test-Path -LiteralPath $oldLnk) { Remove-Item -LiteralPath $oldLnk -Force -ErrorAction SilentlyContinue; Write-Host "   （已移除舊版桌面捷徑 .lnk）" }
-    $dest = Join-Path $desktop '🎤 拖檔轉逐字稿.bat'
-    Copy-Item -LiteralPath $src -Destination $dest -Force
-    Write-Host "   ✅ 桌面已放可拖放啟動器：🎤 拖檔轉逐字稿.bat"
-} catch {
-    Write-Host "   （桌面啟動器沒放成功，不影響使用：$($_.Exception.Message)）"
-    Write-Host "   你仍可用：$src（把檔案拖上去）"
-    exit 0
-}
-CODEX_LAZYPACK_AUDIO_TO_MD_PLACE_DESKTOP_LAUNCHER_PS1
+# audio-to-md/scripts/transcribe.command
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/transcribe.command")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/transcribe.command" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_TRANSCRIBE_COMMAND_738AE21A9D'
+#!/bin/bash
+# audio-to-md｜雙擊我，把影片/錄音檔拖進視窗按 Enter，就會轉成逐字稿知識庫。
+DIR="$HOME/.codex/audio-to-md"
 
-echo "audio-to-md skill installed at {{CODEX_HOME}}/skills/audio-to-md"
+if [ ! -x "$DIR/venv/bin/python3" ] || [ ! -f "$DIR/audio_to_md.py" ]; then
+    echo "找不到本機引擎（$DIR）。"
+    echo "請先跑安裝包的 install.sh 安裝一次，再用這個檔。"
+    read -r -p "按 Enter 關閉..." _
+    exit 1
+fi
+
+echo "============================================================"
+echo " audio-to-md 拖檔轉逐字稿"
+echo "============================================================"
+echo "把影片或錄音檔『拖進這個視窗』，然後按 Enter："
+read -r -e f
+
+# 去掉拖檔可能帶上的外層引號；否則把反斜線跳脫（空格/括號/&/'…）還原
+f="${f# }"; f="${f% }"
+if [ "${f#\"}" != "$f" ] && [ "${f%\"}" != "$f" ]; then
+    f="${f#\"}"; f="${f%\"}"
+elif [ "${f#\'}" != "$f" ] && [ "${f%\'}" != "$f" ]; then
+    f="${f#\'}"; f="${f%\'}"
+else
+    # Terminal 拖檔會把空格、括號、&、單引號等用反斜線跳脫 → 一律還原
+    f="$(printf '%s' "$f" | sed -E 's/\\(.)/\1/g')"
+fi
+
+if [ -z "$f" ] || [ ! -f "$f" ]; then
+    echo "沒有收到有效的檔案路徑。"
+    read -r -p "按 Enter 關閉..." _
+    exit 1
+fi
+
+outdir="$(dirname "$f")"
+echo ""
+echo "轉錄中：$(basename "$f")"
+echo "（第一次會下載語音模型約 1.5GB，需幾分鐘，請耐心等；之後就快）"
+"$DIR/venv/bin/python3" "$DIR/audio_to_md.py" "$f" -o "$outdir"
+rc=$?
+echo ""
+if [ "$rc" -eq 0 ]; then
+    open "$outdir" 2>/dev/null
+    echo "✅ 完成。輸出的『*_逐字稿知識庫.md』就在原始檔旁邊。"
+    echo "下一步：把那個 .md 交給當前 Codex、Claude 或 AntiGravity，說"
+    echo "「幫我校稿並完成這份逐字稿知識庫（簡繁/錯字/斷句＋段落摘要＋重點）」"
+else
+    echo "⚠ 轉檔沒成功，請截圖這個視窗回報老師。"
+fi
+echo ""
+read -r -p "按 Enter 關閉..." _
+AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_TRANSCRIBE_COMMAND_738AE21A9D
+
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md" && echo "audio-to-md installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/audio-to-md/SKILL.md"
-test -f "{{CODEX_HOME}}/skills/audio-to-md/references/usage-guide.md"
-test -f "{{CODEX_HOME}}/skills/audio-to-md/references/execution-notes.md"
-test -f "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md.py"
-test -f "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
-python3 -m py_compile "{{CODEX_HOME}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md"
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/references/usage-guide.md"
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/references/execution-notes.md"
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md.py"
+test -f "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
+python3 -m py_compile "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py"
 ```
 
 本機引擎驗證：

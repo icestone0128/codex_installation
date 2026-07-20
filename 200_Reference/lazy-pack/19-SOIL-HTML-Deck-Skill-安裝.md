@@ -1,8 +1,8 @@
 # 19-SOIL-HTML-Deck-Skill-安裝
 
-> 版本：2026-05-25 Codex App 版，整合 Reveal.js 互動簡報能力
+> 版本：2026-05-25 三 Agent 共用版，整合 Reveal.js 互動簡報能力
 > 用途：建立 SOIL 風格互動 HTML 簡報，輸出單一可攜式 .html，支援互動卡片、排序表格、Chart.js、決策樹、Reveal.js、文字雲/投票規劃、clip-path 對比滑桿與 base64 圖片嵌入。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/soil-html-deck/`，不需要取得原作者本機資料夾。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/soil-html-deck/`，不需要取得原作者本機資料夾。
 
 ## 來源與歷史紀錄
 
@@ -12,19 +12,19 @@
 - 2026-06-03 再次檢查來源 repo `a8fd35b`，補入功能標記建議張數、背景透明度、Firestore session 命名隔離與 Reveal.js 驗收規則。
 - 2026-07-13 補入 `references/soil-deck-core.md`，讓 HTML deck 可從 renderer-neutral SOIL Core 接收與轉換教學規劃。
 - 2026-07-13 補入 `yaml-image-deck` 路由：非互動、非 SOIL 的 YAML-controlled image-first PPTX 改用 LazyPack Item 38。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md`。
+- 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/soil-html-deck/SKILL.md`。
 - Obsidian 全域索引已記錄用途：SOIL HTML 互動簡報；輸出單一可開啟 HTML，包含 inline CSS/JS、base64 圖像、進度列、互動卡片、排序表格、圖表、決策樹、Reveal.js 可選模式、文字雲/投票參考與對比滑桿。
 
 ## 這版和來源工具文件的差異
 
-| 項目 | Codex 版調整 |
+| 項目 | 三 Agent 共用版調整 |
 |---|---|
-| 1 | 移除來源 `SKILL.md` 中的原作者本機 reference deck 路徑，改成 Codex App 可攜式品質標準。 |
+| 1 | 移除來源 `SKILL.md` 中的原作者本機 reference deck 路徑，改成三 Agent 共用的可攜式品質標準。 |
 | 2 | 保留範例 HTML 作為本地 reference example，但不要求下載者擁有原作者 Windows / Google Drive 路徑。 |
 | 3 | 整合 `external-html-slide-builder` 的 Reveal.js、功能標記、文字雲/投票、對比滑桿與圖標去背概念，但移除 來源工具 安裝路徑、來源工具生圖 skill 假設與自動部署預設。 |
 | 4 | Firebase 只作為明確要求時才啟用的可選互動能力；安裝包不內建示範專案金鑰作為預設設定。 |
 | 5 | GitHub Pages 發佈改為獨立確認步驟，不在一般簡報生成流程中自動建立 repo 或 push。 |
-| 6 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/soil-html-deck/`。 |
+| 6 | 正式安裝路徑統一為 `{{SYNC_ROOT}}/skills/soil-html-deck/`。 |
 | 7 | 補入 SOIL Deck Core：先完成 page、SOIL phase、role、learning task、semantic structure、visible text 與 visual brief，再映射成 HTML DOM、互動元件與 responsive components。 |
 | 8 | 補入分流規則：通用 YAML 圖片式 PPTX 使用 `yaml-image-deck`，SOIL 全圖片教學 PPTX 使用 `soil-image-deck`，本 skill 專注 HTML 互動簡報。 |
 
@@ -33,19 +33,19 @@
 1. 打開本文文末「內建 Skill 完整安裝內容」。
 2. 把整段安裝腳本複製到自己的環境執行。
 3. 執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
-4. 安裝後開新 Codex 對話或重啟 Codex App，讓新的全域 skill metadata 被重新載入。
+4. 安裝後依 Item 16 確認三 Agent 原生入口，分別重載 skill 清單。
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md" && echo "soil-html-deck SKILL.md ok"
-test -d "{{CODEX_HOME}}/skills/soil-html-deck/references" && echo "references ok"
-test -d "{{CODEX_HOME}}/skills/soil-html-deck/scripts" && echo "scripts ok"
-test -d "{{CODEX_HOME}}/skills/soil-html-deck/examples" && echo "examples ok"
-test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-adapter.md" && echo "Reveal adapter ok"
-test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/soil-deck-core.md" && echo "soil deck core ok"
-test -f "{{CODEX_HOME}}/skills/soil-html-deck/scripts/remove_bg.py" && echo "icon helper ok"
-test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-license.md" && echo "source license ok"
+test -f "{{SYNC_ROOT}}/skills/soil-html-deck/SKILL.md" && echo "soil-html-deck SKILL.md ok"
+test -d "{{SYNC_ROOT}}/skills/soil-html-deck/references" && echo "references ok"
+test -d "{{SYNC_ROOT}}/skills/soil-html-deck/scripts" && echo "scripts ok"
+test -d "{{SYNC_ROOT}}/skills/soil-html-deck/examples" && echo "examples ok"
+test -f "{{SYNC_ROOT}}/skills/soil-html-deck/references/html-slide-builder-adapter.md" && echo "Reveal adapter ok"
+test -f "{{SYNC_ROOT}}/skills/soil-html-deck/references/soil-deck-core.md" && echo "soil deck core ok"
+test -f "{{SYNC_ROOT}}/skills/soil-html-deck/scripts/remove_bg.py" && echo "icon helper ok"
+test -f "{{SYNC_ROOT}}/skills/soil-html-deck/references/html-slide-builder-license.md" && echo "source license ok"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -69,7 +69,7 @@ test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-lice
 2. 先決定 SOIL 節奏：引起動機 -> 維持注意 -> 喚起行動。
 3. 先建立 renderer-neutral SOIL Core，保留每頁的 learning task、semantic structure、layout id、visible text 與 speaker-only content。
 4. 再依 skill 內 `SKILL.md` 與 references 把 Core 映射成 HTML sections、DOM text、互動元件、Chart.js、決策樹或 Reveal.js component。
-5. 若需要 bitmap 視覺，使用 Codex 內建 image generation 生成，不用本機假圖替代。
+5. 若需要 bitmap 視覺，使用當前 Agent 可用的原生生圖能力；若缺少，改走已核准 API／CLI／手動流程，不用本機假圖替代。
 6. 若需要 Firebase 或 GitHub Pages，先確認使用者真的要啟用，再處理外部服務設定。
 7. 交付前檢查檔案可開啟、文字可讀、版面不溢出、引用資源可攜。
 
@@ -77,11 +77,11 @@ test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-lice
 
 ### 1. 不要把來源工具專用路徑帶進正式安裝
 
-正式版只使用 Codex 全域 skill 路徑 `{{CODEX_HOME}}/skills/soil-html-deck/`。不要建立非 Codex skill 位置、來源工具專用命令或來源作者的本機路徑。
+正式版使用三 Agent 共用主版本 `{{SYNC_ROOT}}/skills/soil-html-deck/`。來源工具專用命令改寫為共用工作流與三個 adapter，不複製來源作者的本機路徑。
 
 ### 2. AI 圖像規則不能用本機假圖替代
 
-這三組 SOIL skills 的品質前提是視覺素材由 Codex 影像生成能力產生。只有精準幾何、數學圖或明確 prototype 需求可使用 deterministic SVG / Python 圖形。
+這三組 SOIL skills 的品質前提是視覺素材由當前 Agent 可用的高品質影像生成路線產生。只有精準幾何、數學圖或明確 prototype 需求可使用 deterministic SVG／Python 圖形。
 
 ### 3. 可攜式 package 要包含 references / scripts / examples
 
@@ -93,29 +93,28 @@ test -f "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-lice
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/soil-html-deck/SKILL.md` 存在。
 - [ ] references / scripts / examples 依本 skill package 實際內容存在。
 - [ ] `references/soil-deck-core.md` 存在。
-- [ ] 搜尋 package 內沒有非 Codex 安裝路徑或非 Codex frontmatter 欄位。
-- [ ] 開新 Codex 對話後，可用 `soil-html-deck`、SOIL 簡報、Reveal.js 或互動 HTML 簡報相關語句觸發。
+- [ ] package 共用核心沒有來源工具專屬路徑或單一 Agent frontmatter；差異均有 adapter 註記。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用 `soil-html-deck`、SOIL 簡報、Reveal.js 或互動 HTML 簡報相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`soil-html-deck`。
+本節是自含式安裝區塊。這個序號項目會安裝：`soil-html-deck`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
 # ---- soil-html-deck ----
-rm -rf "{{CODEX_HOME}}/skills/soil-html-deck"
-mkdir -p "{{CODEX_HOME}}/skills/soil-html-deck"
+mkdir -p "{{SYNC_ROOT}}/skills/soil-html-deck"
 # soil-html-deck/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/SKILL.md" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/SKILL.md" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_SKILL_MD_0E95F5A366'
 ---
 name: soil-html-deck
 description: >
@@ -136,13 +135,13 @@ Use this skill to create a single `.html` presentation with SOIL teaching logic,
 responsive full-screen slides, AI-generated bitmap visuals used as page assets,
 and real HTML/CSS/JS content and interactions.
 
-This skill now also includes a Codex-compatible adaptation of the Reveal.js
+This skill now also includes a cross-agent adaptation of the Reveal.js
 patterns from `external-html-slide-builder`: feature tags,
 Reveal.js component templates, optional Firebase word cloud / poll snippets, and
 an icon background-removal helper. Do not copy source-tool install paths,
 commands, or auto-deployment assumptions from that project.
 
-The target quality bar is a Codex App-compatible 10-12 page SOIL web deck with
+The target quality bar is a cross-agent 10-12 page SOIL web deck with
 full-bleed hero pages, clickable type cards, alternating split image/text pages,
 sortable comparison tables, lazy Chart.js charts, an SVG decision tree, a SOIL
 workflow page, optional Reveal.js mode, optional live interaction pages, and a
@@ -170,8 +169,8 @@ PPTX.
   relative image paths in the final HTML unless the user explicitly asks for a
   folder-based Reveal.js project.
 - Every visual image, background image, illustration, card image, cover image,
-  section visual, or icon sheet must be generated with Codex's built-in image
-  generation capability first, or supplied by the user. Do not replace image
+  section visual, or icon sheet must be generated with the active Agent's native
+  image capability or an approved shared route first, or supplied by the user. Do not replace image
   generation steps with local shape rendering, procedural drawing, CSS-only art,
   or placeholder panels unless the user explicitly asks for a prototype without
   AI images.
@@ -203,7 +202,7 @@ PPTX.
    - default SOIL mode: single-file custom deck with full viewport sections;
    - Reveal.js mode: use `references/reveal-components.md` when the user asks
      for Reveal.js, presenter-friendly controls, or plugin compatibility.
-4. Generate every needed visual with the built-in image generation skill. Use
+4. Generate every needed visual through `image-generator` and its active Agent adapter. Use
    text-free images for card/split/table/workflow visuals; full-bleed hero images
    may include light baked text only if the slide design calls for it.
 5. If using icon sheets, generate one dark-background icon sheet, crop the icons,
@@ -254,10 +253,19 @@ PPTX.
   navigation, base64 embedding, table sorting, chart, and decision-tree code
   from scratch.
 
-## Codex Notes
+## Agent Execution Notes
 
-- If using the in-app browser is available and the user wants preview/testing,
-  open the local HTML there for inspection.
+- Shared steps: use the same SOIL plan, single-file HTML contract, generated
+  assets, interaction behavior, and browser acceptance checks.
+- Codex adapter: use the available native image tool and in-app browser when exposed.
+- Claude adapter: use the native image/browser tool when exposed, otherwise the
+  approved shared image route and shared Playwright/browser script.
+- AntiGravity adapter: use the native image/browser tool when exposed, otherwise
+  the approved shared image route and shared Playwright/browser script.
+- Fallback: open the HTML in a local browser and run the same deterministic
+  lint/interaction checks; do not skip visual verification.
+- Verification: compare desktop and small-screen rendering, navigation,
+  interactions, console errors, embedded assets, and file portability identically.
 - If generated images must be saved to local files for packaging, use a workflow
   that preserves the actual image-generation outputs. Do not silently substitute
   locally rendered graphics.
@@ -265,11 +273,11 @@ PPTX.
   unless the user provides their own project or explicitly approves a demo setup.
 - Treat GitHub Pages deployment as a separate publish step. Confirm repo name,
   visibility, and Pages target before creating or pushing anything.
-CODEX_LAZYPACK_SOIL_HTML_DECK_SKILL_MD
+AGENT_LAZYPACK_SOIL_HTML_DECK_SKILL_MD_0E95F5A366
 
 # soil-html-deck/examples/AI_Agent簡報_類型3_HTML_v3_SOIL互動範例.html
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/examples/AI_Agent簡報_類型3_HTML_v3_SOIL互動範例.html")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/examples/AI_Agent簡報_類型3_HTML_v3_SOIL互動範例.html" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_EXAMPLES_AI_AGENT簡報_類型3_HTML_V3_SOIL互動範例_HTML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/examples/AI_Agent簡報_類型3_HTML_v3_SOIL互動範例.html")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/examples/AI_Agent簡報_類型3_HTML_v3_SOIL互動範例.html" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_EXAMPLES_AI_AGENT_3_HTML_V3_SOIL_HTML_73CB619179'
 <!doctype html>
 <html lang="zh-Hant">
 <head>
@@ -477,11 +485,11 @@ goto(1);
 </script>
 </body>
 </html>
-CODEX_LAZYPACK_SOIL_HTML_DECK_EXAMPLES_AI_AGENT簡報_類型3_HTML_V3_SOIL互動範例_HTML
+AGENT_LAZYPACK_SOIL_HTML_DECK_EXAMPLES_AI_AGENT_3_HTML_V3_SOIL_HTML_73CB619179
 
 # soil-html-deck/references/firebase-interactions.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/references/firebase-interactions.md")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/references/firebase-interactions.md" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_FIREBASE_INTERACTIONS_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/references/firebase-interactions.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/references/firebase-interactions.md" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_FIREBASE_INTERACTIONS_MD_B86F8CA729'
 # Firebase Interaction Snippets
 
 Use this reference only when the user explicitly wants live classroom
@@ -679,11 +687,11 @@ onSnapshot(pollRef, snap => {
   client-side config.
 - Do not copy demo Firebase configs from examples or upstream source repos into
   a real deck. Use placeholders until the user provides their own project.
-CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_FIREBASE_INTERACTIONS_MD
+AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_FIREBASE_INTERACTIONS_MD_B86F8CA729
 
 # soil-html-deck/references/html-patterns.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/references/html-patterns.md")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/references/html-patterns.md" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_PATTERNS_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/references/html-patterns.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/references/html-patterns.md" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_PATTERNS_MD_627EF3EE29'
 # HTML Deck Patterns
 
 ## Reference Shape
@@ -898,16 +906,15 @@ Before delivery, inspect the file or rendered page for:
 - Chart.js is initialized lazily only when the chart slide becomes active
 - decision-tree choices are real clickable HTML cards, not baked into an image
 - no accidental references to undefined id globals such as `sectionTag`
-CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_PATTERNS_MD
+AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_PATTERNS_MD_627EF3EE29
 
 # soil-html-deck/references/html-slide-builder-adapter.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-adapter.md")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-adapter.md" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_SLIDE_BUILDER_ADAPTER_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/references/html-slide-builder-adapter.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/references/html-slide-builder-adapter.md" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_SLIDE_BUILDER_ADAPTER_MD_CF332A1724'
 # HTML Slide Builder Adapter
 
 This reference adapts useful ideas from
-`external-html-slide-builder` into the portable
-Codex `soil-html-deck` skill.
+`external-html-slide-builder` into the portable shared `soil-html-deck` skill.
 
 ## Compatibility Boundary
 
@@ -921,12 +928,12 @@ Use these ideas:
 - Optional icon-sheet generation plus local background removal.
 - Optional GitHub Pages publishing only after explicit user approval.
 
-Do not use these source-tool assumptions:
+Replace these source-tool assumptions with shared routes:
 
-- Do not install to non-Codex skill folders.
+- Keep the package in `{{SYNC_ROOT}}/skills/soil-html-deck` and expose it through all three native skills entrypoints.
 - Do not call external draw scripts or source-tool command shims.
-- Do not require a source-tool runtime to generate images; use Codex image
-  generation or user-provided assets.
+- Do not require a source-tool runtime to generate images; use `image-generator`
+  with the active Agent adapter or user-provided assets.
 - Do not auto-create GitHub repositories or publish Pages as part of normal deck
   creation.
 - Do not ship someone else's demo Firebase config as the default production
@@ -1006,7 +1013,7 @@ For `[ICON]`, generate a single icon sheet with exactly N icons in a horizontal
 row on a dark background. Crop each icon, then run:
 
 ```bash
-python "{{CODEX_HOME}}/skills/soil-html-deck/scripts/remove_bg.py" --dir images
+python "{{SYNC_ROOT}}/skills/soil-html-deck/scripts/remove_bg.py" --dir images
 ```
 
 The script expects files named `icon_*.png` unless specific files are passed.
@@ -1026,14 +1033,14 @@ If the user asks to publish:
 ## Source Attribution
 
 The compatible design ideas and `scripts/remove_bg.py` helper are adapted from `external-html-slide-builder`, MIT License. Keep `references/html-slide-builder-license.md` in portable distributions.
-CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_SLIDE_BUILDER_ADAPTER_MD
+AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_SLIDE_BUILDER_ADAPTER_MD_CF332A1724
 
 # soil-html-deck/references/html-slide-builder-license.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-license.md")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/references/html-slide-builder-license.md" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_SLIDE_BUILDER_LICENSE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/references/html-slide-builder-license.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/references/html-slide-builder-license.md" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_SLIDE_BUILDER_LICENSE_MD_B7B52AF786'
 # html-slide-builder Source License
 
-This skill includes a Codex-compatible adaptation of ideas and a helper script from:
+This skill includes a cross-agent adaptation of ideas and a helper script from:
 
 - Repository: external-html-slide-builder
 - Author: mathruffian-dot
@@ -1062,11 +1069,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_SLIDE_BUILDER_LICENSE_MD
+AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_HTML_SLIDE_BUILDER_LICENSE_MD_B7B52AF786
 
 # soil-html-deck/references/reveal-components.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/references/reveal-components.md")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/references/reveal-components.md" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_REVEAL_COMPONENTS_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/references/reveal-components.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/references/reveal-components.md" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_REVEAL_COMPONENTS_MD_1BB31656BC'
 # Reveal.js Components For SOIL HTML Decks
 
 Use this reference only when the user asks for Reveal.js or a presenter-friendly
@@ -1198,11 +1205,11 @@ document.getElementById("viz-slider")?.addEventListener("input", function(){
   initialization; for widgets in hidden slides, redraw on `slidechanged`.
 - Confirm mobile/narrow preview keeps grids, stats, and comparison sections in a
   readable single-column layout without text overflow.
-CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_REVEAL_COMPONENTS_MD
+AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_REVEAL_COMPONENTS_MD_1BB31656BC
 
 # soil-html-deck/references/soil-deck-core.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/references/soil-deck-core.md")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/references/soil-deck-core.md" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_SOIL_DECK_CORE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/references/soil-deck-core.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/references/soil-deck-core.md" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_SOIL_DECK_CORE_MD_6359B215C1'
 # SOIL Deck Core
 
 Use one renderer-neutral planning model for Image, PowerPoint, and HTML outputs.
@@ -1245,11 +1252,11 @@ them to the renderer.
 - If the same teaching plan may become a `soil-image-deck` or
   `soil-general-deck`, preserve `learning_task`, `semantic_structure`, and
   `layout.id` instead of collapsing them into one-off HTML copy.
-CODEX_LAZYPACK_SOIL_HTML_DECK_REFERENCES_SOIL_DECK_CORE_MD
+AGENT_LAZYPACK_SOIL_HTML_DECK_REFERENCES_SOIL_DECK_CORE_MD_6359B215C1
 
 # soil-html-deck/scripts/build_type3_html_v3_soil_skill.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/scripts/build_type3_html_v3_soil_skill.py")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/scripts/build_type3_html_v3_soil_skill.py" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_BUILD_TYPE3_HTML_V3_SOIL_SKILL_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/scripts/build_type3_html_v3_soil_skill.py")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/scripts/build_type3_html_v3_soil_skill.py" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_BUILD_TYPE3_HTML_V3_SOIL_SKILL_PY_CF4E278985'
 from pathlib import Path
 import base64
 import io
@@ -1498,12 +1505,11 @@ goto(1);
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_BUILD_TYPE3_HTML_V3_SOIL_SKILL_PY
-chmod +x "{{CODEX_HOME}}/skills/soil-html-deck/scripts/build_type3_html_v3_soil_skill.py"
+AGENT_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_BUILD_TYPE3_HTML_V3_SOIL_SKILL_PY_CF4E278985
 
 # soil-html-deck/scripts/remove_bg.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-html-deck/scripts/remove_bg.py")"
-cat > "{{CODEX_HOME}}/skills/soil-html-deck/scripts/remove_bg.py" <<'CODEX_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_REMOVE_BG_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/scripts/remove_bg.py")"
+cat > "{{SYNC_ROOT}}/skills/soil-html-deck/scripts/remove_bg.py" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_REMOVE_BG_PY_26817CCD45'
 #!/usr/bin/env python3
 """
 remove_bg.py — PIL 亮度閾值去背腳本
@@ -1572,9 +1578,11 @@ def main():
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_REMOVE_BG_PY
-chmod +x "{{CODEX_HOME}}/skills/soil-html-deck/scripts/remove_bg.py"
+AGENT_LAZYPACK_SOIL_HTML_DECK_SCRIPTS_REMOVE_BG_PY_26817CCD45
 
+test -f "{{SYNC_ROOT}}/skills/soil-html-deck/SKILL.md" && echo "soil-html-deck installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

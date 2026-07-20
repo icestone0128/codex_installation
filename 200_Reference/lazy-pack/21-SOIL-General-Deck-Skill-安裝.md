@@ -1,8 +1,8 @@
 # 21-SOIL-General-Deck-Skill-安裝
 
-> 版本：2026-05-25 Codex App 版
+> 版本：2026-05-25 三 Agent 共用版
 > 用途：建立、分析或改善 SOIL 風格通用 PowerPoint，輸出可編輯 .pptx，強調資訊清楚度、敘事結構與可驗證版面。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/soil-general-deck/`，不需要取得原作者本機資料夾。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/soil-general-deck/`，不需要取得原作者本機資料夾。
 
 ## 來源與歷史紀錄
 
@@ -10,16 +10,16 @@
 - 原始來源包：使用者提供的 SOIL Deck skills package；本版已改名為 `soil-general-deck`。
 - 2026-07-13 補入 `references/soil-deck-core.md`，並在 SOIL engines 的頁面架構補入 `learning_task`、`semantic_structure` 與 renderer-neutral `layout.id`。
 - 2026-07-13 補入 `yaml-image-deck` 路由：非 SOIL 的 YAML-controlled image-first deck 改用 LazyPack Item 38。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md`。
+- 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/soil-general-deck/SKILL.md`。
 - Obsidian 全域索引已記錄用途：SOIL 通用可編輯 PPTX；用 SOIL engines 規劃簡報流，建立可編輯文字、AI 視覺、幾何圖與版面驗證。
 
 ## 這版和來源工具文件的差異
 
-| 項目 | Codex 版調整 |
+| 項目 | 三 Agent 共用版調整 |
 |---|---|
-| 1 | 移除來源工具專用路徑與非 Codex skill 位置；正式版只保留 Codex 相容限制。 |
-| 2 | 將 reference 內的來源工具品質描述改為 `Codex-quality`。 |
-| 3 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/soil-general-deck/`。 |
+| 1 | 移除來源工具專用路徑，共用核心保留三 Agent 共通的品質與驗證契約。 |
+| 2 | 將 reference 內的來源工具品質描述改為 cross-agent quality contract。 |
+| 3 | 正式安裝路徑統一為 `{{SYNC_ROOT}}/skills/soil-general-deck/`。 |
 | 4 | 補入 SOIL Deck Core：先完成教學決策，再映射成可編輯 PowerPoint 文字、AI 視覺、幾何圖、表格或流程物件。 |
 | 5 | 補入分流規則：通用 YAML 圖片式 PPTX 使用 `yaml-image-deck`；SOIL 全圖片教學 PPTX 使用 `soil-image-deck`；本 skill 專注可編輯 PPTX。 |
 
@@ -28,14 +28,14 @@
 1. 打開本文文末「內建 Skill 完整安裝內容」。
 2. 把整段安裝腳本複製到自己的環境執行。
 3. 執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
-4. 安裝後開新 Codex 對話或重啟 Codex App，讓新的全域 skill metadata 被重新載入。
+4. 安裝後依 Item 16 確認三 Agent 原生入口，分別重載 skill 清單。
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md" && echo "soil-general-deck SKILL.md ok"
-test -d "{{CODEX_HOME}}/skills/soil-general-deck/references" && echo "references ok"
-test -f "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-deck-core.md" && echo "soil deck core ok"
+test -f "{{SYNC_ROOT}}/skills/soil-general-deck/SKILL.md" && echo "soil-general-deck SKILL.md ok"
+test -d "{{SYNC_ROOT}}/skills/soil-general-deck/references" && echo "references ok"
+test -f "{{SYNC_ROOT}}/skills/soil-general-deck/references/soil-deck-core.md" && echo "soil deck core ok"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -57,18 +57,18 @@ test -f "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-deck-core.md" &
 2. 先決定 SOIL 節奏：引起動機 -> 維持注意 -> 喚起行動。
 3. 先建立 renderer-neutral SOIL Core，保留每頁的 learning task、semantic structure、layout id、visible text 與 speaker-only content。
 4. 再依 skill 內 `SKILL.md` 與 references 把 Core 映射成可編輯 PPTX 文字、AI 視覺、幾何圖、表格、流程或比較版面。
-5. 若需要 bitmap 視覺，使用 Codex 內建 image generation 生成，不用本機假圖替代。
+5. 若需要 bitmap 視覺，使用當前 Agent 的原生生圖能力；若缺少，改走已核准 API／CLI／手動流程，不用本機假圖替代。
 6. 交付前檢查檔案可開啟、文字可讀、版面不溢出、引用資源可攜。
 
 ## 踩坑紀錄
 
 ### 1. 不要把來源工具專用路徑帶進正式安裝
 
-正式版只使用 Codex 全域 skill 路徑 `{{CODEX_HOME}}/skills/soil-general-deck/`。不要建立非 Codex skill 位置、來源工具專用命令或來源作者的本機路徑。
+正式版使用三 Agent 共用主版本 `{{SYNC_ROOT}}/skills/soil-general-deck/`。來源工具專用命令改寫為共用工作流與三個 adapter，不複製來源作者的本機路徑。
 
 ### 2. AI 圖像規則不能用本機假圖替代
 
-這三組 SOIL skills 的品質前提是視覺素材由 Codex 影像生成能力產生。只有精準幾何、數學圖或明確 prototype 需求可使用 deterministic SVG / Python 圖形。
+這三組 SOIL skills 的品質前提是視覺素材由當前 Agent 可用的高品質影像生成路線產生。只有精準幾何、數學圖或明確 prototype 需求可使用 deterministic SVG／Python 圖形。
 
 ### 3. 可攜式 package 要包含實際需要的 references
 
@@ -76,29 +76,28 @@ test -f "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-deck-core.md" &
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/soil-general-deck/SKILL.md` 存在。
 - [ ] references 依本 skill package 實際內容存在。
 - [ ] `references/soil-deck-core.md` 存在。
-- [ ] 搜尋 package 內沒有非 Codex 安裝路徑或非 Codex frontmatter 欄位。
-- [ ] 開新 Codex 對話後，可用 `soil-general-deck` 或 SOIL 簡報相關語句觸發。
+- [ ] package 共用核心沒有來源工具專屬路徑或單一 Agent frontmatter；差異均有 adapter 註記。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用 `soil-general-deck` 或 SOIL 簡報相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`soil-general-deck`。
+本節是自含式安裝區塊。這個序號項目會安裝：`soil-general-deck`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
 # ---- soil-general-deck ----
-rm -rf "{{CODEX_HOME}}/skills/soil-general-deck"
-mkdir -p "{{CODEX_HOME}}/skills/soil-general-deck"
+mkdir -p "{{SYNC_ROOT}}/skills/soil-general-deck"
 # soil-general-deck/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/SKILL.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-general-deck/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-general-deck/SKILL.md" <<'AGENT_LAZYPACK_SOIL_GENERAL_DECK_SKILL_MD_0E95F5A366'
 ---
 name: soil-general-deck
 description: >
@@ -133,7 +132,7 @@ every slide should be a full-page image.
 - Text should remain PowerPoint text objects.
 - Every non-geometric visual image, including cover visuals, background images,
   illustrations, section-divider images, and card images, must be generated with
-  Codex's built-in image generation capability first. Do not substitute local
+  the active Agent's native image generation capability first. Do not substitute local
   shape rendering or procedural placeholder images for AI images.
 - For math symbols in PowerPoint, use the two-layer text-box approach when needed:
   keep readable surrounding text editable, and isolate symbols/formulas in
@@ -195,20 +194,26 @@ lesson duration.
 - Read `references/geometry.md` for math diagrams.
 - Read `references/validation.md` before final delivery.
 
-## Codex Compatibility Notes
+## Agent Execution Notes
 
-- Use Codex App-compatible paths such as `{{CODEX_HOME}}/skills/soil-general-deck/`; any command examples should be cross-platform where possible.
-- Do not add source-tool command folders, source-tool slash commands, or non-Codex skill locations to this package.
-- Use Codex built-in image generation for every bitmap visual image. Only precise
-  math/geometry diagrams are exempt; those should be deterministic SVG/Python
-  drawings for correctness.
+- Shared steps: use `{{SYNC_ROOT}}/skills/soil-general-deck/`, the same SOIL plan,
+  PPTX output contract, visual briefs, and validation checklist in all three Agents.
+- Codex adapter: use the native image tool and available Presentations workflow.
+- Claude adapter: use the native image/presentation tool when exposed; otherwise
+  use the shared image route and `python-pptx` build path.
+- AntiGravity adapter: use the native image/presentation tool when exposed;
+  otherwise use the shared image route and `python-pptx` build path.
+- Fallback: only precise math/geometry diagrams use deterministic SVG/Python;
+  bitmap visuals follow `image-generator` and may use an approved shared route.
+- Verification: render the PPTX and apply the same readability, overflow,
+  editability, visual, and file-open checks.
 - Keep AGENTS.md clean; progress and presentation notes belong in Obsidian if the
   user asks for project synchronization.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_SKILL_MD
+AGENT_LAZYPACK_SOIL_GENERAL_DECK_SKILL_MD_0E95F5A366
 
 # soil-general-deck/references/geometry.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/geometry.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/geometry.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_GEOMETRY_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-general-deck/references/geometry.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-general-deck/references/geometry.md" <<'AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_GEOMETRY_MD_3ADF505C33'
 # Geometry Diagrams
 
 Use this reference when a general deck needs math diagrams.
@@ -252,11 +257,11 @@ geometry:
 
 For unsupported shapes, create a custom SVG/Python drawing with explicit
 coordinates. Do not rely on image generation for precise geometric correctness.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_GEOMETRY_MD
+AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_GEOMETRY_MD_3ADF505C33
 
 # soil-general-deck/references/layout-recipes.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/layout-recipes.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/layout-recipes.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT_RECIPES_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-general-deck/references/layout-recipes.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-general-deck/references/layout-recipes.md" <<'AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT_RECIPES_MD_3B74F384E1'
 # Layout Recipes
 
 Use a 16:9 canvas. Keep margins at least 0.5 inches unless a full-bleed slide is
@@ -326,11 +331,11 @@ PowerPoint editable text is not the same as Word OMML. For formulas:
   place it beside editable labels.
 - Avoid a single mixed text box containing long Chinese text and fragile formula
   notation.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT_RECIPES_MD
+AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_LAYOUT_RECIPES_MD_3B74F384E1
 
 # soil-general-deck/references/soil-deck-core.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-deck-core.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-deck-core.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_DECK_CORE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-general-deck/references/soil-deck-core.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-general-deck/references/soil-deck-core.md" <<'AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_DECK_CORE_MD_6359B215C1'
 # SOIL Deck Core
 
 Use one renderer-neutral planning model for Image, PowerPoint, and HTML outputs.
@@ -371,11 +376,11 @@ them to the renderer.
   editable slide structure.
 - If the same teaching plan may become a `soil-image-deck` or `soil-html-deck`,
   preserve `learning_task`, `semantic_structure`, and `layout.id` in the plan.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_DECK_CORE_MD
+AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_DECK_CORE_MD_6359B215C1
 
 # soil-general-deck/references/soil-engines.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-engines.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/soil-engines.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_ENGINES_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-general-deck/references/soil-engines.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-general-deck/references/soil-engines.md" <<'AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_ENGINES_MD_355967CF80'
 # SOIL Engines
 
 ## Engine 1: Concept Positioning
@@ -467,11 +472,11 @@ Define:
 Build the PowerPoint only after visual/geometry requirements are clear. Do not
 make a complete deck and then retrofit diagrams; reserve layout space before
 production.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_ENGINES_MD
+AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_SOIL_ENGINES_MD_355967CF80
 
 # soil-general-deck/references/validation.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/validation.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/validation.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VALIDATION_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-general-deck/references/validation.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-general-deck/references/validation.md" <<'AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VALIDATION_MD_13ED9B90BE'
 # Validation
 
 Before final delivery:
@@ -493,11 +498,11 @@ If a slide overflows:
 3. Shorten body text and move details to speaker notes.
 4. Reduce local padding or image size.
 5. Only then adjust local font size. Do not shrink the whole deck's type scale.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VALIDATION_MD
+AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VALIDATION_MD_13ED9B90BE
 
 # soil-general-deck/references/visual-assets.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/soil-general-deck/references/visual-assets.md")"
-cat > "{{CODEX_HOME}}/skills/soil-general-deck/references/visual-assets.md" <<'CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL_ASSETS_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-general-deck/references/visual-assets.md")"
+cat > "{{SYNC_ROOT}}/skills/soil-general-deck/references/visual-assets.md" <<'AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL_ASSETS_MD_2A41E5D3A2'
 # Visual Assets
 
 Use visuals only when they teach, orient, or create attention.
@@ -550,8 +555,11 @@ Use these rules when the output is "AI image + editable PowerPoint text":
 
 Do not embed relative paths that will break after moving the deck folder. Insert
 images into the PPTX file itself.
-CODEX_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL_ASSETS_MD
+AGENT_LAZYPACK_SOIL_GENERAL_DECK_REFERENCES_VISUAL_ASSETS_MD_2A41E5D3A2
 
+test -f "{{SYNC_ROOT}}/skills/soil-general-deck/SKILL.md" && echo "soil-general-deck installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

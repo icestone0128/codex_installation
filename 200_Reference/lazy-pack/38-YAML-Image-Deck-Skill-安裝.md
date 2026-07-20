@@ -1,15 +1,15 @@
 # 38-YAML-Image-Deck-Skill-安裝
 
-> 版本：2026-07-13 Codex App 版
+> 版本：2026-07-13 三 Agent 共用版
 > 用途：建立通用 YAML-controlled image-first deck，不限定 SOIL；用固定視覺語法、受控版型、黃金樣張與逐頁 YAML 內容產生 NotebookLM-style 圖片式簡報。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/yaml-image-deck/`，不需要取得原作者本機資料夾。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/yaml-image-deck/`，不需要取得原作者本機資料夾。
 
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-07-13。
 - 來源 repo：`mathruffian-dot/yaml-image-deck`。
 - 來源 commit：`8fd0e1e feat: add YAML-driven image deck skill`。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/yaml-image-deck/SKILL.md`。
+- Codex 全域 skill：`{{SYNC_ROOT}}/skills/yaml-image-deck/SKILL.md`。
 - 適用場景：NotebookLM-style image presentation、非 SOIL 的全圖片 PPTX、固定視覺語法的 batch image slides、baked 或 plate 模式。
 
 ## 和 SOIL Deck Skills 的分工
@@ -24,10 +24,10 @@
 
 ## 這版和來源工具文件的差異
 
-| 項目 | Codex 版調整 |
+| 項目 | 三 Agent 共用版調整 |
 |---|---|
 | 1 | 保留 `yaml-image-deck` 為獨立全域 skill，不併入 SOIL 三 skill，避免模糊通用圖片簡報與 SOIL 教學簡報的邊界。 |
-| 2 | 正式安裝路徑統一為 `{{CODEX_HOME}}/skills/yaml-image-deck/`。 |
+| 2 | 正式安裝路徑統一為 `{{SYNC_ROOT}}/skills/yaml-image-deck/`。 |
 | 3 | 保留來源 package 的 `assets/spec-template.yaml`、layout / prompting / schema / validation / subagent references，以及 `validate_spec.py`、`verify_images.py`。 |
 | 4 | Codex 預設使用內建 image generation，不要求 API key；本機腳本只做 YAML 檢查、圖片比例檢查與包裝前驗收輔助。 |
 
@@ -39,22 +39,22 @@
 4. 若要使用內建 Python helpers，安裝依賴：
 
 ```bash
-python -m pip install -r "{{CODEX_HOME}}/skills/yaml-image-deck/requirements.txt"
+python -m pip install -r "{{SYNC_ROOT}}/skills/yaml-image-deck/requirements.txt"
 ```
 
 依賴包含 `PyYAML` 與 `Pillow`，供 `validate_spec.py` 與 `verify_images.py` 使用。
 
-5. 安裝後開新 Codex 對話或重啟 Codex App，讓新的全域 skill metadata 被重新載入。
+5. 安裝後對 Codex、Claude、AntiGravity 分別重載 skill 清單。
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/yaml-image-deck/SKILL.md" && echo "yaml-image-deck SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/yaml-image-deck/assets/spec-template.yaml" && echo "spec template ok"
-test -d "{{CODEX_HOME}}/skills/yaml-image-deck/references" && echo "references ok"
-test -d "{{CODEX_HOME}}/skills/yaml-image-deck/scripts" && echo "scripts ok"
-python -m pip install -r "{{CODEX_HOME}}/skills/yaml-image-deck/requirements.txt"
-python "{{CODEX_HOME}}/skills/yaml-image-deck/scripts/validate_spec.py" --spec "{{CODEX_HOME}}/skills/yaml-image-deck/assets/spec-template.yaml"
+test -f "{{SYNC_ROOT}}/skills/yaml-image-deck/SKILL.md" && echo "yaml-image-deck SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/yaml-image-deck/assets/spec-template.yaml" && echo "spec template ok"
+test -d "{{SYNC_ROOT}}/skills/yaml-image-deck/references" && echo "references ok"
+test -d "{{SYNC_ROOT}}/skills/yaml-image-deck/scripts" && echo "scripts ok"
+python -m pip install -r "{{SYNC_ROOT}}/skills/yaml-image-deck/requirements.txt"
+python "{{SYNC_ROOT}}/skills/yaml-image-deck/scripts/validate_spec.py" --spec "{{SYNC_ROOT}}/skills/yaml-image-deck/assets/spec-template.yaml"
 ```
 
 合理結果是每一行都顯示 `ok`，且 validator 顯示 `VALID`。
@@ -78,7 +78,7 @@ python "{{CODEX_HOME}}/skills/yaml-image-deck/scripts/validate_spec.py" --spec "
 3. 為每頁指定 `semantic_structure` 與固定 `layout.id`。
 4. 先跑 `validate_spec.py`。
 5. 產生一張代表性內容頁作為黃金樣張，確認後寫入 `design_system.style_reference`。
-6. 使用 Codex 內建 image generation 逐頁生成圖片，保存到專案資料夾。
+6. 使用當前 Agent 的原生 image generation 逐頁生成圖片；若缺少，改走已核准 API／CLI／手動 fallback，保存到專案資料夾。
 7. 用 `verify_images.py` 檢查圖片存在與 16:9 比例。
 8. 交給目前可用的簡報工作流打包 PPTX；交付時回報 PPTX 路徑、圖片資料夾、spec 路徑與模式。
 
@@ -86,7 +86,7 @@ python "{{CODEX_HOME}}/skills/yaml-image-deck/scripts/validate_spec.py" --spec "
 
 ### 1. YAML 是設計契約，不是像素渲染程式
 
-YAML 固定視覺語法、版型路由與逐頁內容；真正的投影片圖像仍由 Codex image generation 產生。不要用 Pillow / CSS / SVG 假圖取代圖片生成。
+YAML 固定視覺語法、版型路由與逐頁內容；真正的投影片圖像由當前 Agent 原生 image generation 或已核准 fallback 產生。不要用 Pillow／CSS／SVG 假圖取代圖片生成。
 
 ### 2. 通用圖片 deck 不等於 SOIL 教學 deck
 
@@ -98,30 +98,29 @@ YAML 固定視覺語法、版型路由與逐頁內容；真正的投影片圖像
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/yaml-image-deck/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/yaml-image-deck/SKILL.md` 存在。
 - [ ] `assets/spec-template.yaml` 存在。
 - [ ] references / scripts / agents 依本 skill package 實際內容存在。
 - [ ] `validate_spec.py` 可通過內建 `assets/spec-template.yaml`。
-- [ ] 搜尋 package 內沒有非 Codex 安裝路徑或非 Codex frontmatter 欄位。
-- [ ] 開新 Codex 對話後，可用 `yaml-image-deck` 或 YAML 圖片簡報相關語句觸發。
+- [ ] package 共用核心沒有來源工具專屬路徑或單一 Agent frontmatter；差異均有 adapter 註記。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用 `yaml-image-deck` 或 YAML 圖片簡報相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`yaml-image-deck`。
+本節是自含式安裝區塊。這個序號項目會安裝：`yaml-image-deck`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
 # ---- yaml-image-deck ----
-rm -rf "{{CODEX_HOME}}/skills/yaml-image-deck"
-mkdir -p "{{CODEX_HOME}}/skills/yaml-image-deck"
+mkdir -p "{{SYNC_ROOT}}/skills/yaml-image-deck"
 # yaml-image-deck/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/SKILL.md" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/SKILL.md" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_SKILL_MD_0E95F5A366'
 ---
 name: yaml-image-deck
 description: Create consistent image-first slide decks from a structured YAML design system, layout registry, and per-slide content. Use when the user asks for a YAML image deck, NotebookLM-style image presentation, full-image PPTX, fixed visual grammar with controlled layouts, golden-sample style locking, or batch image slides across any subject. Supports baked slides and text-free plates with editable overlays.
@@ -142,7 +141,7 @@ Default to `yaml_spec`, `sequential`, and `golden_sample`. Use `subagents` only 
 
 ## Hard Rules
 
-- Use Codex built-in image generation by default. Do not require an API key unless the user explicitly selects an API/CLI workflow.
+- Use `image-generator` with the active Agent's native adapter by default. Do not require an API key unless the user explicitly selects an API/CLI workflow.
 - Generate every slide visual with image generation before packaging. Local tools may crop, validate, montage, and package; they must not replace AI-generated slide art.
 - Keep one core claim per slide and visible Chinese text short.
 - Use a 16:9 target canvas and keep critical content inside the YAML safe area.
@@ -200,7 +199,7 @@ The bundled scripts are optional validation helpers. Install the packages in
 `requirements.txt` before using them:
 
 ```bash
-python -m pip install -r "{{CODEX_HOME}}/skills/yaml-image-deck/requirements.txt"
+python -m pip install -r "{{SYNC_ROOT}}/skills/yaml-image-deck/requirements.txt"
 ```
 
 Required packages:
@@ -215,20 +214,27 @@ Required packages:
 - Read `references/prompting.md` before image generation.
 - Read `references/subagent-batching.md` when the user requests parallel generation.
 - Read `references/validation.md` before packaging and delivery.
-CODEX_LAZYPACK_YAML_IMAGE_DECK_SKILL_MD
+AGENT_LAZYPACK_YAML_IMAGE_DECK_SKILL_MD_0E95F5A366
+
+# yaml-image-deck/requirements.txt
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/requirements.txt")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/requirements.txt" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_REQUIREMENTS_TXT_4D7C51B1EF'
+PyYAML
+Pillow
+AGENT_LAZYPACK_YAML_IMAGE_DECK_REQUIREMENTS_TXT_4D7C51B1EF
 
 # yaml-image-deck/agents/openai.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/agents/openai.yaml" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_AGENTS_OPENAI_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/agents/openai.yaml" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "YAML Image Deck"
   short_description: "以 YAML 規格鎖定風格與版型，批次生成一致的圖片式簡報"
   default_prompt: "Use $yaml-image-deck to turn this topic into a consistent YAML-driven image deck."
-CODEX_LAZYPACK_YAML_IMAGE_DECK_AGENTS_OPENAI_YAML
+AGENT_LAZYPACK_YAML_IMAGE_DECK_AGENTS_OPENAI_YAML_DEB9755D27
 
 # yaml-image-deck/assets/spec-template.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/assets/spec-template.yaml")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/assets/spec-template.yaml" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_ASSETS_SPEC_TEMPLATE_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/assets/spec-template.yaml")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/assets/spec-template.yaml" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_ASSETS_SPEC_TEMPLATE_YAML_88748454DC'
 schema_version: "yaml_image_deck_v1"
 
 deck:
@@ -303,11 +309,11 @@ validation:
     - "文字錯誤"
     - "字體不夠粗圓"
     - "版型或風格漂移"
-CODEX_LAZYPACK_YAML_IMAGE_DECK_ASSETS_SPEC_TEMPLATE_YAML
+AGENT_LAZYPACK_YAML_IMAGE_DECK_ASSETS_SPEC_TEMPLATE_YAML_88748454DC
 
 # yaml-image-deck/references/layout-library.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/references/layout-library.md")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/references/layout-library.md" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_LAYOUT_LIBRARY_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/references/layout-library.md")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/references/layout-library.md" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_LAYOUT_LIBRARY_MD_E28FD81A25'
 # Controlled Layout Library
 
 Route by information relationship, not by decoration.
@@ -332,11 +338,11 @@ Rules:
 - Use full-bleed compositions mainly for cover, section, and closing pages.
 - Split content when a layout exceeds its item budget.
 - Alternate left/right visual weight without changing the fixed visual grammar.
-CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_LAYOUT_LIBRARY_MD
+AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_LAYOUT_LIBRARY_MD_E28FD81A25
 
 # yaml-image-deck/references/prompting.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/references/prompting.md")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/references/prompting.md" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_PROMPTING_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/references/prompting.md")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/references/prompting.md" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_PROMPTING_MD_F5263C9E0F'
 # Prompt Compilation
 
 Compile every slide prompt in this order:
@@ -362,11 +368,11 @@ Render the quoted text verbatim and add no other characters.
 For `plate`, generate no text and reserve a calm text zone. Apply a verified installed rounded Chinese font during packaging.
 
 Always state that the output is the slide itself, not a monitor, projector, laptop, or mockup.
-CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_PROMPTING_MD
+AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_PROMPTING_MD_F5263C9E0F
 
 # yaml-image-deck/references/schema.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/references/schema.md")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/references/schema.md" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_SCHEMA_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/references/schema.md")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/references/schema.md" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_SCHEMA_MD_A0DB303F38'
 # YAML Schema
 
 Use four layers:
@@ -404,11 +410,11 @@ Required slide keys:
 Use percentage zones for image prompting. Use PowerPoint coordinates only in a separate `overlay_blocks` section for `plate` mode.
 
 Keep keys and enum values in English. Content may use the audience language.
-CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_SCHEMA_MD
+AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_SCHEMA_MD_A0DB303F38
 
 # yaml-image-deck/references/subagent-batching.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/references/subagent-batching.md")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/references/subagent-batching.md" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_SUBAGENT_BATCHING_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/references/subagent-batching.md")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/references/subagent-batching.md" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_SUBAGENT_BATCHING_MD_3439466C63'
 # Subagent Batching
 
 Use only when the user explicitly requests parallel generation and subagents are available.
@@ -422,11 +428,11 @@ Use only when the user explicitly requests parallel generation and subagents are
 7. The primary agent must inspect the final montage and regenerate drifted pages.
 
 Parallel workers reduce waiting time; they do not increase image quota or guarantee style consistency.
-CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_SUBAGENT_BATCHING_MD
+AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_SUBAGENT_BATCHING_MD_3439466C63
 
 # yaml-image-deck/references/validation.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/references/validation.md")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/references/validation.md" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_VALIDATION_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/references/validation.md")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/references/validation.md" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_VALIDATION_MD_13ED9B90BE'
 # Validation
 
 Reject or regenerate a page when any of these occur:
@@ -447,18 +453,11 @@ Before delivery:
 4. Package the PPTX.
 5. Render the exported PPTX again.
 6. Inspect the rendered montage and run overflow checks.
-CODEX_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_VALIDATION_MD
-
-# yaml-image-deck/requirements.txt
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/requirements.txt")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/requirements.txt" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_REQUIREMENTS_TXT'
-PyYAML
-Pillow
-CODEX_LAZYPACK_YAML_IMAGE_DECK_REQUIREMENTS_TXT
+AGENT_LAZYPACK_YAML_IMAGE_DECK_REFERENCES_VALIDATION_MD_13ED9B90BE
 
 # yaml-image-deck/scripts/validate_spec.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/scripts/validate_spec.py")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/scripts/validate_spec.py" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_SCRIPTS_VALIDATE_SPEC_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/scripts/validate_spec.py")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/scripts/validate_spec.py" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_SCRIPTS_VALIDATE_SPEC_PY_95CCEC28C1'
 #!/usr/bin/env python3
 import argparse
 from pathlib import Path
@@ -534,12 +533,11 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_YAML_IMAGE_DECK_SCRIPTS_VALIDATE_SPEC_PY
-chmod +x "{{CODEX_HOME}}/skills/yaml-image-deck/scripts/validate_spec.py"
+AGENT_LAZYPACK_YAML_IMAGE_DECK_SCRIPTS_VALIDATE_SPEC_PY_95CCEC28C1
 
 # yaml-image-deck/scripts/verify_images.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/yaml-image-deck/scripts/verify_images.py")"
-cat > "{{CODEX_HOME}}/skills/yaml-image-deck/scripts/verify_images.py" <<'CODEX_LAZYPACK_YAML_IMAGE_DECK_SCRIPTS_VERIFY_IMAGES_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/scripts/verify_images.py")"
+cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/scripts/verify_images.py" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_SCRIPTS_VERIFY_IMAGES_PY_D0F52176BC'
 #!/usr/bin/env python3
 import argparse
 from pathlib import Path
@@ -588,9 +586,11 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-CODEX_LAZYPACK_YAML_IMAGE_DECK_SCRIPTS_VERIFY_IMAGES_PY
-chmod +x "{{CODEX_HOME}}/skills/yaml-image-deck/scripts/verify_images.py"
+AGENT_LAZYPACK_YAML_IMAGE_DECK_SCRIPTS_VERIFY_IMAGES_PY_D0F52176BC
 
+test -f "{{SYNC_ROOT}}/skills/yaml-image-deck/SKILL.md" && echo "yaml-image-deck installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

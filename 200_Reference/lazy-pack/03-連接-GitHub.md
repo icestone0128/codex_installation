@@ -2,14 +2,22 @@
 
 ## 目標
 
-確認 Git、GitHub CLI、GitHub connector 與 GitHub Pages 能正常使用。
+確認 Codex、Claude、AntiGravity 都可透過共用 Git／GitHub CLI 處理 repo，並分別驗證各 Agent 原生 GitHub connector／plugin／MCP 與 GitHub Pages 能力。
 
 ## 前置條件
 
 - 已有 GitHub 帳號：`{{GITHUB_USER}}`。
 - 已安裝 Git。
 - 已安裝 GitHub CLI `gh`。
-- Codex App 已啟用 GitHub plugin / connector。
+- 三 Agent 中已安裝者要分別檢查 GitHub connector／plugin／MCP；沒有原生通道時改用共用 `git`／`gh` CLI，該 Agent 仍保留完整工作能力。
+
+## Agent Execution Notes
+
+- 通用路線：`git`、`gh`、repo 內腳本與同一套 branch／commit／push 授權邊界。
+- Codex：可使用 GitHub plugin／connector，但仍要用 `git status`、`git remote -v` 與 `gh` 驗證 live state。
+- Claude：可使用當前版本的 GitHub connector／MCP；缺少或權限不足時回退到 `git`／`gh`。
+- AntiGravity：可使用當前版本的 GitHub connector／MCP；缺少或權限不足時回退到 `git`／`gh`。
+- 任一 Agent 執行 commit、push、repo create、Pages 設定前，都遵守同一使用者授權與 secret 掃描契約。
 
 ## 安裝檢查
 

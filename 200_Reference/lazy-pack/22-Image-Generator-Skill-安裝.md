@@ -1,37 +1,37 @@
 # 22-Image-Generator-Skill-安裝
 
-> 版本：2026-05-25 Codex App 版
-> 用途：建立 `image-generator` 全域 skill，讓使用者用自然語句在 Codex 裡生圖、修圖、寫圖像提示與整理圖片資產。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/image-generator/`，不需要設定 OpenAI API key，也不需要任何非 Codex 工具。
+> 版本：2026-05-25 三 Agent 共用版
+> 用途：建立 `image-generator` 全域 skill，讓使用者用自然語句在 Codex、Claude、AntiGravity 裡生圖、修圖、寫圖像提示與整理圖片資產。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/image-generator/`；預設優先當前 Agent 的原生生圖通道，缺少時再使用已核准 API／CLI／手動 fallback。
 
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-05-25。
 - 來源文件：`08-用Image Gen Skill在Codex生圖.md`。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/image-generator/SKILL.md`。
-- 這版定位：以 Codex 內建 image generation capability 作為一般生圖與修圖入口；API / CLI 只作為明確要求自動化時的進階例外。
+- 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/image-generator/SKILL.md`。
+- 這版定位：以當前 Agent 的原生 image generation capability 作為一般生圖與修圖入口；若該 Agent 沒有原生通道，依序改走已核准 API／CLI／手動流程。
 
 ## 這版和來源文件的差異
 
-| 項目 | Codex 版調整 |
+| 項目 | 三 Agent 共用版調整 |
 |---|---|
-| 1 | 移除非 Codex 工具路徑、外部工具命令與非 Codex frontmatter 假設。 |
-| 2 | 不要求 `OPENAI_API_KEY`；一般生圖、修圖與提示設計都走 Codex 內建影像生成能力。 |
-| 3 | 使用可攜式路徑 `{{CODEX_HOME}}/skills/image-generator/`，不寫入個人電腦絕對路徑。 |
-| 4 | 把新手教學整理成可觸發的 Codex skill workflow 與 reference 文件。 |
+| 1 | 將來源工具路徑、命令與 frontmatter 假設轉成共用核心及三個 Agent adapter。 |
+| 2 | 不預設要求 `OPENAI_API_KEY`；一般生圖、修圖與提示設計先走當前 Agent 的原生影像生成能力。 |
+| 3 | 使用可攜式路徑 `{{SYNC_ROOT}}/skills/image-generator/`，不寫入個人電腦絕對路徑。 |
+| 4 | 把新手教學整理成可由三 Agent 觸發的共用 workflow 與 reference 文件。 |
 
 ## 安裝方式
 
 1. 打開本文文末「內建 Skill 完整安裝內容」。
 2. 把整段安裝腳本複製到自己的環境執行。
 3. 執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
-4. 安裝後開新 Codex 對話或重啟 Codex App，讓新的全域 skill metadata 被重新載入。
+4. 安裝後依 Item 16 確認三 Agent 原生入口，分別重載 skill 清單。
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/image-generator/SKILL.md" && echo "image-generator SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/image-generator/references/imagegen-codex-workflow.md" && echo "image-generator reference ok"
+test -f "{{SYNC_ROOT}}/skills/image-generator/SKILL.md" && echo "image-generator SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/image-generator/references/imagegen-codex-workflow.md" && echo "image-generator reference ok"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -52,7 +52,7 @@ test -f "{{CODEX_HOME}}/skills/image-generator/references/imagegen-codex-workflo
 
 1. 判斷任務是生圖、修圖、提示詞撰寫，還是圖片資產整理。
 2. 擷取用途、比例、主體、場景、風格、色彩、文字需求與限制。
-3. 一般情況直接使用 Codex 內建 image generation capability；不要要求使用者設定 API key。
+3. 一般情況直接使用當前 Agent 的原生 image generation capability；缺少時才走已核准 fallback，不要無故要求使用者設定 API key。
 4. 預設建議圖片不要含文字；重要文字後續用簡報、HTML、Canva 或其他編輯工具加入。
 5. 若使用者指定專案或 Obsidian 位置，完成後才回報實際檔案路徑。
 
@@ -60,11 +60,11 @@ test -f "{{CODEX_HOME}}/skills/image-generator/references/imagegen-codex-workflo
 
 ### 1. 不要把 API key 當成新手必備
 
-Codex 內建生圖和 OpenAI API 是兩條路。一般生圖、修圖、教材視覺與圖片提示先用 Codex 內建能力；只有大量批次、自動化或成本追蹤需求才考慮 API。
+當前 Agent 的原生生圖和外部 API 是兩條路。一般生圖、修圖、教材視覺與圖片提示先用原生能力；只有缺少原生通道、大量批次、自動化或成本追蹤需求才考慮已核准 API／CLI。
 
-### 2. 不要把非 Codex 工具路徑帶進正式安裝
+### 2. 不要把來源工具專屬路徑帶進共用核心
 
-正式版只使用 Codex 全域 skill 路徑 `{{CODEX_HOME}}/skills/image-generator/`。不要建立非 Codex skill 位置、外部工具命令或非 Codex metadata。
+正式版使用三 Agent 共用主版本 `{{SYNC_ROOT}}/skills/image-generator/`。來源工具命令或 metadata 改寫為共用規則與各 Agent adapter。
 
 ### 3. 圖中文字通常要保守
 
@@ -72,49 +72,64 @@ Codex 內建生圖和 OpenAI API 是兩條路。一般生圖、修圖、教材�
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/image-generator/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/image-generator/references/imagegen-codex-workflow.md` 存在。
-- [ ] 搜尋 package 內沒有非 Codex 專用路徑、非 Codex frontmatter 或 API key 要求。
-- [ ] 開新 Codex 對話後，可用 `image-generator`、生圖、修圖或圖片提示相關語句觸發。
+- [ ] `{{SYNC_ROOT}}/skills/image-generator/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/image-generator/references/imagegen-codex-workflow.md` 存在。
+- [ ] package 共用核心沒有來源工具專屬路徑、單一 Agent frontmatter 或無條件 API key 要求。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用 `image-generator`、生圖、修圖或圖片提示相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`image-generator`。
+本節是自含式安裝區塊。這個序號項目會安裝：`image-generator`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
-```bash
+````bash
 set -e
 
 # ---- image-generator ----
-mkdir -p "{{CODEX_HOME}}/skills/image-generator"
+mkdir -p "{{SYNC_ROOT}}/skills/image-generator"
 # image-generator/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/image-generator/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/image-generator/SKILL.md" <<'CODEX_LAZYPACK_IMAGE_GENERATOR_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/image-generator/SKILL.md" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_SKILL_MD_0E95F5A366'
 ---
 name: image-generator
-description: Use when the user asks to generate, edit, restyle, or prepare images in Codex, including 生圖, 修圖, 圖像提示, 教學圖片, 封面, 插圖, 角色, 背景, transparent-background assets, thumbnails, comic panels, or visual assets for slides, websites, games, and Obsidian notes. This skill routes ordinary image work through Codex's built-in image generation capability without requiring an OpenAI API key.
+description: Use when the user asks to generate, edit, restyle, or prepare images in Codex, Claude, or AntiGravity, including 生圖, 修圖, 圖像提示, 教學圖片, 封面, 插圖, 角色, 背景, transparent-background assets, thumbnails, comic panels, or visual assets for slides, websites, games, and Obsidian notes. Use the active agent's native image tool when available, with a shared approved fallback route.
 metadata:
-  short-description: Generate and edit images with Codex image generation
+  short-description: Generate and edit images across three agents
 ---
 
 # Image Generator
 
-Use this skill as a Codex App image-generation workflow. It is a lightweight
-front door for Codex's built-in image generation capability, not an API-key or
-CLI automation package.
+Use this skill as the shared image-generation workflow for Codex, Claude, and
+AntiGravity. It is a lightweight front door to the active agent's native image
+capability or an approved shared fallback, not an automatic API-key setup.
 
 ## Core Rule
 
-- For ordinary image creation, style exploration, or image editing,
-  use Codex's built-in image generation capability.
+- For ordinary image creation, style exploration, or image editing, use the
+  active agent's native image generation capability when it is available.
 - Do not ask the user to set `OPENAI_API_KEY` for normal image work.
 - Do not create API scripts, billing setup, batch-generation workflows, or CLI
   routes unless the user explicitly asks for API automation.
-- Do not use non-Codex skill paths, external tool commands, or non-Codex
-  frontmatter.
+- Keep the shared package under `{{SYNC_ROOT}}/skills/image-generator`; native
+  metadata or commands belong only in the corresponding Agent adapter.
+
+## Agent Execution Notes
+
+- Shared steps: use the same visual brief, source images, safety rules, output
+  format, placement path, and acceptance criteria.
+- Codex adapter: use the native image generation/editing tool exposed in the
+  current Codex session.
+- Claude adapter: use Claude's native image-capable tool when exposed; otherwise
+  use the approved shared image CLI/API or browser/manual route.
+- AntiGravity adapter: use AntiGravity's native image-capable tool when exposed;
+  otherwise use the approved shared image CLI/API or browser/manual route.
+- Fallback: ask before enabling a paid/API route; if no generation route is
+  authorized, deliver the final prompt and exact placement/verification steps.
+- Verification: confirm subject fidelity, dimensions/aspect ratio, text policy,
+  requested edits, file readability, and final placement identically.
 
 ## When To Use
 
@@ -191,17 +206,17 @@ When the user provides or references an image:
 
 ## Reference
 
-Read `references/imagegen-codex-workflow.md` for examples, beginner guidance,
+Read `references/imagegen-codex-workflow.md` for examples, native adapter guidance,
 and common pitfalls.
-CODEX_LAZYPACK_IMAGE_GENERATOR_SKILL_MD
+AGENT_LAZYPACK_IMAGE_GENERATOR_SKILL_MD_0E95F5A366
 
 # image-generator/references/imagegen-codex-workflow.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/image-generator/references/imagegen-codex-workflow.md")"
-cat > "{{CODEX_HOME}}/skills/image-generator/references/imagegen-codex-workflow.md" <<'CODEX_LAZYPACK_IMAGE_GENERATOR_REFERENCES_IMAGEGEN_CODEX_WORKFLOW_MD'
-# Image Generator Reference: Codex Image Generation Workflow
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/references/imagegen-codex-workflow.md")"
+cat > "{{SYNC_ROOT}}/skills/image-generator/references/imagegen-codex-workflow.md" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_IMAGEGEN_CODEX_WORKFLOW_MD_502FEBA26E'
+# Image Generator Reference: Three-Agent Image Workflow
 
 This reference adapts the user-provided guide
-`08-用Image Gen Skill在Codex生圖.md` into a Codex App-compatible skill workflow.
+`08-用Image Gen Skill在Codex生圖.md` into a workflow shared by Codex, Claude, and AntiGravity.
 
 ## Positioning
 
@@ -209,11 +224,11 @@ There are two possible image routes:
 
 | Route | Best for | API key |
 |---|---|---|
-| Codex built-in image generation | ordinary image creation, teaching visuals, covers, thumbnails, image edits, simple assets | not required |
-| OpenAI API automation | large batches, programmatic pipelines, explicit cost tracking, fixed scripts | required |
+| Active Agent native image generation | ordinary image creation, teaching visuals, covers, thumbnails, image edits, simple assets | normally not required |
+| Approved shared CLI/API/browser route | native tool unavailable, large batches, programmatic pipelines, or explicit cost tracking | depends on selected route and requires consent |
 
-Default to the built-in Codex image generation route. Mention API only when the
-user explicitly asks for automation, large-scale generation, or API control.
+Default to the active Agent's native route. Mention a paid or key-based API only
+when the user explicitly approves automation, large-scale generation, or API control.
 
 ## Beginner Requests
 
@@ -279,16 +294,20 @@ project-root `assets/`, `public/`, or `src/` folders just for generated images.
 
 Report the final path only after the file has actually been copied or created.
 
-## Codex Compatibility
+## Agent Execution Compatibility
 
-- Use Codex App image generation capability for generation and editing.
-- Keep the skill in `{{CODEX_HOME}}/skills/image-generator/`.
-- Do not use non-Codex tool commands, non-Codex skill paths, or non-Codex
-  metadata.
+- Keep the skill source in `{{SYNC_ROOT}}/skills/image-generator/`; each Agent
+  reads it through its native skills entrypoint.
+- Use the Codex, Claude, or AntiGravity native image tool when available; use an
+  approved shared CLI/API/browser route when it is not.
+- Keep native metadata and commands in the corresponding adapter without forking
+  the prompt, output, safety, or verification contract.
 - Do not require API keys for normal image work.
-CODEX_LAZYPACK_IMAGE_GENERATOR_REFERENCES_IMAGEGEN_CODEX_WORKFLOW_MD
+AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_IMAGEGEN_CODEX_WORKFLOW_MD_502FEBA26E
 
-echo "image-generator skill installed at {{CODEX_HOME}}/skills/image-generator"
-```
+test -f "{{SYNC_ROOT}}/skills/image-generator/SKILL.md" && echo "image-generator installed for Codex, Claude, and AntiGravity"
+````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

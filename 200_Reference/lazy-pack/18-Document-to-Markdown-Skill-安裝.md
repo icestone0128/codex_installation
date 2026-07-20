@@ -1,8 +1,8 @@
 # 18-Document-to-Markdown-Skill-安裝
 
-> 版本：2026-05-31 Codex App 版
-> 用途：把 doc-to-md 文件轉 Markdown 流程安裝成 Codex App 全域 Skill，用於 PDF、EPUB、TXT、掃描 PDF、圖片型 PDF、圖表、截圖與圖片資料夾轉換，並依情境自動分流純文字轉換或 VLM 視覺解讀。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/doc-to-md/`，不需要額外的 `skills/` 子目錄。
+> 版本：2026-05-31 三 Agent 共用版
+> 用途：把 doc-to-md 文件轉 Markdown 流程安裝成 Codex、Claude、AntiGravity 共用全域 Skill，用於 PDF、EPUB、TXT、掃描 PDF、圖片型 PDF、圖表、截圖與圖片資料夾轉換，並依情境自動分流純文字轉換或 VLM 視覺解讀。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/doc-to-md/`，不需要額外的 `skills/` 子目錄。
 
 ## 來源與歷史紀錄
 
@@ -12,26 +12,26 @@
 - 完整安裝包外層包含：`README.md`、`USAGE.md`、`install.sh`、`install.bat`、`skill.zip`。
 - 後續補齊：`installer-readme.md`、`full-usage.md`、`install.sh`、`install.bat`。
 - 2026-05-31 補充來源：`vlm-to-md-安裝包_v1.2.0.zip`，已將 `vlm_prep.py`、`package_kb.py`、VLM 使用說明與設計筆記併入 `doc-to-md`。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/doc-to-md/SKILL.md`。
+- Codex 全域 skill：`{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md`。
 - Obsidian 全域索引已記錄用途：依文件型態自動分流文字轉 Markdown、掃描 PDF 視覺謄寫、圖表/表格/框架圖解讀與 Obsidian-ready Markdown。
 
 ## 這版和來源工具文件的差異
 
-| 原始取向 | Codex 版 |
+| 原始取向 | 三 Agent 共用版 |
 |---|---|
-| 舊版來源可能保留非 Codex App 路徑範例 | 本版已改為 Codex App / `{{CODEX_HOME}}/skills/doc-to-md` 路徑與 AI 助手通用語意 |
+| 舊版來源可能保留單一工具路徑範例 | 本版已改為 `{{SYNC_ROOT}}/skills/doc-to-md` 共用主版本、三 Agent 通用語意與 adapter 註記 |
 | 轉換器與 skill 安裝容易混在一起 | 本文同時內嵌 skill package 與本機轉換器安裝腳本 |
 | 只安裝 `SKILL.md` 會缺功能 | 必須包含 `references/` 與 `scripts/` |
-| PDF 解析可能被誤認為 Codex 內建 PDF plugin | `doc-to-md` 是自訂轉檔 skill，不是系統 PDF plugin |
+| PDF 解析可能被誤認為某 Agent 內建 PDF 工具 | `doc-to-md` 是三 Agent 共用的自訂轉檔 skill，不等於任一原生 PDF plugin |
 | `doc-to-md` 與 `vlm-to-md` 原本分成兩包 | 本版合併成同一個 `doc-to-md` skill，由 `doc_md_router.py` 自動判斷是否呼叫 VLM |
 | VLM 來源可能被理解成外部 API | 本版只使用本地 Python 前處理與助手內建視覺能力，不需要 API key 或本地大模型 |
 | Codex 執行時可能臨時建立 Python 環境 | 本版明定轉檔時優先呼叫使用者已由 Terminal 安裝的固定轉換器：`{{CODEX_HOME}}/doc-to-md/doc-to-md` 與 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md`；不要為單次轉換建立臨時 venv |
 
 ## 安裝方式
 
-Document to MD 有兩層安裝。Codex 實際轉檔時預設直接呼叫使用者已安裝的 Terminal 轉換器；不要為單次轉換建立 `/tmp` 或 `/private/tmp` 的臨時 Python 環境。
+Document to MD 有兩層安裝。Codex、Claude、AntiGravity 實際轉檔時都預設呼叫同一個已安裝的 Terminal 轉換器；不要為單次轉換建立 `/tmp` 或 `/private/tmp` 的臨時 Python 環境。
 
-1. **Codex Skill 安裝**：使用本文文末「內建 Skill 完整安裝內容」。執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+1. **三 Agent 共用 Skill 安裝**：使用本文文末「內建 Skill 完整安裝內容」寫入 `{{SYNC_ROOT}}/skills/doc-to-md`。
 2. **固定本機轉換器確認**：確認 `{{CODEX_HOME}}/doc-to-md/doc-to-md` 與 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md` 已存在且可執行。這兩個是使用者先前用 Terminal 安裝好的文字轉檔與 VLM 前處理工具。
 3. **fallback 才用內建腳本**：若固定轉換器不存在，才使用 skill 內建 `scripts/`；不要臨時建立 Python 環境。
 
@@ -47,7 +47,7 @@ test -x {{CODEX_HOME}}/vlm-to-md/vlm-to-md && echo "vlm converter ok"
 Codex 自動路由時，可用已安裝的文字轉檔 Python 執行 router，router 會優先呼叫上述兩個固定轉換器：
 
 ```bash
-{{CODEX_HOME}}/doc-to-md/venv/bin/python3 "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" "input.pdf" -o "output/"
+{{CODEX_HOME}}/doc-to-md/venv/bin/python3 "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py" "input.pdf" -o "output/"
 ```
 
 ### Mac / Linux：固定本機轉換器安裝
@@ -55,7 +55,7 @@ Codex 自動路由時，可用已安裝的文字轉檔 Python 執行 router，ro
 若固定轉換器不存在，才執行安裝：
 
 ```bash
-bash "{{CODEX_HOME}}/skills/doc-to-md/scripts/install.sh"
+bash "{{SYNC_ROOT}}/skills/doc-to-md/scripts/install.sh"
 ```
 
 這個安裝程式會自動：
@@ -96,14 +96,14 @@ Windows：
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/doc-to-md/SKILL.md" && echo "doc-to-md SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" && echo "router script ok"
-test -f "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py" && echo "converter script ok"
-test -f "{{CODEX_HOME}}/skills/doc-to-md/scripts/vlm_prep.py" && echo "vlm prep script ok"
-test -f "{{CODEX_HOME}}/skills/doc-to-md/scripts/package_kb.py" && echo "package script ok"
-test -f "{{CODEX_HOME}}/skills/doc-to-md/scripts/requirements.txt" && echo "requirements ok"
-test -f "{{CODEX_HOME}}/skills/doc-to-md/references/combined-routing-guide.md" && echo "routing guide ok"
-test -f "{{CODEX_HOME}}/skills/doc-to-md/references/full-usage.md" && echo "full usage ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md" && echo "doc-to-md SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py" && echo "router script ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py" && echo "converter script ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/vlm_prep.py" && echo "vlm prep script ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/package_kb.py" && echo "package script ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/requirements.txt" && echo "requirements ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/references/combined-routing-guide.md" && echo "routing guide ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/references/full-usage.md" && echo "full usage ok"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -136,13 +136,13 @@ test -f "{{CODEX_HOME}}/skills/doc-to-md/references/full-usage.md" && echo "full
 
 `doc-to-md` 必須包含 `scripts/doc_md_router.py`、`scripts/doc_to_md.py`、`scripts/vlm_prep.py`、`scripts/package_kb.py`、`requirements.txt`、`install.sh`、`install.bat` 與 `references/`。缺任何一段都可能造成自動分流、文字轉換、VLM 前處理或打包失敗。
 
-### 2. 轉換器安裝位置和 Codex skill 位置不同
+### 2. 轉換器 runtime 和共用 skill 主版本位置不同
 
-Codex skill 放在 `{{CODEX_HOME}}/skills/doc-to-md/`；本機轉換器預設安裝到 `{{CODEX_HOME}}/doc-to-md/` 或 Windows 的 `%USERPROFILE%\.codex\doc-to-md\`。不要混成同一個概念。
+共用 skill 放在 `{{SYNC_ROOT}}/skills/doc-to-md/`；本機轉換器預設安裝到 `{{CODEX_HOME}}/doc-to-md/` 或 Windows 的 `%USERPROFILE%\.codex\doc-to-md\`。後者是三 Agent 共用的本機 runtime 習慣路徑，不代表只能由 Codex 執行。
 
 ### 2.1 外層安裝包和內嵌 Skill 路徑不同
 
-原始 `doc-to-md-安裝包_v1.4.6.zip` 的 `install.sh` / `install.bat` 假設旁邊有 `skill.zip`。本懶人包改成自含式有序號文件後，installer 會被放在 `{{CODEX_HOME}}/skills/doc-to-md/scripts/`，所以內嵌版本已調整為：優先讀取上一層 `{{CODEX_HOME}}/skills/doc-to-md/scripts/requirements.txt` 與 `doc_to_md.py`；若找不到，才退回原始安裝包的 `skill.zip` 模式。
+原始 `doc-to-md-安裝包_v1.4.6.zip` 的 `install.sh` / `install.bat` 假設旁邊有 `skill.zip`。本懶人包改成自含式有序號文件後，installer 會被放在 `{{SYNC_ROOT}}/skills/doc-to-md/scripts/`，所以內嵌版本已調整為：優先讀取上一層 `{{SYNC_ROOT}}/skills/doc-to-md/scripts/requirements.txt` 與 `doc_to_md.py`；若找不到，才退回原始安裝包的 `skill.zip` 模式。
 
 ### 3. PDF 系統能力和 doc-to-md 不同
 
@@ -152,36 +152,36 @@ Codex 的文件 / PDF 系統能力可用於解析或視覺 QA；`doc-to-md` 是�
 
 如果 PDF 沒有文字層，`doc_to_md.py` 無法直接抽取內容；但本版 `doc_md_router.py` 會自動改跑 `vlm_prep.py --mode pages`，把每頁渲染成圖片，再由助手視覺能力謄寫與解讀。OCR 仍可作為替代方案，但不是唯一流程。
 
-### 5. 舊來源文件殘留非 Codex App 路徑
+### 5. 舊來源文件殘留單一工具路徑
 
-部分 reference 內可能保留 `{{CODEX_HOME}}/skills/...` 作為來源範例。正式安裝與使用請以 `{{CODEX_HOME}}/skills/doc-to-md/` 與本文指令為準。
+部分 reference 內可能保留 `{{SYNC_ROOT}}/skills/...` 作為來源範例。正式安裝與使用請以 `{{SYNC_ROOT}}/skills/doc-to-md/` 與本文指令為準。
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/doc-to-md/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md` 存在。
 - [ ] `references/full-usage.md`、`references/installer-readme.md`、`references/usage-guide.md`、`references/combined-routing-guide.md`、`references/vlm-usage-guide.md`、`references/vlm-design-notes.md` 存在。
 - [ ] `scripts/doc_md_router.py`、`scripts/doc_to_md.py`、`scripts/vlm_prep.py`、`scripts/package_kb.py`、`scripts/requirements.txt`、`scripts/install.sh`、`scripts/install.bat` 存在。
 - [ ] 固定文字轉檔器 `{{CODEX_HOME}}/doc-to-md/doc-to-md --help` 可正常顯示。
 - [ ] 固定 VLM 轉檔器 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md --help` 可正常顯示。
-- [ ] 若需要自動路由 PDF，`{{CODEX_HOME}}/doc-to-md/venv/bin/python3 "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" --help` 可正常顯示。
-- [ ] 開新 Codex 對話後，可用「doc-to-md」、「PDF 轉 Markdown」、「掃描 PDF 轉 Markdown」、「VLM to MD」或「圖表解讀」觸發。
+- [ ] 若需要自動路由 PDF，`{{CODEX_HOME}}/doc-to-md/venv/bin/python3 "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py" --help` 可正常顯示。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用「doc-to-md」、「PDF 轉 Markdown」、「掃描 PDF 轉 Markdown」、「VLM to MD」或「圖表解讀」觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`doc-to-md`。
+本節是自含式安裝區塊。這個序號項目會安裝：`doc-to-md`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
-```bash
+````bash
 set -e
 
 # ---- doc-to-md ----
-mkdir -p "{{CODEX_HOME}}/skills/doc-to-md"
+mkdir -p "{{SYNC_ROOT}}/skills/doc-to-md"
 # doc-to-md/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/SKILL.md" <<'CODEX_LAZYPACK_DOC_TO_MD_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md" <<'AGENT_LAZYPACK_DOC_TO_MD_SKILL_MD_0E95F5A366'
 ---
 name: doc-to-md
 description: Convert PDF, TXT, EPUB, scanned PDF, image-heavy PDF, screenshots, or image folders to clean Markdown. Use this skill when the user wants document-to-Markdown conversion, Obsidian-ready notes, text extraction, Simplified→Traditional Chinese conversion, scanned/OCR-like visual transcription, chart/table/diagram explanation, or an automatic Doc/VLM routing decision. The skill uses doc_to_md.py for text-first conversion and vlm_prep.py for visual content when needed.
@@ -207,13 +207,13 @@ the VLM-to-MD visual workflow.
   Obsidian or project-specific destination; do not create a project-root
   `output/` folder.
 
-**Works in Codex App and local CLI environments:**
+**Works in Codex, Claude, AntiGravity, and local CLI environments:**
 - Use bundled scripts in this skill folder when the skill is copied into
-  `$CODEX_HOME/skills/doc-to-md`.
+  `{{SYNC_ROOT}}/skills/doc-to-md`.
 - If the user has already installed the Terminal converters, prefer those fixed
   installed programs:
-  - Text converter: `{{CODEX_HOME}}/doc-to-md/doc-to-md`
-  - VLM converter: `{{CODEX_HOME}}/vlm-to-md/vlm-to-md`
+  - Text converter: `~/.codex/doc-to-md/doc-to-md`
+  - VLM converter: `~/.codex/vlm-to-md/vlm-to-md`
 - Do not create a temporary virtual environment during document conversion.
 - Use bundled scripts only as fallback when fixed installed programs are not
   available.
@@ -244,8 +244,8 @@ Use `scripts/doc_md_router.py` first for normal user requests. It decides:
 
 ```bash
 # 1. Prefer the user's fixed Terminal installs when available
-test -x {{CODEX_HOME}}/doc-to-md/doc-to-md && echo "text converter ok"
-test -x {{CODEX_HOME}}/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
+test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
 
 # 2. Run automatic routing. The router calls the fixed installed converters
 #    first, then falls back to bundled scripts.
@@ -256,7 +256,7 @@ If the current system `python3` cannot import PyMuPDF for PDF routing, run the
 router with the Python from the fixed text converter install:
 
 ```bash
-{{CODEX_HOME}}/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "<file>.pdf" -o "<out>"
+~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "<file>.pdf" -o "<out>"
 ```
 
 This uses the already installed Terminal environment. Do not create a one-off
@@ -282,9 +282,9 @@ Use direct scripts only when the user explicitly asks for a specific path:
 
 If the user already ran the Terminal installers, prefer these fixed programs:
 
-- **Text:** `{{CODEX_HOME}}/doc-to-md/doc-to-md`
-- **VLM:** `{{CODEX_HOME}}/vlm-to-md/vlm-to-md`
-- **Router Python when needed:** `{{CODEX_HOME}}/doc-to-md/venv/bin/python3 scripts/doc_md_router.py`
+- **Text:** `~/.codex/doc-to-md/doc-to-md`
+- **VLM:** `~/.codex/vlm-to-md/vlm-to-md`
+- **Router Python when needed:** `~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py`
 
 These are stable user-level tools, not temporary environments. Use them before
 attempting dependency installation.
@@ -302,7 +302,7 @@ If neither Option A nor Option B is available, instruct the user to install usin
 - Text usage guide: `references/full-usage.md`
 - VLM usage guide: `references/vlm-usage-guide.md`
 
-The local installers create `{{CODEX_HOME}}/doc-to-md/` (Mac/Linux) or
+The local installers create `~/.codex/doc-to-md/` (Mac/Linux) or
 `%USERPROFILE%\.codex\doc-to-md\` (Windows), install Python dependencies in a venv,
 copy all Python scripts, and create command-line launchers.
 
@@ -429,7 +429,7 @@ When both pipelines run on the same PDF:
 
 | Problem | Fix |
 |---------|-----|
-| `No module named 'fitz'` with system Python | Run router with `{{CODEX_HOME}}/doc-to-md/venv/bin/python3`; this uses the existing fixed Terminal install |
+| `No module named 'fitz'` with system Python | Run router with `~/.codex/doc-to-md/venv/bin/python3`; this uses the existing fixed Terminal install |
 | Fixed text converter missing | Re-run the `doc-to-md` Terminal installer |
 | Fixed VLM converter missing | Re-run the `vlm-to-md` Terminal installer |
 | Garbled characters | Try `--no-convert-chinese`; if still garbled, file may need OCR |
@@ -441,11 +441,116 @@ When both pipelines run on the same PDF:
 | EPUB shows empty chapters | Some DRM-protected EPUBs block extraction; remove DRM first |
 | Skill tries to create a temporary venv | **Wrong** — call the fixed Terminal installs first; use bundled scripts only as fallback |
 | Skill says "this requires local install" | **Wrong** — prefer fixed installs when present, but bundled scripts are still a fallback |
-CODEX_LAZYPACK_DOC_TO_MD_SKILL_MD
+AGENT_LAZYPACK_DOC_TO_MD_SKILL_MD_0E95F5A366
+
+# doc-to-md/references/combined-routing-guide.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/references/combined-routing-guide.md")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/references/combined-routing-guide.md" <<'AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_COMBINED_ROUTING_GUIDE_MD_54C5AB0C8B'
+# doc-to-md Combined Routing Guide
+
+This guide explains how the unified `doc-to-md` skill chooses between the
+text-first converter and the visual VLM converter.
+
+## Bundled Scripts
+
+| Script | Role |
+|---|---|
+| `scripts/doc_md_router.py` | Default entrypoint. Detects input type and calls the right converter. |
+| `scripts/doc_to_md.py` | Text-first converter for PDF / EPUB / TXT. |
+| `scripts/vlm_prep.py` | Visual preprocessor for scanned PDFs, images, charts, tables, diagrams, and vector exhibits. |
+| `scripts/package_kb.py` | Packages final visual Markdown with its `assets/` folder into a portable zip. |
+
+## Default Decision Rules
+
+1. EPUB or TXT:
+   - Run `doc_to_md.py`.
+   - No VLM pass.
+2. Image file or image folder:
+   - Run `vlm_prep.py`.
+   - The assistant must open images and fill visual placeholders.
+3. PDF with low extractable text density:
+   - Treat as scanned/image PDF.
+   - Run `vlm_prep.py --mode pages`.
+   - Do not run `doc_to_md.py` unless the user explicitly wants the weak text layer too.
+4. Text PDF with embedded figures, vector-heavy pages, or Exhibit/Figure captions:
+   - Run `doc_to_md.py` for text.
+   - Run `vlm_prep.py --mode figures` for visual content.
+5. Text PDF without visual signals:
+   - Run `doc_to_md.py`.
+   - Skip VLM.
+
+## Commands
+
+Use the user's fixed Terminal installs first. Do not create a temporary virtual
+environment for a single conversion.
+
+```bash
+test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
+test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+```
+
+If the current system `python3` lacks PyMuPDF for PDF routing, run the bundled
+router with the already installed text-converter Python:
+
+```bash
+~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
+```
+
+Automatic:
+
+```bash
+python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
+```
+
+Force VLM for a text PDF:
+
+```bash
+python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/" --visual force
+```
+
+Text only:
+
+```bash
+python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/" --visual off
+```
+
+Visual only:
+
+```bash
+python3 scripts/vlm_prep.py --mode auto "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
+```
+
+Package final visual knowledge base:
+
+```bash
+python3 scripts/package_kb.py "100_Todo/projects/doc-to-md/<document-slug>/input_視覺知識庫.md"
+```
+
+## VLM Accuracy Rules
+
+- Open every referenced PNG before writing visual descriptions.
+- Read numbers, labels, titles, and sources directly from the image.
+- If unreadable, write `圖中未能辨識`.
+- Do not invent sources, country lists, axes, or values.
+- For scanned pages, transcribe visible text into Markdown.
+- For decorative photos, keep the description short.
+- Preserve image links and headings.
+
+## Merge Rules
+
+When text and VLM outputs both exist:
+
+1. Treat the text Markdown as the main knowledge base.
+2. Place visual descriptions near the corresponding chapter or page only when
+   the location is obvious.
+3. If placement is uncertain, keep a separate `視覺知識庫` section or companion
+   file.
+4. Package visual Markdown with `assets/` before moving or sharing it.
+AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_COMBINED_ROUTING_GUIDE_MD_54C5AB0C8B
 
 # doc-to-md/references/full-usage.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/references/full-usage.md")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/references/full-usage.md" <<'CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_FULL_USAGE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/references/full-usage.md")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/references/full-usage.md" <<'AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_FULL_USAGE_MD_7426916E96'
 # doc-to-md 使用說明
 
 > 把 PDF / EPUB / TXT 轉成 Markdown 知識庫，搭配 AI 助手自動寫章節摘要
@@ -460,7 +565,7 @@ doc-to-md 分成兩個階段，各自負責不同的事：
 ┌─────────────────────────────┐     ┌─────────────────────────────┐
 │  Phase 1：本地轉換（免費）    │     │  Phase 2：AI 助手摘要        │
 │  ─────────────────────────  │     │  ─────────────────────────  │
-│  你的電腦上執行              │ ──→ │  Codex App 執行         │
+│  你的電腦上執行              │ ──→ │  當前 Agent 執行              │
 │  不花任何 token              │     │  消耗 模型 token           │
 │  不需要網路                  │     │  需要 AI 助手帳號            │
 │                             │     │                             │
@@ -558,7 +663,7 @@ Phase 1 的輸出本身就是完整的 Markdown 知識庫，只是沒有摘要�
 
 ### 方式 A：跟 AI 助手說（最簡單）
 
-打開 Codex App，直接說：
+打開 Codex、Claude 或 AntiGravity，直接說：
 
 **Mac：**
 ```
@@ -585,7 +690,7 @@ AI 助手會自動執行 Phase 1 + Phase 2。
 
 Mac：
 ```bash
-{{CODEX_HOME}}/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
+~/.codex/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
 ```
 
 Windows：
@@ -604,7 +709,7 @@ Windows：
 
 Mac：
 ```bash
-{{CODEX_HOME}}/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
+~/.codex/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
 ```
 
 Windows：
@@ -693,7 +798,7 @@ converted_at: "2026-04-25"  ← 轉換日期
 | AI 助手說檔案太大 | 超過 context 限制 | 分段處理（見上方說明） |
 | EPUB 章節是空的 | DRM 保護 | 需先移除 DRM |
 | PDF 只有圖片沒有文字 | 掃描版 PDF | 需先 OCR |
-| AI 助手沒有自動執行 | Skill 沒裝好 | 確認 Codex App Skills 列表有 doc-to-md |
+| AI 助手沒有自動執行 | Skill 入口或本機 runtime 沒裝好 | 確認 `{{SYNC_ROOT}}/skills/doc-to-md`、當前 Agent 原生入口與 `~/.codex/doc-to-md/doc-to-md --help` |
 | Windows 找不到 Python | 安裝時沒勾 PATH | 重新安裝 Python，勾選「Add Python to PATH」 |
 
 ---
@@ -702,7 +807,7 @@ converted_at: "2026-04-25"  ← 轉換日期
 
 **Mac：**
 ```bash
-rm -rf {{CODEX_HOME}}/doc-to-md
+rm -rf ~/.codex/doc-to-md
 ```
 
 **Windows（PowerShell）：**
@@ -710,12 +815,20 @@ rm -rf {{CODEX_HOME}}/doc-to-md
 Remove-Item -Recurse -Force "$env:USERPROFILE\.doc-to-md"
 ```
 
-然後在 Codex App → Settings → Skills 中移除 `doc-to-md`。
-CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_FULL_USAGE_MD
+若還要移除共享 skill，刪除 `{{SYNC_ROOT}}/skills/doc-to-md` 後用 Item 16 重建三個 Agent 入口；本機 converter runtime 可獨立保留或依上方指令移除。
+
+## Agent Execution Notes
+
+- **Shared steps**：三個 Agent 呼叫同一固定 converter、讀取同一 Markdown、填寫相同摘要與關鍵字格式。
+- **Codex adapter**：在已授權 workspace 呼叫本機 wrapper；需要視覺解讀時使用 native image tool。
+- **Claude adapter**：有 terminal 時直接呼叫 wrapper；沒有 terminal 時由共享 launcher 執行 Phase 1，再把輸出交給 Claude 完成 Phase 2。
+- **AntiGravity adapter**：以本機 shell 呼叫相同 wrapper；需要視覺解讀時使用 Gemini／AntiGravity image input。
+- **Verification**：執行 `doc-to-md --help`、確認輸出檔存在、摘要 placeholder 已完成且來源文字未被改寫。
+AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_FULL_USAGE_MD_7426916E96
 
 # doc-to-md/references/installer-readme.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/references/installer-readme.md")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/references/installer-readme.md" <<'CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_INSTALLER_README_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/references/installer-readme.md")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/references/installer-readme.md" <<'AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_INSTALLER_README_MD_B3AEC3B4EC'
 # doc-to-md 安裝與使用說明
 
 > 把 PDF / EPUB / TXT 檔案轉成乾淨的 Markdown 知識庫，搭配 AI 助手自動寫章節摘要
@@ -737,7 +850,7 @@ cat > "{{CODEX_HOME}}/skills/doc-to-md/references/installer-readme.md" <<'CODEX_
 在 Terminal 中輸入 `bash `（注意 bash 後面有一個空格），然後**把 `install.sh` 檔案拖進 Terminal 視窗**，按 Enter：
 
 ```
-bash {{CODEX_HOME}}/skills/doc-to-md/scripts/install.sh
+bash {{SYNC_ROOT}}/skills/doc-to-md/scripts/install.sh
 ```
 
 > 不用手動打路徑！直接從 Finder 拖檔案進 Terminal 就好。
@@ -761,12 +874,12 @@ bash {{CODEX_HOME}}/skills/doc-to-md/scripts/install.sh
 4. 安裝完成後，**關閉 Terminal / 命令提示字元 重新開啟**
 5. 再次執行安裝程式
 
-### Step 3：在 Codex App 加入技能
+### Step 3：讓三個 Agent 共用 skill
 
-1. 打開 **Codex App**
-2. 點左上方 **Customize** → **Skills** → **+** 號 → **Create Skill** → **Upload a skill**
-3. 選擇安裝包裡的 **skill.zip** 上傳
-4. 確認 `doc-to-md` 出現在 Skills 列表中
+1. LazyPack 安裝版會把完整 package 放到 `{{SYNC_ROOT}}/skills/doc-to-md`。
+2. 執行 Item 16 的 chezmoi bootstrap，建立 Codex、Claude、AntiGravity 的原生 skills 入口。
+3. 重新開啟三個 Agent，確認它們都能讀到 `doc-to-md`。
+4. 若是單獨下載的 `skill.zip`，先解壓到共享主版本，再套用 Item 16；不要分別維護三份 package。
 
 ---
 
@@ -774,7 +887,7 @@ bash {{CODEX_HOME}}/skills/doc-to-md/scripts/install.sh
 
 ### 方式 A：直接跟 AI 助手說（推薦）
 
-在 Codex App 的對話框中輸入：
+在 Codex、Claude 或 AntiGravity 的對話框中輸入：
 
 **Mac：**
 ```
@@ -796,7 +909,7 @@ AI 助手會自動：
 
 **Mac：**
 ```bash
-{{CODEX_HOME}}/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
+~/.codex/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
 ```
 
 **Windows（PowerShell 或命令提示字元）：**
@@ -840,7 +953,7 @@ converted_at: "2026-04-25 17:00"
 |------|------|
 | 安裝時說「Python 版本太舊」 | 到 python.org 下載 Python 3.12，安裝後重開 Terminal 再試 |
 | Windows 顯示「已保護您的電腦」 | 點「其他資訊」→「仍要執行」 |
-| AI 助手說找不到轉換器 | 確認有執行過安裝程式，Mac 試 `{{CODEX_HOME}}/doc-to-md/doc-to-md --help`，Windows 試 `%USERPROFILE%\.codex\doc-to-md\doc-to-md.bat --help` |
+| AI 助手說找不到轉換器 | 確認有執行過安裝程式，Mac 試 `~/.codex/doc-to-md/doc-to-md --help`，Windows 試 `%USERPROFILE%\.codex\doc-to-md\doc-to-md.bat --help` |
 | 轉出來是亂碼 | 加上 `--no-convert-chinese` 參數再試一次 |
 | PDF 內容是掃描圖片 | 這種 PDF 需要先用 OCR 軟體處理（如 Adobe Acrobat） |
 | EPUB 章節是空的 | 可能有 DRM 保護，需先移除 |
@@ -852,7 +965,7 @@ converted_at: "2026-04-25 17:00"
 
 **Mac：**
 ```bash
-rm -rf {{CODEX_HOME}}/doc-to-md
+rm -rf ~/.codex/doc-to-md
 ```
 
 **Windows（PowerShell）：**
@@ -860,7 +973,14 @@ rm -rf {{CODEX_HOME}}/doc-to-md
 Remove-Item -Recurse -Force "$env:USERPROFILE\.doc-to-md"
 ```
 
-然後在 Codex App → Skills 中移除 `doc-to-md`。
+若還要移除共享 skill，刪除 `{{SYNC_ROOT}}/skills/doc-to-md` 後用 Item 16 重建三個 Agent 入口；本機 converter runtime 可獨立保留或移除。
+
+## Agent Execution Notes
+
+- **Codex**：從 `{{CODEX_HOME}}/skills` 原生入口載入；sandbox 需授權來源檔與輸出資料夾。
+- **Claude**：從 `{{CLAUDE_HOME}}/skills` 原生入口載入；有 terminal 時直接呼叫固定 converter，否則先由共享 launcher 產生 Markdown。
+- **AntiGravity**：從 `{{GEMINI_CONFIG}}/skills` 原生入口載入；通常可由本機 shell 呼叫相同 converter。
+- **共同驗證**：三個入口解析到 `{{SYNC_ROOT}}/skills`，而且 `~/.codex/doc-to-md/doc-to-md --help` 成功。`~/.codex` 在此只是既有共享 runtime 路徑，不代表限定 Codex。
 
 ---
 
@@ -868,18 +988,18 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.doc-to-md"
 
 | 項目 | Mac | Windows |
 |------|-----|---------|
-| 安裝位置 | `{{CODEX_HOME}}/doc-to-md/` | `%USERPROFILE%\.codex\doc-to-md\` |
-| 虛擬環境 | `{{CODEX_HOME}}/doc-to-md/venv/` | `%USERPROFILE%\.codex\doc-to-md\venv\` |
-| 啟動器 | `{{CODEX_HOME}}/doc-to-md/doc-to-md`（bash） | `%USERPROFILE%\.codex\doc-to-md\doc-to-md.bat` |
+| 安裝位置 | `~/.codex/doc-to-md/` | `%USERPROFILE%\.codex\doc-to-md\` |
+| 虛擬環境 | `~/.codex/doc-to-md/venv/` | `%USERPROFILE%\.codex\doc-to-md\venv\` |
+| 啟動器 | `~/.codex/doc-to-md/doc-to-md`（bash） | `%USERPROFILE%\.codex\doc-to-md\doc-to-md.bat` |
 | Python 需求 | 3.8+（建議 3.12） | 3.8+（建議 3.12） |
 | 套件依賴 | PyMuPDF, ebooklib, beautifulsoup4, chardet, opencc-python-reimplemented, lxml | 同左 |
 | 支援格式 | PDF, EPUB, TXT | PDF, EPUB, TXT |
 | 輸出格式 | Markdown + YAML frontmatter + Obsidian callout blocks | 同左 |
-CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_INSTALLER_README_MD
+AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_INSTALLER_README_MD_B3AEC3B4EC
 
 # doc-to-md/references/usage-guide.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/references/usage-guide.md")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/references/usage-guide.md" <<'CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_USAGE_GUIDE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/references/usage-guide.md")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/references/usage-guide.md" <<'AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_USAGE_GUIDE_MD_08E0917ECC'
 # doc-to-md Usage Guide
 
 Detailed examples, edge cases, and advanced usage for the `doc-to-md` skill.
@@ -888,25 +1008,27 @@ Detailed examples, edge cases, and advanced usage for the `doc-to-md` skill.
 
 ## Installation Walkthrough
 
-### Codex default: fixed Terminal installs
+### Shared default: fixed local Terminal installs
 
-For Codex document-conversion runs, use the converters the user already
-installed from Terminal. Do not create a temporary virtual environment for a
-one-off conversion.
+For Codex, Claude, or AntiGravity document-conversion runs, use the converters
+the user already installed from Terminal. Do not create a temporary virtual
+environment for a one-off conversion. The historical `~/.codex/...` runtime
+directory is a shared local tool path; it does not restrict which Agent may
+call it.
 
 ```bash
-test -x {{CODEX_HOME}}/doc-to-md/doc-to-md && echo "text converter ok"
-test -x {{CODEX_HOME}}/vlm-to-md/vlm-to-md && echo "vlm converter ok"
-{{CODEX_HOME}}/doc-to-md/venv/bin/python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py "book.pdf" -o ./100_Todo/projects/doc-to-md/book/
+test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
+test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+~/.codex/doc-to-md/venv/bin/python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py "book.pdf" -o ./100_Todo/projects/doc-to-md/book/
 ```
 
-The router calls `{{CODEX_HOME}}/doc-to-md/doc-to-md` and `{{CODEX_HOME}}/vlm-to-md/vlm-to-md` first,
+The router calls `~/.codex/doc-to-md/doc-to-md` and `~/.codex/vlm-to-md/vlm-to-md` first,
 then falls back to bundled scripts only when those fixed installs are missing.
 
 ### macOS fixed converter check
 ```bash
-{{CODEX_HOME}}/doc-to-md/doc-to-md --help
-{{CODEX_HOME}}/vlm-to-md/vlm-to-md --help
+~/.codex/doc-to-md/doc-to-md --help
+~/.codex/vlm-to-md/vlm-to-md --help
 ```
 
 ### Windows fixed converter check
@@ -917,21 +1039,21 @@ then falls back to bundled scripts only when those fixed installs are missing.
 
 ### Linux fixed converter check
 ```bash
-{{CODEX_HOME}}/doc-to-md/doc-to-md --help
-{{CODEX_HOME}}/vlm-to-md/vlm-to-md --help
+~/.codex/doc-to-md/doc-to-md --help
+~/.codex/vlm-to-md/vlm-to-md --help
 ```
 
 ### Persistent virtual environment (optional)
 
 Use this only for a deliberate, persistent user-level install. It is not the
-default Codex workflow and should not be created temporarily per conversion.
+default three-Agent workflow and should not be created temporarily per conversion.
 
 ```bash
 python3 -m venv doc-env
 source doc-env/bin/activate        # macOS/Linux
 # doc-env\Scripts\activate.bat     # Windows
 pip install PyMuPDF ebooklib beautifulsoup4 chardet opencc-python-reimplemented lxml
-python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py book.pdf
+python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py book.pdf
 ```
 
 ---
@@ -940,7 +1062,7 @@ python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py book.pdf
 
 ### Automatic routing (recommended)
 ```bash
-python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py \
+python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py \
   "report.pdf" \
   -o ./100_Todo/projects/doc-to-md/book/
 ```
@@ -950,7 +1072,7 @@ both. Use this for ordinary `doc-to-md` requests.
 
 ### Force visual pass for a text PDF with charts
 ```bash
-python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py \
+python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py \
   "consulting_report.pdf" \
   -o ./100_Todo/projects/doc-to-md/book/ \
   --visual force \
@@ -959,27 +1081,27 @@ python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py \
 
 ### Basic PDF conversion
 ```bash
-python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py "Atomic Habits.pdf"
+python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py "Atomic Habits.pdf"
 # Output: Atomic_Habits_知識庫.md  (same folder)
 ```
 
 ### PDF to specific output folder
 ```bash
-python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
+python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py \
   "第一性原理.pdf" \
   -o ~/Documents/Obsidian/original/ebook/
 ```
 
 ### EPUB book
 ```bash
-python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
+python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py \
   --auto "deep_work.epub" \
   -o ./100_Todo/projects/doc-to-md/book/
 ```
 
 ### TXT transcript (no Chinese conversion)
 ```bash
-python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py \
+python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py \
   --auto "lecture_transcript.txt" \
   --no-convert-chinese \
   -o ./100_Todo/projects/doc-to-md/book/
@@ -1053,7 +1175,7 @@ The script detects sections matching these patterns (auto-detected):
 
 **Recommended solution:** Use the combined router or VLM preprocessor:
 ```bash
-python3 {{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py \
+python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py \
   "scan.pdf" \
   -o ./100_Todo/projects/doc-to-md/book/
 ```
@@ -1193,116 +1315,102 @@ The `^anchor-id` tags on headings are Obsidian block references, enabling:
 The limitations above apply to `doc_to_md.py` alone. The combined skill now
 bundles `vlm_prep.py` for scanned PDFs, images, charts, tables, and diagrams.
 See `references/combined-routing-guide.md` and `references/vlm-usage-guide.md`.
-CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_USAGE_GUIDE_MD
+AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_USAGE_GUIDE_MD_08E0917ECC
 
-# doc-to-md/references/combined-routing-guide.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/references/combined-routing-guide.md")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/references/combined-routing-guide.md" <<'CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_COMBINED_ROUTING_GUIDE_MD'
-# doc-to-md Combined Routing Guide
+# doc-to-md/references/vlm-design-notes.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/references/vlm-design-notes.md")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/references/vlm-design-notes.md" <<'AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_VLM_DESIGN_NOTES_MD_03EE9EF755'
+# vlm-to-md 設計思考筆記
 
-This guide explains how the unified `doc-to-md` skill chooses between the
-text-first converter and the visual VLM converter.
+> 這份筆記不是教你「怎麼用」，而是記錄「我是怎麼想的」。
+> 每一個設計決策，背後都先問了一個對的問題。這也是社群直播要帶大家練的事。
 
-## Bundled Scripts
+來源思考習慣：密涅瓦 76 個 Habits of Mind，本案主用 #問對問題（#rightproblem）。
 
-| Script | Role |
-|---|---|
-| `scripts/doc_md_router.py` | Default entrypoint. Detects input type and calls the right converter. |
-| `scripts/doc_to_md.py` | Text-first converter for PDF / EPUB / TXT. |
-| `scripts/vlm_prep.py` | Visual preprocessor for scanned PDFs, images, charts, tables, diagrams, and vector exhibits. |
-| `scripts/package_kb.py` | Packages final visual Markdown with its `assets/` folder into a portable zip. |
+---
 
-## Default Decision Rules
+## 決策 1：先問「真正的問題是什麼？」而不是「VLM 怎麼接？」
 
-1. EPUB or TXT:
-   - Run `doc_to_md.py`.
-   - No VLM pass.
-2. Image file or image folder:
-   - Run `vlm_prep.py`.
-   - The assistant must open images and fill visual placeholders.
-3. PDF with low extractable text density:
-   - Treat as scanned/image PDF.
-   - Run `vlm_prep.py --mode pages`.
-   - Do not run `doc_to_md.py` unless the user explicitly wants the weak text layer too.
-4. Text PDF with embedded figures, vector-heavy pages, or Exhibit/Figure captions:
-   - Run `doc_to_md.py` for text.
-   - Run `vlm_prep.py --mode figures` for visual content.
-5. Text PDF without visual signals:
-   - Run `doc_to_md.py`.
-   - Skip VLM.
+**直覺答案**：要做 VLM，就去接 GPT-4o / Gemini 的視覺 API。
+**問對問題**：使用者真正卡住的是什麼？
 
-## Commands
+退一步用 5 Whys：
+- 為什麼要 VLM？→ 因為 doc-to-md 處理不了掃描 PDF 和圖表。
+- 為什麼處理不了？→ 因為那些內容是「圖」，抽不出文字。
+- 為什麼一定要外部 VLM？→ ……其實不一定。**AI 助手本身就看得懂圖。**
 
-Use the user's fixed Terminal installs first. Do not create a temporary virtual
-environment for a single conversion.
+**根本洞察**：問題不是「去哪找 VLM」，而是「怎麼把圖餵到一個我們已經有的 VLM 面前」。
+那個 VLM 就是當前 Codex、Claude 或 AntiGravity 已提供的原生視覺能力。
 
-```bash
-test -x {{CODEX_HOME}}/doc-to-md/doc-to-md && echo "text converter ok"
-test -x {{CODEX_HOME}}/vlm-to-md/vlm-to-md && echo "vlm converter ok"
-```
+→ 對應思考題：**你是在解決問題，還是在重複別人的解法？**
 
-If the current system `python3` lacks PyMuPDF for PDF routing, run the bundled
-router with the already installed text-converter Python:
+---
 
-```bash
-{{CODEX_HOME}}/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
-```
+## 決策 2：限制 vs 障礙——分清楚才不會做白工
 
-Automatic:
+用「100 倍資源測試」拆解：
 
-```bash
-python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
-```
+| 項目 | 100 倍資源能解決嗎？ | 結論 |
+|------|---------------------|------|
+| 新手不會設定 API key | 能（給錢請人代設） | 障礙 → 可繞過 |
+| 新手不想付費 | 不能（這是前提） | **限制 → 必須遵守** |
+| 沒有顯卡跑本地模型 | 能（買硬體） | 障礙，但對新手＝限制 |
 
-Force VLM for a text PDF:
+「免費」是**限制**，不是障礙。所以不能用付費 API、也不能要新手裝 Ollama。
+同時滿足「不另裝模型 + 視覺」的路線，是優先使用當前 Agent 已包含的視覺能力；若某個 Agent 沒有此能力，改用其 plugin、經核准 API 或另一個已啟用視覺 adapter 的 Agent，但產出契約不變。
 
-```bash
-python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/" --visual force
-```
+→ 對應思考題：**這條路上，哪些是搬得動的石頭，哪些是搬不動的牆？**
 
-Text only:
+---
 
-```bash
-python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/" --visual off
-```
+## 決策 3：沿用「兩階段」而不是重新發明
 
-Visual only:
+doc-to-md 已經驗證過一個好用的分工：本地做粗活（免費、0 token），AI 助手做細活。
+VLM 直接套同一個骨架——本地渲染圖，AI 助手看圖。
 
-```bash
-python3 scripts/vlm_prep.py --mode auto "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
-```
+好處：學過 doc-to-md 的人，心智模型直接遷移，學習成本接近零。
 
-Package final visual knowledge base:
+→ 對應思考題：**新東西能不能掛在大家已經懂的舊東西上？**
 
-```bash
-python3 scripts/package_kb.py "100_Todo/projects/doc-to-md/<document-slug>/input_視覺知識庫.md"
-```
+---
 
-## VLM Accuracy Rules
+## 決策 4：保留 v7.0 已驗證的細節，丟掉用不到的
 
-- Open every referenced PNG before writing visual descriptions.
-- Read numbers, labels, titles, and sources directly from the image.
-- If unreadable, write `圖中未能辨識`.
-- Do not invent sources, country lists, axes, or values.
-- For scanned pages, transcribe visible text into Markdown.
-- For decorative photos, keep the description short.
-- Preserve image links and headings.
+v7.0 經 14 個 HBS/Ivey/IMD/INSEAD 案例實測過。哪些值得留？
 
-## Merge Rules
+留下（已被驗證有效）：
+- 圖片篩選門檻（250x200px、80K area、aspect<8）→ 濾掉 logo 與裝飾條
+- blockquote 描述格式（類型 + 2-3 句內容）→ 對 RAG 檢索友善
 
-When text and VLM outputs both exist:
+丟掉（這次的限制下用不到）：
+- OpenRouter / Kimi / Qwen fallback → 要 API key，違反「免費」限制
+- 拒絕重試機制 → AI 助手自己不會拒絕描述自己看的圖
 
-1. Treat the text Markdown as the main knowledge base.
-2. Place visual descriptions near the corresponding chapter or page only when
-   the location is obvious.
-3. If placement is uncertain, keep a separate `視覺知識庫` section or companion
-   file.
-4. Package visual Markdown with `assets/` before moving or sharing it.
-CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_COMBINED_ROUTING_GUIDE_MD
+→ 對應思考題：**哪些是「驗證過的資產」值得繼承，哪些是「為了舊限制」該放掉？**
+
+---
+
+## 決策 5：怎麼知道「做對了」？——先想驗證，再寫程式
+
+動手前先定義成功標準（可量測，不是「效果好」）：
+- 掃描 PDF：每頁都渲染成圖、骨架頁數 = PDF 頁數
+- 文字 PDF：只抽出符合尺寸的圖表，不混入 logo
+- 圖片資料夾：每張都進 assets、骨架條目數 = 圖片數
+- 全程不需要任何 API key 或網路
+
+→ 對應思考題：**在你動手之前，你能說出「怎樣才算成功」嗎？**
+
+---
+
+## 一句話總結
+
+> 最好的 VLM 工具，可能不是「再接一個 VLM」，
+> 而是「想清楚你手上已經有一個，只是還沒把圖餵給它」。
+AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_VLM_DESIGN_NOTES_MD_03EE9EF755
 
 # doc-to-md/references/vlm-usage-guide.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/references/vlm-usage-guide.md")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/references/vlm-usage-guide.md" <<'CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_VLM_USAGE_GUIDE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/references/vlm-usage-guide.md")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/references/vlm-usage-guide.md" <<'AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_VLM_USAGE_GUIDE_MD_25FB40AE57'
 # vlm-to-md 使用說明
 
 > 用 AI 助手自己的眼睛，把「看得到、抽不出文字」的內容變成知識庫。
@@ -1311,14 +1419,14 @@ cat > "{{CODEX_HOME}}/skills/doc-to-md/references/vlm-usage-guide.md" <<'CODEX_L
 
 ## 運作原理：AI 助手就是那個 VLM
 
-很多人以為「VLM（視覺語言模型）」一定要接 GPT-4o、Gemini，要 API key、要付費。
-其實 **Codex App 本身就是一個 VLM**——它看得懂圖。所以這個工具的設計很簡單：
+很多人以為「VLM（視覺語言模型）」一定要另外接付費 API。
+其實 **當前 Agent 只要有原生視覺能力就能完成 Phase 2**。Codex、Claude、AntiGravity 共用同一份待解讀檔，差別只在視覺工具入口：
 
 ```
 ┌─────────────────────────────┐     ┌─────────────────────────────┐
 │  Phase 1：本地渲染（免費）    │     │  Phase 2：AI 助手看圖填字     │
 │  ─────────────────────────  │     │  ─────────────────────────  │
-│  你的電腦上執行              │ ──→ │  Codex App 執行         │
+│  你的電腦上執行              │ ──→ │  當前 Agent 執行              │
 │  不花任何 token              │     │  用 AI 助手內建視覺          │
 │  不需要網路、不需 API key     │     │  不需要 API key              │
 │                             │     │                             │
@@ -1328,7 +1436,7 @@ cat > "{{CODEX_HOME}}/skills/doc-to-md/references/vlm-usage-guide.md" <<'CODEX_L
 │  • 產出 Markdown 骨架        │     │  • 補可檢索關鍵字            │
 │  • 掃描 PDF 偵測             │     │  • 掃描頁→逐字謄寫           │
 └─────────────────────────────┘     └─────────────────────────────┘
-      Python（本地）                      AI 助手（你的訂閱內）
+      Python（本地）                      Codex／Claude／AntiGravity
 ```
 
 **重點：Phase 1 只是「把圖準備好」，完全不做 AI 判讀。** 真正的「看圖說話」是 AI 助手在 Phase 2 做的，用的是你現有的 AI 助手（免費版也能用）。
@@ -1385,10 +1493,10 @@ vlm-to-md /path/screenshots_folder/ -o /path/out/
 
 ### 方式 A：跟 AI 助手說（最簡單）
 
-打開 Codex App：
+打開 Codex、Claude 或 AntiGravity：
 
 ```
-幫我把這個 PDF 用視覺轉成 Markdown：{{HOME}}/Desktop/掃描檔.pdf
+幫我把這個 PDF 用視覺轉成 Markdown：/Users/你的名字/Desktop/掃描檔.pdf
 ```
 
 AI 助手會自動跑 Phase 1 + Phase 2。
@@ -1397,7 +1505,7 @@ AI 助手會自動跑 Phase 1 + Phase 2。
 
 ```bash
 # Mac
-{{CODEX_HOME}}/vlm-to-md/vlm-to-md --auto ~/Desktop/掃描檔.pdf -o ~/Desktop/
+~/.codex/vlm-to-md/vlm-to-md --auto ~/Desktop/掃描檔.pdf -o ~/Desktop/
 # Windows
 %USERPROFILE%\.codex\vlm-to-md\vlm-to-md.bat --auto C:\Users\你\Desktop\掃描檔.pdf -o C:\Users\你\Desktop\
 ```
@@ -1443,7 +1551,8 @@ AI 助手會自動跑 Phase 1 + Phase 2。
 | 文字 PDF 抽不到圖 | 本來沒嵌圖／圖被濾掉 | 文字改用 doc-to-md |
 | 渲染出來糊 | DPI 太低 | 加 `--dpi 200` |
 | 圖太多很慢 | 一次太多 | Phase 2 分批，每次 5-10 張 |
-| AI 助手說不能看圖 | 誤會 | Codex App 用 Read 直接讀 PNG |
+| AI 助手說不能看圖 | 原生視覺工具未啟用 | 依下方 Agent adapter 使用 image／vision tool，或把同一待解讀檔交給已啟用視覺能力的 Agent |
+| 當前 Agent 沒有視覺工具 | 原生能力或權限未提供 | 改用該 Agent 的 image／vision plugin、經核准 API，或把同一份待解讀檔交給另一個已啟用視覺 adapter 的 Agent |
 
 ---
 
@@ -1451,108 +1560,25 @@ AI 助手會自動跑 Phase 1 + Phase 2。
 
 ```bash
 # Mac
-rm -rf {{CODEX_HOME}}/vlm-to-md
+rm -rf ~/.codex/vlm-to-md
 # Windows (PowerShell)
 Remove-Item -Recurse -Force "$env:USERPROFILE\.vlm-to-md"
 ```
 
-然後在 Codex App → Skills 移除 `vlm-to-md`。
-CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_VLM_USAGE_GUIDE_MD
+若還要移除 skill，刪除共享來源 `{{SYNC_ROOT}}/skills/doc-to-md` 後，用 Item 16 重新套用三個 Agent 入口；不要只在單一 Agent UI 移除入口而留下漂移狀態。
 
-# doc-to-md/references/vlm-design-notes.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/references/vlm-design-notes.md")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/references/vlm-design-notes.md" <<'CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_VLM_DESIGN_NOTES_MD'
-# vlm-to-md 設計思考筆記
+## Agent Execution Notes
 
-> 這份筆記不是教你「怎麼用」，而是記錄「我是怎麼想的」。
-> 每一個設計決策，背後都先問了一個對的問題。這也是社群直播要帶大家練的事。
-
-來源思考習慣：密涅瓦 76 個 Habits of Mind，本案主用 #問對問題（#rightproblem）。
-
----
-
-## 決策 1：先問「真正的問題是什麼？」而不是「VLM 怎麼接？」
-
-**直覺答案**：要做 VLM，就去接 GPT-4o / Gemini 的視覺 API。
-**問對問題**：使用者真正卡住的是什麼？
-
-退一步用 5 Whys：
-- 為什麼要 VLM？→ 因為 doc-to-md 處理不了掃描 PDF 和圖表。
-- 為什麼處理不了？→ 因為那些內容是「圖」，抽不出文字。
-- 為什麼一定要外部 VLM？→ ……其實不一定。**AI 助手本身就看得懂圖。**
-
-**根本洞察**：問題不是「去哪找 VLM」，而是「怎麼把圖餵到一個我們已經有的 VLM 面前」。
-那個 VLM 就是 Codex App。
-
-→ 對應思考題：**你是在解決問題，還是在重複別人的解法？**
-
----
-
-## 決策 2：限制 vs 障礙——分清楚才不會做白工
-
-用「100 倍資源測試」拆解：
-
-| 項目 | 100 倍資源能解決嗎？ | 結論 |
-|------|---------------------|------|
-| 新手不會設定 API key | 能（給錢請人代設） | 障礙 → 可繞過 |
-| 新手不想付費 | 不能（這是前提） | **限制 → 必須遵守** |
-| 沒有顯卡跑本地模型 | 能（買硬體） | 障礙，但對新手＝限制 |
-
-「免費」是**限制**，不是障礙。所以不能用付費 API、也不能要新手裝 Ollama。
-唯一同時滿足「免費 + 不裝模型 + 視覺」的，就是 Codex App 內建視覺。
-
-→ 對應思考題：**這條路上，哪些是搬得動的石頭，哪些是搬不動的牆？**
-
----
-
-## 決策 3：沿用「兩階段」而不是重新發明
-
-doc-to-md 已經驗證過一個好用的分工：本地做粗活（免費、0 token），AI 助手做細活。
-VLM 直接套同一個骨架——本地渲染圖，AI 助手看圖。
-
-好處：學過 doc-to-md 的人，心智模型直接遷移，學習成本接近零。
-
-→ 對應思考題：**新東西能不能掛在大家已經懂的舊東西上？**
-
----
-
-## 決策 4：保留 v7.0 已驗證的細節，丟掉用不到的
-
-v7.0 經 14 個 HBS/Ivey/IMD/INSEAD 案例實測過。哪些值得留？
-
-留下（已被驗證有效）：
-- 圖片篩選門檻（250x200px、80K area、aspect<8）→ 濾掉 logo 與裝飾條
-- blockquote 描述格式（類型 + 2-3 句內容）→ 對 RAG 檢索友善
-
-丟掉（這次的限制下用不到）：
-- OpenRouter / Kimi / Qwen fallback → 要 API key，違反「免費」限制
-- 拒絕重試機制 → AI 助手自己不會拒絕描述自己看的圖
-
-→ 對應思考題：**哪些是「驗證過的資產」值得繼承，哪些是「為了舊限制」該放掉？**
-
----
-
-## 決策 5：怎麼知道「做對了」？——先想驗證，再寫程式
-
-動手前先定義成功標準（可量測，不是「效果好」）：
-- 掃描 PDF：每頁都渲染成圖、骨架頁數 = PDF 頁數
-- 文字 PDF：只抽出符合尺寸的圖表，不混入 logo
-- 圖片資料夾：每張都進 assets、骨架條目數 = 圖片數
-- 全程不需要任何 API key 或網路
-
-→ 對應思考題：**在你動手之前，你能說出「怎樣才算成功」嗎？**
-
----
-
-## 一句話總結
-
-> 最好的 VLM 工具，可能不是「再接一個 VLM」，
-> 而是「想清楚你手上已經有一個，只是還沒把圖餵給它」。
-CODEX_LAZYPACK_DOC_TO_MD_REFERENCES_VLM_DESIGN_NOTES_MD
+- **Shared steps**：三個 Agent 都先跑相同 Phase 1，讀取相同 PNG 與 `*_VLM待解讀.md`，並回寫同一格式。
+- **Codex adapter**：使用可用的 native image tool／Read image 能力；受 sandbox 限制時把輸出放在已授權 workspace。
+- **Claude adapter**：使用 Claude 當前環境提供的 vision／image tool；無本機 shell 時由使用者或共享 launcher 先跑 Phase 1。
+- **AntiGravity adapter**：使用 Gemini／AntiGravity 的 image input 能力；本機 shell 可直接呼叫固定 converter。
+- **Verification**：確認每個 placeholder 都被取代、引用的圖檔存在、掃描頁文字未遺漏，並保留原始 Markdown 結構。
+AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_VLM_USAGE_GUIDE_MD_25FB40AE57
 
 # doc-to-md/scripts/doc_md_router.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" <<'CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_DOC_MD_ROUTER_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_DOC_MD_ROUTER_PY_07D0C45883'
 #!/usr/bin/env python3
 """
 doc_md_router.py — unified Doc/VLM to Markdown router.
@@ -1616,7 +1642,7 @@ def import_fitz():
             print(
                 "[ERROR] PyMuPDF is required for PDF routing. "
                 "Run this router with the fixed install Python, for example: "
-                "{{CODEX_HOME}}/doc-to-md/venv/bin/python3 scripts/doc_md_router.py",
+                "~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py",
                 file=sys.stderr,
             )
             return None
@@ -1812,11 +1838,12 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_DOC_MD_ROUTER_PY
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_DOC_MD_ROUTER_PY_07D0C45883
+chmod +x "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py"
 
 # doc-to-md/scripts/doc_to_md.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py" <<'CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_DOC_TO_MD_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_DOC_TO_MD_PY_66D9C3786D'
 #!/usr/bin/env python3
 """
 doc_to_md.py — Student-friendly document to Markdown converter
@@ -2419,11 +2446,568 @@ Examples:
 
 if __name__ == '__main__':
     main()
-CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_DOC_TO_MD_PY
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_DOC_TO_MD_PY_66D9C3786D
+
+# doc-to-md/scripts/install.bat
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/install.bat")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/install.bat" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_INSTALL_BAT_63EC789819'
+@echo off
+chcp 65001 >nul 2>nul
+setlocal EnableExtensions EnableDelayedExpansion
+title doc-to-md 安裝程式 v1.5.0
+
+echo.
+echo ============================================================
+echo   doc-to-md 安裝程式 v1.5.0
+echo ============================================================
+echo.
+
+set "INSTALL_DIR=%USERPROFILE%\.doc-to-md"
+set "SCRIPT_DIR=%~dp0"
+set "SKILL_SRC=%SCRIPT_DIR%skill"
+set "EXTRACT_DIR="
+set "VENV_PY=%INSTALL_DIR%\venv\Scripts\python.exe"
+
+:: This installer supports both the original outer installer folder
+:: and the LazyPack embedded location: skills\doc-to-md\scripts\install.bat.
+if not exist "%SKILL_SRC%\scripts\requirements.txt" (
+    for %%I in ("%SCRIPT_DIR%..") do set "SKILL_SRC=%%~fI"
+)
+
+:: If the original package only contains skill.zip, extract it first.
+if not exist "%SKILL_SRC%\scripts\requirements.txt" (
+    if not exist "%SCRIPT_DIR%skill.zip" (
+        echo 找不到 requirements.txt 或 skill.zip，請確認安裝包已完整解壓縮，或已先安裝三 Agent 共用 skill。
+        pause
+        exit /b 1
+    )
+
+    set "EXTRACT_DIR=%TEMP%\doc-to-md-skill-%RANDOM%%RANDOM%"
+    set "DOC_TO_MD_SKILL_ZIP=%SCRIPT_DIR%skill.zip"
+    set "DOC_TO_MD_EXTRACT_DIR=!EXTRACT_DIR!"
+
+    echo [準備] 解壓縮技能檔...
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath $env:DOC_TO_MD_SKILL_ZIP -DestinationPath $env:DOC_TO_MD_EXTRACT_DIR -Force" >nul
+    if errorlevel 1 (
+        echo 解壓縮 skill.zip 失敗，請先將整個安裝包解壓縮後再執行 install.bat。
+        pause
+        exit /b 1
+    )
+    set "SKILL_SRC=!EXTRACT_DIR!\skill"
+)
+
+if not exist "%SKILL_SRC%\scripts\requirements.txt" (
+    echo 找不到 %SKILL_SRC%\scripts\requirements.txt
+    echo 請確認安裝包內容完整，或重新下載安裝包。
+    pause
+    exit /b 1
+)
+
+:: Step 1: Find a real Python 3.8+. Avoid the Microsoft Store WindowsApps alias.
+echo [Step 1/3] 檢查 Python 版本...
+set "PY_CMD="
+set "PY_VER="
+
+call :try_python py -3.13
+call :try_python py -3.12
+call :try_python py -3.11
+call :try_python py -3.10
+call :try_python py -3.9
+call :try_python py -3.8
+call :try_python py -3
+call :try_python python
+call :try_python python3
+
+if "%PY_CMD%"=="" (
+    echo.
+    echo 找不到可用的 Python 3.8 以上版本。
+    echo.
+    echo 請先安裝 Python：
+    echo 1. 前往 https://www.python.org/downloads/
+    echo 2. 下載安裝 Python 3.12 或更新版本
+    echo 3. Windows 安裝時務必勾選 Add Python to PATH
+    echo 4. 安裝完成後，關閉此視窗重新執行 install.bat
+    echo.
+    start https://www.python.org/downloads/
+    pause
+    exit /b 1
+)
+
+echo    找到 Python %PY_VER%：%PY_CMD%
+
+:: Step 2: Create or repair venv.
+echo.
+echo [Step 2/3] 建立虛擬環境...
+
+if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+
+if exist "%VENV_PY%" (
+    "%VENV_PY%" -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)" >nul 2>nul
+    if errorlevel 1 (
+        echo    偵測到舊的虛擬環境已失效，重新建立...
+        rmdir /S /Q "%INSTALL_DIR%\venv" >nul 2>nul
+    ) else (
+        echo    虛擬環境已存在，跳過建立
+    )
+)
+
+if not exist "%VENV_PY%" (
+    %PY_CMD% -m venv "%INSTALL_DIR%\venv"
+    if errorlevel 1 (
+        echo    建立虛擬環境失敗，請截圖回報老師。
+        pause
+        exit /b 1
+    )
+    echo    虛擬環境建立在 %INSTALL_DIR%\venv
+)
+
+:: Step 3: Install dependencies and copy scripts.
+echo.
+echo [Step 3/3] 安裝 Python 套件（可能需要 1-2 分鐘）...
+
+"%VENV_PY%" -m pip install --upgrade pip --quiet
+"%VENV_PY%" -m pip install -r "%SKILL_SRC%\scripts\requirements.txt" --quiet
+
+if errorlevel 1 (
+    echo    安裝失敗，請截圖錯誤訊息回報老師。
+    pause
+    exit /b 1
+)
+echo    所有套件安裝完成
+
+copy /Y "%SKILL_SRC%\scripts\doc_to_md.py" "%INSTALL_DIR%\" >nul
+if errorlevel 1 (
+    echo    複製 doc_to_md.py 失敗。
+    echo    來源：%SKILL_SRC%\scripts\doc_to_md.py
+    echo    目的：%INSTALL_DIR%\
+    pause
+    exit /b 1
+)
+copy /Y "%SKILL_SRC%\scripts\doc_md_router.py" "%INSTALL_DIR%\" >nul
+if errorlevel 1 (
+    echo    複製 doc_md_router.py 失敗。
+    echo    來源：%SKILL_SRC%\scripts\doc_md_router.py
+    echo    目的：%INSTALL_DIR%\
+    pause
+    exit /b 1
+)
+copy /Y "%SKILL_SRC%\scripts\vlm_prep.py" "%INSTALL_DIR%\" >nul
+if errorlevel 1 (
+    echo    複製 vlm_prep.py 失敗。
+    echo    來源：%SKILL_SRC%\scripts\vlm_prep.py
+    echo    目的：%INSTALL_DIR%\
+    pause
+    exit /b 1
+)
+copy /Y "%SKILL_SRC%\scripts\package_kb.py" "%INSTALL_DIR%\" >nul
+if errorlevel 1 (
+    echo    複製 package_kb.py 失敗。
+    echo    來源：%SKILL_SRC%\scripts\package_kb.py
+    echo    目的：%INSTALL_DIR%\
+    pause
+    exit /b 1
+)
+copy /Y "%SKILL_SRC%\scripts\requirements.txt" "%INSTALL_DIR%\" >nul
+if errorlevel 1 (
+    echo    複製 requirements.txt 失敗。
+    echo    來源：%SKILL_SRC%\scripts\requirements.txt
+    echo    目的：%INSTALL_DIR%\
+    pause
+    exit /b 1
+)
+
+if not exist "%INSTALL_DIR%\doc_to_md.py" (
+    echo    找不到已安裝的 doc_to_md.py，請截圖回報老師。
+    pause
+    exit /b 1
+)
+if not exist "%INSTALL_DIR%\doc_md_router.py" (
+    echo    找不到已安裝的 doc_md_router.py，請截圖回報老師。
+    pause
+    exit /b 1
+)
+
+(
+echo @echo off
+echo "%VENV_PY%" "%INSTALL_DIR%\doc_md_router.py" %%*
+) > "%INSTALL_DIR%\doc-to-md.bat"
+
+(
+echo @echo off
+echo "%VENV_PY%" "%INSTALL_DIR%\doc_to_md.py" %%*
+) > "%INSTALL_DIR%\doc-to-md-text.bat"
+
+(
+echo @echo off
+echo "%VENV_PY%" "%INSTALL_DIR%\vlm_prep.py" %%*
+) > "%INSTALL_DIR%\vlm-to-md.bat"
+
+(
+echo @echo off
+echo "%VENV_PY%" "%INSTALL_DIR%\package_kb.py" %%*
+) > "%INSTALL_DIR%\doc-to-md-package.bat"
+
+echo.
+echo 驗證安裝...
+"%VENV_PY%" -c "import sys; print('Python OK:', sys.version.split()[0])"
+if errorlevel 1 (
+    echo    Python 執行失敗，請截圖回報老師。
+    pause
+    exit /b 1
+)
+
+"%VENV_PY%" -c "import fitz, ebooklib, bs4, chardet, opencc, lxml; print('套件匯入 OK')"
+if errorlevel 1 (
+    echo.
+    echo    套件匯入失敗。上方會顯示真正錯誤原因，請截圖回報老師。
+    echo    常見原因：Python 版本/架構不相容，或 Windows 缺少必要執行環境。
+    pause
+    exit /b 1
+)
+
+"%VENV_PY%" "%INSTALL_DIR%\doc_md_router.py" --help
+if errorlevel 1 (
+    echo.
+    echo    doc_md_router.py 驗證失敗。上方會顯示真正錯誤原因，請截圖回報老師。
+    pause
+    exit /b 1
+)
+
+"%VENV_PY%" "%INSTALL_DIR%\doc_to_md.py" --help
+
+if errorlevel 1 (
+    echo.
+    echo    doc_to_md.py 驗證失敗。上方會顯示真正錯誤原因，請截圖回報老師。
+    pause
+    exit /b 1
+)
+
+if defined EXTRACT_DIR rmdir /S /Q "%EXTRACT_DIR%" >nul 2>nul
+
+echo    驗證通過！
+echo.
+echo ============================================================
+echo   安裝完成！
+echo ============================================================
+echo.
+echo 本機 Python 轉換器已安裝完成。
+echo 若你是照 LazyPack 文件操作，共用 skill 應已位於：
+echo %SKILL_SRC%
+echo 請重新開啟 Codex、Claude 與 AntiGravity，讓 skill metadata 重新載入。
+echo.
+echo 手動使用：
+echo "%INSTALL_DIR%\doc-to-md.bat" C:\Users\你的名字\Desktop\mybook.pdf -o C:\Users\你的名字\Desktop\
+echo.
+pause
+exit /b 0
+
+:try_python
+if defined PY_CMD exit /b 0
+for /f "usebackq tokens=1,2 delims=|" %%v in (`%* -c "import sys; exe=sys.executable; ok=sys.version_info >= (3, 8) and 'WindowsApps' not in exe; print(f'{sys.version_info.major}.{sys.version_info.minor}|{exe}' if ok else '')" 2^>nul`) do (
+    set "PY_CMD=%*"
+    set "PY_VER=%%v"
+)
+exit /b 0
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_INSTALL_BAT_63EC789819
+
+# doc-to-md/scripts/install.sh
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/install.sh")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/install.sh" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_INSTALL_SH_E076E43CB8'
+#!/bin/bash
+# ╔════════════════════════════════════════════╗
+# ║   doc-to-md 一鍵安裝器（Mac / Linux）      ║
+# ║   把 PDF/EPUB/TXT 轉成 Markdown 知識庫     ║
+# ╚════════════════════════════════════════════╝
+#
+# 使用方式：打開 Terminal → 拖入此檔案 → 按 Enter
+
+set -e
+trap 'if [ -n "${EXTRACT_DIR:-}" ]; then rm -rf "$EXTRACT_DIR"; fi' EXIT
+
+INSTALL_DIR="$HOME/.codex/doc-to-md"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILL_SRC="$SCRIPT_DIR/skill"
+EXTRACT_DIR=""
+
+# This installer supports both the original outer installer folder
+# and the LazyPack embedded location: skills/doc-to-md/scripts/install.sh.
+if [ ! -f "$SKILL_SRC/scripts/requirements.txt" ]; then
+    SKILL_SRC="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
+
+if [ ! -f "$SKILL_SRC/scripts/requirements.txt" ]; then
+    if [ ! -f "$SCRIPT_DIR/skill.zip" ]; then
+        echo "找不到 requirements.txt 或 skill.zip，請確認安裝包已完整解壓縮，或已先安裝三 Agent 共用 skill。"
+        exit 1
+    fi
+    EXTRACT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/doc-to-md-skill.XXXXXX")"
+    echo "📦 解壓縮技能檔..."
+    unzip -q "$SCRIPT_DIR/skill.zip" -d "$EXTRACT_DIR"
+    SKILL_SRC="$EXTRACT_DIR/skill"
+fi
+
+if [ ! -f "$SKILL_SRC/scripts/requirements.txt" ]; then
+    echo "找不到 $SKILL_SRC/scripts/requirements.txt"
+    echo "請確認安裝包內容完整，或重新下載安裝包。"
+    exit 1
+fi
+
+echo ""
+echo "╔════════════════════════════════════════════╗"
+echo "║   doc-to-md 安裝程式 v1.5.0                ║"
+echo "╚════════════════════════════════════════════╝"
+echo ""
+
+# ── Step 1: 找到可用的 Python 3.8+ ──────────────────────────────────────────
+
+echo "🔍 Step 1/3：檢查 Python 版本..."
+PY=""
+for cmd in python3.13 python3.12 python3.11 python3.10 python3.9 python3; do
+    if command -v "$cmd" &>/dev/null; then
+        ver=$("$cmd" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
+        major=$(echo "$ver" | cut -d. -f1)
+        minor=$(echo "$ver" | cut -d. -f2)
+        if [ "$major" -ge 3 ] 2>/dev/null && [ "$minor" -ge 8 ] 2>/dev/null; then
+            PY="$cmd"
+            echo "   ✅ 找到 $cmd (Python $ver)"
+            break
+        else
+            echo "   ⏭️  $cmd 版本 $ver 太舊，跳過"
+        fi
+    fi
+done
+
+if [ -z "$PY" ]; then
+    echo ""
+    echo "   ❌ 找不到 Python 3.8 以上版本"
+    echo ""
+    echo "   請先安裝 Python："
+    echo "   👉 前往 https://www.python.org/downloads/"
+    echo "   👉 下載安裝 Python 3.12（點擊 Download 大按鈕）"
+    echo "   👉 安裝完成後，關閉 Terminal 重新開啟"
+    echo "   👉 再次拖入此檔案執行"
+    echo ""
+    open "https://www.python.org/downloads/" 2>/dev/null || true
+    exit 1
+fi
+
+# ── Step 2: 建立安裝目錄和 venv ─────────────────────────────────────────────
+
+echo ""
+echo "📦 Step 2/3：建立虛擬環境..."
+
+mkdir -p "$INSTALL_DIR"
+
+if [ -d "$INSTALL_DIR/venv" ]; then
+    echo "   ⏭️  虛擬環境已存在，跳過建立"
+else
+    "$PY" -m venv "$INSTALL_DIR/venv"
+    echo "   ✅ 虛擬環境建立在 $INSTALL_DIR/venv"
+fi
+
+# ── Step 3: 安裝 Python 依賴 + 複製腳本 ─────────────────────────────────────
+
+echo ""
+echo "📥 Step 3/3：安裝 Python 套件（可能需要 1-2 分鐘）..."
+
+"$INSTALL_DIR/venv/bin/pip" install --upgrade pip --quiet 2>/dev/null
+"$INSTALL_DIR/venv/bin/pip" install -r "$SKILL_SRC/scripts/requirements.txt" --quiet
+
+if [ $? -eq 0 ]; then
+    echo "   ✅ 所有套件安裝完成"
+else
+    echo "   ❌ 安裝失敗，請截圖錯誤訊息回報老師"
+    exit 1
+fi
+
+# 複製轉換腳本到安裝目錄
+cp "$SKILL_SRC/scripts/doc_to_md.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/doc_md_router.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/vlm_prep.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/package_kb.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/requirements.txt" "$INSTALL_DIR/"
+
+# 建立全域啟動器
+cat > "$INSTALL_DIR/doc-to-md" << 'LAUNCHER'
+#!/bin/bash
+DIR="$HOME/.codex/doc-to-md"
+"$DIR/venv/bin/python3" "$DIR/doc_md_router.py" "$@"
+LAUNCHER
+chmod +x "$INSTALL_DIR/doc-to-md"
+
+cat > "$INSTALL_DIR/doc-to-md-text" << 'LAUNCHER'
+#!/bin/bash
+DIR="$HOME/.codex/doc-to-md"
+"$DIR/venv/bin/python3" "$DIR/doc_to_md.py" "$@"
+LAUNCHER
+chmod +x "$INSTALL_DIR/doc-to-md-text"
+
+cat > "$INSTALL_DIR/vlm-to-md" << 'LAUNCHER'
+#!/bin/bash
+DIR="$HOME/.codex/doc-to-md"
+"$DIR/venv/bin/python3" "$DIR/vlm_prep.py" "$@"
+LAUNCHER
+chmod +x "$INSTALL_DIR/vlm-to-md"
+
+cat > "$INSTALL_DIR/doc-to-md-package" << 'LAUNCHER'
+#!/bin/bash
+DIR="$HOME/.codex/doc-to-md"
+"$DIR/venv/bin/python3" "$DIR/package_kb.py" "$@"
+LAUNCHER
+chmod +x "$INSTALL_DIR/doc-to-md-package"
+
+# 加入 PATH
+SHELL_RC=""
+if [ -f "$HOME/.zshrc" ]; then
+    SHELL_RC="$HOME/.zshrc"
+elif [ -f "$HOME/.bash_profile" ]; then
+    SHELL_RC="$HOME/.bash_profile"
+elif [ -f "$HOME/.bashrc" ]; then
+    SHELL_RC="$HOME/.bashrc"
+fi
+
+if [ -n "$SHELL_RC" ]; then
+    if ! grep -q "doc-to-md" "$SHELL_RC" 2>/dev/null; then
+        echo "" >> "$SHELL_RC"
+        echo '# doc-to-md converter' >> "$SHELL_RC"
+        echo 'export PATH="$HOME/.codex/doc-to-md:$PATH"' >> "$SHELL_RC"
+    fi
+fi
+
+# ── 驗證 ────────────────────────────────────────────────────────────────────
+
+echo ""
+echo "🧪 驗證安裝..."
+"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/doc_md_router.py" --help >/dev/null 2>&1
+"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/doc_to_md.py" --help >/dev/null 2>&1
+"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/vlm_prep.py" --help >/dev/null 2>&1
+
+if [ $? -eq 0 ]; then
+    echo "   ✅ 驗證通過！"
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║                      🎉 安裝完成！                          ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "║                                                            ║"
+    echo "║  本機 Python 轉換器已安裝完成。                              ║"
+    echo "║  若你是照 LazyPack 文件操作，共用 skill 應已位於：            ║"
+    echo "║  $SKILL_SRC"
+    echo "║  請重新開啟 Codex、Claude 與 AntiGravity。                   ║"
+    echo "║                                                            ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "  🔧 也可以手動在 Terminal 使用自動路由："
+    echo "     $INSTALL_DIR/doc-to-md ~/Desktop/mybook.pdf -o ~/Desktop/"
+    echo "     $INSTALL_DIR/doc-to-md ~/Desktop/report.pdf -o ~/Desktop/"
+    echo ""
+    echo "  ℹ️  重新開啟 Terminal 後也可以直接輸入："
+    echo "     doc-to-md ~/Desktop/report.pdf -o ~/Desktop/"
+    echo ""
+else
+    echo "   ❌ 驗證失敗，請截圖回報老師"
+    exit 1
+fi
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_INSTALL_SH_E076E43CB8
+chmod +x "{{SYNC_ROOT}}/skills/doc-to-md/scripts/install.sh"
+
+# doc-to-md/scripts/package_kb.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/package_kb.py")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/package_kb.py" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_PACKAGE_KB_PY_3F28BCD803'
+#!/usr/bin/env python3
+"""
+package_kb.py — 把「最終知識庫 md + assets/」打包成單一 zip，內含一個資料夾。
+解壓後打開資料夾裡的 md（如 Typora），縮圖會用標準相對連結自動顯示。
+
+解決「只交付一個 md → 縮圖全斷、學員以為壞掉」的問題：交付這個 zip 即可。
+
+用法：
+    python3 package_kb.py <最終.md> [--assets <assets目錄>] [-o <輸出.zip>]
+
+行為：
+    - 只打包 md 實際引用到的圖（![](...) 相對連結），順便當「斷鏈檢查」。
+    - 任一連結找不到圖檔 → 非 0 退出並列出，提醒你「補圖」或「移除該圖片行」。
+"""
+import argparse
+import os
+import re
+import sys
+import zipfile
+
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+SUFFIX = re.compile(r"(_完整知識庫|_視覺知識庫|_知識庫)?\.md$")
+
+
+def main():
+    ap = argparse.ArgumentParser(description="把知識庫 md + assets 打包成可攜 zip（縮圖自動連結）")
+    ap.add_argument("md", help="最終知識庫 md 路徑")
+    ap.add_argument("--assets", default=None, help="assets 目錄（預設：md 同層 assets/）")
+    ap.add_argument("-o", "--output", default=None, help="輸出 zip（預設：md 同層 {stem}_知識庫.zip）")
+    args = ap.parse_args()
+
+    md = os.path.abspath(args.md)
+    if not os.path.isfile(md):
+        print(f"❌ 找不到 md：{md}", file=sys.stderr)
+        sys.exit(1)
+    base = os.path.dirname(md)
+    md_name = os.path.basename(md)
+    stem = SUFFIX.sub("", md_name)
+    folder = f"{stem}_知識庫"
+    out_zip = args.output or os.path.join(base, f"{folder}.zip")
+
+    text = open(md, encoding="utf-8").read()
+    links = re.findall(r"!\[[^]]*\]\(([^)]+)\)", text)
+    rels = [l for l in links if not l.startswith(("http://", "https://", "data:"))]
+
+    missing = []
+    packed = 0
+    if os.path.exists(out_zip):
+        os.remove(out_zip)
+    with zipfile.ZipFile(out_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.write(md, f"{folder}/{md_name}")
+        for rel in sorted(set(rels)):
+            src = os.path.normpath(os.path.join(base, rel))
+            if os.path.isfile(src):
+                zf.write(src, f"{folder}/{rel}")
+                packed += 1
+            else:
+                missing.append(rel)
+
+    print(f"✅ 已打包：{out_zip}")
+    print(f"   結構：{folder}/{md_name} ＋ {packed} 張圖（assets 隨行）")
+    if missing:
+        print(f"   ❌ 有 {len(missing)} 個圖片連結找不到實體檔（未打包，會斷鏈）：")
+        for m in missing[:8]:
+            print(f"        {m}")
+        print("   → 請確認 assets 在 md 同層，或把這些斷鏈的圖片行移除（只留 VLM 文字）後重打包。")
+        sys.exit(2)
+    print(f"   📂 解壓後打開 {folder}/{md_name}（Typora 等）縮圖會自動顯示，0 斷鏈。")
+
+
+if __name__ == "__main__":
+    main()
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_PACKAGE_KB_PY_3F28BCD803
+chmod +x "{{SYNC_ROOT}}/skills/doc-to-md/scripts/package_kb.py"
+
+# doc-to-md/scripts/requirements.txt
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/requirements.txt")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/requirements.txt" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_REQUIREMENTS_TXT_7A3CE58E94'
+PyMuPDF>=1.23.0
+ebooklib>=0.18
+beautifulsoup4>=4.12.0
+chardet>=5.0.0
+opencc-python-reimplemented>=0.1.7
+lxml>=4.9.0
+Pillow>=10.0.0
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_REQUIREMENTS_TXT_7A3CE58E94
 
 # doc-to-md/scripts/vlm_prep.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/scripts/vlm_prep.py")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/scripts/vlm_prep.py" <<'CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_VLM_PREP_PY'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/vlm_prep.py")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/vlm_prep.py" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_VLM_PREP_PY_DD87F2EB0F'
 #!/usr/bin/env python3
 """
 vlm_prep.py  v1.0.3
@@ -2434,7 +3018,7 @@ VLM-to-MD｜Phase 1：本地視覺前處理（免費、離線、0 token）
 把任何視覺輸入（掃描 PDF / 圖表 PDF / 一疊圖片 / 單張截圖）
 變成「AI 助手看得懂的圖檔」＋「一份留好空格的 Markdown 骨架」。
 
-真正的「看圖說話」交給 Codex App 內建視覺能力（Phase 2），不需要 API key。
+真正的「看圖說話」交給當前 Codex、Claude 或 AntiGravity 的視覺 adapter（Phase 2）。
 
 設計沿襲使用者 v7.0 RAG 流程的兩個核心：
   1. 智能圖片篩選（MIN 250x200px, 80K area, aspect<8）— 濾掉 logo / 裝飾條
@@ -2793,7 +3377,7 @@ def build_scaffold(title: str, source: str, kind_label: str,
     head = f"# {title}｜視覺知識庫\n\n"
     head += (
         "> **ℹ️ 這份檔案還沒完成——它在等 AI 助手的眼睛**\n"
-        "> 以下每張圖下方都有「圖像解讀」空格。請在 Codex App 讓 AI 助手用內建視覺能力\n"
+        "> 以下每張圖下方都有「圖像解讀」空格。請讓當前 Codex、Claude 或 AntiGravity 使用可用的視覺 adapter\n"
         "> **逐張開圖**填寫（📊 數據圖表務必細看、抄出處；🖼 裝飾照可簡述）。完全免費、不需 API key。\n\n"
     )
     if scanned:
@@ -2844,7 +3428,7 @@ def process(input_path: str, out_dir: str, mode: str, dpi: int,
 
     if is_pdf:
         if not HAS_FITZ:
-            log("❌ 需要 PyMuPDF。請使用固定安裝的 VLM 轉換器：{{CODEX_HOME}}/vlm-to-md/vlm-to-md")
+            log("❌ 需要 PyMuPDF。請使用固定安裝的 VLM 轉換器：~/.codex/vlm-to-md/vlm-to-md")
             return 1
         doc = fitz.open(input_path)
         log(f"📄 開啟 PDF：{os.path.basename(input_path)}（{len(doc)} 頁）")
@@ -2931,7 +3515,7 @@ def process(input_path: str, out_dir: str, mode: str, dpi: int,
     log(f"   • 圖檔位置：{os.path.join(assets_dir, stem)}/")
     log(f"   • 待解讀檔：{md_path}")
     log("")
-    log("👉 下一步（Phase 2，免費）：在 Codex App 中說")
+    log("👉 下一步（Phase 2）：在 Codex、Claude 或 AntiGravity 中說")
     log(f'   「幫我用視覺能力完成這份 VLM 待解讀檔：{md_path}」')
     log(f"[DONE] scaffold saved to: {md_path}")
     return 0
@@ -2976,574 +3560,12 @@ def main():
 
 if __name__ == "__main__":
     main()
-CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_VLM_PREP_PY
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_VLM_PREP_PY_DD87F2EB0F
+chmod +x "{{SYNC_ROOT}}/skills/doc-to-md/scripts/vlm_prep.py"
 
-# doc-to-md/scripts/package_kb.py
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/scripts/package_kb.py")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/scripts/package_kb.py" <<'CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_PACKAGE_KB_PY'
-#!/usr/bin/env python3
-"""
-package_kb.py — 把「最終知識庫 md + assets/」打包成單一 zip，內含一個資料夾。
-解壓後打開資料夾裡的 md（如 Typora），縮圖會用標準相對連結自動顯示。
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md" && echo "doc-to-md installed for Codex, Claude, and AntiGravity"
+````
 
-解決「只交付一個 md → 縮圖全斷、學員以為壞掉」的問題：交付這個 zip 即可。
-
-用法：
-    python3 package_kb.py <最終.md> [--assets <assets目錄>] [-o <輸出.zip>]
-
-行為：
-    - 只打包 md 實際引用到的圖（![](...) 相對連結），順便當「斷鏈檢查」。
-    - 任一連結找不到圖檔 → 非 0 退出並列出，提醒你「補圖」或「移除該圖片行」。
-"""
-import argparse
-import os
-import re
-import sys
-import zipfile
-
-for _s in (sys.stdout, sys.stderr):
-    try:
-        _s.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:
-        pass
-
-SUFFIX = re.compile(r"(_完整知識庫|_視覺知識庫|_知識庫)?\.md$")
-
-
-def main():
-    ap = argparse.ArgumentParser(description="把知識庫 md + assets 打包成可攜 zip（縮圖自動連結）")
-    ap.add_argument("md", help="最終知識庫 md 路徑")
-    ap.add_argument("--assets", default=None, help="assets 目錄（預設：md 同層 assets/）")
-    ap.add_argument("-o", "--output", default=None, help="輸出 zip（預設：md 同層 {stem}_知識庫.zip）")
-    args = ap.parse_args()
-
-    md = os.path.abspath(args.md)
-    if not os.path.isfile(md):
-        print(f"❌ 找不到 md：{md}", file=sys.stderr)
-        sys.exit(1)
-    base = os.path.dirname(md)
-    md_name = os.path.basename(md)
-    stem = SUFFIX.sub("", md_name)
-    folder = f"{stem}_知識庫"
-    out_zip = args.output or os.path.join(base, f"{folder}.zip")
-
-    text = open(md, encoding="utf-8").read()
-    links = re.findall(r"!\[[^]]*\]\(([^)]+)\)", text)
-    rels = [l for l in links if not l.startswith(("http://", "https://", "data:"))]
-
-    missing = []
-    packed = 0
-    if os.path.exists(out_zip):
-        os.remove(out_zip)
-    with zipfile.ZipFile(out_zip, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.write(md, f"{folder}/{md_name}")
-        for rel in sorted(set(rels)):
-            src = os.path.normpath(os.path.join(base, rel))
-            if os.path.isfile(src):
-                zf.write(src, f"{folder}/{rel}")
-                packed += 1
-            else:
-                missing.append(rel)
-
-    print(f"✅ 已打包：{out_zip}")
-    print(f"   結構：{folder}/{md_name} ＋ {packed} 張圖（assets 隨行）")
-    if missing:
-        print(f"   ❌ 有 {len(missing)} 個圖片連結找不到實體檔（未打包，會斷鏈）：")
-        for m in missing[:8]:
-            print(f"        {m}")
-        print("   → 請確認 assets 在 md 同層，或把這些斷鏈的圖片行移除（只留 VLM 文字）後重打包。")
-        sys.exit(2)
-    print(f"   📂 解壓後打開 {folder}/{md_name}（Typora 等）縮圖會自動顯示，0 斷鏈。")
-
-
-if __name__ == "__main__":
-    main()
-CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_PACKAGE_KB_PY
-
-# doc-to-md/scripts/install.bat
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/scripts/install.bat")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/scripts/install.bat" <<'CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_INSTALL_BAT'
-@echo off
-chcp 65001 >nul 2>nul
-setlocal EnableExtensions EnableDelayedExpansion
-title doc-to-md 安裝程式 v1.5.0
-
-echo.
-echo ============================================================
-echo   doc-to-md 安裝程式 v1.5.0
-echo ============================================================
-echo.
-
-set "INSTALL_DIR=%USERPROFILE%\.codex\doc-to-md"
-set "SCRIPT_DIR=%~dp0"
-set "SKILL_SRC=%SCRIPT_DIR%skill"
-set "EXTRACT_DIR="
-set "VENV_PY=%INSTALL_DIR%\venv\Scripts\python.exe"
-
-:: This installer supports both the original outer installer folder
-:: and the LazyPack embedded location: skills\doc-to-md\scripts\install.bat.
-if not exist "%SKILL_SRC%\scripts\requirements.txt" (
-    for %%I in ("%SCRIPT_DIR%..") do set "SKILL_SRC=%%~fI"
-)
-
-:: If the original package only contains skill.zip, extract it first.
-if not exist "%SKILL_SRC%\scripts\requirements.txt" (
-    if not exist "%SCRIPT_DIR%skill.zip" (
-        echo 找不到 requirements.txt 或 skill.zip，請確認安裝包已完整解壓縮，或已先安裝 Codex skill。
-        pause
-        exit /b 1
-    )
-
-    set "EXTRACT_DIR=%TEMP%\doc-to-md-skill-%RANDOM%%RANDOM%"
-    set "DOC_TO_MD_SKILL_ZIP=%SCRIPT_DIR%skill.zip"
-    set "DOC_TO_MD_EXTRACT_DIR=!EXTRACT_DIR!"
-
-    echo [準備] 解壓縮技能檔...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath $env:DOC_TO_MD_SKILL_ZIP -DestinationPath $env:DOC_TO_MD_EXTRACT_DIR -Force" >nul
-    if errorlevel 1 (
-        echo 解壓縮 skill.zip 失敗，請先將整個安裝包解壓縮後再執行 install.bat。
-        pause
-        exit /b 1
-    )
-    set "SKILL_SRC=!EXTRACT_DIR!\skill"
-)
-
-if not exist "%SKILL_SRC%\scripts\requirements.txt" (
-    echo 找不到 %SKILL_SRC%\scripts\requirements.txt
-    echo 請確認安裝包內容完整，或重新下載安裝包。
-    pause
-    exit /b 1
-)
-
-:: Step 1: Find a real Python 3.8+. Avoid the Microsoft Store WindowsApps alias.
-echo [Step 1/3] 檢查 Python 版本...
-set "PY_CMD="
-set "PY_VER="
-
-call :try_python py -3.13
-call :try_python py -3.12
-call :try_python py -3.11
-call :try_python py -3.10
-call :try_python py -3.9
-call :try_python py -3.8
-call :try_python py -3
-call :try_python python
-call :try_python python3
-
-if "%PY_CMD%"=="" (
-    echo.
-    echo 找不到可用的 Python 3.8 以上版本。
-    echo.
-    echo 請先安裝 Python：
-    echo 1. 前往 https://www.python.org/downloads/
-    echo 2. 下載安裝 Python 3.12 或更新版本
-    echo 3. Windows 安裝時務必勾選 Add Python to PATH
-    echo 4. 安裝完成後，關閉此視窗重新執行 install.bat
-    echo.
-    start https://www.python.org/downloads/
-    pause
-    exit /b 1
-)
-
-echo    找到 Python %PY_VER%：%PY_CMD%
-
-:: Step 2: Create or repair venv.
-echo.
-echo [Step 2/3] 建立虛擬環境...
-
-if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
-
-if exist "%VENV_PY%" (
-    "%VENV_PY%" -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)" >nul 2>nul
-    if errorlevel 1 (
-        echo    偵測到舊的虛擬環境已失效，重新建立...
-        rmdir /S /Q "%INSTALL_DIR%\venv" >nul 2>nul
-    ) else (
-        echo    虛擬環境已存在，跳過建立
-    )
-)
-
-if not exist "%VENV_PY%" (
-    %PY_CMD% -m venv "%INSTALL_DIR%\venv"
-    if errorlevel 1 (
-        echo    建立虛擬環境失敗，請截圖回報老師。
-        pause
-        exit /b 1
-    )
-    echo    虛擬環境建立在 %INSTALL_DIR%\venv
-)
-
-:: Step 3: Install dependencies and copy scripts.
-echo.
-echo [Step 3/3] 安裝 Python 套件（可能需要 1-2 分鐘）...
-
-"%VENV_PY%" -m pip install --upgrade pip --quiet
-"%VENV_PY%" -m pip install -r "%SKILL_SRC%\scripts\requirements.txt" --quiet
-
-if errorlevel 1 (
-    echo    安裝失敗，請截圖錯誤訊息回報老師。
-    pause
-    exit /b 1
-)
-echo    所有套件安裝完成
-
-copy /Y "%SKILL_SRC%\scripts\doc_to_md.py" "%INSTALL_DIR%\" >nul
-if errorlevel 1 (
-    echo    複製 doc_to_md.py 失敗。
-    echo    來源：%SKILL_SRC%\scripts\doc_to_md.py
-    echo    目的：%INSTALL_DIR%\
-    pause
-    exit /b 1
-)
-copy /Y "%SKILL_SRC%\scripts\doc_md_router.py" "%INSTALL_DIR%\" >nul
-if errorlevel 1 (
-    echo    複製 doc_md_router.py 失敗。
-    echo    來源：%SKILL_SRC%\scripts\doc_md_router.py
-    echo    目的：%INSTALL_DIR%\
-    pause
-    exit /b 1
-)
-copy /Y "%SKILL_SRC%\scripts\vlm_prep.py" "%INSTALL_DIR%\" >nul
-if errorlevel 1 (
-    echo    複製 vlm_prep.py 失敗。
-    echo    來源：%SKILL_SRC%\scripts\vlm_prep.py
-    echo    目的：%INSTALL_DIR%\
-    pause
-    exit /b 1
-)
-copy /Y "%SKILL_SRC%\scripts\package_kb.py" "%INSTALL_DIR%\" >nul
-if errorlevel 1 (
-    echo    複製 package_kb.py 失敗。
-    echo    來源：%SKILL_SRC%\scripts\package_kb.py
-    echo    目的：%INSTALL_DIR%\
-    pause
-    exit /b 1
-)
-copy /Y "%SKILL_SRC%\scripts\requirements.txt" "%INSTALL_DIR%\" >nul
-if errorlevel 1 (
-    echo    複製 requirements.txt 失敗。
-    echo    來源：%SKILL_SRC%\scripts\requirements.txt
-    echo    目的：%INSTALL_DIR%\
-    pause
-    exit /b 1
-)
-
-if not exist "%INSTALL_DIR%\doc_to_md.py" (
-    echo    找不到已安裝的 doc_to_md.py，請截圖回報老師。
-    pause
-    exit /b 1
-)
-if not exist "%INSTALL_DIR%\doc_md_router.py" (
-    echo    找不到已安裝的 doc_md_router.py，請截圖回報老師。
-    pause
-    exit /b 1
-)
-
-(
-echo @echo off
-echo "%VENV_PY%" "%INSTALL_DIR%\doc_md_router.py" %%*
-) > "%INSTALL_DIR%\doc-to-md.bat"
-
-(
-echo @echo off
-echo "%VENV_PY%" "%INSTALL_DIR%\doc_to_md.py" %%*
-) > "%INSTALL_DIR%\doc-to-md-text.bat"
-
-(
-echo @echo off
-echo "%VENV_PY%" "%INSTALL_DIR%\vlm_prep.py" %%*
-) > "%INSTALL_DIR%\vlm-to-md.bat"
-
-(
-echo @echo off
-echo "%VENV_PY%" "%INSTALL_DIR%\package_kb.py" %%*
-) > "%INSTALL_DIR%\doc-to-md-package.bat"
-
-echo.
-echo 驗證安裝...
-"%VENV_PY%" -c "import sys; print('Python OK:', sys.version.split()[0])"
-if errorlevel 1 (
-    echo    Python 執行失敗，請截圖回報老師。
-    pause
-    exit /b 1
-)
-
-"%VENV_PY%" -c "import fitz, ebooklib, bs4, chardet, opencc, lxml; print('套件匯入 OK')"
-if errorlevel 1 (
-    echo.
-    echo    套件匯入失敗。上方會顯示真正錯誤原因，請截圖回報老師。
-    echo    常見原因：Python 版本/架構不相容，或 Windows 缺少必要執行環境。
-    pause
-    exit /b 1
-)
-
-"%VENV_PY%" "%INSTALL_DIR%\doc_md_router.py" --help
-if errorlevel 1 (
-    echo.
-    echo    doc_md_router.py 驗證失敗。上方會顯示真正錯誤原因，請截圖回報老師。
-    pause
-    exit /b 1
-)
-
-"%VENV_PY%" "%INSTALL_DIR%\doc_to_md.py" --help
-
-if errorlevel 1 (
-    echo.
-    echo    doc_to_md.py 驗證失敗。上方會顯示真正錯誤原因，請截圖回報老師。
-    pause
-    exit /b 1
-)
-
-if defined EXTRACT_DIR rmdir /S /Q "%EXTRACT_DIR%" >nul 2>nul
-
-echo    驗證通過！
-echo.
-echo ============================================================
-echo   安裝完成！
-echo ============================================================
-echo.
-echo 本機 Python 轉換器已安裝完成。
-echo 若你是照 LazyPack 文件操作，Codex skill 應已位於：
-echo %SKILL_SRC%
-echo 請重新開啟 Codex 對話或重啟 Codex App，讓 skill metadata 重新載入。
-echo.
-echo 手動使用：
-echo "%INSTALL_DIR%\doc-to-md.bat" C:\Users\你的名字\Desktop\mybook.pdf -o C:\Users\你的名字\Desktop\
-echo.
-pause
-exit /b 0
-
-:try_python
-if defined PY_CMD exit /b 0
-for /f "usebackq tokens=1,2 delims=|" %%v in (`%* -c "import sys; exe=sys.executable; ok=sys.version_info >= (3, 8) and 'WindowsApps' not in exe; print(f'{sys.version_info.major}.{sys.version_info.minor}|{exe}' if ok else '')" 2^>nul`) do (
-    set "PY_CMD=%*"
-    set "PY_VER=%%v"
-)
-exit /b 0
-CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_INSTALL_BAT
-
-# doc-to-md/scripts/install.sh
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/scripts/install.sh")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/scripts/install.sh" <<'CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_INSTALL_SH'
-#!/bin/bash
-# ╔════════════════════════════════════════════╗
-# ║   doc-to-md 一鍵安裝器（Mac / Linux）      ║
-# ║   把 PDF/EPUB/TXT 轉成 Markdown 知識庫     ║
-# ╚════════════════════════════════════════════╝
-#
-# 使用方式：打開 Terminal → 拖入此檔案 → 按 Enter
-
-set -e
-trap 'if [ -n "${EXTRACT_DIR:-}" ]; then rm -rf "$EXTRACT_DIR"; fi' EXIT
-
-INSTALL_DIR="${CODEX_HOME}/doc-to-md"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SKILL_SRC="$SCRIPT_DIR/skill"
-EXTRACT_DIR=""
-
-# This installer supports both the original outer installer folder
-# and the LazyPack embedded location: skills/doc-to-md/scripts/install.sh.
-if [ ! -f "$SKILL_SRC/scripts/requirements.txt" ]; then
-    SKILL_SRC="$(cd "$SCRIPT_DIR/.." && pwd)"
-fi
-
-if [ ! -f "$SKILL_SRC/scripts/requirements.txt" ]; then
-    if [ ! -f "$SCRIPT_DIR/skill.zip" ]; then
-        echo "找不到 requirements.txt 或 skill.zip，請確認安裝包已完整解壓縮，或已先安裝 Codex skill。"
-        exit 1
-    fi
-    EXTRACT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/doc-to-md-skill.XXXXXX")"
-    echo "📦 解壓縮技能檔..."
-    unzip -q "$SCRIPT_DIR/skill.zip" -d "$EXTRACT_DIR"
-    SKILL_SRC="$EXTRACT_DIR/skill"
-fi
-
-if [ ! -f "$SKILL_SRC/scripts/requirements.txt" ]; then
-    echo "找不到 $SKILL_SRC/scripts/requirements.txt"
-    echo "請確認安裝包內容完整，或重新下載安裝包。"
-    exit 1
-fi
-
-echo ""
-echo "╔════════════════════════════════════════════╗"
-echo "║   doc-to-md 安裝程式 v1.5.0                ║"
-echo "╚════════════════════════════════════════════╝"
-echo ""
-
-# ── Step 1: 找到可用的 Python 3.8+ ──────────────────────────────────────────
-
-echo "🔍 Step 1/3：檢查 Python 版本..."
-PY=""
-for cmd in python3.13 python3.12 python3.11 python3.10 python3.9 python3; do
-    if command -v "$cmd" &>/dev/null; then
-        ver=$("$cmd" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
-        major=$(echo "$ver" | cut -d. -f1)
-        minor=$(echo "$ver" | cut -d. -f2)
-        if [ "$major" -ge 3 ] 2>/dev/null && [ "$minor" -ge 8 ] 2>/dev/null; then
-            PY="$cmd"
-            echo "   ✅ 找到 $cmd (Python $ver)"
-            break
-        else
-            echo "   ⏭️  $cmd 版本 $ver 太舊，跳過"
-        fi
-    fi
-done
-
-if [ -z "$PY" ]; then
-    echo ""
-    echo "   ❌ 找不到 Python 3.8 以上版本"
-    echo ""
-    echo "   請先安裝 Python："
-    echo "   👉 前往 https://www.python.org/downloads/"
-    echo "   👉 下載安裝 Python 3.12（點擊 Download 大按鈕）"
-    echo "   👉 安裝完成後，關閉 Terminal 重新開啟"
-    echo "   👉 再次拖入此檔案執行"
-    echo ""
-    open "https://www.python.org/downloads/" 2>/dev/null || true
-    exit 1
-fi
-
-# ── Step 2: 建立安裝目錄和 venv ─────────────────────────────────────────────
-
-echo ""
-echo "📦 Step 2/3：建立虛擬環境..."
-
-mkdir -p "$INSTALL_DIR"
-
-if [ -d "$INSTALL_DIR/venv" ]; then
-    echo "   ⏭️  虛擬環境已存在，跳過建立"
-else
-    "$PY" -m venv "$INSTALL_DIR/venv"
-    echo "   ✅ 虛擬環境建立在 $INSTALL_DIR/venv"
-fi
-
-# ── Step 3: 安裝 Python 依賴 + 複製腳本 ─────────────────────────────────────
-
-echo ""
-echo "📥 Step 3/3：安裝 Python 套件（可能需要 1-2 分鐘）..."
-
-"$INSTALL_DIR/venv/bin/pip" install --upgrade pip --quiet 2>/dev/null
-"$INSTALL_DIR/venv/bin/pip" install -r "$SKILL_SRC/scripts/requirements.txt" --quiet
-
-if [ $? -eq 0 ]; then
-    echo "   ✅ 所有套件安裝完成"
-else
-    echo "   ❌ 安裝失敗，請截圖錯誤訊息回報老師"
-    exit 1
-fi
-
-# 複製轉換腳本到安裝目錄
-cp "$SKILL_SRC/scripts/doc_to_md.py" "$INSTALL_DIR/"
-cp "$SKILL_SRC/scripts/doc_md_router.py" "$INSTALL_DIR/"
-cp "$SKILL_SRC/scripts/vlm_prep.py" "$INSTALL_DIR/"
-cp "$SKILL_SRC/scripts/package_kb.py" "$INSTALL_DIR/"
-cp "$SKILL_SRC/scripts/requirements.txt" "$INSTALL_DIR/"
-
-# 建立全域啟動器
-cat > "$INSTALL_DIR/doc-to-md" << 'LAUNCHER'
-#!/bin/bash
-DIR="${CODEX_HOME}/doc-to-md"
-"$DIR/venv/bin/python3" "$DIR/doc_md_router.py" "$@"
-LAUNCHER
-chmod +x "$INSTALL_DIR/doc-to-md"
-
-cat > "$INSTALL_DIR/doc-to-md-text" << 'LAUNCHER'
-#!/bin/bash
-DIR="${CODEX_HOME}/doc-to-md"
-"$DIR/venv/bin/python3" "$DIR/doc_to_md.py" "$@"
-LAUNCHER
-chmod +x "$INSTALL_DIR/doc-to-md-text"
-
-cat > "$INSTALL_DIR/vlm-to-md" << 'LAUNCHER'
-#!/bin/bash
-DIR="${CODEX_HOME}/doc-to-md"
-"$DIR/venv/bin/python3" "$DIR/vlm_prep.py" "$@"
-LAUNCHER
-chmod +x "$INSTALL_DIR/vlm-to-md"
-
-cat > "$INSTALL_DIR/doc-to-md-package" << 'LAUNCHER'
-#!/bin/bash
-DIR="${CODEX_HOME}/doc-to-md"
-"$DIR/venv/bin/python3" "$DIR/package_kb.py" "$@"
-LAUNCHER
-chmod +x "$INSTALL_DIR/doc-to-md-package"
-
-# 加入 PATH
-SHELL_RC=""
-if [ -f "$HOME/.zshrc" ]; then
-    SHELL_RC="$HOME/.zshrc"
-elif [ -f "$HOME/.bash_profile" ]; then
-    SHELL_RC="$HOME/.bash_profile"
-elif [ -f "$HOME/.bashrc" ]; then
-    SHELL_RC="$HOME/.bashrc"
-fi
-
-if [ -n "$SHELL_RC" ]; then
-    if ! grep -q "doc-to-md" "$SHELL_RC" 2>/dev/null; then
-        echo "" >> "$SHELL_RC"
-        echo '# doc-to-md converter' >> "$SHELL_RC"
-        echo 'export PATH="${CODEX_HOME}/doc-to-md:$PATH"' >> "$SHELL_RC"
-    fi
-fi
-
-# ── 驗證 ────────────────────────────────────────────────────────────────────
-
-echo ""
-echo "🧪 驗證安裝..."
-"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/doc_md_router.py" --help >/dev/null 2>&1
-"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/doc_to_md.py" --help >/dev/null 2>&1
-"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/vlm_prep.py" --help >/dev/null 2>&1
-
-if [ $? -eq 0 ]; then
-    echo "   ✅ 驗證通過！"
-    echo ""
-    echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║                      🎉 安裝完成！                          ║"
-    echo "╠══════════════════════════════════════════════════════════════╣"
-    echo "║                                                            ║"
-    echo "║  本機 Python 轉換器已安裝完成。                              ║"
-    echo "║  若你是照 LazyPack 文件操作，Codex skill 應已位於：           ║"
-    echo "║  $SKILL_SRC"
-    echo "║  請重新開啟 Codex 對話或重啟 Codex App。                     ║"
-    echo "║                                                            ║"
-    echo "╚══════════════════════════════════════════════════════════════╝"
-    echo ""
-    echo "  🔧 也可以手動在 Terminal 使用自動路由："
-    echo "     $INSTALL_DIR/doc-to-md ~/Desktop/mybook.pdf -o ~/Desktop/"
-    echo "     $INSTALL_DIR/doc-to-md ~/Desktop/report.pdf -o ~/Desktop/"
-    echo ""
-    echo "  ℹ️  重新開啟 Terminal 後也可以直接輸入："
-    echo "     doc-to-md ~/Desktop/report.pdf -o ~/Desktop/"
-    echo ""
-else
-    echo "   ❌ 驗證失敗，請截圖回報老師"
-    exit 1
-fi
-CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_INSTALL_SH
-
-# doc-to-md/scripts/requirements.txt
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/doc-to-md/scripts/requirements.txt")"
-cat > "{{CODEX_HOME}}/skills/doc-to-md/scripts/requirements.txt" <<'CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_REQUIREMENTS_TXT'
-PyMuPDF>=1.23.0
-ebooklib>=0.18
-beautifulsoup4>=4.12.0
-chardet>=5.0.0
-opencc-python-reimplemented>=0.1.7
-lxml>=4.9.0
-Pillow>=10.0.0
-CODEX_LAZYPACK_DOC_TO_MD_SCRIPTS_REQUIREMENTS_TXT
-
-chmod +x "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" \
-  "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_to_md.py" \
-  "{{CODEX_HOME}}/skills/doc-to-md/scripts/vlm_prep.py" \
-  "{{CODEX_HOME}}/skills/doc-to-md/scripts/package_kb.py" \
-  "{{CODEX_HOME}}/skills/doc-to-md/scripts/install.sh"
-
-test -f "{{CODEX_HOME}}/skills/doc-to-md/SKILL.md" && echo "doc-to-md installed"
-test -f "{{CODEX_HOME}}/skills/doc-to-md/scripts/doc_md_router.py" && echo "doc-to-md router installed"
-test -f "{{CODEX_HOME}}/skills/doc-to-md/scripts/vlm_prep.py" && echo "doc-to-md vlm installed"
-
-echo "embedded skills installed: doc-to-md"
-```
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

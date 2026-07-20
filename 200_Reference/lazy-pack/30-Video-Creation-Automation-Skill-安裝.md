@@ -1,8 +1,8 @@
 # 30-Video-Creation-Automation-Skill-安裝
 
-> 版本：2026-06-29 Codex App 版
+> 版本：2026-06-29 三 Agent 共用版
 > 用途：安裝 `video-creation-automation` 全域 skill，在「沒有現成影片」時，從題目、腳本、設計、素材、旁白與 HTML / HyperFrames composition 開始生成影片。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/video-creation-automation/`。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/video-creation-automation/`。
 
 ## 來源與歷史紀錄
 
@@ -10,7 +10,7 @@
 - 來源：使用者提供的 video specs 來源 repo。
 - 來源 commit：`3bcb03f`。
 - 2026-06-29 依實際重跑 HyperFrames 生成影片流程，補入離線可重現資源規則、Google Fonts / 遠端 texture 禁用、HyperFrames lint / validate / inspect / render 驗證與 sandbox Chrome route。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/video-creation-automation/SKILL.md`。
+- 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/video-creation-automation/SKILL.md`。
 
 ## 與 Video Processing Automation 的關係
 
@@ -26,17 +26,17 @@
 - 若有，改用 `video-processing-automation`。
 - 若沒有，才繼續 `video-creation-automation`。
 
-## Codex 相容化調整
+## 三 Agent 相容化調整
 
 - 保留來源 repo 的三種影片規格：活動紀錄影片、教學影片、社群科普影片。
 - 保留 script-first 與 design-first 的確認閘門：先產 `SCRIPT.md`，確認後產 `DESIGN.md`，再次確認後才實作。
-- 排除來源工具專屬入口、安裝路徑、相容性表格與非 Codex agent 包裝。
+- 將來源工具專屬入口、安裝路徑、相容性表格與 agent 包裝改寫為共用工作流與三個 Agent adapter。
 - 不內嵌 API key、OAuth token、素材檔、成品影片或個人品牌資產。
-- 以 Codex App 可用能力為準：HyperFrames、Codex 影像生成、本機 CLI、Playwright / ffmpeg 或使用者指定的渲染路線。
+- 共用核心以 HyperFrames、共用 script／CLI、Playwright／ffmpeg 與可驗證渲染契約為準；影像生成依當前 Agent 原生能力或已核准 fallback 執行。
 
 ## 前置條件
 
-- Codex App 可讀寫目標專案資料夾。
+- 當前 Agent 已取得目標專案資料夾的讀寫權限；三 Agent 要各自驗證。
 - 需要渲染影片時，建議準備 Node.js、ffmpeg / ffprobe。
 - 若使用 HyperFrames，依 `26-HyperFrames-Skill-安裝.md` 安裝與驗證。
 - 若需要雲端 TTS、STT、生圖或 API，API key 一律只放在 `{{CODEX_HOME}}/secrets/`，不寫進 repo、LazyPack 或 Obsidian。
@@ -61,35 +61,35 @@
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/video-creation-automation/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/video-creation-automation/SKILL.md` 存在。
 - [ ] `references/source-adaptation.md`、`references/video-types.md`、`references/gotchas.md` 存在。
 - [ ] 啟動時會先詢問是否有現成影片。
 - [ ] 已有影片時會路由到 `video-processing-automation`，沒有影片時才繼續生成影片流程。
 - [ ] HTML / CSS / JS 已通過 HyperFrames lint / validate / inspect；最終 MP4 已用 `ffprobe` 驗證。
 - [ ] 沒有外部字型、遠端 texture、favicon 或不可重現 URL 依賴。
 - [ ] 沒有把 API key、OAuth token、影片素材、個人照片或成品影片寫進 repo。
-- [ ] 開新 Codex 對話後可用 `video-creation-automation` 或「沒有影片、從零做影片」相關語句觸發。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用 `video-creation-automation` 或「沒有影片、從零做影片」相關語句觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`video-creation-automation`。
+本節是自含式安裝區塊。這個序號項目會安裝：`video-creation-automation`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
-```bash
+````bash
 set -e
 
 # ---- video-creation-automation ----
-mkdir -p "{{CODEX_HOME}}/skills/video-creation-automation/references"
-
+mkdir -p "{{SYNC_ROOT}}/skills/video-creation-automation"
 # video-creation-automation/SKILL.md
-cat > "{{CODEX_HOME}}/skills/video-creation-automation/SKILL.md" <<'CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-creation-automation/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/video-creation-automation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_SKILL_MD_0E95F5A366'
 ---
 name: video-creation-automation
 description: >
-  Use when the user asks Codex to create a video from scratch when there is no
+  Use when the user asks Codex, Claude, or AntiGravity to create a video from scratch when there is no
   existing edited video: choose a video type, interview for topic/materials,
   write SCRIPT.md and DESIGN.md, create a HyperFrames-style HTML video plan,
   prepare TTS/assets, render or hand off to rendering tools, and package the
@@ -175,8 +175,8 @@ Inside the draft folder, produce or prepare:
 6. Build the composition:
    - create or adapt `index.html` / HyperFrames composition;
    - keep media local under the draft folder, usually `assets/`;
-   - if using generated images, use Codex image generation or a user-approved
-     image workflow;
+   - if using generated images, use `image-generator` with the active Agent
+     adapter or a user-approved shared image workflow;
    - if using external photos, download local copies and record attribution
      notes when required.
 7. Prepare narration/audio:
@@ -207,9 +207,24 @@ Inside the draft folder, produce or prepare:
 - Keep `video-processing-automation` as the route for existing video processing. This
   skill is for creating the video itself when no video exists yet.
 
+## Agent Execution Notes
+
+- Shared steps: all three Agents use the same routing question, approval gates,
+  SCRIPT/DESIGN contracts, project folders, render inputs, and final checks.
+- Codex adapter: use available native image, browser, terminal, and HyperFrames
+  tools while honoring sandbox permissions.
+- Claude adapter: use available native tools and the same shared scripts/CLI;
+  route image generation through `image-generator`.
+- AntiGravity adapter: use available native tools and the same shared scripts/CLI;
+  route image generation through `image-generator`.
+- Fallback: shared HyperFrames/Playwright/ffmpeg scripts and an approved image or
+  TTS route must preserve the same deliverables.
+- Verification: apply identical lint, render, ffprobe, audio, caption, first/last
+  frame, and package checks.
+
 ## Verification
 
-- Global skill package exists at `{{CODEX_HOME}}/skills/video-creation-automation`.
+- Global skill package exists at `{{SYNC_ROOT}}/skills/video-creation-automation`.
 - `video-processing-automation` remains installed for existing-video workflows.
 - `SCRIPT.md` and `DESIGN.md` are present before any implementation output.
 - Referenced local assets exist before rendering.
@@ -217,115 +232,11 @@ Inside the draft folder, produce or prepare:
   accidental click overlay in frame 0.
 - Scan the package for old tool names or old agent-specific paths before
   syncing.
-CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_SKILL_MD
-
-# video-creation-automation/references/source-adaptation.md
-cat > "{{CODEX_HOME}}/skills/video-creation-automation/references/source-adaptation.md" <<'CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_SOURCE_ADAPTATION_MD'
-# Source Adaptation
-
-Source repository: user-provided video specs source repo.
-
-Snapshot checked: commit `3bcb03f`.
-
-This Codex skill keeps the useful production ideas:
-
-- three video types;
-- environment and render readiness checks;
-- script-first and design-first approval gates;
-- practical gotchas for subtitles, assets, Playwright, ffmpeg, HTML video, and
-  Python path handling;
-- repeatable project structure for generated video work.
-
-Converted for Codex:
-
-- global skill path is `{{CODEX_HOME}}/skills/video-creation-automation`;
-- no legacy agent install paths, command shims, or agent-specific packaging;
-- no assumption that shell install scripts should run automatically;
-- HyperFrames / Codex image generation / local CLI routes are preferred when
-  available;
-- `video-processing-automation` is the sibling route for existing-video processing.
-
-Excluded:
-
-- source install scripts as executable defaults;
-- source agent compatibility tables;
-- old agent-specific skill packaging;
-- binary assets, downloaded fonts, media, or generated outputs.
-
-## Relationship To Video Processing Automation
-
-`video-processing-automation` starts from an existing raw or finished video file and creates
-subtitles, transcript, metadata, cover, and upload package.
-
-`video-creation-automation` starts from no video file and creates the video
-itself from idea, script, design, assets, narration, HTML composition, and
-render plan.
-
-The first routing question decides which skill is correct.
-CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_SOURCE_ADAPTATION_MD
-
-# video-creation-automation/references/video-types.md
-cat > "{{CODEX_HOME}}/skills/video-creation-automation/references/video-types.md" <<'CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_VIDEO_TYPES_MD'
-# Video Types
-
-Choose one type before writing the script.
-
-## Type 01: Event Recap
-
-Use for a completed activity or event that should become a short emotional recap.
-
-- Typical length: 60-180 seconds.
-- Typical scenes: field trip, workshop, ceremony, sports day, community event,
-  marathon, graduation, wedding.
-- Core elements: narration, large title cards, BGM, emotional pacing.
-- Structure: Hook, Setup, Peak, Turn, Echo.
-- Visual rules: 16:9 by default, gentle Ken Burns motion, slow fades, warm
-  highlight color, one title-card sentence per page.
-- Asset preference: real event photos first, generated fill-in images only when
-  gaps are clear and approved.
-
-## Type 02: Teaching Video
-
-Use for explaining a school or knowledge concept so viewers can understand and
-apply it.
-
-- Typical length: 3-8 minutes.
-- Typical subjects: math, science, social studies, concept explanation.
-- Core elements: SOIL-style teaching logic, animated visual explanation, TTS or
-  human narration.
-- Structure: concept positioning, context positioning, page architecture,
-  cognitive clarity, visual style, composition.
-- Visual rules: dense but clear information, step-by-step reveals, diagrams,
-  formulas where needed, strong alignment and readable subtitles.
-- Math rule: verify every formula, calculation, diagram, label, and unit.
-
-## Type 03: Social Knowledge Video
-
-Use for short social, science, AI, health, finance, psychology, or popular
-knowledge videos.
-
-- Typical length: 2-3 minutes.
-- Core elements: strong first-three-second hook, multiple layouts, photos or
-  visual evidence, readable captions for silent viewing.
-- Structure: Hook, Analogy, Mechanism, Reversal/Application, Closing.
-- Visual rules: at least five layout types across the video, enlarged captions,
-  clear contrast, local image copies, attribution notes when required.
-- Asset preference: user-provided assets first, then licensed/free stock photos,
-  then generated images if approved.
-
-## Type Selection Prompt
-
-Ask:
-
-1. Is this an event recap, a teaching explanation, or a social knowledge video?
-2. Who will watch it?
-3. Where will it be published?
-4. What length and aspect ratio do you want?
-5. What assets already exist?
-CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_VIDEO_TYPES_MD
+AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_SKILL_MD_0E95F5A366
 
 # video-creation-automation/references/gotchas.md
-cat > "{{CODEX_HOME}}/skills/video-creation-automation/references/gotchas.md" <<'CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_GOTCHAS_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-creation-automation/references/gotchas.md")"
+cat > "{{SYNC_ROOT}}/skills/video-creation-automation/references/gotchas.md" <<'AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_REFERENCES_GOTCHAS_MD_DE4E8B5CD6'
 # Gotchas
 
 Read before implementing any generated video.
@@ -398,9 +309,118 @@ Read before implementing any generated video.
 - Write paths relative to the script file or project root explicitly. Do not
   rely on whichever cwd happens to run the command.
 - Use UTF-8 for all generated files.
-CODEX_LAZYPACK_VIDEO_CREATION_AUTOMATION_GOTCHAS_MD
+AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_REFERENCES_GOTCHAS_MD_DE4E8B5CD6
 
-echo "Installed video-creation-automation skill into {{CODEX_HOME}}/skills/video-creation-automation"
-```
+# video-creation-automation/references/source-adaptation.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-creation-automation/references/source-adaptation.md")"
+cat > "{{SYNC_ROOT}}/skills/video-creation-automation/references/source-adaptation.md" <<'AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40'
+# Source Adaptation
+
+Source repository: user-provided video specs source repo.
+
+Snapshot checked: commit `3bcb03f`.
+
+This shared Codex／Claude／AntiGravity skill keeps the useful production ideas:
+
+- three video types;
+- environment and render readiness checks;
+- script-first and design-first approval gates;
+- practical gotchas for subtitles, assets, Playwright, ffmpeg, HTML video, and
+  Python path handling;
+- repeatable project structure for generated video work.
+
+Adapted for all three Agents:
+
+- global skill path is `{{SYNC_ROOT}}/skills/video-creation-automation`;
+- no legacy agent install paths, command shims, or agent-specific packaging;
+- no assumption that shell install scripts should run automatically;
+- HyperFrames / current Agent image generation / local CLI routes are preferred
+  when available, with per-Agent adapters documented in `SKILL.md`;
+- `video-processing-automation` is the sibling route for existing-video processing.
+
+Excluded:
+
+- source install scripts as executable defaults;
+- obsolete source compatibility tables, replaced by the current three-Agent adapter matrix;
+- old agent-specific skill packaging;
+- binary assets, downloaded fonts, media, or generated outputs.
+
+## Relationship To Video Processing Automation
+
+`video-processing-automation` starts from an existing raw or finished video file and creates
+subtitles, transcript, metadata, cover, and upload package.
+
+`video-creation-automation` starts from no video file and creates the video
+itself from idea, script, design, assets, narration, HTML composition, and
+render plan.
+
+The first routing question decides which skill is correct.
+AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40
+
+# video-creation-automation/references/video-types.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-creation-automation/references/video-types.md")"
+cat > "{{SYNC_ROOT}}/skills/video-creation-automation/references/video-types.md" <<'AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_REFERENCES_VIDEO_TYPES_MD_E030221008'
+# Video Types
+
+Choose one type before writing the script.
+
+## Type 01: Event Recap
+
+Use for a completed activity or event that should become a short emotional recap.
+
+- Typical length: 60-180 seconds.
+- Typical scenes: field trip, workshop, ceremony, sports day, community event,
+  marathon, graduation, wedding.
+- Core elements: narration, large title cards, BGM, emotional pacing.
+- Structure: Hook, Setup, Peak, Turn, Echo.
+- Visual rules: 16:9 by default, gentle Ken Burns motion, slow fades, warm
+  highlight color, one title-card sentence per page.
+- Asset preference: real event photos first, generated fill-in images only when
+  gaps are clear and approved.
+
+## Type 02: Teaching Video
+
+Use for explaining a school or knowledge concept so viewers can understand and
+apply it.
+
+- Typical length: 3-8 minutes.
+- Typical subjects: math, science, social studies, concept explanation.
+- Core elements: SOIL-style teaching logic, animated visual explanation, TTS or
+  human narration.
+- Structure: concept positioning, context positioning, page architecture,
+  cognitive clarity, visual style, composition.
+- Visual rules: dense but clear information, step-by-step reveals, diagrams,
+  formulas where needed, strong alignment and readable subtitles.
+- Math rule: verify every formula, calculation, diagram, label, and unit.
+
+## Type 03: Social Knowledge Video
+
+Use for short social, science, AI, health, finance, psychology, or popular
+knowledge videos.
+
+- Typical length: 2-3 minutes.
+- Core elements: strong first-three-second hook, multiple layouts, photos or
+  visual evidence, readable captions for silent viewing.
+- Structure: Hook, Analogy, Mechanism, Reversal/Application, Closing.
+- Visual rules: at least five layout types across the video, enlarged captions,
+  clear contrast, local image copies, attribution notes when required.
+- Asset preference: user-provided assets first, then licensed/free stock photos,
+  then generated images if approved.
+
+## Type Selection Prompt
+
+Ask:
+
+1. Is this an event recap, a teaching explanation, or a social knowledge video?
+2. Who will watch it?
+3. Where will it be published?
+4. What length and aspect ratio do you want?
+5. What assets already exist?
+AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_REFERENCES_VIDEO_TYPES_MD_E030221008
+
+test -f "{{SYNC_ROOT}}/skills/video-creation-automation/SKILL.md" && echo "video-creation-automation installed for Codex, Claude, and AntiGravity"
+````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

@@ -1,40 +1,40 @@
 # 24-Diary-Interview-Assistant-Skill-安裝
 
-> 版本：2026-05-31 Codex App 版
+> 版本：2026-05-31 三 Agent 共用版
 > 用途：建立 `diary-interview-assistant` 全域 skill，將使用者每天的間歇式日記，或完全沒有內容時的空白反思，轉成採訪式追問、深層洞察與可發表的寫作素材。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{CODEX_HOME}}/skills/diary-interview-assistant/`，不需要取得原作者本機資料夾，也不需要任何外部工具。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/diary-interview-assistant/`，不需要取得原作者本機資料夾，也不需要任何外部工具。
 
 ## 來源與歷史紀錄
 
 - 初次同步日期：2026-05-26。
 - 來源 prompt：使用者提供的「日記訪談助手」prompt。
-- 補充來源：外部 `learning-journal` 反思問題設計；僅採用空白狀態下的引導問答邏輯，不採用任何資料夾、寫檔、讀檔、GitHub 推送或非 Codex App 專用路徑動作。
-- Codex 全域 skill：`{{CODEX_HOME}}/skills/diary-interview-assistant/SKILL.md`。
+- 補充來源：外部 `learning-journal` 反思問題設計；僅採用空白狀態下的引導問答邏輯，不採用與本 skill 無關的資料夾、寫檔、讀檔或 GitHub 推送動作；來源專屬路徑改寫為三 Agent 共用路由。
+- 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md`。
 - 這版定位：每日間歇式日記或空白反思的訪談與寫作素材萃取工作流；不寫入日記檔案，而是透過逐題追問把素材轉成可寫作的洞察。
 
 ## 這版和來源 prompt 的差異
 
-| 項目 | Codex 版調整 |
+| 項目 | 三 Agent 共用版調整 |
 |---|---|
-| 1 | 轉成 Codex App 全域 skill 結構，正式 skill name 使用可攜式英文 ID `diary-interview-assistant`，顯示名稱保留「日記訪談助手」。 |
+| 1 | 整理成三 Agent 共用全域 skill package，正式 skill name 使用可攜式英文 ID `diary-interview-assistant`，顯示名稱保留「日記訪談助手」。 |
 | 2 | 保留來源核心流程：收到間歇式日記後才開始採訪，每次只問 1 題，總共 3-5 題。 |
 | 3 | 將輸出格式固定為 3 個關鍵亮點，每個亮點包含亮點解釋、寫作延伸點子、下一步小行動與文章草稿提示。 |
 | 4 | 新增空白反思情境：使用者沒有任何日記內容時，依「事實、驚喜、反思、可控改進、下一步」五個方向逐題訪談。 |
-| 5 | 明確排除來源 `learning-journal` 的資料夾建立、日記檔案讀寫、GitHub 推送與非 Codex App 專用設定。 |
-| 6 | 加入 `agents/openai.yaml` 作為可攜式介面摘要；不依賴非 Codex App 專用設定或任何外部工具。 |
+| 5 | 來源的資料夾建立、日記檔案讀寫與 GitHub 推送不屬於本 skill 契約；來源專屬設定改寫為三 Agent adapter。 |
+| 6 | `agents/openai.yaml` 作為 Codex UI adapter 摘要；共用工作流不依賴它，Claude 與 AntiGravity 使用各自原生入口讀取同一 package。 |
 
 ## 安裝方式
 
 1. 打開本文文末「內建 Skill 完整安裝內容」。
 2. 把整段安裝腳本複製到自己的環境執行。
 3. 執行前先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
-4. 安裝後開新 Codex 對話或重啟 Codex App，讓新的全域 skill metadata 被重新載入。
+4. 安裝後依 Item 16 確認三 Agent 原生入口，分別重載 skill 清單。
 
 ## 驗證
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/diary-interview-assistant/SKILL.md" && echo "diary-interview-assistant SKILL.md ok"
-test -f "{{CODEX_HOME}}/skills/diary-interview-assistant/agents/openai.yaml" && echo "diary-interview-assistant agent metadata ok"
+test -f "{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md" && echo "diary-interview-assistant SKILL.md ok"
+test -f "{{SYNC_ROOT}}/skills/diary-interview-assistant/agents/openai.yaml" && echo "diary-interview-assistant agent metadata ok"
 ```
 
 合理結果是每一行都顯示 `ok`。
@@ -82,10 +82,10 @@ test -f "{{CODEX_HOME}}/skills/diary-interview-assistant/agents/openai.yaml" && 
 
 ## 最終檢查清單
 
-- [ ] `{{CODEX_HOME}}/skills/diary-interview-assistant/SKILL.md` 存在。
-- [ ] `{{CODEX_HOME}}/skills/diary-interview-assistant/agents/openai.yaml` 存在。
-- [ ] 搜尋 package 內沒有非 Codex App 專用路徑、非 Codex frontmatter 或原作者本機絕對路徑。
-- [ ] 開新 Codex 對話後，可用「日記訪談助手」或 `diary-interview-assistant` 相關語句觸發。
+- [ ] `{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md` 存在。
+- [ ] `{{SYNC_ROOT}}/skills/diary-interview-assistant/agents/openai.yaml` 存在。
+- [ ] package 共用核心沒有來源工具專屬路徑、單一 Agent frontmatter 或原作者本機絕對路徑。
+- [ ] Codex、Claude、AntiGravity 重載後，都可用「日記訪談助手」或 `diary-interview-assistant` 相關語句觸發。
 - [ ] 實測採訪階段時，每次只問 1 題，總題數維持 3-5 題。
 - [ ] 使用者沒有提供日記時，會直接進入 5 題空白反思訪談，不會要求先提供日記。
 - [ ] 空白反思情境不會建立資料夾、寫入日記檔、讀取既有日記或推送 GitHub。
@@ -94,18 +94,18 @@ test -f "{{CODEX_HOME}}/skills/diary-interview-assistant/agents/openai.yaml" && 
 
 ## 內建 Skill 完整安裝內容
 
-本節會安裝：`diary-interview-assistant`。
+本節是自含式安裝區塊。這個序號項目會安裝：`diary-interview-assistant`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{HOME}}/.codex`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
-```bash
+````bash
 set -e
 
 # ---- diary-interview-assistant ----
-mkdir -p "{{CODEX_HOME}}/skills/diary-interview-assistant"
+mkdir -p "{{SYNC_ROOT}}/skills/diary-interview-assistant"
 # diary-interview-assistant/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/diary-interview-assistant/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/diary-interview-assistant/SKILL.md" <<'CODEX_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md" <<'AGENT_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_SKILL_MD_0E95F5A366'
 ---
 name: diary-interview-assistant
 description: Use when the user asks for 日記訪談助手, Daily Interview Assistant, diary interview assistant, 間歇式日記訪談, daily journal interview, learning journal, or wants to turn either a time-block diary or an empty-start reflection into 3 publishable writing insights. This skill interviews the user one question at a time in Traditional Chinese, then outputs 3 highlights with explanations, writing ideas, next actions, and article draft prompts.
@@ -272,11 +272,11 @@ Repeat the same structure for three highlights.
   update Obsidian, commit to GitHub, or perform any storage action as part of
   this skill unless the user separately asks for that action.
 - Do not judge the user's choices or over-pathologize ordinary behavior.
-CODEX_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_SKILL_MD
+AGENT_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_SKILL_MD_0E95F5A366
 
 # diary-interview-assistant/agents/openai.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/diary-interview-assistant/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/diary-interview-assistant/agents/openai.yaml" <<'CODEX_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_AGENTS_OPENAI_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/diary-interview-assistant/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/diary-interview-assistant/agents/openai.yaml" <<'AGENT_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "日記訪談助手"
   short_description: "訪談間歇式日記，或從空白狀態引導反思，萃取三個可寫成文章的洞察"
@@ -284,11 +284,11 @@ interface:
 
 policy:
   allow_implicit_invocation: true
-CODEX_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_AGENTS_OPENAI_YAML
+AGENT_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_AGENTS_OPENAI_YAML_DEB9755D27
 
-test -f "{{CODEX_HOME}}/skills/diary-interview-assistant/SKILL.md" && echo "diary-interview-assistant installed"
+test -f "{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md" && echo "diary-interview-assistant installed for Codex, Claude, and AntiGravity"
+````
 
-echo "embedded skills installed: diary-interview-assistant"
-```
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

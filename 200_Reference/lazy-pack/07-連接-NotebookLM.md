@@ -9,7 +9,7 @@
 
 ## 前置條件
 
-- 已安裝 Codex App。
+- 三 Agent 中至少一個現在可用；三者原生入口由 Item 16 預先準備。
 - 已有 Google 帳號並可使用 NotebookLM。
 - 已決定 `{{NOTEBOOKLM_OUTPUT}}`，例如 `{{NOTEBOOKLM_OUTPUT}}`。
 - 若使用 NotebookLM MCP，需已安裝對應 CLI，並確認可登入 Google 帳號。
@@ -69,9 +69,9 @@ tool_timeout_sec = 120
 
 ```bash
 for skill in notebooklm-architecture presentation-workflow; do
-  mkdir -p "{{CODEX_HOME}}/skills/$skill"
+  mkdir -p "{{SYNC_ROOT}}/skills/$skill"
   # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
-  test -f "{{CODEX_HOME}}/skills/$skill/SKILL.md" && echo "$skill installed"
+  test -f "{{SYNC_ROOT}}/skills/$skill/SKILL.md" && echo "$skill installed"
 done
 ```
 
@@ -90,15 +90,15 @@ done
 | 連接 NotebookLM、讀取 notebook、下載成品 | NotebookLM MCP / connector |
 | 設計 NotebookLM Soul / Body Framework | `notebooklm-architecture` |
 | 產生 NotebookLM YAML 風格規格與逐頁規劃 | `presentation-workflow` |
-| NotebookLM 風格但改由 Codex 生圖並打包圖片式 PPTX | `yaml-image-deck` |
+| NotebookLM 風格但改由當前 Agent 原生生圖或已核准 fallback 生圖，再打包圖片式 PPTX | `yaml-image-deck` |
 | SOIL 教學圖片式 PPTX | `soil-image-deck` |
 
-`yaml-image-deck` 對應 LazyPack Item 38：`38-YAML-Image-Deck-Skill-安裝.md`。不要把它併入 `presentation-workflow`；前者負責 Codex 內建 Imagegen 與圖片式 deck 生產，後者負責 NotebookLM YAML 風格規格與簡報工作流。
+`yaml-image-deck` 對應 LazyPack Item 38：`38-YAML-Image-Deck-Skill-安裝.md`。不要把它併入 `presentation-workflow`；前者負責透過當前 Agent 的原生生圖能力或已核准 fallback 生產圖片式 deck，後者負責 NotebookLM YAML 風格規格與簡報工作流。
 
 ## 驗證
 
-1. 重啟 Codex App 或開新對話。
-2. 請 Codex 檢查 NotebookLM 工具是否可用。
+1. 重載本次已設定的 Codex、Claude 或 AntiGravity adapter。
+2. 請當前 Agent 檢查 NotebookLM 工具是否可用。
 3. 測試列出 notebooks 或讀取一個測試 notebook。
 4. 下載任何 NotebookLM 成品後，放入 `{{NOTEBOOKLM_OUTPUT}}` 對應子資料夾。
 
@@ -118,7 +118,7 @@ tool_timeout_sec = 120
 
 ## 踩坑修正
 
-- MCP 設定改完後，工具不一定立刻出現，通常要重啟 Codex。
+- MCP 設定改完後，工具不一定立刻出現，通常要重載當前 Agent；三 Agent 的 MCP／OAuth session 要分別驗證。
 - 不要假設 `nlm mcp` 一定能當 Codex MCP command；以 `command -v notebooklm-mcp` 或實際可執行檔為準。
 - 如果 NotebookLM 工具未載入，先檢查 `command` 是否是完整絕對路徑。
 - Google 帳號登入狀態會影響 NotebookLM 讀取；必要時重新登入 MCP 或 Google connector。
@@ -127,26 +127,18 @@ tool_timeout_sec = 120
 
 ## 內建 Skill 完整安裝內容
 
-本節是自含式安裝區塊。這個序號項目會安裝：`notebooklm-architecture`, `presentation-workflow`。若需要 YAML-controlled image-first deck，請另安裝 Item 38 `yaml-image-deck`。
+本節是自含式安裝區塊。這個序號項目會安裝：`notebooklm-architecture`、`presentation-workflow`。
 
-使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請先把 `{{CODEX_HOME}}` 替換成自己的 Codex 設定資料夾，例如 `{{CODEX_HOME}}`。
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-decode_base64() {
-  if base64 --help 2>/dev/null | grep -q -- '-d'; then
-    base64 -d
-  else
-    base64 -D
-  fi
-}
-
 # ---- notebooklm-architecture ----
-mkdir -p "{{CODEX_HOME}}/skills/notebooklm-architecture"
+mkdir -p "{{SYNC_ROOT}}/skills/notebooklm-architecture"
 # notebooklm-architecture/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/notebooklm-architecture/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/notebooklm-architecture/SKILL.md" <<'CODEX_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/notebooklm-architecture/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/notebooklm-architecture/SKILL.md" <<'AGENT_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_SKILL_MD_0E95F5A366'
 ---
 name: notebooklm-architecture
 description: Create reusable NotebookLM architecture source files that control a notebook's role, thinking logic, teaching method, output structure, formatting, and source-selection behavior. Use when the user asks to design, revise, or package NotebookLM control prompts, Soul Frameworks, Body Frameworks, source files, note-to-source workflows, YAML-like configuration content, teacher-facing NotebookLM templates, or reusable architecture instructions for NotebookLM.
@@ -233,20 +225,20 @@ After producing framework content, include these steps unless the user explicitl
 2. 進入記事後選擇「轉換成來源」。
 3. 進入記事後選擇「匯出至 Google 文件」。
 4. 於目標筆記本點擊「新增來源」，從 Google 雲端硬碟匯入該文件；之後可修改文件並讓 NotebookLM 同步。
-CODEX_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_SKILL_MD
+AGENT_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_SKILL_MD_0E95F5A366
 
 # notebooklm-architecture/agents/openai.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/notebooklm-architecture/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/notebooklm-architecture/agents/openai.yaml" <<'CODEX_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_AGENTS_OPENAI_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/notebooklm-architecture/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/notebooklm-architecture/agents/openai.yaml" <<'AGENT_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "NotebookLM Architecture"
   short_description: "Create reusable NotebookLM Soul and Body framework source files."
   default_prompt: "Create a NotebookLM framework source file for the requested role, thinking logic, teaching method, structure, or output format."
-CODEX_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_AGENTS_OPENAI_YAML
+AGENT_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_AGENTS_OPENAI_YAML_DEB9755D27
 
 # notebooklm-architecture/references/framework-spec.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/notebooklm-architecture/references/framework-spec.md")"
-cat > "{{CODEX_HOME}}/skills/notebooklm-architecture/references/framework-spec.md" <<'CODEX_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_REFERENCES_FRAMEWORK_SPEC_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/notebooklm-architecture/references/framework-spec.md")"
+cat > "{{SYNC_ROOT}}/skills/notebooklm-architecture/references/framework-spec.md" <<'AGENT_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_REFERENCES_FRAMEWORK_SPEC_MD_496FAB806B'
 # NotebookLM Framework Spec
 
 Source: `NotebookLM 系統架構大師.docx`
@@ -398,15 +390,15 @@ After producing framework content, guide the teacher to turn it into a NotebookL
 4. 於目標筆記本點擊「新增來源」，從 Google 雲端硬碟匯入該文件，可以修改後在別的筆記本使用。
 
 If changes are needed later, edit the document directly and sync it in NotebookLM.
-CODEX_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_REFERENCES_FRAMEWORK_SPEC_MD
+AGENT_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_REFERENCES_FRAMEWORK_SPEC_MD_496FAB806B
 
-test -f "{{CODEX_HOME}}/skills/notebooklm-architecture/SKILL.md" && echo "notebooklm-architecture installed"
+test -f "{{SYNC_ROOT}}/skills/notebooklm-architecture/SKILL.md" && echo "notebooklm-architecture installed for Codex, Claude, and AntiGravity"
 
 # ---- presentation-workflow ----
-mkdir -p "{{CODEX_HOME}}/skills/presentation-workflow"
+mkdir -p "{{SYNC_ROOT}}/skills/presentation-workflow"
 # presentation-workflow/SKILL.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/presentation-workflow/SKILL.md")"
-cat > "{{CODEX_HOME}}/skills/presentation-workflow/SKILL.md" <<'CODEX_LAZYPACK_PRESENTATION_WORKFLOW_SKILL_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/presentation-workflow/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/presentation-workflow/SKILL.md" <<'AGENT_LAZYPACK_PRESENTATION_WORKFLOW_SKILL_MD_0E95F5A366'
 ---
 name: presentation-workflow
 description: Analyze and create presentations with an emphasis on NotebookLM slide generation, YAML-controlled visual style, and repeatable deck iteration. Use when Codex needs to read or critique a slide deck, plan a presentation, create slide content, generate or refine NotebookLM YAML style specifications, translate visual references such as Pinterest posters or landing pages into design language, define per-slide layouts and prompts, or revise NotebookLM-generated slides page by page.
@@ -547,20 +539,20 @@ For analysis, return:
 - prioritized fixes
 - revised structure or YAML changes
 - slide-by-slide notes when possible
-CODEX_LAZYPACK_PRESENTATION_WORKFLOW_SKILL_MD
+AGENT_LAZYPACK_PRESENTATION_WORKFLOW_SKILL_MD_0E95F5A366
 
 # presentation-workflow/agents/openai.yaml
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/presentation-workflow/agents/openai.yaml")"
-cat > "{{CODEX_HOME}}/skills/presentation-workflow/agents/openai.yaml" <<'CODEX_LAZYPACK_PRESENTATION_WORKFLOW_AGENTS_OPENAI_YAML'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/presentation-workflow/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/presentation-workflow/agents/openai.yaml" <<'AGENT_LAZYPACK_PRESENTATION_WORKFLOW_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "Presentation Workflow"
   short_description: "NotebookLM YAML slide control"
   default_prompt: "Use $presentation-workflow to create a NotebookLM YAML style specification for this presentation."
-CODEX_LAZYPACK_PRESENTATION_WORKFLOW_AGENTS_OPENAI_YAML
+AGENT_LAZYPACK_PRESENTATION_WORKFLOW_AGENTS_OPENAI_YAML_DEB9755D27
 
 # presentation-workflow/references/notebooklm-yaml-style.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/presentation-workflow/references/notebooklm-yaml-style.md")"
-cat > "{{CODEX_HOME}}/skills/presentation-workflow/references/notebooklm-yaml-style.md" <<'CODEX_LAZYPACK_PRESENTATION_WORKFLOW_REFERENCES_NOTEBOOKLM_YAML_STYLE_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/presentation-workflow/references/notebooklm-yaml-style.md")"
+cat > "{{SYNC_ROOT}}/skills/presentation-workflow/references/notebooklm-yaml-style.md" <<'AGENT_LAZYPACK_PRESENTATION_WORKFLOW_REFERENCES_NOTEBOOKLM_YAML_STYLE_MD_A8A4B147F1'
 # NotebookLM YAML Style Control
 
 Use this reference to create a YAML style specification for NotebookLM slide generation.
@@ -684,11 +676,11 @@ slides:
 - If content is too wordy, constrain `generation_prompt` with word count and tone.
 - If a slide works well, lock it and only iterate weak pages.
 - If only typos or font glitches remain, fix them directly in Canva or PowerPoint instead of regenerating the whole deck.
-CODEX_LAZYPACK_PRESENTATION_WORKFLOW_REFERENCES_NOTEBOOKLM_YAML_STYLE_MD
+AGENT_LAZYPACK_PRESENTATION_WORKFLOW_REFERENCES_NOTEBOOKLM_YAML_STYLE_MD_A8A4B147F1
 
 # presentation-workflow/references/style-extraction-workflow.md
-mkdir -p "$(dirname "{{CODEX_HOME}}/skills/presentation-workflow/references/style-extraction-workflow.md")"
-cat > "{{CODEX_HOME}}/skills/presentation-workflow/references/style-extraction-workflow.md" <<'CODEX_LAZYPACK_PRESENTATION_WORKFLOW_REFERENCES_STYLE_EXTRACTION_WORKFLOW_MD'
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/presentation-workflow/references/style-extraction-workflow.md")"
+cat > "{{SYNC_ROOT}}/skills/presentation-workflow/references/style-extraction-workflow.md" <<'AGENT_LAZYPACK_PRESENTATION_WORKFLOW_REFERENCES_STYLE_EXTRACTION_WORKFLOW_MD_2331D8CD04'
 # Style Extraction Workflow
 
 Use this reference when converting visual inspiration into NotebookLM YAML style instructions.
@@ -769,12 +761,11 @@ global_design:
 - If layout ideas are unclear, let NotebookLM generate one draft from source material first, then revise YAML from the actual pages.
 - Build a reusable inspiration library with tags and folders so style vocabulary accumulates over time.
 - Use a project template in AI workspace project or a similar AI workspace to turn long style discussions into YAML automatically.
-CODEX_LAZYPACK_PRESENTATION_WORKFLOW_REFERENCES_STYLE_EXTRACTION_WORKFLOW_MD
+AGENT_LAZYPACK_PRESENTATION_WORKFLOW_REFERENCES_STYLE_EXTRACTION_WORKFLOW_MD_2331D8CD04
 
-test -f "{{CODEX_HOME}}/skills/presentation-workflow/SKILL.md" && echo "presentation-workflow installed"
-
-
-echo "embedded skills installed: notebooklm-architecture presentation-workflow"
+test -f "{{SYNC_ROOT}}/skills/presentation-workflow/SKILL.md" && echo "presentation-workflow installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
 
 <!-- END EMBEDDED_SKILLS -->

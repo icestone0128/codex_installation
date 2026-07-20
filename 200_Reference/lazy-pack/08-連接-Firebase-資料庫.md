@@ -188,7 +188,7 @@ startup_timeout_sec = 60
 tool_timeout_sec = 120
 ```
 
-重啟 Codex App 或開新對話後再測試。
+上方 TOML 是 Codex adapter；寫入後重載 Codex。Claude 與 AntiGravity 要依各自當前版本的原生 MCP 設定新增同一 `firebase-tools@latest mcp` 服務，不直接複製 Codex TOML；三 Agent 都可使用 Firebase CLI 作為共用 fallback。
 
 ## 驗證
 

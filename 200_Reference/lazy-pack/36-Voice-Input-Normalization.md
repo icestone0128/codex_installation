@@ -16,7 +16,7 @@
 ## 安裝位置
 
 ```text
-{{CODEX_HOME}}/skills/voice-input-normalization/
+{{SYNC_ROOT}}/skills/voice-input-normalization/
 ```
 
 ## 直接安裝
@@ -27,21 +27,21 @@
 CODEX_HOME="${CODEX_HOME}" bash install-voice-input-normalization.sh
 ```
 
-安裝後開新 Codex 對話或重啟 Codex App，讓 skill discovery 重新載入。
+安裝後對 Codex、Claude、AntiGravity 分別開新對話或重載原生入口，讓 skill discovery 重新載入。
 
 ## 驗證安裝
 
 ```bash
-test -f "{{CODEX_HOME}}/skills/voice-input-normalization/SKILL.md"
-test -f "{{CODEX_HOME}}/skills/voice-input-normalization/references/normalization-rules.md"
-test -x "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py"
-python3 "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --dry-run
+test -f "{{SYNC_ROOT}}/skills/voice-input-normalization/SKILL.md"
+test -f "{{SYNC_ROOT}}/skills/voice-input-normalization/references/normalization-rules.md"
+test -x "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py"
+python3 "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --dry-run
 ```
 
-若安裝者有 Codex 內建 validator，也可執行：
+若安裝者有 Codex 內建 validator，可當作 Codex adapter 的額外驗證；Claude 與 AntiGravity 仍要各自做原生 discovery 測試：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/.system/skill-creator/scripts/quick_validate.py" "{{CODEX_HOME}}/skills/voice-input-normalization"
+python3 "{{CODEX_HOME}}/skills/.system/skill-creator/scripts/quick_validate.py" "{{SYNC_ROOT}}/skills/voice-input-normalization"
 ```
 
 ## 語音輸入正規化安裝方式
@@ -49,19 +49,19 @@ python3 "{{CODEX_HOME}}/skills/.system/skill-creator/scripts/quick_validate.py" 
 預設先 dry-run，不寫入任何 Agent 設定：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --dry-run
+python3 "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --dry-run
 ```
 
 確認後才套用：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --apply
+python3 "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --apply
 ```
 
 移除受控區塊或專用規則檔：
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --remove --apply
+python3 "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --remove --apply
 ```
 
 安全邊界：
@@ -73,16 +73,22 @@ python3 "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_i
 - 不修改模型、MCP、API key、登入憑證、cookies、tokens 或 provider 設定。
 - 一般 ChatGPT 雲端聊天無法由本機檔案 installer 安裝，需使用者手動設定。
 
+<!-- BEGIN EMBEDDED_SKILLS -->
+
 ## 內建 Skill 完整安裝內容
+
+本節是自含式安裝區塊。這個序號項目會安裝：`voice-input-normalization`。
+
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
 
-CODEX_HOME="${CODEX_HOME:-${CODEX_HOME}}"
-mkdir -p "$CODEX_HOME/skills"
-
-mkdir -p "$(dirname "$CODEX_HOME/skills/voice-input-normalization/SKILL.md")"
-cat > "$CODEX_HOME/skills/voice-input-normalization/SKILL.md" <<'CODEX_LAZYPACK_36_VOICE_INPUT_NORMALIZATION_SKILL_MD'
+# ---- voice-input-normalization ----
+mkdir -p "{{SYNC_ROOT}}/skills/voice-input-normalization"
+# voice-input-normalization/SKILL.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-input-normalization/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/voice-input-normalization/SKILL.md" <<'AGENT_LAZYPACK_VOICE_INPUT_NORMALIZATION_SKILL_MD_0E95F5A366'
 ---
 name: voice-input-normalization
 description: Use when the user asks to install, update, remove, audit, or package speech-to-text / voice-input normalization rules across Codex, Claude Code, AntiGravity/Gemini, or OpenCode global settings.
@@ -109,14 +115,14 @@ Use this skill when the user wants AI agents to interpret speech-to-text mistake
 2. If the user asks to install or audit, run a dry-run first:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --dry-run
+python3 "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --dry-run
 ```
 
-3. Show the detected agents, target files, and skipped surfaces.
+3. Show the Codex, Claude, and AntiGravity targets plus any optional detected Agent surfaces.
 4. Apply only after the user confirms:
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --apply
+python3 "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --apply
 ```
 
 5. Verify marker counts and config syntax using the script output.
@@ -124,25 +130,38 @@ python3 "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_i
 
 ## Supported Targets
 
-- Codex: `{{CODEX_HOME}}/AGENTS.md` when a local Codex environment exists.
-- Claude Code: `{{HOME}}/.claude/rules/voice-input-normalization.md` when Claude is detected.
-- AntiGravity / Gemini: `{{HOME}}/.gemini/GEMINI.md` when Gemini config is detected.
+- Codex: `{{CODEX_HOME}}/AGENTS.md`.
+- Claude Code: `{{CLAUDE_HOME}}/rules/voice-input-normalization.md`.
+- AntiGravity / Gemini: `{{GEMINI_HOME}}/GEMINI.md`.
 - OpenCode: `{{HOME}}/.config/opencode/instructions/voice-input-normalization.md` and `{{HOME}}/.config/opencode/opencode.json` when OpenCode is detected.
+
+The first three targets are always prepared, even when the matching app binary
+is not installed yet, so a new machine remains future-ready.
 
 ## Uninstall
 
 Use the same script with `--remove --apply`. It removes only the managed block or managed rule file and preserves unrelated settings.
 
 ```bash
-python3 "{{CODEX_HOME}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --remove --apply
+python3 "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" --remove --apply
 ```
-CODEX_LAZYPACK_36_VOICE_INPUT_NORMALIZATION_SKILL_MD
+AGENT_LAZYPACK_VOICE_INPUT_NORMALIZATION_SKILL_MD_0E95F5A366
 
-mkdir -p "$(dirname "$CODEX_HOME/skills/voice-input-normalization/references/normalization-rules.md")"
-cat > "$CODEX_HOME/skills/voice-input-normalization/references/normalization-rules.md" <<'CODEX_LAZYPACK_36_VOICE_INPUT_NORMALIZATION_REFERENCES_NORMALIZATION_RULES_MD'
+# voice-input-normalization/agents/openai.yaml
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-input-normalization/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/voice-input-normalization/agents/openai.yaml" <<'AGENT_LAZYPACK_VOICE_INPUT_NORMALIZATION_AGENTS_OPENAI_YAML_DEB9755D27'
+interface:
+  display_name: "Voice Input Normalization"
+  short_description: "Install speech-to-text correction rules"
+  default_prompt: "Use $voice-input-normalization to install voice input normalization rules."
+AGENT_LAZYPACK_VOICE_INPUT_NORMALIZATION_AGENTS_OPENAI_YAML_DEB9755D27
+
+# voice-input-normalization/references/normalization-rules.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-input-normalization/references/normalization-rules.md")"
+cat > "{{SYNC_ROOT}}/skills/voice-input-normalization/references/normalization-rules.md" <<'AGENT_LAZYPACK_VOICE_INPUT_NORMALIZATION_REFERENCES_NORMALIZATION_RULES_MD_CC249321DA'
 # Voice Input Normalization Rules
 
-This reference adapts `AGENT_SETUP_語音輸入文字正規化_跨Agent全域安裝.md` into Codex-compatible instructions.
+This reference adapts `AGENT_SETUP_語音輸入文字正規化_跨Agent全域安裝.md` into shared Codex, Claude, and AntiGravity instructions.
 
 ## Managed Block
 
@@ -186,10 +205,11 @@ Installers must preserve the begin/end markers.
 - Claude Code should prefer a dedicated `{{HOME}}/.claude/rules/voice-input-normalization.md` rule file when supported.
 - Gemini / AntiGravity can use `{{HOME}}/.gemini/GEMINI.md`.
 - OpenCode uses a dedicated instruction file plus a JSON `instructions` entry.
-CODEX_LAZYPACK_36_VOICE_INPUT_NORMALIZATION_REFERENCES_NORMALIZATION_RULES_MD
+AGENT_LAZYPACK_VOICE_INPUT_NORMALIZATION_REFERENCES_NORMALIZATION_RULES_MD_CC249321DA
 
-mkdir -p "$(dirname "$CODEX_HOME/skills/voice-input-normalization/scripts/install_voice_input_normalization.py")"
-cat > "$CODEX_HOME/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" <<'CODEX_LAZYPACK_36_VOICE_INPUT_NORMALIZATION_SCRIPTS_INSTALL_VOICE_INPUT_NORMALIZATION_PY'
+# voice-input-normalization/scripts/install_voice_input_normalization.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py")"
+cat > "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py" <<'AGENT_LAZYPACK_VOICE_INPUT_NORMALIZATION_SCRIPTS_INSTALL_VOICE_INPUT_NORMALIZATION_PY_B97D5B4209'
 #!/usr/bin/env python3
 from __future__ import annotations
 
@@ -306,20 +326,18 @@ def update_opencode_config(config: Path, instruction_rel: str, *, apply: bool, r
 
 
 def detect_targets(home: Path) -> list[tuple[str, Path, str]]:
-    targets: list[tuple[str, Path, str]] = []
-    if (home / ".codex").exists() or command_exists("codex"):
-        targets.append(("ChatGPT Codex", home / ".codex" / "AGENTS.md", "fresh Codex session required"))
-    if (home / ".claude").exists() or command_exists("claude"):
-        targets.append(("Claude Code", home / ".claude" / "rules" / "voice-input-normalization.md", "restart or fresh Claude session required"))
-    if (home / ".gemini").exists():
-        targets.append(("AntiGravity/Gemini", home / ".gemini" / "GEMINI.md", "restart or fresh Gemini/AntiGravity session required"))
+    targets: list[tuple[str, Path, str]] = [
+        ("ChatGPT Codex", home / ".codex" / "AGENTS.md", "fresh Codex session required"),
+        ("Claude Code", home / ".claude" / "rules" / "voice-input-normalization.md", "restart or fresh Claude session required"),
+        ("AntiGravity/Gemini", home / ".gemini" / "GEMINI.md", "restart or fresh Gemini/AntiGravity session required"),
+    ]
     if (home / ".config" / "opencode").exists() or command_exists("opencode"):
         targets.append(("OpenCode", home / ".config" / "opencode" / "instructions" / "voice-input-normalization.md", "restart or fresh OpenCode session required"))
     return targets
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Install voice input normalization managed rules across detected local AI agents.")
+    parser = argparse.ArgumentParser(description="Install voice input normalization for Codex, Claude, and AntiGravity, plus optional detected agents.")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--dry-run", action="store_true", help="Preview detected targets and intended changes.")
     mode.add_argument("--apply", action="store_true", help="Apply changes with backups.")
@@ -332,7 +350,7 @@ def main() -> int:
     results: list[Result] = []
     targets = detect_targets(home)
     if not targets:
-        print("No supported local AI agent settings detected.")
+        print("No AI agent targets available.")
         return 0
 
     for agent, target, restart in targets:
@@ -364,21 +382,15 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-CODEX_LAZYPACK_36_VOICE_INPUT_NORMALIZATION_SCRIPTS_INSTALL_VOICE_INPUT_NORMALIZATION_PY
+AGENT_LAZYPACK_VOICE_INPUT_NORMALIZATION_SCRIPTS_INSTALL_VOICE_INPUT_NORMALIZATION_PY_B97D5B4209
+chmod +x "{{SYNC_ROOT}}/skills/voice-input-normalization/scripts/install_voice_input_normalization.py"
 
-mkdir -p "$(dirname "$CODEX_HOME/skills/voice-input-normalization/agents/openai.yaml")"
-cat > "$CODEX_HOME/skills/voice-input-normalization/agents/openai.yaml" <<'CODEX_LAZYPACK_36_VOICE_INPUT_NORMALIZATION_AGENTS_OPENAI_YAML'
-interface:
-  display_name: "Voice Input Normalization"
-  short_description: "Install speech-to-text correction rules"
-  default_prompt: "Use $voice-input-normalization to install voice input normalization rules."
-CODEX_LAZYPACK_36_VOICE_INPUT_NORMALIZATION_AGENTS_OPENAI_YAML
-
-chmod +x "$CODEX_HOME/skills/voice-input-normalization/scripts/install_voice_input_normalization.py"
-
-echo "Installed: $CODEX_HOME/skills/voice-input-normalization"
-echo "Restart Codex or open a new conversation before expecting the new skill to appear."
+test -f "{{SYNC_ROOT}}/skills/voice-input-normalization/SKILL.md" && echo "voice-input-normalization installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
+
+<!-- END EMBEDDED_SKILLS -->
 
 ## 安全邊界
 
