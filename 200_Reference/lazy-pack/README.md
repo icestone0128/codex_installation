@@ -4,7 +4,7 @@
 > 用途：讓下載者從零開始設定 Codex、Claude、AntiGravity 共用的全域規則與 skills，以及 plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
 
-2026-07-21 更新：Item 10 將 `HANDOFF.md` 收為開工必讀、收工必寫；Item 16 加入共享 `session-sync-checkpoint.sh`，以可驗證 gate 執行 `chezmoi update`，並限制 `chezmoi add` 只用於新增白名單入口。共享全域 skill 主版本固定為 `{{SYNC_ROOT}}/skills`，專案 skill 固定為 `<project-root>/000_Agent/skills`。
+2026-07-21 更新：Item 10 將 `HANDOFF.md` 收為開工必讀、收工必寫；Item 16 加入共享 `session-sync-checkpoint.sh`、三 Agent Python-tools 中立 bridge 與安全 shell loader，以可驗證 gate 執行 `chezmoi update`，並限制 `chezmoi add` 只用於新增白名單入口；Item 34 成為每台電腦重建共用 Python runtime 的主線項目。共享全域 skill 主版本固定為 `{{SYNC_ROOT}}/skills`，專案 skill 固定為 `<project-root>/000_Agent/skills`。
 
 ## 先填這張設定表
 
@@ -20,6 +20,7 @@
 | `{{GEMINI_HOME}}` | AntiGravity / Gemini 家目錄 | `{{HOME}}/.gemini` |
 | `{{GEMINI_CONFIG}}` | AntiGravity / Gemini 相容設定資料夾 | `{{GEMINI_HOME}}/config` |
 | `{{CHEZMOI_SOURCE}}` | chezmoi source state | `{{HOME}}/.local/share/chezmoi` |
+| `{{PYTHON_TOOLS_HOME}}` | 每台電腦的本機 Python tools runtime | `{{CODEX_HOME}}/python-tools` |
 | `{{WORK_ROOT}}` | 專案工作根目錄 | `{{HOME}}/Projects` 或雲端硬碟內的工作資料夾 |
 | `{{PROJECT_ROOT}}` | 目前要操作的單一專案資料夾 | `{{WORK_ROOT}}/my-project` |
 | `{{SETUP_REPO}}` | 這份懶人包所在專案 | `{{WORK_ROOT}}/codex_installation` |
@@ -66,9 +67,10 @@
 6. [[06-連接-GitHub-與-Obsidian]]
 7. [[07-連接-NotebookLM]]
 8. [[08-連接-Firebase-資料庫]]
-9. [[16-Codex-全域-Skills-跨裝置同步]]（chezmoi 必裝；先建立 Agent 全域入口）
-10. [[09-個人助手設定]]
-11. [[10-專案初始化工作模式]]
+9. [[16-Codex-全域-Skills-跨裝置同步]]（chezmoi 必裝；建立 Agent 全域入口與三 Agent 共用 Python bridge）
+10. [[34-Python-Tools-全域工具包安裝]]（每台電腦重建本機 runtime；不要同步 venv）
+11. [[09-個人助手設定]]
+12. [[10-專案初始化工作模式]]
 
 ## 進階模組
 
@@ -119,7 +121,7 @@
 13：brainstorm
 14：social-cards
 15：landing-page
-16：cross-device-sync；chezmoi 必裝，負責 Codex／Claude／AntiGravity 原生入口的 dry-run、備份、apply、驗證與新電腦重建；內建 session checkpoint、受控 update 與新入口 add 規則
+16：cross-device-sync；chezmoi 必裝，負責 Codex／Claude／AntiGravity 原生入口與三 Agent 共用 Python-tools 中立 bridge／env loader／shell profile 標記區塊的 dry-run、備份、apply、驗證與新電腦重建；內建 session checkpoint、受控 update 與新入口 add 規則，不同步 venv
 17：rightproblem-coach
 18：doc-to-md
 19：soil-html-deck
@@ -155,7 +157,9 @@
 | Chezmoi bootstrap | `{{CHEZMOI_SOURCE}}` | 維護三個 Agent 的原生規則／skills 入口 templates；不保存 secrets |
 | Agent 原生入口 | `{{CODEX_HOME}}/*`、`{{CLAUDE_HOME}}/*`、`{{GEMINI_HOME}}/*` | symlink 到共享主版本，不複製內容 |
 | LazyPack 自含式安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...38.md` | 每個序號文件內嵌對應全域 skill、工具或 workflow 的完整安裝內容 |
-| 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每個專案共用的本機 Python 工具 venv 與 wrapper；不放模型、技能 runtime 或 symlink |
+| 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每台電腦本機重建的 Python 工具 venv 與 wrapper；供 Codex／Claude／AntiGravity 和所有專案共用，不放模型或技能專屬 runtime |
+| 三 Agent Python 中立入口 | `{{HOME}}/.local/share/agent-tools/python-tools` | Item 16 的 chezmoi symlink，指向該機器的 Python tools runtime；三個 Agent 都從它的 `bin` 呼叫相同 wrapper |
+| 三 Agent Python env loader | `{{HOME}}/.config/agent-tools/python-tools.env` | Item 16 建立；透過不覆蓋既有內容的 `.zshenv`／`.zprofile`／`.profile`／`.bash_profile` 標記區塊載入 PATH |
 | Arry/個人助手全域入口 | `{{SYNC_ROOT}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
 | 個人助手跨專案記憶 | `{{ASSISTANT_ROOT}}/memories` | 個人偏好、踩坑、跨專案可重用決策 |
 | 個人助手跨專案 workflow | `{{ASSISTANT_ROOT}}/workflows` | 尚未升級成全域 skill 的 workflow 草稿 |
@@ -176,7 +180,7 @@
 
 | 順序 | Skill | 對應懶人包 | 狀態 |
 | --- | --- | --- | --- |
-| 1 | `cross-device-sync` | [[16-Codex-全域-Skills-跨裝置同步]] | 先設定 `{{SYNC_ROOT}}`；chezmoi 必裝，建立 Codex／Claude／AntiGravity 原生入口 |
+| 1 | `cross-device-sync` | [[16-Codex-全域-Skills-跨裝置同步]] | 先設定 `{{SYNC_ROOT}}`；chezmoi 必裝，建立 Codex／Claude／AntiGravity 原生入口、Python-tools 中立 bridge 與 shell loader |
 | 2 | `codex-skill-creator` | [[11-Codex-Skill-Creator-工作流]] | 為相容舊觸發語意保留此 ID；產出必須同時支援三 Agent |
 | 3 | `project-init-sync` | [[10-專案初始化工作模式]] | 可直接安裝；Agent profile 固定為 Codex＋Claude＋AntiGravity，不刪除未安裝者 |
 | 4 | `startup-sync` | [[10-專案初始化工作模式]] | 必讀 `HANDOFF.md`，執行受控 chezmoi checkpoint，再以 live state 為準 |
@@ -207,7 +211,7 @@
 | 29 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
 | 30 | `voxcpm2-voice-cloner` | [[32-VoxCPM2-Voice-Cloner-Skill-安裝]] | 可直接安裝；授權聲音克隆、合成聲音設計、Apple Silicon MPS／CUDA／CPU、本機 runtime／模型快取路由與 consent gate |
 | 31 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；Phase 2 由當前 Agent 依同一契約做逐段校稿、摘要與重點整理，需要的差異腳本記在 adapter |
-| 32 | Python teaching file tools runtime | [[34-Python-Tools-全域工具包安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools`，供所有專案共用 Word／Excel／PPT／PDF／OCR／圖表／影音輔助 Python 套件與 wrapper；macOS/Homebrew 會安裝 Tesseract、Ghostscript、Poppler、ffmpeg，LibreOffice 可用 `INSTALL_OFFICE_TOOLS=1` 按需安裝；既有 `audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` runtime 維持在 `{{CODEX_HOME}}/<skill-name>` |
+| 32 | Python teaching file tools runtime | [[34-Python-Tools-全域工具包安裝]] | 可直接安裝；每台電腦建立 `{{CODEX_HOME}}/python-tools`，透過 Item 16 中立 bridge 供 Codex／Claude／AntiGravity 與所有專案共用 Word／Excel／PPT／PDF／OCR／圖表／影音輔助 Python 套件和 wrapper；內含完整 wrapper 來源矩陣，額外功能由 Items 12／18／32／33／35／37 補齊；macOS/Homebrew 會安裝 Tesseract、Ghostscript、Poppler、ffmpeg，LibreOffice 可用 `INSTALL_OFFICE_TOOLS=1` 按需安裝 |
 | 33 | Taigi Teaching Agent | [[35-Taigi-Teaching-Agent-安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools/taigi-teaching-agent`、專用 Python 3.12 venv 與 `taigi-teaching-agent` wrapper，用於臺羅標音、臺語 TTS、教材檢核與範例教材生成 |
 | 34 | Voice Input Normalization | [[36-Voice-Input-Normalization]] | 可直接安裝；包含 `voice-input-normalization`，提供 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範歸 Item 16 `cross-device-sync` |
 | 35 | Voice Reply | [[37-Voice-Reply-Skill-安裝]] | 可直接安裝；三 Agent 共用 macOS 語音回覆 wrapper，優先 Edge-TTS 串流，整檔播放備援，最後 macOS `say` 離線備援 |
