@@ -85,6 +85,23 @@ exec "$PYTHON_TOOLS_VENV/bin/python" "\$@"
 SH
 chmod +x "$PYTHON_TOOLS_HOME/bin/python-tools-python"
 
+write_venv_command_wrapper() {
+  command_name="$1"
+  if [ ! -x "$PYTHON_TOOLS_VENV/bin/$command_name" ]; then
+    return
+  fi
+  cat > "$PYTHON_TOOLS_HOME/bin/$command_name" <<SH
+#!/usr/bin/env bash
+set -euo pipefail
+exec "$PYTHON_TOOLS_VENV/bin/$command_name" "\$@"
+SH
+  chmod +x "$PYTHON_TOOLS_HOME/bin/$command_name"
+}
+
+for command_name in edge-tts markitdown ocrmypdf yt-dlp; do
+  write_venv_command_wrapper "$command_name"
+done
+
 if [ -d "$HOME/.audio-to-md" ] && [ ! -L "$HOME/.audio-to-md" ]; then
   if [ ! -e "$CODEX_HOME/audio-to-md" ]; then
     mv "$HOME/.audio-to-md" "$CODEX_HOME/audio-to-md"
@@ -158,4 +175,10 @@ fi
 "$PYTHON_TOOLS_HOME/bin/python-tools-python" -c "import docx, docxcompose, openpyxl, xlsxwriter, pandas, pptx, pypdf, fitz, pdfplumber, pdf2image, reportlab, fpdf, PIL, matplotlib, qrcode, markitdown, mammoth, ocrmypdf; import edge_tts, yt_dlp, youtube_transcript_api; print('python teaching file tools ok')"
 
 echo "Python tools installed at: $PYTHON_TOOLS_HOME"
-echo "Add this to PATH when desired: $PYTHON_TOOLS_HOME/bin"
+echo "Shared command directory: $PYTHON_TOOLS_HOME/bin"
+if [ -L "$HOME/.local/share/agent-tools/python-tools" ]; then
+  echo "Three-Agent bridge detected. Start a new Agent conversation or run:"
+  echo "  . \"$HOME/.config/agent-tools/python-tools.env\""
+else
+  echo "Next: run LazyPack Item 16 to create the Codex/Claude/AntiGravity bridge and shell loader."
+fi

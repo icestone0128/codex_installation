@@ -75,8 +75,9 @@ Arry 助手 AI 分身資料層：
 - 本 repo 的 `000_Agent/` 只保留指向說明，不存放真實個人記憶或偏好。
 - 跨 Agent 全域規則唯一實體主版本為 `codex_symlink/core-rules.md`；Codex、Claude 與 AntiGravity 的原生規則入口都由 Item 16 的 chezmoi bootstrap 指向它，不再使用或重建 `codex_symlink/agents/AGENTS.md`。
 - 跨 Agent skills 唯一實體主版本為 `codex_symlink/skills`；Codex 使用 `~/.codex/skills`、Claude 使用 `~/.claude/skills`、AntiGravity 使用 `~/.gemini/config/skills`。舊 AntiGravity `config/AGENTS.md` 與 `config/plugins/codex/skills` 只保留相容入口。
-- chezmoi 是新電腦安裝、入口重建與修復的必要工具；既有 Google Drive symlink 仍負責即時共用內容。chezmoi 不同步 secrets、sessions、cache、OAuth/MCP 認證或 repo Git 歷史，也不自動 commit/push source。
-- 每次開工／收工由 `cross-device-sync/scripts/session-sync-checkpoint.sh` 自動執行 bootstrap dry-run 與 `chezmoi status`；開工只在 source 已有 commit、remote 且乾淨時自動 update。`chezmoi add` 不用於既有九個 templates，只在新增白名單入口時使用受控 #16 流程。
+- chezmoi 是新電腦安裝、入口重建與修復的必要工具；既有 Google Drive symlink 仍負責即時共用內容。chezmoi 另外管理三 Agent 共用 Python 工具的中立 bridge、env loader 與 shell profile 標記區塊，但不同步 runtime／venv、secrets、sessions、cache、OAuth/MCP 認證或 repo Git 歷史，也不自動 commit/push source。
+- 三 Agent 共用 Python 工具的實體 runtime 預設在 `{{CODEX_HOME}}/python-tools`，中立入口在 `{{HOME}}/.local/share/agent-tools/python-tools`，loader 在 `{{HOME}}/.config/agent-tools/python-tools.env`；新電腦由 Item 34 重建 runtime、Item 16 重建入口，不替三個 Agent 複製三份 venv。
+- 每次開工／收工由 `cross-device-sync/scripts/session-sync-checkpoint.sh` 自動執行 bootstrap dry-run 與 `chezmoi status`；開工只在 source 已有 commit、remote 且乾淨時自動 update。`chezmoi add` 不用於既有受管理 templates，只在新增白名單入口時使用受控 #16 流程。
 - 可被所有專案與三個 Agent 呼叫的部分放在全域 skill 主版本：`{{SYNC_ROOT}}/skills/arry-assistant/SKILL.md`。
 - Arry 助手本身是全域入口 skill；每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷新 skill 歸屬。
 - 任何自訂 skill 的建立與維護都必須由全域 `codex-skill-creator` 工作流處理。

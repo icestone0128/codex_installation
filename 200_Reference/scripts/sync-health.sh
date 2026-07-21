@@ -5,6 +5,9 @@ CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 CLAUDE_HOME="${CLAUDE_HOME:-$HOME/.claude}"
 GEMINI_HOME="${GEMINI_HOME:-$HOME/.gemini}"
 CHEZMOI_SOURCE="${CHEZMOI_SOURCE:-$HOME/.local/share/chezmoi}"
+PYTHON_TOOLS_HOME="${PYTHON_TOOLS_HOME:-$CODEX_HOME/python-tools}"
+PYTHON_TOOLS_BRIDGE="${PYTHON_TOOLS_BRIDGE:-$HOME/.local/share/agent-tools/python-tools}"
+PYTHON_TOOLS_ENV="${PYTHON_TOOLS_ENV:-$HOME/.config/agent-tools/python-tools.env}"
 : "${SYNC_ROOT:?Set SYNC_ROOT to your portable sync root before running this script.}"
 : "${SETUP_REPO:?Set SETUP_REPO to your setup repo before running this script.}"
 LAZYPACK_ROOT="${LAZYPACK_ROOT:-$SETUP_REPO/200_Reference/lazy-pack}"
@@ -59,6 +62,8 @@ printf 'CODEX_HOME=<set>\n'
 printf 'CLAUDE_HOME=<set>\n'
 printf 'GEMINI_HOME=<set>\n'
 printf 'CHEZMOI_SOURCE=<set>\n'
+printf 'PYTHON_TOOLS_HOME=<set>\n'
+printf 'PYTHON_TOOLS_BRIDGE=<set>\n'
 printf 'SYNC_ROOT=<set>\n'
 printf 'SETUP_REPO=<set>\n'
 printf 'LAZYPACK_ROOT=<set>\n'
@@ -68,12 +73,52 @@ check_path "$SYNC_ROOT/core-rules.md" "portable core-rules exists"
 check_symlink_target "$CODEX_HOME/AGENTS.md" "$SYNC_ROOT/core-rules.md" "Codex AGENTS.md points to portable core-rules"
 check_symlink_target "$CODEX_HOME/skills" "$SYNC_ROOT/skills" "Codex skills points to portable skills"
 check_symlink_target "$CODEX_HOME/memories" "$SYNC_ROOT/memories" "Codex memories points to portable memories"
-check_symlink_target "$CODEX_HOME/rules" "$SYNC_ROOT/rules" "Codex rules points to portable rules"
-check_symlink_target "$CODEX_HOME/automations" "$SYNC_ROOT/automations" "Codex automations points to portable automations"
 check_symlink_target "$CLAUDE_HOME/CLAUDE.md" "$SYNC_ROOT/core-rules.md" "Claude CLAUDE.md points to portable core-rules"
 check_symlink_target "$CLAUDE_HOME/skills" "$SYNC_ROOT/skills" "Claude skills points to portable skills"
 check_symlink_target "$GEMINI_HOME/GEMINI.md" "$SYNC_ROOT/core-rules.md" "AntiGravity GEMINI.md points to portable core-rules"
+check_symlink_target "$GEMINI_HOME/config/AGENTS.md" "$SYNC_ROOT/core-rules.md" "AntiGravity AGENTS.md points to portable core-rules"
 check_symlink_target "$GEMINI_HOME/config/skills" "$SYNC_ROOT/skills" "AntiGravity skills points to portable skills"
+check_symlink_target "$GEMINI_HOME/config/plugins/codex/skills" "$SYNC_ROOT/skills" "AntiGravity Codex-plugin skills points to portable skills"
+check_symlink_target "$PYTHON_TOOLS_BRIDGE" "$PYTHON_TOOLS_HOME" "neutral Python tools bridge points to the local runtime"
+
+if [ -f "$PYTHON_TOOLS_ENV" ]; then
+  pass "shared Python tools environment loader exists"
+else
+  fail "shared Python tools environment loader exists"
+fi
+
+for profile in "$HOME/.zshenv" "$HOME/.zprofile" "$HOME/.profile" "$HOME/.bash_profile"; do
+  label="$(basename "$profile") loads shared Python tools environment"
+  if [ -f "$profile" ] && \
+     grep -Fq '# >>> agent-python-tools >>>' "$profile" && \
+     grep -Fq '# <<< agent-python-tools <<<' "$profile"; then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+done
+
+if [ -x "$PYTHON_TOOLS_HOME/bin/python-tools-python" ]; then
+  pass "shared Python tools runtime exists"
+  if "$PYTHON_TOOLS_BRIDGE/bin/python-tools-python" -c 'import sys; assert sys.version_info >= (3, 12)' >/dev/null 2>&1; then
+    pass "shared Python tools runtime executes through neutral bridge"
+  else
+    fail "shared Python tools runtime executes through neutral bridge"
+  fi
+else
+  fail "shared Python tools runtime exists (install LazyPack Item 34)"
+fi
+
+if command -v zsh >/dev/null 2>&1; then
+  python_tools_command="$(zsh -lc 'command -v python-tools-python' 2>/dev/null || true)"
+else
+  python_tools_command="$(sh -lc '. "$HOME/.profile"; command -v python-tools-python' 2>/dev/null || true)"
+fi
+if [ -n "$python_tools_command" ]; then
+  pass "fresh Agent shell discovers python-tools-python"
+else
+  fail "fresh Agent shell discovers python-tools-python"
+fi
 
 if command -v chezmoi >/dev/null 2>&1; then
   pass "chezmoi installed ($(chezmoi --version | awk '{print $3}' | tr -d ','))"

@@ -2,11 +2,11 @@
 
 ## Current state
 
-- Codex、Claude、AntiGravity 共用規則、skills、LazyPack 與 chezmoi 原生入口架構已完成整合；12 個專案的跨 Agent 契約與四個 runtime adapter 已完成驗證及 GitHub 發布。
-- `startup-sync`／`shutdown-sync` 已加入固定 handoff 與 chezmoi session checkpoint；LazyPack 與 Obsidian 鏡像已驗證一致。
-- 跨 Agent session 交接檔的唯一標準檔名已統一為 `HANDOFF.md`，所有主規則、相關 skills 與可攜安裝內容已同步。
-- 12 個現有專案均已補齊共用 `AGENTS.md`、薄 `CLAUDE.md` 與大寫 `HANDOFF.md`；有模型呼叫的四個專案已建立 `auto|codex|claude|antigravity` adapter。
-- 本機已安裝 Claude Code 2.1.205（Homebrew stable cask）與 Gemini CLI 0.51.0（Google 官方 npm stable package）；兩者的新 zsh PATH、`--version`／`--help` 與共享入口皆已驗證。
+- Codex、Claude、AntiGravity 共用規則、skills、LazyPack 與 chezmoi 原生入口架構已完成整合；12 個專案的跨 Agent 契約已發布。
+- 本機共用 Python runtime 保留在 `{{CODEX_HOME}}/python-tools`；chezmoi 管理中立 bridge、env loader、四個 shell profile modifiers 與九個 Agent 規則／skills 入口，共 15 個受管理項目。
+- LazyPack Item 16／34 與 README 已補齊新電腦重建順序、三 Agent 執行 adapter、wrapper 來源矩陣、PATH 優先序踩坑、安裝／驗證腳本與 health check。
+- LazyPack 與 Obsidian 鏡像一致；全域 `cross-device-sync`、核心規則、全域 Skills 索引與專案駕駛艙已同步。
+- 本機已安裝 Codex CLI、Claude Code 2.1.205 與 Gemini CLI 0.51.0；fresh zsh 會從同一中立 bridge 找到 Python 3.12.13 與共用 wrappers。
 
 ## Next action
 
@@ -19,5 +19,5 @@
 
 ## Last verified
 
-- 2026-07-21，Codex；12/12 專案契約、11 個相鄰 repo 與本 repo 的 staged safety、四個 runtime 專案測試、CLI adapter dry-run、LazyPack／Obsidian 鏡像、九個 symlink、`chezmoi status` 與 shutdown checkpoint 均通過。
-- 2026-07-21，Codex；Claude Code 2.1.205 與 Gemini CLI 0.51.0 安裝、fresh zsh PATH、CLI help／doctor、九個 chezmoi 入口與 LazyPack Item 10／16 安裝說明均已驗證；未啟動 OAuth、未 stage／commit／push。
+- 2026-07-21，Codex；`cross-device-sync` validator、三 Agent compatibility audit、isolated HOME idempotency、Item 34 imports／wrappers／系統工具、公開路徑／secret scan、LazyPack 內嵌一致性與 `git diff --check` 均通過。
+- 2026-07-21，Codex；`sync-health.sh` 0 failures、repo／Obsidian LazyPack `diff -qr` 為 0、chezmoi diff／status 為空、15 個受管理入口與所有 live wrapper smoke tests 均通過。

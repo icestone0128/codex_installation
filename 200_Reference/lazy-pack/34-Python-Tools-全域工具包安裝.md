@@ -4,7 +4,7 @@
 
 ## 用途
 
-這個安裝包讓每個專案都能共用同一套 Python 檔案處理工具，而不是每個 repo 各自建立一份 `.venv`。
+這個安裝包讓 Codex、Claude Code、AntiGravity／Gemini 與所有專案共用同一套 Python 檔案處理工具，而不是每個 Agent 或每個 repo 各自建立一份 `.venv`。
 
 已涵蓋：
 
@@ -38,6 +38,8 @@ Python 工具列表.md
 
 - 通用 Python 檔案處理 venv：`{{CODEX_HOME}}/python-tools/teaching-file-tools/.venv`
 - 共用 wrapper：`{{CODEX_HOME}}/python-tools/bin`
+- 三 Agent 中立入口：`{{HOME}}/.local/share/agent-tools/python-tools`，由 LazyPack Item 16 的 chezmoi template 指向本機 `python-tools` runtime
+- shell loader：`{{HOME}}/.config/agent-tools/python-tools.env`，由 Item 16 安全載入 `.zshenv`、`.zprofile`、`.profile` 與 `.bash_profile`
 - 技能專屬 runtime：`{{CODEX_HOME}}/audio-to-md`、`{{CODEX_HOME}}/voxcpm2-voice-cloner`、`{{CODEX_HOME}}/doc-to-md`、`{{CODEX_HOME}}/vlm-to-md`
 - uv 套件快取：維持 `{{HOME}}/.cache/uv`，不要搬進 `python-tools`
 - uv tool 安裝清單與工具環境：維持 `{{HOME}}/.local/share/uv`，不要搬進 `python-tools`
@@ -49,7 +51,49 @@ Python 工具列表.md
 {{CODEX_HOME}}/python-tools/bin/python-tools-python -c "import pandas; print('ok')"
 ```
 
-也可以把 `{{CODEX_HOME}}/python-tools/bin` 加進 PATH。
+安裝 Item 16 後，三個 Agent 都可以直接呼叫同一個指令：
+
+```bash
+python-tools-python -c "import pandas; print('ok')"
+```
+
+| 執行端 | 共用入口 | 執行方式 |
+| --- | --- | --- |
+| Codex App / Codex CLI | `{{HOME}}/.local/share/agent-tools/python-tools/bin` | 由 Agent terminal 直接呼叫 wrapper；若 sandbox 限制寫入，依任務加入最小 writable root |
+| Claude Code | 同一個中立 `bin` | 由 Claude terminal 直接呼叫相同 wrapper 名稱 |
+| AntiGravity / Gemini CLI | 同一個中立 `bin` | 由 Gemini terminal 直接呼叫相同 wrapper 名稱 |
+
+三個 adapter 的工具行為、參數與輸出完全相同，不需要三份腳本。若某個 Agent 的非互動 shell 沒有載入 profile，執行：
+
+```bash
+. "{{HOME}}/.config/agent-tools/python-tools.env"
+```
+
+或直接使用中立入口的絕對路徑。不要手動在三個 Agent 的設定檔各加一份 PATH。
+
+## 新電腦完整重建順序
+
+1. 依 Item 16 安裝 chezmoi，執行 `bootstrap-agent-sync.sh --dry-run` 後再 `--apply`。這會建立三個 Agent 的規則／skills 入口、Python bridge、env loader 與不覆蓋既有內容的 zsh／bash profile 標記區塊。
+2. 執行本 Item 34 的 `install_python_tools.sh`，在本機重建 Python 3.12 runtime 與核心 wrappers。
+3. 需要現有完整 wrapper 組合時，再依下表安裝對應 LazyPack 項目；每個項目都把 wrapper 寫進同一個共用 `bin`。
+4. 開新終端或新 Agent 對話，或 source 共用 env loader。
+5. 執行 Item 16 bootstrap dry-run、`chezmoi status`、Item 34 驗證腳本與 repo `sync-health.sh`。
+
+Item 16 和 Item 34 的先後可互換：若先跑 Item 16，bridge 會先存在並回報 Item 34 尚未安裝；Item 34 完成後該 bridge 會立即生效。venv 必須在每台電腦重建，不放進 chezmoi、Git、Google Drive、LazyPack 或 Obsidian。
+
+### Wrapper 來源與完整功能
+
+| Wrapper | 來源 | 新電腦如何重建 |
+| --- | --- | --- |
+| `python-tools-python`、`edge-tts`、`markitdown`、`ocrmypdf`、`yt-dlp` | Item 34 | 執行本 Item 安裝腳本 |
+| `cli-hub` | Item 12 | 執行外部工具整合工作流內建 installer |
+| `doc-to-md`、`vlm-to-md` | Item 18 | 安裝 Document-to-Markdown skill 與 runtime |
+| `voxcpm2-python` | Item 32 | 安裝 VoxCPM2 Voice Cloner runtime |
+| `audio-to-md` | Item 33 | 安裝 Audio-to-Markdown runtime |
+| `taigi-teaching-agent` | Item 35 | 執行 Taigi Teaching Agent installer |
+| `voice-reply`、專用 `edge-tts` | Item 37 | 安裝 Voice Reply skill 與 runtime；可取代 Item 34 的通用 `edge-tts` wrapper，但仍使用同一共用入口 |
+
+這張表是「和維護者電腦達到同等功能」的重建清單；缺少選用項目時，bridge 仍正常，只會缺少該項目負責的 wrapper。
 
 ## 安裝腳本
 
@@ -206,10 +250,15 @@ tesseract --list-langs | grep -E '^(chi_tra|chi_sim|eng|osd)$'
 - 移除舊路徑 symlink，並把實際入口改成對應的 `{{CODEX_HOME}}/<skill-name>` 路徑
 - 建立 wrapper：
   - `python-tools-python`
+  - `edge-tts`
+  - `cli-hub`
   - `audio-to-md`
   - `voxcpm2-python`
   - `doc-to-md`
   - `vlm-to-md`
+  - `taigi-teaching-agent`
+  - `voice-reply`
+- 使用 Item 16 建立 `{{HOME}}/.local/share/agent-tools/python-tools` 中立 bridge 與 `{{HOME}}/.config/agent-tools/python-tools.env`，並確認 Codex、Claude、AntiGravity 的新 shell 都能找到相同 wrapper
 
 本機驗證：
 
@@ -237,7 +286,10 @@ VoxCPM2 doctor：通過，mps=True
 - `brew install tesseract tesseract-lang` 可能長時間卡住；這次實際原因是 Homebrew 目錄權限不可寫。先跑 `brew doctor`，必要時修 `/opt/homebrew`、`{{HOME}}/Library/Caches/Homebrew`、`{{HOME}}/Library/Logs/Homebrew` 的 owner / user write 權限，再重跑安裝。
 - Tesseract 主程式、繁中語言包與 Ghostscript 是 OCR 能力的關鍵；只安裝 `ocrmypdf` Python 套件不等於掃描 PDF OCR 可用。
 - `pywin32` 只用於 Windows Office COM 自動化；macOS / Linux / WSL runtime 不安裝。若安裝腳本偵測到 Windows native bash (`MINGW` / `MSYS` / `CYGWIN`)，會把 `pywin32` 加進同一個 Windows venv。
-- 搬移 `.venv` 可能受絕對路徑影響，所以必須同步修改 wrapper、skill scripts 與文件入口，不用 symlink 做相容層。
+- 搬移或跨機同步 `.venv` 會受到作業系統、CPU、Python ABI 與絕對路徑影響；每台電腦都應重建 runtime。只對 runtime 根目錄建立中立 bridge，不對 venv 內部檔案建立相容 symlink。
+- 直接把整份 `.zshenv`、`.zprofile`、`.profile` 或 `.bash_profile` 收進 chezmoi 會覆蓋使用者既有 API key loader、Homebrew 或 alias；Item 16 使用 `modify_` scripts，只維護 `agent-python-tools` 標記區塊，遇到不完整或重複標記會停止。
+- Agent 對話在啟動時取得 PATH；安裝完成後既有對話可能看不到新 wrapper。開新對話／終端，或 source `{{HOME}}/.config/agent-tools/python-tools.env`。
+- `.zprofile`、Homebrew 或 user-level Python 可能在 `.zshenv` 之後再次 prepend PATH，讓舊版同名指令先被找到。Item 16 讓同一 loader 在後續 profile 再執行；loader 會去除重複 bridge 路徑並把它放回最前面。
 - 技能專屬 runtime 不應集中到 `python-tools`。`python-tools` 是通用 Python 工具包；`audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` 應保留在 `{{CODEX_HOME}}/<skill-name>`，再由 `{{CODEX_HOME}}/python-tools/bin` 提供跨專案 wrapper。
 
 ## 安裝後檢查清單
@@ -251,6 +303,10 @@ test ! -e "{{CODEX_HOME}}/python-tools/voxcpm2-voice-cloner"
 test ! -d "{{CODEX_HOME}}/python-tools/uv"
 test -d "{{HOME}}/.cache/uv"
 test -d "{{HOME}}/.local/share/uv"
+test -L "{{HOME}}/.local/share/agent-tools/python-tools"
+test "$(readlink "{{HOME}}/.local/share/agent-tools/python-tools")" = "{{CODEX_HOME}}/python-tools"
+test -f "{{HOME}}/.config/agent-tools/python-tools.env"
+zsh -lc 'command -v python-tools-python'
 
 "{{CODEX_HOME}}/python-tools/bin/python-tools-python" \
   "{{SETUP_REPO}}/200_Reference/scripts/python-tools/verify_python_tools.py"
@@ -358,6 +414,23 @@ exec "$PYTHON_TOOLS_VENV/bin/python" "\$@"
 SH
 chmod +x "$PYTHON_TOOLS_HOME/bin/python-tools-python"
 
+write_venv_command_wrapper() {
+  command_name="$1"
+  if [ ! -x "$PYTHON_TOOLS_VENV/bin/$command_name" ]; then
+    return
+  fi
+  cat > "$PYTHON_TOOLS_HOME/bin/$command_name" <<SH
+#!/usr/bin/env bash
+set -euo pipefail
+exec "$PYTHON_TOOLS_VENV/bin/$command_name" "\$@"
+SH
+  chmod +x "$PYTHON_TOOLS_HOME/bin/$command_name"
+}
+
+for command_name in edge-tts markitdown ocrmypdf yt-dlp; do
+  write_venv_command_wrapper "$command_name"
+done
+
 if [ -d "$HOME/.audio-to-md" ] && [ ! -L "$HOME/.audio-to-md" ]; then
   if [ ! -e "$CODEX_HOME/audio-to-md" ]; then
     mv "$HOME/.audio-to-md" "$CODEX_HOME/audio-to-md"
@@ -431,7 +504,13 @@ fi
 "$PYTHON_TOOLS_HOME/bin/python-tools-python" -c "import docx, docxcompose, openpyxl, xlsxwriter, pandas, pptx, pypdf, fitz, pdfplumber, pdf2image, reportlab, fpdf, PIL, matplotlib, qrcode, markitdown, mammoth, ocrmypdf; import edge_tts, yt_dlp, youtube_transcript_api; print('python teaching file tools ok')"
 
 echo "Python tools installed at: $PYTHON_TOOLS_HOME"
-echo "Add this to PATH when desired: $PYTHON_TOOLS_HOME/bin"
+echo "Shared command directory: $PYTHON_TOOLS_HOME/bin"
+if [ -L "$HOME/.local/share/agent-tools/python-tools" ]; then
+  echo "Three-Agent bridge detected. Start a new Agent conversation or run:"
+  echo "  . \"$HOME/.config/agent-tools/python-tools.env\""
+else
+  echo "Next: run LazyPack Item 16 to create the Codex/Claude/AntiGravity bridge and shell loader."
+fi
 ````
 
 ## 內建驗證腳本內容
@@ -441,6 +520,8 @@ echo "Add this to PATH when desired: $PYTHON_TOOLS_HOME/bin"
 ````python
 from importlib import import_module
 from importlib.metadata import distributions
+import os
+from pathlib import Path
 import shutil
 
 IMPORTS = [
@@ -467,6 +548,14 @@ IMPORTS = [
     "youtube_transcript_api",
 ]
 
+CORE_WRAPPERS = [
+    "python-tools-python",
+    "edge-tts",
+    "markitdown",
+    "ocrmypdf",
+    "yt-dlp",
+]
+
 
 def main() -> int:
     failed = []
@@ -483,6 +572,24 @@ def main() -> int:
     else:
         print("  OK all core imports")
 
+    codex_home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
+    runtime_home = Path(os.environ.get("PYTHON_TOOLS_HOME", codex_home / "python-tools"))
+    wrapper_failures = []
+    print("\nCore wrappers:")
+    for name in CORE_WRAPPERS:
+        wrapper = runtime_home / "bin" / name
+        available = wrapper.is_file() and os.access(wrapper, os.X_OK)
+        print(f"  {'OK' if available else 'MISSING'} {name}: {wrapper if available else '-'}")
+        if not available:
+            wrapper_failures.append(name)
+
+    bridge = Path.home() / ".local" / "share" / "agent-tools" / "python-tools"
+    print("\nThree-Agent bridge:")
+    if bridge.is_symlink() and bridge.resolve() == runtime_home.resolve():
+        print("  OK neutral bridge points to this runtime")
+    else:
+        print("  PENDING run LazyPack Item 16 to create or repair the neutral bridge")
+
     print("\nSystem tools:")
     for tool in ["tesseract", "gs", "pdftoppm", "ffmpeg", "soffice"]:
         path = shutil.which(tool)
@@ -493,7 +600,7 @@ def main() -> int:
     for name in names:
         print(f"  {name}")
 
-    return 1 if failed else 0
+    return 1 if failed or wrapper_failures else 0
 
 
 if __name__ == "__main__":
@@ -504,4 +611,5 @@ if __name__ == "__main__":
 
 - 不把 `.venv`、模型、Whisper cache、VoxCPM2 模型、聲音 profile 或生成音訊放進 Git、LazyPack、Obsidian 或 Google Drive 同步資料夾。
 - LazyPack 只保存可重建腳本、工具列表、安裝說明與踩坑紀錄。
+- chezmoi 只保存 bridge、env loader、profile modifier 與 machine-local path template；不保存 runtime 內容。
 - 任何 API key 仍放 `{{CODEX_HOME}}/secrets/`，不寫進 runtime、repo 或筆記。

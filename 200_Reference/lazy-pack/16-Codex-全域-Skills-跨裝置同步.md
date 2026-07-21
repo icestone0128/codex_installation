@@ -1,11 +1,11 @@
 # 16-Codex-全域-Skills-跨裝置同步
 
-> 2026-07-21 更新：chezmoi 維持必要安裝；新增開工／收工共用 checkpoint、受控 `chezmoi update` 與新入口才使用的 `chezmoi add` 規則。請使用文末自含式 Skill 安裝內容。
+> 2026-07-21 更新：chezmoi 維持必要安裝；除三 Agent 規則／skills 入口外，新增三 Agent 共用 Python-tools 中立 bridge、env loader、保留既有內容的 shell profile modifier，以及開工／收工 checkpoint。請使用文末自含式 Skill 安裝內容。
 
 
-> 版本：2026-07-21 Cross-Agent Session Checkpoint 版
-> 用途：用「雲端內容主版本 + chezmoi 原生入口」讓 Codex、Claude、AntiGravity 在新電腦或既有電腦共用專案、全域規則與 skills。
-> 成品：下載者可安裝 `cross-device-sync`，再用內建 `bootstrap-agent-sync.sh` 安裝 chezmoi、預覽、備份、建立入口並驗證。
+> 版本：2026-07-21 Cross-Agent Shared Runtime Bridge 版
+> 用途：用「雲端內容主版本 + chezmoi 原生入口 + 每機重建的本機 runtime」讓 Codex、Claude、AntiGravity 在新電腦或既有電腦共用專案、全域規則、skills 與 Python wrapper 指令。
+> 成品：下載者可安裝 `cross-device-sync`，再用內建 `bootstrap-agent-sync.sh` 安裝 chezmoi、預覽、備份、建立 Agent 入口與 Python bridge，並驗證 fresh shell。
 
 ## 這份文件會做什麼
 
@@ -27,6 +27,16 @@ Claude:      {{CLAUDE_HOME}}/CLAUDE.md, {{CLAUDE_HOME}}/skills
 AntiGravity: {{GEMINI_HOME}}/GEMINI.md, {{GEMINI_HOME}}/config/skills
 ```
 
+三個 Agent 共用的本機 Python 指令入口是：
+
+```text
+Runtime（每台電腦重建）：{{CODEX_HOME}}/python-tools
+中立 bridge：{{HOME}}/.local/share/agent-tools/python-tools
+env loader：{{HOME}}/.config/agent-tools/python-tools.env（載入 zsh／bash profiles）
+```
+
+bridge 讓三個 Agent 都從同一個 `bin` 呼叫相同 wrapper，但不把 venv 收進 chezmoi 或雲端。Runtime 由 Item 34 安裝；Item 12／18／32／33／35／37 可把選用 wrapper 補到同一個 `bin`。
+
 這樣新裝置先同步 `{{SYNC_ROOT}}`，再跑同一支 bootstrap，就能重建入口。Claude 或 AntiGravity 尚未安裝也可以先建立入口；Agent 本體與登入仍各自安裝、各自登入。
 
 若你也要讓 Codex 與其他 AI agent 共用同一份全域規則，主檔固定放：
@@ -44,7 +54,9 @@ AntiGravity: {{GEMINI_HOME}}/GEMINI.md, {{GEMINI_HOME}}/config/skills
 - `{{GEMINI_HOME}}/config/skills`：AntiGravity 正式 skills 入口；`{{GEMINI_HOME}}/GEMINI.md` 是正式全域規則入口。
 - `{{GEMINI_HOME}}/config/AGENTS.md` 與 `{{GEMINI_HOME}}/config/plugins/codex/skills`：既有環境的相容別名，不是新主路徑。
 - `{{SYNC_ROOT}}/core-rules.md`：可攜式全域核心規則主檔；其他 AI agent 也應讀這一份。
-- `{{CHEZMOI_SOURCE}}`：只保存可攜式 symlink templates；機器實際 `syncRoot` 放在 chezmoi local config。
+- `{{CHEZMOI_SOURCE}}`：只保存可攜式 symlink templates、Python env loader 與 shell profile modifier；機器實際 `syncRoot`、`pythonToolsHome` 放在 chezmoi local config。
+- `{{HOME}}/.local/share/agent-tools/python-tools`：三 Agent 中立 Python 入口；指向該機器的 `{{CODEX_HOME}}/python-tools`，不指向雲端 venv。
+- `{{HOME}}/.config/agent-tools/python-tools.env`：把中立入口的 `bin` 加入 PATH；`.zshenv`、`.zprofile`、`.profile`、`.bash_profile` 只由 `modify_` scripts 管理標記區塊，不覆蓋其他內容。
 - `{{SYNC_ROOT}}/memories`、`{{SYNC_ROOT}}/workflows`、`{{SYNC_ROOT}}/knowledge`：個人助手全域資料層；不 symlink 到 `{{CODEX_HOME}}/skills`。
 - `<project-root>/000_Agent/skills`：單一專案本地 skill；不 symlink 到 `{{CODEX_HOME}}/skills`。
 
@@ -56,6 +68,7 @@ AntiGravity: {{GEMINI_HOME}}/GEMINI.md, {{GEMINI_HOME}}/config/skills
 | chezmoi | **必要** | 新電腦 bootstrap、入口重建、衝突預覽與修復 |
 | Git | chezmoi source 選配 | 只有使用者要版本備份時才 commit／remote／push |
 | Codex / Claude / AntiGravity 本體 | 按需安裝 | 各自執行與登入；未安裝者仍可先準備入口 |
+| Item 34 | 共用 Python 工具時必要 | 在每台電腦重建 runtime；不跨電腦同步 venv |
 | Item 10 | 新專案必要 | `AGENTS.md`、薄 `CLAUDE.md`、`HANDOFF.md` 與開工／收工生命週期 |
 
 chezmoi 不取代 symlink：symlink 是 Agent 每次讀取共享內容的即時入口；chezmoi 是在每台電腦安全、可重跑地建立這些 symlink 的管理器。
@@ -118,6 +131,7 @@ Claude 可用 `claude auth status` 做只讀狀態檢查。Gemini 第一次執�
 - `{{SYNC_ROOT}}/skills`、`memories`、`workflows`、`knowledge` 是否保持可攜式 Markdown / package 結構。
 - MCP、plugin、hooks、commands、subtask / delegation 設定是否只做格式轉換，不直接共用不相容設定檔。
 - session、logs、auth、cache、token、shell snapshot 是否明確排除。
+- Python bridge 是否指向該機器的 runtime、fresh shell 是否找到 `python-tools-python`，且三個 Agent 沒有各自複製 venv。
 
 bootstrap 預設 dry-run；只有加 `--apply` 才修改入口。詳細檢查表已內嵌在 `cross-device-sync/references/multi-agent-compatibility.md`；跨 Agent 全域設定規格放在 `cross-device-sync/references/global-settings-spec.md`。
 
@@ -130,6 +144,7 @@ bootstrap 預設 dry-run；只有加 `--apply` 才修改入口。詳細檢查表
 - cache / tmp
 - shell snapshots
 - 本機狀態與登入資訊
+- Python venv、compiled wheels、模型與大型 runtime cache
 
 這些跨裝置同步容易壞，也有隱私風險。本文件只讓 Agent 入口連到共享內容；登入與執行狀態全部留在本機。
 
@@ -147,6 +162,7 @@ bootstrap 預設 dry-run；只有加 `--apply` 才修改入口。詳細檢查表
 | `{{SYNC_ROOT}}` | 雲端同步母資料夾 | 你的雲端同步資料夾中的 `codex_symlink` |
 | `{{GLOBAL_RULES}}` | 可攜式全域核心規則主檔 | `{{SYNC_ROOT}}/core-rules.md` |
 | `{{BACKUP_ROOT}}` | 本機備份位置 | `{{HOME}}` |
+| `{{PYTHON_TOOLS_HOME}}` | 每台機器的本機 Python tools runtime | `{{CODEX_HOME}}/python-tools` |
 | `{{SECRETS_DIR}}` | 本機 secrets 資料夾 | `{{CODEX_HOME}}/secrets` |
 | `{{LOCAL_BIN}}` | 使用者本機 CLI wrapper 資料夾 | 你的本機 bin 資料夾 |
 | `{{OBSIDIAN_VAULT}}` | Obsidian vault | 你的 Obsidian vault |
@@ -192,7 +208,7 @@ bash "$SCRIPT" \
   --apply
 ```
 
-腳本支援 macOS Homebrew、Linux Homebrew／官方 installer、Windows 原生 winget。它會驗證 `{{SYNC_ROOT}}`、備份既有入口、拒絕不明實體檔或錯誤 symlink、初始化 chezmoi、寫入 machine-local `syncRoot`、apply 並逐一驗證。
+腳本支援 macOS Homebrew、Linux Homebrew／官方 installer、Windows 原生 winget。它會驗證 `{{SYNC_ROOT}}`、備份既有入口／Python bridge／env loader／shell profiles、拒絕不明實體檔或錯誤 symlink、初始化 chezmoi、寫入 machine-local `syncRoot` 與 `pythonToolsHome`、apply，並驗證 fresh shell。若 Item 34 尚未安裝，bridge 可先建立並明確回報 pending。
 
 完成後：
 
@@ -217,7 +233,7 @@ bash "$CHECKPOINT" --phase startup --sync-root "{{SYNC_ROOT}}" --update
 bash "$CHECKPOINT" --phase shutdown --sync-root "{{SYNC_ROOT}}"
 ```
 
-checkpoint 固定先執行 bootstrap dry-run 與 `chezmoi status`。開工加 `--update` 時，只有下列條件全部成立才會備份九個 Agent 入口後執行 `chezmoi update`：
+checkpoint 固定先執行 bootstrap dry-run 與 `chezmoi status`。開工加 `--update` 時，只有下列條件全部成立才會備份所有受管理 Agent 入口、Python bridge、env loader 與 shell profiles 後執行 `chezmoi update`：
 
 - chezmoi source 是 Git repo 且已有至少一個 commit。
 - source worktree 乾淨。
@@ -225,7 +241,7 @@ checkpoint 固定先執行 bootstrap dry-run 與 `chezmoi status`。開工加 `-
 
 條件不足時是安全 no-op，腳本只回報 `CHEZMOI_UPDATE=skipped:<reason>`，不開 TTY、不覆寫現有入口。
 
-`chezmoi add` 不是日常開工／收工動作。既有九個入口已是含 `{{ .syncRoot }}` 的 templates；直接對它們執行 `chezmoi add --template-symlinks` 會要求移除 template 屬性，headless shell 還會因嘗試開 `/dev/tty` 失敗。只在新增白名單入口時，才先擴充 `bootstrap-agent-sync.sh` 的可攜 template、備份與 dry-run，再用受控 `chezmoi add` 檢視 diff。
+`chezmoi add` 不是日常開工／收工動作。既有規則／skills 入口、Python bridge、env loader 與 shell modifier 已是受管理 templates；直接重新 add 可能移除 template 屬性，headless shell 還會因嘗試開 `/dev/tty` 失敗。只在新增白名單入口時，才先擴充 `bootstrap-agent-sync.sh` 的可攜 template、備份與 dry-run，再用受控 `chezmoi add` 檢視 diff。
 
 ## 實際踩坑紀錄（2026-07-20～2026-07-21 驗證）
 
@@ -237,6 +253,10 @@ checkpoint 固定先執行 bootstrap dry-run 與 `chezmoi status`。開工加 `-
 - Gemini 官方首頁雖列出 `brew install gemini-cli`，但 2026-07-21 的 Homebrew formula 已標示為上游不支援並排定停用；新安裝改走 Google 官方部署文件的 `npm install -g @google/gemini-cli@latest`，不要改裝成不同產品的 CLI。
 - 在離線測試 source 對已管理 symlink 重跑 `chezmoi add --template-symlinks` 時，chezmoi 警告會「remove template attribute」；無 TTY 環境隨後失敗為 `could not open a new TTY`。這證實既有 templates 不應在每次收工重新 add。
 - `chezmoi update` 本質上會更新 source 並 apply；因此不應在 source 尚無 commit／remote 或 worktree 不乾淨時自動執行。checkpoint 把這三個條件收成機器可驗證的 gate。
+- 把整份 zsh／bash profile 當一般 template 會覆蓋現有 key loader、Homebrew 或 alias。改用四個 `modify_` scripts，只替換 `agent-python-tools` 標記區塊；標記不完整或重複時停止。
+- venv 不能可靠跨 OS、CPU、Python ABI 或 home path 搬移。Item 34 每機重建 runtime，Item 16 只管理中立 bridge 與 PATH loader。
+- Agent 對話通常在啟動時取得 PATH；安裝後要開新對話／終端，或 source `{{HOME}}/.config/agent-tools/python-tools.env`。
+- 只在 `.zshenv` prepend PATH 仍可能被後續 `.zprofile` 的 Homebrew／user Python 設定蓋到後面，導致同名舊指令先被找到。四個 profile 都載入同一個 idempotent env loader；loader 會移除重複 bridge 路徑再放回 PATH 最前面。
 
 ## 舊版手動搬移流程（只供既有安裝遷移參考）
 
@@ -378,6 +398,7 @@ mv "{{CODEX_HOME}}/skills.before-symlink-YYYYMMDD-HHMMSS" "{{CODEX_HOME}}/skills
 ## 下載者安全規則
 
 - 不要同步整個 `{{CODEX_HOME}}`。
+- 不要同步 `{{CODEX_HOME}}/python-tools` 的 venv；只同步可重建腳本，並讓 chezmoi 管理中立 bridge／loader。
 - 不要同步 `auth.json`、token、`.env`、sqlite、logs、sessions、cache。
 - 全域 skill 主版本固定是 `{{SYNC_ROOT}}/skills`；Codex、Claude、AntiGravity 只使用 chezmoi 管理的原生入口，專案 skill 固定放 `<project-root>/000_Agent/skills`。
 - 不要把私密 skills、個人記憶或草稿放進 public repo。
@@ -403,6 +424,9 @@ RESULT=<可讀到的自訂 skill 數量與抽測結果>
 - [ ] `readlink "{{CODEX_HOME}}/skills"` 指向 `{{SYNC_ROOT}}/skills`。
 - [ ] `{{CLAUDE_HOME}}/CLAUDE.md` 與 `{{CLAUDE_HOME}}/skills` 指向共享主版本（Claude 未安裝也先準備）。
 - [ ] `{{GEMINI_HOME}}/GEMINI.md` 與 `{{GEMINI_HOME}}/config/skills` 指向共享主版本（AntiGravity 未安裝也先準備）。
+- [ ] `{{HOME}}/.local/share/agent-tools/python-tools` 指向本機 `{{PYTHON_TOOLS_HOME}}`，不是雲端 runtime。
+- [ ] `{{HOME}}/.config/agent-tools/python-tools.env` 存在，`.zshenv`、`.zprofile`、`.profile`、`.bash_profile` 各只有一組完整標記。
+- [ ] fresh shell 的 `command -v python-tools-python` 指向中立 bridge；Codex、Claude、AntiGravity 呼叫相同 wrapper 名稱。
 - [ ] `chezmoi status` 為空，`chezmoi doctor` 沒有功能性錯誤。
 - [ ] `{{SYNC_ROOT}}/skills` 內有自訂 skills。
 - [ ] `{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md` 可讀。
@@ -430,7 +454,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_0E95F5A366'
 ---
 name: cross-device-sync
-description: Use when the user asks to install, bootstrap, audit, repair, or document cross-device and cross-agent synchronization for Claude Code, Codex, AntiGravity/Gemini, chezmoi/dotfiles, global skills, AGENTS.md or CLAUDE.md rules, shared core-rules.md, Arry Assistant data, Obsidian cockpits, AI assistant memory, cloud sync, GitHub backups, or a new-computer migration across macOS, Windows, Linux, Google Drive, iCloud, Dropbox, or OneDrive.
+description: Use when the user asks to install, bootstrap, audit, repair, or document cross-device and cross-agent synchronization for Claude Code, Codex, AntiGravity/Gemini, chezmoi/dotfiles, shared local Python tools, global skills, AGENTS.md or CLAUDE.md rules, shared core-rules.md, Arry Assistant data, Obsidian cockpits, AI assistant memory, cloud sync, GitHub backups, or a new-computer migration across macOS, Windows, Linux, Google Drive, iCloud, Dropbox, or OneDrive.
 metadata:
   short-description: Bootstrap and verify cross-agent portability
 ---
@@ -447,6 +471,8 @@ The durable assets remain agent-neutral where possible. Each agent uses its own 
 - Chezmoi source state: `~/.local/share/chezmoi` by default; it manages entrypoint templates and symlinks, not the shared content itself
 - Portable global rules: `ASSISTANT_ROOT/core-rules.md` or `SYNC_ROOT/core-rules.md`; `$CODEX_HOME/AGENTS.md` may be a symlink entrypoint to that file
 - Custom global skill source: `SYNC_ROOT/skills`; expose the same package source through Codex, Claude, and AntiGravity native skills entrypoints
+- Shared local Python command surface: `~/.local/share/agent-tools/python-tools/bin`; it is a neutral symlink bridge to the device-local runtime, normally `$CODEX_HOME/python-tools`, and all three Agents invoke the same wrapper names
+- Shared shell loader: `~/.config/agent-tools/python-tools.env`; chezmoi inserts an idempotent source block into `.zshenv`, `.zprofile`, `.profile`, and `.bash_profile` without owning the rest of those files
 - Project rules: `AGENTS.md`
 - Optional assistant data-layer root: `ASSISTANT_ROOT`
 - Optional assistant global layer: `ASSISTANT_ROOT`, containing `skills/`, `memories/`, `workflows/`, and `knowledge/`
@@ -462,6 +488,7 @@ This user's current defaults are documented in the root `README.md`; treat them 
 - Do not move, symlink, delete, or overwrite the user's existing Codex config, skills, memories, or Obsidian notes without first showing the concrete plan and getting explicit confirmation.
 - Always make a timestamped backup before any operation that moves files, rewrites symlinks, changes Git remotes, or edits shared assistant memory.
 - Never sync secrets, OAuth tokens, API keys, local credentials, app caches, shell snapshots, or machine-specific state across devices.
+- Never sync or copy a Python virtual environment between devices. Rebuild it locally with LazyPack Item 34; let Item 16 manage only its neutral bridge, shell loader, and machine-local runtime path.
 - Treat `~/.codex/auth.json`, `~/.codex/sessions/`, `~/.codex/log/`, SQLite state, caches, and local override config as machine-local; never sync or commit them.
 - Treat public repos as public. Do not put private backups, credentials, private memory, drafts, or personal logs into tracked project files.
 - Prefer the user's established project folder and knowledge cockpit pattern unless they choose another sync route.
@@ -472,7 +499,7 @@ This user's current defaults are documented in the root `README.md`; treat them 
 
 - Cloud storage or Git synchronizes durable content. A symlink exposes that content at an agent's live path.
 - Chezmoi installs, recreates, templates, audits, and repairs those live entrypoints on each device. It does not replace the cloud sync provider.
-- Keep `SYNC_ROOT` machine-specific in the local chezmoi config. Store only `{{ .syncRoot }}` templates in the source state so account-specific cloud paths do not enter a portable dotfiles repo.
+- Keep `SYNC_ROOT` and `pythonToolsHome` machine-specific in the local chezmoi config. Store only `{{ .syncRoot }}` and `{{ .pythonToolsHome }}` templates in the source state so account-specific cloud paths and runtime locations do not enter a portable dotfiles repo.
 - A local chezmoi source repo may remain uncommitted while testing. `chezmoi doctor` will report a dirty working-tree warning until the user explicitly chooses a private remote and authorizes commit/push.
 - Use `scripts/bootstrap-agent-sync.sh` for deterministic audit/apply behavior on macOS, Linux, or WSL. Windows native users should install chezmoi with WinGet and run the equivalent documented commands; symlinks may require Developer Mode or an elevated shell.
 
@@ -502,8 +529,8 @@ Policy:
 - Both phases run the bootstrap dry-run and `chezmoi status`.
 - Startup may run `chezmoi update` automatically only when the source has at least one commit, a configured remote, and a clean working tree. The script backs up all managed Agent entrypoints first. Otherwise update is a safe no-op and reports the reason once.
 - Shutdown does not pull or apply remote changes.
-- Do not run `chezmoi add` on the nine existing managed symlinks. An isolated test confirmed that chezmoi warns this would remove the template attribute; in a headless Agent it also attempts `/dev/tty`. That would replace the portable `.syncRoot` template with machine-specific state.
-- `chezmoi add` is only for a genuinely new approved entrypoint. Extend the bootstrap whitelist and create its `{{ .syncRoot }}` template first, back up the destination, then inspect the source diff and rerun the checkpoint. Changes inside `{{SYNC_ROOT}}` do not need `chezmoi add` because cloud/Git sync owns that content.
+- Do not run `chezmoi add` on existing managed rule, skill, Python bridge, environment-loader, or profile-modifier entries. An isolated test confirmed that adding an existing managed symlink can remove its template attribute; in a headless Agent it may also attempt `/dev/tty`. That would replace portable template state with a machine-specific path.
+- `chezmoi add` is only for a genuinely new approved entrypoint. Extend the bootstrap whitelist and create its portable template first, back up the destination, then inspect the source diff and rerun the checkpoint. Changes inside `{{SYNC_ROOT}}` or the local Python runtime do not need `chezmoi add` because their own installers/sync channels own that content.
 - Project session state is separate from machine bootstrap: `startup-sync` always reads project-root `HANDOFF.md`; `shutdown-sync` always creates or refreshes it.
 
 ### Agent execution notes
@@ -512,8 +539,9 @@ Policy:
 - Codex adapter: run through the available terminal; Codex sandbox must allow the narrow chezmoi config/source and managed entrypoint paths.
 - Claude adapter: run the same script through Claude's terminal environment; when no local terminal is available, use the project's normal shell and return the checkpoint output to Claude.
 - AntiGravity adapter: run the same script through the local shell; verify the Gemini entrypoints listed by the bootstrap dry-run.
+- Shared Python adapter: all three Agents call `python-tools-python`, `audio-to-md`, `doc-to-md`, and any other installed wrapper by the same command name. If an Agent shell does not load user profiles, source `~/.config/agent-tools/python-tools.env` or use the neutral bridge's absolute `bin` path.
 - Fallback: run `bootstrap-agent-sync.sh --dry-run`, `chezmoi status`, and the guarded Git-source checks manually without changing the policy.
-- Verification: the nine entrypoints still resolve to `SYNC_ROOT`, `chezmoi status` is clean or its differences are reported, and `HANDOFF.md` matches live project state.
+- Verification: every selected Agent entrypoint resolves to `SYNC_ROOT`, the neutral Python bridge resolves to the device-local runtime, a fresh shell discovers `python-tools-python`, `chezmoi status` is clean or its differences are reported, and `HANDOFF.md` matches live project state.
 
 ## LazyPack Public Packaging Policy
 
@@ -578,6 +606,7 @@ Private project notes may record verification results, but public LazyPack conte
    - initialize or reuse the approved chezmoi source state without adding a remote, commit, or push automatically
    - keep `SYNC_ROOT` in machine-local chezmoi config data and agent adapters in portable templates
    - apply the Codex, Claude, and AntiGravity rule/skill entrypoint symlinks; create future-ready parent folders even when a corresponding app is not installed yet
+   - keep the Python virtual environment local, then expose its `bin` directory through the neutral bridge and idempotent shell loader shared by all three Agents
    - create `.gitignore` before any Git add
    - create a health-check script if useful
    - create or update a migration note
@@ -590,6 +619,7 @@ Private project notes may record verification results, but public LazyPack conte
    - no secrets or machine-local state are staged
    - Codex skill frontmatter still validates if skills were moved or created
    - Codex, Claude, and AntiGravity use their native global skill entrypoints; `SYNC_ROOT/skills` remains the shared package source, and project-local skills remain under the project's documented path
+   - all three Agent shells discover the same Python wrapper commands without duplicating the runtime; a missing local runtime is reported as the Item 34 dependency
 7. Report exact paths changed for private local work. For public LazyPack or portable packaging work, report placeholder names and verification results without expanding the author's real local paths.
 
 ## Multi-Agent Compatibility Audit
@@ -727,6 +757,7 @@ Do not create three independent workflows. Keep the common logic together and li
 | Rules | `core-rules.md` and project `AGENTS.md` | `AGENTS.md` native entry | thin `CLAUDE.md` import or global symlink | `GEMINI.md` native entry |
 | Skills | `{{SYNC_ROOT}}/skills` | `{{CODEX_HOME}}/skills` symlink | `{{CLAUDE_HOME}}/skills` symlink | `{{GEMINI_CONFIG}}/skills` symlink |
 | Deterministic work | project/shared script | run through available terminal | run through available terminal | run through available terminal |
+| Shared local Python tools | neutral `~/.local/share/agent-tools/python-tools/bin` wrappers | call the shared command name or neutral absolute path | call the same shared command name or neutral absolute path | call the same shared command name or neutral absolute path |
 | MCP or connector | same service intent and permission scope | Codex-native config/tool surface | Claude-native config/tool surface verified at execution time | AntiGravity-native config/tool surface verified at execution time |
 | Image generation | same visual brief and acceptance criteria | native image tool when available | native image tool when available; otherwise approved shared route | native image tool when available; otherwise approved shared route |
 | Browser/UI | same read/write authorization boundary | available browser/computer tool or shared browser script | available browser/computer tool or shared browser script | available browser/computer tool or shared browser script |
@@ -804,6 +835,7 @@ After an approved execution, the user should have some or all of:
 - a timestamped backup before risky file movement
 - a visible mother folder for portable assistant assets
 - required chezmoi-managed native entrypoint symlinks for each selected agent, after preview and conflict checks
+- a chezmoi-managed neutral Python-tools bridge and shell loader so all three Agents discover the same device-local wrappers
 - optional private GitHub backup with a `.gitignore`
 - optional `sync-health.sh` or equivalent health check
 - a migration note explaining how to restore on a new device or adapt to a future AI tool
@@ -822,6 +854,8 @@ Default portable Codex surfaces:
 | AntiGravity entrypoints | `{{GEMINI_HOME}}/GEMINI.md`, `{{GEMINI_HOME}}/config/skills` |
 | AntiGravity compatibility aliases | `{{GEMINI_HOME}}/config/AGENTS.md`, `{{GEMINI_HOME}}/config/plugins/codex/skills` |
 | Chezmoi source | `{{CHEZMOI_SOURCE}}`; templates only, secrets excluded |
+| Device-local Python runtime | `{{CODEX_HOME}}/python-tools`; rebuild per computer with LazyPack Item 34, never sync the venv |
+| Three-Agent Python command surface | `{{HOME}}/.local/share/agent-tools/python-tools/bin`; neutral bridge managed by Item 16 and loaded through `{{HOME}}/.config/agent-tools/python-tools.env` |
 | System skills | `{{CODEX_HOME}}/skills/.system` |
 | Project rules | canonical `AGENTS.md`; Claude adapter is a thin `CLAUDE.md` containing `@AGENTS.md` |
 | Cross-agent session state | required project `HANDOFF.md`; startup reads it and shutdown creates or refreshes it |
@@ -847,7 +881,7 @@ Default portable Codex surfaces:
 5. Treat `codex_installation` as a public repo. Do not place private backups, credentials, private memory, drafts, or personal logs in tracked project paths.
 6. Do not edit system skills under `{{CODEX_HOME}}/skills/.system`.
 7. If Obsidian notes are involved, read the vault `AGENTS.md` and update additively.
-8. Chezmoi is required for bootstrap and repair, but it must not own the cloud content tree, credentials, sessions, caches, MCP auth, or project repositories.
+8. Chezmoi is required for bootstrap and repair, but it must not own the cloud content tree, Python virtual environments, credentials, sessions, caches, MCP auth, or project repositories.
 
 ## Section A: Preflight And Interview
 
@@ -1238,8 +1272,8 @@ Suggested sections:
 1. Install the desired agents and sign in normally; agent installation and assistant-content bootstrap are separate steps.
 2. Sync or clone the mother folder.
 3. Install chezmoi using the platform-native package manager.
-4. Run the bundled Item 16 bootstrap in dry-run mode, then apply it to recreate Codex, Claude, and AntiGravity native entrypoints.
-5. Restore or install any tool-specific integrations that cannot share the Markdown skill package directly.
+4. Run the bundled Item 16 bootstrap in dry-run mode, then apply it to recreate Codex, Claude, and AntiGravity native entrypoints plus the neutral Python-tools bridge.
+5. Run Item 34 to rebuild the local Python runtime; install any optional LazyPack items whose wrappers are needed, then start a new Agent conversation or source the shared environment loader.
 6. Log in separately for services that use OAuth or local credentials.
 7. Confirm `000_Agent/`, `100_Todo/`, and `200_Reference/` boundaries are still intact.
 8. Run `chezmoi status`, `chezmoi doctor`, and the health check.
@@ -1267,6 +1301,7 @@ Before reporting done, verify:
 - `000_Agent/`, `100_Todo/`, and `200_Reference/` boundaries remain intact when using the Arry Assistant architecture
 - approved portable files exist in expected location
 - symlink targets exist if symlinks were used
+- the neutral Python-tools bridge points to the device-local runtime and a fresh shell discovers `python-tools-python`
 - health check exists and runs if generated
 - migration note exists if requested
 - `.gitignore` exists before Git staging
@@ -1296,6 +1331,7 @@ Check these surfaces:
 | Sessions/logs/auth/cache | keep local; do not sync |
 | Project state | use canonical project `AGENTS.md`, required `HANDOFF.md`, and Obsidian cockpit notes |
 | Bootstrap state | keep chezmoi templates in `{{CHEZMOI_SOURCE}}`; keep machine-specific `syncRoot` in the local chezmoi config |
+| Shared Python commands | rebuild `{{CODEX_HOME}}/python-tools` per computer; manage only its neutral bridge, environment loader, and machine-specific `pythonToolsHome` with chezmoi |
 
 Report each item as one of:
 
@@ -1316,6 +1352,8 @@ For the full checklist and report template, read `references/multi-agent-compati
 - Health checks should not be cron by default; scheduled checks are local machine configuration and should be opt-in.
 - Sync `core-rules.md`, skills, and memory; do not sync app state/cache/credentials.
 - Chezmoi's `--promptString` matches the visible prompt text, not the template key; a headless mismatch tries `/dev/tty` and fails.
+- Taking over `.zshenv`, `.zprofile`, `.profile`, or `.bash_profile` as whole-file templates can erase unrelated user settings; use the bundled `modify_` scripts to own only the marked loader block.
+- A Python venv is not portable across operating systems or home paths. Rebuild it from Item 34 and expose it through the neutral bridge instead of syncing or cloning the runtime.
 - `CHEZMOI_SOURCE` in the bundled installer is a script option variable, not a native chezmoi environment variable; direct CLI verification must pass `--source` when using a non-default source.
 - Homebrew may spend several minutes auto-updating before the first `brew install chezmoi` prints useful progress.
 - Never replace an unexpected physical file or a symlink to a different target automatically; back it up and resolve the conflict first.
@@ -1409,6 +1447,8 @@ The shared skill root provides `startup-sync` and `shutdown-sync` for Codex, Cla
 - Chezmoi is the required bootstrap and adapter manager for the cross-device profile. Cloud storage or Git still synchronizes the durable content; symlinks remain the live entrypoint mechanism.
 - Keep machine-specific `syncRoot` data in the local chezmoi config. The source state stores templates such as `{{ .syncRoot }}/core-rules.md`, not one user's cloud account path.
 - Manage Codex, Claude, and AntiGravity entrypoints separately. Never symlink their incompatible MCP, auth, session, cache, or full settings files together.
+- Manage one neutral Python command bridge for all three Agents: `{{HOME}}/.local/share/agent-tools/python-tools` points to the device-local runtime, and `{{HOME}}/.config/agent-tools/python-tools.env` adds its `bin` directory to Agent shells.
+- Keep `pythonToolsHome` machine-specific in local chezmoi data. Do not sync a venv or hardcode the author's runtime path into the portable source.
 - Always run a dry-run/diff, create a timestamped backup, and stop on physical-file or mismatched-symlink conflicts before apply.
 - Never add secrets, session files, OAuth tokens, cookies, or local state DBs to dotfiles.
 - Do not add a dotfiles remote, commit, or push unless the user explicitly asks. A dirty-source warning from `chezmoi doctor` is expected before the source is intentionally versioned.
@@ -1426,9 +1466,10 @@ Use `cross-device-sync/scripts/bootstrap-agent-sync.sh` on macOS, Linux, or WSL.
 ### Verified pitfalls
 
 - Homebrew may auto-update before downloading chezmoi, so a quiet period is not automatically a failure. Wait for the final bottle/install result before switching routes.
-- `--promptString` matches the visible prompt text, not the stored data key. For the bundled template, headless initialization must pass `--promptString "Portable AI assistant sync root=<path>"`; using `syncRoot=<path>` tries to open `/dev/tty` and fails in a headless Agent shell.
+- `--promptString` matches the visible prompt text, not the stored data key. For the bundled template, headless initialization must pass `--promptString "Portable AI assistant sync root=<path>"` and `--promptString "Local Python tools runtime=<path>"`; using the data keys directly can try to open `/dev/tty` and fail in a headless Agent shell.
 - `CHEZMOI_SOURCE` is a LazyPack/script environment variable, not a native chezmoi global flag. Direct CLI verification of an alternate source must use `chezmoi --source <path> ...`.
 - Existing physical files or symlinks pointing elsewhere are conflicts. Back them up and resolve them intentionally; do not force-apply over them.
+- Do not use a normal chezmoi file template for `.zshenv`, `.zprofile`, `.profile`, or `.bash_profile`; the bundled `modify_` scripts own only the marked Python-tools loader block and preserve existing aliases, key loaders, and environment settings.
 
 ## Speech Input Assumptions
 
@@ -1461,7 +1502,7 @@ Durable assets:
 - knowledge indexes under `SYNC_ROOT/knowledge`
 - project `AGENTS.md` files and Obsidian project cockpits
 
-App-specific assets:
+Device-local assets:
 
 - Codex `config.toml`
 - agent-specific settings files
@@ -1469,6 +1510,7 @@ App-specific assets:
 - session databases and logs
 - auth files and OAuth tokens
 - shell snapshots and temp files
+- Python virtual environments, binary wheels, compiled extensions, and model caches
 
 ## Audit Steps
 
@@ -1596,6 +1638,25 @@ Expected:
 - the source state contains templates, not a public copy of one user's cloud account path.
 - no auth, session, MCP credential, cookie, cache, or local database is managed.
 - a dirty working-tree warning is acceptable until the user chooses and authorizes private dotfiles versioning.
+
+### 5.2 Check The Shared Python Command Surface
+
+The runtime is local to each computer, but its command surface is shared by all three Agents:
+
+```bash
+test -L "{{HOME}}/.local/share/agent-tools/python-tools"
+readlink "{{HOME}}/.local/share/agent-tools/python-tools"
+test -f "{{HOME}}/.config/agent-tools/python-tools.env"
+zsh -lc 'command -v python-tools-python'
+```
+
+Expected:
+
+- the neutral bridge points to the device-local `{{CODEX_HOME}}/python-tools` runtime, or to the explicit machine-local `pythonToolsHome` selected during bootstrap
+- `.zshenv`, `.zprofile`, `.profile`, and `.bash_profile` contain one managed loader block while preserving all unrelated shell content
+- Codex, Claude, and AntiGravity use the same wrapper names from the neutral bridge; do not build three virtual environments or maintain three divergent wrapper directories
+- a new computer installs Item 34 to rebuild the runtime and Item 16 to recreate the bridge; the venv itself is never placed in cloud storage, Git, LazyPack, or Obsidian
+- optional wrappers such as `cli-hub`, `taigi-teaching-agent`, and `voice-reply` appear in the same shared `bin` directory after their owning LazyPack items are installed
 
 ### 6. Check Commands, Hooks, And Agent Delegation
 
@@ -1955,13 +2016,18 @@ Options:
   --source PATH       Chezmoi source directory
                       Default: ~/.local/share/chezmoi
   --backup-root PATH  Backup parent directory. Default: ~
+  --python-tools-home PATH
+                      Shared local Python tools runtime
+                      Default: $CODEX_HOME/python-tools
   --install-chezmoi   Install chezmoi when missing (requires --apply)
   --apply             Write source templates and apply managed symlinks
   --dry-run           Audit and print the plan only (default)
   -h, --help          Show this help
 
-The script manages only AI-agent rule/skill entrypoint symlinks. It never
-syncs credentials, sessions, caches, MCP configs, or secrets.
+The script manages AI-agent rule/skill entrypoint symlinks plus one neutral
+local Python-tools bridge and shell loader shared by all three Agents. It never
+syncs a Python virtual environment, credentials, sessions, caches, MCP configs,
+or secrets.
 EOF
 }
 
@@ -1971,6 +2037,7 @@ agents="codex,claude,antigravity"
 sync_root=""
 source_dir="${CHEZMOI_SOURCE:-$HOME/.local/share/chezmoi}"
 backup_root="${BACKUP_ROOT:-$HOME}"
+python_tools_home=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -1988,6 +2055,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --backup-root)
       backup_root="${2:?--backup-root requires a value}"
+      shift 2
+      ;;
+    --python-tools-home)
+      python_tools_home="${2:?--python-tools-home requires a value}"
       shift 2
       ;;
     --install-chezmoi)
@@ -2105,6 +2176,18 @@ codex_home="${CODEX_HOME:-$HOME/.codex}"
 claude_home="${CLAUDE_HOME:-$HOME/.claude}"
 gemini_home="${GEMINI_HOME:-$HOME/.gemini}"
 gemini_config="${GEMINI_CONFIG:-$gemini_home/config}"
+if [ -z "$python_tools_home" ]; then
+  python_tools_home="${PYTHON_TOOLS_HOME:-$codex_home/python-tools}"
+fi
+case "$python_tools_home" in
+  /*) ;;
+  *)
+    printf 'ERROR --python-tools-home must be an absolute path\n' >&2
+    exit 2
+    ;;
+esac
+python_tools_bridge="$HOME/.local/share/agent-tools/python-tools"
+python_tools_env="$HOME/.config/agent-tools/python-tools.env"
 
 targets=()
 if has_agent codex; then
@@ -2136,6 +2219,7 @@ printf 'MODE=%s\n' "$([ "$apply" -eq 1 ] && printf apply || printf dry-run)"
 printf 'AGENTS=%s\n' "$agents"
 printf 'SYNC_ROOT=<configured>\n'
 printf 'CHEZMOI_SOURCE=<configured>\n'
+printf 'PYTHON_TOOLS_HOME=<configured>\n'
 
 conflicts=0
 for spec in "${targets[@]}"; do
@@ -2156,6 +2240,26 @@ for spec in "${targets[@]}"; do
     printf 'CREATE symlink: %s\n' "${target#$HOME/}"
   fi
 done
+
+if [ -L "$python_tools_bridge" ]; then
+  if [ "$(readlink "$python_tools_bridge")" = "$python_tools_home" ]; then
+    printf 'OK Python tools bridge: %s\n' "${python_tools_bridge#$HOME/}"
+  else
+    printf 'CONFLICT Python tools bridge target differs: %s\n' "${python_tools_bridge#$HOME/}"
+    conflicts=$((conflicts + 1))
+  fi
+elif [ -e "$python_tools_bridge" ]; then
+  printf 'CONFLICT physical Python tools bridge exists: %s\n' "${python_tools_bridge#$HOME/}"
+  conflicts=$((conflicts + 1))
+else
+  printf 'CREATE Python tools bridge: %s\n' "${python_tools_bridge#$HOME/}"
+fi
+
+if [ -x "$python_tools_home/bin/python-tools-python" ]; then
+  printf 'OK Python tools runtime available\n'
+else
+  printf 'PENDING Python tools runtime; install LazyPack Item 34 on this device\n'
+fi
 
 if [ "$conflicts" -gt 0 ]; then
   printf 'ERROR resolve or back up %s conflict(s) before applying\n' "$conflicts" >&2
@@ -2184,6 +2288,12 @@ for spec in "${targets[@]}"; do
     cp -a "$target" "$backup_dir/entrypoints/$safe_name"
   fi
 done
+for target in "$python_tools_bridge" "$python_tools_env" "$HOME/.zshenv" "$HOME/.zprofile" "$HOME/.profile" "$HOME/.bash_profile"; do
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    safe_name="$(printf '%s' "${target#$HOME/}" | tr '/' '_')"
+    cp -a "$target" "$backup_dir/entrypoints/$safe_name"
+  fi
+done
 
 if [ ! -d "$source_dir/.git" ]; then
   chezmoi init --source "$source_dir"
@@ -2199,9 +2309,12 @@ write_source() {
   printf '%s\n' "$content" > "$path"
 }
 
-write_source "$source_dir/.chezmoi.toml.tmpl" '{{- $syncRoot := promptStringOnce . "syncRoot" "Portable AI assistant sync root" -}}
+config_template='{{- $syncRoot := promptStringOnce . "syncRoot" "Portable AI assistant sync root" -}}
+{{- $pythonToolsHome := promptStringOnce . "pythonToolsHome" "Local Python tools runtime" -}}
 [data]
-    syncRoot = {{ $syncRoot | quote }}'
+    syncRoot = {{ $syncRoot | quote }}
+    pythonToolsHome = {{ $pythonToolsHome | quote }}'
+write_source "$source_dir/.chezmoi.toml.tmpl" "$config_template"
 
 if has_agent codex; then
   write_source "$source_dir/dot_codex/symlink_AGENTS.md.tmpl" '{{ .syncRoot }}/core-rules.md'
@@ -2221,16 +2334,91 @@ if has_agent antigravity; then
   write_source "$source_dir/dot_gemini/config/plugins/codex/symlink_skills.tmpl" '{{ .syncRoot }}/skills'
 fi
 
+write_source "$source_dir/dot_local/share/agent-tools/symlink_python-tools.tmpl" '{{ .pythonToolsHome }}'
+write_source "$source_dir/dot_config/agent-tools/python-tools.env" '# Shared by Codex, Claude Code, and AntiGravity/Gemini.
+# The runtime stays local to each computer; chezmoi manages only this loader.
+AGENT_PYTHON_TOOLS_HOME="${AGENT_PYTHON_TOOLS_HOME:-$HOME/.local/share/agent-tools/python-tools}"
+export AGENT_PYTHON_TOOLS_HOME
+if [ -d "$AGENT_PYTHON_TOOLS_HOME/bin" ]; then
+  AGENT_PYTHON_TOOLS_BIN="$AGENT_PYTHON_TOOLS_HOME/bin"
+  PATH="$AGENT_PYTHON_TOOLS_BIN$(printf '\''%s'\'' "$PATH" | awk -v managed="$AGENT_PYTHON_TOOLS_BIN" '\''BEGIN { RS = ":" } $0 != managed { printf ":%s", $0 }'\'')"
+  export PATH
+  unset AGENT_PYTHON_TOOLS_BIN
+fi'
+
+profile_modifier='#!/bin/sh
+set -eu
+
+awk '\''
+BEGIN {
+  start = "# >>> agent-python-tools >>>"
+  finish = "# <<< agent-python-tools <<<"
+  loader = "[ -r \"$HOME/.config/agent-tools/python-tools.env\" ] && . \"$HOME/.config/agent-tools/python-tools.env\""
+}
+$0 == start {
+  starts++
+  inside = 1
+  next
+}
+$0 == finish {
+  finishes++
+  inside = 0
+  next
+}
+!inside {
+  lines[++count] = $0
+}
+END {
+  if (starts != finishes || starts > 1 || finishes > 1) {
+    print "ERROR malformed agent-python-tools managed block" > "/dev/stderr"
+    exit 2
+  }
+  while (count > 0 && lines[count] == "") {
+    count--
+  }
+  for (i = 1; i <= count; i++) {
+    print lines[i]
+  }
+  if (count > 0) {
+    print ""
+  }
+  print start
+  print loader
+  print finish
+}
+'\'''
+write_source "$source_dir/modify_dot_zshenv" "$profile_modifier"
+write_source "$source_dir/modify_dot_zprofile" "$profile_modifier"
+write_source "$source_dir/modify_dot_profile" "$profile_modifier"
+write_source "$source_dir/modify_dot_bash_profile" "$profile_modifier"
+chmod +x \
+  "$source_dir/modify_dot_zshenv" \
+  "$source_dir/modify_dot_zprofile" \
+  "$source_dir/modify_dot_profile" \
+  "$source_dir/modify_dot_bash_profile"
+
 config_path="$(chezmoi dump-config --format=json | sed -n 's/.*"configFile"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)"
 if [ -z "$config_path" ] || [ ! -f "$config_path" ]; then
   chezmoi init --source "$source_dir" \
-    --promptString "Portable AI assistant sync root=$sync_root"
+    --promptString "Portable AI assistant sync root=$sync_root" \
+    --promptString "Local Python tools runtime=$python_tools_home"
 else
   configured_root="$(chezmoi execute-template '{{ .syncRoot }}' 2>/dev/null || true)"
   if [ "$configured_root" != "$sync_root" ]; then
     printf 'ERROR existing chezmoi data.syncRoot differs; update the local config intentionally\n' >&2
     exit 1
   fi
+  configured_python_tools="$(chezmoi execute-template '{{ .pythonToolsHome }}' 2>/dev/null || true)"
+  if [ -n "$configured_python_tools" ] && [ "$configured_python_tools" != "$python_tools_home" ]; then
+    printf 'ERROR existing chezmoi data.pythonToolsHome differs; update the local config intentionally\n' >&2
+    exit 1
+  fi
+fi
+
+if [ -f "$config_path" ] && [ -z "$(chezmoi execute-template '{{ .pythonToolsHome }}' 2>/dev/null || true)" ]; then
+  chezmoi init --source "$source_dir" \
+    --promptString "Portable AI assistant sync root=$sync_root" \
+    --promptString "Local Python tools runtime=$python_tools_home"
 fi
 
 chezmoi --source "$source_dir" apply
@@ -2243,6 +2431,38 @@ for spec in "${targets[@]}"; do
     exit 1
   fi
 done
+
+if [ ! -L "$python_tools_bridge" ] || [ "$(readlink "$python_tools_bridge")" != "$python_tools_home" ]; then
+  printf 'ERROR Python tools bridge verification failed\n' >&2
+  exit 1
+fi
+if [ ! -f "$python_tools_env" ]; then
+  printf 'ERROR Python tools environment loader verification failed\n' >&2
+  exit 1
+fi
+for profile in "$HOME/.zshenv" "$HOME/.zprofile" "$HOME/.profile" "$HOME/.bash_profile"; do
+  if ! grep -Fq '# >>> agent-python-tools >>>' "$profile" || \
+     ! grep -Fq '# <<< agent-python-tools <<<' "$profile"; then
+    printf 'ERROR Python tools profile loader verification failed: %s\n' "${profile#$HOME/}" >&2
+    exit 1
+  fi
+done
+
+if [ -x "$python_tools_home/bin/python-tools-python" ]; then
+  if command -v zsh >/dev/null 2>&1; then
+    resolved_python_tools="$(zsh -lc 'command -v python-tools-python' 2>/dev/null || true)"
+  else
+    resolved_python_tools="$(sh -lc '. "$HOME/.profile"; command -v python-tools-python' 2>/dev/null || true)"
+  fi
+  if [ -z "$resolved_python_tools" ]; then
+    printf 'ERROR fresh shell cannot discover python-tools-python\n' >&2
+    exit 1
+  fi
+  "$python_tools_bridge/bin/python-tools-python" -c 'import sys; print(sys.executable)' >/dev/null
+  printf 'OK shared Python tools command: python-tools-python\n'
+else
+  printf 'PENDING shared Python tools command until LazyPack Item 34 is installed\n'
+fi
 
 printf 'APPLY complete\n'
 printf 'BACKUP=%s\n' "$backup_dir"
@@ -2273,7 +2493,9 @@ Options:
 The checkpoint never runs chezmoi add for existing managed templates. Adding
 an already managed symlink can remove its template attribute and hardcode a
 machine path. New managed entrypoints must first be added to the bootstrap
-whitelist with a {{ .syncRoot }} template and reviewed as a setup change.
+whitelist with a portable template and reviewed as a setup change. The shared
+Python virtual environment remains local; only its neutral bridge and profile
+loader are managed by chezmoi.
 EOF
 }
 
@@ -2411,6 +2633,12 @@ entrypoints=(
   "$HOME/.gemini/config/AGENTS.md"
   "$HOME/.gemini/config/skills"
   "$HOME/.gemini/config/plugins/codex/skills"
+  "$HOME/.local/share/agent-tools/python-tools"
+  "$HOME/.config/agent-tools/python-tools.env"
+  "$HOME/.zshenv"
+  "$HOME/.zprofile"
+  "$HOME/.profile"
+  "$HOME/.bash_profile"
 )
 
 for target in "${entrypoints[@]}"; do
