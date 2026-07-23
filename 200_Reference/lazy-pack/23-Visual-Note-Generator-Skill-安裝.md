@@ -46,12 +46,22 @@
 
 本文件採自含式安裝；全域 skill 的實體主版本在 `{{SYNC_ROOT}}/skills/visual-note-generator/`，Arry 環境中該路徑會透過 symlink 指向 `{{SYNC_ROOT}}/skills/visual-note-generator/`。LazyPack 不再維護舊式獨立 skill 子目錄。
 
-```bash
-mkdir -p "{{SYNC_ROOT}}/skills/visual-note-generator/references" "{{SYNC_ROOT}}/skills/visual-note-generator/agents"
+<!-- BEGIN EMBEDDED_SKILLS -->
 
+## 內建 Skill 完整安裝內容
+
+本節是自含式安裝區塊。這個序號項目會安裝：`visual-note-generator`。
+
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
+
+````bash
+set -e
+
+# ---- visual-note-generator ----
+mkdir -p "{{SYNC_ROOT}}/skills/visual-note-generator"
 # visual-note-generator/SKILL.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-note-generator/SKILL.md")"
-cat > "{{SYNC_ROOT}}/skills/visual-note-generator/SKILL.md" <<'CODEX_LAZYPACK_VISUAL_NOTE_SKILL_MD'
+cat > "{{SYNC_ROOT}}/skills/visual-note-generator/SKILL.md" <<'AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_SKILL_MD_0E95F5A366'
 ---
 name: visual-note-generator
 description: Turn a photographed or scanned hand-drawn note into an upright, source-faithful 16:9 visual note using a replaceable personal Style Profile. Use when the user provides 手繪筆記、圖解筆記、白紙草圖、拍照筆記 or asks for Visual Note Generator, exact Traditional Chinese text preservation, Q-version character handling, a personalized hand-drawn style, or a finished 2K visual-note image. This skill is only for hand-drawn-note-to-image creation, not article rewriting, transcripts, social posts, prose-to-infographic work, or slide outlines.
@@ -108,11 +118,11 @@ User instructions may override style choices, but never override source-text fid
 The bundled Arry profile is textual and must work without Arry's local asset folders. Local character sheets and portfolio images are optional fidelity references, not installation requirements.
 
 Another user should keep the same Skill workflow and replace only `default-style-profile.yaml` with a profile based on `style-profile-template.yaml`. They must not rewrite `workflow-contract.md` merely to change colors, handwriting, characters, decorations, or visual mood.
-CODEX_LAZYPACK_VISUAL_NOTE_SKILL_MD
+AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_SKILL_MD_0E95F5A366
 
 # visual-note-generator/agents/openai.yaml
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-note-generator/agents/openai.yaml")"
-cat > "{{SYNC_ROOT}}/skills/visual-note-generator/agents/openai.yaml" <<'CODEX_LAZYPACK_VISUAL_NOTE_AGENTS_OPENAI_YAML'
+cat > "{{SYNC_ROOT}}/skills/visual-note-generator/agents/openai.yaml" <<'AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "圖解筆記生成"
   short_description: "把手繪筆記套用可替換 Style Profile 生成圖解"
@@ -120,11 +130,11 @@ interface:
 
 policy:
   allow_implicit_invocation: true
-CODEX_LAZYPACK_VISUAL_NOTE_AGENTS_OPENAI_YAML
+AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_AGENTS_OPENAI_YAML_DEB9755D27
 
 # visual-note-generator/references/default-style-profile.yaml
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-note-generator/references/default-style-profile.yaml")"
-cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/default-style-profile.yaml" <<'CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_DEFAULT_STYLE_PROFILE_YAML'
+cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/default-style-profile.yaml" <<'AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_DEFAULT_STYLE_PROFILE_YAML_C1D1A71E43'
 profile_version: "1.0"
 profile_id: "arry-default"
 display_name: "Arry warm educational hand-drawn notes"
@@ -216,11 +226,11 @@ optional_asset_routes:
   missing_asset_behavior: "use_text_profile"
 
 rendering_snippet: "Render as an Arry-style educational visual note: near-white warm ivory background, clean black hand-marker lines, slight human irregularity, sparse orange-red emphasis, pale blue/purple/green/yellow-orange/pink washes, generous whitespace, handwritten Traditional Chinese, restrained sketchbook decoration, and professional educational Q-version characters."
-CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_DEFAULT_STYLE_PROFILE_YAML
+AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_DEFAULT_STYLE_PROFILE_YAML_C1D1A71E43
 
 # visual-note-generator/references/generation-guardrails.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-note-generator/references/generation-guardrails.md")"
-cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/generation-guardrails.md" <<'CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_GENERATION_GUARDRAILS_MD'
+cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/generation-guardrails.md" <<'AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_GENERATION_GUARDRAILS_MD_9CC057022D'
 # Generation Guardrails and Failure Recovery
 
 These rules apply to every Style Profile.
@@ -339,11 +349,11 @@ Regenerating the whole image to fix paper tone, shadow, or subtle palette can da
 Do not treat “high resolution” as proof of 2K. Inspect pixel dimensions and upscale when required.
 
 The dimension check must run on the actual file being shown, saved, or handed off, not only on an earlier generated version.
-CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_GENERATION_GUARDRAILS_MD
+AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_GENERATION_GUARDRAILS_MD_9CC057022D
 
 # visual-note-generator/references/style-profile-guide.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-note-generator/references/style-profile-guide.md")"
-cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/style-profile-guide.md" <<'CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_STYLE_PROFILE_GUIDE_MD'
+cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/style-profile-guide.md" <<'AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_STYLE_PROFILE_GUIDE_MD_6CDDFC8991'
 # Style Profile Guide
 
 A Style Profile is personal rendering data. It changes how a note looks without changing how the Skill works.
@@ -414,11 +424,11 @@ Keep these top-level keys:
 - `rendering_snippet`
 
 Additional style-only keys are allowed. Workflow keys are not.
-CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_STYLE_PROFILE_GUIDE_MD
+AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_STYLE_PROFILE_GUIDE_MD_6CDDFC8991
 
 # visual-note-generator/references/style-profile-template.yaml
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-note-generator/references/style-profile-template.yaml")"
-cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/style-profile-template.yaml" <<'CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_STYLE_PROFILE_TEMPLATE_YAML'
+cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/style-profile-template.yaml" <<'AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_STYLE_PROFILE_TEMPLATE_YAML_07855E64EB'
 profile_version: "1.0"
 profile_id: "replace-with-unique-id"
 display_name: "Replace with personal style name"
@@ -485,11 +495,11 @@ optional_asset_routes:
   missing_asset_behavior: "use_text_profile"
 
 rendering_snippet: "Write one concise paragraph that describes only the personal rendering style."
-CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_STYLE_PROFILE_TEMPLATE_YAML
+AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_STYLE_PROFILE_TEMPLATE_YAML_07855E64EB
 
 # visual-note-generator/references/workflow-contract.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-note-generator/references/workflow-contract.md")"
-cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/workflow-contract.md" <<'CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_WORKFLOW_CONTRACT_MD'
+cat > "{{SYNC_ROOT}}/skills/visual-note-generator/references/workflow-contract.md" <<'AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_WORKFLOW_CONTRACT_MD_43267AFB66'
 # Workflow Contract
 
 This file defines the generic process and output behavior. It must remain valid when the personal Style Profile changes.
@@ -609,10 +619,14 @@ Ask only when one of these affects the result materially:
 - the destination or overwrite decision is unresolved after final approval.
 
 Do not ask again for details already visible in the source or already specified by the user.
-CODEX_LAZYPACK_VISUAL_NOTE_REFERENCES_WORKFLOW_CONTRACT_MD
+AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_REFERENCES_WORKFLOW_CONTRACT_MD_43267AFB66
 
-echo "Installed visual-note-generator skill into {{SYNC_ROOT}}/skills/visual-note-generator"
-```
+test -f "{{SYNC_ROOT}}/skills/visual-note-generator/SKILL.md" && echo "visual-note-generator installed for Codex, Claude, and AntiGravity"
+````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
+
+<!-- END EMBEDDED_SKILLS -->
 
 ## 驗證
 

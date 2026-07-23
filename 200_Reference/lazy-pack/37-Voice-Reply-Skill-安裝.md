@@ -61,15 +61,22 @@ Edge-TTS streaming + ffplay/mpv
 - macOS `say` 是離線備援，不上傳文字，但自然度較低。
 - 不要用本技能唸出 API key、token、密碼、個資或敏感私密內容；敏感文字如需語音，請明確指定 `--engine say`。
 
+<!-- BEGIN EMBEDDED_SKILLS -->
+
 ## 內建 Skill 完整安裝內容
 
+本節是自含式安裝區塊。這個序號項目會安裝：`voice-reply`。
+
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
+
 ````bash
-#!/usr/bin/env bash
-set -euo pipefail
-CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
-mkdir -p "$CODEX_HOME/skills/voice-reply"
+set -e
+
+# ---- voice-reply ----
+mkdir -p "{{SYNC_ROOT}}/skills/voice-reply"
+# voice-reply/SKILL.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-reply/SKILL.md")"
-cat > "{{SYNC_ROOT}}/skills/voice-reply/SKILL.md" <<'CODEX_LAZYPACK_VOICE_REPLY_55B84175E734'
+cat > "{{SYNC_ROOT}}/skills/voice-reply/SKILL.md" <<'AGENT_LAZYPACK_VOICE_REPLY_SKILL_MD_0E95F5A366'
 ---
 name: voice-reply
 description: Use when the user asks Codex to speak, read aloud, use voice reply, summarize by voice, generate a short spoken answer, or create TTS narration on macOS/Codex. Prioritizes Edge-TTS streaming, then Edge-TTS whole-file playback, then macOS say offline fallback.
@@ -188,15 +195,19 @@ voice-reply "語音回覆已安裝完成。"
 ## References
 
 - `references/source-adaptation.md` explains what was changed from the Windows-first source design.
-CODEX_LAZYPACK_VOICE_REPLY_55B84175E734
+AGENT_LAZYPACK_VOICE_REPLY_SKILL_MD_0E95F5A366
+
+# voice-reply/agents/openai.yaml
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-reply/agents/openai.yaml")"
-cat > "{{SYNC_ROOT}}/skills/voice-reply/agents/openai.yaml" <<'CODEX_LAZYPACK_VOICE_REPLY_8FFA99F5690F'
+cat > "{{SYNC_ROOT}}/skills/voice-reply/agents/openai.yaml" <<'AGENT_LAZYPACK_VOICE_REPLY_AGENTS_OPENAI_YAML_DEB9755D27'
 name: "voice-reply"
 description: "Speak concise Codex replies using Edge-TTS first and macOS say fallback."
 default_prompt: "Use $voice-reply when the user asks to speak, read aloud, or provide a voice summary. Keep the spoken script concise and use the voice-reply command."
-CODEX_LAZYPACK_VOICE_REPLY_8FFA99F5690F
+AGENT_LAZYPACK_VOICE_REPLY_AGENTS_OPENAI_YAML_DEB9755D27
+
+# voice-reply/references/source-adaptation.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-reply/references/source-adaptation.md")"
-cat > "{{SYNC_ROOT}}/skills/voice-reply/references/source-adaptation.md" <<'CODEX_LAZYPACK_VOICE_REPLY_FDD90718FB7D'
+cat > "{{SYNC_ROOT}}/skills/voice-reply/references/source-adaptation.md" <<'AGENT_LAZYPACK_VOICE_REPLY_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40'
 # Source Adaptation
 
 Source reviewed: `mathruffian-dot/agent-speak-skill`.
@@ -237,16 +248,19 @@ Portable packaging:
 - Public install docs must use `{{CODEX_HOME}}`, `{{LOCAL_BIN}}`, and `{{SECRETS_DIR}}` style placeholders.
 - Do not publish the maintainer's real local paths.
 - Do not package generated audio files or personal voice samples.
-CODEX_LAZYPACK_VOICE_REPLY_FDD90718FB7D
+AGENT_LAZYPACK_VOICE_REPLY_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40
+
+# voice-reply/scripts/install_voice_reply.sh
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-reply/scripts/install_voice_reply.sh")"
-cat > "{{SYNC_ROOT}}/skills/voice-reply/scripts/install_voice_reply.sh" <<'CODEX_LAZYPACK_VOICE_REPLY_A18AF9F1C87B'
+cat > "{{SYNC_ROOT}}/skills/voice-reply/scripts/install_voice_reply.sh" <<'AGENT_LAZYPACK_VOICE_REPLY_SCRIPTS_INSTALL_VOICE_REPLY_SH_81825105CB'
 #!/usr/bin/env bash
 set -euo pipefail
 
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 PYTHON_TOOLS_HOME="${PYTHON_TOOLS_HOME:-$CODEX_HOME/python-tools}"
 RUNTIME_HOME="${VOICE_REPLY_HOME:-$CODEX_HOME/voice-reply}"
-SKILL_DIR="${VOICE_REPLY_SKILL_DIR:-$CODEX_HOME/skills/voice-reply}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILL_DIR="${VOICE_REPLY_SKILL_DIR:-$(dirname "$SCRIPT_DIR")}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 mkdir -p "$RUNTIME_HOME" "$PYTHON_TOOLS_HOME/bin"
@@ -284,10 +298,12 @@ PY
 echo "voice-reply installed"
 echo "wrapper: {{CODEX_HOME}}/python-tools/bin/voice-reply"
 echo "edge-tts wrapper: {{CODEX_HOME}}/python-tools/bin/edge-tts"
-CODEX_LAZYPACK_VOICE_REPLY_A18AF9F1C87B
+AGENT_LAZYPACK_VOICE_REPLY_SCRIPTS_INSTALL_VOICE_REPLY_SH_81825105CB
 chmod +x "{{SYNC_ROOT}}/skills/voice-reply/scripts/install_voice_reply.sh"
+
+# voice-reply/scripts/voice_reply.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-reply/scripts/voice_reply.py")"
-cat > "{{SYNC_ROOT}}/skills/voice-reply/scripts/voice_reply.py" <<'CODEX_LAZYPACK_VOICE_REPLY_C579784D67D7'
+cat > "{{SYNC_ROOT}}/skills/voice-reply/scripts/voice_reply.py" <<'AGENT_LAZYPACK_VOICE_REPLY_SCRIPTS_VOICE_REPLY_PY_AC7A3C8A16'
 #!/usr/bin/env python3
 """macOS/Codex voice reply helper.
 
@@ -556,8 +572,12 @@ async def run() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(asyncio.run(run()))
-CODEX_LAZYPACK_VOICE_REPLY_C579784D67D7
+AGENT_LAZYPACK_VOICE_REPLY_SCRIPTS_VOICE_REPLY_PY_AC7A3C8A16
 chmod +x "{{SYNC_ROOT}}/skills/voice-reply/scripts/voice_reply.py"
-bash "{{SYNC_ROOT}}/skills/voice-reply/scripts/install_voice_reply.sh"
-echo "embedded skill installed: voice-reply"
+
+test -f "{{SYNC_ROOT}}/skills/voice-reply/SKILL.md" && echo "voice-reply installed for Codex, Claude, and AntiGravity"
 ````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
+
+<!-- END EMBEDDED_SKILLS -->
