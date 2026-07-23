@@ -128,14 +128,56 @@ def replace_one_skill_block(path: Path, skill: str) -> None:
     path.write_text(updated, encoding="utf-8")
 
 
+# ---------------------------------------------------------------------------
+# Script embedding for Antigravity LazyPack
+# ---------------------------------------------------------------------------
+
+ANTIGRAVITY_REPO = Path(
+    os.environ.get("ANTIGRAVITY_REPO", REPO.parent / "antigravity_installation")
+).expanduser()
+ANTIGRAVITY_LAZYPACK = ANTIGRAVITY_REPO / "200_Reference" / "lazy-pack"
+
+LANG_MAP = {
+    ".py": "python",
+    ".sh": "bash",
+    ".js": "javascript",
+    ".ts": "typescript",
+}
+
+
+def replace_embedded_script(lazypack_file: Path, script_name: str, script_path: Path) -> None:
+    """Replace content between EMBEDDED_SCRIPT markers with the source script."""
+    text = lazypack_file.read_text(encoding="utf-8")
+    start = f"<!-- BEGIN EMBEDDED_SCRIPT:{script_name} -->"
+    end = f"<!-- END EMBEDDED_SCRIPT:{script_name} -->"
+    if start not in text or end not in text:
+        raise ValueError(f"Embedded script markers for {script_name} missing in {lazypack_file}")
+    if not script_path.is_file():
+        raise FileNotFoundError(f"Source script not found: {script_path}")
+
+    lang = LANG_MAP.get(script_path.suffix, "")
+    content = script_path.read_text(encoding="utf-8").rstrip("\n")
+    section = f"""{start}
+
+```{lang}
+{content}
+```
+
+{end}"""
+    before, remainder = text.split(start, 1)
+    _, after = remainder.split(end, 1)
+    lazypack_file.write_text(before + section + after, encoding="utf-8")
+
+
 def main() -> None:
     sections = {
+        "01-Codex-必裝-Skills-與-Plugins.md": ["pdf", "playwright"],
         "02-Codex-MCP-Essentials.md": ["heptabase-cli"],
         "05-第二大腦設定指南.md": ["secondbrain-research-digest"],
         "07-連接-NotebookLM.md": ["notebooklm-architecture", "presentation-workflow"],
         "10-專案初始化工作模式.md": ["project-init-sync", "startup-sync", "shutdown-sync"],
         "11-Codex-Skill-Creator-工作流.md": ["codex-skill-creator"],
-        "12-外部工具整合工作流.md": ["tool-integration-workflow"],
+        "12-外部工具整合工作流.md": ["tool-integration-workflow", "cli-anything"],
         "13-Brainstorm-規劃模式.md": ["brainstorm"],
         "14-Social-Cards-Skill-安裝.md": ["social-cards"],
         "15-Landing-Page-Skill-安裝.md": ["landing-page"],
@@ -146,6 +188,7 @@ def main() -> None:
         "20-SOIL-Image-Deck-Skill-安裝.md": ["soil-image-deck"],
         "21-SOIL-General-Deck-Skill-安裝.md": ["soil-general-deck"],
         "22-Image-Generator-Skill-安裝.md": ["image-generator"],
+        "23-Visual-Note-Generator-Skill-安裝.md": ["visual-note-generator"],
         "24-Diary-Interview-Assistant-Skill-安裝.md": ["diary-interview-assistant"],
         "25-Gemini-Free-API-Skill-安裝.md": ["gemini-free-api"],
         "26-HyperFrames-Skill-安裝.md": [
@@ -162,6 +205,7 @@ def main() -> None:
         "32-VoxCPM2-Voice-Cloner-Skill-安裝.md": ["voxcpm2-voice-cloner"],
         "33-Audio-to-Markdown-Skill-安裝.md": ["audio-to-md"],
         "36-Voice-Input-Normalization.md": ["voice-input-normalization"],
+        "37-Voice-Reply-Skill-安裝.md": ["voice-reply"],
         "38-YAML-Image-Deck-Skill-安裝.md": ["yaml-image-deck"],
     }
     for filename, skills in sections.items():
@@ -169,6 +213,19 @@ def main() -> None:
         print(f"synced {filename}: {', '.join(skills)}")
     replace_one_skill_block(LAZYPACK / "09-個人助手設定.md", "arry-assistant")
     print("synced 09-個人助手設定.md: arry-assistant")
+
+    # --- Antigravity Installation LazyPack: embedded scripts ---
+    ag_lazypack = ANTIGRAVITY_LAZYPACK / "01-antigravity-lazypack.md"
+    if ag_lazypack.is_file():
+        ag_scripts = {
+            "register_mcp.py": ANTIGRAVITY_REPO / "200_Reference" / "scripts" / "register_mcp.py",
+            "setup.sh": ANTIGRAVITY_REPO / "200_Reference" / "scripts" / "setup.sh",
+        }
+        for script_name, script_path in ag_scripts.items():
+            replace_embedded_script(ag_lazypack, script_name, script_path)
+        print(f"synced antigravity 01-antigravity-lazypack.md: {', '.join(ag_scripts.keys())}")
+    else:
+        print(f"skipped antigravity sync: {ag_lazypack} not found")
 
 
 if __name__ == "__main__":
