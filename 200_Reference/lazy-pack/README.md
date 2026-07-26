@@ -118,7 +118,7 @@
 10：project-init-sync、startup-sync、shutdown-sync；開工必讀、收工必寫 `HANDOFF.md`，共用 Item 16 checkpoint
 11：codex-skill-creator
 12：tool-integration-workflow、cli-anything；包含「通道 x 鑰匙」判斷、Google Workspace 個人資料 OAuth 規則、常見服務路線、跨 Agent 設定入口，以及沒有現成工具時的 CLI-Anything 安裝與 fallback 指引
-13：brainstorm
+13：brainstorm；內建 Quick 規劃與 RDQ 四象限需求探索，原始 `lesson` 題庫已替換為機構工程 `mechanical`
 14：social-cards
 15：landing-page
 16：cross-device-sync；chezmoi 必裝，負責 Codex／Claude／AntiGravity 原生入口與三 Agent 共用 Python-tools 中立 bridge／env loader／shell profile 標記區塊的 dry-run、備份、apply、驗證與新電腦重建；內建 session checkpoint、受控 update 與新入口 add 規則，不同步 venv
@@ -188,7 +188,7 @@
 | 6 | `arry-assistant` | [[09-個人助手設定]] | 個人助手模板；含 `agent-execution-strategy.md` 策略總入口，安裝時需改名與替換資料層路徑 |
 | 7 | `secondbrain-research-digest` | [[05-第二大腦設定指南]] | 需設定 `{{OBSIDIAN_VAULT}}` |
 | 8 | `tool-integration-workflow` / `cli-anything` | [[12-外部工具整合工作流]] | `tool-integration-workflow` 可直接安裝；`cli-anything` 透過 `200_Reference/scripts/cli-anything/install_cli_anything.sh` 將上游名為 `codex-skill` 的來源 package 安裝成三 Agent 共用 skill 與 CLI-Hub |
-| 9 | `brainstorm` | [[13-Brainstorm-規劃模式]] | 可直接安裝 |
+| 9 | `brainstorm` | [[13-Brainstorm-規劃模式]] | 可直接安裝；單一入口先選 Quick／RDQ，RDQ 含機構工程題庫 |
 | 10 | `heptabase-cli` | [[02-Codex-MCP-Essentials]] | 外部 CLI 連線類，需 Heptabase desktop app 與 CLI |
 | 11 | Notion connector／plugin／MCP | [[01-Codex-必裝-Skills-與-Plugins]] | 分別使用三 Agent 的原生通道；缺少時記錄已核准 fallback |
 | 12 | `pdf`／`playwright` skills 與 PDF／Browser 原生能力 | [[01-Codex-必裝-Skills-與-Plugins]] | `pdf` 與 `playwright` 列為三 Agent 共用必裝 skills；各 Agent 原生 PDF／browser 能力另做 adapter 檢查 |
@@ -261,7 +261,7 @@ rg -n "<舊使用者名稱>|<舊 GitHub 帳號>|<舊 Firebase project id>|<舊�
 - 個人助手設定以 `09-個人助手設定` 為準；舊 Agent Folder 文檔只作為轉換來源，不直接照做。
 - Skill Creator 啟動包以 [[11-Codex-Skill-Creator-工作流]] 為準；外部／第三方 skill 教學只作為轉換來源，不直接照做。此項也支援把成功對話、prompt 或重複工作流萃取成三 Agent 共用 skill。
 - 外部工具整合以 [[12-外部工具整合工作流]] 為準。
-- Brainstorm 規劃模式以 [[13-Brainstorm-規劃模式]] 為準。
+- Brainstorm 規劃模式以 [[13-Brainstorm-規劃模式]] 為準；`brainstorm` 是唯一入口，Quick 與 RDQ 為內建模式。
 - Social Cards Skill 以 [[14-Social-Cards-Skill-安裝]] 為準。
 - Landing Page skill 以 [[15-Landing-Page-Skill-安裝]] 為準。
 - Codex 全域 skills 跨裝置同步與多 Agent 相容性健檢以 [[16-Codex-全域-Skills-跨裝置同步]] 為準。
