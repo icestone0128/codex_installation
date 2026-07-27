@@ -2,23 +2,23 @@
 
 ## Current state
 
-- Arry 私人全域 `waki-brain` 已安裝 13 個 AI 瓦基第二大腦專案包，共 46 個私人來源檔；版本 catalog 與已授權官網一致。
-- Skill 已支援自然語意自動觸發，不必先說 Waki Brain 或專案包名稱；完整詞庫分為強觸發詞與需搭配語境的情境詞。
-- 路由器採「正式包名／一個強觸發詞／至少兩個情境詞」判斷，並排除純檔名或資料夾改名操作。
-- Codex、Claude、AntiGravity 共用同一個私人全域 package；每週日 06:00 的 `waki-brain-weekly-update` 排程維持啟用。
-- 私人課程內容不進 public LazyPack、public repo、commit、push 或部署；公開 repo 只保存本交接紀錄。
+- Arry 私人全域 `productivity-coach` 已完成，v3.1／V4 與 28 張單元卡是唯一教練主版本；舊 NotebookLM v2 內容不會覆蓋新版方法。
+- Skill 可獨立完成精力、知識、成果三層卡點診斷，帶一個 5～15 分鐘最小練習，並在使用者確認後才回寫候選規則。
+- NotebookLM 是選配工具，不是 Skill 的必要依賴；只有使用者明確要求時，Agent 才會建立／選擇筆記本、加入來源、設定 Chat 或建立 notes。
+- Codex、Claude、AntiGravity 共用同一個私人全域 package；三個原生 skills 入口都解析到 `codex_symlink/skills/productivity-coach`。
+- 私人課程與 NotebookLM 靜態來源不進 public LazyPack、public repo、commit、push 或部署；公開 repo 只保存本交接紀錄。
 
 ## Next action
 
-- 在 Codex、Claude 或 AntiGravity 的新對話直接使用一個未提及 Waki 的真實需求，確認自然語意觸發符合預期。
-- 觀察下一次週日 06:00 版本檢查；只有官網新增、刪除、改名專案包或語意邊界需要調整時，才由 `codex-skill-creator` 更新詞庫與測試。
+- 在新對話用一個真實工作卡點測試自然語意觸發，例如「今天事情太多，不知道先做什麼」。
+- 只有需要長期來源引用、規則累積或多輪教練時，才明確要求建立或使用 Productivity Coach NotebookLM。
 
 ## Blockers
 
-- 無。若已授權 Chrome session 失效，週日更新會安全停止並要求 Arry 重新從知識衛星課程進入官網。
+- 無。Codex NotebookLM 原生 MCP 已連線；Claude／AntiGravity 若未設定對等 MCP，仍可完成本地教練流程並使用瀏覽器／人工 fallback。
 
 ## Last verified
 
-- 2026-07-27，Codex App：13/13 自然需求正確選包；6 個一般敘述／純檔名案例未誤觸；同時包含檔名與實際領域任務時仍能正確路由。
-- 2026-07-27，Codex App：Skill quick validator 通過；三 Agent compatibility audit 掃描 53 個檔案、0 findings；三個原生入口皆解析到同一全域 package。
-- 2026-07-27，Codex App：本機 catalog 為 13 包、46 檔；公開 LazyPack 無 Waki 私人內容；secret signature 掃描與 `git diff --check` 通過。
+- 2026-07-28，Codex App：專用 validator 通過，確認 28 張單元卡、Soul／Body Framework、合併來源最新且沒有舊 v2 單元路由。
+- 2026-07-28，Codex App：Skill quick validator 通過；三 Agent compatibility audit 掃描 55 個檔案、0 findings；三個原生入口解析到同一全域 package。
+- 2026-07-28，Codex App：NotebookLM 連線完成唯讀 notebook list 驗證，未建立或修改外部筆記本；public LazyPack 未包含私人 Skill 或課程來源。
