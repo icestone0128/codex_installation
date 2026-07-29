@@ -1,8 +1,8 @@
 # 26-HyperFrames-Skill-安裝
 
-> 版本：2026-06-01 三 Agent 共用版
+> 版本：2026-07-29 三 Agent 共用版
 > 用途：安裝 HeyGen HyperFrames skill suite，讓 Codex、Claude、AntiGravity 都可協助以 HTML、CSS、動畫與媒體素材製作可渲染的影片 composition。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 15 個 `{{SYNC_ROOT}}/skills/` 全域 skills。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 16 個 `{{SYNC_ROOT}}/skills/` 全域 skills，包含共用 `video-tool-evaluation`。
 
 ## 來源與歷史紀錄
 
@@ -11,7 +11,7 @@
 - 來源 commit：`3c7e2f36` / `3c7e2f36497de471e5a63ecc6d582522d206b208`。
 - 上游 HyperFrames plugin 參考版本：`0.6.64`。
 - 授權：Apache-2.0。
-- 內嵌檔案數：172 個。
+- 內嵌檔案數：177 個（HyperFrames suite 172 個，加上共用 evaluator 5 個）。
 - 三 Agent 共用 skill 主版本：`{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md`。
 
 ## 三 Agent 相容化調整
@@ -32,10 +32,33 @@
 - 音量調整需以實測 dB 驗證；FFmpeg 動態 `volume` 表達式需使用 `eval=frame`；預先降音的音樂檔在 HTML 中避免再被 `data-volume` 雙重降音。
 - 完成最終輸出並驗證後，需詢問使用者是否要清理專案資料夾；清理時保留來源素材、VideoSpec、設計文件、必要 MD 與最終輸出，移除預覽圖、非最終 render、音軌檢查與暫存解析檔，並將來源與最終輸出整理到清楚資料夾。
 
+## 2026-07-29 STT／TTS 共用路由
+
+- HyperFrames 需要轉錄時，先使用 Item 29 的
+  `transcribe_preferred.py`：正式順序為 Groq → faster-whisper →
+  MacWhisper；whisper.cpp 只供明確快速預覽，SenseVoice 只供補充分析。
+- HyperFrames 需要旁白時，不使用上游 Kokoro／`npx hyperframes tts`。
+  先確認女聲或男聲，再交給 Item 37 `voice-reply`：女聲 Anna Su →
+  HsiaoChen → macOS `say`；男聲跳過 ElevenLabs，使用 YunJhe → macOS
+  `say`。
+- 上游 `transcribe` 命令只用來匯入共用路由已產生的 Groq JSON 或 SRT，
+  不作為 Arry 的預設 STT 引擎。
+
+## 2026-07-29 影片工具共用評估
+
+- 新影片、多步驟 composition、網站轉影片與 Remotion 遷移在寫 HTML 前，
+  一律先以 `video-tool-evaluation` 建立並驗證 `TOOL_EVALUATION.md`。
+- 53 個 route 逐項涵蓋 routing、素材、Pexels、去背、TTS、五種 STT、
+  Auto-Editor、FFmpeg、HyperFrames、GSAP／Anime.js／WAAPI／Lottie／
+  Three.js／TypeGPU、字幕、驗證與明確排除項。
+- 每項都要評估，不代表每項都要執行；直接 lint／inspect／preview／
+  render 會沿用既有已核准評估。
+
 ## 這版安裝的 Skills
 
 | Skill | 用途 |
 |---|---|
+| `video-tool-evaluation` | 所有影片規劃共用的 53-route 工具評估 catalog 與 validator。 |
 | `animejs` | Anime.js 動畫模式。 |
 | `contribute-catalog` | HyperFrames catalog 貢獻模板與規範。 |
 | `css-animations` | CSS keyframes / transitions 動畫模式。 |
@@ -77,6 +100,8 @@
 ## 驗證
 
 ```bash
+test -f "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" && echo "video-tool-evaluation SKILL.md ok"
+python3 "{{SYNC_ROOT}}/skills/video-tool-evaluation/scripts/validate_tool_evaluation.py" --self-test
 test -f "{{SYNC_ROOT}}/skills/animejs/SKILL.md" && echo "animejs SKILL.md ok"
 test -f "{{SYNC_ROOT}}/skills/contribute-catalog/SKILL.md" && echo "contribute-catalog SKILL.md ok"
 test -f "{{SYNC_ROOT}}/skills/css-animations/SKILL.md" && echo "css-animations SKILL.md ok"
@@ -106,6 +131,7 @@ npx hyperframes --help
 
 ## 最終檢查清單
 
+- [ ] `{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md` 存在且 self-test 通過。
 - [ ] `{{SYNC_ROOT}}/skills/animejs/SKILL.md` 存在。
 - [ ] `{{SYNC_ROOT}}/skills/contribute-catalog/SKILL.md` 存在。
 - [ ] `{{SYNC_ROOT}}/skills/css-animations/SKILL.md` 存在。
@@ -134,12 +160,580 @@ npx hyperframes --help
 
 ## 內建 Skill 完整安裝內容
 
-本節是自含式安裝區塊。這個序號項目會安裝：`animejs`、`contribute-catalog`、`css-animations`、`gsap`、`hyperframes`、`hyperframes-cli`、`hyperframes-media`、`hyperframes-registry`、`lottie`、`remotion-to-hyperframes`、`tailwind`、`three`、`typegpu`、`waapi`、`website-to-hyperframes`。
+本節是自含式安裝區塊。這個序號項目會安裝：`video-tool-evaluation`、`animejs`、`contribute-catalog`、`css-animations`、`gsap`、`hyperframes`、`hyperframes-cli`、`hyperframes-media`、`hyperframes-registry`、`lottie`、`remotion-to-hyperframes`、`tailwind`、`three`、`typegpu`、`waapi`、`website-to-hyperframes`。
 
 使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
+
+# ---- video-tool-evaluation ----
+mkdir -p "{{SYNC_ROOT}}/skills/video-tool-evaluation"
+# video-tool-evaluation/SKILL.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366'
+---
+name: video-tool-evaluation
+description: Use when Codex, Claude, or AntiGravity plans a video workflow, chooses among video tools/providers, creates or processes a multi-step video, writes a VideoSpec/storyboard, builds a HyperFrames composition, converts a website or Remotion project into video, or needs to confirm that every available video route was considered. Produces and validates TOOL_EVALUATION.md before implementation. Direct one-command execution with an already specified tool may consume an existing approved evaluation instead of creating a new one.
+---
+
+# Video Tool Evaluation
+
+Use one shared, full-catalog decision record across every planning-capable video
+skill. The purpose is to evaluate every available route, not to force every
+tool into one video.
+
+## Trigger Boundary
+
+Run the full workflow when any of these is true:
+
+- the user asks for a plan, storyboard, VideoSpec, tool comparison, provider
+  choice, new video, full processing package, website-to-video conversion, or
+  Remotion-to-HyperFrames translation;
+- the workflow will make multiple tool/provider decisions;
+- `video-creation-automation`, `video-processing-automation`,
+  `video-spec-builder`, `hyperframes`, `website-to-hyperframes`, or
+  `remotion-to-hyperframes` reaches its planning gate.
+
+For an exact one-command operation such as “lint this HyperFrames project”,
+“burn this SRT with FFmpeg”, or “render this approved composition”, do not
+create 53 rows solely for ceremony. Consume the existing approved
+`TOOL_EVALUATION.md` when present. If the operation would select a provider,
+change framing, upload data, incur cost, or expand scope, run the full
+evaluation first.
+
+## Output Contract
+
+Create `TOOL_EVALUATION.md` in the same draft/project folder as the plan,
+`video-spec.md`, `SCRIPT.md`, or composition. Read
+[references/tool-catalog.md](references/tool-catalog.md) and include every
+required route ID exactly once. Use
+[references/example-processing-evaluation.md](references/example-processing-evaluation.md)
+as a complete processing example, not as reusable project reasoning.
+
+Use exactly these columns:
+
+```markdown
+| route_id | tool_or_route | status | project_reason | boundary_and_fallback |
+|---|---|---|---|---|
+```
+
+Allowed statuses:
+
+- `selected`
+- `fallback`
+- `not-needed`
+- `unavailable`
+- `excluded`
+
+`not-needed` is a valid result. It must explain why that route adds no value to
+this project. Never leave a route pending, silently omit it, or treat
+installation as authorization to use it.
+
+## Workflow
+
+1. Identify the calling video skill and project output folder.
+2. Inspect existing assets, project rules, prior approved evaluation, and
+   non-secret local availability.
+3. Evaluate all route IDs in `references/tool-catalog.md`.
+4. Record project-specific reasoning plus the real privacy, cost, credential,
+   attribution, framing, timing, timestamp, quality, and fallback boundaries
+   that apply.
+5. Run:
+
+   ```bash
+   python3 "{{SYNC_ROOT}}/skills/video-tool-evaluation/scripts/validate_tool_evaluation.py" \
+     "<project-path>/TOOL_EVALUATION.md"
+   ```
+
+6. Fix every missing, duplicate, invalid, or placeholder row.
+7. Carry only `selected` and `fallback` routes into the downstream plan. Keep
+   all other rows in the evaluation as the audit trail.
+8. If the chosen route changes during execution, update the row with the
+   actual route and fallback reason before delivery.
+
+## Planning Safety
+
+Planning authorizes read-only checks such as `--version`, `--help`, filter
+inventory, key-file existence/permission, and API health checks that do not
+expose the key.
+
+Planning does not authorize:
+
+- installing software or downloading models;
+- spending paid credits or starting a large paid batch;
+- uploading private audio, video, images, text, or source code;
+- downloading stock assets;
+- rendering or publishing;
+- automatic vertical reframing, 9:16 crop, or source-media crop.
+
+Ask only when a selected route crosses a cost, privacy, licensing, download,
+upload, or material output boundary not already approved by the user/project.
+
+## Shared Preferences
+
+- STT formal order: Groq `whisper-large-v3-turbo` → faster-whisper
+  `large-v3-turbo` → MacWhisper. whisper.cpp is explicit quick preview only.
+  SenseVoice is supplementary analysis, not the timed final transcript.
+- TTS first resolves female or male. Female: ElevenLabs Anna Su → Edge-TTS
+  HsiaoChen → macOS `say`. Male: skip ElevenLabs → Edge-TTS YunJhe → macOS
+  `say`. Sensitive content starts with local `say`.
+- Pexels requires a usable local key, quota check, source/creator tracking, and
+  an approved download route.
+- Use FFmpeg Full when `subtitles`, `ass`, or `drawtext` is selected.
+- Kokoro stays removed. Python `openai-whisper`, the OpenAI Whisper API, and
+  direct HyperFrames TTS/STT are not default speech routes.
+- Preserve source aspect ratio and framing unless the user explicitly requests
+  a change.
+
+## Integration Rules
+
+- `video-creation-automation`: validate before the SCRIPT approval gate.
+- `video-processing-automation`: validate before smart cut, cloud upload, or
+  any other mutation.
+- `video-spec-builder`: create/update the evaluation beside `video-spec.md` and
+  validate both before handoff.
+- `hyperframes`: validate before composition HTML is written, unless this is a
+  small direct edit using an already approved evaluation.
+- `website-to-hyperframes`: validate after strategy is locked and before the
+  storyboard/script gate.
+- `remotion-to-hyperframes`: validate during translation planning and before
+  generating HTML.
+- `hyperframes-media` and `hyperframes-cli`: consume the approved evaluation for
+  direct operations; invoke this skill if they must choose a route/provider.
+
+## Agent Execution Notes
+
+- Shared steps: all three Agents use this same catalog, statuses, output shape,
+  safety boundary, validator, and downstream handoff.
+- Codex adapter: use available terminal/browser/native media tools for
+  read-only checks and shared scripts for validation.
+- Claude adapter: use the same package through the shared skills entrypoint and
+  the available terminal/native adapters.
+- AntiGravity adapter: use the same package through the shared skills
+  entrypoint and the available terminal/native adapters.
+- Fallback: if an Agent lacks a native capability, record it as unavailable or
+  use the approved shared CLI/API/browser route; do not delete the route.
+- Verification: every adapter must produce a validator-passing
+  `TOOL_EVALUATION.md` with the same required route IDs.
+
+## Verification
+
+- `python3 scripts/validate_tool_evaluation.py --self-test` passes.
+- A complete realistic evaluation passes.
+- Removing one required route makes validation fail.
+- The calling video skill names this shared package rather than maintaining a
+  private copy of the catalog.
+- All three native skill entrypoints resolve to the same global package.
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366
+
+# video-tool-evaluation/agents/openai.yaml
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/agents/openai.yaml" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_AGENTS_OPENAI_YAML_DEB9755D27'
+interface:
+  display_name: "Video Tool Evaluation"
+  short_description: "Evaluate every video tool before choosing a workflow"
+  default_prompt: "Use $video-tool-evaluation to assess every available video tool before selecting a video workflow."
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_AGENTS_OPENAI_YAML_DEB9755D27
+
+# video-tool-evaluation/references/example-processing-evaluation.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/references/example-processing-evaluation.md")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/references/example-processing-evaluation.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_REFERENCES_EXAMPLE_PROCESSING_EVALUATION_MD_4DB522276E'
+# Example: 16:9 Talking-Head Processing Evaluation
+
+Scenario: an existing 16:9 talking-head recording needs silence cleanup,
+Traditional Chinese subtitles, BGM ducking, a cover, metadata, and a final
+upload package. The speaker's original human voice is retained.
+
+| route_id | tool_or_route | status | project_reason | boundary_and_fallback |
+|---|---|---|---|---|
+| route-video-creation | Video Creation Automation | not-needed | A complete source recording already exists, so rebuilding the video from an idea would duplicate work. | Keep the existing-video route; switch only if the recording is rejected and a new composition is requested. |
+| route-video-processing | Video Processing Automation | selected | The requested smart cut, captions, audio mix, cover, metadata, and package are this workflow's direct outputs. | Preserve the 16:9 source and pause at title or short-candidate choices that require user input. |
+| planning-direct | Processing workflow plan | selected | The processing skill already covers the required edit, subtitle, audio, cover, and packaging decisions. | Record the plan here before any cut or upload; escalate only if the creative scope becomes a new video. |
+| planning-video-spec-builder | Video Spec Builder | not-needed | No new shot design or animated storyboard is needed for a straightforward talking-head edit. | Invoke VideoSpec only if new scenes, complex motion, or shot-level redesign is added. |
+| route-website-to-hyperframes | Website to HyperFrames | not-needed | No website is a source of brand evidence, messaging, or captured media for this recording. | If a product site becomes a required visual source, capture it only after URL and reuse scope are approved. |
+| route-remotion-to-hyperframes | Remotion to HyperFrames | not-needed | The project contains video footage rather than a Remotion source-code composition. | Use the migration skill only after explicit Remotion source translation is requested. |
+| asset-user-provided | Existing recording and brand assets | selected | The source video, approved logo, vocabulary, and BGM are the authoritative production inputs. | Keep originals unchanged, work from local copies, and verify every referenced path before packaging. |
+| asset-image-generator | Shared Image Generator | fallback | A generated cover background may help only if no suitable source frame can support the chosen title. | Do not generate before cover direction is approved; use the active Agent adapter and disclose limitations. |
+| asset-pexels | Pexels photo and video search | not-needed | The talking-head package does not require B-roll, and stock media would add attribution and editorial review. | If B-roll is later requested, check key and quota, present a manifest, and download only selected originals. |
+| asset-website-capture | Browser website capture | not-needed | No web UI, product page, or live brand surface needs to appear in the final edit. | Capture only a user-approved URL and record whether screenshots may be redistributed. |
+| asset-background-removal | HyperFrames u2net remove-background | not-needed | The speaker remains in the original scene, with no transparent overlay or text-behind-subject treatment. | If separation is added, distinguish subject cutout from hole-cut plate and do not claim true inpainting. |
+| title-hyperframes-css | HyperFrames live titles | not-needed | The deliverable is a conventional processed video package rather than an HTML motion composition. | Use live titles only if the user adds an animated composition section and approves HyperFrames. |
+| title-imagemagick | ImageMagick title card | fallback | A deterministic local title card can replace generated cover text or supply a simple intro if requested. | Verify Chinese font rendering and dimensions; otherwise use a clean cover background plus approved design tool. |
+| voice-human | Original speaker recording | selected | Retaining the real speaker preserves identity, emotion, and natural timing without synthesis. | Do not replace or clone the voice; use cleaned original audio and measure the final mix. |
+| voice-female-route | Female TTS route | not-needed | The project keeps the recorded speaker and has no missing female narration. | If female narration is added, confirm the choice and use Anna Su, then HsiaoChen, then local say. |
+| voice-male-route | Male TTS route | not-needed | The project keeps the recorded speaker and has no missing male narration. | If male narration is added, skip ElevenLabs and use YunJhe, then local say. |
+| voice-offline | Local private TTS route | not-needed | No synthetic reading is needed, so private text does not need local speech generation. | If confidential pickup lines are requested, start with local say and do not upload the text. |
+| voice-elevenlabs-anna | ElevenLabs Anna Su | not-needed | No female synthetic narration is required for this human-voice edit. | Never call ElevenLabs for male narration; confirm credits before any later large female batch. |
+| voice-edge-hsiaochen | Edge-TTS HsiaoChen | not-needed | No female synthetic fallback is required while the original speaker audio is usable. | Edge uploads text; use only after a female TTS need is approved and Anna Su is unavailable. |
+| voice-edge-yunjhe | Edge-TTS YunJhe | not-needed | No male synthetic narration is required while the original speaker audio is retained. | Edge uploads text; use only after male TTS is requested, with local say as fallback. |
+| voice-macos-say | macOS say | not-needed | The current edit needs no synthetic pickup lines or privacy-only narration. | Keep it as the local fallback if approved TTS providers fail or text must remain offline. |
+| voice-voxcpm2 | VoxCPM2 voice cloning | excluded | The user did not request authorized cloning or voice design, and the human source audio is sufficient. | Do not load a cloning profile without explicit scope, consent, and authorized reference audio. |
+| stt-groq | Groq whisper-large-v3-turbo | selected | It is the approved first formal STT route and provides strong multilingual transcription with timestamps. | Upload only under the standing project approval; fall back immediately on key, quota, network, model, or upload failure. |
+| stt-faster-whisper | faster-whisper large-v3-turbo | fallback | It provides the required local formal transcript when Groq cannot be used. | Confirm the local model footprint before first download and report the fallback reason and elapsed time. |
+| stt-whisper-cpp | whisper.cpp preview | not-needed | This job requires a final-quality transcript rather than an explicitly requested rapid preview. | Use only if the user asks for quick preview; never let it replace the formal local fallback silently. |
+| stt-macwhisper | MacWhisper | fallback | It remains the final Whisper comparison route if Groq and faster-whisper cannot deliver usable timestamps. | Verify installed CLI entitlement and validate SRT timecodes before accepting its output. |
+| stt-sensevoice | SenseVoice supplementary analysis | not-needed | The clear Mandarin talking-head audio needs timed captions, not emotion or sound-event tagging. | Use only as a Chinese or Cantonese cross-check; do not present its untimed text as final SRT. |
+| edit-auto-editor | Auto-Editor smart cut | selected | Removing long pauses will tighten the talking-head pacing before transcript timestamps are generated. | Normalize VFR to CFR and verify stream order first; compare duration and inspect cuts for clipped words. |
+| edit-ffmpeg-clip | FFmpeg deterministic trims | fallback | Manual trims can repair isolated cut errors or produce an approved highlight without another smart-cut pass. | Preserve source aspect ratio, map video and audio explicitly, and verify boundary frames. |
+| compose-hyperframes | HyperFrames composition | not-needed | The requested package does not need new animated scenes or a seekable HTML composition. | Select it only if the scope adds motion graphics or redesigned scenes that cannot be simple overlays. |
+| compose-playwright-ffmpeg | Browser capture and FFmpeg | not-needed | No browser-rendered fallback composition is needed for this conventional edit. | Use only if an approved HTML renderer is required and HyperFrames cannot meet the project constraint. |
+| translate-remotion | Remotion translation | not-needed | There is no React or Remotion source code in the project. | If source code appears, lint it first and document unsupported patterns before translation. |
+| motion-gsap | GSAP motion | not-needed | No new timeline-based motion graphics are required for the approved talking-head package. | If motion graphics are added, use deterministic seekable timelines and validate every scene. |
+| motion-animejs | Anime.js motion | not-needed | The project has no animation requirement that benefits from Anime.js over the normal processing path. | Select only with an approved composition and a documented adapter reason. |
+| motion-waapi-css | WAAPI or CSS motion | not-needed | A conventional cut and subtitle burn does not require lightweight browser animation. | Use only for an approved HTML overlay or composition with deterministic timing. |
+| motion-lottie | Lottie assets | not-needed | No existing After Effects or dotLottie asset is part of the supplied materials. | Add only after licensing, local asset availability, looping, and render behavior are verified. |
+| motion-three-webgl | Three.js or WebGL | not-needed | The talking-head edit has no 3D model, product rotation, or shader scene requirement. | Select only after a 3D asset and GPU-supported composition are explicitly approved. |
+| motion-typegpu-webgpu | TypeGPU or WebGPU | not-needed | The requested output does not need an experimental GPU-rendered visual effect. | Require runtime support and a deterministic fallback before using WebGPU in a deliverable. |
+| motion-audio-reactive | Audio-reactive animation | not-needed | BGM should support speech quietly rather than drive visible rhythmic animation. | If selected later, derive deterministic analysis data and keep captions legible during peaks. |
+| audio-ffmpeg | FFmpeg Full audio processing | selected | The final package needs stream mapping, BGM fades, measured levels, and a verified audio stream. | Use FFmpeg Full, state the measurement basis, and remux instead of rerendering when only audio changes. |
+| audio-mix-audio | mix_audio.py BGM ducking | selected | The requested background music must lower under speech without changing the approved 16:9 framing. | Record duck timing and target dB, then measure source, music bed, and final mix. |
+| caption-srt | Validated Traditional Chinese SRT | selected | A separate, editable timed subtitle file is required for accessibility and platform upload. | Generate after the final cut, apply vocabulary without changing timecodes, and run SRT validation. |
+| caption-libass-drawtext | FFmpeg Full subtitles and drawtext | selected | The user wants a readable burned-caption master in addition to the separate SRT. | Confirm FFmpeg Full filters and font rendering; preserve a clean master without burned captions. |
+| caption-opencv-pillow | OpenCV and Pillow subtitle fallback | fallback | It provides a cross-platform burner only if the required FFmpeg Full filters are unavailable. | Expect slower processing and verify Chinese fonts, sync, frame rate, audio remux, and output quality. |
+| caption-hyperframes-dynamic | HyperFrames animated captions | not-needed | Static burned subtitles meet the brief; word-level animated captions would change the visual style. | Use only with a separately approved HyperFrames composition and verified word timestamps. |
+| verify-hyperframes | HyperFrames quality checks | not-needed | No HyperFrames composition is selected for this conventional edit. | If scope changes, require lint, validate, inspect, animation map, contrast, and playback review. |
+| verify-ffprobe | ffprobe final media verification | selected | Resolution, aspect ratio, duration, codec, frame rate, and both streams must be confirmed before delivery. | Fail delivery if video or audio is missing, framing changed, or duration differs unexpectedly. |
+| verify-remotion-ssim | Remotion SSIM comparison | not-needed | No Remotion baseline or HyperFrames translation exists to compare. | If migration is added, align pixel format and color space before measuring the correct tier threshold. |
+| handoff-video-processing | Titles, cover, metadata, highlights, and package | selected | The final request explicitly includes a publish-ready folder beyond the edited video itself. | Pause for title and optional highlight selection, then package only approved artifacts and notes. |
+| exclude-kokoro | Kokoro exclusion | excluded | Kokoro was removed from the approved TTS stack and must not reappear through an old example. | Use the gender-gated shared voice route if synthesis is later requested. |
+| exclude-openai-whisper | openai-whisper and OpenAI API exclusion | excluded | These routes duplicate the approved Groq and faster-whisper stack without a project benefit. | Use them only for an explicit, separately approved comparison and record the resulting cost or model download. |
+| exclude-hyperframes-built-in-speech | HyperFrames built-in speech exclusion | excluded | Direct built-in TTS and raw-audio STT would bypass the shared gender and Groq-first routing rules. | HyperFrames may normalize an approved transcript, but provider selection stays in the shared speech routes. |
+| exclude-vertical-short | Automatic 9:16 crop exclusion | excluded | The user requires the original 16:9 composition and did not request reframing or a vertical variant. | Preserve source dimensions and framing; make any later format change an explicit, previewed decision. |
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_REFERENCES_EXAMPLE_PROCESSING_EVALUATION_MD_4DB522276E
+
+# video-tool-evaluation/references/tool-catalog.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/references/tool-catalog.md")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/references/tool-catalog.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_REFERENCES_TOOL_CATALOG_MD_6592FBEAB8'
+# Shared Video Tool Catalog
+
+Every planning-capable video workflow must assess every route below. Selection
+is not required; explicit, project-specific `not-needed`, `unavailable`, and
+`excluded` decisions are valid.
+
+## Required Route IDs
+
+### Workflow routing
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `route-video-creation` | Use `video-creation-automation` when no source video exists and the work starts from an idea, script, or assets. |
+| `route-video-processing` | Use `video-processing-automation` when raw or finished video already exists and needs editing, captions, packaging, or enhancement. |
+| `planning-direct` | Use the calling skill's direct interview/plan when its existing gate is sufficient. |
+| `planning-video-spec-builder` | Use `video-spec-builder` when shot-level requirements, capabilities, or storyboard decisions need deeper clarification. |
+| `route-website-to-hyperframes` | Use `website-to-hyperframes` when a live website is the source of brand/product evidence and capture assets. |
+| `route-remotion-to-hyperframes` | Use `remotion-to-hyperframes` only for an explicit source-code migration from Remotion. |
+
+### Assets and titles
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `asset-user-provided` | Existing photos, video, audio, screenshots, documents, logo, brand assets, fonts, music, and reference links. |
+| `asset-image-generator` | Current Agent native image generation through the shared `image-generator` route. |
+| `asset-pexels` | Pexels photo/video search, live key/quota health, manifest review, source page, creator attribution, and unchanged framing. |
+| `asset-website-capture` | Website screenshot/DOM/style capture through the website workflow or approved browser route. |
+| `asset-background-removal` | HyperFrames `remove-background`/u2net for transparent subject layers; distinguish cutout, hole-cut plate, and true inpainting. |
+| `title-hyperframes-css` | HyperFrames/CSS live title and text treatment. |
+| `title-imagemagick` | ImageMagick deterministic PNG title cards through `make_title_card.py`. |
+
+### Voice and TTS
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `voice-human` | Existing or newly recorded human narration. |
+| `voice-female-route` | Female route decision: Anna Su → HsiaoChen → local `say`. |
+| `voice-male-route` | Male route decision: skip ElevenLabs → YunJhe → local `say`. |
+| `voice-offline` | Sensitive/private narration forced to local macOS `say`. |
+| `voice-elevenlabs-anna` | ElevenLabs Anna Su, female only; assess key, quota/credits, cloud text upload, and batch size. |
+| `voice-edge-hsiaochen` | Edge-TTS `zh-TW-HsiaoChenNeural`, female fallback/default-quality comparison. |
+| `voice-edge-yunjhe` | Edge-TTS `zh-TW-YunJheNeural`, male primary route. |
+| `voice-macos-say` | macOS `say` local fallback for either gender and private content. |
+| `voice-voxcpm2` | VoxCPM2 only for explicit, authorized voice cloning or voice design. |
+
+### Speech-to-text
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `stt-groq` | Formal STT first choice: Groq `whisper-large-v3-turbo`; assess upload permission, key, quota, network, and timestamps. |
+| `stt-faster-whisper` | Formal local fallback: faster-whisper `large-v3-turbo`; assess local model size, speed, and compute. |
+| `stt-whisper-cpp` | Explicit quick preview only; assess the local model and preview-quality tradeoff. |
+| `stt-macwhisper` | Final Whisper option or GUI/manual comparison; validate CLI entitlement and timestamp output. |
+| `stt-sensevoice` | Supplementary Chinese/Cantonese, emotion, and sound-event analysis only; not the timed final transcript. |
+
+### Editing, composition, and motion
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `edit-auto-editor` | Auto-Editor through `smart_cut.py` for silence/pace cleanup; assess VFR/CFR and stream-order risk. |
+| `edit-ffmpeg-clip` | FFmpeg/`clip_cut.py` for deterministic trims, splices, remuxing, or highlight extraction. |
+| `compose-hyperframes` | Preferred seekable HTML composition and render route. |
+| `compose-playwright-ffmpeg` | Shared browser capture plus FFmpeg fallback when HyperFrames is not the selected renderer. |
+| `translate-remotion` | Remotion source lint, mechanical translation, escape hatch, and gap documentation. |
+| `motion-gsap` | GSAP timeline animation and HyperFrames synchronization. |
+| `motion-animejs` | Anime.js adapter when its timeline/property model better fits the approved composition. |
+| `motion-waapi-css` | Web Animations API or CSS keyframes for lightweight deterministic motion. |
+| `motion-lottie` | Lottie/dotLottie when an existing animation asset or lightweight loop is appropriate. |
+| `motion-three-webgl` | Three.js/WebGL for 3D models, product rotation, shaders, or GPU scenes. |
+| `motion-typegpu-webgpu` | TypeGPU/WebGPU for an approved GPU-rendered effect with supported runtime. |
+| `motion-audio-reactive` | Audio analysis mapped to deterministic visual properties when music/voice should drive motion. |
+
+### Audio and captions
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `audio-ffmpeg` | FFmpeg Full muxing, fades, normalization, ducking filters, stream mapping, and audio-only revision/remux. |
+| `audio-mix-audio` | `video-processing-automation/scripts/mix_audio.py` for BGM ducking without reframing. |
+| `caption-srt` | Timed SRT derived from the actual narration or human recording, with vocabulary cleanup and validation. |
+| `caption-libass-drawtext` | FFmpeg Full `subtitles`/`ass` and `drawtext` burn-in or text overlay. |
+| `caption-opencv-pillow` | OpenCV/Pillow subtitle burner only when FFmpeg Full/libass is unavailable. |
+| `caption-hyperframes-dynamic` | HyperFrames timed, word-highlighted, karaoke, or other animated captions. |
+
+### Verification and packaging
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `verify-hyperframes` | HyperFrames lint, validate, inspect, animation map, contrast, first/last-frame, and playback review. |
+| `verify-ffprobe` | Final resolution, duration, aspect ratio, frame rate, codec, video stream, and audio stream verification. |
+| `verify-remotion-ssim` | Remotion-to-HyperFrames pixel-format alignment, SSIM diff, tier threshold, and frame-strip diagnosis. |
+| `handoff-video-processing` | Subtitle cleanup, titles, cover, metadata/SEO, highlight clips, and upload-package handoff. |
+
+### Explicit exclusions and format boundary
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `exclude-kokoro` | Kokoro is removed and must not return as a TTS route. |
+| `exclude-openai-whisper` | Python `openai-whisper` and the OpenAI Whisper API are not defaults because they duplicate the approved STT stack. |
+| `exclude-hyperframes-built-in-speech` | Direct HyperFrames built-in TTS/STT commands are not Arry's default speech routes. |
+| `exclude-vertical-short` | No automatic vertical-short mode, 9:16 crop, or reframing; only explicit user requests may change format/framing. |
+
+## Required Decision Detail
+
+For each applicable row, record:
+
+- why the tool changes or does not change this project's result;
+- installed/runtime/credential readiness without exposing secrets;
+- free, paid, quota, model-download, or compute implications;
+- local/cloud execution and privacy;
+- source, creator, attribution, or license duties;
+- framing, crop, resolution, timing, transcript, and timestamp effects;
+- the exact fallback or handoff.
+
+Generic reasons such as “not needed”, `TBD`, `N/A`, or empty cells do not pass
+validation.
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_REFERENCES_TOOL_CATALOG_MD_6592FBEAB8
+
+# video-tool-evaluation/scripts/validate_tool_evaluation.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/scripts/validate_tool_evaluation.py")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/scripts/validate_tool_evaluation.py" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SCRIPTS_VALIDATE_TOOL_EVALUATION_PY_4DEA47693E'
+#!/usr/bin/env python3
+"""Validate the shared full-catalog video tool evaluation."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+import re
+import sys
+
+
+REQUIRED_ROUTE_IDS = (
+    "route-video-creation",
+    "route-video-processing",
+    "planning-direct",
+    "planning-video-spec-builder",
+    "route-website-to-hyperframes",
+    "route-remotion-to-hyperframes",
+    "asset-user-provided",
+    "asset-image-generator",
+    "asset-pexels",
+    "asset-website-capture",
+    "asset-background-removal",
+    "title-hyperframes-css",
+    "title-imagemagick",
+    "voice-human",
+    "voice-female-route",
+    "voice-male-route",
+    "voice-offline",
+    "voice-elevenlabs-anna",
+    "voice-edge-hsiaochen",
+    "voice-edge-yunjhe",
+    "voice-macos-say",
+    "voice-voxcpm2",
+    "stt-groq",
+    "stt-faster-whisper",
+    "stt-whisper-cpp",
+    "stt-macwhisper",
+    "stt-sensevoice",
+    "edit-auto-editor",
+    "edit-ffmpeg-clip",
+    "compose-hyperframes",
+    "compose-playwright-ffmpeg",
+    "translate-remotion",
+    "motion-gsap",
+    "motion-animejs",
+    "motion-waapi-css",
+    "motion-lottie",
+    "motion-three-webgl",
+    "motion-typegpu-webgpu",
+    "motion-audio-reactive",
+    "audio-ffmpeg",
+    "audio-mix-audio",
+    "caption-srt",
+    "caption-libass-drawtext",
+    "caption-opencv-pillow",
+    "caption-hyperframes-dynamic",
+    "verify-hyperframes",
+    "verify-ffprobe",
+    "verify-remotion-ssim",
+    "handoff-video-processing",
+    "exclude-kokoro",
+    "exclude-openai-whisper",
+    "exclude-hyperframes-built-in-speech",
+    "exclude-vertical-short",
+)
+ALLOWED_STATUSES = {
+    "selected",
+    "fallback",
+    "not-needed",
+    "unavailable",
+    "excluded",
+}
+PLACEHOLDER_PATTERN = re.compile(
+    r"(?:\b(?:pending|tbd|todo|n/?a|fill)\b|待定|待補|稍後|不需要$)",
+    re.IGNORECASE,
+)
+
+
+def parse_rows(text: str) -> dict[str, tuple[str, str, str, str, int]]:
+    rows: dict[str, tuple[str, str, str, str, int]] = {}
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        if not line.lstrip().startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) != 5:
+            continue
+        route_id, tool, status, reason, boundary = cells
+        if route_id not in REQUIRED_ROUTE_IDS:
+            continue
+        if route_id in rows:
+            raise ValueError(
+                f"Duplicate route_id `{route_id}` on line {line_number}."
+            )
+        rows[route_id] = (
+            tool,
+            status.lower(),
+            reason,
+            boundary,
+            line_number,
+        )
+    return rows
+
+
+def validate_rows(
+    rows: dict[str, tuple[str, str, str, str, int]],
+) -> list[str]:
+    errors: list[str] = []
+    missing = [route_id for route_id in REQUIRED_ROUTE_IDS if route_id not in rows]
+    if missing:
+        errors.append("Missing route IDs: " + ", ".join(missing))
+
+    for route_id, (tool, status, reason, boundary, line_number) in rows.items():
+        if status not in ALLOWED_STATUSES:
+            errors.append(
+                f"Line {line_number} `{route_id}` has invalid status `{status}`."
+            )
+        if len(tool) < 2 or PLACEHOLDER_PATTERN.search(tool):
+            errors.append(
+                f"Line {line_number} `{route_id}` needs a concrete tool/route."
+            )
+        if len(reason) < 12 or PLACEHOLDER_PATTERN.search(reason):
+            errors.append(
+                f"Line {line_number} `{route_id}` needs a project-specific reason."
+            )
+        if len(boundary) < 12 or PLACEHOLDER_PATTERN.search(boundary):
+            errors.append(
+                f"Line {line_number} `{route_id}` needs boundary/fallback details."
+            )
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Validate a shared video TOOL_EVALUATION.md."
+    )
+    parser.add_argument("input", type=Path, nargs="?")
+    parser.add_argument(
+        "--self-test",
+        action="store_true",
+        help="Run an internal complete-catalog validator smoke test.",
+    )
+    args = parser.parse_args()
+
+    if args.self_test:
+        rows = {
+            route_id: (
+                "Representative tool or route",
+                "selected",
+                "Representative project-specific evaluation reason.",
+                "Representative privacy, cost, framing, and fallback boundary.",
+                index + 2,
+            )
+            for index, route_id in enumerate(REQUIRED_ROUTE_IDS)
+        }
+        errors = validate_rows(rows)
+        if errors:
+            for error in errors:
+                print("ERROR: " + error, file=sys.stderr)
+            return 1
+        incomplete_rows = dict(rows)
+        missing_route = REQUIRED_ROUTE_IDS[-1]
+        incomplete_rows.pop(missing_route)
+        incomplete_errors = validate_rows(incomplete_rows)
+        if not any(
+            error.startswith("Missing route IDs:") and missing_route in error
+            for error in incomplete_errors
+        ):
+            print(
+                "ERROR: self-test did not reject an incomplete catalog.",
+                file=sys.stderr,
+            )
+            return 1
+        print(
+            "Self-test passed: "
+            f"{len(rows)}/{len(REQUIRED_ROUTE_IDS)} routes assessed; "
+            "incomplete catalog rejected."
+        )
+        return 0
+
+    if args.input is None:
+        parser.error("input is required unless --self-test is used")
+    if not args.input.is_file():
+        print(f"Tool evaluation does not exist: {args.input}", file=sys.stderr)
+        return 2
+
+    try:
+        rows = parse_rows(args.input.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    errors = validate_rows(rows)
+    if errors:
+        for error in errors:
+            print("ERROR: " + error, file=sys.stderr)
+        return 1
+
+    print(
+        f"Tool evaluation valid: {len(rows)}/{len(REQUIRED_ROUTE_IDS)} routes assessed."
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SCRIPTS_VALIDATE_TOOL_EVALUATION_PY_4DEA47693E
+
+test -f "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" && echo "video-tool-evaluation installed for Codex, Claude, and AntiGravity"
 
 # ---- animejs ----
 mkdir -p "{{SYNC_ROOT}}/skills/animejs"
@@ -1836,6 +2430,14 @@ Read [references/prompt-expansion.md](references/prompt-expansion.md) for the fu
 
 Before writing HTML, think at a high level:
 
+For a new composition, multi-step build, storyboard, or any request that
+requires choosing tools/providers, invoke `video-tool-evaluation`, create
+`TOOL_EVALUATION.md` beside the composition plan, assess every shared route,
+and run its validator before implementation. Most routes may be `not-needed`;
+they still need a project-specific reason. For a small direct edit, consume the
+existing approved evaluation when present and do not create a new 53-row file
+solely for ceremony.
+
 1. **What** — what should the viewer experience? Identify the narrative arc, key moments, and emotional beats.
 2. **Structure** — how many compositions, which are sub-compositions vs inline, what tracks carry what (video, audio, overlays, captions).
 3. **Rhythm** — declare your scene rhythm before implementing. Which scenes are quick hits, which are holds, where do shaders land, where does energy peak. Name the pattern: fast-fast-SLOW-fast-SHADER-hold. Read [references/beat-direction.md](references/beat-direction.md) for rhythm templates.
@@ -1848,7 +2450,11 @@ Before writing HTML, think at a high level:
 For small edits (fix a color, adjust timing, add one element), skip straight to the rules.
 
 <HARD-GATE>
-Before writing ANY composition HTML — verify you have a visual identity from Step 1. If you're reaching for `#333`, `#3b82f6`, or `Roboto`, you skipped it.
+Before writing ANY composition HTML — verify you have a visual identity from
+Step 1. For a new or multi-step composition, also verify that the shared
+`TOOL_EVALUATION.md` contains every route and passes
+`video-tool-evaluation/scripts/validate_tool_evaluation.py`. If you're reaching
+for `#333`, `#3b82f6`, or `Roboto`, you skipped the visual identity gate.
 </HARD-GATE>
 
 ## Layout Before Animation
@@ -2203,6 +2809,8 @@ If no `design.md` exists, follow [house-style.md](./house-style.md) for aestheti
 
 **Fast (run immediately, block on results):**
 
+- [ ] Shared `TOOL_EVALUATION.md` passes for new/multi-step work, or the direct
+      edit names the existing approved evaluation it consumed
 - [ ] `npx hyperframes lint` and `npx hyperframes validate` both pass
 - [ ] Design adherence verified if design.md exists
 
@@ -3498,11 +4106,15 @@ cat > "{{SYNC_ROOT}}/skills/hyperframes/references/captions.md" <<'AGENT_LAZYPAC
 
 ## Language Rule (Non-Negotiable)
 
-**Never use `.en` models unless the user explicitly states the audio is English.** `.en` models TRANSLATE non-English audio into English instead of transcribing it.
+Do not select HyperFrames `.en` models for the shared formal route.
 
-1. User says the language → `--model small --language <code>` (no `.en`)
-2. User says English → `--model small.en`
-3. Language unknown → `--model small` (no `.en`, no `--language`) — auto-detects
+1. Known source language → pass `--language <code>` to
+   `transcribe_preferred.py`.
+2. English → pass `--language en`.
+3. Unknown or mixed language → pass `--language auto`.
+
+Formal order remains Groq → faster-whisper → MacWhisper. whisper.cpp is only
+for an explicitly requested preview.
 
 ---
 
@@ -5715,8 +6327,8 @@ The CLI auto-detects and normalizes these formats:
 
 | Format                | Extension | Source                                                                      | Word-level?       |
 | --------------------- | --------- | --------------------------------------------------------------------------- | ----------------- |
-| whisper.cpp JSON      | `.json`   | `hyperframes init --video`, `hyperframes transcribe`                        | Yes               |
-| OpenAI Whisper API    | `.json`   | `openai.audio.transcriptions.create({ timestamp_granularities: ["word"] })` | Yes               |
+| Groq verbose JSON     | `.json`   | Preferred `transcribe_preferred.py` formal route                            | Yes               |
+| whisper.cpp JSON      | `.json`   | Explicit HyperFrames/local preview only                                     | Yes               |
 | SRT subtitles         | `.srt`    | Video editors, subtitle tools, YouTube                                      | No (phrase-level) |
 | VTT subtitles         | `.vtt`    | Web players, YouTube, transcription services                                | No (phrase-level) |
 | Normalized word array | `.json`   | Pre-processed by any tool                                                   | Yes               |
@@ -5741,13 +6353,19 @@ After every transcription, **read the transcript and check for quality issues be
 
 **If more than 20% of entries are `♪`/`�` tokens, or the transcript contains obvious nonsense words, the transcription failed.** Do not proceed with the bad transcript. Instead:
 
-1. **Retry with `medium.en`** if the original used `small.en` or smaller:
+1. **Cross-check with faster-whisper** if the preferred Groq transcript is
+   obviously unusable:
    ```bash
-   npx hyperframes transcribe audio.mp3 --model medium.en
+   python-tools-python \
+     "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_preferred.py" \
+     audio.mp3 --out transcript.srt \
+     --engine faster-whisper --language auto --traditional
    ```
-2. **If `medium.en` also fails** (still >20% music tokens or garbled), tell the user the audio is too noisy for local transcription and suggest:
+2. **If faster-whisper also fails**, use MacWhisper only as the final Whisper
+   comparison, validate its timestamps, then tell the user when the audio is
+   too noisy for automatic transcription and suggest:
    - Providing lyrics manually as an SRT/VTT file
-   - Using an external API (OpenAI or Groq Whisper — see below)
+   - Cleaning the audio or providing a clearer speech stem
 3. **Always clean the transcript** before building captions — filter out `♪`/`�` tokens and entries where `text` is a single non-word character. Only real words should reach the caption composition.
 
 ### Cleaning a transcript
@@ -5764,54 +6382,47 @@ var words = raw.filter(function (w) {
 });
 ```
 
-### When to use which model (decision tree)
+### Provider decision tree
 
-1. **Is this speech over silence/light background?** → `small.en` is fine
-2. **Is this speech over music, or music with vocals?** → Start with `medium.en`
-3. **Is this a produced music track (vocals + full instrumentation)?** → Start with `medium.en`, expect to need manual lyrics or an external API
-4. **Is this multilingual?** → Use `medium` or `large-v3` (no `.en` suffix)
+1. **Formal transcription** → Groq `whisper-large-v3-turbo`.
+2. **Groq unavailable, upload disallowed, or local-only** → faster-whisper
+   `large-v3-turbo`.
+3. **Explicit fast preview** → whisper.cpp.
+4. **Chinese/Cantonese language, emotion, or sound-event cross-check** →
+   SenseVoice in addition to the timed transcript.
+5. **Final Whisper option** → MacWhisper with timestamp validation.
 
-## Using External Transcription APIs
+Python `openai-whisper`, OpenAI Whisper API, and direct HyperFrames local
+transcription are not default routes.
 
-For the best accuracy, use an external API and import the result:
-
-**OpenAI Whisper API** (recommended for quality):
-
-```bash
-# Generate with word timestamps, then import
-curl https://api.openai.com/v1/audio/transcriptions \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -F file=@audio.mp3 -F model=whisper-1 \
-  -F response_format=verbose_json \
-  -F "timestamp_granularities[]=word" \
-  -o transcript-openai.json
-
-npx hyperframes transcribe transcript-openai.json
-```
-
-**Groq Whisper API** (fast, free tier available):
+## Preferred Groq Route
 
 ```bash
-curl https://api.groq.com/openai/v1/audio/transcriptions \
-  -H "Authorization: Bearer $GROQ_API_KEY" \
-  -F file=@audio.mp3 -F model=whisper-large-v3 \
-  -F response_format=verbose_json \
-  -F "timestamp_granularities[]=word" \
-  -o transcript-groq.json
-
-npx hyperframes transcribe transcript-groq.json
+python-tools-python \
+  "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_preferred.py" \
+  audio.mp3 --out transcript.srt --raw-json transcript-groq.json \
+  --allow-cloud --language auto --traditional
+if [ -f transcript-groq.json ]; then
+  npx hyperframes transcribe transcript-groq.json
+else
+  npx hyperframes transcribe transcript.srt
+fi
 ```
 
 ## If No Transcript Exists
 
 1. Check the project root for `transcript.json`, `.srt`, or `.vtt` files
-2. If none found, run transcription — pick the starting model based on the content type:
-   - Speech/voiceover → `small.en`
-   - Music with vocals → `medium.en`
+2. If none is found, run the shared preferred route:
    ```bash
-   npx hyperframes transcribe <audio-or-video-file> --model medium.en
+   python-tools-python \
+     "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_preferred.py" \
+     <audio-or-video-file> --out transcript.srt \
+     --raw-json transcript-groq.json \
+     --allow-cloud --language auto --traditional
    ```
-3. **Read the transcript and run the quality check** (see above). If it fails, retry with a larger model or suggest manual lyrics.
+3. **Read the transcript and run the quality check** (see above). If it fails,
+   follow the faster-whisper → MacWhisper cross-check order or request manual
+   lyrics/a cleaner speech stem.
 AGENT_LAZYPACK_HYPERFRAMES_REFERENCES_TRANSCRIPT_GUIDE_MD_7B8E89F08C
 
 # hyperframes/references/transitions.md
@@ -9616,6 +10227,14 @@ Everything runs through `npx hyperframes`. Requires Node.js >= 22 and FFmpeg.
 
 Lint and inspect before preview. `lint` catches missing `data-composition-id`, overlapping tracks, and unregistered timelines. `inspect` opens the rendered composition in headless Chrome, seeks through the timeline, and reports text spilling out of bubbles/containers or off the canvas.
 
+For `init` as part of a new video plan or any workflow that still needs tool,
+provider, asset, speech, motion, caption, or renderer choices, invoke
+`video-tool-evaluation` first and validate `TOOL_EVALUATION.md`. Direct
+operational commands (`lint`, `validate`, `inspect`, `preview`, `render`,
+`doctor`, `info`) consume the approved project evaluation and do not regenerate
+the full catalog. If a direct request expands scope or crosses a cloud, cost,
+download, privacy, or framing boundary, return to the shared evaluation first.
+
 ## Scaffolding
 
 ```bash
@@ -9629,7 +10248,10 @@ npx hyperframes init my-video --non-interactive       # skip prompts (CI/agents)
 
 Templates: `blank`, `warm-grain`, `play-mode`, `swiss-grid`, `vignelli`, `decision-tree`, `kinetic-type`, `product-promo`, `nyt-graph`.
 
-`init` creates the right file structure, copies media, transcribes audio with Whisper, and installs AI coding skills. Use it instead of creating files by hand.
+`init` creates the right file structure, copies media, may transcribe audio
+with its bundled local Whisper, and installs AI coding skills. Keep the
+scaffold, but replace any auto-generated transcript with Arry's shared
+Groq-first route before final caption work.
 
 When using `--tailwind`, invoke the `tailwind` skill before editing classes or theme tokens. The scaffold uses Tailwind v4.2 via the browser runtime, not Studio's Tailwind v3 setup.
 
@@ -9720,7 +10342,13 @@ npx hyperframes render --docker                       # byte-identical
 
 ## Asset Preprocessing
 
-`npx hyperframes tts`, `transcribe`, and `remove-background` produce assets (narration audio, word-level transcripts, transparent video) that get dropped into a composition. Each downloads its own model on first run. For voice selection, whisper model rules (the `.en`-translates-non-English gotcha), output format choice (VP9 alpha WebM vs ProRes), and the TTS → transcribe → captions chain, invoke the `hyperframes-media` skill.
+For Arry's workflow, do not use `npx hyperframes tts`; invoke
+`hyperframes-media` so TTS first asks female/male and calls `voice-reply`.
+Likewise, do not transcribe raw audio/video through the CLI as the normal STT
+route; use `transcribe_preferred.py`, then use `npx hyperframes transcribe`
+only to import the resulting Groq JSON or fallback SRT. `remove-background`
+remains a supported direct asset command. Invoke `hyperframes-media` for the
+full commands and verification contract.
 
 ## Troubleshooting
 
@@ -9751,112 +10379,139 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_MEDIA_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes-media
-description: Asset preprocessing for HyperFrames compositions — text-to-speech narration (Kokoro), audio/video transcription (Whisper), and background removal for transparent overlays (u2net). Use when generating voiceover from text, transcribing speech for captions, removing the background from a video or image to use as a transparent overlay, choosing a TTS voice or whisper model, or chaining these (TTS → transcribe → captions). Each command downloads its own model on first run.
+description: Asset preprocessing for HyperFrames compositions — gender-gated text-to-speech narration through ElevenLabs or Edge-TTS with macOS say fallback, audio/video transcription (Whisper), and background removal for transparent overlays (u2net). Use when generating voiceover from text, transcribing speech for captions, removing the background from a video or image to use as a transparent overlay, choosing a TTS voice or Whisper model, or chaining these (TTS → transcribe → captions).
 ---
 
 # HyperFrames Media Preprocessing
 
-Three CLI commands that produce assets for compositions: `tts` (speech), `transcribe` (timestamps), and `remove-background` (transparent video). Each downloads a model on first run and caches it under `~/.cachehyperframes/`. Drop the output into the project, then reference it from the composition HTML — see the `hyperframes` skill for the audio/video element conventions.
+This workflow produces narration, timestamps, and transparent video assets for
+HyperFrames compositions. Narration uses the shared `voice-reply` command;
+transcription and background removal use the HyperFrames CLI. Drop each output
+into the project, then reference it from the composition HTML — see the
+`hyperframes` skill for the audio/video element conventions.
 
-## Text-to-Speech (`tts`)
+## Shared Planning Integration
 
-Generate speech audio locally with Kokoro-82M. No API key.
+When this skill is used inside a new video plan, VideoSpec, storyboard,
+multi-step processing run, or provider/tool comparison, invoke
+`video-tool-evaluation` first and consume its validated
+`TOOL_EVALUATION.md`. The evaluation must assess every video route, not only
+speech and media preprocessing.
+
+For a direct command whose engine and output are already specified, such as
+“use Edge HsiaoChen for this approved script” or “remove this background”, do
+not create a new full evaluation solely for ceremony. Use the approved project
+evaluation when present. If gender/provider, cloud upload, cost, model
+download, privacy, or output framing is unresolved, run the shared evaluation
+before executing.
+
+## Text-to-Speech (`voice-reply`)
+
+Before TTS, ask for female or male unless the request already specifies the
+voice gender. Do not synthesize with an unspecified gender.
+
+- Female: ElevenLabs Anna Su → Edge-TTS HsiaoChen → macOS `say`.
+- Male: skip ElevenLabs → Edge-TTS YunJhe → macOS `say`.
 
 ```bash
-npx hyperframes tts "Text here" --voice af_nova --output narration.wav
-npx hyperframes tts script.txt --voice bf_emma --output narration.wav
-npx hyperframes tts --list                       # all 54 voices
+voice-reply --voice-gender female "Text here"
+voice-reply --voice-gender male --file script.txt --out narration.mp3
 ```
 
-### Voice Selection
+Default voices and model:
 
-Match voice to content. Default is `af_heart`.
-
-| Content type      | Voice                 | Why                           |
-| ----------------- | --------------------- | ----------------------------- |
-| Product demo      | `af_heart`/`af_nova`  | Warm, professional            |
-| Tutorial / how-to | `am_adam`/`bf_emma`   | Neutral, easy to follow       |
-| Marketing / promo | `af_sky`/`am_michael` | Energetic or authoritative    |
-| Documentation     | `bf_emma`/`bm_george` | Clear British English, formal |
-| Casual / social   | `af_heart`/`af_sky`   | Approachable, natural         |
-
-### Multilingual
-
-Voice IDs encode language in the first letter: `a`=American English, `b`=British English, `e`=Spanish, `f`=French, `h`=Hindi, `i`=Italian, `j`=Japanese, `p`=Brazilian Portuguese, `z`=Mandarin. The CLI auto-detects the phonemizer locale from the prefix — no `--lang` needed when the voice matches the text.
-
-```bash
-npx hyperframes tts "La reunión empieza a las nueve" --voice ef_dora --output es.wav
-npx hyperframes tts "今日はいい天気ですね" --voice jf_alpha --output ja.wav
-```
-
-Use `--lang` only to override auto-detection (stylized accents). Valid codes: `en-us`, `en-gb`, `es`, `fr-fr`, `hi`, `it`, `pt-br`, `ja`, `zh`. Non-English phonemization requires `espeak-ng` system-wide (`brew install espeak-ng` / `apt-get install espeak-ng`).
-
-### Speed
-
-- `0.7-0.8` — tutorial, complex content, accessibility
-- `1.0` — natural pace (default)
-- `1.1-1.2` — intros, transitions, upbeat content
-- `1.5+` — rarely appropriate; test carefully
+- ElevenLabs voice: `Anna Su - Casual, Friendly and Bright`
+- ElevenLabs voice ID: `9lHjugDhwqoxA5MhX0az`
+- ElevenLabs model: `eleven_multilingual_v2`
+- Edge-TTS female profile: `zh-TW-HsiaoChenNeural`
+- Edge-TTS male profile: `zh-TW-YunJheNeural`
+- macOS `say` voice: `Meijia`
 
 ### Long Scripts
 
-For more than a few paragraphs, write to a `.txt` file and pass the path. Inputs over ~5 minutes of speech may benefit from splitting into segments.
+For more than a few paragraphs, write to a `.txt` file and pass it with
+`--file`. Inputs over about five minutes of speech may benefit from splitting
+into segments. Test two opening sentences first, measure the real duration, and
+then adjust storyboard timing.
 
-### Requirements
-
-Python 3.8+ with `kokoro-onnx` and `soundfile` (`pip install kokoro-onnx soundfile`). Model downloads on first use (~311 MB + ~27 MB voices, cached in `~/.cachehyperframes/tts/`).
-
-#### 💡 安裝避坑指南 (macOS & Python 環境)
-* **Mac 全域 Python 安裝限制**: 在 macOS (由 Homebrew 管理的 Python 3.11+) 上，直接執行 `pip` 會因 `PEP 668` 外部管理環境限制而報錯。必須執行以下指令進行強制安裝：
-  ```bash
-  pip3 install --break-system-packages kokoro-onnx soundfile
-  ```
-  或者如果您有安裝 `uv`：
-  ```bash
-  uv pip install --system kokoro-onnx soundfile
-  ```
-* **非英語發音（例如中文 zh）依賴**:
-  Kokoro 音訊合成在非英語下需要 `espeak-ng` 音素器。在 macOS 上請先安裝系統級依賴：
-  ```bash
-  brew install espeak-ng
-  ```
-  若在沙盒中無權限調用 `brew`，可使用 Python 補丁套件：`pip3 install --break-system-packages espeakng-loader`。
-
-#### ⚠️ Agent Execution Notes
-* **Shared steps**: 三個 Agent 都呼叫相同的 HyperFrames media scripts、輸入輸出格式與驗證指令。
-* **Codex adapter**: 若運行於獨立 Sandbox，內建 Terminal 的 Python 可能與系統 Python 隔離；在可寫 runtime 補依賴，並確認專案 Python 解譯器與 MCP 環境一致。
-* **Claude adapter**: 依 Claude 當前 terminal／container 權限呼叫同一腳本；若無本機 shell，改由使用者在專案終端執行並回傳產物。
-* **AntiGravity adapter**: 通常直接繼承 macOS `zsh`、Homebrew 路徑與系統配置，但仍需先驗證 Python 與模型快取位置。
-  - 您可以直接在本機執行 `pip3 install --break-system-packages` 或 `brew` 安裝依賴。
-  - **macOS Say 離線替代方案**: 在網絡不佳、無法順利從 Hugging Face 下載 Kokoro 模型時，Codex、Claude、AntiGravity 只要能使用 macOS shell，都可呼叫 Mac 內建語音引擎：
-    ```bash
-    say -v Meijia -f narration.txt -o narration.aiff && ffmpeg -y -i narration.aiff -ar 44100 narration.wav && rm narration.aiff
-    ```
-    （`Meijia` 為台灣中文女聲，此方法 100% 離線、秒級生成，非常適合作為備用方案）。
-
-## Transcription (`transcribe`)
-
-Produce a normalized `transcript.json` with word-level timestamps.
+### Provider Overrides
 
 ```bash
-npx hyperframes transcribe audio.mp3
-npx hyperframes transcribe video.mp4 --model small --language es
-npx hyperframes transcribe subtitles.srt          # import existing
-npx hyperframes transcribe subtitles.vtt
-npx hyperframes transcribe openai-response.json
+voice-reply --engine elevenlabs --voice-gender female --file script.txt --out narration.mp3
+voice-reply --engine edge --voice-gender female --file script.txt --out narration.mp3
+voice-reply --engine edge --voice-gender male --file script.txt --out narration.mp3
+voice-reply --engine say --file script.txt --out narration.wav
 ```
+
+#### ⚠️ Agent Execution Notes
+
+- **Shared steps:** Three Agents resolve the female/male gate first, call the
+  same `voice-reply` command, and receive the same conditional route and output
+  contract.
+- **Codex adapter:** Use the shared local Python-tools wrapper.
+- **Claude adapter:** Use the same wrapper from the shared agent-tools bridge.
+- **AntiGravity adapter:** Use the same wrapper from the shared agent-tools
+  bridge.
+- **Privacy:** ElevenLabs and Edge-TTS upload text. For secrets, confidential
+  work, private identifiers, or other sensitive content, start at
+  `--engine say`.
+- The upstream `npx hyperframes tts` model route is not part of the supported
+  Arry TTS stack and its local model cache is not required.
+
+## Transcription (Shared Preferred Route)
+
+Do not run `npx hyperframes transcribe` directly on raw audio/video as the
+normal route. First produce a preferred-route transcript:
+
+```bash
+python-tools-python \
+  "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_preferred.py" \
+  audio.mp3 \
+  --out transcript.srt \
+  --raw-json transcript.groq.json \
+  --allow-cloud --language auto --traditional
+```
+
+The formal order is Groq `whisper-large-v3-turbo` → faster-whisper
+`large-v3-turbo` → MacWhisper. For an explicitly requested fast preview:
+
+```bash
+python-tools-python \
+  "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_preferred.py" \
+  audio.mp3 --out preview.srt \
+  --engine whisper.cpp --language auto --traditional
+```
+
+SenseVoice remains a separate supplementary Chinese/Cantonese, emotion, and
+sound-event check. It does not replace the timed transcript.
+
+After the preferred router succeeds, use HyperFrames only as a normalizer:
+
+```bash
+if [ -f transcript.groq.json ]; then
+  npx hyperframes transcribe transcript.groq.json
+else
+  npx hyperframes transcribe transcript.srt
+fi
+```
+
+Groq JSON retains word-level timestamps. The fallback SRT has phrase-level
+timestamps but preserves the selected provider order.
 
 ### Language Rule (Non-Negotiable)
 
 **Never use `.en` models unless the user explicitly states the audio is English.** `.en` models (`small.en`, `medium.en`) **translate** non-English audio into English instead of transcribing it. This silently destroys the original language.
 
-1. Language known and non-English → `--model small --language <code>` (no `.en` suffix)
-2. Language known and English → `--model small.en`
-3. Language unknown → `--model small` (no `.en`, no `--language`) — whisper auto-detects
+1. Language known and non-English → pass `--language <code>`.
+2. Language known and English → pass `--language en`.
+3. Language unknown or mixed → pass `--language auto`.
 
-**Default model is `small`, not `small.en`.**
+Do not select `.en` model variants in the shared formal route.
 
-### Model Sizes
+### HyperFrames Local Preview Model Sizes
+
+These upstream models are not Arry's formal default. They are retained only
+for understanding or explicit local-preview maintenance.
 
 | Model      | Size   | Speed    | When to use                           |
 | ---------- | ------ | -------- | ------------------------------------- |
@@ -9866,7 +10521,9 @@ npx hyperframes transcribe openai-response.json
 | `medium`   | 1.5 GB | Slow     | Important content, noisy audio, music |
 | `large-v3` | 3.1 GB | Slowest  | Production quality                    |
 
-Music with vocals: start at `medium` minimum; produced tracks often need manual SRT/VTT import. For caption-quality checks (mandatory after every transcription), the cleaning JS, retry rules, and the OpenAI/Groq API import path, see [hyperframes/references/transcript-guide.md](..hyperframes/references/transcript-guide.md).
+Music with vocals often needs manual SRT/VTT correction. For mandatory
+caption-quality checks and import handling, see
+[hyperframes/references/transcript-guide.md](../hyperframes/references/transcript-guide.md).
 
 ### Output Shape
 
@@ -9893,7 +10550,7 @@ npx hyperframes remove-background subject.mp4 -o transparent.webm --device cpu
 npx hyperframes remove-background --info                           # detected providers
 ```
 
-Uses `u2net_human_seg` (MIT). First run downloads ~168 MB of weights to `~/.cachehyperframes/background-removal/models/`.
+Uses `u2net_human_seg` (MIT). First run downloads ~168 MB of weights to `~/.cache/hyperframes/background-removal/models/`.
 
 ### Layer separation (`--background-output`)
 
@@ -10015,11 +10672,22 @@ Then GSAP-flip the wrapper opacity at the cut: `tl.set(cutoutWrap, { opacity: 1 
 When there's no pre-recorded voiceover, generate one and transcribe it back to get word-level timestamps for captions:
 
 ```bash
-npx hyperframes tts script.txt --voice af_heart --output narration.wav
-npx hyperframes transcribe narration.wav   # → transcript.json
+voice-reply --voice-gender female --file script.txt --out narration.mp3
+# or: voice-reply --voice-gender male --file script.txt --out narration.mp3
+python-tools-python \
+  "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_preferred.py" \
+  narration.mp3 --out narration.srt --raw-json narration.groq.json \
+  --allow-cloud --language auto --traditional
+if [ -f narration.groq.json ]; then
+  npx hyperframes transcribe narration.groq.json
+else
+  npx hyperframes transcribe narration.srt
+fi
 ```
 
-Whisper extracts precise word boundaries from the generated audio, so caption timing matches delivery without hand-tuning.
+Groq word timestamps provide the most precise caption timing. When Groq is
+unavailable, the shared route preserves the faster-whisper fallback instead of
+silently switching to HyperFrames' local model.
 AGENT_LAZYPACK_HYPERFRAMES_MEDIA_SKILL_MD_0E95F5A366
 
 test -f "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md" && echo "hyperframes-media installed for Codex, Claude, and AntiGravity"
@@ -10801,6 +11469,16 @@ Read [`references/api-map.md`](references/api-map.md) — the index of every Rem
 | `@remotion/google-fonts/<Family>`, `Font.loadFont`, `@font-face`          | [`fonts.md`](references/fonts.md)             |
 
 Don't load all of them — load only what the specific source needs.
+
+Also invoke `video-tool-evaluation` and create `TOOL_EVALUATION.md` beside the
+translation output. Assess every shared route before generating HTML. For a
+source migration, many creation, stock, speech, and processing routes will be
+`not-needed`; record why they would change fidelity or add no value instead of
+omitting them. Select `translate-remotion`, the required HyperFrames/motion
+adapters, matched media/audio routes, and `verify-remotion-ssim` only when the
+source actually requires them. Run
+`video-tool-evaluation/scripts/validate_tool_evaluation.py` and do not continue
+to Step 3 until it passes.
 
 ### Step 3: Generate the HF composition
 
@@ -16261,7 +16939,7 @@ Users say things like:
 
 The workflow has 7 steps. Each produces an artifact that gates the next. By default it's collaborative — gates marked 💬 stop and ask the user. If the user signals autonomous mode ("decide for me", "surprise me"), 💬 user-preference gates are skipped; see step-2-brief.md for how that propagates.
 
-**Autonomous mode is NOT "skip all gates."** Auto mode covers user-preference questions (TTS provider, voice, color emphasis, beat count, music yes/no, captions yes/no — where the agent decides on the user's behalf). It does NOT cover quality-verification gates. The following remain non-skippable in auto mode:
+**Autonomous mode is NOT "skip all gates."** Auto mode covers user-preference questions (voice, color emphasis, beat count, music yes/no, captions yes/no — where the agent decides on the user's behalf). It does NOT cover quality-verification gates. The following remain non-skippable in auto mode:
 
 - Asset Audit (Step 3) — viewing contact sheets and justifying USE/SKIP for each asset
 - Per-beat HTML read (Step 5) — structured evidence block per beat
@@ -16300,7 +16978,17 @@ Write DESIGN.md — a brand cheat sheet covering the visual identity: colors, ty
 
 Align with the user on **what the video must communicate** before talking visuals or assets. Parse the user's prompt — they probably already gave you the video type and style. Ask only what's missing: the ONE thing this video must say, the narrative arc, and the audience.
 
-**Gate:** Video type, duration, format, and — critically — the message and narrative arc are locked. Without those, Step 3 can't write a concept-first storyboard.
+Once those decisions are known, invoke `video-tool-evaluation`, create
+`TOOL_EVALUATION.md` beside the planned project artifacts, assess every shared
+route (including Pexels, website capture, speech, animation/render adapters,
+FFmpeg, captions, verification, and explicit exclusions), and run the shared
+validator. The captured site does not automatically authorize stock downloads,
+cloud uploads, paid generation, or vertical reframing.
+
+**Gate:** Video type, duration, format, message, and narrative arc are locked,
+and `TOOL_EVALUATION.md` passes
+`video-tool-evaluation/scripts/validate_tool_evaluation.py`. Without those,
+Step 3 can't write a concept-first storyboard.
 
 ---
 
@@ -16310,7 +16998,8 @@ Align with the user on **what the video must communicate** before talking visual
 
 Write the storyboard concept-first: message → narrative arc → beats that serve the arc → techniques per beat → brand accents pass at the end. Then write the narration script to match. Present both to the user with a beat-by-beat summary. Iterate until they approve.
 
-**Gate:** `STORYBOARD.md` + `SCRIPT.md` exist AND the user has approved the plan.
+**Gate:** `STORYBOARD.md` + `SCRIPT.md` + validated `TOOL_EVALUATION.md` exist
+AND the user has approved the plan.
 
 ---
 
@@ -16318,9 +17007,17 @@ Write the storyboard concept-first: message → narrative arc → beats that ser
 
 **Read:** [references/step-4-vo.md](references/step-4-vo.md)
 
-If Step 2 said no narration — ask about background music, then skip to Step 5. Otherwise: ask the user which TTS provider (HeyGen TTS, ElevenLabs, or Kokoro), generate audio, transcribe, map timestamps to beats. Then ask about captions.
+If Step 2 said no narration — ask about background music, then skip to Step 5.
+Otherwise, resolve the female/male voice gate first. Female uses Anna Su →
+HsiaoChen → macOS `say`; male skips ElevenLabs and uses YunJhe → macOS `say`.
+Then generate audio, transcribe, map timestamps to beats, and ask about
+captions.
 
-**Gate:** Either (a) no narration was requested and storyboard has manual beat timings, or (b) `narration.wav` + `transcript.json` exist and beat timings updated with real durations.
+Transcription uses the shared formal order: Groq → faster-whisper →
+MacWhisper. whisper.cpp is only for an explicitly requested quick preview;
+SenseVoice is supplementary.
+
+**Gate:** Either (a) no narration was requested and storyboard has manual beat timings, or (b) `narration.mp3` or `narration.wav` plus `transcript.json` exist and beat timings are updated with real durations.
 
 ---
 
@@ -16378,7 +17075,7 @@ Beat count is not in this table intentionally — it should come from the storyb
 | [step-2-brief.md](references/step-2-brief.md)                                      | Step 2 — align on message, narrative arc, audience with user                                                                                   |
 | [capabilities.md](references/capabilities.md)                                      | Steps 2 & 5 — full inventory of what HyperFrames can do (24 sections). Scan the TOC during the brief, deep-dive specific sections during build |
 | [step-3-storyboard.md](references/step-3-storyboard.md)                            | Step 3 — storyboard + script (combined) with user review gate                                                                                  |
-| [step-4-vo.md](references/step-4-vo.md)                                            | Step 4 — TTS provider choice, generation, timing                                                                                               |
+| [step-4-vo.md](references/step-4-vo.md)                                            | Step 4 — fixed TTS fallback route, generation, timing                                                                                          |
 | [step-5-build.md](references/step-5-build.md)                                      | Step 5 — build index.html + compositions                                                                                                       |
 | [step-6-validate.md](references/step-6-validate.md)                                | Step 6 — lint, validate, snapshots (scaled to video length), preview                                                                           |
 | [techniques.md](..hyperframes/references/techniques.md)                           | Steps 3 & 5 — 13 primitive animation techniques with code patterns (adapt, don't copy-paste)                                                   |
@@ -39827,7 +40524,7 @@ For implementation patterns (working code), see `techniques.md`. This file is th
 | 8   | **HTML-in-canvas**                                   | Live DOM as GPU texture (drawElementImage), Three.js planes, WebGL shaders on HTML, 7 VFX blocks (iPhone/MacBook device, liquid, glass, magnetic, portal, shatter, text cursor)                                                 |
 | 9   | **Three.js / WebGL custom scenes**                   | Full 3D: AnimationMixer, custom GLSL, post-processing, GLTF models, lights, cameras, materials — all deterministic via hf-seek                                                                                                  |
 | 10  | **SVG / canvas / variable fonts**                    | SVG path drawing, Canvas 2D procedural art, CSS 3D card, per-word type, variable font axes, character typing, velocity-matched cuts, MotionPath                                                                                 |
-| 11  | **Media: video, audio, TTS**                         | Video compositing + frame injection, audio mixer (multi-track), Kokoro TTS (54 voices, 9 languages), Whisper/Groq/OpenAI transcription, background removal (u2net)                                                              |
+| 11  | **Media: video, audio, TTS**                         | Video compositing + frame injection, audio mixer (multi-track), gender-gated Anna Su/HsiaoChen or YunJhe narration route, Groq-first Whisper transcription with faster-whisper fallback, background removal (u2net)                   |
 | 12  | **Registry (51 blocks + 4 components + 8 examples)** | Social overlays (8), showcases (5), data viz (2), logo branding (1), 3D/VFX (7), shader transitions (14), transition galleries (13), components (grain, shimmer, pixelate, texture-mask), 8 starter examples                    |
 | 13  | **CLI (25 commands)**                                | init, add, catalog, play, preview, publish, render (MP4/WebM/MOV/PNG, HDR, GPU, parallel), lint, validate, inspect, snapshot, capture, tts, transcribe, remove-background, doctor, and more                                     |
 | 14  | **Linter (60+ rules)**                               | Core, media, GSAP, captions, composition, adapters, textures, fonts — plus async URL checks                                                                                                                                     |
@@ -40028,13 +40725,13 @@ Documented in skills/hyperframes/references/transitions/ across 14 category file
 
 | Source                                     | Format   | Granularity       |
 | ------------------------------------------ | -------- | ----------------- |
-| hyperframes transcribe (local whisper.cpp) | JSON     | Word-level        |
+| Preferred STT router (Groq → faster-whisper → MacWhisper) | Groq JSON or fallback SRT | Word-level on Groq; phrase-level fallback |
 | OpenAI verbose_json                        | JSON     | Word-level        |
 | Groq verbose_json                          | JSON     | Word-level        |
 | Manually authored                          | JSON     | Word-level        |
 | SRT                                        | text     | Phrase-level only |
 | VTT                                        | text     | Phrase-level only |
-| hyperframes tts → transcribe chain         | wav→json | Word-level        |
+| voice-reply → hyperframes transcribe chain | audio→json | Word-level      |
 
 ### Positioning helpers
 
@@ -40165,22 +40862,25 @@ window.addEventListener("hf-seek", (e) => {
 - Master audioGain from EngineConfig
 - Output: AAC 192kbps
 
-### TTS (Kokoro-82M, local)
+### TTS (shared `voice-reply` route)
 
-- 54 bundled voices with prefixes: `a` American EN, `b` British EN, `e` Spanish, `f` French, `h` Hindi, `i` Italian, `j` Japanese, `p` Brazilian Portuguese, `z` Mandarin
-- Default voice: `af_heart`
-- Speed: 0.1–3.0 (default 1.0)
-- Languages: en-us, en-gb, es, fr-fr, hi, it, pt-br, ja, zh (non-EN needs system espeak-ng)
-- Output: WAV; no pitch/volume CLI flags
-- No API key required
+- First: ElevenLabs voice `Anna Su - Casual, Friendly and Bright`
+  (`9lHjugDhwqoxA5MhX0az`), model `eleven_multilingual_v2`
+- Ask for female or male before TTS unless the request already specifies it.
+- Female: ElevenLabs Anna Su → Edge-TTS `zh-TW-HsiaoChenNeural` → macOS `say`
+- Male: skip ElevenLabs → Edge-TTS `zh-TW-YunJheNeural` → macOS `say`
+- Final offline fallback: macOS `say`, voice `Meijia`
+- Output: MP3 by default; FFmpeg converts to another requested extension
+- Sensitive content: use `voice-reply --engine say`
 
 ### Transcription
 
-- Whisper.cpp models: tiny, base, small, medium, large-v3, small.en, medium.en (default small)
+- whisper.cpp is retained only for explicitly requested fast preview; its
+  upstream model list is not the formal STT default.
 - Groq API: whisper-large-v3 with word granularities
-- OpenAI API: whisper-1 verbose_json
 - Imports: SRT, VTT, JSON formats
-- Quality gates: music-token detection, garbage cleaning, retry with medium.en
+- Quality gates: music-token detection, garbage cleaning, then
+  faster-whisper → MacWhisper cross-check
 
 ### Background removal
 
@@ -40244,8 +40944,8 @@ Install: `npx hyperframes add <name>` for blocks/components, `hyperframes init <
 | benchmark         | 5 preset configs × N runs (--runs 3)                                                                                                                                                                                                                                                                                     |
 | browser           | Manage Chrome (ensure/path/clear)                                                                                                                                                                                                                                                                                        |
 | remove-background | u2net + FFmpeg → transparent video                                                                                                                                                                                                                                                                                       |
-| transcribe        | whisper.cpp or import SRT/VTT/JSON                                                                                                                                                                                                                                                                                       |
-| tts               | Kokoro-82M (--voice, --speed, --lang, --list)                                                                                                                                                                                                                                                                            |
+| transcribe        | Generate with the shared Groq-first router, then import Groq JSON or fallback SRT; whisper.cpp only for explicit preview                                                                                                                                                                                                  |
+| tts               | Upstream command is not used by Arry's workflow; use the shared `voice-reply` route                                                                                                                                                                                                                                      |
 | docs              | Print bundled markdown topics (data-attributes, examples, rendering, gsap, troubleshooting, compositions)                                                                                                                                                                                                                |
 | doctor            | Environment checklist (Node, CPU, memory, disk, FFmpeg, FFprobe, Chrome, Docker)                                                                                                                                                                                                                                         |
 | upgrade           | npm update check + optional global install                                                                                                                                                                                                                                                                               |
@@ -41009,6 +41709,12 @@ Not every video needs a voiceover. Ask:
 - **No narration, visual-only** — music/SFX only, the visuals tell the story (brand reels, social ads, music-driven pieces)
 - **Minimal narration** — just a hook sentence or tagline, rest is visual (short social ads, teasers)
 
+If narration or minimal narration is selected and voice gender was not already
+specified, immediately ask:
+
+- **Female voice** — Anna Su first, then HsiaoChen fallback
+- **Male voice** — skip ElevenLabs and use YunJhe
+
 This decision changes the pipeline:
 
 - **With narration:** Step 3 includes a full script. Step 4 generates TTS, transcribes, maps timestamps to beats.
@@ -41032,7 +41738,14 @@ When the user gives no creative direction, default to what the brand's visual id
 
 With that minimum in hand, still write an ambitious storyboard. "Surprise me" means "impress me," not "play it safe." Go bold.
 
-**Autonomous mode propagates — for user-preference gates only.** When the user signals "surprise me" / "decide for me" / "just build it" here at Step 2, that signal kills downstream user-preference 💬 gates: Step 3's storyboard approval, Step 4's TTS provider choice, music yes/no, captions yes/no. Make those creative decisions yourself and present the finished video at the end. Do not ask four separate questions across four separate steps. Read the room once and commit.
+**Autonomous mode propagates — for user-preference gates only.** When the user
+signals "surprise me" / "decide for me" / "just build it" here at Step 2,
+that signal kills downstream user-preference 💬 gates: Step 3's storyboard
+approval, music yes/no, and captions yes/no. Voice gender remains a required
+gate unless the same request explicitly delegates the female/male choice.
+Provider choice is not asked: the selected gender determines the fixed route.
+Make the remaining creative decisions yourself and present the finished video
+at the end.
 
 **Auto mode does NOT skip quality-verification gates.** These run regardless and must produce evidence in your final summary:
 
@@ -41199,7 +41912,7 @@ Every STORYBOARD.md starts with global settings:
 
 ```markdown
 **Format:** 1920×1080
-**Audio:** [TTS provider] voiceover + underscore + SFX
+**Audio:** female uses Anna Su → HsiaoChen → macOS `say`; male uses YunJhe → macOS `say`; then underscore + SFX
 **VO direction:** [voice character — e.g., "mid-age male, calm confident delivery,
 Apple keynote register — economy of words, silence between sentences is a feature"]
 **Style basis:** DESIGN.md (brand colors, fonts, components from the captured site)
@@ -41532,7 +42245,7 @@ project/
 ├── SCRIPT.md                     narration text (from Step 3)
 ├── STORYBOARD.md                 THIS FILE — creative north star
 ├── transcript.json               word-level timestamps (from Step 4)
-├── narration.wav                 TTS audio (from Step 4)
+├── narration.mp3                 TTS audio (from Step 4; `.wav` is also valid)
 ├── capture/                      captured website data (from Step 0)
 │   ├── screenshots/
 │   ├── assets/
@@ -41676,232 +42389,181 @@ cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/references/step-4-vo.md" <<'A
 
 ## If Step 2 said "no narration"
 
-Skip the TTS sections below. The storyboard already has beat durations planned based on pacing and rhythm — those become `data-start` and `data-duration` values directly in Step 5.
+Skip TTS. The storyboard's planned beat durations become `data-start` and
+`data-duration` values directly in Step 5.
 
-**Background music:** Ask the user before moving to Step 5:
+Ask about background music before moving on:
 
-> "Do you have a music track for this video? If not, I can suggest where to find one:
->
-> - **Artlist.io** or **Musicbed** — licensed music for commercial use
-> - **Uppbeat.io** or **Pixabay Music** — free tracks with attribution
-> - **Freesound.org** — free samples and loops
->
-> Or share a reference track ('something like this') and I can find something similar."
+> Do you have a music track for this video? If not, I can suggest a licensed
+> source such as Artlist or Musicbed, or a free source such as Uppbeat or
+> Pixabay Music.
 
-If the user provides a track: note the file path and BPM in the storyboard for Step 5 to wire into `index.html`. If they skip music entirely, the video uses SFX only — confirm that's intentional.
+If the user provides a track, record its path and BPM in the storyboard. If
+they skip music, confirm that an SFX-only or silent bed is intentional.
 
-Move to Step 5.
+## Voice-Gender Gate And Fixed Provider Route
 
----
+Do not ask the user to choose a provider. Before TTS, ask whether the
+narration should use a female or male voice unless Step 2 already captured it.
+Do not generate narration while gender is unspecified.
 
-## Generate a test clip before full narration — calibrate timing first
+- Female: ElevenLabs Anna Su → Edge-TTS HsiaoChen → macOS `say`.
+- Male: skip ElevenLabs → Edge-TTS YunJhe → macOS `say`.
 
-Generate a 2-sentence test clip NOW using the script's opening lines. Measure the actual duration. Kokoro compresses scripts by ~40% (35s planned → 19s actual) and HeyGen runs faster than expected. If you discover the audio is 40% shorter than expected, you'll need to revise the storyboard beat timings before investing time in full narration generation.
+The user's standing preference authorizes the selected conditional route for
+ordinary, non-sensitive narration. Do not upload secrets, confidential work,
+private identifiers, or other sensitive text; use `--engine say` for that
+material.
 
-**Do this before committing to beat count and durations:**
+The ElevenLabs key is read from `ELEVENLABS_API_KEY` or
+`~/.codex/secrets/elevenlabs_api_key`. Never put a key in the project, a
+`.env` file, a prompt, or output logs.
 
-```bash
-# Quick Kokoro test (2 sentences):
-npx hyperframes tts "First sentence. Second sentence." --voice af_nova --output /tmp/test-tts.wav
-# Measure: seconds ÷ words × total script words = estimated full audio length
-```
+Defaults:
 
-If the estimate puts your video at ±15% of the planned duration, proceed. If it's more than 15% off, recalibrate the script length first:
+- ElevenLabs voice: `Anna Su - Casual, Friendly and Bright`
+- ElevenLabs voice ID: `9lHjugDhwqoxA5MhX0az`
+- ElevenLabs model: `eleven_multilingual_v2`
+- Edge-TTS female profile: `zh-TW-HsiaoChenNeural`
+- Edge-TTS male profile: `zh-TW-YunJheNeural`
+- macOS `say` voice: `Meijia`
 
-- **Audio TOO SHORT** (more than 15% under planned duration) → add strategic pauses. In `narration.txt`, insert blank lines between paragraphs (≈0.6s each) or `...` between sentences (≈0.4s each). Aim for the pauses to land at storyboard beat boundaries so the silence feels intentional, not dead air.
-- **Audio TOO LONG** (more than 15% over planned duration) → identify the beat in your storyboard with the highest words-per-second density. Cut one supporting sentence from THAT beat's lines — preserve the lead sentence (the one that names the beat's idea). Re-measure with another test clip before committing to full generation.
-- **Audio matches plan but beat boundaries drift** → adjust the storyboard durations to match the actual narration, not the other way around. The audio is the ground truth once narration is generated.
+## Calibrate with a Test Clip
 
-The script formula assumes constant words-per-second, but punctuation, dramatic pauses, and silence cues all stretch real audio. Always trust a measured test clip over the formula.
-
-## Background music
-
-**Always ask about background music** — even when narration is present:
-
-> "Do you want background music under the narration? (Artlist.io, Musicbed for licensed; Uppbeat/Pixabay for free; or share a reference track). Even a subtle ambient underscore makes pauses between sentences feel intentional rather than empty."
-
-If they want music, note the track in the storyboard for Step 5 to wire into `index.html`.
-
-## TTS Provider
-
-Ask the user which voice provider they'd like:
-
-> **Which voice provider would you like to use for narration?**
->
-> 1. **HeyGen TTS** — Good quality voices, and it returns word-level timestamps automatically (saves a separate transcription step). Requires HeyGen API key.
-> 2. **ElevenLabs** — Large voice library, very natural output. Requires ElevenLabs API key. Does not return word timestamps — you'll transcribe separately.
-> 3. **Kokoro** (Free) — Runs locally, no API key needed. Decent quality but more robotic than the others. Good for drafts or budget runs.
-
-If the user picks ElevenLabs or HeyGen and doesn't have a key set up yet, help them:
-
-- **ElevenLabs:** "Add `ELEVENLABS_API_KEY=your-key` to a `.env` file in the project root, or just paste it here and I'll set it up."
-- **HeyGen:** "Add `HEYGEN_API_KEY=your-key` to a `.env` file, or paste it here."
-
-Don't judge or critique if the user pastes a key directly in chat — just use it and move on.
-
-## Audition voices
-
-After the provider is selected, audition at least 2 voices with the first sentence of SCRIPT.md.
-
-**ElevenLabs:**
-
-- If the ElevenLabs MCP is available: use `mcp__elevenlabs__search_voices` to browse, `mcp__elevenlabs__text_to_speech` to generate.
-- If no MCP: call the REST API directly:
-
-  ```bash
-  # List voices
-  curl -s "https://api.elevenlabs.io/v1/voices" \
-    -H "xi-api-key: $ELEVENLABS_API_KEY" | jq '.voices[:5] | .[].name'
-
-  # Generate speech (replace VOICE_ID with chosen voice)
-  curl -s -X POST "https://api.elevenlabs.io/v1/text-to-speech/VOICE_ID" \
-    -H "xi-api-key: $ELEVENLABS_API_KEY" \
-    -H "Content-Type: application/json" \
-    -d '{"text":"First sentence of your script","model_id":"eleven_multilingual_v2"}' \
-    --output narration.mp3
-  ```
-
-- Does not return word timestamps — transcribe separately after generating.
-
-**HeyGen TTS:**
-
-- If the HeyGen MCP is available: use the TTS tool directly.
-- If no MCP: use the v3 API (current; v1/v2 deprecated, supported until Oct 2026):
-
-  ```bash
-  # List voices — response shape: { "data": [...], "has_more": bool }
-  # data is a direct list (NOT data.voices — that was v2)
-  curl -s "https://api.heygen.com/v3/voices?engine=starfish&type=public&limit=20" \
-    -H "x-api-key: $HEYGEN_API_KEY" | python3 -c \
-    "import json,sys; v=json.load(sys.stdin)['data']; [print(x['voice_id'], x['name'], x['language']) for x in v[:10]]"
-
-  # Generate audio — response: { "data": { "audio_url": ..., "word_timestamps": [...] } }
-  curl -s -X POST "https://api.heygen.com/v3/voices/speech" \
-    -H "x-api-key: $HEYGEN_API_KEY" \
-    -H "Content-Type: application/json" \
-    -d '{"text":"Your script here","voice_id":"VOICE_ID","speed":1.0}' \
-    | python3 -c "
-  import json,sys
-  r=json.load(sys.stdin)
-  d=r['data']
-  print(d['audio_url'])
-  open('transcript_raw.json','w').write(json.dumps(d.get('word_timestamps',[]),indent=2))
-  "
-
-  # Then download the audio
-  curl -sL "AUDIO_URL_FROM_ABOVE" --output narration.mp3
-  ```
-
-- Returns word-level timestamps directly in the response — no separate transcription step needed.
-
-**Kokoro (free, local):**
+Before generating the full narration, save the exact spoken text as
+`narration.txt`, synthesize the opening two sentences, and measure the real
+duration:
 
 ```bash
-npx hyperframes tts SCRIPT.md --voice af_nova --output narration.wav
+head -n 2 narration.txt > /tmp/narration-test.txt
+voice-reply --voice-gender female \
+  --file /tmp/narration-test.txt --out /tmp/narration-test.mp3
+ffprobe -v error -show_entries format=duration \
+  -of default=noprint_wrappers=1:nokey=1 /tmp/narration-test.mp3
 ```
 
-No API key, no MCP needed. Runs locally. Use `--list` to see all 54 available voices.
+Compare estimated full duration with the storyboard:
 
-Pick the voice that sounds most natural and conversational. Listen for pacing — does it breathe between sentences? Does it sound like a person or a robot?
+- More than 15% short: add intentional pauses or restore useful supporting
+  copy.
+- More than 15% long: trim the densest beat without removing its main idea.
+- Beat boundaries drift: update the storyboard to match the generated audio.
 
-## Script length check
+Always trust measured audio over a words-per-second estimate.
 
-Before generating, verify the script makes sense for the video. Word count depends entirely on the creative direction. The storyboard's pacing and style determine how much narration the video needs.
+## Background Music
 
-The key check: are there stretches where NOTHING is happening — no narration AND no compelling visual movement? Those are dead spots that lose the viewer. Every second needs either spoken words or strong visual energy carrying it.
+Even when narration is present, ask whether the user wants background music.
+Record the approved track, license/source, and BPM in `STORYBOARD.md`.
 
-## Generate full narration
-
-Generate the full script as `narration.wav` (or `.mp3`) in the project directory.
-
-**If any command hangs for more than 60 seconds — don't just wait.** The user is sitting there watching you do nothing. Escalation order:
-
-1. **Try again** — kill the process, run the same command again (transient failures are common)
-2. **Try different flags** — smaller model (`--model tiny.en`), different voice, shorter test sentence first
-3. **Try a different tool for the same task** — if `hyperframes transcribe` hangs, try `whisper-cli` directly, or Groq API (`npx hyperframes transcribe --provider groq`), or OpenAI API
-4. **Switch provider entirely** — if ElevenLabs is down, try HeyGen or Kokoro. If Kokoro hangs, try ElevenLabs.
-
-Never sit idle for 10 minutes hoping a stuck process will finish.
-
-**Kokoro pronunciation issues:** Kokoro mispronounces product names and tech terms. Always apply substitutions before generating. Known problems and fixes:
-
-- `API` → `A P I` (spell it out)
-- `UI` → `U I`, `SaaS` → `sass`, `DevOps` → `dev ops`
-- Product names with unusual spelling: test the first sentence first and listen. Common failure: "Vercel" → "versatile", "WorkOS" → "work O S", "One API" → "Wanna PI"
-- If a name sounds wrong: write it phonetically in `narration.txt` (e.g., `Vercel` → `Ver-sell`, `Supabase` → `Soopa-base`)
-- Always generate a short test clip with the first 2 sentences before generating the full audio
-- **No SSML tags** — Kokoro reads them as literal text. `<break time="1s"/>` is spoken as "break time equals one slash." Use blank lines or `...` for pauses in `narration.txt`
-
-For ElevenLabs and HeyGen TTS, substitutions are usually unnecessary — they handle product names correctly.
-
-**Also save the exact spoken text** — with pronunciation substitutions applied (e.g., `API` → `A P I`, `$2T` → `two trillion` and etc.) — as `narration.txt` in the same directory. This is the string passed to TTS, distinct from `SCRIPT.md` which is the human-readable creative doc. Having `narration.txt` makes it trivial to regenerate the audio later with a different voice without re-deriving the substitutions. Name it exactly `narration.txt`.
-
-## Transcribe for word-level timestamps
-
-**If you used HeyGen v3 TTS:** word timestamps were returned in the generate call. Normalize the format before saving — HeyGen v3 uses `word` but the pipeline expects `text`:
-
-```python
-import json
-raw = json.load(open('transcript_raw.json'))
-normalized = [{"text": w["word"], "start": w["start"], "end": w["end"]} for w in raw]
-json.dump(normalized, open('transcript.json', 'w'), indent=2)
-```
-
-No separate transcription step needed.
-
-**If you used ElevenLabs or Kokoro:**
+## Generate Full Narration
 
 ```bash
-npx hyperframes transcribe narration.wav
+voice-reply \
+  --voice-gender female \
+  --file narration.txt \
+  --out narration.mp3
 ```
 
-Produces `transcript.json` with `[{ text, start, end }]` for every word. These timestamps are the source of truth for all beat durations.
+Use `--voice-gender male` instead for the male route. The command reports the
+engine actually used. Record that mode:
 
-## Map timestamps to beats
+- `elevenlabs-file`
+- `edge-file`
+- `say`
 
-Go through STORYBOARD.md beat by beat. For each beat:
+If narration must remain offline:
 
-1. Find the first word of that beat's VO cue in `transcript.json`
-2. Find the last word of that beat's VO cue
-3. Set `beat.start = firstWord.start`, `beat.end = lastWord.end`
-4. Add 0.3-0.5s padding at the end for visual breathing room
-
-Update STORYBOARD.md with real durations. Replace estimated times (e.g., "0:00-0:05") with actual timestamps as precise as possible (e.g., "0.00-3.21s").
-
-Beat boundaries land on word onsets — hard cuts to the VO.
-
-## Timing reconciliation — required before Step 5
-
-After mapping all beats, compare real total audio duration against the storyboard's planned duration:
-
-```
-real_total = last_word.end + cta_hold (typically 2–3s)
-planned_total = sum of all beat planned durations
-delta = |real_total - planned_total|
+```bash
+voice-reply --engine say --file narration.txt --out narration.wav
 ```
 
-**If delta > 15% of planned total — do not proceed to Step 5 without resolving it.** Common causes and fixes:
+On the female route, if ElevenLabs fails, do not manually retry it in a loop;
+the command automatically tries HsiaoChen and then macOS `say`. The male route
+does not call ElevenLabs. If all selected-route engines fail, report the last
+concise error and stop before Step 5.
 
-- **Audio shorter than planned (most common with Kokoro):** Kokoro generates compressed speech with minimal pauses. Proportionally scale all non-CTA beat durations down to match the real audio. Example: planned 30s, audio 19s — multiply each beat duration by 19/30 (excluding the CTA hold). Update STORYBOARD.md.
-- **Audio much longer than planned (>30% over):** The script was too long for the intended duration. Trim the script (remove one beat's VO), regenerate audio, re-transcribe.
-- **CTA beat timing:** The CTA beat should hold for 2–3 seconds after the last spoken word — not extend to fill empty time. `cta_start = last_word.end + 0.3s`, `cta_duration = 2.5s`. Hard cap. Dead silence after the CTA hold loses the viewer.
+For a large paid batch, estimate the text volume and reconfirm cost before
+generation.
 
-**Always tell the user** if you adjusted durations significantly from the storyboard plan. They approved a specific beat structure — if it changed, they need to know.
+## Script and Pronunciation Check
+
+`SCRIPT.md` is the creative script. `narration.txt` is the exact string sent to
+TTS. Keep both.
+
+Test product names, acronyms, numbers, and mixed Chinese/English phrases in the
+opening clip. If pronunciation is wrong, make a minimal phonetic substitution
+in `narration.txt`, not `SCRIPT.md`, then regenerate the test.
+
+## Transcribe for Word-Level Timestamps
+
+Narration does not provide the normalized timing format needed by the
+composition, so transcribe the generated file:
+
+```bash
+python-tools-python \
+  "{{SYNC_ROOT}}/skills/video-processing-automation/scripts/transcribe_preferred.py" \
+  narration.mp3 \
+  --out narration.srt \
+  --raw-json narration.groq.json \
+  --allow-cloud --language auto --traditional
+if [ -f narration.groq.json ]; then
+  npx hyperframes transcribe narration.groq.json
+else
+  npx hyperframes transcribe narration.srt
+fi
+```
+
+This produces `transcript.json` with word objects:
+
+```json
+[
+  { "text": "Hello", "start": 0.0, "end": 0.5 }
+]
+```
+
+This is the approved priority: Groq Whisper first, faster-whisper fallback,
+MacWhisper last, and whisper.cpp only for an explicitly requested quick
+preview. SenseVoice is supplementary only. Do not replace this command with a
+direct raw-audio HyperFrames transcription.
+
+## Map Timestamps to Beats
+
+For each beat in `STORYBOARD.md`:
+
+1. Find the first spoken word in `transcript.json`.
+2. Find the last spoken word.
+3. Set the beat start and end from those timestamps.
+4. Add 0.3-0.5 seconds after the last word when a visual breath is needed.
+
+After mapping, compare:
+
+```text
+real_total = last_word.end + CTA hold
+planned_total = sum of planned beat durations
+```
+
+If the difference exceeds 15%, resolve it before Step 5. A CTA normally holds
+2-3 seconds after the final spoken word; do not stretch it just to fill dead
+time. Tell the user when approved timings change significantly.
 
 ## Captions
 
-After the narration is generated and transcribed, ask the user:
+After narration and timing are ready, ask whether captions are wanted:
 
-> **Would you like captions on the video?**
->
-> - **Yes** — per-word captions synced to the narration. Great for social media (most viewers watch on mute) and accessibility.
-> - **No** — narration audio only, no text overlay.
+- Yes: build a separate `compositions/captions.html` driven by
+  `transcript.json`.
+- No: keep narration audio only.
 
-If yes, captions are built as a separate composition (`compositions/captions.html`) in Step 5. The `transcript.json` drives the timing — each word appears/highlights as it's spoken. Read [the captions reference](../..hyperframes/references/captions.md) for styling options (scale-pop, typewriter, fade+slide, etc.) and positioning rules.
+## Gate Before Step 5
 
-## Save timing data for Step 5
+Continue only when all applicable items exist:
 
-Record the final beat timings (start, duration) so Step 5 (Build) can use them when building `index.html`. The storyboard now has real timestamps — these become `data-start` and `data-duration` values on each scene slot when the root composition is assembled in Step 5.
+- `narration.txt`
+- `narration.mp3` or `narration.wav`
+- `transcript.json`
+- `STORYBOARD.md` updated with measured beat timings
+- background music and caption choices recorded
 AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_REFERENCES_STEP_4_VO_MD_431063CBBB
 
 # website-to-hyperframes/references/step-5-build.md

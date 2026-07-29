@@ -2,22 +2,25 @@
 
 ## Current state
 
-- LazyPack Item 39 `Coach Skill` 已完成，把 Life Coach（實際 Skill ID `future-coach`）、Voice Coach、Waki Brain、Productivity Coach 整理成單一私人新電腦安裝與驗證入口。
-- Public repo 只包含可攜式說明、安全 installer 與 verifier；私人身份、記憶、聲音課程、Waki 購課專案包與 Productivity Coach 課程 corpus 仍只存在私人 `codex_symlink`。
-- 安裝器重用 Item 16 chezmoi bootstrap，支援 dry-run、apply、verify-only 與明確授權的 chezmoi 安裝；沒有建立第五個會競爭觸發的 Coach Skill。
-- Codex、Claude、AntiGravity 共用同一個私人全域 skills 主版本；Productivity Coach 的 NotebookLM 維持選配。
+- 共用 `video-tool-evaluation` 已完成 53-route catalog、validator 與 16:9 talking-head 完整範例；影片規劃會評估所有 route，但只執行被選取或備援的工具。
+- `video-processing-automation`、`video-creation-automation`、`video-spec-builder`、HyperFrames 相關 Skills 與目前安裝的 plugin adapters 已接入同一個 `TOOL_EVALUATION.md` planning gate。
+- STT 固定為 Groq Whisper 優先、faster-whisper 正式備援、whisper.cpp 快速預覽、MacWhisper 最後選項；SenseVoice 只作補充分析。
+- TTS 先確認女聲或男聲；女聲為 ElevenLabs Anna Su → Edge HsiaoChen → macOS `say`，男聲跳過 ElevenLabs，使用 Edge YunJhe → macOS `say`；Kokoro 已排除。
+- LazyPack Items 26／27／29／30 都各自內嵌完整 `video-tool-evaluation`，Items 33／37 也保留獨立安裝；Item 34 補齊 FFmpeg Full、ImageMagick、Auto-Editor 與 provider packages。
+- TTS 比較音檔留在本機 `100_Todo/projects/tts-comparison-20260729/`，不納入 public repo。
 
 ## Next action
 
-- 在另一台電腦同步私人 `codex_symlink`、取得本 repo 後，先執行 Item 39 dry-run，再以 `--apply` 建立三 Agent 入口。
-- 四個私人 Skill 更新後只需重新執行 Item 39 `--verify-only`；不需要重建或公開私人 corpus。
+- 下次執行任何多步驟影片任務時，先由對應影片 Skill 產生並驗證 `TOOL_EVALUATION.md`，再進入剪輯、雲端上傳、旁白或 HyperFrames 實作。
+- 新電腦可只安裝所需的 Item 26、27、29 或 30；任一項都會帶入完整 evaluator，不要求同時安裝其他影片 LazyPack。
 
 ## Blockers
 
-- 無。新電腦仍需先完成私人雲端同步，並為各 Agent、NotebookLM、Chrome 或其他外部服務分別登入。
+- 無。ElevenLabs Anna Su 是否能由 API 生成仍受帳號方案與 credits 限制；不可用時會依設定自動切換 Edge HsiaoChen。
 
 ## Last verified
 
-- 2026-07-28，Codex App：Item 39 在隔離臨時 HOME 完成真實 apply；Codex、Claude、AntiGravity 入口與四個 Skill smoke tests 全數通過。
-- 2026-07-28，Codex App：Voice Coach 65 份筆記／索引、Waki Brain 13 個專案包、Productivity Coach 28 張編號單元卡與來源 freshness 驗證通過。
-- 2026-07-28，Codex App：相容性 audit 為 0 findings；公開路徑、secret signature、shell／Python syntax、Git diff 與 LazyPack／Obsidian 鏡像一致性檢查通過。
+- 2026-07-30，Codex App：12 個受影響的共用 Skills 通過 `quick_validate.py`；三 Agent compatibility audit 掃描 582 個檔案、0 findings。
+- 2026-07-30，Codex App：53/53 evaluator self-test、完整範例與缺項反向測試通過。
+- 2026-07-30，Codex App：LazyPack Items 26／27／29／30／33／37 均在隔離目錄完成獨立安裝與 Skill 驗證。
+- 2026-07-30，Codex App：共用 Python runtime imports、FFmpeg／ffprobe／Auto-Editor／ImageMagick、Whisper／SenseVoice／MacWhisper wrappers 與三 Agent bridge 驗證通過。

@@ -649,7 +649,9 @@ Default behavior:
 4. Keep secrets, OAuth, sessions, cookies, local state DBs, and full private config contents out of repos and public notes.
 5. Keep the deterministic chezmoi/bootstrap installer in this skill and LazyPack Item 16; project lifecycle behavior remains in Item 10.
 
-Read `references/global-settings-spec.md` for the converted policy, path map, voice reply boundary, and speech-input assumption boundary.
+Read `references/global-settings-spec.md` for the converted policy, path map,
+the shared STT/TTS provider order, voice-reply boundary, and speech-input
+assumption boundary.
 
 ## Three-Agent Portability Map
 
@@ -1428,10 +1430,29 @@ This reference adapts AI agent global-setting guides into the `cross-device-sync
 - Trigger voice reply only when explicitly requested: "用語音回答", "唸出來", "唸給我聽", "用語音講結論".
 - Spoken script should be 100-250 Chinese characters when possible.
 - Prefer conclusion and next action; keep details in text.
-- Default Traditional Chinese voice: `zh-TW-YunJheNeural`.
-- Other common Traditional Chinese Edge-TTS voices: `zh-TW-HsiaoChenNeural`, `zh-TW-HsiaoYuNeural`.
+- Ask for female or male before TTS unless the request already specifies it; do not synthesize while gender is unknown.
+- Female route: ElevenLabs Anna Su, then Edge-TTS HsiaoChen, then macOS `say`.
+- Male route: skip ElevenLabs, then Edge-TTS YunJhe, then macOS `say`.
+- Traditional Chinese female profile: `zh-TW-HsiaoChenNeural`.
+- Traditional Chinese male profile: `zh-TW-YunJheNeural`.
 - Edge-TTS is a cloud TTS service. Do not use it for sensitive text unless the user accepts that boundary.
 - Do not substitute voice cloning. Authorized voice cloning belongs to a dedicated skill such as VoxCPM2.
+
+## Speech-To-Text Rules
+
+- Formal transcription uses Groq Whisper `whisper-large-v3-turbo` first.
+- Missing or invalid credentials, API/network/quota/model/upload failure, or an
+  explicit local-only requirement immediately falls back to local
+  faster-whisper `large-v3-turbo`.
+- whisper.cpp is only for an explicitly requested fast preview.
+- SenseVoice is supplementary for Chinese/Cantonese cross-checks, language,
+  emotion, and sound-event tags; it is not the formal subtitle route.
+- MacWhisper is the final Whisper option and its timestamps must be validated.
+- Python `openai-whisper`, OpenAI Whisper API, HyperFrames' local transcription,
+  and other wrappers are not defaults. Use them only for an explicitly
+  requested comparison or an approved project-specific exception.
+- Use the shared preferred-route adapter for SRT/HyperFrames inputs and report
+  the actual engine plus any Groq fallback reason.
 
 ## Startup / Shutdown Sync
 

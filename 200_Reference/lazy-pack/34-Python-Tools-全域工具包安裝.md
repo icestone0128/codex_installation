@@ -14,7 +14,12 @@
 - PDF：`pypdf`、`PyMuPDF`、`pdfplumber`、`pdf2image`、`reportlab`、`fpdf2`、`ocrmypdf`
 - 圖片與圖表：`pillow`、`matplotlib`、`qrcode`
 - 轉檔與 AI 前處理：`markitdown[pdf,docx,pptx,xlsx]`
-- 影音輔助：`edge-tts`、`yt-dlp`、`youtube-transcript-api`
+- 影音輔助：`edge-tts`、`yt-dlp`、`youtube-transcript-api`、Groq SDK
+  `1.6.0`、ElevenLabs SDK `2.59.0`、OpenCC
+  `opencc-python-reimplemented 0.1.7`
+- 影片共用命令：官方 Auto-Editor `31.4.0` standalone、FFmpeg Full
+  `ffmpeg` / `ffprobe` wrappers；FFmpeg Full 含 `subtitles`、`ass`、
+  `drawtext` 與 libass
 - Windows Office 自動化項：`pywin32`。這是 Windows-only；安裝腳本只會在 Windows native bash (`MINGW` / `MSYS` / `CYGWIN`) 環境加入，不安裝到 macOS / Linux / WSL runtime。
 - 常用技能 runtime wrapper：`audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md`
 
@@ -85,11 +90,12 @@ Item 16 和 Item 34 的先後可互換：若先跑 Item 16，bridge 會先存在
 
 | Wrapper | 來源 | 新電腦如何重建 |
 | --- | --- | --- |
-| `python-tools-python`、`edge-tts`、`markitdown`、`ocrmypdf`、`yt-dlp` | Item 34 | 執行本 Item 安裝腳本 |
+| `python-tools-python`、`edge-tts`、`markitdown`、`ocrmypdf`、`yt-dlp`、`auto-editor`、FFmpeg Full `ffmpeg` / `ffprobe` | Item 34 | 執行本 Item 安裝腳本 |
 | `cli-hub` | Item 12 | 執行外部工具整合工作流內建 installer |
 | `doc-to-md`、`vlm-to-md` | Item 18 | 安裝 Document-to-Markdown skill 與 runtime |
 | `voxcpm2-python` | Item 32 | 安裝 VoxCPM2 Voice Cloner runtime |
-| `audio-to-md` | Item 33 | 安裝 Audio-to-Markdown runtime |
+| `audio-to-md`、`audio-to-md-python` | Item 33 + Item 34 | 先安裝 Audio-to-Markdown runtime，再由 Item 34 建立共用 runtime 入口 |
+| `whisper-cli`、`sensevoice-cli`、`macwhisper-cli` | Item 29 | 執行 Video Processing Automation 內建 optional video tools installer |
 | `taigi-teaching-agent` | Item 35 | 執行 Taigi Teaching Agent installer |
 | `voice-reply`、專用 `edge-tts` | Item 37 | 安裝 Voice Reply skill 與 runtime；可取代 Item 34 的通用 `edge-tts` wrapper，但仍使用同一共用入口 |
 
@@ -117,7 +123,8 @@ tesseract
 tesseract-lang
 ghostscript
 poppler
-ffmpeg
+ffmpeg-full
+imagemagick
 ```
 
 若只想安裝 Python venv，不動系統工具：
@@ -180,10 +187,11 @@ Python 套件之外，部分功能需要系統工具：
 | Tesseract + language data | `ocrmypdf` OCR，繁中需 `chi_tra` | `brew install tesseract tesseract-lang` |
 | Ghostscript / `gs` | `ocrmypdf` 產生 PDF/A 或處理部分 PDF 流程 | `brew install ghostscript` |
 | Poppler / `pdftoppm` | `pdf2image` PDF 轉圖 | `brew install poppler` |
-| ffmpeg | `yt-dlp` 下載合併影音 | `brew install ffmpeg` |
+| FFmpeg Full | `yt-dlp` 合併影音、libass 字幕、`drawtext`、影片混音 | `brew install ffmpeg-full` |
+| ImageMagick | 本機標題卡與圖片前處理 | `brew install imagemagick` |
 | Microsoft Word 或 LibreOffice | `docx2pdf` / Office 轉 PDF | 安裝 Office 或 LibreOffice |
 
-安裝腳本預設會在 macOS + Homebrew 上安裝 `tesseract`、`tesseract-lang`、`ghostscript`、`poppler` 與 `ffmpeg`。LibreOffice / Microsoft Office 屬大型 GUI app 或商業軟體，預設不安裝；需要 `soffice` 時用 `INSTALL_OFFICE_TOOLS=1` 跑腳本，或自行安裝 Microsoft Office / LibreOffice。安裝完系統工具後，通常要重開終端，並對 Codex、Claude、AntiGravity 分別開新對話或重載環境，PATH 才會刷新。
+安裝腳本預設會在 macOS + Homebrew 上安裝 `tesseract`、`tesseract-lang`、`ghostscript`、`poppler`、`ffmpeg-full` 與 `imagemagick`，並把 keg-only 的 FFmpeg Full 經共用 wrapper 放到三 Agent 的中立命令入口。LibreOffice / Microsoft Office 屬大型 GUI app 或商業軟體，預設不安裝；需要 `soffice` 時用 `INSTALL_OFFICE_TOOLS=1` 跑腳本，或自行安裝 Microsoft Office / LibreOffice。安裝完系統工具後，通常要重開終端，並對 Codex、Claude、AntiGravity 分別開新對話或重載環境，PATH 才會刷新。
 
 ### Tesseract 安裝與 Homebrew 權限修復
 
@@ -244,15 +252,28 @@ tesseract --list-langs | grep -E '^(chi_tra|chi_sim|eng|osd)$'
 - 建立 `{{CODEX_HOME}}/python-tools/teaching-file-tools/.venv`
 - 使用 `uv` 建立 Python 3.12.13 venv，避開系統 Python 3.14.6 的套件相容風險
 - 安裝來源工具包指定的核心 Python 套件與影音選用套件；`markitdown` 改用 `markitdown[pdf,docx,pptx,xlsx]`，確保 PDF / Word / PowerPoint / Excel 轉 Markdown 依賴完整
+- 影音共用工具更新為 Auto-Editor `31.4.0`、FFmpeg Full `8.1.2_1`、
+  ImageMagick `7.1.2-29`、Groq SDK `1.6.0`、ElevenLabs SDK `2.59.0`
+  與 OpenCC `0.1.7`
+- FFmpeg Full 已驗證 `subtitles`、`ass`、`drawtext`、`loudnorm` 與
+  `sidechaincompress`；一般 Homebrew FFmpeg 可並存，但三 Agent PATH
+  優先使用共用 Full wrapper
 - 安裝 `tesseract 5.5.2`、`tesseract-lang 4.1.0` 與 `ghostscript 10.07.1`，並確認 `poppler` / `pdftoppm`、`ffmpeg`、`soffice` 可用；語言包包含 `chi_tra`、`chi_sim`、`eng`、`osd`
 - 保留 `{{HOME}}/.cache/uv` 與 `{{HOME}}/.local/share/uv` 原位，不移入 `python-tools`
 - 將技能 runtime 整理為本機實體資料夾：`{{CODEX_HOME}}/audio-to-md`、`{{CODEX_HOME}}/voxcpm2-voice-cloner`、`{{CODEX_HOME}}/doc-to-md`、`{{CODEX_HOME}}/vlm-to-md`
 - 移除舊路徑 symlink，並把實際入口改成對應的 `{{CODEX_HOME}}/<skill-name>` 路徑
 - 建立 wrapper：
   - `python-tools-python`
+  - `auto-editor`
+  - `ffmpeg`
+  - `ffprobe`
   - `edge-tts`
   - `cli-hub`
   - `audio-to-md`
+  - `audio-to-md-python`
+  - `whisper-cli`
+  - `sensevoice-cli`
+  - `macwhisper-cli`
   - `voxcpm2-python`
   - `doc-to-md`
   - `vlm-to-md`
@@ -264,7 +285,7 @@ tesseract --list-langs | grep -E '^(chi_tra|chi_sim|eng|osd)$'
 
 ```text
 python-tools-python import 驗證：通過，包含 markitdown extras 的 `mammoth`
-verify_python_tools.py 系統工具驗證：tesseract / gs / pdftoppm / ffmpeg / soffice 全部 OK
+verify_python_tools.py 系統工具驗證：tesseract / gs / pdftoppm / FFmpeg Full / ffprobe / ImageMagick / soffice 全部 OK
 audio-to-md --help：通過
 doc-to-md --help：通過
 vlm-to-md --help：通過
@@ -289,6 +310,16 @@ VoxCPM2 doctor：通過，mps=True
 - 搬移或跨機同步 `.venv` 會受到作業系統、CPU、Python ABI 與絕對路徑影響；每台電腦都應重建 runtime。只對 runtime 根目錄建立中立 bridge，不對 venv 內部檔案建立相容 symlink。
 - 直接把整份 `.zshenv`、`.zprofile`、`.profile` 或 `.bash_profile` 收進 chezmoi 會覆蓋使用者既有 API key loader、Homebrew 或 alias；Item 16 使用 `modify_` scripts，只維護 `agent-python-tools` 標記區塊，遇到不完整或重複標記會停止。
 - Agent 對話在啟動時取得 PATH；安裝完成後既有對話可能看不到新 wrapper。開新對話／終端，或 source `{{HOME}}/.config/agent-tools/python-tools.env`。
+- Homebrew `ffmpeg-full` 是 keg-only，不能假設 `/opt/homebrew/bin/ffmpeg`
+  會自動變成 Full build；Item 34 固定建立共用 `ffmpeg` / `ffprobe`
+  wrapper，避免 `subtitles` / `drawtext` 因 PATH 又落回精簡版。
+- Auto-Editor 的 PyPI 版可能落後官方 standalone release；Item 34 使用
+  固定版本與 SHA-256 安裝官方 binary，不再從 user-level Python 找舊版。
+- 不安裝官方 Python `openai-whisper`：現有 faster-whisper 與
+  whisper.cpp 已分別覆蓋本機正式備援與明確快速預覽，避免加入 PyTorch
+  與另一份重複的大型模型。正式 STT 的第一順位仍是 Groq
+  `whisper-large-v3-turbo`；`whisper-cli` 是 whisper.cpp 的命令，不是
+  官方 Python `whisper`。
 - `.zprofile`、Homebrew 或 user-level Python 可能在 `.zshenv` 之後再次 prepend PATH，讓舊版同名指令先被找到。Item 16 讓同一 loader 在後續 profile 再執行；loader 會去除重複 bridge 路徑並把它放回最前面。
 - 技能專屬 runtime 不應集中到 `python-tools`。`python-tools` 是通用 Python 工具包；`audio-to-md`、`voxcpm2-voice-cloner`、`doc-to-md`、`vlm-to-md` 應保留在 `{{CODEX_HOME}}/<skill-name>`，再由 `{{CODEX_HOME}}/python-tools/bin` 提供跨專案 wrapper。
 
@@ -326,16 +357,20 @@ gs --version
 
 以下內容與 repo 腳本 `200_Reference/scripts/python-tools/install_python_tools.sh` 等價；下載者也可以直接使用 repo 腳本。
 
-````bash
+<!-- BEGIN EMBEDDED_SCRIPT:install_python_tools.sh -->
+
+```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-CODEX_HOME="${CODEX_HOME:-${CODEX_HOME}}"
+CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 PYTHON_TOOLS_HOME="${PYTHON_TOOLS_HOME:-$CODEX_HOME/python-tools}"
 PYTHON_TOOLS_VENV="$PYTHON_TOOLS_HOME/teaching-file-tools/.venv"
 UV_BIN="${UV_BIN:-}"
 INSTALL_SYSTEM_TOOLS="${INSTALL_SYSTEM_TOOLS:-1}"
 INSTALL_OFFICE_TOOLS="${INSTALL_OFFICE_TOOLS:-0}"
+INSTALL_AUTO_EDITOR="${INSTALL_AUTO_EDITOR:-1}"
+AUTO_EDITOR_VERSION="${AUTO_EDITOR_VERSION:-31.4.0}"
 EXTRA_PIP_PACKAGES=()
 
 log() {
@@ -356,8 +391,8 @@ install_macos_system_tools() {
     exit 1
   fi
 
-  log "installing macOS system tools: tesseract, language data, ghostscript, poppler, ffmpeg"
-  brew install tesseract tesseract-lang ghostscript poppler ffmpeg
+  log "installing macOS system tools: tesseract, language data, ghostscript, poppler, ffmpeg-full, ImageMagick"
+  brew install tesseract tesseract-lang ghostscript poppler ffmpeg-full imagemagick
 
   if [ "$INSTALL_OFFICE_TOOLS" = "1" ]; then
     log "installing LibreOffice for soffice/docx conversion support"
@@ -388,6 +423,49 @@ mkdir -p "$PYTHON_TOOLS_HOME/bin" "$PYTHON_TOOLS_HOME/matplotlib-cache"
 
 "$UV_BIN" venv --python 3.12 "$PYTHON_TOOLS_VENV"
 
+install_auto_editor() {
+  os="$(uname -s)"
+  arch="$(uname -m)"
+  case "$os/$arch" in
+    Darwin/arm64)
+      asset="auto-editor-macos-arm64"
+      digest="14707c80f4fae359c344e160b028366ec7de3b85362df11067ea1c01422ea799"
+      ;;
+    Darwin/x86_64)
+      asset="auto-editor-macos-x86_64"
+      digest="de2fa7ab430f5e7252c4b0a495338e10bbcce4537d7d9b0409f43c57aad972ff"
+      ;;
+    Linux/aarch64|Linux/arm64)
+      asset="auto-editor-linux-aarch64"
+      digest="83217a9e2117ea628c90b6bb1981c3aa22902cd33a245b743196039b4feb6865"
+      ;;
+    Linux/x86_64)
+      asset="auto-editor-linux-x86_64"
+      digest="495aafb6609e2ab8155f2ff854f213907457c84743ad0ed0ce6f5c7123fea670"
+      ;;
+    *)
+      log "No pinned Auto-Editor binary for $os/$arch; install the official release manually."
+      return
+      ;;
+  esac
+
+  temp_dir="$(mktemp -d)"
+  archive="$temp_dir/$asset"
+  url="https://github.com/WyattBlue/auto-editor/releases/download/$AUTO_EDITOR_VERSION/$asset"
+  curl --http1.1 -fL --retry 5 --retry-delay 2 "$url" -o "$archive"
+  if command -v shasum >/dev/null 2>&1; then
+    printf '%s  %s\n' "$digest" "$archive" | shasum -a 256 -c -
+  else
+    printf '%s  %s\n' "$digest" "$archive" | sha256sum -c -
+  fi
+  install -m 755 "$archive" "$PYTHON_TOOLS_HOME/bin/auto-editor"
+  rm -rf "$temp_dir"
+}
+
+if [ "$INSTALL_AUTO_EDITOR" = "1" ]; then
+  install_auto_editor
+fi
+
 case "$(uname -s)" in
   MINGW*|MSYS*|CYGWIN*)
     EXTRA_PIP_PACKAGES+=(pywin32)
@@ -399,6 +477,7 @@ esac
   python-docx docxcompose openpyxl xlsxwriter pandas python-pptx \
   pypdf PyMuPDF pdfplumber pdf2image reportlab fpdf2 pillow matplotlib \
   qrcode 'markitdown[pdf,docx,pptx,xlsx]' ocrmypdf docx2pdf edge-tts yt-dlp youtube-transcript-api \
+  'groq==1.6.0' 'elevenlabs==2.59.0' 'opencc-python-reimplemented==0.1.7' \
   "${EXTRA_PIP_PACKAGES[@]}"
 
 cat > "$PYTHON_TOOLS_HOME/bin/python-tools-python" <<SH
@@ -430,6 +509,17 @@ SH
 for command_name in edge-tts markitdown ocrmypdf yt-dlp; do
   write_venv_command_wrapper "$command_name"
 done
+
+if [ -x /opt/homebrew/opt/ffmpeg-full/bin/ffmpeg ]; then
+  for command_name in ffmpeg ffprobe; do
+    cat > "$PYTHON_TOOLS_HOME/bin/$command_name" <<SH
+#!/usr/bin/env bash
+set -euo pipefail
+exec "/opt/homebrew/opt/ffmpeg-full/bin/$command_name" "\$@"
+SH
+    chmod +x "$PYTHON_TOOLS_HOME/bin/$command_name"
+  done
+fi
 
 if [ -d "$HOME/.audio-to-md" ] && [ ! -L "$HOME/.audio-to-md" ]; then
   if [ ! -e "$CODEX_HOME/audio-to-md" ]; then
@@ -474,6 +564,22 @@ SH
   chmod +x "$PYTHON_TOOLS_HOME/bin/audio-to-md"
 fi
 
+if [ -x "$CODEX_HOME/audio-to-md/venv/bin/python" ]; then
+  cat > "$PYTHON_TOOLS_HOME/bin/audio-to-md-python" <<SH
+#!/usr/bin/env bash
+set -euo pipefail
+exec "$CODEX_HOME/audio-to-md/venv/bin/python" "\$@"
+SH
+  chmod +x "$PYTHON_TOOLS_HOME/bin/audio-to-md-python"
+elif [ -x "$CODEX_HOME/audio-to-md/.venv/bin/python" ]; then
+  cat > "$PYTHON_TOOLS_HOME/bin/audio-to-md-python" <<SH
+#!/usr/bin/env bash
+set -euo pipefail
+exec "$CODEX_HOME/audio-to-md/.venv/bin/python" "\$@"
+SH
+  chmod +x "$PYTHON_TOOLS_HOME/bin/audio-to-md-python"
+fi
+
 if [ -d "$CODEX_HOME/voxcpm2-voice-cloner/.venv" ]; then
   cat > "$PYTHON_TOOLS_HOME/bin/voxcpm2-python" <<SH
 #!/usr/bin/env bash
@@ -501,7 +607,7 @@ SH
   chmod +x "$PYTHON_TOOLS_HOME/bin/vlm-to-md"
 fi
 
-"$PYTHON_TOOLS_HOME/bin/python-tools-python" -c "import docx, docxcompose, openpyxl, xlsxwriter, pandas, pptx, pypdf, fitz, pdfplumber, pdf2image, reportlab, fpdf, PIL, matplotlib, qrcode, markitdown, mammoth, ocrmypdf; import edge_tts, yt_dlp, youtube_transcript_api; print('python teaching file tools ok')"
+"$PYTHON_TOOLS_HOME/bin/python-tools-python" -c "import docx, docxcompose, openpyxl, xlsxwriter, pandas, pptx, pypdf, fitz, pdfplumber, pdf2image, reportlab, fpdf, PIL, matplotlib, qrcode, markitdown, mammoth, ocrmypdf; import edge_tts, yt_dlp, youtube_transcript_api, groq, elevenlabs, opencc; print('python teaching and video adapter tools ok')"
 
 echo "Python tools installed at: $PYTHON_TOOLS_HOME"
 echo "Shared command directory: $PYTHON_TOOLS_HOME/bin"
@@ -511,18 +617,23 @@ if [ -L "$HOME/.local/share/agent-tools/python-tools" ]; then
 else
   echo "Next: run LazyPack Item 16 to create the Codex/Claude/AntiGravity bridge and shell loader."
 fi
-````
+```
+
+<!-- END EMBEDDED_SCRIPT:install_python_tools.sh -->
 
 ## 內建驗證腳本內容
 
 以下內容與 repo 腳本 `200_Reference/scripts/python-tools/verify_python_tools.py` 等價。
 
-````python
+<!-- BEGIN EMBEDDED_SCRIPT:verify_python_tools.py -->
+
+```python
 from importlib import import_module
 from importlib.metadata import distributions
 import os
 from pathlib import Path
 import shutil
+import sys
 
 IMPORTS = [
     "docx",
@@ -546,6 +657,9 @@ IMPORTS = [
     "edge_tts",
     "yt_dlp",
     "youtube_transcript_api",
+    "groq",
+    "elevenlabs",
+    "opencc",
 ]
 
 CORE_WRAPPERS = [
@@ -554,10 +668,31 @@ CORE_WRAPPERS = [
     "markitdown",
     "ocrmypdf",
     "yt-dlp",
+    "auto-editor",
+    "ffmpeg",
+    "ffprobe",
 ]
 
 
 def main() -> int:
+    codex_home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
+    runtime_home = Path(os.environ.get("PYTHON_TOOLS_HOME", codex_home / "python-tools"))
+    runtime_venv = runtime_home / "teaching-file-tools" / ".venv"
+    runtime_wrapper = runtime_home / "bin" / "python-tools-python"
+
+    # The public instructions allow running this verifier with system `python3`.
+    # Re-enter through the shared runtime so package imports and distribution
+    # inventory describe the environment being verified instead of the caller.
+    if (
+        runtime_wrapper.is_file()
+        and os.access(runtime_wrapper, os.X_OK)
+        and Path(sys.prefix).resolve() != runtime_venv.resolve()
+    ):
+        os.execv(
+            str(runtime_wrapper),
+            [str(runtime_wrapper), str(Path(__file__).resolve())],
+        )
+
     failed = []
     for name in IMPORTS:
         try:
@@ -572,8 +707,6 @@ def main() -> int:
     else:
         print("  OK all core imports")
 
-    codex_home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
-    runtime_home = Path(os.environ.get("PYTHON_TOOLS_HOME", codex_home / "python-tools"))
     wrapper_failures = []
     print("\nCore wrappers:")
     for name in CORE_WRAPPERS:
@@ -591,9 +724,20 @@ def main() -> int:
         print("  PENDING run LazyPack Item 16 to create or repair the neutral bridge")
 
     print("\nSystem tools:")
-    for tool in ["tesseract", "gs", "pdftoppm", "ffmpeg", "soffice"]:
+    for tool in ["tesseract", "gs", "pdftoppm", "ffmpeg", "ffprobe", "magick", "soffice"]:
         path = shutil.which(tool)
         print(f"  {'OK' if path else 'MISSING'} {tool}: {path or '-'}")
+
+    print("\nOptional video wrappers:")
+    for tool in [
+        "audio-to-md-python",
+        "whisper-cli",
+        "sensevoice-cli",
+        "macwhisper-cli",
+    ]:
+        wrapper = runtime_home / "bin" / tool
+        available = wrapper.is_file() and os.access(wrapper, os.X_OK)
+        print(f"  {'OK' if available else 'OPTIONAL'} {tool}: {wrapper if available else '-'}")
 
     names = sorted(dist.metadata["Name"] for dist in distributions())
     print(f"\nInstalled distributions: {len(names)}")
@@ -605,7 +749,9 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-````
+```
+
+<!-- END EMBEDDED_SCRIPT:verify_python_tools.py -->
 
 ## 安全邊界
 

@@ -1,33 +1,30 @@
 # 33-Audio-to-Markdown-Skill-安裝
 
-> 來源：`{{DOWNLOADS_DIR}}/audio-to-md-安裝包_v1.2.0.zip`，並補入 Groq 雲端 STT 平行路線。本機 Whisper 與 Groq 是兩個平行選項；執行 Phase 1 前必須先詢問使用者選哪一個，沒有預設引擎。
+> 來源：`{{DOWNLOADS_DIR}}/audio-to-md-安裝包_v1.2.0.zip`。原始本機引擎是 faster-whisper `large-v3-turbo`；現行安裝版已升級為 v1.3.0，自動採 Groq 優先、faster-whisper 備援。
 
 ## 用途
 
 這個 Skill 讓 Codex 協助處理影音轉逐字稿工作流：
 
-- 引導使用者在 Phase 1 前選擇本機 Whisper turbo 或 Groq 雲端 STT，把音訊或影片轉成 Markdown 逐字稿知識庫。
+- Phase 1 正式轉錄先用 Groq Whisper；Groq 無法使用或素材要求 local-only 時，自動改用本機 faster-whisper，把音訊或影片轉成 Markdown 逐字稿知識庫。
 - 明確區分 Phase 1 轉錄與 Phase 2 AI 校稿、摘要、重點整理。
 - 對長稿採用分檔與逐段校稿，避免 AI 把逐字稿縮成摘要。
 - 支援會議、訪談、podcast、課程、Zoom 錄影與其他影音來源。
 - 支援同一音檔的本機 Whisper / Groq 品質比較。
 - 內嵌完整 Python 腳本、執行紀錄與踩坑，方便其他人用 LazyPack repo 重建同樣效果。
 
-## 引擎選擇
+## 引擎優先序
 
-執行 Phase 1 前必須先詢問使用者：
+1. Phase 1 正式轉錄一律先用 Groq `whisper-large-v3-turbo`。
+2. 缺少或無效 key、API／網路／額度／模型／上傳失敗，或素材明確要求 local-only 時，立即改用本機 faster-whisper `large-v3-turbo`，不要反覆重試 Groq。
+3. 若使用者或專案已同意 Groq 雲端上傳，可沿用該決定；尚無決定時只確認一次。
+4. 兩種引擎只影響 Phase 1；產出 Markdown 後，Phase 2 校稿、摘要、自檢與另存 `_校稿.md` 的流程完全相同。
 
-```text
-這次要用哪個轉錄引擎？
-1. 本機 Whisper：不上傳、0 API key、適合敏感或大量素材。
-2. Groq 雲端 STT：會上傳音檔，通常速度、繁中與標點較好，需要 Groq API key。
-```
-
-兩個選項平行，沒有預設值。Groq 需要 `GROQ_API_KEY` 或 `{{SECRETS_DIR}}/groq_api_key`，且必須取得使用者同意雲端上傳。兩種引擎只影響 Phase 1；產出 Markdown 後，Phase 2 校稿、摘要、自檢與另存 `_校稿.md` 的流程完全相同。
+Groq 需要 `GROQ_API_KEY` 或 `{{SECRETS_DIR}}/groq_api_key`。每次交付要記錄實際引擎；若 fallback，另記 Groq 失敗原因。
 
 ## 本機引擎安裝狀態
 
-本機引擎由安裝包內的 `install.sh` 安裝，固定路徑如下：
+共用自動路由與本機備援由安裝包內的 `install.sh` 安裝，固定路徑如下：
 
 ```text
 {{CODEX_HOME}}/audio-to-md/
@@ -35,29 +32,41 @@
 ~/Desktop/轉逐字稿.command
 ```
 
-安裝器會建立 Python venv、安裝 `faster-whisper`，並下載 `large-v3-turbo` 模型。本機 Whisper 轉錄不需要 API key，也不消耗 LLM token。
+安裝器會建立 Python venv、安裝 `faster-whisper`，並下載
+`large-v3-turbo` 模型；同時把 `audio-to-md` launcher 指向
+`audio_to_md_auto.py`。本機 Whisper 轉錄不需要 API key，也不消耗 LLM
+token；它現為 Groq 無法使用時的正式備援。
 
-Groq 路線使用 Skill package 內的 `scripts/audio_to_md_groq.py`，不取代本機引擎。
+Groq 路線使用 Skill package 內的 `scripts/audio_to_md_groq.py`；本機引擎保留為第一備援。
 
 ## 使用方式
 
-先問使用者選哪個引擎，再執行對應指令。
+正式轉錄只需呼叫同一個 `audio-to-md` 入口；它先執行 Groq，符合 fallback
+條件時自動改用本機 faster-whisper，並輸出實際使用的引擎與 fallback
+原因。
 
-本機 Whisper：雙擊桌面 `轉逐字稿.command`，把影音檔拖進視窗後按 Enter。輸出會在原始檔旁邊，檔名通常是 `*_逐字稿知識庫.md` 或長稿分段檔。
+桌面操作：雙擊 `轉逐字稿.command`，把影音檔拖進視窗後按 Enter。它也會
+呼叫相同 Groq-first 自動路由；輸出會在原始檔旁邊，檔名通常是
+`*_逐字稿知識庫.md` 或長稿分段檔。
 
-手動方式：
-
-```bash
-{{CODEX_HOME}}/audio-to-md/audio-to-md "/path/to/audio-or-video.mp4"
-```
-
-Groq 雲端 STT：
+正式手動方式：
 
 ```bash
-python3 "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py" "/path/to/audio-or-video.mp4" -o "/path/to/output" --language zh
+audio-to-md "/path/to/audio-or-video.mp4"
 ```
 
-拿到 Markdown 後，再交給 Codex 使用 `audio-to-md` skill 做 Phase 2：校稿、段落摘要、全篇重點與自檢。這部分不分本機 Whisper 或 Groq。
+明確要求 local-only 時：
+
+```bash
+python3 "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_auto.py" \
+  "/path/to/audio-or-video.mp4" \
+  --engine faster-whisper
+```
+
+只有在診斷或品質比較時才直接呼叫 `audio_to_md_groq.py` 或
+`audio_to_md.py`；一般工作流不要繞過自動路由。拿到 Markdown 後，再交給
+當前 Agent 使用 `audio-to-md` skill 做 Phase 2：校稿、段落摘要、全篇重點
+與自檢。這部分不分本機 Whisper 或 Groq。
 
 ## 執行紀錄與踩坑
 
@@ -72,11 +81,11 @@ python3 "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py" "/path/to
 - `install.sh` 實際安裝過程。
 - 本機 Whisper 與 Groq 的實測指令與比較。
 - `audio_to_md.py`、`audio_to_md_groq.py` 的 Python 內嵌方式。
-- Groq API key、雲端上傳、segments 差異、LazyPack 內嵌與「沒有預設引擎」等踩坑紀錄。
+- Groq API key、雲端上傳、segments 差異、LazyPack 內嵌與 Groq-first fallback 等踩坑紀錄。
 
 ## 注意事項
 
-- Phase 1 執行前必須先問使用者選哪個引擎，且沒有預設引擎。
+- Phase 1 正式轉錄預設 Groq；沒有既有雲端上傳決定時先確認一次，Groq 無法使用或素材要求 local-only 時改用 faster-whisper。
 - 本機 Whisper 不上傳檔案；Groq 會上傳音訊/影片並需要 API key。
 - 中文本機 Whisper 建議使用 `large-v3-turbo`，不要降級成 small/base。
 - Phase 2 校稿不得刪除、合併或改寫逐字主體；只能做簡繁、確證錯字、標點、斷句與專名查證留痕。
@@ -104,54 +113,47 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SKILL_MD_0E95F5A366'
 ---
 name: audio-to-md
-description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉成帶時間戳的逐字稿 Markdown 知識庫。當需要：(1) 把錄音／podcast／會議／訪談音檔轉成逐字稿 (2) 把影片（演講、課程、Zoom 錄影）抽音軌轉逐字稿 (3) 比較本機 Whisper 與 Groq 轉錄品質 (4) 把逐字稿整理成可檢索、含段落摘要與重點的知識庫 (5) 為 RAG 補上「聲音」這一塊時使用。Phase 1 執行前必須先詢問使用者選擇「本機 Whisper」或「Groq 雲端 STT」，兩者是平行選項，沒有預設引擎。Groq 需要使用者明確接受雲端上傳且有 GROQ_API_KEY 或 ~/.codex/secrets/groq_api_key。Phase 2 由當前 Agent 校稿（簡繁／錯字／斷句）＋寫摘要與重點，Codex、Claude、AntiGravity 使用同一套契約。
+description: 用 Groq Whisper 優先、本機 faster-whisper 備援，把「音訊或影片」轉成帶時間戳的逐字稿 Markdown 知識庫。當需要：(1) 把錄音／podcast／會議／訪談音檔轉成逐字稿 (2) 把影片（演講、課程、Zoom 錄影）抽音軌轉逐字稿 (3) 比較雲端 Groq 與本機 faster-whisper 轉錄品質 (4) 把逐字稿整理成可檢索、含段落摘要與重點的知識庫 (5) 為 RAG 補上「聲音」這一塊時使用。Phase 1 正式轉錄預設使用 Groq `whisper-large-v3-turbo`；缺少或無效 key、API／網路／額度／模型／上傳失敗，或素材明確要求 local-only 時，立即改用本機 faster-whisper `large-v3-turbo`。Groq 需要既有的雲端上傳同意與 GROQ_API_KEY 或 ~/.codex/secrets/groq_api_key。Phase 2 由當前 Agent 校稿（簡繁／錯字／斷句）＋寫摘要與重點，Codex、Claude、AntiGravity 使用同一套契約。
 ---
 
 # audio-to-md Skill
 
 把「影音的聲音」變成「可檢索、整理好的文字知識庫」。
-**核心理念（指揮 AI 的分工）**：聽打＝機械活 → 執行前先問使用者要用 **本地 Whisper（免費、0 token、不上傳）** 或 **Groq Whisper（通常較快、繁中與標點可能較好、但會上傳音檔且需要 API key）**；兩者是平行選項，沒有預設引擎；
+**核心理念（指揮 AI 的分工）**：聽打＝機械活 → 正式轉錄優先用 **Groq Whisper**；只有 Groq 無法使用或素材要求 local-only 時，才改用 **本機 faster-whisper**；
 校稿、理解、抓重點＝判斷活 → 交給 **當前 Agent（Phase 2，花少量 token）**。把對的工序派給對的工具。
 
 **和家族的分工：**
 - `doc-to-md` → 文字檔的文字 ｜ `vlm-to-md` → 圖的視覺 ｜ **`audio-to-md` → 影音的聲音**
 
 **兩階段架構（與家族一致）：**
-- **Phase 1A（本地 Whisper）**：`audio_to_md.py` 用 faster-whisper 把音訊／影片（影片自動抽音軌）轉成**帶時間戳的逐字稿骨架**，留好「校稿、段落摘要、重點」空格。優點是免費、0 token、0 API key、不上傳。
-- **Phase 1B（Groq 雲端 STT）**：`audio_to_md_groq.py` 使用 Groq `whisper-large-v3-turbo` 產生同樣的 Markdown 骨架與原始 JSON。只有在使用者接受雲端轉錄、且已設定 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key` 時可選。
+- **Phase 1 auto router**：正式入口固定使用 `audio_to_md_auto.py`。它先呼叫 `audio_to_md_groq.py`；Groq 無法使用時，自動呼叫 `audio_to_md.py`，不再由人工挑錯入口。
+- **Phase 1A（Groq 優先）**：`audio_to_md_groq.py` 使用 Groq `whisper-large-v3-turbo` 產生 Markdown 骨架、原始 JSON 與 manifest。只要使用者／專案已有雲端上傳同意，且 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key` 可用，就直接使用，不必每次重問。
+- **Phase 1B（本機 fallback）**：Groq 缺少／無效 key，發生 API、網路、額度、模型或上傳失敗，或素材明確要求 local-only 時，`audio_to_md.py` 使用 faster-whisper `large-v3-turbo` 產生同樣的帶時間戳逐字稿骨架。優點是免費、0 token、0 API key、不上傳。
 - **Phase 2（當前 Agent、花少量 token）**：校稿（簡繁→繁中、錯字、標點、斷句）＋填段落摘要＋抓全篇重點／待辦／金句。Codex、Claude、AntiGravity 都使用同一套驗收契約；**不需要付費 ASR、不需要 API key。**
 
 > **⚠️ 比 doc-to-md 多一步：要先下載 Whisper turbo 模型（約 1.5GB）。** 安裝程式會幫忙預先下載。
 > **中文一律用 `large-v3-turbo`，不要降級成 small/base**——小模型中文會糙到連校稿都救不回（這是品質底線）。弱機只是慢一點，照樣用 turbo。
 > **安裝建議使用 Python 3.12。** Mac 舊系統上 Python 3.13+ 可能遇到 onnxruntime / faster-whisper wheel 相容性問題；安裝器會自動避開。
 
-## 引擎選擇：本機 Whisper vs Groq
+## 引擎優先序：Groq → faster-whisper
 
-執行 Phase 1 前先詢問使用者要用哪個引擎；不要自行選擇任一引擎，也不要因為某個引擎可用就直接執行。**本機 Whisper 與 Groq 是兩個平行選項，沒有預設值。**
+正式 Phase 1 固定依下列順序執行：
 
-詢問範例：
+1. **Groq Whisper**：使用者／專案已接受雲端上傳，且 key 可用時，直接使用 `whisper-large-v3-turbo`。
+2. **faster-whisper**：Groq 無法使用或素材明確要求 local-only 時，自動 fallback 到本機 `large-v3-turbo`，不必為 fallback 再次詢問。
 
-```text
-這次要用哪個轉錄引擎？
-1. 本機 Whisper：不上傳、0 API key、適合敏感或大量素材。
-2. Groq 雲端 STT：會上傳音檔，通常速度、繁中與標點較好，需要 Groq API key。
-```
+Groq 無法使用包含：
 
-只有使用者選擇 Groq，且符合下列條件，才使用 Groq：
+- `GROQ_API_KEY` 與 `~/.codex/secrets/groq_api_key` 都不存在，或 key 驗證失敗。
+- Groq API、網路、額度、模型或服務暫時不可用。
+- 音訊壓縮後仍超過上傳限制，或上傳／轉錄失敗。
+- 使用者明確要求本機、離線、0 API key，或素材被標記為不可上傳。
 
-- 使用者明確接受把音訊/影片上傳到 Groq 做雲端 STT。
-- 本機已存在 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key`。
-- 使用者重視速度、繁中輸出、標點品質，或想和本機 Whisper 做品質比較。
-
-不要在下列情況使用 Groq；若使用者仍要轉錄，重新詢問是否改選本機 Whisper：
-
-- 音訊含敏感、不可外傳、未授權或使用者不想上傳的內容。
-- 沒有 API key，或 key 可能已出現在聊天、log、截圖、repo、Obsidian。
-- 使用者明確要求本機、免費、離線或 0 API key。
+若使用者／專案從未同意雲端上傳，在第一次使用 Groq 前只確認一次；拒絕或無法確認時直接使用 faster-whisper。不要為同一次 Groq 失敗反覆重試或阻塞任務；fallback 後回報實際使用的引擎與失敗原因。
 
 兩種引擎只影響 Phase 1 的「文字從哪裡來」。一旦產生 Markdown 骨架，Phase 2 的所有後續流程完全相同：逐字主體保留、簡繁/錯字/標點/斷句、段落摘要、全篇重點、自檢、另存 `_校稿.md`，不可因為來源是 Groq 就改成字幕工作流或影片上架工作流。
 
-實測參考（Arry `ref_voice.wav`，14 秒）：本機 Whisper 產生 4 個 segments，內容完整但簡體，且把「清楚發音」誤聽成「清除發音」；Groq 產生 1 個 segment / 55 words，直接繁中且正確輸出「清楚發音」。這段短中文乾淨錄音上，Groq 轉錄品質較優；但這只是比較結果，不代表未來自動選 Groq。每次 Phase 1 都要先由使用者選擇引擎。
+實測參考（Arry `ref_voice.wav`，14 秒）：本機 Whisper 產生 4 個 segments，內容完整但簡體，且把「清楚發音」誤聽成「清除發音」；Groq 產生 1 個 segment / 55 words，直接繁中且正確輸出「清楚發音」。這段短中文乾淨錄音與後續固定語料測試都支持 Groq 作為速度優先的正式路線；faster-whisper 保留為可靠的本機 fallback。
 
 ## 可攜化與踩坑紀錄
 
@@ -162,16 +164,19 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 這份文件保存：
 
 - v1.2.0 zip 內 `install.sh` 的實際執行流程。
-- `audio_to_md.py` 與 `audio_to_md_groq.py` 的 LazyPack 內嵌方式。
+- `audio_to_md_auto.py`、`audio_to_md.py` 與 `audio_to_md_groq.py` 的 LazyPack 內嵌方式。
 - Arry `ref_voice.wav` 的本機 Whisper / Groq 實測輸出與比較。
-- 「兩個平行選項、沒有預設引擎」的設計原因。
+- Groq-first、faster-whisper fallback 的優先序與失敗條件。
 - Groq API key、雲端上傳、segments 顆粒度、Python heredoc 內嵌等踩坑。
 
 ---
 
 ## Agent Execution Notes：Phase 1 必須在可執行本機 runtime 的環境跑
 
-> **鐵則**：Phase 1 轉錄需要本地 Whisper turbo 模型（約 1.5GB）。任一 Agent 如果目前處於不能下載模型、不能讀取本機路徑或不能執行 Terminal 的 Desktop／網頁／沙箱，就改用使用者電腦上的已安裝 launcher。上傳到對話不等於沙箱可執行 Phase 1。
+> **鐵則**：Phase 1 必須能讀取本機素材並執行 launcher；只有 Groq
+> fallback 才需要本地 Whisper turbo 模型（約 1.5GB）。任一 Agent 如果
+> 不能讀取本機路徑或不能執行 Terminal，就改用使用者電腦上的已安裝
+> launcher。上傳到對話不等於沙箱可執行 Phase 1。
 
 **絕對禁止的行為（會讓工具看起來壞掉、白繞一圈，正是 v1.0.3／v1.0.5 學員的鬼打牆）：**
 - ❌ 不要在沙箱裡 `pip install faster-whisper` ＋ 跑轉錄 ＋ 下載模型——**幾乎必然卡在 HuggingFace 被封、模型載不下來**。
@@ -233,13 +238,14 @@ description: 用本地 Whisper 或 Groq 雲端 STT，把「音訊或影片」轉
 ### 進階：bundled 腳本（Codex／Claude／AntiGravity 任一可用本機終端的環境）
 ```bash
 pip install -r scripts/requirements.txt          # 裝 faster-whisper
-python3 scripts/audio_to_md.py "<音訊或影片>" -o "<輸出資料夾>"
+python3 scripts/audio_to_md_auto.py \
+  "<音訊或影片>" -o "<輸出資料夾>" --allow-cloud
 ```
 > ⚠️ 第一次會下載 turbo 模型（~1.5GB）。**只要在 Desktop／網頁沙箱，這條一定失敗，不要嘗試——改回上面的本機啟動器。**
 
 ---
 
-## Step 2 — 執行 Phase 1（本地轉錄）
+## Step 2 — 執行 Phase 1（Groq-first，失敗自動本機備援）
 
 學員端最簡單就是**拖檔啟動器**：標準四盒專案優先用 `200_Reference/scripts/` 內的專案啟動器；沒有專案啟動器時，才用桌面拖檔圖示（Windows「🎤 拖檔轉逐字稿」／Mac「轉逐字稿.command」）。
 要手動下指令時（本機啟動器，**不是沙箱**）：
@@ -253,16 +259,18 @@ python3 scripts/audio_to_md.py "<音訊或影片>" -o "<輸出資料夾>"
 ~/.codex/audio-to-md/audio-to-md "<音訊或影片>"
 ```
 
-Groq 雲端路線（執行前必須先詢問並取得使用者同意）：
+共用 auto router（第一次使用且尚無既有雲端上傳同意時，先確認一次）：
 
 ```bash
-python3 "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py" \
+python3 "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_auto.py" \
   "<音訊或影片>" \
   -o "<輸出資料夾>" \
-  --language zh
+  --allow-cloud \
+  --language auto
 ```
 
-Groq 輸出：
+成功時會輸出 `engine_used=groq` 或 `engine_used=faster-whisper`。Groq
+成功的附加輸出包括：
 
 - `*_groq_逐字稿知識庫.md`
 - `*_groq.json`
@@ -368,9 +376,9 @@ Groq 輸出：
 | 安裝時提示 Python 不相容 | 請安裝 Python 3.12，關閉 Terminal/視窗後重跑 `install.sh` / `install.bat` |
 | 第一次很久 | 在下載 turbo 模型（~1.5GB）；之後就快。請耐心等，不要因此改用小模型 |
 | 轉錄字有點糙 | 正常，turbo 已是品質底線；剩下交由當前 Agent 依 Phase 2 契約校稿修正 |
-| 本機 Whisper 與 Groq 哪個比較好 | 短中文乾淨錄音常見 Groq 較好，尤其繁中與標點；敏感、離線、批量或不想用 API 時通常本機 Whisper 較合適。實際執行前仍要讓使用者選擇 |
+| 本機 Whisper 與 Groq 哪個比較好 | 正式轉錄預設 Groq；它通常更快，繁中與標點也較接近可讀狀態。Groq 無法使用或素材要求 local-only 時，改用 faster-whisper |
 | Groq 找不到 API key | 檢查 `GROQ_API_KEY` 或 `~/.codex/secrets/groq_api_key`；不要把 key 寫進 repo、Obsidian 或聊天 |
-| Groq 不能用於這段音訊 | 若內容敏感、未授權或使用者不接受雲端上傳，不使用 Groq；重新詢問是否改選本機 Whisper |
+| Groq 不能用於這段音訊 | 立即 fallback 到本機 faster-whisper，並回報 key／API／網路／額度／模型／上傳或 local-only 的實際原因 |
 | 機器很慢/記憶體小 | 用 `--beam-size 1` 加速；`--compute-type int8` 已是預設。**仍維持 turbo 模型** |
 | 影片轉不出聲音 | 確認影片有音軌；faster-whisper 內含 PyAV 可直接抽，不需系統 ffmpeg |
 | 多人對話分不出講者 | Whisper 不做語者分離；Phase 2 由當前 Agent 依語氣／內容標講者 |
@@ -382,7 +390,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/references/execution-notes
 cat > "{{SYNC_ROOT}}/skills/audio-to-md/references/execution-notes.md" <<'AGENT_LAZYPACK_AUDIO_TO_MD_REFERENCES_EXECUTION_NOTES_MD_F65D5054D2'
 # audio-to-md 執行紀錄、Python 內嵌與踩坑
 
-本文件記錄 `audio-to-md` v1.2.0 安裝包在 Codex、Claude、AntiGravity／LazyPack 中的實際整合方式。目標是讓其他人使用 `codex_installation` LazyPack repo 時，能重建相同效果：本機 Whisper 與 Groq 雲端 STT 作為 Phase 1 平行選項，產出 Markdown 後由當前 Agent 依同一套 Phase 2 校稿契約處理。
+本文件記錄 `audio-to-md` v1.2.0 安裝包在 Codex、Claude、AntiGravity／LazyPack 中的實際整合方式。目標是讓其他人使用 `codex_installation` LazyPack repo 時，能重建相同效果：Phase 1 正式轉錄 Groq-first，Groq 無法使用或素材要求 local-only 時 fallback 到本機 faster-whisper；產出 Markdown 後由當前 Agent 依同一套 Phase 2 校稿契約處理。
 
 ## 目前 Skill Package
 
@@ -409,22 +417,14 @@ LazyPack 可攜化文件：
 {{SETUP_REPO}}/200_Reference/lazy-pack/33-Audio-to-Markdown-Skill-安裝.md
 ```
 
-## Phase 1 平行選項
-
-執行 Phase 1 前必須先問使用者：
-
-```text
-這次要用哪個轉錄引擎？
-1. 本機 Whisper：不上傳、0 API key、適合敏感或大量素材。
-2. Groq 雲端 STT：會上傳音檔，通常速度、繁中與標點較好，需要 Groq API key。
-```
+## Phase 1 優先序
 
 規則：
 
-- 本機 Whisper 和 Groq 是平行選項，沒有預設引擎。
-- 不要因為本機引擎已安裝就自動使用本機。
-- 不要因為 Groq key 存在或 Groq 實測較好就自動上傳音檔。
-- 只有使用者明確選擇 Groq，且接受雲端上傳，才走 Groq。
+- 正式轉錄預設 Groq `whisper-large-v3-turbo`。
+- 使用者／專案已有雲端上傳同意時，不必每次重問；尚未同意時只在第一次使用前確認。
+- Groq 缺少或無效 key、API／網路／額度／模型／上傳失敗，或素材要求 local-only 時，立即 fallback 到本機 faster-whisper `large-v3-turbo`。
+- 同一次 Groq 失敗不要無限重試；fallback 後回報實際引擎與原因。
 - 兩種引擎只影響「文字從哪裡來」；Markdown 產出後，Phase 2 完全相同。
 
 ## 本機 Whisper 安裝過程
@@ -611,8 +611,8 @@ Groq 原始逐字：
 結論：
 
 - 在這段 14 秒短中文乾淨錄音上，Groq 產出品質較優。
-- 這只是比較結果，不是預設路由。
-- 未來每次 Phase 1 仍必須先問使用者選本機 Whisper 或 Groq。
+- 目前正式路由以 Groq 優先。
+- faster-whisper 保留為 Groq 無法使用或 local-only 的 fallback。
 
 ## Phase 2 共用流程
 
@@ -669,17 +669,17 @@ AGENT_LAZYPACK_AUDIO_TO_MD_GROQ_PY
 - 新增 Groq 腳本後，若只更新全域 skill、不重建 LazyPack Item 33，第二台電腦安裝時會缺 `audio_to_md_groq.py`。
 - Groq 是 cloud route，不能把 API key 寫進 LazyPack；LazyPack 只能寫 key 檔路徑與權限規則。
 - 若 top-level 文件中的 shell example 用反斜線續行，產生器字串要避免 Python 把反斜線吃掉；可用獨立 fenced code block 直接寫多行。
-- `audio_to_md.py` 內部有模型、beam size、chunk size 的技術預設，這不是「引擎選擇預設」。文件中要明確區分：引擎無預設，單一引擎內部參數可有預設。
+- `audio_to_md.py` 內部的模型、beam size、chunk size 是本機 fallback 的技術預設；不要與 Groq-first 的引擎優先序混淆。
 
 ## 主要踩坑與固定規則
 
-### 1. 不要把本機 Whisper 當預設
+### 1. Groq 是正式轉錄預設
 
-最終規則是本機 Whisper 與 Groq 平行。每次 Phase 1 前都問使用者，沒有預設引擎。
+使用者／專案已有雲端上傳同意且 key 可用時，直接使用 Groq，不需每次重問。
 
-### 2. 不要把 Groq 當預設
+### 2. faster-whisper 是第一 fallback
 
-即使 Groq 在短中文乾淨錄音上較好，也不能自動上傳使用者音檔。Groq 需要使用者明確選擇與同意雲端上傳。
+Groq 缺 key、驗證失敗、API／網路／額度／模型／上傳失敗，或素材要求 local-only 時，立即改用 faster-whisper。若從未取得雲端上傳同意，第一次使用 Groq 前先確認；拒絕時也直接走 faster-whisper。
 
 ### 3. 產出文字後流程完全相同
 
@@ -728,7 +728,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/references/usage-guide.md"
 cat > "{{SYNC_ROOT}}/skills/audio-to-md/references/usage-guide.md" <<'AGENT_LAZYPACK_AUDIO_TO_MD_REFERENCES_USAGE_GUIDE_MD_08E0917ECC'
 # audio-to-md 參考：三 Agent 共用 Phase 2 指引
 
-逐字稿骨架 `*_逐字稿知識庫.md` 可由本地 Whisper turbo 或 Groq 雲端 STT 產生（帶時間戳）。執行 Phase 1 前必須先詢問使用者要用哪個引擎；本機 Whisper 與 Groq 是平行選項，沒有預設值。Groq 會上傳音檔，必須取得使用者同意。
+逐字稿骨架 `*_逐字稿知識庫.md` 可由 Groq Whisper 或本機 faster-whisper 產生（帶時間戳）。正式 Phase 1 固定 Groq-first；Groq 缺 key、驗證失敗、API／網路／額度／模型／上傳失敗，或素材要求 local-only 時，立即 fallback 到 faster-whisper。Groq 會上傳音檔；若使用者／專案尚未同意，只在第一次使用前確認一次。
 
 不論 Phase 1 來源是哪一個，輸出 Markdown 後的 Phase 2 完全相同。當前 Codex、Claude 或 AntiGravity 在 Phase 2 都做三件事：
 
@@ -756,12 +756,13 @@ cat > "{{SYNC_ROOT}}/skills/audio-to-md/references/usage-guide.md" <<'AGENT_LAZY
 最後 `重點 / 待辦 / 金句` 空格：3-5 個重點、（若有）待辦／行動項、1-3 句可摘金句。
 
 ## 規則
-- 引擎選擇只影響 Phase 1；文字輸出後不要切換成 video-processing 的字幕工作流。
-- 不要自行替使用者選擇引擎；即使其中一個引擎已安裝或曾在測試中較好，仍要在執行前詢問。
+- 引擎路由只影響 Phase 1；文字輸出後不要切換成 video-processing 的字幕工作流。
+- 正式轉錄優先 Groq；Groq 無法使用或素材要求 local-only 時，自動改用 faster-whisper。只有缺少既有雲端上傳同意時才在第一次使用前確認。
 - 只替換 placeholder 內容；時間戳、段落標題、frontmatter 不動。
 - 長逐字稿分段處理、可多輪。
 - 繁中（台灣用語）。
-- 校稿是「花少量 token 的判斷活」——轉錄（重活）已由本地 Whisper 免費做掉。
+- 校稿是「花少量 token 的判斷活」——轉錄（重活）已由 Groq-first
+  auto router 完成；Groq 無法使用時才由本機 faster-whisper 接手。
 
 ## 引擎比較基準
 
@@ -773,7 +774,7 @@ cat > "{{SYNC_ROOT}}/skills/audio-to-md/references/usage-guide.md" <<'AGENT_LAZY
 - 時間戳：segments 是否足夠細，是否適合後續逐段校稿。
 - 隱私與成本：是否可接受雲端上傳、API key 與服務成本。
 
-Arry `ref_voice.wav` 實測：本機 Whisper 完整但輸出簡體，且將「清楚發音」聽成「清除發音」；Groq 直接輸出繁中並正確辨識「清楚發音」。在這段短中文乾淨錄音上，Groq 品質較優。這是比較結果，不是預設路由；後續每次執行仍要先詢問使用者。
+Arry `ref_voice.wav` 實測：本機 Whisper 完整但輸出簡體，且將「清楚發音」聽成「清除發音」；Groq 直接輸出繁中並正確辨識「清楚發音」。因此目前正式路由以 Groq 優先，faster-whisper 作為本機 fallback。
 AGENT_LAZYPACK_AUDIO_TO_MD_REFERENCES_USAGE_GUIDE_MD_08E0917ECC
 
 # audio-to-md/scripts/audio_to_md.py
@@ -1121,6 +1122,183 @@ if __name__ == "__main__":
     main()
 AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_AUDIO_TO_MD_PY_2FE9C8C130
 
+# audio-to-md/scripts/audio_to_md_auto.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_auto.py")"
+cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_auto.py" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_AUDIO_TO_MD_AUTO_PY_776D58184B'
+#!/usr/bin/env python3
+"""Route audio-to-md through Groq first and faster-whisper as fallback."""
+
+from __future__ import annotations
+
+import argparse
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import sys
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+GROQ_SCRIPT = SCRIPT_DIR / "audio_to_md_groq.py"
+LOCAL_SCRIPT = SCRIPT_DIR / "audio_to_md.py"
+
+
+def cloud_is_approved(args: argparse.Namespace) -> bool:
+    if args.allow_cloud:
+        return True
+    if os.environ.get("AUDIO_TO_MD_ALLOW_CLOUD", "").lower() in {
+        "1",
+        "true",
+        "yes",
+    }:
+        return True
+    approval_files = (
+        Path.home() / ".codex" / "audio-to-md" / "cloud-upload-approved",
+        Path.home() / ".audio-to-md" / "cloud-upload-approved",
+    )
+    return any(path.is_file() for path in approval_files)
+
+
+def run_command(command: list[str], dry_run: bool) -> int:
+    if dry_run:
+        print("dry-run command=" + shlex.join(command))
+        return 0
+    return subprocess.run(command, check=False).returncode
+
+
+def groq_command(args: argparse.Namespace) -> list[str]:
+    command = [
+        sys.executable,
+        str(GROQ_SCRIPT),
+        str(args.input),
+        "--model",
+        args.groq_model,
+        "--language",
+        args.language,
+        "--chunk-min",
+        str(args.chunk_min),
+        "--prompt",
+        args.prompt,
+    ]
+    if args.output:
+        command.extend(["--output", str(args.output)])
+    return command
+
+
+def local_command(args: argparse.Namespace) -> list[str]:
+    local_python = shutil.which("audio-to-md-python") or sys.executable
+    command = [
+        local_python,
+        str(LOCAL_SCRIPT),
+        str(args.input),
+        "--model",
+        args.local_model,
+        "--language",
+        args.language,
+        "--device",
+        args.device,
+        "--compute-type",
+        args.compute_type,
+        "--beam-size",
+        str(args.beam_size),
+        "--chunk-min",
+        str(args.chunk_min),
+        "--lowconf-threshold",
+        str(args.lowconf_threshold),
+        "--split-min",
+        str(args.split_min),
+        "--part-min",
+        str(args.part_min),
+    ]
+    if args.output:
+        command.extend(["--output", str(args.output)])
+    return command
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description=(
+            "audio-to-md preferred route: Groq whisper-large-v3-turbo first, "
+            "then local faster-whisper large-v3-turbo."
+        )
+    )
+    parser.add_argument("input", type=Path, help="Audio or video input")
+    parser.add_argument("-o", "--output", type=Path)
+    parser.add_argument(
+        "--engine",
+        choices=("auto", "groq", "faster-whisper"),
+        default="auto",
+    )
+    parser.add_argument(
+        "--allow-cloud",
+        action="store_true",
+        help="Confirm that this input may be uploaded to Groq.",
+    )
+    parser.add_argument("--language", default="auto")
+    parser.add_argument("--groq-model", default="whisper-large-v3-turbo")
+    parser.add_argument("--local-model", default="large-v3-turbo")
+    parser.add_argument("--chunk-min", type=int, default=6)
+    parser.add_argument(
+        "--prompt",
+        default=(
+            "以下可能包含繁體中文、英文或混合語言。繁體中文請保留繁體。"
+            "專有名詞：Codex、ChatGPT、OpenAI、NotebookLM、Gemini、"
+            "Groq、Whisper、GitHub、Obsidian、Firebase、Netlify、"
+            "Python、JavaScript。"
+        ),
+    )
+    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--compute-type", default="int8")
+    parser.add_argument("--beam-size", type=int, default=5)
+    parser.add_argument("--lowconf-threshold", type=float, default=-0.8)
+    parser.add_argument("--split-min", type=int, default=35)
+    parser.add_argument("--part-min", type=int, default=18)
+    parser.add_argument("--dry-run", action="store_true")
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    if not args.input.is_file() and not args.dry_run:
+        print(f"Input file does not exist: {args.input}", file=sys.stderr)
+        return 2
+
+    if args.engine in {"auto", "groq"} and not cloud_is_approved(args):
+        if args.engine == "groq":
+            print(
+                "Cloud upload approval is required. Use --allow-cloud or "
+                "AUDIO_TO_MD_ALLOW_CLOUD=1.",
+                file=sys.stderr,
+            )
+            return 2
+        print("skip=groq reason=cloud-upload-not-approved")
+    elif args.engine in {"auto", "groq"}:
+        print(f"route=groq model={args.groq_model}")
+        groq_result = run_command(groq_command(args), args.dry_run)
+        if groq_result == 0:
+            print("engine_planned=groq" if args.dry_run else "engine_used=groq")
+            return 0
+        if args.engine == "groq":
+            return groq_result
+        print(f"fallback=faster-whisper reason=groq-exit-{groq_result}")
+
+    print(f"route=faster-whisper model={args.local_model}")
+    local_result = run_command(local_command(args), args.dry_run)
+    if local_result == 0:
+        print(
+            "engine_planned=faster-whisper"
+            if args.dry_run
+            else "engine_used=faster-whisper"
+        )
+    return local_result
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_AUDIO_TO_MD_AUTO_PY_776D58184B
+chmod +x "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_auto.py"
+
 # audio-to-md/scripts/audio_to_md_groq.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py")"
 cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/audio_to_md_groq.py" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_AUDIO_TO_MD_GROQ_PY_F42408E099'
@@ -1455,12 +1633,12 @@ rem ASCII-ONLY: a .bat with Chinese bytes mis-parses on Big5/zh-TW (DBCS) consol
 rem PYTHONUTF8 so embedded python -c Chinese output won't UnicodeEncodeError on cp1252.
 set "PYTHONUTF8=1"
 set "PYTHONIOENCODING=utf-8"
-title audio-to-md installer v1.2.0
+title audio-to-md installer v1.3.0
 
 echo.
 echo ============================================================
-echo   audio-to-md installer v1.2.0
-echo   audio/video -^> transcript knowledge base (local Whisper)
+echo   audio-to-md installer v1.3.0
+echo   audio/video -^> transcript knowledge base (Groq-first)
 echo ============================================================
 echo.
 
@@ -1535,13 +1713,24 @@ echo    packages installed
 
 copy /Y "%SKILL_SRC%\scripts\audio_to_md.py" "%INSTALL_DIR%\" >nul
 if errorlevel 1 ( echo    copy audio_to_md.py failed, screenshot for teacher. & pause & exit /b 1 )
+copy /Y "%SKILL_SRC%\scripts\audio_to_md_groq.py" "%INSTALL_DIR%\" >nul
+if errorlevel 1 ( echo    copy audio_to_md_groq.py failed, screenshot for teacher. & pause & exit /b 1 )
+copy /Y "%SKILL_SRC%\scripts\audio_to_md_auto.py" "%INSTALL_DIR%\" >nul
+if errorlevel 1 ( echo    copy audio_to_md_auto.py failed, screenshot for teacher. & pause & exit /b 1 )
 copy /Y "%SKILL_SRC%\scripts\requirements.txt" "%INSTALL_DIR%\" >nul
 if errorlevel 1 ( echo    copy requirements.txt failed, screenshot for teacher. & pause & exit /b 1 )
-if not exist "%INSTALL_DIR%\audio_to_md.py" ( echo    installed audio_to_md.py missing, screenshot for teacher. & pause & exit /b 1 )
+if not exist "%INSTALL_DIR%\audio_to_md_auto.py" ( echo    installed audio_to_md_auto.py missing, screenshot for teacher. & pause & exit /b 1 )
 (
 echo @echo off
-echo "%VENV_PY%" "%INSTALL_DIR%\audio_to_md.py" %%*
+echo "%VENV_PY%" "%INSTALL_DIR%\audio_to_md_auto.py" %%*
 ) > "%INSTALL_DIR%\audio-to-md.bat"
+
+if not exist "%INSTALL_DIR%\cloud-upload-approved" (
+    set "CLOUD_REPLY="
+    set /P "CLOUD_REPLY=Allow Groq-first cloud STT, with local fallback? [y/N] "
+    if /I "!CLOUD_REPLY!"=="Y" >"%INSTALL_DIR%\cloud-upload-approved" echo approved
+    if /I "!CLOUD_REPLY!"=="YES" >"%INSTALL_DIR%\cloud-upload-approved" echo approved
+)
 
 rem Windows: 複製 transcribe.bat 到引擎快取作為備份，但不強行往桌面或專案擺放
 if exist "%SKILL_SRC%\scripts\transcribe.bat" (
@@ -1558,8 +1747,8 @@ echo.
 echo Verifying...
 "%VENV_PY%" -c "import faster_whisper, av, ctranslate2; print('   core packages OK')"
 if errorlevel 1 ( echo    package import failed, screenshot for teacher. & pause & exit /b 1 )
-"%VENV_PY%" "%INSTALL_DIR%\audio_to_md.py" --help >nul
-if errorlevel 1 ( echo    audio_to_md.py verify failed, screenshot for teacher. & pause & exit /b 1 )
+"%VENV_PY%" "%INSTALL_DIR%\audio_to_md_auto.py" --help >nul
+if errorlevel 1 ( echo    audio_to_md_auto.py verify failed, screenshot for teacher. & pause & exit /b 1 )
 if defined EXTRACT_DIR rmdir /S /Q "%EXTRACT_DIR%" >nul 2>nul
 
 echo    Verified!
@@ -1599,7 +1788,7 @@ cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/install.sh" <<'AGENT_LAZYPACK_AU
 #!/bin/bash
 # ╔════════════════════════════════════════════════╗
 # ║   audio-to-md 一鍵安裝器（Mac / Linux）          ║
-# ║   本地 Whisper：把影音的聲音轉成 Markdown 逐字稿 ║
+# ║   Groq-first：把影音的聲音轉成 Markdown 逐字稿  ║
 # ╚════════════════════════════════════════════════╝
 #
 # 使用方式：打開 Terminal → 輸入 bash 加空格 → 拖入此檔案 → 按 Enter
@@ -1636,8 +1825,8 @@ fi
 
 echo ""
 echo "╔════════════════════════════════════════════╗"
-echo "║   audio-to-md 安裝程式 v1.2.0              ║"
-echo "║   影音 → 逐字稿知識庫（本地 Whisper turbo）  ║"
+echo "║   audio-to-md 安裝程式 v1.3.0              ║"
+echo "║   影音 → 逐字稿知識庫（Groq → 本機備援）     ║"
 echo "╚════════════════════════════════════════════╝"
 echo ""
 
@@ -1715,13 +1904,26 @@ fi
 echo "   ✅ 套件安裝完成"
 
 cp "$SKILL_SRC/scripts/audio_to_md.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/audio_to_md_groq.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/audio_to_md_auto.py" "$INSTALL_DIR/"
 cp "$SKILL_SRC/scripts/requirements.txt" "$INSTALL_DIR/"
 cat > "$INSTALL_DIR/audio-to-md" << 'LAUNCHER'
 #!/bin/bash
 DIR="$HOME/.codex/audio-to-md"
-"$DIR/venv/bin/python3" "$DIR/audio_to_md.py" "$@"
+"$DIR/venv/bin/python3" "$DIR/audio_to_md_auto.py" "$@"
 LAUNCHER
 chmod +x "$INSTALL_DIR/audio-to-md"
+
+if [ ! -f "$INSTALL_DIR/cloud-upload-approved" ] && [ -t 0 ]; then
+    printf "正式轉錄是否允許先上傳到 Groq，再於失敗時改用本機 faster-whisper？[y/N] "
+    read -r AUDIO_TO_MD_CLOUD_REPLY
+    case "$AUDIO_TO_MD_CLOUD_REPLY" in
+        y|Y|yes|YES)
+            printf "approved\n" > "$INSTALL_DIR/cloud-upload-approved"
+            chmod 600 "$INSTALL_DIR/cloud-upload-approved"
+            ;;
+    esac
+fi
 
 # 確保技能目錄 scripts/ 下的 transcribe.command 擁有可執行權限
 if [ -f "$SKILL_SRC/scripts/transcribe.command" ]; then
@@ -1758,7 +1960,7 @@ fi
 echo ""
 echo "🧪 驗證安裝..."
 "$INSTALL_DIR/venv/bin/python3" -c "import faster_whisper, av, ctranslate2; print('   核心套件 OK')"
-"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/audio_to_md.py" --help >/dev/null 2>&1 && echo "   ✅ 驗證通過！"
+"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/audio_to_md_auto.py" --help >/dev/null 2>&1 && echo "   ✅ 驗證通過！"
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
@@ -1869,7 +2071,7 @@ rem Strip trailing backslash from %~dp1: otherwise -o "C:\folder\" makes \" an e
 rem quote and Python gets an invalid path (Windows C-runtime quoting trap).
 set "ODIR=%~dp1"
 if "%ODIR:~-1%"=="\" set "ODIR=%ODIR:~0,-1%"
-"%PY%" "%DIR%\audio_to_md.py" "%~1" -o "%ODIR%"
+"%PY%" "%DIR%\audio_to_md_auto.py" "%~1" -o "%ODIR%"
 if errorlevel 1 (
     call :logf "[fail]" "%~nx1"
     call :show "[X] FAILED" "%~nx1"
@@ -1922,7 +2124,7 @@ cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/transcribe.command" <<'AGENT_LAZ
 # audio-to-md｜雙擊我，把影片/錄音檔拖進視窗按 Enter，就會轉成逐字稿知識庫。
 DIR="$HOME/.codex/audio-to-md"
 
-if [ ! -x "$DIR/venv/bin/python3" ] || [ ! -f "$DIR/audio_to_md.py" ]; then
+if [ ! -x "$DIR/venv/bin/python3" ] || [ ! -f "$DIR/audio_to_md_auto.py" ]; then
     echo "找不到本機引擎（$DIR）。"
     echo "請先跑安裝包的 install.sh 安裝一次，再用這個檔。"
     read -r -p "按 Enter 關閉..." _
@@ -1956,7 +2158,7 @@ outdir="$(dirname "$f")"
 echo ""
 echo "轉錄中：$(basename "$f")"
 echo "（第一次會下載語音模型約 1.5GB，需幾分鐘，請耐心等；之後就快）"
-"$DIR/venv/bin/python3" "$DIR/audio_to_md.py" "$f" -o "$outdir"
+"$DIR/venv/bin/python3" "$DIR/audio_to_md_auto.py" "$f" -o "$outdir"
 rc=$?
 echo ""
 if [ "$rc" -eq 0 ]; then

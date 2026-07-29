@@ -134,18 +134,18 @@
 23：visual-note-generator
 24：diary-interview-assistant
 25：gemini-free-api
-26：HyperFrames 官方 skill suite：`hyperframes`、`hyperframes-cli`、`hyperframes-media`、`hyperframes-registry`、`website-to-hyperframes`、`remotion-to-hyperframes`、`gsap`、`animejs`、`css-animations`、`lottie`、`tailwind`、`three`、`typegpu`、`waapi`、`contribute-catalog`
-27：video-spec-builder
+26：HyperFrames 官方 skill suite + 共用 `video-tool-evaluation`：`hyperframes`、`hyperframes-cli`、`hyperframes-media`、`hyperframes-registry`、`website-to-hyperframes`、`remotion-to-hyperframes`、`gsap`、`animejs`、`css-animations`、`lottie`、`tailwind`、`three`、`typegpu`、`waapi`、`contribute-catalog`
+27：video-tool-evaluation + video-spec-builder
 28：netlify-deploy
-29：video-processing-automation
-30：video-creation-automation
+29：video-tool-evaluation + video-processing-automation
+30：video-tool-evaluation + video-creation-automation
 31：youtube-transcript-collector
 32：voxcpm2-voice-cloner
 33：audio-to-md
 34：Python teaching file tools global runtime；不是 skill，安裝 Word / Excel / PPT / PDF / OCR / 圖表 / 影音輔助 Python 套件，建立跨專案 wrapper，並在 macOS/Homebrew 上安裝 Tesseract、Ghostscript、Poppler、ffmpeg 等系統工具；技能 runtime 仍各自放在 `{{CODEX_HOME}}/<skill-name>`
 35：Taigi Teaching Agent；不是 skill，安裝 `mathruffian-dot/taigi-teaching-agent` 臺語教材產生器、Python 3.12 專用 venv 與 `taigi-teaching-agent` wrapper
 36：voice-input-normalization；語音輸入文字正規化跨 Agent 安裝，包含 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範已併入 Item 16 `cross-device-sync`
-37：voice-reply；三 Agent 共用的 macOS 語音回覆 skill，優先 Edge-TTS 串流，其次 Edge-TTS 整檔播放，最後 macOS `say` 離線備援；本機 runtime 沿用 `{{CODEX_HOME}}/voice-reply/.venv` 與 `{{CODEX_HOME}}/python-tools/bin`，但三個 Agent 都呼叫同一 wrapper
+37：voice-reply；三 Agent 共用的 macOS 語音回覆 skill，優先 ElevenLabs，無法使用時自動切換 Edge-TTS，最後使用 macOS `say` 離線備援；本機 runtime 沿用 `{{CODEX_HOME}}/voice-reply/.venv` 與 `{{CODEX_HOME}}/python-tools/bin`，但三個 Agent 都呼叫同一 wrapper
 38：yaml-image-deck；通用 YAML-controlled image-first deck，不限定 SOIL；用固定視覺語法、受控版型、黃金樣張與逐頁 YAML 內容產生 NotebookLM-style 圖片式簡報
 39：Coach Skill；Arry 私人來源橋接型安裝群組，驗證並啟用 `future-coach`、`voice-coach`、`waki-brain`、`productivity-coach`；需要私人 `{{SYNC_ROOT}}`，公開 Item 不含四套私人 corpus
 ```
@@ -207,18 +207,18 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 21 | `visual-note-generator` | [[23-Visual-Note-Generator-Skill-安裝]] | 可直接安裝；固定手繪筆記 Workflow、可替換 Style Profile、內建 Arry 預設風格與 16:9／2K 驗收 |
 | 22 | `diary-interview-assistant` | [[24-Diary-Interview-Assistant-Skill-安裝]] | 可直接安裝；間歇式日記訪談、寫作洞察與文章草稿提示 |
 | 23 | `gemini-free-api` | [[25-Gemini-Free-API-Skill-安裝]] | 可直接安裝；Gemini API Free Tier、`GEMINI_API_KEY` 安全儲存、收費邊界與後端整合 |
-| 24 | HyperFrames skill suite | [[26-HyperFrames-Skill-安裝]] | 可直接安裝；HTML/CSS/media/seekable animation 到 MP4 的影片 composition 工作流，含相片紀念影片預覽、音訊驗證與完稿後資料夾清理詢問；實際 render 需 Node.js 22+ 與 FFmpeg |
-| 25 | Video Spec Builder | [[27-Video-Spec-Builder-Skill-安裝]] | 可直接安裝；追問影片需求、拆分鏡、產出可交給 HyperFrames 的 `video-spec.md` |
+| 24 | HyperFrames skill suite | [[26-HyperFrames-Skill-安裝]] | 可直接安裝；含共用 `video-tool-evaluation`，新影片與多步驟 composition 在實作前逐項評估 53 個工具 route；HTML/CSS/media/seekable animation 到 MP4，實際 render 需 Node.js 22+ 與 FFmpeg |
+| 25 | Video Spec Builder | [[27-Video-Spec-Builder-Skill-安裝]] | 可直接安裝；含共用 53-route 工具評估，追問影片需求、拆分鏡、產出 `TOOL_EVALUATION.md` 與可交給 HyperFrames 的 `video-spec.md` |
 | 26 | `netlify-deploy` | [[28-Netlify-Deploy-Skill-安裝]] | 可直接安裝；官方 Netlify MCP 設定、Netlify 前端部署與 Clasp + Apps Script API 閉環部署流程 |
-| 27 | `video-processing-automation` | [[29-Video-Processing-Automation-Skill-安裝]] | 可直接安裝；原始影片到 YouTube / 社群影片上架包，含智能剪口播、Groq STT、專案詞彙表字幕修正、文字稿、封面、metadata、短片亮點與 ffprobe 驗收 |
-| 28 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時，先確認入口後生成腳本、設計、素材、旁白、HyperFrames composition 與渲染包；補入離線可重現資源、lint / validate / inspect / ffprobe 驗收；若已有影片則轉用 `video-processing-automation` |
+| 27 | `video-processing-automation` | [[29-Video-Processing-Automation-Skill-安裝]] | 可直接安裝；先以共用 `video-tool-evaluation` 評估 53 個 route，再把原始影片處理成上架包；正式轉錄採 Groq 優先、faster-whisper 備援，另含 Auto-Editor、FFmpeg Full 字幕／drawtext、BGM ducking、封面、metadata 與 ffprobe 驗收；不預設直式裁切 |
+| 28 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時先以共用 `video-tool-evaluation` 評估 53 個 route，再生成腳本、設計、素材、旁白與 HyperFrames composition；含固定 TTS route、ImageMagick 與 Pexels；不預設直式裁切，已有影片則轉用 `video-processing-automation` |
 | 29 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
 | 30 | `voxcpm2-voice-cloner` | [[32-VoxCPM2-Voice-Cloner-Skill-安裝]] | 可直接安裝；授權聲音克隆、合成聲音設計、Apple Silicon MPS／CUDA／CPU、本機 runtime／模型快取路由與 consent gate |
-| 31 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 前先詢問使用者選本機 Whisper 或 Groq 雲端 STT，將音訊／影片轉成 Markdown 逐字稿知識庫；Phase 2 由當前 Agent 依同一契約做逐段校稿、摘要與重點整理，需要的差異腳本記在 adapter |
+| 31 | `audio-to-md` | [[33-Audio-to-Markdown-Skill-安裝]] | 可直接安裝；Phase 1 正式轉錄採 Groq Whisper 優先，Groq 無法使用或素材要求 local-only 時改用 faster-whisper，將音訊／影片轉成 Markdown 逐字稿知識庫；Phase 2 由當前 Agent 依同一契約做逐段校稿、摘要與重點整理，需要的差異腳本記在 adapter |
 | 32 | Python teaching file tools runtime | [[34-Python-Tools-全域工具包安裝]] | 可直接安裝；每台電腦建立 `{{CODEX_HOME}}/python-tools`，透過 Item 16 中立 bridge 供 Codex／Claude／AntiGravity 與所有專案共用 Word／Excel／PPT／PDF／OCR／圖表／影音輔助 Python 套件和 wrapper；內含完整 wrapper 來源矩陣，額外功能由 Items 12／18／32／33／35／37 補齊；macOS/Homebrew 會安裝 Tesseract、Ghostscript、Poppler、ffmpeg，LibreOffice 可用 `INSTALL_OFFICE_TOOLS=1` 按需安裝 |
 | 33 | Taigi Teaching Agent | [[35-Taigi-Teaching-Agent-安裝]] | 可直接安裝；建立 `{{CODEX_HOME}}/python-tools/taigi-teaching-agent`、專用 Python 3.12 venv 與 `taigi-teaching-agent` wrapper，用於臺羅標音、臺語 TTS、教材檢核與範例教材生成 |
 | 34 | Voice Input Normalization | [[36-Voice-Input-Normalization]] | 可直接安裝；包含 `voice-input-normalization`，提供 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範歸 Item 16 `cross-device-sync` |
-| 35 | Voice Reply | [[37-Voice-Reply-Skill-安裝]] | 可直接安裝；三 Agent 共用 macOS 語音回覆 wrapper，優先 Edge-TTS 串流，整檔播放備援，最後 macOS `say` 離線備援 |
+| 35 | Voice Reply | [[37-Voice-Reply-Skill-安裝]] | 可直接安裝；三 Agent 共用 macOS 語音回覆 wrapper，優先 ElevenLabs，無法使用時自動切換 Edge-TTS，最後 macOS `say` 離線備援 |
 | 36 | Coach Skill | [[39-Coach-Skill-安裝]] | Arry 私人來源橋接；先同步私人 `{{SYNC_ROOT}}`，再一次驗證並啟用 `future-coach`、`voice-coach`、`waki-brain`、`productivity-coach`，不從 public repo 下載私人 corpus |
 | 37 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
