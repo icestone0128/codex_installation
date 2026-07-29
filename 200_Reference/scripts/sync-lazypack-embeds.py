@@ -192,15 +192,21 @@ def main() -> None:
         "24-Diary-Interview-Assistant-Skill-安裝.md": ["diary-interview-assistant"],
         "25-Gemini-Free-API-Skill-安裝.md": ["gemini-free-api"],
         "26-HyperFrames-Skill-安裝.md": [
-            "animejs", "contribute-catalog", "css-animations", "gsap", "hyperframes",
+            "video-tool-evaluation", "animejs", "contribute-catalog", "css-animations", "gsap", "hyperframes",
             "hyperframes-cli", "hyperframes-media", "hyperframes-registry", "lottie",
             "remotion-to-hyperframes", "tailwind", "three", "typegpu", "waapi",
             "website-to-hyperframes",
         ],
-        "27-Video-Spec-Builder-Skill-安裝.md": ["video-spec-builder"],
+        "27-Video-Spec-Builder-Skill-安裝.md": [
+            "video-tool-evaluation", "video-spec-builder",
+        ],
         "28-Netlify-Deploy-Skill-安裝.md": ["netlify-deploy"],
-        "29-Video-Processing-Automation-Skill-安裝.md": ["video-processing-automation"],
-        "30-Video-Creation-Automation-Skill-安裝.md": ["video-creation-automation"],
+        "29-Video-Processing-Automation-Skill-安裝.md": [
+            "video-tool-evaluation", "video-processing-automation",
+        ],
+        "30-Video-Creation-Automation-Skill-安裝.md": [
+            "video-tool-evaluation", "video-creation-automation",
+        ],
         "31-YouTube-Transcript-Collector-Skill-安裝.md": ["youtube-transcript-collector"],
         "32-VoxCPM2-Voice-Cloner-Skill-安裝.md": ["voxcpm2-voice-cloner"],
         "33-Audio-to-Markdown-Skill-安裝.md": ["audio-to-md"],
@@ -213,6 +219,26 @@ def main() -> None:
         print(f"synced {filename}: {', '.join(skills)}")
     replace_one_skill_block(LAZYPACK / "09-個人助手設定.md", "arry-assistant")
     print("synced 09-個人助手設定.md: arry-assistant")
+
+    python_tools_item = LAZYPACK / "34-Python-Tools-全域工具包安裝.md"
+    python_tool_scripts = {
+        "install_python_tools.sh": REPO
+        / "200_Reference"
+        / "scripts"
+        / "python-tools"
+        / "install_python_tools.sh",
+        "verify_python_tools.py": REPO
+        / "200_Reference"
+        / "scripts"
+        / "python-tools"
+        / "verify_python_tools.py",
+    }
+    for script_name, script_path in python_tool_scripts.items():
+        replace_embedded_script(python_tools_item, script_name, script_path)
+    print(
+        "synced 34-Python-Tools-全域工具包安裝.md: "
+        + ", ".join(python_tool_scripts)
+    )
 
     # --- Antigravity Installation LazyPack: embedded scripts ---
     ag_lazypack = ANTIGRAVITY_LAZYPACK / "01-antigravity-lazypack.md"

@@ -48,6 +48,12 @@
 | 抓 YouTube 現成字幕做逐字稿 | 想要影片逐字稿但不想聽打 | `youtube-transcript-api` | 「抓這支 YouTube 影片的字幕，整理成逐字稿」 |
 | 講稿轉語音旁白（免費） | 請人配音或買 AI 語音很貴 | `edge-tts` | 「把這份講稿轉成中文語音 mp3，語速慢一點」 |
 | 課本轉乾淨文字（餵 AI 前處理） | 課本格式亂，丟 AI 效果差 | `markitdown[pdf,docx,pptx,xlsx]` | 「把這份 PDF／Word／PPT／Excel 轉成 Markdown」 |
+| 自動剪掉停頓 | 口播片停頓多，人工粗剪費時 | Auto-Editor `31.4.0` | 「保留原比例，用智能剪輯去除停頓，先產預覽給我確認」 |
+| 字幕硬燒與文字疊圖 | 一般 FFmpeg 缺 `subtitles` / `drawtext` | FFmpeg Full＋libass | 「把這份 SRT 硬燒進影片，不改尺寸、不裁切」 |
+| 本機 Whisper 字幕 | 不想上傳音訊到雲端 | faster-whisper、官方 `whisper` 或 whisper.cpp `whisper-cli` | 「用本機 large-v3-turbo 產繁中 SRT」 |
+| 快速中文逐字稿 | 想用另一個本機模型交叉確認中文辨識 | SenseVoice q8 | 「用 SenseVoice 產繁中 TXT，保留情緒／事件標籤供檢查」 |
+| 本機標題卡 | 不想開剪輯軟體逐張做字卡 | ImageMagick | 「做一張 1920×1080 中文標題卡，不改影片比例」 |
+| 雲端高品質旁白 | 需要 ElevenLabs 的指定授權聲線 | ElevenLabs SDK | 「確認成本與隱私後，用這個 voice ID 生成旁白」 |
 
 ## 🧩 安裝狀態與按需項
 
@@ -56,6 +62,13 @@
 | `markitdown[pdf,docx,pptx,xlsx]` | 已納入 Item 34 | 補齊文件格式 extras；本機補裝後新增 `mammoth` 與 `cobble`。 |
 | Ghostscript / `gs` | 已納入 Item 34 系統相依 | 搭配 `ocrmypdf` 處理 PDF/A 與部分 OCR 流程；macOS 用 `brew install ghostscript`。 |
 | `pywin32` | Windows native bash 自動納入；macOS / Linux / WSL 不裝 | 只服務 Windows Microsoft Office COM 自動化；安裝腳本偵測到 `MINGW` / `MSYS` / `CYGWIN` 才加入同一個 Windows venv。 |
+| Auto-Editor `31.4.0` | 已納入 Item 34 | 使用官方 standalone 與固定 SHA-256，避開落後的 user-level Python 版本。 |
+| FFmpeg Full / ImageMagick | 已納入 Item 34 系統相依 | FFmpeg Full 透過共用 wrapper 提供 `subtitles`、`ass`、`drawtext`；ImageMagick 提供本機字卡。 |
+| `whisper-cli` / SenseVoice / `macwhisper-cli` | 已納入 Item 29 選用工具安裝器 | 模型存在本機 `{{CODEX_HOME}}/whisper-cpp` 與 `{{CODEX_HOME}}/sensevoice`，MacWhisper wrapper 指向本機 App；大型模型不進 Git 或 Google Drive。 |
+| Whisper 本機轉文字 | 使用 Item 29／33 | 正式 SRT 用 faster-whisper；Apple Silicon 快速預覽用 whisper.cpp；不重複安裝官方 Python `openai-whisper`。 |
+| MacWhisper | Item 29 的 macOS 選項 | 目前本機 14.4.1 已驗證 `mw` CLI；不同版本或授權先跑 `macwhisper-cli --help`，輸出仍需驗證時間碼。 |
+| Pexels API | 不收費；需要免費 key | 預設每小時 200 次、每月 20,000 次；下載時保留來源頁與作者資訊。 |
+| ElevenLabs API | 有免費 credits，超額或特定功能付費 | 透過本機 secret 與 `--confirm-cloud` 才呼叫，不把 key 寫進專案。 |
 | Windows repo-local `.venv` | 不取代本 LazyPack 位置 | 下載來源檔適合 Windows 單 repo 安裝；本 Item 34 維持跨專案共用的 `{{CODEX_HOME}}/python-tools`。 |
 
 ---

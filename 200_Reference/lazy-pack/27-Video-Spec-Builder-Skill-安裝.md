@@ -1,8 +1,8 @@
 # 27-Video-Spec-Builder-Skill-安裝
 
-> 版本：2026-06-01 三 Agent 共用版
+> 版本：2026-07-29 三 Agent 共用版
 > 用途：安裝 `video-spec-builder` 全域 skill，讓 Codex、Claude、AntiGravity 都能像影片編導一樣追問需求，產出可交給 HyperFrames 的 `video-spec.md` 分鏡腳本。
-> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/video-spec-builder/`。
+> 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `video-tool-evaluation` 與 `video-spec-builder` 兩個共用 Skills。
 
 ## 來源與歷史紀錄
 
@@ -10,7 +10,7 @@
 - 來源 repo：https://github.com/feicaiclub/video-spec-builder
 - 來源 commit：`9e73275` / `9e73275b35e827b8f7af4bca900790909d86e63e`。
 - 授權：MIT。
-- 內嵌檔案數：33 個。
+- 內嵌檔案數：38 個（VideoSpec package 33 個，加上共用 evaluator 5 個）。
 - 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md`。
 
 ## 三 Agent 相容化調整
@@ -31,8 +31,25 @@
 - 文案不可直接使用資料夾名稱，需依照片內容與敘事脈絡重寫；同類連續照片保持文字框樣式與語氣一致。
 - 若插入原始影片或現場人聲，Spec 需記錄音樂起點、ducking 區間、目標音量 dB、淡入淡出時間與是否只重混音軌。
 
+## 2026-07-29 聲音規格固定值
+
+- 旁白未指定性別時先確認女聲或男聲；女聲記錄 Anna Su → HsiaoChen →
+  macOS `say`，男聲記錄跳過 ElevenLabs → YunJhe → macOS `say`。
+- 需要字幕或逐字稿時，Spec 記錄正式 STT 為 Groq → faster-whisper →
+  MacWhisper；whisper.cpp 只供明確快速預覽，SenseVoice 只供補充分析。
+
+## 2026-07-29 完整工具評估
+
+- 0-1 與迭代模式都會在 `video-spec.md` 同層建立或更新
+  `TOOL_EVALUATION.md`。
+- 共用 `video-tool-evaluation` 強制逐項評估 53 個 routing、素材、聲音、
+  STT、剪輯、composition、動效、音訊、字幕與驗證 route；不採用的工具
+  也要留下專案理由。
+- `video-spec.md` 只有在共用 validator 通過後才能交付 HyperFrames。
+
 ## 安裝內容
 
+- `video-tool-evaluation/`：所有影片 Skills 共用的完整 catalog 與 validator。
 - `SKILL.md`：video-spec-builder 主要工作流。
 - `references/`：0-1 模式、迭代模式、追問題庫、分鏡拆解、組件目錄、節奏規則、spec 規則與對話風格。
 - `templates/video-spec-template.md`：`video-spec.md` 輸出模板。
@@ -64,6 +81,8 @@
 ## 驗證
 
 ```bash
+test -f "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" && echo "video-tool-evaluation SKILL.md ok"
+python3 "{{SYNC_ROOT}}/skills/video-tool-evaluation/scripts/validate_tool_evaluation.py" --self-test
 test -f "{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md" && echo "video-spec-builder SKILL.md ok"
 test -f "{{SYNC_ROOT}}/skills/video-spec-builder/templates/video-spec-template.md" && echo "video-spec-builder template ok"
 test -f "{{SYNC_ROOT}}/skills/video-spec-builder/references/question-bank.md" && echo "video-spec-builder references ok"
@@ -72,6 +91,7 @@ test -f "{{SYNC_ROOT}}/skills/video-spec-builder/spec-mono/design.md" && echo "S
 
 ## 最終檢查清單
 
+- [ ] `video-tool-evaluation` 已安裝，且 53-route validator self-test 通過。
 - [ ] `{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md` 存在。
 - [ ] `templates/video-spec-template.md` 存在。
 - [ ] `references/` 內 8 個主要參考檔存在。
@@ -87,12 +107,580 @@ test -f "{{SYNC_ROOT}}/skills/video-spec-builder/spec-mono/design.md" && echo "S
 
 ## 內建 Skill 完整安裝內容
 
-本節是自含式安裝區塊。這個序號項目會安裝：`video-spec-builder`。
+本節是自含式安裝區塊。這個序號項目會安裝：`video-tool-evaluation`、`video-spec-builder`。
 
 使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
 
 ````bash
 set -e
+
+# ---- video-tool-evaluation ----
+mkdir -p "{{SYNC_ROOT}}/skills/video-tool-evaluation"
+# video-tool-evaluation/SKILL.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366'
+---
+name: video-tool-evaluation
+description: Use when Codex, Claude, or AntiGravity plans a video workflow, chooses among video tools/providers, creates or processes a multi-step video, writes a VideoSpec/storyboard, builds a HyperFrames composition, converts a website or Remotion project into video, or needs to confirm that every available video route was considered. Produces and validates TOOL_EVALUATION.md before implementation. Direct one-command execution with an already specified tool may consume an existing approved evaluation instead of creating a new one.
+---
+
+# Video Tool Evaluation
+
+Use one shared, full-catalog decision record across every planning-capable video
+skill. The purpose is to evaluate every available route, not to force every
+tool into one video.
+
+## Trigger Boundary
+
+Run the full workflow when any of these is true:
+
+- the user asks for a plan, storyboard, VideoSpec, tool comparison, provider
+  choice, new video, full processing package, website-to-video conversion, or
+  Remotion-to-HyperFrames translation;
+- the workflow will make multiple tool/provider decisions;
+- `video-creation-automation`, `video-processing-automation`,
+  `video-spec-builder`, `hyperframes`, `website-to-hyperframes`, or
+  `remotion-to-hyperframes` reaches its planning gate.
+
+For an exact one-command operation such as “lint this HyperFrames project”,
+“burn this SRT with FFmpeg”, or “render this approved composition”, do not
+create 53 rows solely for ceremony. Consume the existing approved
+`TOOL_EVALUATION.md` when present. If the operation would select a provider,
+change framing, upload data, incur cost, or expand scope, run the full
+evaluation first.
+
+## Output Contract
+
+Create `TOOL_EVALUATION.md` in the same draft/project folder as the plan,
+`video-spec.md`, `SCRIPT.md`, or composition. Read
+[references/tool-catalog.md](references/tool-catalog.md) and include every
+required route ID exactly once. Use
+[references/example-processing-evaluation.md](references/example-processing-evaluation.md)
+as a complete processing example, not as reusable project reasoning.
+
+Use exactly these columns:
+
+```markdown
+| route_id | tool_or_route | status | project_reason | boundary_and_fallback |
+|---|---|---|---|---|
+```
+
+Allowed statuses:
+
+- `selected`
+- `fallback`
+- `not-needed`
+- `unavailable`
+- `excluded`
+
+`not-needed` is a valid result. It must explain why that route adds no value to
+this project. Never leave a route pending, silently omit it, or treat
+installation as authorization to use it.
+
+## Workflow
+
+1. Identify the calling video skill and project output folder.
+2. Inspect existing assets, project rules, prior approved evaluation, and
+   non-secret local availability.
+3. Evaluate all route IDs in `references/tool-catalog.md`.
+4. Record project-specific reasoning plus the real privacy, cost, credential,
+   attribution, framing, timing, timestamp, quality, and fallback boundaries
+   that apply.
+5. Run:
+
+   ```bash
+   python3 "{{SYNC_ROOT}}/skills/video-tool-evaluation/scripts/validate_tool_evaluation.py" \
+     "<project-path>/TOOL_EVALUATION.md"
+   ```
+
+6. Fix every missing, duplicate, invalid, or placeholder row.
+7. Carry only `selected` and `fallback` routes into the downstream plan. Keep
+   all other rows in the evaluation as the audit trail.
+8. If the chosen route changes during execution, update the row with the
+   actual route and fallback reason before delivery.
+
+## Planning Safety
+
+Planning authorizes read-only checks such as `--version`, `--help`, filter
+inventory, key-file existence/permission, and API health checks that do not
+expose the key.
+
+Planning does not authorize:
+
+- installing software or downloading models;
+- spending paid credits or starting a large paid batch;
+- uploading private audio, video, images, text, or source code;
+- downloading stock assets;
+- rendering or publishing;
+- automatic vertical reframing, 9:16 crop, or source-media crop.
+
+Ask only when a selected route crosses a cost, privacy, licensing, download,
+upload, or material output boundary not already approved by the user/project.
+
+## Shared Preferences
+
+- STT formal order: Groq `whisper-large-v3-turbo` → faster-whisper
+  `large-v3-turbo` → MacWhisper. whisper.cpp is explicit quick preview only.
+  SenseVoice is supplementary analysis, not the timed final transcript.
+- TTS first resolves female or male. Female: ElevenLabs Anna Su → Edge-TTS
+  HsiaoChen → macOS `say`. Male: skip ElevenLabs → Edge-TTS YunJhe → macOS
+  `say`. Sensitive content starts with local `say`.
+- Pexels requires a usable local key, quota check, source/creator tracking, and
+  an approved download route.
+- Use FFmpeg Full when `subtitles`, `ass`, or `drawtext` is selected.
+- Kokoro stays removed. Python `openai-whisper`, the OpenAI Whisper API, and
+  direct HyperFrames TTS/STT are not default speech routes.
+- Preserve source aspect ratio and framing unless the user explicitly requests
+  a change.
+
+## Integration Rules
+
+- `video-creation-automation`: validate before the SCRIPT approval gate.
+- `video-processing-automation`: validate before smart cut, cloud upload, or
+  any other mutation.
+- `video-spec-builder`: create/update the evaluation beside `video-spec.md` and
+  validate both before handoff.
+- `hyperframes`: validate before composition HTML is written, unless this is a
+  small direct edit using an already approved evaluation.
+- `website-to-hyperframes`: validate after strategy is locked and before the
+  storyboard/script gate.
+- `remotion-to-hyperframes`: validate during translation planning and before
+  generating HTML.
+- `hyperframes-media` and `hyperframes-cli`: consume the approved evaluation for
+  direct operations; invoke this skill if they must choose a route/provider.
+
+## Agent Execution Notes
+
+- Shared steps: all three Agents use this same catalog, statuses, output shape,
+  safety boundary, validator, and downstream handoff.
+- Codex adapter: use available terminal/browser/native media tools for
+  read-only checks and shared scripts for validation.
+- Claude adapter: use the same package through the shared skills entrypoint and
+  the available terminal/native adapters.
+- AntiGravity adapter: use the same package through the shared skills
+  entrypoint and the available terminal/native adapters.
+- Fallback: if an Agent lacks a native capability, record it as unavailable or
+  use the approved shared CLI/API/browser route; do not delete the route.
+- Verification: every adapter must produce a validator-passing
+  `TOOL_EVALUATION.md` with the same required route IDs.
+
+## Verification
+
+- `python3 scripts/validate_tool_evaluation.py --self-test` passes.
+- A complete realistic evaluation passes.
+- Removing one required route makes validation fail.
+- The calling video skill names this shared package rather than maintaining a
+  private copy of the catalog.
+- All three native skill entrypoints resolve to the same global package.
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366
+
+# video-tool-evaluation/agents/openai.yaml
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/agents/openai.yaml" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_AGENTS_OPENAI_YAML_DEB9755D27'
+interface:
+  display_name: "Video Tool Evaluation"
+  short_description: "Evaluate every video tool before choosing a workflow"
+  default_prompt: "Use $video-tool-evaluation to assess every available video tool before selecting a video workflow."
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_AGENTS_OPENAI_YAML_DEB9755D27
+
+# video-tool-evaluation/references/example-processing-evaluation.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/references/example-processing-evaluation.md")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/references/example-processing-evaluation.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_REFERENCES_EXAMPLE_PROCESSING_EVALUATION_MD_4DB522276E'
+# Example: 16:9 Talking-Head Processing Evaluation
+
+Scenario: an existing 16:9 talking-head recording needs silence cleanup,
+Traditional Chinese subtitles, BGM ducking, a cover, metadata, and a final
+upload package. The speaker's original human voice is retained.
+
+| route_id | tool_or_route | status | project_reason | boundary_and_fallback |
+|---|---|---|---|---|
+| route-video-creation | Video Creation Automation | not-needed | A complete source recording already exists, so rebuilding the video from an idea would duplicate work. | Keep the existing-video route; switch only if the recording is rejected and a new composition is requested. |
+| route-video-processing | Video Processing Automation | selected | The requested smart cut, captions, audio mix, cover, metadata, and package are this workflow's direct outputs. | Preserve the 16:9 source and pause at title or short-candidate choices that require user input. |
+| planning-direct | Processing workflow plan | selected | The processing skill already covers the required edit, subtitle, audio, cover, and packaging decisions. | Record the plan here before any cut or upload; escalate only if the creative scope becomes a new video. |
+| planning-video-spec-builder | Video Spec Builder | not-needed | No new shot design or animated storyboard is needed for a straightforward talking-head edit. | Invoke VideoSpec only if new scenes, complex motion, or shot-level redesign is added. |
+| route-website-to-hyperframes | Website to HyperFrames | not-needed | No website is a source of brand evidence, messaging, or captured media for this recording. | If a product site becomes a required visual source, capture it only after URL and reuse scope are approved. |
+| route-remotion-to-hyperframes | Remotion to HyperFrames | not-needed | The project contains video footage rather than a Remotion source-code composition. | Use the migration skill only after explicit Remotion source translation is requested. |
+| asset-user-provided | Existing recording and brand assets | selected | The source video, approved logo, vocabulary, and BGM are the authoritative production inputs. | Keep originals unchanged, work from local copies, and verify every referenced path before packaging. |
+| asset-image-generator | Shared Image Generator | fallback | A generated cover background may help only if no suitable source frame can support the chosen title. | Do not generate before cover direction is approved; use the active Agent adapter and disclose limitations. |
+| asset-pexels | Pexels photo and video search | not-needed | The talking-head package does not require B-roll, and stock media would add attribution and editorial review. | If B-roll is later requested, check key and quota, present a manifest, and download only selected originals. |
+| asset-website-capture | Browser website capture | not-needed | No web UI, product page, or live brand surface needs to appear in the final edit. | Capture only a user-approved URL and record whether screenshots may be redistributed. |
+| asset-background-removal | HyperFrames u2net remove-background | not-needed | The speaker remains in the original scene, with no transparent overlay or text-behind-subject treatment. | If separation is added, distinguish subject cutout from hole-cut plate and do not claim true inpainting. |
+| title-hyperframes-css | HyperFrames live titles | not-needed | The deliverable is a conventional processed video package rather than an HTML motion composition. | Use live titles only if the user adds an animated composition section and approves HyperFrames. |
+| title-imagemagick | ImageMagick title card | fallback | A deterministic local title card can replace generated cover text or supply a simple intro if requested. | Verify Chinese font rendering and dimensions; otherwise use a clean cover background plus approved design tool. |
+| voice-human | Original speaker recording | selected | Retaining the real speaker preserves identity, emotion, and natural timing without synthesis. | Do not replace or clone the voice; use cleaned original audio and measure the final mix. |
+| voice-female-route | Female TTS route | not-needed | The project keeps the recorded speaker and has no missing female narration. | If female narration is added, confirm the choice and use Anna Su, then HsiaoChen, then local say. |
+| voice-male-route | Male TTS route | not-needed | The project keeps the recorded speaker and has no missing male narration. | If male narration is added, skip ElevenLabs and use YunJhe, then local say. |
+| voice-offline | Local private TTS route | not-needed | No synthetic reading is needed, so private text does not need local speech generation. | If confidential pickup lines are requested, start with local say and do not upload the text. |
+| voice-elevenlabs-anna | ElevenLabs Anna Su | not-needed | No female synthetic narration is required for this human-voice edit. | Never call ElevenLabs for male narration; confirm credits before any later large female batch. |
+| voice-edge-hsiaochen | Edge-TTS HsiaoChen | not-needed | No female synthetic fallback is required while the original speaker audio is usable. | Edge uploads text; use only after a female TTS need is approved and Anna Su is unavailable. |
+| voice-edge-yunjhe | Edge-TTS YunJhe | not-needed | No male synthetic narration is required while the original speaker audio is retained. | Edge uploads text; use only after male TTS is requested, with local say as fallback. |
+| voice-macos-say | macOS say | not-needed | The current edit needs no synthetic pickup lines or privacy-only narration. | Keep it as the local fallback if approved TTS providers fail or text must remain offline. |
+| voice-voxcpm2 | VoxCPM2 voice cloning | excluded | The user did not request authorized cloning or voice design, and the human source audio is sufficient. | Do not load a cloning profile without explicit scope, consent, and authorized reference audio. |
+| stt-groq | Groq whisper-large-v3-turbo | selected | It is the approved first formal STT route and provides strong multilingual transcription with timestamps. | Upload only under the standing project approval; fall back immediately on key, quota, network, model, or upload failure. |
+| stt-faster-whisper | faster-whisper large-v3-turbo | fallback | It provides the required local formal transcript when Groq cannot be used. | Confirm the local model footprint before first download and report the fallback reason and elapsed time. |
+| stt-whisper-cpp | whisper.cpp preview | not-needed | This job requires a final-quality transcript rather than an explicitly requested rapid preview. | Use only if the user asks for quick preview; never let it replace the formal local fallback silently. |
+| stt-macwhisper | MacWhisper | fallback | It remains the final Whisper comparison route if Groq and faster-whisper cannot deliver usable timestamps. | Verify installed CLI entitlement and validate SRT timecodes before accepting its output. |
+| stt-sensevoice | SenseVoice supplementary analysis | not-needed | The clear Mandarin talking-head audio needs timed captions, not emotion or sound-event tagging. | Use only as a Chinese or Cantonese cross-check; do not present its untimed text as final SRT. |
+| edit-auto-editor | Auto-Editor smart cut | selected | Removing long pauses will tighten the talking-head pacing before transcript timestamps are generated. | Normalize VFR to CFR and verify stream order first; compare duration and inspect cuts for clipped words. |
+| edit-ffmpeg-clip | FFmpeg deterministic trims | fallback | Manual trims can repair isolated cut errors or produce an approved highlight without another smart-cut pass. | Preserve source aspect ratio, map video and audio explicitly, and verify boundary frames. |
+| compose-hyperframes | HyperFrames composition | not-needed | The requested package does not need new animated scenes or a seekable HTML composition. | Select it only if the scope adds motion graphics or redesigned scenes that cannot be simple overlays. |
+| compose-playwright-ffmpeg | Browser capture and FFmpeg | not-needed | No browser-rendered fallback composition is needed for this conventional edit. | Use only if an approved HTML renderer is required and HyperFrames cannot meet the project constraint. |
+| translate-remotion | Remotion translation | not-needed | There is no React or Remotion source code in the project. | If source code appears, lint it first and document unsupported patterns before translation. |
+| motion-gsap | GSAP motion | not-needed | No new timeline-based motion graphics are required for the approved talking-head package. | If motion graphics are added, use deterministic seekable timelines and validate every scene. |
+| motion-animejs | Anime.js motion | not-needed | The project has no animation requirement that benefits from Anime.js over the normal processing path. | Select only with an approved composition and a documented adapter reason. |
+| motion-waapi-css | WAAPI or CSS motion | not-needed | A conventional cut and subtitle burn does not require lightweight browser animation. | Use only for an approved HTML overlay or composition with deterministic timing. |
+| motion-lottie | Lottie assets | not-needed | No existing After Effects or dotLottie asset is part of the supplied materials. | Add only after licensing, local asset availability, looping, and render behavior are verified. |
+| motion-three-webgl | Three.js or WebGL | not-needed | The talking-head edit has no 3D model, product rotation, or shader scene requirement. | Select only after a 3D asset and GPU-supported composition are explicitly approved. |
+| motion-typegpu-webgpu | TypeGPU or WebGPU | not-needed | The requested output does not need an experimental GPU-rendered visual effect. | Require runtime support and a deterministic fallback before using WebGPU in a deliverable. |
+| motion-audio-reactive | Audio-reactive animation | not-needed | BGM should support speech quietly rather than drive visible rhythmic animation. | If selected later, derive deterministic analysis data and keep captions legible during peaks. |
+| audio-ffmpeg | FFmpeg Full audio processing | selected | The final package needs stream mapping, BGM fades, measured levels, and a verified audio stream. | Use FFmpeg Full, state the measurement basis, and remux instead of rerendering when only audio changes. |
+| audio-mix-audio | mix_audio.py BGM ducking | selected | The requested background music must lower under speech without changing the approved 16:9 framing. | Record duck timing and target dB, then measure source, music bed, and final mix. |
+| caption-srt | Validated Traditional Chinese SRT | selected | A separate, editable timed subtitle file is required for accessibility and platform upload. | Generate after the final cut, apply vocabulary without changing timecodes, and run SRT validation. |
+| caption-libass-drawtext | FFmpeg Full subtitles and drawtext | selected | The user wants a readable burned-caption master in addition to the separate SRT. | Confirm FFmpeg Full filters and font rendering; preserve a clean master without burned captions. |
+| caption-opencv-pillow | OpenCV and Pillow subtitle fallback | fallback | It provides a cross-platform burner only if the required FFmpeg Full filters are unavailable. | Expect slower processing and verify Chinese fonts, sync, frame rate, audio remux, and output quality. |
+| caption-hyperframes-dynamic | HyperFrames animated captions | not-needed | Static burned subtitles meet the brief; word-level animated captions would change the visual style. | Use only with a separately approved HyperFrames composition and verified word timestamps. |
+| verify-hyperframes | HyperFrames quality checks | not-needed | No HyperFrames composition is selected for this conventional edit. | If scope changes, require lint, validate, inspect, animation map, contrast, and playback review. |
+| verify-ffprobe | ffprobe final media verification | selected | Resolution, aspect ratio, duration, codec, frame rate, and both streams must be confirmed before delivery. | Fail delivery if video or audio is missing, framing changed, or duration differs unexpectedly. |
+| verify-remotion-ssim | Remotion SSIM comparison | not-needed | No Remotion baseline or HyperFrames translation exists to compare. | If migration is added, align pixel format and color space before measuring the correct tier threshold. |
+| handoff-video-processing | Titles, cover, metadata, highlights, and package | selected | The final request explicitly includes a publish-ready folder beyond the edited video itself. | Pause for title and optional highlight selection, then package only approved artifacts and notes. |
+| exclude-kokoro | Kokoro exclusion | excluded | Kokoro was removed from the approved TTS stack and must not reappear through an old example. | Use the gender-gated shared voice route if synthesis is later requested. |
+| exclude-openai-whisper | openai-whisper and OpenAI API exclusion | excluded | These routes duplicate the approved Groq and faster-whisper stack without a project benefit. | Use them only for an explicit, separately approved comparison and record the resulting cost or model download. |
+| exclude-hyperframes-built-in-speech | HyperFrames built-in speech exclusion | excluded | Direct built-in TTS and raw-audio STT would bypass the shared gender and Groq-first routing rules. | HyperFrames may normalize an approved transcript, but provider selection stays in the shared speech routes. |
+| exclude-vertical-short | Automatic 9:16 crop exclusion | excluded | The user requires the original 16:9 composition and did not request reframing or a vertical variant. | Preserve source dimensions and framing; make any later format change an explicit, previewed decision. |
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_REFERENCES_EXAMPLE_PROCESSING_EVALUATION_MD_4DB522276E
+
+# video-tool-evaluation/references/tool-catalog.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/references/tool-catalog.md")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/references/tool-catalog.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_REFERENCES_TOOL_CATALOG_MD_6592FBEAB8'
+# Shared Video Tool Catalog
+
+Every planning-capable video workflow must assess every route below. Selection
+is not required; explicit, project-specific `not-needed`, `unavailable`, and
+`excluded` decisions are valid.
+
+## Required Route IDs
+
+### Workflow routing
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `route-video-creation` | Use `video-creation-automation` when no source video exists and the work starts from an idea, script, or assets. |
+| `route-video-processing` | Use `video-processing-automation` when raw or finished video already exists and needs editing, captions, packaging, or enhancement. |
+| `planning-direct` | Use the calling skill's direct interview/plan when its existing gate is sufficient. |
+| `planning-video-spec-builder` | Use `video-spec-builder` when shot-level requirements, capabilities, or storyboard decisions need deeper clarification. |
+| `route-website-to-hyperframes` | Use `website-to-hyperframes` when a live website is the source of brand/product evidence and capture assets. |
+| `route-remotion-to-hyperframes` | Use `remotion-to-hyperframes` only for an explicit source-code migration from Remotion. |
+
+### Assets and titles
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `asset-user-provided` | Existing photos, video, audio, screenshots, documents, logo, brand assets, fonts, music, and reference links. |
+| `asset-image-generator` | Current Agent native image generation through the shared `image-generator` route. |
+| `asset-pexels` | Pexels photo/video search, live key/quota health, manifest review, source page, creator attribution, and unchanged framing. |
+| `asset-website-capture` | Website screenshot/DOM/style capture through the website workflow or approved browser route. |
+| `asset-background-removal` | HyperFrames `remove-background`/u2net for transparent subject layers; distinguish cutout, hole-cut plate, and true inpainting. |
+| `title-hyperframes-css` | HyperFrames/CSS live title and text treatment. |
+| `title-imagemagick` | ImageMagick deterministic PNG title cards through `make_title_card.py`. |
+
+### Voice and TTS
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `voice-human` | Existing or newly recorded human narration. |
+| `voice-female-route` | Female route decision: Anna Su → HsiaoChen → local `say`. |
+| `voice-male-route` | Male route decision: skip ElevenLabs → YunJhe → local `say`. |
+| `voice-offline` | Sensitive/private narration forced to local macOS `say`. |
+| `voice-elevenlabs-anna` | ElevenLabs Anna Su, female only; assess key, quota/credits, cloud text upload, and batch size. |
+| `voice-edge-hsiaochen` | Edge-TTS `zh-TW-HsiaoChenNeural`, female fallback/default-quality comparison. |
+| `voice-edge-yunjhe` | Edge-TTS `zh-TW-YunJheNeural`, male primary route. |
+| `voice-macos-say` | macOS `say` local fallback for either gender and private content. |
+| `voice-voxcpm2` | VoxCPM2 only for explicit, authorized voice cloning or voice design. |
+
+### Speech-to-text
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `stt-groq` | Formal STT first choice: Groq `whisper-large-v3-turbo`; assess upload permission, key, quota, network, and timestamps. |
+| `stt-faster-whisper` | Formal local fallback: faster-whisper `large-v3-turbo`; assess local model size, speed, and compute. |
+| `stt-whisper-cpp` | Explicit quick preview only; assess the local model and preview-quality tradeoff. |
+| `stt-macwhisper` | Final Whisper option or GUI/manual comparison; validate CLI entitlement and timestamp output. |
+| `stt-sensevoice` | Supplementary Chinese/Cantonese, emotion, and sound-event analysis only; not the timed final transcript. |
+
+### Editing, composition, and motion
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `edit-auto-editor` | Auto-Editor through `smart_cut.py` for silence/pace cleanup; assess VFR/CFR and stream-order risk. |
+| `edit-ffmpeg-clip` | FFmpeg/`clip_cut.py` for deterministic trims, splices, remuxing, or highlight extraction. |
+| `compose-hyperframes` | Preferred seekable HTML composition and render route. |
+| `compose-playwright-ffmpeg` | Shared browser capture plus FFmpeg fallback when HyperFrames is not the selected renderer. |
+| `translate-remotion` | Remotion source lint, mechanical translation, escape hatch, and gap documentation. |
+| `motion-gsap` | GSAP timeline animation and HyperFrames synchronization. |
+| `motion-animejs` | Anime.js adapter when its timeline/property model better fits the approved composition. |
+| `motion-waapi-css` | Web Animations API or CSS keyframes for lightweight deterministic motion. |
+| `motion-lottie` | Lottie/dotLottie when an existing animation asset or lightweight loop is appropriate. |
+| `motion-three-webgl` | Three.js/WebGL for 3D models, product rotation, shaders, or GPU scenes. |
+| `motion-typegpu-webgpu` | TypeGPU/WebGPU for an approved GPU-rendered effect with supported runtime. |
+| `motion-audio-reactive` | Audio analysis mapped to deterministic visual properties when music/voice should drive motion. |
+
+### Audio and captions
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `audio-ffmpeg` | FFmpeg Full muxing, fades, normalization, ducking filters, stream mapping, and audio-only revision/remux. |
+| `audio-mix-audio` | `video-processing-automation/scripts/mix_audio.py` for BGM ducking without reframing. |
+| `caption-srt` | Timed SRT derived from the actual narration or human recording, with vocabulary cleanup and validation. |
+| `caption-libass-drawtext` | FFmpeg Full `subtitles`/`ass` and `drawtext` burn-in or text overlay. |
+| `caption-opencv-pillow` | OpenCV/Pillow subtitle burner only when FFmpeg Full/libass is unavailable. |
+| `caption-hyperframes-dynamic` | HyperFrames timed, word-highlighted, karaoke, or other animated captions. |
+
+### Verification and packaging
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `verify-hyperframes` | HyperFrames lint, validate, inspect, animation map, contrast, first/last-frame, and playback review. |
+| `verify-ffprobe` | Final resolution, duration, aspect ratio, frame rate, codec, video stream, and audio stream verification. |
+| `verify-remotion-ssim` | Remotion-to-HyperFrames pixel-format alignment, SSIM diff, tier threshold, and frame-strip diagnosis. |
+| `handoff-video-processing` | Subtitle cleanup, titles, cover, metadata/SEO, highlight clips, and upload-package handoff. |
+
+### Explicit exclusions and format boundary
+
+| route_id | Tool or decision to assess |
+|---|---|
+| `exclude-kokoro` | Kokoro is removed and must not return as a TTS route. |
+| `exclude-openai-whisper` | Python `openai-whisper` and the OpenAI Whisper API are not defaults because they duplicate the approved STT stack. |
+| `exclude-hyperframes-built-in-speech` | Direct HyperFrames built-in TTS/STT commands are not Arry's default speech routes. |
+| `exclude-vertical-short` | No automatic vertical-short mode, 9:16 crop, or reframing; only explicit user requests may change format/framing. |
+
+## Required Decision Detail
+
+For each applicable row, record:
+
+- why the tool changes or does not change this project's result;
+- installed/runtime/credential readiness without exposing secrets;
+- free, paid, quota, model-download, or compute implications;
+- local/cloud execution and privacy;
+- source, creator, attribution, or license duties;
+- framing, crop, resolution, timing, transcript, and timestamp effects;
+- the exact fallback or handoff.
+
+Generic reasons such as “not needed”, `TBD`, `N/A`, or empty cells do not pass
+validation.
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_REFERENCES_TOOL_CATALOG_MD_6592FBEAB8
+
+# video-tool-evaluation/scripts/validate_tool_evaluation.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/scripts/validate_tool_evaluation.py")"
+cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/scripts/validate_tool_evaluation.py" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SCRIPTS_VALIDATE_TOOL_EVALUATION_PY_4DEA47693E'
+#!/usr/bin/env python3
+"""Validate the shared full-catalog video tool evaluation."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+import re
+import sys
+
+
+REQUIRED_ROUTE_IDS = (
+    "route-video-creation",
+    "route-video-processing",
+    "planning-direct",
+    "planning-video-spec-builder",
+    "route-website-to-hyperframes",
+    "route-remotion-to-hyperframes",
+    "asset-user-provided",
+    "asset-image-generator",
+    "asset-pexels",
+    "asset-website-capture",
+    "asset-background-removal",
+    "title-hyperframes-css",
+    "title-imagemagick",
+    "voice-human",
+    "voice-female-route",
+    "voice-male-route",
+    "voice-offline",
+    "voice-elevenlabs-anna",
+    "voice-edge-hsiaochen",
+    "voice-edge-yunjhe",
+    "voice-macos-say",
+    "voice-voxcpm2",
+    "stt-groq",
+    "stt-faster-whisper",
+    "stt-whisper-cpp",
+    "stt-macwhisper",
+    "stt-sensevoice",
+    "edit-auto-editor",
+    "edit-ffmpeg-clip",
+    "compose-hyperframes",
+    "compose-playwright-ffmpeg",
+    "translate-remotion",
+    "motion-gsap",
+    "motion-animejs",
+    "motion-waapi-css",
+    "motion-lottie",
+    "motion-three-webgl",
+    "motion-typegpu-webgpu",
+    "motion-audio-reactive",
+    "audio-ffmpeg",
+    "audio-mix-audio",
+    "caption-srt",
+    "caption-libass-drawtext",
+    "caption-opencv-pillow",
+    "caption-hyperframes-dynamic",
+    "verify-hyperframes",
+    "verify-ffprobe",
+    "verify-remotion-ssim",
+    "handoff-video-processing",
+    "exclude-kokoro",
+    "exclude-openai-whisper",
+    "exclude-hyperframes-built-in-speech",
+    "exclude-vertical-short",
+)
+ALLOWED_STATUSES = {
+    "selected",
+    "fallback",
+    "not-needed",
+    "unavailable",
+    "excluded",
+}
+PLACEHOLDER_PATTERN = re.compile(
+    r"(?:\b(?:pending|tbd|todo|n/?a|fill)\b|待定|待補|稍後|不需要$)",
+    re.IGNORECASE,
+)
+
+
+def parse_rows(text: str) -> dict[str, tuple[str, str, str, str, int]]:
+    rows: dict[str, tuple[str, str, str, str, int]] = {}
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        if not line.lstrip().startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) != 5:
+            continue
+        route_id, tool, status, reason, boundary = cells
+        if route_id not in REQUIRED_ROUTE_IDS:
+            continue
+        if route_id in rows:
+            raise ValueError(
+                f"Duplicate route_id `{route_id}` on line {line_number}."
+            )
+        rows[route_id] = (
+            tool,
+            status.lower(),
+            reason,
+            boundary,
+            line_number,
+        )
+    return rows
+
+
+def validate_rows(
+    rows: dict[str, tuple[str, str, str, str, int]],
+) -> list[str]:
+    errors: list[str] = []
+    missing = [route_id for route_id in REQUIRED_ROUTE_IDS if route_id not in rows]
+    if missing:
+        errors.append("Missing route IDs: " + ", ".join(missing))
+
+    for route_id, (tool, status, reason, boundary, line_number) in rows.items():
+        if status not in ALLOWED_STATUSES:
+            errors.append(
+                f"Line {line_number} `{route_id}` has invalid status `{status}`."
+            )
+        if len(tool) < 2 or PLACEHOLDER_PATTERN.search(tool):
+            errors.append(
+                f"Line {line_number} `{route_id}` needs a concrete tool/route."
+            )
+        if len(reason) < 12 or PLACEHOLDER_PATTERN.search(reason):
+            errors.append(
+                f"Line {line_number} `{route_id}` needs a project-specific reason."
+            )
+        if len(boundary) < 12 or PLACEHOLDER_PATTERN.search(boundary):
+            errors.append(
+                f"Line {line_number} `{route_id}` needs boundary/fallback details."
+            )
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Validate a shared video TOOL_EVALUATION.md."
+    )
+    parser.add_argument("input", type=Path, nargs="?")
+    parser.add_argument(
+        "--self-test",
+        action="store_true",
+        help="Run an internal complete-catalog validator smoke test.",
+    )
+    args = parser.parse_args()
+
+    if args.self_test:
+        rows = {
+            route_id: (
+                "Representative tool or route",
+                "selected",
+                "Representative project-specific evaluation reason.",
+                "Representative privacy, cost, framing, and fallback boundary.",
+                index + 2,
+            )
+            for index, route_id in enumerate(REQUIRED_ROUTE_IDS)
+        }
+        errors = validate_rows(rows)
+        if errors:
+            for error in errors:
+                print("ERROR: " + error, file=sys.stderr)
+            return 1
+        incomplete_rows = dict(rows)
+        missing_route = REQUIRED_ROUTE_IDS[-1]
+        incomplete_rows.pop(missing_route)
+        incomplete_errors = validate_rows(incomplete_rows)
+        if not any(
+            error.startswith("Missing route IDs:") and missing_route in error
+            for error in incomplete_errors
+        ):
+            print(
+                "ERROR: self-test did not reject an incomplete catalog.",
+                file=sys.stderr,
+            )
+            return 1
+        print(
+            "Self-test passed: "
+            f"{len(rows)}/{len(REQUIRED_ROUTE_IDS)} routes assessed; "
+            "incomplete catalog rejected."
+        )
+        return 0
+
+    if args.input is None:
+        parser.error("input is required unless --self-test is used")
+    if not args.input.is_file():
+        print(f"Tool evaluation does not exist: {args.input}", file=sys.stderr)
+        return 2
+
+    try:
+        rows = parse_rows(args.input.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    errors = validate_rows(rows)
+    if errors:
+        for error in errors:
+            print("ERROR: " + error, file=sys.stderr)
+        return 1
+
+    print(
+        f"Tool evaluation valid: {len(rows)}/{len(REQUIRED_ROUTE_IDS)} routes assessed."
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SCRIPTS_VALIDATE_TOOL_EVALUATION_PY_4DEA47693E
+
+test -f "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" && echo "video-tool-evaluation installed for Codex, Claude, and AntiGravity"
 
 # ---- video-spec-builder ----
 mkdir -p "{{SYNC_ROOT}}/skills/video-spec-builder"
@@ -602,6 +1190,10 @@ description: 当用户说想做一个视频、宣传片、产品演示、动画�
 
     **迭代模式**：用户对已有 video-spec.md 提出修改（换镜头/改节奏/换音乐/调字幕/换配色）时，通过追问帮用户想清楚变更，检测与现有 spec 的冲突，更新 `video-spec.md`。
 
+    两种模式都必须调用共享 `video-tool-evaluation`，在 `video-spec.md`
+    同目录建立或更新 `TOOL_EVALUATION.md`，逐项评估完整工具清单。目的
+    是确认每个选项都被考虑，不是强迫每支影片使用所有工具。
+
 [启动检查]
     1. 扫描项目目录查找 video-spec 文档：
         - 精确匹配：`video-spec.md`
@@ -611,6 +1203,20 @@ description: 当用户说想做一个视频、宣传片、产品演示、动画�
         - 没找到 → 0-1 模式（read `references/workflow-0-1.md`）
     2. 检查项目根目录有没有 `design.md` / `DESIGN.md`（自定义主题文件；视觉风格阶段才用到，启动时不强制）
 
+[共享工具评估]
+    1. 读取 `video-tool-evaluation/references/tool-catalog.md`。
+    2. 在访谈取得足够的影片目的、素材、声音、字幕、动效、输出与隐私
+       条件后，完成完整 `TOOL_EVALUATION.md`；每项只能标记
+       selected / fallback / not-needed / unavailable / excluded，并写当前
+       项目的具体理由。
+    3. 规划阶段只能做只读的工具、凭证存在性与 API 健康检查；不得安装、
+       下载模型或素材、上传私密内容、消耗付费额度、生成音档或渲染。
+    4. 运行
+       `video-tool-evaluation/scripts/validate_tool_evaluation.py TOOL_EVALUATION.md`；
+       未通过时不得交付 `video-spec.md`。
+    5. 把 selected / fallback 的路线写进 spec；其他路线保留在评估档作为
+       可追溯记录。
+
 [第一性原则]
 
     [能力优先]
@@ -619,6 +1225,7 @@ description: 当用户说想做一个视频、宣传片、产品演示、动画�
 
         - 用户说"加段旁白" → 主动问"要不要我直接帮你生成 AI 配音，省得你录？30 秒搞定，
                               不过会有点'课件感'，没有真人那种小停顿和情绪"
+          如果选择 AI 配音，下一题固定问男声或女声；不要让用户重新挑 provider。
         - 用户说"加字幕" → 主动问"字幕要整句一起跳出来，像看电影那种安静呈现？
                               还是一个字一个字蹦，像 Karpathy 推文那种讲到哪个词亮哪个？"
         - 用户说"想要 3D 感" → 主动问"你想要 Apple 发布会那种产品 360° 真实旋转的沉浸感？
@@ -650,7 +1257,7 @@ description: 当用户说想做一个视频、宣传片、产品演示、动画�
 
         - 用户提到参考视频/品牌/产品 → 你直接说"我去上网查一下"，然后去搜
         - 涉及行业惯例（抖音时长、YouTube 比例、信息流节奏）→ 先去搜
-        - 涉及具体 TTS 模型 / 字体 / 动画库 → 上网搜确认最新可用版本
+        - TTS provider 固定沿用共享性别路由，不重新上网挑模型；字体 / 动画库或用户明确要求比较其他 provider 时才上网确认最新版本
         - 不确定的就去搜，不要凭印象答
 
 [技能]
@@ -681,6 +1288,7 @@ description: 当用户说想做一个视频、宣传片、产品演示、动画�
     ```
     项目根目录/
     ├── video-spec.md                           # 最终产物，由 skill 生成
+    ├── TOOL_EVALUATION.md                      # 共享完整工具评估与验证记录
     ├── design.md                               # 自定义主题；HyperFrames 渲染端读这个
     │                                           #（选 8 预设之一则无此文件）
     └── tokens.css                              # 可选 · 自定义主题的可复用 CSS
@@ -795,8 +1403,8 @@ description: 当用户说想做一个视频、宣传片、产品演示、动画�
 
     | 能力 | 触发条件 |
     |---|---|
-    | TTS 配音（本地 TTS，多语种） | 用户提到"旁白"、"配音"、"voice over" |
-    | 字幕生成（Whisper 逐词时间戳） | 用户提到"字幕"、"无声播放"、"卡拉 OK" |
+    | TTS 配音（先问男／女声，再走共享路由） | 用户提到"旁白"、"配音"、"voice over" |
+    | 字幕生成（Groq 优先的 Whisper 时间戳） | 用户提到"字幕"、"无声播放"、"卡拉 OK" |
     | 抠像（人物分割，透明 WebM） | 用户有真人出镜素材 |
     | GSAP / animejs / waapi / CSS 动画 | 任何镜头默认有动效 |
     | Lottie | 用户提到"已有 AE 资产"或想要轻量循环动效 |
@@ -912,9 +1520,9 @@ description: 当用户说想做一个视频、宣传片、产品演示、动画�
     - 迭代模式：read `references/workflow-iteration.md`
 
     [完成后引导]
-        Spec 生成完毕后（不管是 0-1 模式还是迭代模式），告诉用户：
+        Spec 与共享工具评估都生成并通过验证后（不管是 0-1 模式还是迭代模式），告诉用户：
 
-        "video-spec.md 已[生成 / 更新]完毕。
+        "video-spec.md 与 TOOL_EVALUATION.md 已[生成 / 更新]并通过验证。
          接下来是否启动 HyperFrames 生成视频？输入 hyperframes 开始。"
 
         不需要解释 HyperFrames 怎么干活——它会自己读 video-spec.md。
@@ -6003,7 +6611,7 @@ cat > "{{SYNC_ROOT}}/skills/video-spec-builder/examples/video-spec-spacex.md" <<
 
 | 类型 | 生成方式 | 输出 |
 |---|---|---|
-| TTS 旁白 | 用渲染端本地 TTS，男声 / 略沉稳 / 偏纪录片旁白感 / 1.0x 速率（具体 voice ID 查渲染端文档） | audio/narration.wav |
+| TTS 旁白 | 男声共享路由：跳过 ElevenLabs，使用 Edge-TTS YunJhe，失败时 macOS `say`；略沉稳 / 偏纪录片旁白感 / 先按自然语速实测 | audio/narration.mp3 |
 | 字幕 transcript | 用 transcribe 从 narration.wav 生成逐词时间戳 | transcript.json |
 
 ### 待搜索素材
@@ -6394,7 +7002,7 @@ cat > "{{SYNC_ROOT}}/skills/video-spec-builder/examples/video-spec-spacex.md" <<
 - Scene 04–05 Falcon 1 第四发视频：NASA 公共素材是否有 1080p 以上版本？如果只有低质，需在渲染前确认，或考虑用 SpaceX 后期重制的纪念视频
 - 画面标注数值核对：各 Scene 标注里的数值（122m 塔高 / 70m 助推器 / Falcon 9 着陆速度区间 / SpaceX 年度发射数）渲染前需逐项核对最新公开数据，避免标注出错——标注层一旦数字错，比没有标注更伤可信度
 - 速度 / 高度读数：Scene 07 / 14 的实时读数需要和所选 footage 的真实下降曲线对齐，渲染端若拿不到遥测数据，可改为"区间标注"（如"≈ 300 → 0 km/h"）而非逐帧精确读数
-- Voice ID：语气基调描述为"男声 / 略沉稳 / 纪录片旁白感"，具体可用 voice ID 查渲染端文档后填入，建议试 2-3 个选最对味的
+- TTS：已定男声，固定跳过 ElevenLabs，使用 Edge-TTS YunJhe；失败时用 macOS `say`，先做两句实测再按影片节奏微调
 - 音效文件：blip / tick / pop / thump / boom 待从 Freesound / Pixabay SFX 搜索下载，关键词已在 § 5 待搜索素材列出
 - BGM 时长适配：Pixabay 上 Minimal Tech Ambient (Main) 原长度需确认是否 ≥ 180s，如不足需用同曲多版本拼接
 AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_EXAMPLES_VIDEO_SPEC_SPACEX_MD_6F0760D580
@@ -7719,21 +8327,24 @@ description: 视频需求收集追问问题库，5 个 Phase。你在收集需�
             BGM 节奏决定剪辑卡点。不先定音频路径，所有时间码都没基准。
 
         [主问题]
-            先告知能力："渲染端内置本地 TTS（不需要 API key、不要钱、纯本地。具体型号 / 支持声音 ID / 支持语言数 → 我去查渲染端文档或上网搜一下最新版本。)"
+            先告知能力："AI 配音会先问男声或女声，再自动走已经设定好的声音顺序，不需要重新挑 provider。"
             然后问：
             - 旁白怎么搞？三个选项：
                 1. **真人录音**（你或同事录，发我 wav/mp3）
-                2. **本地 TTS**（直接走配置）
+                2. **AI TTS**（再确认男声／女声）
                 3. **不要旁白**（纯文字 + 音乐）
             - 背景音乐打算用版权音乐（Epidemic Sound / Artlist）还是免版税（YouTube Audio Library）？还是不要？
             - 音效（whoosh、click、ding）打算放吗？
 
         [追问深化]
             **(a) TTS 路径**
-                - 用户说"用 AI 配音"→ 你回："什么语言？具体可用的声音 ID 我去查渲染端文档（或上网拉最新列表）。选一个或我列候选给你试。"
-                - 用户说"中文配音"→ 你回："本地 TTS 中文整体不如英文自然（中文 TTS 普遍如此）。介意吗？介意就考虑真人录音 + 后期混音。"
-                - 用户说"用 GPT 那种 voice"→ 你回："本地 TTS 不要 API key 不要钱不发出网络请求。要做几十次迭代用本地 TTS 不心疼，要做一次但音质极致可以考虑 ElevenLabs / 类似云 TTS，但要单独接入。挑一个路线。"
-                - 用户说"语速正常"→ 你回："本地 TTS 默认 1.0，教程类一般 0.7-0.8，营销类 1.1-1.2。你这支是哪种？"
+                - 用户说"用 AI 配音"→ 你先问："要男声还是女声？"；已经说明性别就不重问。
+                - 女声固定记录：ElevenLabs Anna Su → Edge-TTS HsiaoChen → macOS `say`。
+                - 男声固定记录：跳过 ElevenLabs → Edge-TTS YunJhe → macOS `say`。
+                - 用户说"中文配音"但没有性别 → 仍只追问男声／女声，不重新列 provider 或 voice ID 清单。
+                - 用户说"用 GPT 那种 voice"→ 说明目前已有固定路由；只有用户明确要比较新 provider 时才另开比较。
+                - 用户说"语速正常"→ 你回："会先用该声音的自然语速做两句试听，再按实测时长微调。你这支偏教程感还是营销感？"
+                - 机密、个资或不可上传文字 → 固定记录离线 `voice-reply --engine say`。
 
             **(b) 真人录音路径**
                 - 用户说"我录"→ 你回："录音环境是房间还是录音棚？房间有反响音的话需要后期降噪。"
@@ -7746,7 +8357,7 @@ description: 视频需求收集追问问题库，5 个 Phase。你在收集需�
                 - 用户说"不要背景音乐"→ 你回："纯人声 + 环境音也行，但要确认旁白音频本身够干净。再说一次：要有节奏感的视频，没 BGM 会显得很赤裸。"
 
         [接受标准]
-            - 旁白路径确定：真人 / TTS（带声音 ID，具体 ID 由渲染端文档定）/ 无旁白
+            - 旁白路径确定：真人 / TTS（男声或女声 + 共享路由）/ 无旁白
             - BGM 来源确定（具体歌曲或确认让你推荐）
             - 是否要音效确定
 
@@ -7989,7 +8600,7 @@ description: 视频需求收集追问问题库，5 个 Phase。你在收集需�
 
                 1. **常驻字幕**：全句出现，停留几秒，下一句替换。最朴素。
                 2. **关键词高亮**：全句出现，某个关键词颜色加粗或加 marker / 圈圈 / burst / scribble。
-                3. **卡拉 OK 逐词**：本地 Whisper 自动生成逐词时间戳，每个词在被念到的瞬间高亮（颜色变 / 字重变 / 微缩放）。
+                3. **卡拉 OK 逐词**：共享 Groq-first STT 路由生成时间戳，每个词在被念到的瞬间高亮（颜色变 / 字重变 / 微缩放）。
 
             然后问：
             - 你要哪一档？社媒短视频几乎必选 3，教程片常选 1 或 2，纪录片常选 1。
@@ -7997,7 +8608,7 @@ description: 视频需求收集追问问题库，5 个 Phase。你在收集需�
             - 还有打字机效果（字一个一个跳出来）吗？动态字重变化（字重从 400 渐变到 800 强调）吗？
 
         [追问深化]
-            - 用户说"做小红书的"→ 你回："几乎一定要卡拉 OK 逐词字幕，因为 70% 用户静音刷。用本地 Whisper 直接生成时间戳，不要 API key。同意吗？"
+            - 用户说"做小红书的"→ 你回："几乎一定要卡拉 OK 逐词字幕，因为 70% 用户静音刷。正式字幕会先用 Groq，无法使用时自动改用 faster-whisper；同意吗？"
             - 用户说"教程视频"→ 你回："建议常驻字幕 + 关键词高亮。每句话停留 2-4 秒，关键词用 marker（亮色矩形扫过）强调。"
             - 用户说"不要字幕"→ 你回："确定？平台默认静音播放的话，30%-70% 用户看不懂在说什么。再次确认。"
             - 用户说"想要那种打字机"→ 你回："打字机效果在每个场景持续 2-3 秒就够，太长用户会烦。你要打字机的场景是 hook、定义、还是收尾？"
@@ -9043,7 +9654,8 @@ description: 填写 video-spec.md 模板时的字段约束、规格一致性校�
 - hook 镜头必须落在视频开头 3s 内至少 1 个
 
 ### § 7 音频时间轴
-- TTS 旁白写清「用 [voice ID] [Nx 速率] 从 [script 文件] 生成」
+- TTS 旁白写清「男声／女声、共享 fallback 顺序、实测速率、script 文件」；女声固定 Anna Su → HsiaoChen → `say`，男声固定 YunJhe → `say`
+- STT 写清正式顺序 Groq → faster-whisper → MacWhisper；whisper.cpp 仅限明确快速预览，SenseVoice 仅限补充分析
 - BGM volume 通常 0.15-0.25，旁白同时存在时 ducking 到 0.1-0.15
 - 音效时间码必须能在 § 6 分镜表找到对应触发点
 - BGM 起止时间 = 视频总时长
