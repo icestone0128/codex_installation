@@ -1,6 +1,6 @@
 # 02-Codex-MCP-Essentials
 
-> 2026-07-20 更新：MCP 改為「共用服務契約＋Codex／Claude／AntiGravity 原生 adapter」。Heptabase CLI Skill 維持 `0.4.x` 相容；Codex sandbox references 明確標示為 Codex 專屬 adapter，不當作其他 Agent 設定格式。
+> 2026-07-30 更新：新增 Claude-first 的 Google Workspace MCP 必要項，固定使用 `workspace-mcp==1.22.2`、本機 loopback HTTP、Drive／Gmail／Calendar core read-only 權限與共用 Python runtime；完整 installer、runner 與 macOS LaunchAgent template 放在 `02-assets/google-workspace-mcp/`。MCP 仍採「共用服務契約＋Codex／Claude／AntiGravity 原生 adapter」。
 
 
 ## 目標
@@ -24,6 +24,7 @@ python3 --version
 - 多數本地 stdio MCP server 透過 `npx` 啟動，沒有 Node.js / npm 會直接失敗。
 - Git 只在安裝腳本需要 clone 或從 GitHub 安裝時才是必要。
 - Python 只在 Python CLI、uv tool 或 CLI-Anything harness 需要時才是必要。
+- Google Workspace MCP 需要 `uv` 與 Python 3.10+；本 Item 的安裝器固定用 Python 3.12，並重用 Item 34 的 `{{CODEX_HOME}}/python-tools` 共用 runtime。
 - 需要 Firecrawl 時，準備 `{{CODEX_HOME}}/secrets/firecrawl_api_key`，權限設為 `600`。
 - 需要 Filesystem MCP 時，先決定最小授權資料夾。
 
@@ -119,15 +120,160 @@ tool_timeout_sec = 120
 
 安裝方式請使用本文文末「內建 Skill 完整安裝內容」；本項會同步安裝 `SKILL.md` 與 `references/`。
 
-## Google Drive / Gmail / Calendar
+## Google Workspace MCP（Claude-first 必要項）
 
-當前 Agent 有對應 plugins／connectors 時，優先使用原生通道；沒有時使用經核准的 OAuth／CLI／API 路線，不因某 Agent 缺少 plugin 而排除它。
+用途：在 Claude Code 沒有 Codex Google plugins 的環境中，提供同一個 Drive／Gmail／Calendar 唯讀工作面。來源是 [taylorwilsdon/google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)，Python package 固定為 `workspace-mcp==1.22.2`；更新版本前要先重跑權限與工具清單驗證。
 
-建議：
+這個預設不是「把整個 Google Workspace 全開」：
 
-- Drive / Docs / Sheets / Slides：Google Drive plugin。
-- Gmail：Gmail plugin。
-- Calendar：Google Calendar plugin。
+- 只啟用 `calendar`、`drive`、`gmail`。
+- 使用 `--tool-tier core`。
+- 三個服務都使用 `readonly`。
+- HTTP server 只綁定 `127.0.0.1:8000`，不對區網或網際網路開放。
+- OAuth client secret 與 token 只放在 `{{CODEX_HOME}}/secrets`，不寫進 repo、LazyPack、Obsidian 或 Agent 設定。
+- Codex 已有 Google Drive、Gmail、Calendar 官方 plugins 時繼續使用原生 plugins；避免在同一個 Agent 重複暴露兩套同義工具。Claude 預設連這個 MCP；AntiGravity 依其目前原生 MCP 入口加上同一 endpoint。
+
+### 1. Google Cloud 最小設定
+
+建議建立一個專用 Google Cloud project；若帳號已達 project quota，可沿用既有 project，但只新增獨立 OAuth client，不改 Firebase 或其他服務設定。
+
+1. 在 OAuth consent screen 建立 app，External 測試模式要把自己的 Google 帳號加入 Test users。
+2. 只啟用：
+   - Google Drive API
+   - Gmail API
+   - Google Calendar API
+3. 建立 `Desktop app` 類型的 OAuth 2.0 Client。
+4. 不要把下載的 OAuth JSON 放進 repo。只把 client ID、client secret 與登入帳號存成下列本機檔案：
+
+```text
+{{CODEX_HOME}}/secrets/google_workspace_mcp_oauth_client_id
+{{CODEX_HOME}}/secrets/google_workspace_mcp_oauth_client_secret
+{{CODEX_HOME}}/secrets/google_workspace_mcp_user_email
+```
+
+安全寫入範例：
+
+```bash
+install -d -m 700 "{{CODEX_HOME}}/secrets"
+
+IFS= read -r -p "OAuth client ID: " google_client_id
+printf '%s\n' "$google_client_id" > "{{CODEX_HOME}}/secrets/google_workspace_mcp_oauth_client_id"
+unset google_client_id
+
+IFS= read -r -s -p "OAuth client secret: " google_client_secret
+printf '\n'
+printf '%s\n' "$google_client_secret" > "{{CODEX_HOME}}/secrets/google_workspace_mcp_oauth_client_secret"
+unset google_client_secret
+
+IFS= read -r -p "Google account email: " google_user_email
+printf '%s\n' "$google_user_email" > "{{CODEX_HOME}}/secrets/google_workspace_mcp_user_email"
+unset google_user_email
+
+chmod 600 "{{CODEX_HOME}}/secrets/google_workspace_mcp_"*
+```
+
+### 2. 安裝共用 runtime 與本機服務
+
+從完整 LazyPack 根目錄執行：
+
+```bash
+bash 02-assets/google-workspace-mcp/install_google_workspace_mcp.sh
+```
+
+若從本 repo 根目錄執行：
+
+```bash
+bash 200_Reference/lazy-pack/02-assets/google-workspace-mcp/install_google_workspace_mcp.sh
+```
+
+安裝器會：
+
+- 用 `uv tool` 把固定版本安裝到 `{{CODEX_HOME}}/python-tools/google-workspace-mcp/uv-tools`。
+- 把共用執行入口放在 `{{CODEX_HOME}}/python-tools/bin`。
+- 建立 `{{CODEX_HOME}}/secrets/google_workspace_mcp_credentials` 作為 OAuth token 目錄，權限為 `700`。
+- 在 macOS 建立 `com.lazy-pack.google-workspace-mcp` LaunchAgent，保持 loopback server 可用。
+- 預設以 user scope 新增 Claude HTTP adapter：`google-workspace -> http://127.0.0.1:8000/mcp`。
+- 等待 server readiness 後才判定成功，避免背景啟動較慢造成假失敗。
+
+Linux／WSL 不會安裝 macOS LaunchAgent；請用 systemd user service 或在使用前執行：
+
+```bash
+"{{CODEX_HOME}}/python-tools/bin/google-workspace-mcp-server"
+```
+
+### 3. 三 Agent adapter
+
+共用 endpoint：
+
+```text
+http://127.0.0.1:8000/mcp
+```
+
+Claude adapter（安裝器預設自動完成）：
+
+```bash
+claude mcp add --transport http --scope user google-workspace http://127.0.0.1:8000/mcp
+claude mcp list
+```
+
+Codex adapter（只有在沒有或停用對應 Google plugins 時才加）：
+
+```bash
+codex mcp add google-workspace --url http://127.0.0.1:8000/mcp
+codex mcp list
+```
+
+AntiGravity adapter：在目前版本的 MCP Store 或 `{{GEMINI_CONFIG}}/mcp_config.json` 加入相同 HTTP endpoint，再重載。若使用 Gemini CLI：
+
+```bash
+gemini mcp add --scope user --transport http google-workspace http://127.0.0.1:8000/mcp
+gemini mcp list
+```
+
+三個 adapter 不共用設定檔，也不把彼此的 JSON／TOML 做 symlink；共用的只有 endpoint、權限、OAuth secret 路由與驗證標準。
+
+### 4. OAuth 與唯讀驗證
+
+先驗證 server：
+
+```bash
+bash 02-assets/google-workspace-mcp/install_google_workspace_mcp.sh --check
+"{{CODEX_HOME}}/python-tools/bin/workspace-cli" \
+  --url http://127.0.0.1:8000/mcp \
+  list
+```
+
+第一次實際呼叫 Google 工具時，依畫面開啟 OAuth URL 並同意指定 scope；token 會進入 `{{CODEX_HOME}}/secrets/google_workspace_mcp_credentials`。之後只做低風險 read-only smoke test：
+
+- Calendar：列出日曆或查一段短日期範圍。
+- Drive：搜尋一個已知、不敏感的測試檔名。
+- Gmail：搜尋自己的低敏感測試郵件；不要批次讀整個信箱。
+- 工具清單不應包含寄信、建立 Drive 檔案、建立資料夾或修改行事曆事件等寫入工具。
+
+若要新增 Docs／Sheets／Slides／Tasks，先回到最小權限評估；不要直接把 `complete` tier 或所有 API 當預設。
+
+### 5. 更新、停用與撤銷
+
+版本更新必須明確指定並重新驗證：
+
+```bash
+WORKSPACE_MCP_VERSION=<已審查版本> \
+  bash 02-assets/google-workspace-mcp/install_google_workspace_mcp.sh
+```
+
+停用 Claude adapter：
+
+```bash
+claude mcp remove --scope user google-workspace
+```
+
+撤銷時同步：
+
+1. 在 Google Account 撤銷該 app 的授權。
+2. 在 Google Cloud 刪除或停用對應 OAuth client。
+3. 卸載各 Agent adapter。
+4. 停止本機 LaunchAgent。
+5. 將 `{{CODEX_HOME}}/secrets/google_workspace_mcp_credentials` 移到垃圾桶或安全刪除。
 
 ## 驗證
 
@@ -139,7 +285,7 @@ tool_timeout_sec = 120
 4. Firecrawl：抓取 `https://example.com`。
 5. Filesystem：列出 `{{FILESYSTEM_ALLOWED_DIR}}` 內的一個測試資料夾。
 6. Browser plugin：開啟 `https://example.com` 並截圖。
-7. Google Drive / Gmail / Calendar：各查一個不敏感的測試項目。
+7. Google Workspace MCP：確認 endpoint handshake、三服務唯讀工具清單與各一個低敏感 read-only 查詢；有原生 Google plugins 的 Codex 不重複安裝 adapter。
 
 若任何一項失敗，先檢查 command 絕對路徑、API key、登入狀態與當前 Agent 是否已重載，再測試共用 CLI／API fallback。
 
@@ -188,6 +334,10 @@ args = ["-lc", "NPM_CONFIG_CACHE=/private/tmp/firecrawl-mcp-cache FIRECRAWL_API_
 - 當前 Agent 已有原生 browser／computer-use 時，瀏覽器自動化優先使用原生通道；需要可重現 CLI 時改用 `playwright` skill。
 - Filesystem MCP 授權範圍不能太大，否則安全風險高。
 - Firecrawl key 不能進 Git、Obsidian 公開筆記或 README。
+- Google Workspace OAuth client secret 與 token 只能放在 `{{CODEX_HOME}}/secrets`；OAuth consent、Desktop client、三個 API 與首次登入缺一不可。
+- Google Workspace MCP 的預設權限是 Drive／Gmail／Calendar core read-only；擴權前要重新評估，不把 `complete` tier 當成安裝成功捷徑。
+- 首次 OAuth 的 authorization URL 含短效 state；看到 `Invalid or expired OAuth state parameter` 時，不要重建 client，直接重跑原本的唯讀工具取得新 URL，並在約 10 分鐘內完成同意與 callback。
+- macOS LaunchAgent 啟動 Python server 可能需要數秒；安裝器要等待 MCP handshake，不以單次立即探測判定失敗。
 - 對影響到的 Codex、Claude、AntiGravity 分別重載後，再確認 MCP 是否出現在實際可呼叫工具清單。
 
 
