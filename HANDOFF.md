@@ -2,27 +2,23 @@
 
 ## Current state
 
-- `mattpocock/skills` 的 41 個來源項目已完成盤點：22 個穩定
-  engineering／productivity skills 已適配為三 Agent 共用套件，其餘
-  19 個 deprecated／in-progress／misc／personal 項目只在 manifest
-  追蹤。
-- 全域主版本新增 `engineering-methods`、`setup-engineering-methods`、
-  `grill-me` 等 22 個 packages；`engineering-methods` 內建只讀上游
-  SHA checker、完整 manifest、更新流程與 suite verifier。
-- LazyPack Item 40 完整內嵌 22 個 packages；Item 11 已接入
-  `writing-great-skills` 方法論。Repo LazyPack、Obsidian 懶人包鏡像與
-  全域 Skills 索引一致。
-- 公開發布 commit `774d00b feat: add engineering methods skill suite`
-  已推送至 `origin/main`。
+- Google Workspace MCP 已採 Claude-first 路線完成安裝；Codex 保留原生
+  Google Drive、Gmail、Calendar plugins，避免同義工具重複。
+- 本機固定使用 `workspace-mcp==1.22.2`、共用 Python runtime、
+  loopback HTTP endpoint 與 macOS LaunchAgent。
+- 公開 LazyPack Item 02 已包含完整安裝文件、runner、installer 與
+  LaunchAgent template；Obsidian 懶人包鏡像已同步。
+- 預設工具契約只啟用 Drive／Gmail／Calendar core read-only，OAuth
+  client 與 token 只保存在本機 secrets 目錄，不進 repo 或 Obsidian。
 
 ## Next action
 
-- 日常使用從 `$engineering-methods` 選流程，或直接呼叫
-  `$grill-me`、`$to-spec`、`$to-tickets`、`$implement` 等成員。
-- 未來先執行
-  `engineering-methods/scripts/check_upstream.py`；只有上游 SHA 改變時，
-  才依 `references/update-workflow.md` 重新分類、適配、重建 Item 40、
-  同步 Obsidian 並做隔離安裝。
+- 日常 Claude 任務直接使用 `google-workspace` MCP；Codex 繼續使用官方
+  Google plugins。
+- 更新 `workspace-mcp` 前先審查版本、重跑 Item 02 installer、確認 9 個
+  唯讀工具與三服務 smoke test，再同步 LazyPack／Obsidian。
+- 若 callback 顯示 OAuth state 過期，重新觸發任一唯讀工具取得新 URL，
+  不需重建 OAuth client。
 
 ## Blockers
 
@@ -30,10 +26,11 @@
 
 ## Last verified
 
-- 2026-07-30，Codex App：23 個受影響 skills 通過 quick validation；
-  suite verifier 22／22、0 findings；上游 baseline SHA 仍為 current。
-- 2026-07-30，Codex App：跨 Agent audit 掃描 615 個檔案、0 findings；
-  Item 40 在隔離 `SYNC_ROOT` 真實安裝 22／22。
-- 2026-07-30，Codex App：LazyPack／Obsidian `diff -qr` 為 0；
-  `sync-health.sh` 為 0 failures、1 個預期未提交變更 warning。
-- 2026-07-30，Codex App：`origin/main` 已包含 `774d00b`。
+- 2026-07-30，Codex App：MCP handshake、Claude adapter、loopback
+  listener、LaunchAgent 與 read-only 工具契約通過。
+- 2026-07-30，Codex App：Calendar、Drive、Gmail 三項真實唯讀 smoke
+  test 通過；OAuth token 檔案權限為 `600`。
+- 2026-07-30，Codex App：macOS 實機重裝與 Linux／WSL 隔離安裝通過；
+  Bash／plist、公開路徑、secret pattern 與 `git diff --check` 通過。
+- 2026-07-30，Codex App：repo LazyPack 與 Obsidian 懶人包鏡像
+  `diff -qr` 為 0。

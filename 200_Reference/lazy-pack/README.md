@@ -10,6 +10,8 @@
 
 2026-07-30 更新：新增 [[40-Engineering-Methods-Skill-Suite-安裝]]，把 `mattpocock/skills` 的 22 個穩定 engineering／productivity 方法改寫成 Codex、Claude、AntiGravity 共用套件；內建 `engineering-methods` 路由、`grill-me`、規格／ticket／TDD／review／debug／handoff 等 skills，以及只讀上游版本檢查與完整 41 項 manifest。19 個 deprecated、in-progress、misc、personal 項目只追蹤、不安裝。
 
+2026-07-30 更新：Item 02 新增 Claude-first Google Workspace MCP 必要項。公開 LazyPack 內建 pinned `workspace-mcp` installer、loopback runner 與 macOS LaunchAgent template，預設只開 Drive／Gmail／Calendar core read-only；Codex 有官方 Google plugins 時不重複註冊同義 MCP，Claude 與 AntiGravity 使用各自原生 adapter。
+
 ## 先填這張設定表
 
 開始前，先決定自己的路徑與帳號。後續所有文件都引用這張表。
@@ -45,6 +47,9 @@
 | `{{GITHUB_EMAIL}}` | Git commit email | `123456+alex-dev@users.noreply.github.com` |
 | `{{REPO_NAME}}` | GitHub repo 名稱 | `my-project` |
 | `{{GOOGLE_ACCOUNT}}` | Google 帳號 | `alex@example.com` |
+| `{{GOOGLE_WORKSPACE_MCP_CLIENT_ID_PATH}}` | Google Workspace MCP OAuth client ID 本機檔案 | `{{CODEX_HOME}}/secrets/google_workspace_mcp_oauth_client_id` |
+| `{{GOOGLE_WORKSPACE_MCP_CLIENT_SECRET_PATH}}` | Google Workspace MCP OAuth client secret 本機檔案 | `{{CODEX_HOME}}/secrets/google_workspace_mcp_oauth_client_secret` |
+| `{{GOOGLE_WORKSPACE_MCP_CREDENTIALS_DIR}}` | Google Workspace MCP OAuth token 本機目錄 | `{{CODEX_HOME}}/secrets/google_workspace_mcp_credentials` |
 | `{{FIREBASE_PROJECT_ID}}` | Firebase 專案 ID | `my-project-12345` |
 | `{{FIRECRAWL_API_KEY_SECRET_PATH}}` | Firecrawl API key 本機檔案 | `{{CODEX_HOME}}/secrets/firecrawl_api_key`；不寫進 repo |
 | `{{FILESYSTEM_ALLOWED_DIR}}` | Filesystem MCP 最小授權資料夾 | `{{HOME}}/Documents` |
@@ -64,7 +69,7 @@
 照這個順序做，下載者可以從空白環境建立 Codex、Claude、AntiGravity 共用專案架構。即使當下尚未安裝其中某個 Agent，Item 16 仍會預先建好入口：
 
 1. [[01-Codex-必裝-Skills-與-Plugins]]
-2. [[02-Codex-MCP-Essentials]]
+2. [[02-Codex-MCP-Essentials]]（含 Claude-first Google Workspace MCP 必要項）
 3. [[03-連接-GitHub]]
 4. [[04-建立第二大腦-Obsidian]]
 5. [[05-第二大腦設定指南]]
@@ -117,7 +122,7 @@
 
 ```text
 01：三 Agent 共用 `pdf`、`playwright` skills，並對 Codex／Claude／AntiGravity 各自的 plugins、connectors、MCP 與原生 browser 能力做 adapter 檢查
-02：MCP / 外部工具 / CLI 連線，例如 Firecrawl、Filesystem、heptabase-cli
+02：MCP / 外部工具 / CLI 連線，例如 Firecrawl、Filesystem、heptabase-cli，以及 pinned `workspace-mcp` 的 Drive／Gmail／Calendar core read-only 安裝資產
 05：secondbrain-research-digest
 07：notebooklm-architecture、presentation-workflow
 09：arry-assistant
@@ -165,7 +170,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | Chezmoi bootstrap | `{{CHEZMOI_SOURCE}}` | 維護三個 Agent 的原生規則／skills 入口 templates；不保存 secrets |
 | Agent 原生入口 | `{{CODEX_HOME}}/*`、`{{CLAUDE_HOME}}/*`、`{{GEMINI_HOME}}/*` | symlink 到共享主版本，不複製內容 |
 | LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...40.md` | Items 01～38 與 40 依各文件標示內嵌公開可散布內容；Item 39 只含私人來源橋接 installer／verifier |
-| 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每台電腦本機重建的 Python 工具 venv 與 wrapper；供 Codex／Claude／AntiGravity 和所有專案共用，不放模型或技能專屬 runtime |
+| 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每台電腦本機重建的 Python 工具 venv 與 wrapper；供 Codex／Claude／AntiGravity 和所有專案共用，Google Workspace MCP 也使用這個 runtime，不放模型或技能專屬 runtime |
 | 三 Agent Python 中立入口 | `{{HOME}}/.local/share/agent-tools/python-tools` | Item 16 的 chezmoi symlink，指向該機器的 Python tools runtime；三個 Agent 都從它的 `bin` 呼叫相同 wrapper |
 | 三 Agent Python env loader | `{{HOME}}/.config/agent-tools/python-tools.env` | Item 16 建立；透過不覆蓋既有內容的 `.zshenv`／`.zprofile`／`.profile`／`.bash_profile` 標記區塊載入 PATH |
 | Arry/個人助手全域入口 | `{{SYNC_ROOT}}/skills/{{ASSISTANT_SKILL_NAME}}` | 每次專案初始化都要帶入，用來讀取個人助手資料層並協助判斷 skill 歸屬 |
@@ -235,12 +240,14 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 - 需要 GitHub 時，安裝 GitHub CLI `gh` 並登入。
 - 需要 Firebase 時，準備 Firebase / Google 帳號與一個 Firebase project。
 - 需要 Firecrawl 時，準備 Firecrawl API key。
-- 需要 NotebookLM／Google Drive／Gmail／Calendar 時，優先當前 Agent 的原生 plugin／connector／MCP；缺少時走已核准 OAuth／CLI／手動 fallback。
+- 需要 Claude 使用 Google Drive／Gmail／Calendar 時，Item 02 的 Google Workspace MCP 是必要安裝；要先準備 `uv`、Python 3.12、Google Cloud OAuth Desktop client，並只啟用三個對應 API。
+- Codex 已有 Google Drive／Gmail／Calendar 官方 plugins 時優先原生 plugin，不重複註冊 Item 02 的同義 MCP；AntiGravity 使用自己的原生 MCP adapter 連同一個 loopback endpoint。
 
 ## 共同安全規則
 
 - 不把 `.env`、API key、token、密碼、Admin 憑證、個資或敏感資料寫入 repo 或 Obsidian 筆記。
 - 需要 API key 的 MCP 只能記錄遮蔽範例，例如 `fc-***`。
+- Google Workspace OAuth client secret 與 OAuth token 只放在 `{{CODEX_HOME}}/secrets`；公開 LazyPack 只包含 installer 與 placeholder，不包含任何人的 OAuth client 或帳號授權。
 - 專案固定規則寫在專案根目錄 `AGENTS.md`。
 - 可攜式全域核心規則寫在 `{{GLOBAL_RULES}}`；三個 Agent 的原生規則入口由 chezmoi 指向同一份主檔。
 - 不要另外維護 `{{SYNC_ROOT}}/agents/AGENTS.md`，也不要在 Agent home 複製內容。
