@@ -2,25 +2,38 @@
 
 ## Current state
 
-- 共用 `video-tool-evaluation` 已完成 53-route catalog、validator 與 16:9 talking-head 完整範例；影片規劃會評估所有 route，但只執行被選取或備援的工具。
-- `video-processing-automation`、`video-creation-automation`、`video-spec-builder`、HyperFrames 相關 Skills 與目前安裝的 plugin adapters 已接入同一個 `TOOL_EVALUATION.md` planning gate。
-- STT 固定為 Groq Whisper 優先、faster-whisper 正式備援、whisper.cpp 快速預覽、MacWhisper 最後選項；SenseVoice 只作補充分析。
-- TTS 先確認女聲或男聲；女聲為 ElevenLabs Anna Su → Edge HsiaoChen → macOS `say`，男聲跳過 ElevenLabs，使用 Edge YunJhe → macOS `say`；Kokoro 已排除。
-- LazyPack Items 26／27／29／30 都各自內嵌完整 `video-tool-evaluation`，Items 33／37 也保留獨立安裝；Item 34 補齊 FFmpeg Full、ImageMagick、Auto-Editor 與 provider packages。
-- TTS 比較音檔留在本機 `100_Todo/projects/tts-comparison-20260729/`，不納入 public repo。
+- `mattpocock/skills` 的 41 個來源項目已完成盤點：22 個穩定
+  engineering／productivity skills 已適配為三 Agent 共用套件，其餘
+  19 個 deprecated／in-progress／misc／personal 項目只在 manifest
+  追蹤。
+- 全域主版本新增 `engineering-methods`、`setup-engineering-methods`、
+  `grill-me` 等 22 個 packages；`engineering-methods` 內建只讀上游
+  SHA checker、完整 manifest、更新流程與 suite verifier。
+- LazyPack Item 40 完整內嵌 22 個 packages；Item 11 已接入
+  `writing-great-skills` 方法論。Repo LazyPack、Obsidian 懶人包鏡像與
+  全域 Skills 索引一致。
+- 公開發布 commit `774d00b feat: add engineering methods skill suite`
+  已推送至 `origin/main`。
 
 ## Next action
 
-- 下次執行任何多步驟影片任務時，先由對應影片 Skill 產生並驗證 `TOOL_EVALUATION.md`，再進入剪輯、雲端上傳、旁白或 HyperFrames 實作。
-- 新電腦可只安裝所需的 Item 26、27、29 或 30；任一項都會帶入完整 evaluator，不要求同時安裝其他影片 LazyPack。
+- 日常使用從 `$engineering-methods` 選流程，或直接呼叫
+  `$grill-me`、`$to-spec`、`$to-tickets`、`$implement` 等成員。
+- 未來先執行
+  `engineering-methods/scripts/check_upstream.py`；只有上游 SHA 改變時，
+  才依 `references/update-workflow.md` 重新分類、適配、重建 Item 40、
+  同步 Obsidian 並做隔離安裝。
 
 ## Blockers
 
-- 無。ElevenLabs Anna Su 是否能由 API 生成仍受帳號方案與 credits 限制；不可用時會依設定自動切換 Edge HsiaoChen。
+- 無。
 
 ## Last verified
 
-- 2026-07-30，Codex App：12 個受影響的共用 Skills 通過 `quick_validate.py`；三 Agent compatibility audit 掃描 582 個檔案、0 findings。
-- 2026-07-30，Codex App：53/53 evaluator self-test、完整範例與缺項反向測試通過。
-- 2026-07-30，Codex App：LazyPack Items 26／27／29／30／33／37 均在隔離目錄完成獨立安裝與 Skill 驗證。
-- 2026-07-30，Codex App：共用 Python runtime imports、FFmpeg／ffprobe／Auto-Editor／ImageMagick、Whisper／SenseVoice／MacWhisper wrappers 與三 Agent bridge 驗證通過。
+- 2026-07-30，Codex App：23 個受影響 skills 通過 quick validation；
+  suite verifier 22／22、0 findings；上游 baseline SHA 仍為 current。
+- 2026-07-30，Codex App：跨 Agent audit 掃描 615 個檔案、0 findings；
+  Item 40 在隔離 `SYNC_ROOT` 真實安裝 22／22。
+- 2026-07-30，Codex App：LazyPack／Obsidian `diff -qr` 為 0；
+  `sync-health.sh` 為 0 failures、1 個預期未提交變更 warning。
+- 2026-07-30，Codex App：`origin/main` 已包含 `774d00b`。
