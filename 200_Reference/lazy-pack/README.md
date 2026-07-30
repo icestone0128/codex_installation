@@ -1,12 +1,14 @@
 # Codex 懶人包總目錄
 
-> 版本：2026-07-28 可自行安裝版
+> 版本：2026-07-30 可自行安裝版
 > 用途：讓下載者從零開始設定 Codex、Claude、AntiGravity 共用的全域規則與 skills，以及 plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
 
 2026-07-21 更新：Item 10 將 `HANDOFF.md` 收為開工必讀、收工必寫；Item 16 加入共享 `session-sync-checkpoint.sh`、三 Agent Python-tools 中立 bridge 與安全 shell loader，以可驗證 gate 執行 `chezmoi update`，並限制 `chezmoi add` 只用於新增白名單入口；Item 34 成為每台電腦重建共用 Python runtime 的主線項目。共享全域 skill 主版本固定為 `{{SYNC_ROOT}}/skills`，專案 skill 固定為 `<project-root>/000_Agent/skills`。
 
 2026-07-28 更新：新增 [[39-Coach-Skill-安裝]]，把 Life Coach（實際 ID `future-coach`）、Voice Coach、Waki Brain、Productivity Coach 整理成 Arry 私人新電腦安裝群組。Item 39 只公開安全安裝器與驗證器；四個私人 Skill 本體必須先由私人雲端同步到 `{{SYNC_ROOT}}`，不會內嵌到 public LazyPack。
+
+2026-07-30 更新：新增 [[40-Engineering-Methods-Skill-Suite-安裝]]，把 `mattpocock/skills` 的 22 個穩定 engineering／productivity 方法改寫成 Codex、Claude、AntiGravity 共用套件；內建 `engineering-methods` 路由、`grill-me`、規格／ticket／TDD／review／debug／handoff 等 skills，以及只讀上游版本檢查與完整 41 項 manifest。19 個 deprecated、in-progress、misc、personal 項目只追蹤、不安裝。
 
 ## 先填這張設定表
 
@@ -107,10 +109,11 @@
 37. [[37-Voice-Reply-Skill-安裝]]
 38. [[38-YAML-Image-Deck-Skill-安裝]]
 39. [[39-Coach-Skill-安裝]]
+40. [[40-Engineering-Methods-Skill-Suite-安裝]]
 
 ## 全域 Skills 安裝總表
 
-公開可散布的全域 skill 完整內容已內嵌在對應的有序號懶人包文件中，不再另外提供獨立的 `skills/` 子目錄。安裝時請打開對應編號文件，使用文末「內建 Skill 完整安裝內容」。Item 39 是明確例外：它是 Arry 私人來源橋接型安裝群組，只內建公開安全的 installer／verifier，不內嵌私人身份、記憶或購課內容。
+公開可散布的全域 skill 完整內容已內嵌在對應的有序號懶人包文件中，不再另外提供獨立的 `skills/` 子目錄。安裝時請打開對應編號文件，使用文末「內建 Skill 完整安裝內容」。Item 39 是明確例外：它是 Arry 私人來源橋接型安裝群組，只內建公開安全的 installer／verifier，不內嵌私人身份、記憶或購課內容。Item 40 則是公開的上游改寫套件，完整內嵌 22 個穩定 skills 與版本追蹤工具。
 
 ```text
 01：三 Agent 共用 `pdf`、`playwright` skills，並對 Codex／Claude／AntiGravity 各自的 plugins、connectors、MCP 與原生 browser 能力做 adapter 檢查
@@ -148,6 +151,7 @@
 37：voice-reply；三 Agent 共用的 macOS 語音回覆 skill，優先 ElevenLabs，無法使用時自動切換 Edge-TTS，最後使用 macOS `say` 離線備援；本機 runtime 沿用 `{{CODEX_HOME}}/voice-reply/.venv` 與 `{{CODEX_HOME}}/python-tools/bin`，但三個 Agent 都呼叫同一 wrapper
 38：yaml-image-deck；通用 YAML-controlled image-first deck，不限定 SOIL；用固定視覺語法、受控版型、黃金樣張與逐頁 YAML 內容產生 NotebookLM-style 圖片式簡報
 39：Coach Skill；Arry 私人來源橋接型安裝群組，驗證並啟用 `future-coach`、`voice-coach`、`waki-brain`、`productivity-coach`；需要私人 `{{SYNC_ROOT}}`，公開 Item 不含四套私人 corpus
+40：Engineering Methods Skill Suite；完整內嵌 `engineering-methods`、`grill-me` 與其他 20 個穩定工程／生產力 skills，追蹤 `mattpocock/skills` 全部 41 項來源，提供只讀更新檢查、跨 Agent adapters 與隔離驗證器
 ```
 
 Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人身份與記憶路由，`voice-coach`、`waki-brain`、`productivity-coach` 含私人課程或購課內容。它們只存在私人 `{{SYNC_ROOT}}/skills` 與 Obsidian 全域索引；Item 39 只提供安裝／驗證橋接，不提供可重建 corpus。這是隱私與內容權利邊界，不是 Agent 相容性限制。
@@ -160,7 +164,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 跨 Agent 全域 skills | `{{SYNC_ROOT}}/skills` | 三個 Agent 共用的 skill package 主版本 |
 | Chezmoi bootstrap | `{{CHEZMOI_SOURCE}}` | 維護三個 Agent 的原生規則／skills 入口 templates；不保存 secrets |
 | Agent 原生入口 | `{{CODEX_HOME}}/*`、`{{CLAUDE_HOME}}/*`、`{{GEMINI_HOME}}/*` | symlink 到共享主版本，不複製內容 |
-| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...39.md` | Items 01～38 依各文件標示內嵌公開可散布內容；Item 39 只含私人來源橋接 installer／verifier |
+| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...40.md` | Items 01～38 與 40 依各文件標示內嵌公開可散布內容；Item 39 只含私人來源橋接 installer／verifier |
 | 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每台電腦本機重建的 Python 工具 venv 與 wrapper；供 Codex／Claude／AntiGravity 和所有專案共用，不放模型或技能專屬 runtime |
 | 三 Agent Python 中立入口 | `{{HOME}}/.local/share/agent-tools/python-tools` | Item 16 的 chezmoi symlink，指向該機器的 Python tools runtime；三個 Agent 都從它的 `bin` 呼叫相同 wrapper |
 | 三 Agent Python env loader | `{{HOME}}/.config/agent-tools/python-tools.env` | Item 16 建立；透過不覆蓋既有內容的 `.zshenv`／`.zprofile`／`.profile`／`.bash_profile` 標記區塊載入 PATH |
@@ -176,7 +180,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 - 全域 skill：同步 `{{SYNC_ROOT}}/skills/<skill-name>`、對應序號懶人包文件的內嵌安裝內容，與 Obsidian 全域 Skills 索引。
 - 專案 skill：放在 `<project-root>/000_Agent/skills/<skill-name>`，保留完整 `SKILL.md`、references、scripts、assets；若該專案使用 Git，這個資料夾應跟著專案版本化。
 
-維護者更新 Item 09／10／16 的 source skills 後，執行 `python3 200_Reference/scripts/sync-lazypack-embeds.py` 重建自含式安裝區塊；若 source skills 不在 repo 同層的 `codex_symlink/skills`，先設定 `SYNC_SKILLS_ROOT`。重跑前後內容應保持 idempotent，完成後仍要做隔離安裝驗證。
+維護者更新任何已內嵌的 source skills 後，執行 `python3 200_Reference/scripts/sync-lazypack-embeds.py` 重建自含式安裝區塊；若 source skills 不在 repo 同層的 `codex_symlink/skills`，先設定 `SYNC_SKILLS_ROOT`。重跑前後內容應保持 idempotent，完成後仍要做隔離安裝驗證。
 
 公開可散布的有序號懶人包文件應自含需要安裝的 `SKILL.md`、`references/`、`scripts/`、`templates/`、`assets/`、`agents/` 或 package 檔內容。一般情況下，`node_modules/` 這類可重建相依套件不內嵌，改由安裝者在自己的電腦重建；但 `social-cards/node_modules/` 是本使用者指定保留的可攜式執行依賴特例。Item 39 因私人身份、記憶與購課授權，採「公開 installer／verifier＋私人 `{{SYNC_ROOT}}`」模式，不把私人 package 內嵌到公開文件。
 
@@ -220,7 +224,8 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 34 | Voice Input Normalization | [[36-Voice-Input-Normalization]] | 可直接安裝；包含 `voice-input-normalization`，提供 Codex / Claude Code / AntiGravity-Gemini / OpenCode 的 dry-run、apply、remove、備份與 idempotent upsert；跨 Agent 全域設定規範歸 Item 16 `cross-device-sync` |
 | 35 | Voice Reply | [[37-Voice-Reply-Skill-安裝]] | 可直接安裝；三 Agent 共用 macOS 語音回覆 wrapper，優先 ElevenLabs，無法使用時自動切換 Edge-TTS，最後 macOS `say` 離線備援 |
 | 36 | Coach Skill | [[39-Coach-Skill-安裝]] | Arry 私人來源橋接；先同步私人 `{{SYNC_ROOT}}`，再一次驗證並啟用 `future-coach`、`voice-coach`、`waki-brain`、`productivity-coach`，不從 public repo 下載私人 corpus |
-| 37 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 37 | Engineering Methods Skill Suite | [[40-Engineering-Methods-Skill-Suite-安裝]] | 可直接安裝；22 個穩定工程／生產力 skills、跨 Agent adapters、完整上游 manifest 與只讀更新檢查；`grill-me` 是套件成員，`engineering-methods` 是統一路由 |
+| 38 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
