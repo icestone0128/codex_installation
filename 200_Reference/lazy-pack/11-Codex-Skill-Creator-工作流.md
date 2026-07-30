@@ -408,6 +408,11 @@ For field-by-field conversion details, read `references/codex-bootstrap-adapter.
 
 Before creating or substantially redesigning a skill, read `references/built-in-quality-practices.md`. It integrates the quality controls from Codex's built-in `skill-creator` while keeping this skill as the single user-facing entry workflow.
 
+For methodology on invocation load, information hierarchy, progressive
+disclosure, completion criteria, and pruning, consult `$writing-great-skills`.
+Treat it as design reference only; this skill remains the required creation,
+adaptation, packaging, and validation workflow.
+
 ## Design Quality Rules
 
 - Start from concrete trigger examples and expected outputs. Skip discovery only when existing usage already makes them unambiguous.
