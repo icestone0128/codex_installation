@@ -2,23 +2,27 @@
 
 ## Current state
 
-- Google Workspace MCP 已採 Claude-first 路線完成安裝；Codex 保留原生
-  Google Drive、Gmail、Calendar plugins，避免同義工具重複。
-- 本機固定使用 `workspace-mcp==1.22.2`、共用 Python runtime、
-  loopback HTTP endpoint 與 macOS LaunchAgent。
-- 公開 LazyPack Item 02 已包含完整安裝文件、runner、installer 與
-  LaunchAgent template；Obsidian 懶人包鏡像已同步。
-- 預設工具契約只啟用 Drive／Gmail／Calendar core read-only，OAuth
-  client 與 token 只保存在本機 secrets 目錄，不進 repo 或 Obsidian。
+- `doc-to-md` v1.6.0 已吸收 `doc-vlm-to-md` 安裝包中可攜部分：PDF
+  page-adjacent combined Markdown、manifest、UTF-8、防遞迴 router、完成度
+  validator 與原子 ZIP 打包；公開 LazyPack Item 18 已重建。內建腳本固定
+  使用 `~/.codex/doc-to-md/venv/bin/python3`，不再把通用
+  `python-tools-python` 誤當成文件依賴完整的 runtime。
+- `codex-skill-creator` 已吸收 Claude Skill Forge 中可攜部分：使用者最新
+  修正優先的 correction ledger、Claude 相容 frontmatter hard validation，
+  以及只有明確要求時才建立的安全 Claude ZIP；公開 LazyPack Item 11 已重建。
+- 兩個全域 Skills、LazyPack 內嵌安裝內容、Obsidian 懶人包鏡像與全域
+  Skills 索引均已同步；本次收工將 Item 11、Item 18 與本交接檔發布到
+  `origin/main`，不部署。
 
 ## Next action
 
-- 日常 Claude 任務直接使用 `google-workspace` MCP；Codex 繼續使用官方
-  Google plugins。
-- 更新 `workspace-mcp` 前先審查版本、重跑 Item 02 installer、確認 9 個
-  唯讀工具與三服務 smoke test，再同步 LazyPack／Obsidian。
-- 若 callback 顯示 OAuth state 過期，重新觸發任一唯讀工具取得新 URL，
-  不需重建 OAuth client。
+- 沒有必要的後續修復；下次可直接在新對話使用更新後的 `doc-to-md` 或
+  `$codex-skill-creator`。
+- 未來變更全域 Skill 時，繼續用
+  `200_Reference/scripts/sync-lazypack-embeds.py` 重建對應 LazyPack，並實際
+  比對 Obsidian 鏡像與三 Agent 原生入口。
+- Claude ZIP 只在使用者明確要求 Customize／API 上傳成品時建立；共用
+  Skill 主版本仍固定放在 `codex_symlink/skills`。
 
 ## Blockers
 
@@ -26,11 +30,12 @@
 
 ## Last verified
 
-- 2026-07-30，Codex App：MCP handshake、Claude adapter、loopback
-  listener、LaunchAgent 與 read-only 工具契約通過。
-- 2026-07-30，Codex App：Calendar、Drive、Gmail 三項真實唯讀 smoke
-  test 通過；OAuth token 檔案權限為 `600`。
-- 2026-07-30，Codex App：macOS 實機重裝與 Linux／WSL 隔離安裝通過；
-  Bash／plist、公開路徑、secret pattern 與 `git diff --check` 通過。
-- 2026-07-30，Codex App：repo LazyPack 與 Obsidian 懶人包鏡像
-  `diff -qr` 為 0。
+- 2026-08-01，Codex App：`doc-to-md` 使用專用 runtime 的 5 個公開契約
+  測試通過；Item 18 隔離安裝 17 個檔案與主版本一致，內建與 portable
+  validation、三 Agent audit 均通過。
+- 2026-08-01，Codex App：`codex-skill-creator` 內建／portable validator、
+  ZIP 正負向測試與獨立 forward-test 通過；Item 11 隔離安裝 7/7 一致，
+  compatibility audit 為 0 findings。
+- 2026-08-01，Codex App：repo LazyPack 與 Obsidian 懶人包鏡像
+  `diff -qr` 為 0；內嵌同步 idempotent，`git diff --check` 與公開 diff
+  secret-pattern scan 通過。

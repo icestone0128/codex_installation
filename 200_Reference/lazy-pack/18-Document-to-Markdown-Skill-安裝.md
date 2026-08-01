@@ -1,7 +1,7 @@
 # 18-Document-to-Markdown-Skill-安裝
 
-> 版本：2026-05-31 三 Agent 共用版
-> 用途：把 doc-to-md 文件轉 Markdown 流程安裝成 Codex、Claude、AntiGravity 共用全域 Skill，用於 PDF、EPUB、TXT、掃描 PDF、圖片型 PDF、圖表、截圖與圖片資料夾轉換，並依情境自動分流純文字轉換或 VLM 視覺解讀。
+> 版本：2026-08-01 三 Agent 共用版
+> 用途：把 doc-to-md 文件轉 Markdown 流程安裝成 Codex、Claude、AntiGravity 共用全域 Skill，用於 PDF、EPUB、TXT、掃描 PDF、圖片型 PDF、圖表、截圖與圖片資料夾轉換；支援自動 Doc/VLM 分流、PDF 單一 page-adjacent 圖文 Markdown、manifest、完成度驗證與安全打包。
 > 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/doc-to-md/`，不需要額外的 `skills/` 子目錄。
 
 ## 來源與歷史紀錄
@@ -12,6 +12,7 @@
 - 完整安裝包外層包含：`README.md`、`USAGE.md`、`install.sh`、`install.bat`、`skill.zip`。
 - 後續補齊：`installer-readme.md`、`full-usage.md`、`install.sh`、`install.bat`。
 - 2026-05-31 補充來源：`vlm-to-md-安裝包_v1.2.0.zip`，已將 `vlm_prep.py`、`package_kb.py`、VLM 使用說明與設計筆記併入 `doc-to-md`。
+- 2026-08-01 再比對：`doc-vlm-to-md-安裝包_v1.2.0.zip`（SHA-256 `d13a693a8241d786bc73a73c8dedc6eee14596fdeeb128df7abecd63756c111e`）。只吸收單一圖文輸出、manifest、Windows UTF-8 與完成度關卡；不另建 skill、不另建 per-session venv、不宣稱依 PDF 座標精準定位。
 - Codex 全域 skill：`{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md`。
 - Obsidian 全域索引已記錄用途：依文件型態自動分流文字轉 Markdown、掃描 PDF 視覺謄寫、圖表/表格/框架圖解讀與 Obsidian-ready Markdown。
 
@@ -25,14 +26,16 @@
 | PDF 解析可能被誤認為某 Agent 內建 PDF 工具 | `doc-to-md` 是三 Agent 共用的自訂轉檔 skill，不等於任一原生 PDF plugin |
 | `doc-to-md` 與 `vlm-to-md` 原本分成兩包 | 本版合併成同一個 `doc-to-md` skill，由 `doc_md_router.py` 自動判斷是否呼叫 VLM |
 | VLM 來源可能被理解成外部 API | 本版只使用本地 Python 前處理與助手內建視覺能力，不需要 API key 或本地大模型 |
-| Codex 執行時可能臨時建立 Python 環境 | 本版明定轉檔時優先呼叫使用者已由 Terminal 安裝的固定轉換器：`{{CODEX_HOME}}/doc-to-md/doc-to-md` 與 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md`；不要為單次轉換建立臨時 venv |
+| 圖文輸出要人工合併 | 保留 `separate` 預設，新增 PDF-only `--output-mode combined`，圖像放在來源頁文字之後並附 manifest |
+| 未填完 placeholder 也能打包 | `validate_kb.py` 與 `package_kb.py` 預設拒絕殘留摘要、`⬜ 未檢視`、圖片斷鏈與越界路徑 |
+| Codex 執行時可能臨時建立 Python 環境 | 本版優先呼叫共用中立入口 `doc-to-md`、`vlm-to-md`；內建腳本固定使用 `{{CODEX_HOME}}/doc-to-md/venv/bin/python3`，不為單次轉換建立臨時 venv |
 
 ## 安裝方式
 
-Document to MD 有兩層安裝。Codex、Claude、AntiGravity 實際轉檔時都預設呼叫同一個已安裝的 Terminal 轉換器；不要為單次轉換建立 `/tmp` 或 `/private/tmp` 的臨時 Python 環境。
+Document to MD 有兩層安裝。Codex、Claude、AntiGravity 實際轉檔時都呼叫同一個本機 runtime 與中立入口；不要為單次轉換建立 `/tmp` 或 `/private/tmp` 的臨時 Python 環境。
 
 1. **三 Agent 共用 Skill 安裝**：使用本文文末「內建 Skill 完整安裝內容」寫入 `{{SYNC_ROOT}}/skills/doc-to-md`。
-2. **固定本機轉換器確認**：確認 `{{CODEX_HOME}}/doc-to-md/doc-to-md` 與 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md` 已存在且可執行。這兩個是使用者先前用 Terminal 安裝好的文字轉檔與 VLM 前處理工具。
+2. **本機轉換器確認**：優先確認 `doc-to-md`、`vlm-to-md` 中立入口可執行；內建腳本的依賴完整 runtime 固定在 `{{CODEX_HOME}}/doc-to-md/venv/bin/python3`，不要假設通用 `python-tools-python` 已含文件轉換依賴。
 3. **fallback 才用內建腳本**：若固定轉換器不存在，才使用 skill 內建 `scripts/`；不要臨時建立 Python 環境。
 
 ### Mac / Linux：固定本機轉換器確認
@@ -40,14 +43,16 @@ Document to MD 有兩層安裝。Codex、Claude、AntiGravity 實際轉檔時都
 開啟 Terminal，執行：
 
 ```bash
-test -x {{CODEX_HOME}}/doc-to-md/doc-to-md && echo "text converter ok"
-test -x {{CODEX_HOME}}/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+command -v doc-to-md
+command -v vlm-to-md
+test -x "{{CODEX_HOME}}/doc-to-md/venv/bin/python3"
 ```
 
 Codex 自動路由時，可用已安裝的文字轉檔 Python 執行 router，router 會優先呼叫上述兩個固定轉換器：
 
 ```bash
-{{CODEX_HOME}}/doc-to-md/venv/bin/python3 "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py" "input.pdf" -o "output/"
+doc-to-md "input.pdf" -o "output/"
+doc-to-md "input.pdf" -o "output/" --output-mode combined
 ```
 
 ### Mac / Linux：固定本機轉換器安裝
@@ -64,8 +69,8 @@ bash "{{SYNC_ROOT}}/skills/doc-to-md/scripts/install.sh"
 - 若找不到 Python 3.8+，提示到 python.org 安裝 Python 3.12 或更新版本。
 - 建立固定的 `{{CODEX_HOME}}/doc-to-md/venv/`。
 - 用 pip 安裝 `PyMuPDF`、`ebooklib`、`beautifulsoup4`、`chardet`、`opencc-python-reimplemented`、`lxml`、`Pillow`。
-- 複製 `doc_md_router.py`、`doc_to_md.py`、`vlm_prep.py`、`package_kb.py` 與 `requirements.txt` 到 `{{CODEX_HOME}}/doc-to-md/`。
-- 建立 `{{CODEX_HOME}}/doc-to-md/doc-to-md` 文字轉檔啟動器。VLM 若是使用獨立安裝包，固定啟動器位於 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md`。
+- 複製 `doc_md_router.py`、`doc_to_md.py`、`combined_kb.py`、`vlm_prep.py`、`validate_kb.py`、`package_kb.py` 與 `requirements.txt` 到 `{{CODEX_HOME}}/doc-to-md/`。
+- 建立 router、text、VLM、validator 與 packager 啟動器；router 呼叫內層 `doc-to-md-text`，避免遞迴呼叫自己。
 
 ### Windows：安裝 Python 轉換器
 
@@ -100,6 +105,8 @@ test -f "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md" && echo "doc-to-md SKILL.md ok
 test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py" && echo "router script ok"
 test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py" && echo "converter script ok"
 test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/vlm_prep.py" && echo "vlm prep script ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/combined_kb.py" && echo "combined script ok"
+test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/validate_kb.py" && echo "validator script ok"
 test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/package_kb.py" && echo "package script ok"
 test -f "{{SYNC_ROOT}}/skills/doc-to-md/scripts/requirements.txt" && echo "requirements ok"
 test -f "{{SYNC_ROOT}}/skills/doc-to-md/references/combined-routing-guide.md" && echo "routing guide ok"
@@ -119,6 +126,7 @@ test -f "{{SYNC_ROOT}}/skills/doc-to-md/references/full-usage.md" && echo "full 
 - 「這份文件請自動判斷需不需要 VLM」
 - 「把 TXT 整理成帶 YAML frontmatter 的 Markdown」
 - 「轉成繁體中文 Markdown 並加章節摘要」
+- 「圖文合併成一個 Markdown，並附 manifest」
 
 ## 預設工作流程
 
@@ -127,14 +135,15 @@ test -f "{{SYNC_ROOT}}/skills/doc-to-md/references/full-usage.md" && echo "full 
 3. EPUB/TXT 或純文字 PDF：使用 `doc_to_md.py` 轉出文字 Markdown。
 4. 掃描 PDF、圖片型 PDF、圖片檔或圖片資料夾：使用 `vlm_prep.py` 產出 VLM 待解讀 Markdown 與 assets。
 5. 文字 PDF 但含嵌入圖表、向量圖表頁或 Exhibit/Figure caption：先跑 `doc_to_md.py`，再跑 `vlm_prep.py --mode figures`。
-6. 轉出後補 YAML frontmatter、章節摘要 callout、關鍵字、圖像解讀與 Obsidian-friendly 結構。
-7. 若交付包含圖片的視覺知識庫，使用 `package_kb.py` 打包 Markdown 與 assets，避免圖片斷鏈。
+6. 使用者要單一 PDF 圖文檔時，加 `--output-mode combined`；這是 page-adjacent，不宣稱依 PDF 座標精準定位。
+7. 轉出後補 YAML frontmatter、章節摘要 callout、關鍵字、圖像解讀與 Obsidian-friendly 結構。
+8. 先用 `validate_kb.py` 驗證，再用 `package_kb.py` 原子打包 Markdown 與實際引用的 assets。
 
 ## 踩坑紀錄
 
 ### 1. 只裝 SKILL.md 不夠
 
-`doc-to-md` 必須包含 `scripts/doc_md_router.py`、`scripts/doc_to_md.py`、`scripts/vlm_prep.py`、`scripts/package_kb.py`、`requirements.txt`、`install.sh`、`install.bat` 與 `references/`。缺任何一段都可能造成自動分流、文字轉換、VLM 前處理或打包失敗。
+`doc-to-md` 必須包含 `scripts/doc_md_router.py`、`scripts/doc_to_md.py`、`scripts/combined_kb.py`、`scripts/vlm_prep.py`、`scripts/validate_kb.py`、`scripts/package_kb.py`、`requirements.txt`、`install.sh`、`install.bat`、`tests/` 與 `references/`。
 
 ### 2. 轉換器 runtime 和共用 skill 主版本位置不同
 
@@ -156,14 +165,22 @@ Codex 的文件 / PDF 系統能力可用於解析或視覺 QA；`doc-to-md` 是�
 
 部分 reference 內可能保留 `{{SYNC_ROOT}}/skills/...` 作為來源範例。正式安裝與使用請以 `{{SYNC_ROOT}}/skills/doc-to-md/` 與本文指令為準。
 
+### 6. 搬移過的 venv 可能保留舊 pip shebang
+
+舊 runtime 若從 `~/.doc-to-md` 搬到 `~/.codex/doc-to-md`，`venv/bin/pip` 可能仍指向舊路徑而回傳 exit 126。v1.6.0 安裝器一律使用 `venv/bin/python3 -m pip`，不依賴可漂移的 pip shebang。
+
+### 7. Router 不可回頭呼叫自己
+
+`doc-to-md` 是 router 啟動器；文字分流必須呼叫 `doc-to-md-text`，否則安裝後會無限遞迴。本版有公開契約測試防止回歸。
+
 ## 最終檢查清單
 
 - [ ] `{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md` 存在。
 - [ ] `references/full-usage.md`、`references/installer-readme.md`、`references/usage-guide.md`、`references/combined-routing-guide.md`、`references/vlm-usage-guide.md`、`references/vlm-design-notes.md` 存在。
-- [ ] `scripts/doc_md_router.py`、`scripts/doc_to_md.py`、`scripts/vlm_prep.py`、`scripts/package_kb.py`、`scripts/requirements.txt`、`scripts/install.sh`、`scripts/install.bat` 存在。
-- [ ] 固定文字轉檔器 `{{CODEX_HOME}}/doc-to-md/doc-to-md --help` 可正常顯示。
-- [ ] 固定 VLM 轉檔器 `{{CODEX_HOME}}/vlm-to-md/vlm-to-md --help` 可正常顯示。
-- [ ] 若需要自動路由 PDF，`{{CODEX_HOME}}/doc-to-md/venv/bin/python3 "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py" --help` 可正常顯示。
+- [ ] `scripts/doc_md_router.py`、`scripts/doc_to_md.py`、`scripts/combined_kb.py`、`scripts/vlm_prep.py`、`scripts/validate_kb.py`、`scripts/package_kb.py`、`scripts/tests/`、`scripts/requirements.txt`、`scripts/install.sh`、`scripts/install.bat` 存在。
+- [ ] `doc-to-md --help` 有 `--output-mode {separate,combined}`。
+- [ ] `{{CODEX_HOME}}/doc-to-md/doc-to-md-text --help`、`{{CODEX_HOME}}/doc-to-md/vlm-to-md --help`、`{{CODEX_HOME}}/doc-to-md/doc-to-md-validate --help` 可正常顯示。
+- [ ] `{{CODEX_HOME}}/doc-to-md/venv/bin/python3 -m unittest discover -s "{{SYNC_ROOT}}/skills/doc-to-md/scripts/tests" -v` 通過。
 - [ ] Codex、Claude、AntiGravity 重載後，都可用「doc-to-md」、「PDF 轉 Markdown」、「掃描 PDF 轉 Markdown」、「VLM to MD」或「圖表解讀」觸發。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
@@ -184,7 +201,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md" <<'AGENT_LAZYPACK_DOC_TO_MD_SKILL_MD_0E95F5A366'
 ---
 name: doc-to-md
-description: Convert PDF, TXT, EPUB, scanned PDF, image-heavy PDF, screenshots, or image folders to clean Markdown. Use this skill when the user wants document-to-Markdown conversion, Obsidian-ready notes, text extraction, Simplified→Traditional Chinese conversion, scanned/OCR-like visual transcription, chart/table/diagram explanation, or an automatic Doc/VLM routing decision. The skill uses doc_to_md.py for text-first conversion and vlm_prep.py for visual content when needed.
+description: Convert PDF, TXT, EPUB, scanned PDF, image-heavy PDF, screenshots, or image folders to clean Markdown. Use when creating Obsidian-ready notes, extracting text, converting Simplified to Traditional Chinese, transcribing visuals, explaining charts/tables/diagrams, routing Doc/VLM work, producing one-file page-adjacent PDF output, or validating and packaging a final knowledge base.
 ---
 
 # doc-to-md Skill
@@ -200,8 +217,13 @@ the VLM-to-MD visual workflow.
   pages.
 - `doc_md_router.py` is the default entrypoint. It inspects the input and calls
   the right script automatically.
+- `combined_kb.py` creates one PDF Markdown file with visuals placed after the
+  text from their source page, plus a deterministic manifest. It does not claim
+  PDF-coordinate placement.
+- `validate_kb.py` rejects unfinished summaries, unchecked visual placeholders,
+  broken image links, and unsafe local image paths.
 - `package_kb.py` packages a final visual knowledge base Markdown file together
-  with its sibling `assets/` folder when VLM images are included.
+  with its sibling `assets/` folder after strict validation.
 - In standard four-box projects, place generated Markdown and assets under
   `100_Todo/projects/doc-to-md/<document-slug>/` unless the user chooses an
   Obsidian or project-specific destination; do not create a project-root
@@ -210,10 +232,11 @@ the VLM-to-MD visual workflow.
 **Works in Codex, Claude, AntiGravity, and local CLI environments:**
 - Use bundled scripts in this skill folder when the skill is copied into
   `{{SYNC_ROOT}}/skills/doc-to-md`.
-- If the user has already installed the Terminal converters, prefer those fixed
-  installed programs:
-  - Text converter: `~/.codex/doc-to-md/doc-to-md`
-  - VLM converter: `~/.codex/vlm-to-md/vlm-to-md`
+- Prefer the shared neutral commands `doc-to-md` and `vlm-to-md` when
+  available. The document converter's dependency-complete runtime remains
+  under `~/.codex/doc-to-md/`; the neutral command bridge avoids per-Agent
+  runtime copies. The generic `python-tools-python` bridge is not guaranteed to
+  include document-conversion dependencies.
 - Do not create a temporary virtual environment during document conversion.
 - Use bundled scripts only as fallback when fixed installed programs are not
   available.
@@ -243,20 +266,22 @@ Use `scripts/doc_md_router.py` first for normal user requests. It decides:
 - Image file or image folder: run `vlm_prep.py`.
 
 ```bash
-# 1. Prefer the user's fixed Terminal installs when available
-test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
-test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+# 1. Prefer the shared neutral entrypoints when available
+command -v doc-to-md
+command -v vlm-to-md
 
-# 2. Run automatic routing. The router calls the fixed installed converters
-#    first, then falls back to bundled scripts.
-python3 scripts/doc_md_router.py "/mnt/user-data/uploads/<file>.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
+# 2. Run automatic routing
+doc-to-md "/mnt/user-data/uploads/<file>.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
+
+# 3. Optional: one page-adjacent PDF Markdown plus manifest
+doc-to-md "/mnt/user-data/uploads/<file>.pdf" -o "<out>" --output-mode combined
 ```
 
 If the current system `python3` cannot import PyMuPDF for PDF routing, run the
 router with the Python from the fixed text converter install:
 
 ```bash
-~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "<file>.pdf" -o "<out>"
+~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "<file>.pdf" -o "<out>" --bundled-only
 ```
 
 This uses the already installed Terminal environment. Do not create a one-off
@@ -277,14 +302,16 @@ Use direct scripts only when the user explicitly asks for a specific path:
 - Force visual on a text PDF: `python3 scripts/doc_md_router.py "<input.pdf>" -o "<out>" --visual force`
 - Disable visual pass: `python3 scripts/doc_md_router.py "<input.pdf>" -o "<out>" --visual off`
 - Higher visual DPI: `python3 scripts/doc_md_router.py "<input.pdf>" -o "<out>" --dpi 200`
+- One page-adjacent PDF Markdown: `python3 scripts/doc_md_router.py "<input.pdf>" -o "<out>" --output-mode combined --bundled-only`
 
 ### Fixed Terminal installs
 
-If the user already ran the Terminal installers, prefer these fixed programs:
+Prefer these neutral commands after installation:
 
-- **Text:** `~/.codex/doc-to-md/doc-to-md`
-- **VLM:** `~/.codex/vlm-to-md/vlm-to-md`
-- **Router Python when needed:** `~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py`
+- **Router:** `doc-to-md`
+- **VLM:** `vlm-to-md`
+- **Bundled-script Python:** `~/.codex/doc-to-md/venv/bin/python3`
+- **Direct fallback:** `~/.codex/doc-to-md/doc-to-md`
 
 These are stable user-level tools, not temporary environments. Use them before
 attempting dependency installation.
@@ -332,8 +359,9 @@ what happened:
 | `--vlm-mode both` | Full pages plus figures |
 | `--dpi 200` | Increase visual render quality |
 | `--no-convert-chinese` | Skip Simplified→Traditional conversion |
-| `--ocr-classify` | Use macOS local Vision OCR & layout analysis to automatically classify and filter pure text pages and crop images (macOS only) |
-| `--no-ocr-classify` | Force disable OCR classification and layout checks |
+| `--output-mode separate` | Preserve separate text and visual outputs; default behavior |
+| `--output-mode combined` | PDF only: create one page-adjacent Markdown plus manifest |
+| `--bundled-only` | Ignore fixed installers and run the bundled scripts with the current Python |
 | `-o DIR` | Output directory (default: same folder as input) |
 
 **Supported formats:** `.pdf` `.epub` `.txt` plus images
@@ -344,6 +372,8 @@ After running:
 
 - Text output path is printed as `[DONE] Markdown saved to: ...`.
 - VLM scaffold path is printed as `[DONE] scaffold saved to: ...`.
+- Combined output paths are printed as `[DONE] Combined Markdown: ...` and
+  `[DONE] Manifest: ...`.
 
 ---
 
@@ -396,11 +426,14 @@ links. For each image item:
 If final delivery needs to preserve images, run:
 
 ```bash
+python3 scripts/validate_kb.py "<final_visual.md>"
 python3 scripts/package_kb.py "<final_visual.md>"
 ```
 
-This creates a zip containing the Markdown and its `assets/` folder so image
-links do not break.
+Packaging is strict by default: unresolved AI summary markers, `⬜ 未檢視`,
+broken image links, or unsafe paths stop before any existing zip is replaced.
+Use `--allow-incomplete` only when the user explicitly wants a draft package;
+broken links and unsafe paths still fail.
 
 ---
 
@@ -409,7 +442,7 @@ links do not break.
 After filling text callouts and VLM placeholders, overwrite the generated files
 in place.
 
-When both pipelines run on the same PDF:
+When both pipelines run on the same PDF in the default `separate` mode:
 
 1. Keep the `doc_to_md.py` Markdown as the main text knowledge base.
 2. Use the VLM scaffold as a visual companion knowledge base, or paste each
@@ -419,9 +452,34 @@ When both pipelines run on the same PDF:
    of guessing.
 4. Package visual Markdown with `assets/` when delivering or moving the file.
 
+When the user wants one file, use `--output-mode combined`. The resulting
+`*_完整知識庫.md` places each extracted visual after the text from its
+source page and records `layout: page-adjacent`; it does not infer exact bounding
+box placement. Fill all summary and visual placeholders before strict packaging.
+
 **Text final filename format:** `{Author}_{Title}_知識庫.md`
 
 **Visual final filename format:** `{Title}_視覺知識庫.md`
+
+**Combined filename format:** `{Title}_完整知識庫.md` plus `{Title}_manifest.json`
+
+---
+
+## Agent Adapters and Verification
+
+- **共用步驟:** Use the same router flags, output contracts, completeness
+  validation, and packaging behavior in all three Agents.
+- **Codex adapter:** Use local shell commands and the shared neutral runtime;
+  inspect rendered images with Codex image tools before replacing placeholders.
+- **Claude adapter:** Use the same shared scripts and runtime bridge; use Claude's
+  native image-reading tool for the visual pass.
+- **AntiGravity adapter:** Use the same shared scripts and runtime bridge; use
+  AntiGravity's native image-reading adapter for the visual pass.
+- **Fallback:** If a native image tool is unavailable, keep placeholders and do
+  not package as final. Never invent unreadable values or sources.
+- **驗證:** Run `validate_kb.py`, then `package_kb.py`; for code changes also
+  run `python3 -m unittest discover -s scripts/tests -v` with the installed
+  doc-to-md Python.
 
 ---
 
@@ -429,7 +487,7 @@ When both pipelines run on the same PDF:
 
 | Problem | Fix |
 |---------|-----|
-| `No module named 'fitz'` with system Python | Run router with `~/.codex/doc-to-md/venv/bin/python3`; this uses the existing fixed Terminal install |
+| `No module named 'fitz'` with system or generic shared Python | Use `doc-to-md`, or run the bundled router with the dependency-complete `~/.codex/doc-to-md/venv/bin/python3`; do not assume `python-tools-python` contains document dependencies |
 | Fixed text converter missing | Re-run the `doc-to-md` Terminal installer |
 | Fixed VLM converter missing | Re-run the `vlm-to-md` Terminal installer |
 | Garbled characters | Try `--no-convert-chinese`; if still garbled, file may need OCR |
@@ -437,6 +495,7 @@ When both pipelines run on the same PDF:
 | Text PDF has charts not in Markdown | Use the router default or `--visual force --vlm-mode figures` |
 | VLM scaffold has many images | Fill in batches of 5-10 images |
 | Image links break after moving Markdown | Run `package_kb.py` and move the resulting zip |
+| Packaging says knowledge base is incomplete | Fill all summary/visual placeholders; use `--allow-incomplete` only for an explicitly requested draft |
 | 0 sections detected | Unusual headings — output still usable, no chapter splits |
 | EPUB shows empty chapters | Some DRM-protected EPUBs block extraction; remove DRM first |
 | Skill tries to create a temporary venv | **Wrong** — call the fixed Terminal installs first; use bundled scripts only as fallback |
@@ -448,104 +507,110 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/references/combined-routing-
 cat > "{{SYNC_ROOT}}/skills/doc-to-md/references/combined-routing-guide.md" <<'AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_COMBINED_ROUTING_GUIDE_MD_54C5AB0C8B'
 # doc-to-md Combined Routing Guide
 
-This guide explains how the unified `doc-to-md` skill chooses between the
-text-first converter and the visual VLM converter.
+This guide defines the unified text/VLM router, the optional one-file PDF mode,
+and the final validation boundary.
 
 ## Bundled Scripts
 
 | Script | Role |
 |---|---|
-| `scripts/doc_md_router.py` | Default entrypoint. Detects input type and calls the right converter. |
-| `scripts/doc_to_md.py` | Text-first converter for PDF / EPUB / TXT. |
-| `scripts/vlm_prep.py` | Visual preprocessor for scanned PDFs, images, charts, tables, diagrams, and vector exhibits. |
-| `scripts/package_kb.py` | Packages final visual Markdown with its `assets/` folder into a portable zip. |
+| `scripts/doc_md_router.py` | Default entrypoint and format/visual-signal router. |
+| `scripts/doc_to_md.py` | Text-first PDF / EPUB / TXT converter. |
+| `scripts/vlm_prep.py` | Scanned-page, image, chart, table, diagram, and vector-exhibit preprocessor. |
+| `scripts/combined_kb.py` | Creates one page-adjacent PDF Markdown plus a JSON manifest. |
+| `scripts/validate_kb.py` | Rejects unfinished placeholders, broken links, and unsafe image paths. |
+| `scripts/package_kb.py` | Strictly validates, then atomically packages Markdown and referenced assets. |
 
 ## Default Decision Rules
 
-1. EPUB or TXT:
-   - Run `doc_to_md.py`.
-   - No VLM pass.
-2. Image file or image folder:
-   - Run `vlm_prep.py`.
-   - The assistant must open images and fill visual placeholders.
-3. PDF with low extractable text density:
-   - Treat as scanned/image PDF.
-   - Run `vlm_prep.py --mode pages`.
-   - Do not run `doc_to_md.py` unless the user explicitly wants the weak text layer too.
-4. Text PDF with embedded figures, vector-heavy pages, or Exhibit/Figure captions:
-   - Run `doc_to_md.py` for text.
-   - Run `vlm_prep.py --mode figures` for visual content.
-5. Text PDF without visual signals:
-   - Run `doc_to_md.py`.
-   - Skip VLM.
+1. EPUB or TXT runs the text converter only.
+2. An image or image folder runs visual preprocessing and requires an Agent
+   image-reading pass.
+3. A low-text-density PDF renders full pages.
+4. A text PDF with embedded figures, vector-heavy pages, or Exhibit/Figure
+   captions runs text conversion plus visual extraction.
+5. A text PDF without visual signals runs text conversion only.
+
+The default `--output-mode separate` preserves independent text and visual
+files. `--output-mode combined` is PDF-only and produces:
+
+- `{stem}_完整知識庫.md`
+- `{stem}_manifest.json`
+- `assets/{stem}/...` when visuals are found
+
+Combined layout is `page-adjacent`: each image follows the text extracted from
+its source page. It is not PDF-coordinate or bounding-box placement.
 
 ## Commands
 
-Use the user's fixed Terminal installs first. Do not create a temporary virtual
-environment for a single conversion.
+Prefer the shared neutral entrypoints; do not create a temporary environment
+for a single conversion.
 
 ```bash
-test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
-test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
+command -v doc-to-md
+command -v vlm-to-md
 ```
 
-If the current system `python3` lacks PyMuPDF for PDF routing, run the bundled
-router with the already installed text-converter Python:
+Automatic separate output:
 
 ```bash
-~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
+doc-to-md "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
 ```
 
-Automatic:
+One page-adjacent PDF Markdown plus manifest:
 
 ```bash
-python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
+doc-to-md "input.pdf" \
+  -o "100_Todo/projects/doc-to-md/<document-slug>/" \
+  --output-mode combined
 ```
 
-Force VLM for a text PDF:
+Bundled fallback with the fixed document-converter Python:
 
 ```bash
-python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/" --visual force
+~/.codex/doc-to-md/venv/bin/python3 scripts/doc_md_router.py "input.pdf" \
+  -o "100_Todo/projects/doc-to-md/<document-slug>/" \
+  --output-mode combined \
+  --bundled-only
 ```
 
-Text only:
+The generic `python-tools-python` bridge is not the document converter's
+dependency boundary and may omit packages such as PyMuPDF, EbookLib, or
+chardet.
+
+Force visual rendering or disable it:
 
 ```bash
-python3 scripts/doc_md_router.py "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/" --visual off
+doc-to-md "input.pdf" -o "<out>" --visual force
+doc-to-md "input.pdf" -o "<out>" --visual off
 ```
 
-Visual only:
+Validate and package a completed knowledge base:
 
 ```bash
-python3 scripts/vlm_prep.py --mode auto "input.pdf" -o "100_Todo/projects/doc-to-md/<document-slug>/"
+python3 scripts/validate_kb.py "<out>/input_完整知識庫.md"
+python3 scripts/package_kb.py "<out>/input_完整知識庫.md"
 ```
 
-Package final visual knowledge base:
+The packager refuses unresolved summary markers, `⬜ 未檢視`, broken
+image links, and paths outside the package boundary. `--allow-incomplete` is an
+explicit draft-only override for placeholders; it never bypasses link or path
+safety checks.
 
-```bash
-python3 scripts/package_kb.py "100_Todo/projects/doc-to-md/<document-slug>/input_視覺知識庫.md"
-```
+## Visual Accuracy Rules
 
-## VLM Accuracy Rules
-
-- Open every referenced PNG before writing visual descriptions.
+- Open every referenced image before replacing its placeholder.
 - Read numbers, labels, titles, and sources directly from the image.
-- If unreadable, write `圖中未能辨識`.
-- Do not invent sources, country lists, axes, or values.
+- If unreadable, write `圖中未能辨識`; never invent values or sources.
 - For scanned pages, transcribe visible text into Markdown.
-- For decorative photos, keep the description short.
-- Preserve image links and headings.
+- Preserve source-page comments, image links, headings, and anchors.
 
-## Merge Rules
+## Agent Contract
 
-When text and VLM outputs both exist:
-
-1. Treat the text Markdown as the main knowledge base.
-2. Place visual descriptions near the corresponding chapter or page only when
-   the location is obvious.
-3. If placement is uncertain, keep a separate `視覺知識庫` section or companion
-   file.
-4. Package visual Markdown with `assets/` before moving or sharing it.
+Codex, Claude, and AntiGravity use the same scripts, arguments, output layout,
+validation, and packaging rules. Only the native image-reading adapter differs.
+If an Agent cannot inspect the images, leave the placeholders unresolved and do
+not present the package as final.
 AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_COMBINED_ROUTING_GUIDE_MD_54C5AB0C8B
 
 # doc-to-md/references/full-usage.md
@@ -812,7 +877,7 @@ rm -rf ~/.codex/doc-to-md
 
 **Windows（PowerShell）：**
 ```powershell
-Remove-Item -Recurse -Force "$env:USERPROFILE\.doc-to-md"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.codex\doc-to-md"
 ```
 
 若還要移除共享 skill，刪除 `{{SYNC_ROOT}}/skills/doc-to-md` 後用 Item 16 重建三個 Agent 入口；本機 converter runtime 可獨立保留或依上方指令移除。
@@ -909,7 +974,8 @@ AI 助手會自動：
 
 **Mac：**
 ```bash
-~/.codex/doc-to-md/doc-to-md --auto ~/Desktop/書名.pdf -o ~/Desktop/
+doc-to-md ~/Desktop/書名.pdf -o ~/Desktop/
+doc-to-md ~/Desktop/書名.pdf -o ~/Desktop/ --output-mode combined
 ```
 
 **Windows（PowerShell 或命令提示字元）：**
@@ -958,6 +1024,7 @@ converted_at: "2026-04-25 17:00"
 | PDF 內容是掃描圖片 | 這種 PDF 需要先用 OCR 軟體處理（如 Adobe Acrobat） |
 | EPUB 章節是空的 | 可能有 DRM 保護，需先移除 |
 | Windows 安裝 Python 後仍找不到 | 確認安裝時有勾選「Add Python to PATH」，若沒勾要重新安裝 |
+| 打包時顯示知識庫未完成 | 先補完章節摘要與圖像解讀；只有草稿交付才用 `--allow-incomplete` |
 
 ---
 
@@ -970,7 +1037,7 @@ rm -rf ~/.codex/doc-to-md
 
 **Windows（PowerShell）：**
 ```powershell
-Remove-Item -Recurse -Force "$env:USERPROFILE\.doc-to-md"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.codex\doc-to-md"
 ```
 
 若還要移除共享 skill，刪除 `{{SYNC_ROOT}}/skills/doc-to-md` 後用 Item 16 重建三個 Agent 入口；本機 converter runtime 可獨立保留或移除。
@@ -980,7 +1047,7 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.doc-to-md"
 - **Codex**：從 `{{CODEX_HOME}}/skills` 原生入口載入；sandbox 需授權來源檔與輸出資料夾。
 - **Claude**：從 `{{CLAUDE_HOME}}/skills` 原生入口載入；有 terminal 時直接呼叫固定 converter，否則先由共享 launcher 產生 Markdown。
 - **AntiGravity**：從 `{{GEMINI_CONFIG}}/skills` 原生入口載入；通常可由本機 shell 呼叫相同 converter。
-- **共同驗證**：三個入口解析到 `{{SYNC_ROOT}}/skills`，而且 `~/.codex/doc-to-md/doc-to-md --help` 成功。`~/.codex` 在此只是既有共享 runtime 路徑，不代表限定 Codex。
+- **共同驗證**：三個入口解析到 `{{SYNC_ROOT}}/skills`，`doc-to-md --help` 含 `--output-mode`，且 `~/.codex/doc-to-md/doc-to-md-validate --help` 成功。`~/.codex` 只是既有共享 runtime 實體路徑，不代表限定 Codex。
 
 ---
 
@@ -993,8 +1060,8 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.doc-to-md"
 | 啟動器 | `~/.codex/doc-to-md/doc-to-md`（bash） | `%USERPROFILE%\.codex\doc-to-md\doc-to-md.bat` |
 | Python 需求 | 3.8+（建議 3.12） | 3.8+（建議 3.12） |
 | 套件依賴 | PyMuPDF, ebooklib, beautifulsoup4, chardet, opencc-python-reimplemented, lxml | 同左 |
-| 支援格式 | PDF, EPUB, TXT | PDF, EPUB, TXT |
-| 輸出格式 | Markdown + YAML frontmatter + Obsidian callout blocks | 同左 |
+| 支援格式 | PDF, EPUB, TXT, 圖片與圖片資料夾 | 同左 |
+| 輸出格式 | 分離圖文或 PDF 單一 page-adjacent Markdown + manifest + assets | 同左 |
 AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_INSTALLER_README_MD_B3AEC3B4EC
 
 # doc-to-md/references/usage-guide.md
@@ -1008,22 +1075,23 @@ Detailed examples, edge cases, and advanced usage for the `doc-to-md` skill.
 
 ## Installation Walkthrough
 
-### Shared default: fixed local Terminal installs
+### Shared default: neutral local entrypoints
 
-For Codex, Claude, or AntiGravity document-conversion runs, use the converters
-the user already installed from Terminal. Do not create a temporary virtual
-environment for a one-off conversion. The historical `~/.codex/...` runtime
-directory is a shared local tool path; it does not restrict which Agent may
-call it.
+For Codex, Claude, or AntiGravity document-conversion runs, prefer the neutral
+commands backed by the shared local tool bridge. Do not create a temporary
+virtual environment for a one-off conversion.
 
 ```bash
-test -x ~/.codex/doc-to-md/doc-to-md && echo "text converter ok"
-test -x ~/.codex/vlm-to-md/vlm-to-md && echo "vlm converter ok"
-~/.codex/doc-to-md/venv/bin/python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py "book.pdf" -o ./100_Todo/projects/doc-to-md/book/
+command -v doc-to-md
+command -v vlm-to-md
+doc-to-md "book.pdf" -o ./100_Todo/projects/doc-to-md/book/
 ```
 
-The router calls `~/.codex/doc-to-md/doc-to-md` and `~/.codex/vlm-to-md/vlm-to-md` first,
-then falls back to bundled scripts only when those fixed installs are missing.
+The installed router calls its inner `doc-to-md-text` and `vlm-to-md`
+launchers. A bundled run should use `--bundled-only` to avoid runtime ambiguity.
+Use `~/.codex/doc-to-md/venv/bin/python3` for bundled scripts; the generic
+`python-tools-python` bridge is not guaranteed to include document-conversion
+dependencies.
 
 ### macOS fixed converter check
 ```bash
@@ -1069,6 +1137,18 @@ python3 {{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py \
 
 The router decides whether to run text conversion, VLM visual preparation, or
 both. Use this for ordinary `doc-to-md` requests.
+
+### One page-adjacent PDF Markdown plus manifest
+
+```bash
+doc-to-md "report.pdf" \
+  -o ./100_Todo/projects/doc-to-md/book/ \
+  --output-mode combined
+```
+
+This PDF-only mode produces `*_完整知識庫.md`, a manifest, and any
+referenced assets. Images follow the text from their source page; the mode does
+not infer PDF coordinates.
 
 ### Force visual pass for a text PDF with charts
 ```bash
@@ -1218,7 +1298,7 @@ python3 doc_to_md.py input_utf8.txt
 
 **Cause:** File uses non-standard heading format
 
-**Solution:** After conversion, manually add headings in the Markdown, or ask AI 助手to detect and insert headings based on content flow.
+**Solution:** After conversion, manually add headings in the Markdown, or ask AI 助手 to detect and insert headings based on content flow.
 
 ### DRM-Protected EPUBs
 
@@ -1315,6 +1395,11 @@ The `^anchor-id` tags on headings are Obsidian block references, enabling:
 The limitations above apply to `doc_to_md.py` alone. The combined skill now
 bundles `vlm_prep.py` for scanned PDFs, images, charts, tables, and diagrams.
 See `references/combined-routing-guide.md` and `references/vlm-usage-guide.md`.
+
+Before final delivery, run `validate_kb.py` and `package_kb.py`. Final packaging
+rejects unresolved summaries, unchecked visual placeholders, broken image
+links, and unsafe paths. Use `--allow-incomplete` only for an explicitly
+requested draft.
 AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_USAGE_GUIDE_MD_08E0917ECC
 
 # doc-to-md/references/vlm-design-notes.md
@@ -1576,6 +1661,252 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.vlm-to-md"
 - **Verification**：確認每個 placeholder 都被取代、引用的圖檔存在、掃描頁文字未遺漏，並保留原始 Markdown 結構。
 AGENT_LAZYPACK_DOC_TO_MD_REFERENCES_VLM_USAGE_GUIDE_MD_25FB40AE57
 
+# doc-to-md/scripts/combined_kb.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/combined_kb.py")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/combined_kb.py" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_COMBINED_KB_PY_753200849B'
+#!/usr/bin/env python3
+"""Build one PDF knowledge-base Markdown with visuals placed after source-page text."""
+
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+import doc_to_md
+import vlm_prep
+
+
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+
+def _atomic_write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle = tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        delete=False,
+    )
+    temp_path = Path(handle.name)
+    try:
+        with handle:
+            handle.write(content)
+        os.replace(temp_path, path)
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+
+def _collect_visual_items(
+    pdf_path: Path,
+    assets_dir: Path,
+    dpi: int,
+    visual: str,
+    vlm_mode: str | None,
+) -> tuple[list[dict], bool, float]:
+    doc = vlm_prep.fitz.open(str(pdf_path))
+    try:
+        scanned, avg_chars = vlm_prep.is_scanned_pdf(doc)
+        if visual == "off":
+            return [], scanned, avg_chars
+
+        stem = vlm_prep.safe_stem(str(pdf_path))
+        if scanned or vlm_mode == "pages" or (visual == "force" and vlm_mode is None):
+            return vlm_prep.render_pages(doc, stem, str(assets_dir), dpi), scanned, avg_chars
+
+        items = vlm_prep.extract_figures(doc, stem, str(assets_dir))
+        captured_pages = {item["page"] - 1 for item in items}
+        vector_items = vlm_prep.extract_vector_chart_pages(
+            doc,
+            stem,
+            str(assets_dir),
+            dpi,
+            vlm_prep.VECTOR_DRAW_THRESHOLD,
+            captured_pages,
+        )
+        items.extend(vector_items)
+        captured_pages.update(item["page"] - 1 for item in vector_items)
+        caption_items = vlm_prep.render_caption_pages(
+            doc,
+            stem,
+            str(assets_dir),
+            dpi,
+            vlm_prep.exhibit_caption_pages(doc),
+            captured_pages,
+        )
+        items.extend(caption_items)
+
+        if vlm_mode == "both":
+            items.extend(vlm_prep.render_pages(doc, stem, str(assets_dir), dpi))
+        return sorted(items, key=lambda item: (item["page"], item["filename"])), scanned, avg_chars
+    finally:
+        doc.close()
+
+
+def _frontmatter(meta: dict, visual_items: int) -> str:
+    lines = doc_to_md.make_yaml_frontmatter(meta).splitlines()
+    lines[-1:-1] = [
+        "output_mode: combined",
+        "layout: page-adjacent",
+        f"visual_items: {visual_items}",
+    ]
+    return "\n".join(lines)
+
+
+def _page_markdown(page_text: str, page_number: int, convert_chinese: bool) -> list[str]:
+    cleaned = doc_to_md.clean_text_block(page_text)
+    cleaned = doc_to_md.merge_broken_paragraphs(cleaned)
+    if convert_chinese and doc_to_md.OPENCC_AVAILABLE:
+        cleaned = doc_to_md.convert_to_tw(cleaned)
+
+    if not cleaned.strip():
+        return [">本頁沒有可擷取文字，請依下方頁面影像逐字謄寫。"]
+
+    sections = doc_to_md.detect_sections(cleaned)
+    section_map: dict[int, dict] = {}
+    for index, section in enumerate(sections, 1):
+        section["anchor"] = f"p{page_number:03d}-s{index:02d}"
+        if convert_chinese and doc_to_md.OPENCC_AVAILABLE:
+            section["title"] = doc_to_md.convert_to_tw(section["title"])
+        section_map[section["line_index"]] = section
+
+    output: list[str] = []
+    for line_index, line in enumerate(cleaned.splitlines()):
+        if line_index in section_map:
+            section = section_map[line_index]
+            output.extend(
+                [
+                    doc_to_md.make_section_heading(section),
+                    "",
+                    doc_to_md.section_placeholder(section["anchor"]),
+                    "",
+                ]
+            )
+        else:
+            output.append(line)
+    return output
+
+
+def build_combined(
+    pdf_path: Path,
+    out_dir: Path,
+    dpi: int,
+    visual: str,
+    vlm_mode: str | None,
+    convert_chinese: bool,
+) -> tuple[Path, Path]:
+    raw_meta, pages = doc_to_md.extract_pdf(str(pdf_path))
+    pages = doc_to_md.strip_repeated_headers_footers(pages)
+    meta = doc_to_md.pdf_meta_to_dict(raw_meta, str(pdf_path))
+    meta["pages"] = len(pages)
+    if convert_chinese and doc_to_md.OPENCC_AVAILABLE:
+        meta["title"] = doc_to_md.convert_to_tw(meta["title"])
+        meta["author"] = doc_to_md.convert_to_tw(meta["author"])
+
+    assets_dir = out_dir / "assets"
+    visual_items, scanned, avg_chars = _collect_visual_items(
+        pdf_path,
+        assets_dir,
+        dpi,
+        visual,
+        vlm_mode,
+    )
+    by_page: dict[int, list[dict]] = {}
+    for item in visual_items:
+        by_page.setdefault(int(item["page"]), []).append(item)
+
+    parts = [
+        _frontmatter(meta, len(visual_items)),
+        "",
+        f"# {meta['title']}",
+        "",
+        "> 圖像以「來源頁文字之後」的頁面相鄰方式排列，並非依 PDF 座標定位。",
+        "",
+    ]
+    for page_number, page_text in enumerate(pages, 1):
+        parts.extend([f"<!-- source-page: {page_number} -->", f"## 來源第 {page_number} 頁", ""])
+        parts.extend(_page_markdown(page_text, page_number, convert_chinese))
+        parts.append("")
+        for item in by_page.get(page_number, []):
+            kind = "數據圖表" if item["kind"] == "chart_page" else "圖像"
+            parts.extend(
+                [
+                    f"### {kind}｜來源第 {page_number} 頁",
+                    "",
+                    f"![來源第 {page_number} 頁 {kind}]({item['rel_path']})",
+                    "",
+                    vlm_prep.PLACEHOLDER,
+                    "",
+                ]
+            )
+
+    stem = vlm_prep.safe_stem(str(pdf_path))
+    md_path = out_dir / f"{stem}_完整知識庫.md"
+    manifest_path = out_dir / f"{stem}_manifest.json"
+    manifest_items = [
+        {key: value for key, value in item.items() if key != "img_path"}
+        for item in visual_items
+    ]
+    manifest = {
+        "source": pdf_path.name,
+        "combined_markdown": md_path.name,
+        "output_mode": "combined",
+        "layout": "page-adjacent",
+        "pages": len(pages),
+        "scanned": scanned,
+        "average_sample_chars_per_page": round(avg_chars, 1),
+        "visual_items": len(visual_items),
+        "items": manifest_items,
+        "generated_at": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
+    }
+    _atomic_write(md_path, "\n".join(parts).rstrip() + "\n")
+    _atomic_write(manifest_path, json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+    return md_path, manifest_path
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="產生圖文依來源頁相鄰的單一 PDF 知識庫 Markdown")
+    parser.add_argument("input", help="PDF 路徑")
+    parser.add_argument("-o", "--output", default=None, help="輸出資料夾")
+    parser.add_argument("--dpi", type=int, default=150, help="視覺頁面渲染 DPI")
+    parser.add_argument("--visual", choices=["auto", "force", "off"], default="auto")
+    parser.add_argument("--vlm-mode", choices=["auto", "pages", "figures", "both"], default=None)
+    parser.add_argument("--no-convert-chinese", action="store_true")
+    args = parser.parse_args()
+
+    pdf_path = Path(args.input).expanduser().resolve()
+    if not pdf_path.is_file() or pdf_path.suffix.lower() != ".pdf":
+        print(f"[ERROR] combined mode 目前僅支援 PDF：{pdf_path}", file=sys.stderr)
+        return 2
+    out_dir = Path(args.output).expanduser().resolve() if args.output else pdf_path.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+    md_path, manifest_path = build_combined(
+        pdf_path,
+        out_dir,
+        args.dpi,
+        args.visual,
+        args.vlm_mode,
+        not args.no_convert_chinese,
+    )
+    print(f"[DONE] Combined Markdown: {md_path}")
+    print(f"[DONE] Manifest: {manifest_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_COMBINED_KB_PY_753200849B
+
 # doc-to-md/scripts/doc_md_router.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py")"
 cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_md_router.py" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_DOC_MD_ROUTER_PY_07D0C45883'
@@ -1608,8 +1939,9 @@ MIN_IMG_WIDTH = 250
 MIN_IMG_HEIGHT = 200
 MIN_IMG_AREA = 80000
 MAX_ASPECT_RATIO = 8
-INSTALLED_DOC_TO_MD = Path.home() / ".codex" / "doc-to-md" / "doc-to-md"
-INSTALLED_VLM_TO_MD = Path.home() / ".codex" / "vlm-to-md" / "vlm-to-md"
+INSTALLED_DOC_TO_MD = Path.home() / ".codex" / "doc-to-md" / "doc-to-md-text"
+INSTALLED_VLM_TO_MD = Path.home() / ".codex" / "doc-to-md" / "vlm-to-md"
+LEGACY_VLM_TO_MD = Path.home() / ".codex" / "vlm-to-md" / "vlm-to-md"
 
 
 def script_dir() -> Path:
@@ -1621,10 +1953,11 @@ def run(cmd: list[str]) -> int:
     return subprocess.call(cmd)
 
 
-def installed_or_script(installed: Path, script: Path) -> Optional[list[str]]:
+def installed_or_script(installed: tuple[Path, ...], script: Path) -> Optional[list[str]]:
     """Prefer user's fixed Terminal install, fall back to bundled script."""
-    if installed.exists() and os.access(installed, os.X_OK):
-        return [str(installed)]
+    for candidate in installed:
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return [str(candidate)]
     if script.exists():
         return [sys.executable, str(script)]
     return None
@@ -1743,6 +2076,12 @@ def main() -> int:
         action="store_true",
         help="Ignore fixed Terminal installs and run bundled scripts with the current Python.",
     )
+    parser.add_argument(
+        "--output-mode",
+        choices=["separate", "combined"],
+        default="separate",
+        help="separate=preserve text/VLM outputs; combined=one page-adjacent PDF Markdown plus manifest",
+    )
     args = parser.parse_args()
 
     input_path = Path(args.input).expanduser().resolve()
@@ -1758,13 +2097,17 @@ def main() -> int:
     scripts = script_dir()
     doc_script = scripts / "doc_to_md.py"
     vlm_script = scripts / "vlm_prep.py"
-    doc_base = [sys.executable, str(doc_script)] if args.bundled_only else installed_or_script(INSTALLED_DOC_TO_MD, doc_script)
-    vlm_base = [sys.executable, str(vlm_script)] if args.bundled_only else installed_or_script(INSTALLED_VLM_TO_MD, vlm_script)
+    doc_base = [sys.executable, str(doc_script)] if args.bundled_only else installed_or_script((INSTALLED_DOC_TO_MD,), doc_script)
+    vlm_base = [sys.executable, str(vlm_script)] if args.bundled_only else installed_or_script((INSTALLED_VLM_TO_MD, LEGACY_VLM_TO_MD), vlm_script)
 
     ext = input_path.suffix.lower()
     is_image_input = input_path.is_dir() or ext in IMG_EXTS
     is_pdf = ext == ".pdf"
     is_text_doc = ext in {".epub", ".txt"}
+
+    if args.output_mode == "combined" and not is_pdf:
+        print("[ERROR] --output-mode combined currently supports PDF input only.", file=sys.stderr)
+        return 2
 
     exit_codes: list[int] = []
 
@@ -1804,6 +2147,29 @@ def main() -> int:
         visual_needed = True
     elif args.visual == "off":
         visual_needed = False
+
+    if args.output_mode == "combined":
+        combined_script = scripts / "combined_kb.py"
+        if not combined_script.is_file():
+            print(f"[ERROR] Missing combined converter: {combined_script}", file=sys.stderr)
+            return 1
+        print("[ROUTE] Combined page-adjacent PDF output selected.", flush=True)
+        combined_cmd = [
+            sys.executable,
+            str(combined_script),
+            str(input_path),
+            "-o",
+            str(out_dir),
+            "--dpi",
+            str(args.dpi),
+            "--visual",
+            args.visual,
+        ]
+        if args.vlm_mode:
+            combined_cmd.extend(["--vlm-mode", args.vlm_mode])
+        if args.no_convert_chinese:
+            combined_cmd.append("--no-convert-chinese")
+        return run(combined_cmd)
 
     if scanned:
         print("[ROUTE] Scanned/image PDF detected: VLM pages pipeline only.", flush=True)
@@ -1848,7 +2214,7 @@ cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/doc_to_md.py" <<'AGENT_LAZYPACK_DO
 """
 doc_to_md.py — Student-friendly document to Markdown converter
 Supports: PDF, EPUB, TXT
-Output: Clean Markdown with YAML frontmatter + section anchors for AI 助手to annotate
+Output: Clean Markdown with YAML frontmatter + section anchors for AI 助手 to annotate
 """
 
 import sys
@@ -1858,6 +2224,13 @@ import argparse
 import datetime
 from pathlib import Path
 from collections import Counter
+
+# Windows and redirected shells may default to cp1252. Keep all CLI output UTF-8.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 
 # ── Dependency checks ──────────────────────────────────────────────────────────
 
@@ -2246,7 +2619,7 @@ def make_section_heading(sec: dict) -> str:
     return heading
 
 def section_placeholder(anchor: str) -> str:
-    """Generate the placeholder callout block AI 助手will fill in."""
+    """Generate the placeholder callout block the AI assistant will fill in."""
     return (
         f"> [!note] 章節摘要\n"
         f"> **摘要**：（AI 助手將在此填入本節摘要）\n"
@@ -2442,7 +2815,7 @@ Examples:
     # Run pipeline
     out_path = process_file(input_path, output_dir, convert_chinese)
     print(f"\n[DONE] Markdown saved to:\n  {out_path}")
-    print("\nNext step: Ask AI 助手to read this file and fill in the 章節摘要 callouts.")
+    print("\nNext step: Ask AI 助手 to read this file and fill in the 章節摘要 callouts.")
 
 if __name__ == '__main__':
     main()
@@ -2454,15 +2827,15 @@ cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/install.bat" <<'AGENT_LAZYPACK_DOC
 @echo off
 chcp 65001 >nul 2>nul
 setlocal EnableExtensions EnableDelayedExpansion
-title doc-to-md 安裝程式 v1.5.0
+title doc-to-md 安裝程式 v1.6.0
 
 echo.
 echo ============================================================
-echo   doc-to-md 安裝程式 v1.5.0
+echo   doc-to-md 安裝程式 v1.6.0
 echo ============================================================
 echo.
 
-set "INSTALL_DIR=%USERPROFILE%\.doc-to-md"
+set "INSTALL_DIR=%USERPROFILE%\.codex\doc-to-md"
 set "SCRIPT_DIR=%~dp0"
 set "SKILL_SRC=%SCRIPT_DIR%skill"
 set "EXTRACT_DIR="
@@ -2591,11 +2964,23 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
+copy /Y "%SKILL_SRC%\scripts\combined_kb.py" "%INSTALL_DIR%\" >nul
+if errorlevel 1 (
+    echo    複製 combined_kb.py 失敗。
+    pause
+    exit /b 1
+)
 copy /Y "%SKILL_SRC%\scripts\vlm_prep.py" "%INSTALL_DIR%\" >nul
 if errorlevel 1 (
     echo    複製 vlm_prep.py 失敗。
     echo    來源：%SKILL_SRC%\scripts\vlm_prep.py
     echo    目的：%INSTALL_DIR%\
+    pause
+    exit /b 1
+)
+copy /Y "%SKILL_SRC%\scripts\validate_kb.py" "%INSTALL_DIR%\" >nul
+if errorlevel 1 (
+    echo    複製 validate_kb.py 失敗。
     pause
     exit /b 1
 )
@@ -2647,6 +3032,11 @@ echo @echo off
 echo "%VENV_PY%" "%INSTALL_DIR%\package_kb.py" %%*
 ) > "%INSTALL_DIR%\doc-to-md-package.bat"
 
+(
+echo @echo off
+echo "%VENV_PY%" "%INSTALL_DIR%\validate_kb.py" %%*
+) > "%INSTALL_DIR%\doc-to-md-validate.bat"
+
 echo.
 echo 驗證安裝...
 "%VENV_PY%" -c "import sys; print('Python OK:', sys.version.split()[0])"
@@ -2673,11 +3063,39 @@ if errorlevel 1 (
     exit /b 1
 )
 
+"%VENV_PY%" "%INSTALL_DIR%\combined_kb.py" --help
+if errorlevel 1 (
+    echo    combined_kb.py 驗證失敗。
+    pause
+    exit /b 1
+)
+
 "%VENV_PY%" "%INSTALL_DIR%\doc_to_md.py" --help
 
 if errorlevel 1 (
     echo.
     echo    doc_to_md.py 驗證失敗。上方會顯示真正錯誤原因，請截圖回報老師。
+    pause
+    exit /b 1
+)
+
+"%VENV_PY%" "%INSTALL_DIR%\validate_kb.py" --help
+if errorlevel 1 (
+    echo    validate_kb.py 驗證失敗。
+    pause
+    exit /b 1
+)
+
+"%VENV_PY%" "%INSTALL_DIR%\vlm_prep.py" --help
+if errorlevel 1 (
+    echo    vlm_prep.py 驗證失敗。
+    pause
+    exit /b 1
+)
+
+"%VENV_PY%" "%INSTALL_DIR%\package_kb.py" --help
+if errorlevel 1 (
+    echo    package_kb.py 驗證失敗。
     pause
     exit /b 1
 )
@@ -2754,7 +3172,7 @@ fi
 
 echo ""
 echo "╔════════════════════════════════════════════╗"
-echo "║   doc-to-md 安裝程式 v1.5.0                ║"
+echo "║   doc-to-md 安裝程式 v1.6.0                ║"
 echo "╚════════════════════════════════════════════╝"
 echo ""
 
@@ -2810,8 +3228,8 @@ fi
 echo ""
 echo "📥 Step 3/3：安裝 Python 套件（可能需要 1-2 分鐘）..."
 
-"$INSTALL_DIR/venv/bin/pip" install --upgrade pip --quiet 2>/dev/null
-"$INSTALL_DIR/venv/bin/pip" install -r "$SKILL_SRC/scripts/requirements.txt" --quiet
+"$INSTALL_DIR/venv/bin/python3" -m pip install --upgrade pip --quiet 2>/dev/null
+"$INSTALL_DIR/venv/bin/python3" -m pip install -r "$SKILL_SRC/scripts/requirements.txt" --quiet
 
 if [ $? -eq 0 ]; then
     echo "   ✅ 所有套件安裝完成"
@@ -2823,7 +3241,9 @@ fi
 # 複製轉換腳本到安裝目錄
 cp "$SKILL_SRC/scripts/doc_to_md.py" "$INSTALL_DIR/"
 cp "$SKILL_SRC/scripts/doc_md_router.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/combined_kb.py" "$INSTALL_DIR/"
 cp "$SKILL_SRC/scripts/vlm_prep.py" "$INSTALL_DIR/"
+cp "$SKILL_SRC/scripts/validate_kb.py" "$INSTALL_DIR/"
 cp "$SKILL_SRC/scripts/package_kb.py" "$INSTALL_DIR/"
 cp "$SKILL_SRC/scripts/requirements.txt" "$INSTALL_DIR/"
 
@@ -2856,6 +3276,13 @@ DIR="$HOME/.codex/doc-to-md"
 LAUNCHER
 chmod +x "$INSTALL_DIR/doc-to-md-package"
 
+cat > "$INSTALL_DIR/doc-to-md-validate" << 'LAUNCHER'
+#!/bin/bash
+DIR="$HOME/.codex/doc-to-md"
+"$DIR/venv/bin/python3" "$DIR/validate_kb.py" "$@"
+LAUNCHER
+chmod +x "$INSTALL_DIR/doc-to-md-validate"
+
 # 加入 PATH
 SHELL_RC=""
 if [ -f "$HOME/.zshrc" ]; then
@@ -2878,11 +3305,15 @@ fi
 
 echo ""
 echo "🧪 驗證安裝..."
-"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/doc_md_router.py" --help >/dev/null 2>&1
-"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/doc_to_md.py" --help >/dev/null 2>&1
-"$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/vlm_prep.py" --help >/dev/null 2>&1
+VERIFY_OK=1
+for verify_script in doc_md_router.py combined_kb.py doc_to_md.py vlm_prep.py validate_kb.py package_kb.py; do
+    if ! "$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/$verify_script" --help >/dev/null 2>&1; then
+        echo "   ❌ $verify_script --help 驗證失敗"
+        VERIFY_OK=0
+    fi
+done
 
-if [ $? -eq 0 ]; then
+if [ "$VERIFY_OK" -eq 1 ]; then
     echo "   ✅ 驗證通過！"
     echo ""
     echo "╔══════════════════════════════════════════════════════════════╗"
@@ -2921,7 +3352,7 @@ package_kb.py — 把「最終知識庫 md + assets/」打包成單一 zip，內
 解決「只交付一個 md → 縮圖全斷、學員以為壞掉」的問題：交付這個 zip 即可。
 
 用法：
-    python3 package_kb.py <最終.md> [--assets <assets目錄>] [-o <輸出.zip>]
+    python3 package_kb.py <最終.md> [--assets <assets目錄>] [-o <輸出.zip>] [--allow-incomplete]
 
 行為：
     - 只打包 md 實際引用到的圖（![](...) 相對連結），順便當「斷鏈檢查」。
@@ -2931,7 +3362,12 @@ import argparse
 import os
 import re
 import sys
+import tempfile
 import zipfile
+
+from pathlib import Path
+
+from validate_kb import inspect_markdown
 
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -2947,6 +3383,11 @@ def main():
     ap.add_argument("md", help="最終知識庫 md 路徑")
     ap.add_argument("--assets", default=None, help="assets 目錄（預設：md 同層 assets/）")
     ap.add_argument("-o", "--output", default=None, help="輸出 zip（預設：md 同層 {stem}_知識庫.zip）")
+    ap.add_argument(
+        "--allow-incomplete",
+        action="store_true",
+        help="允許摘要或圖像占位符；圖片斷鏈仍會失敗",
+    )
     args = ap.parse_args()
 
     md = os.path.abspath(args.md)
@@ -2959,32 +3400,39 @@ def main():
     folder = f"{stem}_知識庫"
     out_zip = args.output or os.path.join(base, f"{folder}.zip")
 
-    text = open(md, encoding="utf-8").read()
-    links = re.findall(r"!\[[^]]*\]\(([^)]+)\)", text)
-    rels = [l for l in links if not l.startswith(("http://", "https://", "data:"))]
+    assets_dir = Path(args.assets).expanduser().resolve() if args.assets else None
+    issues, images = inspect_markdown(Path(md), assets_dir, args.allow_incomplete)
+    if issues:
+        print(f"❌ 知識庫尚未完成或不可安全打包，共 {len(issues)} 項：", file=sys.stderr)
+        for issue in issues:
+            print(f"   - {issue}", file=sys.stderr)
+        print("   → 請先補完摘要／圖像解讀與斷鏈；只有草稿交付才使用 --allow-incomplete。", file=sys.stderr)
+        sys.exit(2)
 
-    missing = []
     packed = 0
-    if os.path.exists(out_zip):
-        os.remove(out_zip)
-    with zipfile.ZipFile(out_zip, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.write(md, f"{folder}/{md_name}")
-        for rel in sorted(set(rels)):
-            src = os.path.normpath(os.path.join(base, rel))
-            if os.path.isfile(src):
+    out_zip = os.path.abspath(out_zip)
+    os.makedirs(os.path.dirname(out_zip), exist_ok=True)
+    temp_handle = tempfile.NamedTemporaryFile(
+        dir=os.path.dirname(out_zip),
+        prefix=f".{os.path.basename(out_zip)}.",
+        suffix=".tmp",
+        delete=False,
+    )
+    temp_zip = temp_handle.name
+    temp_handle.close()
+    try:
+        with zipfile.ZipFile(temp_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.write(md, f"{folder}/{md_name}")
+            for rel, src in images:
                 zf.write(src, f"{folder}/{rel}")
                 packed += 1
-            else:
-                missing.append(rel)
+        os.replace(temp_zip, out_zip)
+    finally:
+        if os.path.exists(temp_zip):
+            os.remove(temp_zip)
 
     print(f"✅ 已打包：{out_zip}")
     print(f"   結構：{folder}/{md_name} ＋ {packed} 張圖（assets 隨行）")
-    if missing:
-        print(f"   ❌ 有 {len(missing)} 個圖片連結找不到實體檔（未打包，會斷鏈）：")
-        for m in missing[:8]:
-            print(f"        {m}")
-        print("   → 請確認 assets 在 md 同層，或把這些斷鏈的圖片行移除（只留 VLM 文字）後重打包。")
-        sys.exit(2)
     print(f"   📂 解壓後打開 {folder}/{md_name}（Typora 等）縮圖會自動顯示，0 斷鏈。")
 
 
@@ -3004,6 +3452,123 @@ opencc-python-reimplemented>=0.1.7
 lxml>=4.9.0
 Pillow>=10.0.0
 AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_REQUIREMENTS_TXT_7A3CE58E94
+
+# doc-to-md/scripts/validate_kb.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/validate_kb.py")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/validate_kb.py" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_VALIDATE_KB_PY_D059EB2E0B'
+#!/usr/bin/env python3
+"""Validate a final knowledge-base Markdown file before portable packaging."""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+from urllib.parse import unquote
+
+
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+
+IMAGE_LINK = re.compile(r"!\[[^]]*\]\(([^)]+)\)")
+REMOTE_PREFIXES = ("http://", "https://", "data:")
+INCOMPLETE_MARKERS = (
+    "AI 助手將在此填入",
+    "⬜ 未檢視",
+    "（2-3 句：顯示什麼",
+    "（4-8 個詞，逗號分隔）",
+    "（表格／圖表／流程圖／框架圖／截圖／照片／文字頁）",
+)
+
+
+def _resolve_local_image(md_dir: Path, rel: str, assets_dir: Path | None) -> tuple[Path | None, str | None]:
+    clean = unquote(rel.strip().strip("<>")).split("#", 1)[0]
+    if not clean or clean.startswith(REMOTE_PREFIXES):
+        return None, None
+
+    rel_path = Path(clean)
+    if rel_path.is_absolute():
+        return None, f"不允許絕對圖片路徑：{rel}"
+
+    if assets_dir is not None and rel_path.parts and rel_path.parts[0] == "assets":
+        root = assets_dir.resolve()
+        candidate = root.joinpath(*rel_path.parts[1:]).resolve()
+    else:
+        root = md_dir.resolve()
+        candidate = root.joinpath(rel_path).resolve()
+
+    try:
+        candidate.relative_to(root)
+    except ValueError:
+        return None, f"圖片路徑超出打包範圍：{rel}"
+    return candidate, None
+
+
+def inspect_markdown(
+    md_path: Path,
+    assets_dir: Path | None = None,
+    allow_incomplete: bool = False,
+) -> tuple[list[str], list[tuple[str, Path]]]:
+    """Return validation issues and safe local image paths."""
+    text = md_path.read_text(encoding="utf-8")
+    issues: list[str] = []
+
+    if not allow_incomplete:
+        for marker in INCOMPLETE_MARKERS:
+            if marker in text:
+                issues.append(f"未完成內容仍存在：{marker}")
+
+    images: list[tuple[str, Path]] = []
+    seen: set[str] = set()
+    for rel in IMAGE_LINK.findall(text):
+        if rel.startswith(REMOTE_PREFIXES) or rel in seen:
+            continue
+        seen.add(rel)
+        resolved, path_issue = _resolve_local_image(md_path.parent, rel, assets_dir)
+        if path_issue:
+            issues.append(path_issue)
+        elif resolved is not None and not resolved.is_file():
+            issues.append(f"圖片斷鏈：{rel}")
+        elif resolved is not None:
+            images.append((rel, resolved))
+
+    return issues, images
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="驗證知識庫 Markdown 的完整度與圖片連結")
+    parser.add_argument("md", help="最終知識庫 Markdown")
+    parser.add_argument("--assets", default=None, help="可選：取代 Markdown 同層 assets/ 的資料夾")
+    parser.add_argument(
+        "--allow-incomplete",
+        action="store_true",
+        help="允許摘要或圖像占位符；圖片斷鏈仍會失敗",
+    )
+    args = parser.parse_args()
+
+    md_path = Path(args.md).expanduser().resolve()
+    if not md_path.is_file():
+        print(f"❌ 找不到 md：{md_path}", file=sys.stderr)
+        return 1
+    assets = Path(args.assets).expanduser().resolve() if args.assets else None
+    issues, images = inspect_markdown(md_path, assets, args.allow_incomplete)
+    if issues:
+        print(f"❌ 驗證失敗，共 {len(issues)} 項：", file=sys.stderr)
+        for issue in issues:
+            print(f"   - {issue}", file=sys.stderr)
+        return 2
+    print(f"✅ 驗證通過：{md_path.name}（{len(images)} 個本地圖片連結）")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_VALIDATE_KB_PY_D059EB2E0B
 
 # doc-to-md/scripts/vlm_prep.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/vlm_prep.py")"
@@ -3562,6 +4127,173 @@ if __name__ == "__main__":
     main()
 AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_VLM_PREP_PY_DD87F2EB0F
 chmod +x "{{SYNC_ROOT}}/skills/doc-to-md/scripts/vlm_prep.py"
+
+# doc-to-md/scripts/tests/test_doc_to_md.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/scripts/tests/test_doc_to_md.py")"
+cat > "{{SYNC_ROOT}}/skills/doc-to-md/scripts/tests/test_doc_to_md.py" <<'AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_TESTS_TEST_DOC_TO_MD_PY_C55D405844'
+#!/usr/bin/env python3
+"""Public-contract tests for the portable doc-to-md skill package."""
+
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+import fitz
+
+
+SCRIPTS_DIR = Path(__file__).resolve().parents[1]
+SKILL_DIR = SCRIPTS_DIR.parent
+ROUTER = SCRIPTS_DIR / "doc_md_router.py"
+TEXT_CONVERTER = SCRIPTS_DIR / "doc_to_md.py"
+PACKAGER = SCRIPTS_DIR / "package_kb.py"
+
+
+def run_script(script: Path, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(script), *args],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=env,
+    )
+
+
+class DocToMdContractTests(unittest.TestCase):
+    def test_combined_mode_creates_page_adjacent_markdown_and_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            pdf = root / "sample.pdf"
+            out = root / "out"
+
+            doc = fitz.open()
+            first = doc.new_page()
+            first.insert_text(
+                (72, 72),
+                "Chapter 1 Overview PAGE_ONE_TEXT " + "A" * 180,
+            )
+            for index in range(30):
+                y = 120 + index * 3
+                first.draw_line((72, y), (300, y))
+            second = doc.new_page()
+            second.insert_text(
+                (72, 72),
+                "Chapter 2 Follow-up PAGE_TWO_TEXT " + "B" * 180,
+            )
+            doc.save(pdf)
+            doc.close()
+
+            result = run_script(
+                ROUTER,
+                "--bundled-only",
+                "--output-mode",
+                "combined",
+                str(pdf),
+                "-o",
+                str(out),
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            markdown_files = list(out.glob("*_\u5b8c\u6574\u77e5\u8b58\u5eab.md"))
+            manifest_files = list(out.glob("*_manifest.json"))
+            self.assertEqual(len(markdown_files), 1)
+            self.assertEqual(len(manifest_files), 1)
+
+            markdown = markdown_files[0].read_text(encoding="utf-8")
+            first_pos = markdown.index("PAGE_ONE_TEXT")
+            image_pos = markdown.index("![", first_pos)
+            second_pos = markdown.index("PAGE_TWO_TEXT")
+            self.assertLess(first_pos, image_pos)
+            self.assertLess(image_pos, second_pos)
+            self.assertIn("layout: page-adjacent", markdown)
+            self.assertNotIn("exact original position", markdown.lower())
+
+            manifest = json.loads(manifest_files[0].read_text(encoding="utf-8"))
+            self.assertEqual(manifest["output_mode"], "combined")
+            self.assertEqual(manifest["layout"], "page-adjacent")
+            self.assertGreaterEqual(manifest["visual_items"], 1)
+
+    def test_packager_rejects_incomplete_markdown_unless_explicitly_allowed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            assets = root / "assets"
+            assets.mkdir()
+            (assets / "figure.png").write_bytes(b"not-a-real-image-but-present")
+            markdown = root / "draft_\u5b8c\u6574\u77e5\u8b58\u5eab.md"
+            markdown.write_text(
+                "# Draft\n\n![figure](assets/figure.png)\n\n"
+                "> **\u6458\u8981**\uff1a\uff08AI \u52a9\u624b\u5c07\u5728\u6b64\u586b\u5165\u672c\u7bc0\u6458\u8981\uff09\n"
+                "> \u6aa2\u8996\u72c0\u614b\uff1a\u2b1c \u672a\u6aa2\u8996\n",
+                encoding="utf-8",
+            )
+            archive = root / "draft_\u77e5\u8b58\u5eab.zip"
+            archive.write_bytes(b"existing-archive")
+
+            strict = run_script(PACKAGER, str(markdown))
+            self.assertNotEqual(strict.returncode, 0)
+            self.assertIn("\u672a\u5b8c\u6210", strict.stdout + strict.stderr)
+            self.assertEqual(archive.read_bytes(), b"existing-archive")
+
+            override = run_script(PACKAGER, str(markdown), "--allow-incomplete")
+            self.assertEqual(override.returncode, 0, override.stdout + override.stderr)
+            self.assertTrue(archive.is_file())
+            self.assertNotEqual(archive.read_bytes(), b"existing-archive")
+
+    def test_text_converter_forces_utf8_when_stdio_encoding_is_legacy(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "\u6e2c\u8a66.txt"
+            source.write_text("\u7b2c1\u7ae0 \u6e2c\u8a66\n\u9019\u662f\u4e00\u6bb5\u6587\u5b57\u3002\n", encoding="utf-8")
+            out = root / "out"
+            env = os.environ.copy()
+            env["PYTHONIOENCODING"] = "cp1252"
+
+            result = run_script(
+                TEXT_CONVERTER,
+                "--auto",
+                str(source),
+                "-o",
+                str(out),
+                env=env,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(len(list(out.glob("*.md"))), 1)
+
+    def test_router_uses_inner_text_launcher_instead_of_recursing_into_itself(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            install = root / ".codex" / "doc-to-md"
+            install.mkdir(parents=True)
+            outer = install / "doc-to-md"
+            outer.write_text("#!/bin/sh\nexit 91\n", encoding="utf-8")
+            outer.chmod(0o755)
+            inner = install / "doc-to-md-text"
+            inner.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            inner.chmod(0o755)
+            source = root / "sample.txt"
+            source.write_text("hello", encoding="utf-8")
+            env = os.environ.copy()
+            env["HOME"] = str(root)
+
+            result = run_script(ROUTER, str(source), "-o", str(root / "out"), env=env)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_skill_docs_do_not_advertise_removed_ocr_flags(self) -> None:
+        skill_text = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        self.assertNotIn("--ocr-classify", skill_text)
+        self.assertNotIn("--no-ocr-classify", skill_text)
+
+
+if __name__ == "__main__":
+    unittest.main()
+AGENT_LAZYPACK_DOC_TO_MD_SCRIPTS_TESTS_TEST_DOC_TO_MD_PY_C55D405844
 
 test -f "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md" && echo "doc-to-md installed for Codex, Claude, and AntiGravity"
 ````

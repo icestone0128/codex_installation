@@ -2,6 +2,8 @@
 
 > 2026-05-24 更新：本文件已改為自含式 Skill 安裝文件。請使用文末「內建 Skill 完整安裝內容」，不需要額外的舊版獨立 skills 子目錄。
 
+> 2026-08-01 更新：吸收 Claude Skill Forge 通用模板中可攜的部分，新增「使用者修正優先」對話萃取規則、Claude 相容 frontmatter 嚴格驗證，以及只有明確需要 Claude 上傳時才使用的選配 ZIP 封裝工具；不強制固定四問、`references/`、`examples/` 或每次打包 ZIP。
+
 
 ## 目標
 
@@ -28,6 +30,8 @@
 - `{{CODEX_HOME}}/skills/.system` 是 Codex 內建 adapter 資產，平常只讀取；Claude 與 AntiGravity 使用各自原生入口，不複製 `.system`。
 - 個人助手或單一專案的本地 skills 固定放在對應的 `000_Agent/skills`，不要 symlink 到全域共用主版本。
 - `codex-skill-creator` 是自訂 skill 建立與維護的必要入口；系統內建 creator 只讀，只作輔助參考。
+- 共用 `SKILL.md` 必須同時符合 Claude 的嚴格 frontmatter 可攜範圍：非空且合法的 `name`、非空且清楚描述「做什麼＋何時用」的第三人稱 `description`，並拒絕保留字與 XML markup。
+- 只有使用者明確需要 Claude Customize／API 上傳成品時才建立 ZIP；ZIP 是衍生發布物，不是第二份 skill 主版本，也不自動上傳。
 - 全域 skills 有新增、修改或刪除時，要同步更新 Obsidian 的全域 Skills 索引。
 - 任何 skill 不論全域或專案本地，都要做成可攜式版本。
 
@@ -65,19 +69,24 @@ codex-skill-creator
 {{SYNC_ROOT}}/skills/codex-skill-creator/references/built-in-quality-practices.md
 {{SYNC_ROOT}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
 {{SYNC_ROOT}}/skills/codex-skill-creator/references/conversation-to-skill.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/references/standalone-claude-package.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py
 ```
 
 用途：
 
 - 把 外部 / 第三方 skill 教學轉成 三 Agent 相容流程。
 - 把成功對話、prompt、輸出格式或重複工作流萃取成三 Agent 共用 skill。
+- 將使用者中途拒絕、修正、縮限、改名或重排的最新明確要求視為第一級驗收證據。
 - 建立、優化、驗證自訂全域或專案本地 skills。
+- 需要 Claude 上傳檔時，以同一共用主版本驗證並衍生安全 ZIP，不強制每個 skill 都打包。
 - 記得同步可攜式版本；全域 skill 同步 Obsidian 全域 skill 索引，專案 skill 同步專案駕駛艙。
 - 顯式呼叫使用 `$codex-skill-creator`；自然語句如「幫我建立 skill」、「把這段對話變成 skill」也必須觸發。
 - 沒有結構化選項 UI 時，改用簡短編號選項或一次一題的純文字訪談，不中斷工作流。
 - 目標 skill 已存在時，先讀取並判斷是局部修正、完整更新、改名或無需修改；完整替換與改名前先建 timestamped backup 或確認版本控制可回復。
 - 建立檔案不算完成；必須用一組代表性輸入實際觸發並驗證輸出。
 - 新建 skill 時，優先使用系統內建 `init_skill.py` 建立標準骨架；更新後使用 `quick_validate.py`，並維護 `agents/openai.yaml`。
+- 內建 `quick_validate.py` 後再執行 `package_claude_skill.py validate`，補查保留字、資料夾名稱、非空 metadata 與明顯非第三人稱描述。
 - 依任務脆弱度選擇高／中／低自由度；`SKILL.md` 採漸進揭露，詳細內容移入直接連結的 `references/`。
 - 複雜或高影響 skill 在能力可用時進行無答案洩漏的 forward-test；若測試耗時、需額外核准或會碰觸 live system，先取得使用者同意。
 
@@ -141,6 +150,7 @@ test -f "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill
 - `SKILL.md` 保持精簡，放觸發、路徑、流程與安全規則。
 - 長範例、來源轉換表、模板放 `references/`。
 - 只有需要穩定重複執行的檢查或轉換，才放 `scripts/`。
+- `references/`、`scripts/`、`assets/` 與範例都是按需建立；最低完整結構仍可以只有 `SKILL.md`。
 - 新建 skill 優先用 `.system/skill-creator/scripts/init_skill.py`；驗證優先用 `quick_validate.py`。
 - 執行 validator 前先確認該 Python 可 `import yaml`；預設 Python 缺 PyYAML 時，改用已有依賴的 interpreter 並回報 fallback，不靜默略過驗證。
 - `agents/openai.yaml` 的 `default_prompt` 必須使用真實 `$skill-name`，且重大修改後要重新核對。
@@ -160,10 +170,31 @@ metadata:
 
 檢查規則：
 
-- `name` 必須與資料夾名稱一致。
-- `description` 要把最常用觸發場景放前面。
+- `name` 必須非空、最多 64 字元、只用小寫英文字母／數字／單一連字號，不能包含 `claude`、`anthropic` 或 XML markup，且必須與資料夾名稱一致。
+- `description` 必須非空、最多 1024 字元、不含 XML markup、使用第三人稱，並同時說明 skill 做什麼與何時使用。
+- 動名詞名稱只是建議，不是載入條件。
 - 不放 來源工具專用 欄位。
 - 不寫 API key、token、密碼或個資。
+
+## 選配 Claude ZIP 發布
+
+只有使用者明確要求 Claude Customize／API 上傳 ZIP 時，才讀取：
+
+```text
+{{SYNC_ROOT}}/skills/codex-skill-creator/references/standalone-claude-package.md
+```
+
+先驗證，再建立本機衍生檔：
+
+```bash
+python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" \
+  validate "<skill-folder>"
+
+python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" \
+  package "<skill-folder>" --output-dir "<output-directory>" --version 1.0.0
+```
+
+工具會拒絕 symlink、`.env`、credentials、private-key 類檔案，排除 cache、venv、`node_modules` 與 Git 資料，並確認 ZIP 最上層是 frontmatter `name` 對應的資料夾。`--timestamp` 與版本檔名是本懶人包的防覆寫慣例，不是 Claude 官方必填規格；未取得額外授權不得自動上傳。
 
 ## 建立第一個真實 Skill 的流程
 
@@ -214,6 +245,7 @@ metadata:
 - `name` 等於資料夾名稱。
 - `description` 有具體觸發語。
 - `references/` 內被引用的檔案真的存在。
+- 使用者在原對話中的最新可重用修正已轉成驗收條件、邊界或步驟順序，而不是遺失在聊天紀錄中。
 - 沒有誤放 來源工具專用 欄位或路徑。
 
 範例檢查：
@@ -221,6 +253,7 @@ metadata:
 ```bash
 find "{{SYNC_ROOT}}/skills/<skill-name>" -maxdepth 2 -type f -print
 sed -n '1,20p' "{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md"
+python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" validate "{{SYNC_ROOT}}/skills/<skill-name>"
 ```
 
 ### 5. 同步
@@ -256,6 +289,8 @@ sed -n '1,20p' "{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md"
 {{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md
 {{SYNC_ROOT}}/skills/codex-skill-creator/references/codex-bootstrap-adapter.md
 {{SYNC_ROOT}}/skills/codex-skill-creator/references/conversation-to-skill.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/references/standalone-claude-package.md
+{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py
 {{SYNC_ROOT}}/skills/secondbrain-research-digest/SKILL.md
 {{SYNC_ROOT}}/skills/secondbrain-research-digest/references/research-note-template.md
 ```
@@ -309,12 +344,14 @@ sed -n '1,20p' "{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md"
 1. 先套用本文件的三 Agent 共用契約與 adapter 規則。
 2. 使用 `codex-skill-creator` companion skill。
 3. 若是從對話萃取 skill，先確認要固化的片段、skill 名稱、是否保留優化過程與觸發/輸出格式。
-4. 若是第一個真實工作 skill，先做簡短訪談。
-5. 判斷 skill 歸屬，建立或更新 `{{SYNC_ROOT}}/skills/<skill-name>` 或 `<project-root>/000_Agent/skills/<skill-name>`。
-6. 驗證 frontmatter、路徑與 reference。
-7. 若系統 helper 可用，執行 `init_skill.py`／`generate_openai_yaml.py`／`quick_validate.py` 對應步驟，並視複雜度做 forward-test。
-8. 同步可攜式版本：全域同步 LazyPack 與 Obsidian 全域 Skills；專案同步專案 `000_Agent/skills` 與專案駕駛艙。
-9. 回報 Codex、Claude、AntiGravity 各自的安裝入口、重載方式、實際驗證與 fallback。
+4. 先把使用者在對話中的最新修正整理成可重用驗收條件；已知資訊不重問。
+5. 若是第一個真實工作 skill，先做簡短訪談。
+6. 判斷 skill 歸屬，建立或更新 `{{SYNC_ROOT}}/skills/<skill-name>` 或 `<project-root>/000_Agent/skills/<skill-name>`。
+7. 驗證 frontmatter、路徑與 reference，並執行共用可攜 validator。
+8. 若系統 helper 可用，執行 `init_skill.py`／`generate_openai_yaml.py`／`quick_validate.py` 對應步驟，並視複雜度做 forward-test。
+9. 使用者明確要 Claude ZIP 時才建立本機衍生 archive；不自動上傳。
+10. 同步可攜式版本：全域同步 LazyPack 與 Obsidian 全域 Skills；專案同步專案 `000_Agent/skills` 與專案駕駛艙。
+11. 回報 Codex、Claude、AntiGravity 各自的安裝入口、重載方式、實際驗證與 fallback。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
@@ -334,7 +371,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD_0E95F5A366'
 ---
 name: codex-skill-creator
-description: Use for every request to create, extract, adapt, improve, validate, rename, or synchronize a custom Agent Skill shared by Codex, Claude, and AntiGravity. This is the required entry workflow for global and project-local skill work, including turning third-party guides or successful conversations into reusable cross-agent packages. Use global source packages under {{SYNC_ROOT}}/skills and project skills under 000_Agent/skills.
+description: Builds, extracts, adapts, improves, validates, renames, and synchronizes custom Agent Skills shared by Codex, Claude, and AntiGravity. Use when creating or maintaining global or project-local skills, adapting third-party guides, or turning successful conversations into reusable cross-agent packages.
 metadata:
   short-description: Build cross-agent skills
 ---
@@ -377,13 +414,14 @@ Use this skill as Arry's required entry workflow for creating and maintaining cu
 1. Keep one shared package under `{{SYNC_ROOT}}/skills` or the project `000_Agent/skills`; native Agent paths are adapters, not additional sources.
 2. Do not overwrite `{{CODEX_HOME}}/skills/.system/skill-creator` or route the user around `codex-skill-creator`; built-in material may be consulted only as supporting guidance.
 3. Use shared frontmatter with `name`, `description`, and optional `metadata.short-description`; keep vendor-specific metadata in a native adapter file.
-4. Convert fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, `when_to_use`, or subagent config into portable trigger, permission, and workflow instructions unless all three agents support the field identically.
-5. Do not assume one invocation syntax. Put the durable trigger intent in metadata and document native invocation differences only when they matter.
-6. Keep `SKILL.md` concise. Move detailed examples, source adaptations, schemas, and checklists into `references/`.
-7. After adding, changing, or deleting a custom global skill, update the LazyPack portable copy and Obsidian global skill mirror note.
-8. After adding, changing, or deleting a project-local skill, keep the complete portable package under the project `000_Agent/skills` and update the project cockpit.
-9. Do not create alternative content roots. Global source work stays under `{{SYNC_ROOT}}/skills`; project-local work stays under `<project-root>/000_Agent/skills`.
-10. Any Agent-specific connector, MCP, image tool, sandbox, model, UI, or command step must include `Shared steps`, `Codex adapter`, `Claude adapter`, `AntiGravity adapter`, `Fallback`, and `Verification` notes. Read `../cross-device-sync/references/agent-execution-compatibility.md` for the contract.
+4. Keep shared frontmatter inside the strict portable envelope required by Claude as one consumer of the package: `name` is non-empty, at most 64 characters, lowercase letters/digits/hyphens only, contains neither `claude` nor `anthropic`, contains no XML markup, and matches the folder name. `description` is non-empty, at most 1024 characters, contains no XML markup, uses third-person phrasing, and states both what the skill does and when to use it. Gerund naming is a recommendation, not a requirement.
+5. Convert fields such as `allowed-tools`, `disable-model-invocation`, `user-invocable`, `when_to_use`, or subagent config into portable trigger, permission, and workflow instructions unless all three agents support the field identically.
+6. Do not assume one invocation syntax. Put the durable trigger intent in metadata and document native invocation differences only when they matter.
+7. Keep `SKILL.md` concise. Move detailed examples, source adaptations, schemas, and checklists into `references/`.
+8. After adding, changing, or deleting a custom global skill, update the LazyPack portable copy and Obsidian global skill mirror note.
+9. After adding, changing, or deleting a project-local skill, keep the complete portable package under the project `000_Agent/skills` and update the project cockpit.
+10. Do not create alternative content roots. Global source work stays under `{{SYNC_ROOT}}/skills`; project-local work stays under `<project-root>/000_Agent/skills`.
+11. Any Agent-specific connector, MCP, image tool, sandbox, model, UI, or command step must include `Shared steps`, `Codex adapter`, `Claude adapter`, `AntiGravity adapter`, `Fallback`, and `Verification` notes. Read `../cross-device-sync/references/agent-execution-compatibility.md` for the contract.
 
 ## Ownership Decision
 
@@ -403,6 +441,7 @@ Choose the branch before writing files:
 - Conversation-extraction mode: the user wants to turn a successful conversation, prompt, output style, debugging pattern, or repeated workflow into a reusable skill. Read `references/conversation-to-skill.md`.
 - Direct-maintenance mode: an existing shared skill needs a small improvement, validation, or sync repair. Read the target skill and patch only the needed sections.
 - First-skill interview mode: the user wants help finding a practical first skill. Use the short interview below.
+- Standalone Claude ZIP output: the user explicitly needs a local archive for Claude Customize upload or another Claude distribution surface. Read `references/standalone-claude-package.md`; do not make ZIP creation or upload the default for shared skills.
 
 For field-by-field conversion details, read `references/codex-bootstrap-adapter.md` when the source material is 來源工具導向 or third-party-specific.
 
@@ -434,7 +473,7 @@ adaptation, packaging, and validation workflow.
    - Existing custom skill: read the current skill first, then patch only the needed sections.
    - Built-in system skill: do not patch; create a companion custom skill or a reference note.
    - Confirm that this request is being handled through `codex-skill-creator`; do not hand custom-skill ownership to the built-in creator.
-   - For a new skill, normalize the name to lowercase hyphen-case, keep it at 64 characters or fewer, and use the built-in initializer when available:
+   - For a new skill, normalize the name to lowercase hyphen-case, keep it at 64 characters or fewer, reject the reserved words `claude` and `anthropic`, and use the built-in initializer when available:
      `python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/init_skill.py" <skill-name> --path <parent> [--resources ...] --interface ...`.
    - If the built-in initializer is unavailable, create the same minimal structure manually and record that fallback in the result.
 2. Extract the useful workflow from the source material:
@@ -469,20 +508,27 @@ adaptation, packaging, and validation workflow.
    - run the built-in validator when available:
      `python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" <skill-folder>`
    - before running it, confirm the selected interpreter can `import yaml`; if the default `python3` cannot, use another available interpreter with PyYAML and report the fallback rather than silently skipping validation
+   - run the shared portable-envelope validator, which supplements the built-in check with reserved-name, folder-match, non-empty metadata, and obvious first-/second-person description checks:
+     `python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" validate <skill-folder>`
    - test every added script directly; for several similar scripts, test a representative sample
    - verify `agents/openai.yaml` still matches the skill name, purpose, and real Codex invocation without changing Claude or AntiGravity behavior
    - run `cross-device-sync/scripts/audit-agent-compatibility.py` on the changed package and portable documentation
-6. Sync portable copies and indexes:
+6. Package a standalone Claude ZIP only when explicitly requested:
+   - follow `references/standalone-claude-package.md`
+   - validate before packaging and inspect the archive after creation
+   - keep the shared source package authoritative; the ZIP is a derived distribution artifact
+   - do not upload it or change a Claude account without separate authorization
+7. Sync portable copies and indexes:
    - Global skill: sync `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>` and the Obsidian global skill mirror note.
    - Project skill: keep the complete portable package under `<project-root>/000_Agent/skills/<skill-name>` and update the project cockpit.
-7. Sync the Obsidian mirror note when the skill is global:
+8. Sync the Obsidian mirror note when the skill is global:
    - add or update the custom skill table row
    - add or update the skill summary section
    - append a dated sync record
-8. Report the result with exact paths, ownership level, portable-copy status, all three native entrypoints, and per-agent restart/fresh-session requirements.
-9. Test discoverability with the real skill name: use `$<skill-name>` when explicit invocation is useful, or a natural-language trigger covered by the skill description.
-10. Complete one realistic trial with representative input. Creating files without a real trigger-and-output check is not a finished skill workflow.
-11. Forward-test complex or high-impact skills with a fresh independent agent when that capability is available. Give it the raw skill and a realistic user request, not the intended answer or suspected defect. Ask the user first if the test may take substantial time, require extra approvals, or touch live systems. If independent agents are unavailable, document the local realistic trial as the fallback.
+9. Report the result with exact paths, ownership level, portable-copy status, all three native entrypoints, and per-agent restart/fresh-session requirements.
+10. Test discoverability with the real skill name: use `$<skill-name>` when explicit invocation is useful, or a natural-language trigger covered by the skill description.
+11. Complete one realistic trial with representative input. Creating files without a real trigger-and-output check is not a finished skill workflow.
+12. Forward-test complex or high-impact skills with a fresh independent agent when that capability is available. Give it the raw skill and a realistic user request, not the intended answer or suspected defect. Ask the user first if the test may take substantial time, require extra approvals, or touch live systems. If independent agents are unavailable, document the local realistic trial as the fallback.
 
 ## Interview Pattern For A First Skill
 
@@ -509,6 +555,7 @@ After the first skill is built:
 - Global skill source lives under `{{SYNC_ROOT}}/skills/<skill-name>/` and resolves through all three native entrypoints; project skill lives under `<project-root>/000_Agent/skills/<skill-name>/`.
 - Portable package exists in the correct place: `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>` for global, project `000_Agent/skills/<skill-name>` for project-local.
 - `SKILL.md` frontmatter includes `name` and `description`.
+- Shared frontmatter passes the portable envelope: valid non-reserved folder-matching `name`; non-empty third-person `description` of at most 1024 characters that states what the skill does and when to use it; no XML markup.
 - `description` includes concrete trigger phrases and use cases.
 - Detailed material is in `references/`, not bloating `SKILL.md`.
 - The chosen instruction freedom matches task fragility; deterministic operations use scripts when appropriate.
@@ -522,6 +569,7 @@ After the first skill is built:
 - Existing skill replacement has a backup or version-control recovery path; narrow updates preserve unrelated files.
 - At least one realistic trigger-and-output trial was completed or the unperformed trial is explicitly reported.
 - Complex skills received an uncontaminated forward-test when available, or the fallback and reason were reported.
+- A standalone Claude ZIP exists only when explicitly requested, contains the named skill folder at archive root, excludes local caches and likely secret files, and remains a derived artifact rather than a second source package.
 - Obsidian mirror note is updated for global skill changes; project cockpit is updated for project-local skill changes.
 AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD_0E95F5A366
 
@@ -589,7 +637,9 @@ Rules:
 
 - normalize names to lowercase hyphen-case
 - keep names at 64 characters or fewer
+- reject `claude` and `anthropic` in the shared skill name so the package remains loadable by Claude
 - make the folder name match frontmatter `name`
+- keep `description` non-empty, at most 1024 characters, free of XML markup, and in third-person language that states both what the skill does and when to use it
 - do not use `--examples` unless placeholder examples will be replaced or removed immediately
 - if the helper is unavailable, create the equivalent minimal package manually and report the fallback
 
@@ -626,6 +676,15 @@ python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_
 ```
 
 First verify that the selected interpreter can `import yaml`. If the default `python3` lacks PyYAML, use another available interpreter that has it and report the fallback. Do not silently skip validation or install packages globally without considering the environment's package-management policy.
+
+Then run the shared portability validator:
+
+```bash
+python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" \
+  validate <skill-folder>
+```
+
+This supplements the built-in validator with folder-name matching, reserved-name checks, required non-empty metadata, and obvious first-/second-person description detection. When the user explicitly asks for a Claude upload ZIP, use the same script's `package` command and follow `references/standalone-claude-package.md`; ZIP creation is not the default shared-skill workflow.
 
 Also verify:
 
@@ -797,12 +856,21 @@ If the conversation contains private data, secrets, personal stories, client det
 
 ## Extraction Steps
 
+Before abstracting the workflow, build a short correction ledger from the conversation:
+
+- capture every point where the user rejected, corrected, narrowed, renamed, or reordered the result
+- treat the latest explicit correction as canonical when it conflicts with an earlier preference
+- keep only corrections that define reusable behavior; leave one-off wording and temporary context out of a global skill
+
+User corrections are first-class evidence because they reveal hidden acceptance criteria that the initial request often omitted.
+
 1. Identify the repeated job:
    - user trigger phrases
    - desired output
    - required inputs
    - decisions the active agent must make
    - things every agent must avoid
+   - correction-derived acceptance criteria
 2. Separate reusable method from incidental context:
    - keep stable steps, heuristics, formats, and checks
    - remove one-off names, temporary paths, credentials, and private details
@@ -825,34 +893,343 @@ If the conversation contains private data, secrets, personal stories, client det
 
 ## Recommended Output Shape
 
-For a new global skill:
+For a new global skill, start with the minimum complete package:
 
 ```text
 {{SYNC_ROOT}}/skills/<skill-name>/
-├── SKILL.md
-└── references/
-    └── <method-or-pattern>.md
+└── SKILL.md
 ```
 
 For a project-local skill:
 
 ```text
 <project-root>/000_Agent/skills/<skill-name>/
-├── SKILL.md
-└── references/
-    └── <method-or-pattern>.md
+└── SKILL.md
 ```
 
-If examples are needed, include short synthetic examples. Do not paste the full original conversation unless the user explicitly asks and the content is safe for the chosen skill scope.
+Add `references/`, `scripts/`, or `assets/` only when the extracted workflow actually needs them. If examples are needed, prefer short synthetic examples in a directly linked reference. Do not paste the full original conversation unless the user explicitly asks and the content is safe for the chosen skill scope.
 
 ## Skill Draft Checklist
 
 - The description names the real user phrase that should trigger the skill.
+- The latest reusable user corrections are reflected as acceptance criteria, boundaries, or workflow ordering rather than being lost in the raw conversation.
 - The body tells the active agent when to read each reference file.
 - The workflow explains what to do first, what to ask, what to produce, and how to verify.
 - The skill contains no secrets, raw private chat, or one-off project state unless it is project-local and intentionally scoped.
 - The final report states whether the skill is global or project-local, where it was written, what portable copy was updated, and which agents need a fresh session or restart.
 AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CONVERSATION_TO_SKILL_MD_4D4BF7D9EA
+
+# codex-skill-creator/references/standalone-claude-package.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/references/standalone-claude-package.md")"
+cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/references/standalone-claude-package.md" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_STANDALONE_CLAUDE_PACKAGE_MD_AF2B981C30'
+---
+title: Standalone Claude Skill Package
+date: 2026-08-01
+type: reference
+tags:
+  - claude
+  - skills
+  - packaging
+---
+
+# Standalone Claude Skill Package
+
+Use this route only when the user explicitly needs a local ZIP for Claude Customize upload, Claude API upload, or another Claude-specific distribution surface. The shared package under `{{SYNC_ROOT}}/skills` or project `000_Agent/skills` remains authoritative; the ZIP is a derived artifact.
+
+## Shared Requirements
+
+- Finish and validate the shared Codex/Claude/AntiGravity package first.
+- Keep the minimum package at `SKILL.md`; add `references/`, `scripts/`, `assets/`, or examples only when they are operationally useful.
+- Do not put secrets, credentials, `.env` files, caches, virtual environments, dependency trees, raw private conversations, or unrelated project files in the archive.
+- Refuse symlinks inside the package so the archive cannot silently copy data from outside the skill directory.
+- Do not upload the ZIP or change a Claude account unless the user separately authorizes that external action.
+
+## Claude-Compatible Frontmatter
+
+The shared `SKILL.md` must use this portable envelope:
+
+- `name`: non-empty, at most 64 characters, lowercase letters/digits/hyphens only, no `claude` or `anthropic`, no XML markup, and equal to the folder name
+- `description`: non-empty, at most 1024 characters, no XML markup, third-person phrasing, and a clear statement of what the skill does and when to use it; the validator treats a missing usage condition as an error
+- Gerund naming is recommended but not required.
+
+These constraints were verified against Anthropic's Agent Skills overview and authoring guidance on 2026-08-01. Recheck current official documentation if Claude changes its upload contract.
+
+Official references:
+
+- [Skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
+- [How to create custom skills](https://support.claude.com/en/articles/12512198-how-to-create-custom-skills)
+
+## Package Workflow
+
+1. Run Codex's built-in `quick_validate.py` when available.
+2. Run the shared validator:
+
+   ```bash
+   python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" \
+     validate <skill-folder>
+   ```
+
+3. Create the local ZIP only after validation passes:
+
+   ```bash
+   python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" \
+     package <skill-folder> --output-dir <output-directory> --version 1.0.0
+   ```
+
+   Add `--timestamp` when multiple builds of the same version must coexist. Version and timestamp formatting are local distribution conventions, not Claude platform requirements.
+
+4. Inspect the reported archive entries. The ZIP root must contain exactly the named skill folder, with `SKILL.md` inside it.
+5. Keep the ZIP outside the authoritative skill folder. Do not edit the ZIP as a second source.
+
+## Agent Adapters
+
+### Shared steps
+
+All three agents create and validate the same shared package before any destination-specific delivery.
+
+### Codex adapter
+
+Run the local packaging script and return the resulting file path. Use Claude UI control only when the user explicitly asks for upload and the active session has that capability.
+
+### Claude adapter
+
+For Claude Customize upload, upload the validated ZIP whose root contains the named skill folder. For Claude Code filesystem discovery, use the shared/native skill folder directly; a ZIP is unnecessary unless requested for transfer.
+
+### AntiGravity adapter
+
+Use the same shared package for normal discovery. Produce the Claude ZIP only as a destination artifact when the user asks to transfer the skill to Claude.
+
+### Fallback
+
+If the packaging helper cannot run, validate the package manually, archive the named folder without following symlinks, exclude local caches and likely secret files, then inspect the archive listing before delivery. Report the fallback.
+
+### Verification
+
+- the shared source still exists unchanged
+- the archive contains `<skill-name>/SKILL.md`
+- every archive entry stays below `<skill-name>/`
+- no excluded cache, dependency, environment, credential, or symlink entry is present
+- the ZIP was not uploaded without authorization
+AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_STANDALONE_CLAUDE_PACKAGE_MD_AF2B981C30
+
+# codex-skill-creator/scripts/package_claude_skill.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py")"
+cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SCRIPTS_PACKAGE_CLAUDE_SKILL_PY_26DB4AC9F2'
+#!/usr/bin/env python3
+"""Validate a shared Agent Skill and optionally build a Claude upload ZIP."""
+
+from __future__ import annotations
+
+import argparse
+from datetime import datetime
+from pathlib import Path
+import re
+import sys
+import zipfile
+
+import yaml
+
+
+NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+RESERVED_NAME_WORDS = ("anthropic", "claude")
+OBVIOUS_NON_THIRD_PERSON = re.compile(
+    r"^(?:i(?:\s|['’]m\b|['’]ll\b|['’]ve\b)|we\b|you\b)", re.IGNORECASE
+)
+USAGE_CONDITION_PATTERN = re.compile(
+    r"\b(?:use when|use for|when|for requests?|for tasks?|triggered by)\b"
+    r"|(?:當|適用於|用於|觸發|需要.{0,20}時)",
+    re.IGNORECASE,
+)
+VERSION_PATTERN = re.compile(r"^[0-9]+(?:\.[0-9]+){0,2}(?:[-.][0-9A-Za-z.-]+)?$")
+EXCLUDED_DIRS = {
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "node_modules",
+    "venv",
+}
+SKIPPED_FILES = {".DS_Store"}
+SENSITIVE_FILES = {".env", ".env.local", "credentials.json", "id_rsa"}
+EXCLUDED_SUFFIXES = {".key", ".pem", ".p12", ".pfx", ".pyc"}
+
+
+class SkillPackageError(ValueError):
+    """Raised when a skill cannot be safely validated or packaged."""
+
+
+def load_frontmatter(skill_dir: Path) -> dict[str, object]:
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.is_file():
+        raise SkillPackageError(f"SKILL.md not found: {skill_md}")
+    content = skill_md.read_text(encoding="utf-8")
+    match = re.match(r"^---\r?\n(.*?)\r?\n---(?:\r?\n|$)", content, re.DOTALL)
+    if not match:
+        raise SkillPackageError("SKILL.md must start with valid YAML frontmatter")
+    try:
+        frontmatter = yaml.safe_load(match.group(1))
+    except yaml.YAMLError as exc:
+        raise SkillPackageError(f"invalid YAML frontmatter: {exc}") from exc
+    if not isinstance(frontmatter, dict):
+        raise SkillPackageError("frontmatter must be a YAML mapping")
+    return frontmatter
+
+
+def validate_skill(skill_dir: Path) -> tuple[str, list[str]]:
+    skill_dir = skill_dir.expanduser().resolve()
+    if not skill_dir.is_dir():
+        raise SkillPackageError(f"skill directory not found: {skill_dir}")
+
+    frontmatter = load_frontmatter(skill_dir)
+    name = frontmatter.get("name")
+    description = frontmatter.get("description")
+
+    if not isinstance(name, str) or not name.strip():
+        raise SkillPackageError("frontmatter name must be a non-empty string")
+    name = name.strip()
+    if len(name) > 64:
+        raise SkillPackageError(f"name exceeds 64 characters: {len(name)}")
+    if not NAME_PATTERN.fullmatch(name):
+        raise SkillPackageError("name must use lowercase letters, digits, and single hyphens")
+    if any(word in name for word in RESERVED_NAME_WORDS):
+        raise SkillPackageError("name cannot contain reserved words: anthropic, claude")
+    if skill_dir.name != name:
+        raise SkillPackageError(
+            f"folder name '{skill_dir.name}' does not match frontmatter name '{name}'"
+        )
+
+    if not isinstance(description, str) or not description.strip():
+        raise SkillPackageError("frontmatter description must be a non-empty string")
+    description = description.strip()
+    if len(description) > 1024:
+        raise SkillPackageError(f"description exceeds 1024 characters: {len(description)}")
+    if "<" in description or ">" in description:
+        raise SkillPackageError("description cannot contain XML or angle brackets")
+    if OBVIOUS_NON_THIRD_PERSON.match(description):
+        raise SkillPackageError(
+            "description must use third-person phrasing; do not start with I, we, or you"
+        )
+
+    if not USAGE_CONDITION_PATTERN.search(description):
+        raise SkillPackageError(
+            "description must state when to use the skill with a concrete trigger or context"
+        )
+    return name, []
+
+
+def collect_package_files(skill_dir: Path) -> list[Path]:
+    files: list[Path] = []
+    for path in sorted(skill_dir.rglob("*")):
+        relative = path.relative_to(skill_dir)
+        if any(part in EXCLUDED_DIRS for part in relative.parts):
+            continue
+        if path.is_symlink():
+            raise SkillPackageError(f"symlinks are not allowed in a standalone ZIP: {relative}")
+        if not path.is_file():
+            continue
+        if path.name in SKIPPED_FILES:
+            continue
+        if (
+            path.name in SENSITIVE_FILES
+            or path.name.startswith(".env.")
+            or path.suffix.lower() in EXCLUDED_SUFFIXES
+        ):
+            raise SkillPackageError(f"likely local or sensitive file must be removed: {relative}")
+        files.append(path)
+    if not files:
+        raise SkillPackageError("skill package contains no files")
+    return files
+
+
+def build_zip(
+    skill_dir: Path,
+    output_dir: Path,
+    version: str,
+    include_timestamp: bool,
+) -> Path:
+    if not VERSION_PATTERN.fullmatch(version):
+        raise SkillPackageError("version must look like 1, 1.0, or 1.0.0")
+    skill_dir = skill_dir.expanduser().resolve()
+    name, warnings = validate_skill(skill_dir)
+    files = collect_package_files(skill_dir)
+
+    output_dir = output_dir.expanduser().resolve()
+    try:
+        output_dir.relative_to(skill_dir)
+    except ValueError:
+        pass
+    else:
+        raise SkillPackageError("output directory must stay outside the source skill folder")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now().strftime("-%Y%m%d-%H%M%S") if include_timestamp else ""
+    archive = output_dir / f"{name}-v{version}{timestamp}.zip"
+    if archive.exists():
+        raise SkillPackageError(f"refusing to overwrite existing archive: {archive}")
+
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as handle:
+        for path in files:
+            relative = path.relative_to(skill_dir)
+            handle.write(path, arcname=(Path(name) / relative).as_posix())
+
+    with zipfile.ZipFile(archive) as handle:
+        entries = handle.namelist()
+        required = f"{name}/SKILL.md"
+        if required not in entries:
+            archive.unlink(missing_ok=True)
+            raise SkillPackageError(f"archive verification failed: missing {required}")
+        if any(not entry.startswith(f"{name}/") for entry in entries):
+            archive.unlink(missing_ok=True)
+            raise SkillPackageError("archive verification failed: entry escaped skill root")
+
+    for warning in warnings:
+        print(f"WARNING: {warning}")
+    print(f"VALID name={name} files={len(files)}")
+    print(f"ARCHIVE {archive}")
+    print(f"ENTRIES {len(entries)} root={name}/")
+    return archive
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Validate a shared Agent Skill and optionally build a Claude upload ZIP."
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    validate_parser = subparsers.add_parser("validate", help="validate shared frontmatter")
+    validate_parser.add_argument("skill_dir", type=Path)
+
+    package_parser = subparsers.add_parser("package", help="validate and build a ZIP")
+    package_parser.add_argument("skill_dir", type=Path)
+    package_parser.add_argument("--output-dir", type=Path, required=True)
+    package_parser.add_argument("--version", default="1.0.0")
+    package_parser.add_argument(
+        "--timestamp", action="store_true", help="append a local build timestamp"
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    try:
+        if args.command == "validate":
+            name, warnings = validate_skill(args.skill_dir)
+            for warning in warnings:
+                print(f"WARNING: {warning}")
+            print(f"VALID name={name}")
+            return 0
+        build_zip(args.skill_dir, args.output_dir, args.version, args.timestamp)
+        return 0
+    except (OSError, SkillPackageError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SCRIPTS_PACKAGE_CLAUDE_SKILL_PY_26DB4AC9F2
+chmod +x "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py"
 
 test -f "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md" && echo "codex-skill-creator installed for Codex, Claude, and AntiGravity"
 ````
