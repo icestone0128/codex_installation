@@ -1,6 +1,8 @@
 # 02-Codex-MCP-Essentials
 
-> 2026-07-30 更新：新增 Claude-first 的 Google Workspace MCP 必要項，固定使用 `workspace-mcp==1.22.2`、本機 loopback HTTP、Drive／Gmail／Calendar core read-only 權限與共用 Python runtime；完整 installer、runner 與 macOS LaunchAgent template 放在 `02-assets/google-workspace-mcp/`。MCP 仍採「共用服務契約＋Codex／Claude／AntiGravity 原生 adapter」。
+> 2026-07-30 更新：新增 Claude-first 的 Google Workspace MCP 必要項，固定使用 `workspace-mcp==1.22.2`、本機 loopback HTTP 與共用 Python runtime；完整 installer、runner 與 macOS LaunchAgent template 放在 `02-assets/google-workspace-mcp/`。MCP 仍採「共用服務契約＋Codex／Claude／AntiGravity 原生 adapter」。
+>
+> 2026-08-02 更新：Google Workspace MCP 由使用者明確要求改為可實際操作，權限提升為 Drive／Gmail／Calendar `full` 加 `--tool-tier complete`，取代原本的 core read-only 預設。擴權後仍維持 loopback-only 綁定與 secrets 隔離，且寫入類動作（寄信、刪檔、修改行事曆）在各 Agent 執行前仍需逐次向使用者確認。
 
 
 ## 目標
@@ -122,14 +124,15 @@ tool_timeout_sec = 120
 
 ## Google Workspace MCP（Claude-first 必要項）
 
-用途：在 Claude Code 沒有 Codex Google plugins 的環境中，提供同一個 Drive／Gmail／Calendar 唯讀工作面。來源是 [taylorwilsdon/google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)，Python package 固定為 `workspace-mcp==1.22.2`；更新版本前要先重跑權限與工具清單驗證。
+用途：在 Claude Code 沒有 Codex Google plugins 的環境中，提供同一個 Drive／Gmail／Calendar 工作面。來源是 [taylorwilsdon/google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)，Python package 固定為 `workspace-mcp==1.22.2`；更新版本前要先重跑權限與工具清單驗證。
 
-這個預設不是「把整個 Google Workspace 全開」：
+新安裝的建議起點是最小權限；本機目前這台則是使用者明確要求後的可操作設定：
 
 - 只啟用 `calendar`、`drive`、`gmail`。
-- 使用 `--tool-tier core`。
-- 三個服務都使用 `readonly`。
-- HTTP server 只綁定 `127.0.0.1:8000`，不對區網或網際網路開放。
+- 新環境建議起點：`--tool-tier core` 加三服務 `readonly`。
+- 本機目前設定（2026-08-02，使用者要求）：`--tool-tier complete` 加 `calendar:full drive:full gmail:full`，可建立與修改 Drive 檔案、行事曆事件，並具備 Gmail 寄信 scope。
+- 擴權不改變其他邊界：HTTP server 只綁定 `127.0.0.1:8000`，不對區網或網際網路開放。
+- 擴權後由 Agent 行為層把關：寄信、刪除、覆蓋與其他不可逆動作，執行前一律逐次向使用者確認，不因為 scope 已開就自動執行。
 - OAuth client secret 與 token 只放在 `{{CODEX_HOME}}/secrets`，不寫進 repo、LazyPack、Obsidian 或 Agent 設定。
 - Codex 已有 Google Drive、Gmail、Calendar 官方 plugins 時繼續使用原生 plugins；避免在同一個 Agent 重複暴露兩套同義工具。Claude 預設連這個 MCP；AntiGravity 依其目前原生 MCP 入口加上同一 endpoint。
 
@@ -248,9 +251,10 @@ bash 02-assets/google-workspace-mcp/install_google_workspace_mcp.sh --check
 - Calendar：列出日曆或查一段短日期範圍。
 - Drive：搜尋一個已知、不敏感的測試檔名。
 - Gmail：搜尋自己的低敏感測試郵件；不要批次讀整個信箱。
-- 工具清單不應包含寄信、建立 Drive 檔案、建立資料夾或修改行事曆事件等寫入工具。
+- 若沿用新環境建議的 core read-only 起點，工具清單不應包含寄信、建立 Drive 檔案、建立資料夾或修改行事曆事件等寫入工具。
+- 若採用本機目前的 `complete` 加 `full` 設定，工具清單會包含上述寫入工具；smoke test 仍只做唯讀查詢，不用真實資料驗證寫入或寄信。
 
-若要新增 Docs／Sheets／Slides／Tasks，先回到最小權限評估；不要直接把 `complete` tier 或所有 API 當預設。
+新增 Docs／Sheets／Slides／Tasks 或從 read-only 擴權，都要回到最小權限評估並取得使用者明確要求；不要把 `complete` tier 當成安裝成功捷徑或預設值。擴權後必須重新完成 OAuth 同意，舊 token 的 scope 不會自動升級。
 
 ### 5. 更新、停用與撤銷
 
@@ -285,7 +289,7 @@ claude mcp remove --scope user google-workspace
 4. Firecrawl：抓取 `https://example.com`。
 5. Filesystem：列出 `{{FILESYSTEM_ALLOWED_DIR}}` 內的一個測試資料夾。
 6. Browser plugin：開啟 `https://example.com` 並截圖。
-7. Google Workspace MCP：確認 endpoint handshake、三服務唯讀工具清單與各一個低敏感 read-only 查詢；有原生 Google plugins 的 Codex 不重複安裝 adapter。
+7. Google Workspace MCP：確認 endpoint handshake、三服務工具清單與目前 `--permissions` 設定相符，並各做一個低敏感 read-only 查詢；有原生 Google plugins 的 Codex 不重複安裝 adapter。
 
 若任何一項失敗，先檢查 command 絕對路徑、API key、登入狀態與當前 Agent 是否已重載，再測試共用 CLI／API fallback。
 
@@ -335,7 +339,7 @@ args = ["-lc", "NPM_CONFIG_CACHE=/private/tmp/firecrawl-mcp-cache FIRECRAWL_API_
 - Filesystem MCP 授權範圍不能太大，否則安全風險高。
 - Firecrawl key 不能進 Git、Obsidian 公開筆記或 README。
 - Google Workspace OAuth client secret 與 token 只能放在 `{{CODEX_HOME}}/secrets`；OAuth consent、Desktop client、三個 API 與首次登入缺一不可。
-- Google Workspace MCP 的預設權限是 Drive／Gmail／Calendar core read-only；擴權前要重新評估，不把 `complete` tier 當成安裝成功捷徑。
+- Google Workspace MCP 目前為 Drive／Gmail／Calendar `full` 加 `complete` tier，是使用者在 2026-08-02 明確要求的可操作設定，不是安裝預設。新環境從 core read-only 起步，只有在使用者明確要求時才擴權，並且要重跑 OAuth 同意與工具清單驗證。
 - 首次 OAuth 的 authorization URL 含短效 state；看到 `Invalid or expired OAuth state parameter` 時，不要重建 client，直接重跑原本的唯讀工具取得新 URL，並在約 10 分鐘內完成同意與 callback。
 - macOS LaunchAgent 啟動 Python server 可能需要數秒；安裝器要等待 MCP handshake，不以單次立即探測判定失敗。
 - 對影響到的 Codex、Claude、AntiGravity 分別重載後，再確認 MCP 是否出現在實際可呼叫工具清單。

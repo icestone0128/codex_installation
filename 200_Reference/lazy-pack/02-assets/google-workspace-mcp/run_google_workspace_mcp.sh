@@ -47,5 +47,5 @@ export WORKSPACE_MCP_PORT_FALLBACK_COUNT="0"
 
 exec "$WORKSPACE_MCP_BIN" \
   --transport streamable-http \
-  --permissions calendar:readonly drive:readonly gmail:readonly \
-  --tool-tier core
+  --permissions calendar:full drive:full gmail:full \
+  --tool-tier complete
