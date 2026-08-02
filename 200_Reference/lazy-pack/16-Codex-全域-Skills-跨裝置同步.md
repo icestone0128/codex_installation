@@ -219,6 +219,46 @@ chezmoi doctor
 
 `chezmoi status` 應為空。`chezmoi doctor` 若只警告 source Git repo 尚未 commit，代表功能可用；是否建立 remote、commit 或 push 仍由使用者決定。
 
+## 建立 private remote 與新電腦從 remote 重建（選配）
+
+沒有 remote 時 chezmoi 仍可在本機正常運作，只是開工 checkpoint 的 `chezmoi update` 會固定回報 `CHEZMOI_UPDATE=skipped:no-remote`，新電腦也只能靠手動搬 source。要讓新電腦真的能一行拉回三 Agent 入口，才需要這一步。
+
+**先做安全掃描，再建 remote。** source 只應包含 symlink templates、`modify_` scripts 與 env loader，不應出現任何真實憑證：
+
+```bash
+cd "$(chezmoi source-path)"
+git ls-files
+grep -rInE "(sk-|gho_|ghp_|github_pat|AIza|xoxb-|BEGIN [A-Z ]*PRIVATE KEY)" . --exclude-dir=.git
+```
+
+`git ls-files` 應只列出受管理入口 templates；grep 應無命中。`.chezmoi.toml.tmpl` 若使用 `promptStringOnce`，`syncRoot` 與 `pythonToolsHome` 只會寫進每台機器的 local config，不會進 source，因此 source 內不該出現任何絕對路徑或帳號字串。
+
+**remote 一律建 private。** 目前內容雖然不含 secret，但 dotfiles source 日後很容易被加入個人設定；private 讓後續擴充不必每次重新評估外洩風險。
+
+```bash
+cd "$(chezmoi source-path)"
+gh repo create <YOUR_DOTFILES_REPO> --private --source=. --remote=origin --push
+```
+
+驗證：
+
+```bash
+gh repo view <OWNER>/<YOUR_DOTFILES_REPO> --json visibility,defaultBranchRef
+git -C "$(chezmoi source-path)" status -sb
+```
+
+`visibility` 應為 `PRIVATE`，且本地 branch 已 tracking `origin/main`。之後重跑開工 checkpoint，`CHEZMOI_UPDATE` 應從 `skipped:no-remote` 變成 `running` → `complete`。
+
+**新電腦從 remote 重建：**
+
+```bash
+chezmoi init --apply https://github.com/<OWNER>/<YOUR_DOTFILES_REPO>.git
+```
+
+會提示輸入該機器的 `syncRoot`（雲端硬碟內的 `codex_symlink` 路徑）與 `pythonToolsHome`。這一步只重建三 Agent 入口 symlink、Python bridge 與 shell profile 標記區塊；Python runtime 本身仍必須用 Item 34 在該機器重建，不從 remote 拉取 venv、模型或 cache。
+
+不要把 API key、OAuth token、session、MCP 認證或 Agent 設定資料庫加進這個 repo，即使它是 private。
+
 ## 開工／收工自動 checkpoint
 
 Item 10 的 `startup-sync` 與 `shutdown-sync` 固定呼叫同一支腳本；Codex、Claude、AntiGravity 都使用相同命令：

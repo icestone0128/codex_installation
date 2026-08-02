@@ -19,15 +19,44 @@
 - chezmoi source `~/.local/share/chezmoi` 已建立首個 commit `b6d517c`
   （16 檔／189 行，三 Agent 入口 templates、Python bridge、shell profile
   modify_ scripts），工作樹乾淨。
+- chezmoi source 已依使用者要求建立 private remote
+  `icestone0128/chezmoi-agent-sync` 並 push；本地 `main` tracking `origin/main`，
+  0 ahead／0 behind。推送前掃描確認 source 只含 templates／modify_ scripts／
+  env loader，無 secret pattern、無 email、無機器專屬絕對路徑
+  （`syncRoot`、`pythonToolsHome` 由 `promptStringOnce` 存在本機 config）。
+- `.bash_profile` 的 chezmoi 漂移已 apply 修正（僅區塊順序），先備份到
+  `~/.bash_profile.backup-20260802-115112`。修正後 `agent-python-tools` loader
+  在 doc-to-md 之後才 prepend PATH，`doc-to-md` 與 `python-tools-python` 均解析到
+  共用中立入口 `~/.local/share/agent-tools/python-tools/bin/`，符合全域規則。
+- 開工 checkpoint 的 update 閘門已解除：`CHEZMOI_STATUS=clean` →
+  `CHEZMOI_UPDATE=complete`，不再是 `skipped:no-remote`。
+- LazyPack Item 16 已新增「建立 private remote 與新電腦從 remote 重建（選配）」
+  一節，內容為通用佔位符寫法，未寫入個人 repo URL。
+- `100_Todo/projects/tool-integration/2026-05-20-tool-integration-plan.md` 已複審：
+  原決策原則寫「Codex connector 優先於 MCP」，與 `core-rules.md` 的 Google MCP-first
+  路由相反，已改為 MCP 優先並加上複審說明段落。Google Drive／Gmail／Calendar
+  三個 connector 區塊合併為單一「Google Workspace（MCP-first）」區塊；
+  GitHub 與 Obsidian 兩項本次實測複驗通過。未勾選項由 39 降為 18，
+  且全部為「有需求時才做」，無積壓待辦。尾段指引改為三 Agent 中性寫法，
+  並更正原本指向從未建立的 `200_Reference/tool-capabilities.md`。
+- `sync-health.sh` 本次結果：0 failures、1 warning（即本次未 commit 檔案）。
+  三 Agent 10 個入口 symlink、Python bridge／loader／四個 shell profile、
+  chezmoi managed entrypoints、78 個 SKILL.md、LazyPack 鏡像、secret 掃描全部 PASS。
 
 ## Next action
 
-- 使用者將重載 session 以取得 38 支 google-workspace 工具；重載後確認清單含
-  `send_gmail_message`、`create_drive_file`、`manage_event` 即為成功。
-- 重載前的 session 只有舊的 9 支唯讀工具；若期間需要 Google 寫入操作，
-  先向使用者確認是重載還是該次改走 connector，不得自行切換 route。
-- chezmoi `update` 目前仍是 `skipped:no-remote`。若要讓新電腦真的能拉取設定，
-  需另外建立 remote 並 push；這是選配，必須使用者明確要求。
+- google-workspace MCP 38 支工具已於 2026-08-02 session 重載後確認可見
+  （含 `send_gmail_message`、`create_drive_file`、`manage_event`），此項結案。
+  仍未以真實資料測試寫入或寄信；首次實際寫入前逐次向使用者確認。
+- 本檔無積壓待辦。tool-integration 計畫已結案，除非新增工具或既有路線失效，
+  否則不需再開啟；下次複審先核對 `core-rules.md` 是否又有路由變更。
+- 可考慮但非必要：活躍 MCP server 數已超過 `context-management-strategy.md`
+  建議的 10 個上限，Google 三項在 MCP 與 connector 之間功能重疊。
+  使用者已決定保留 connectors，不自行關閉；要調整需使用者明確要求。
+- 新電腦重建指令：
+  `chezmoi init --apply https://github.com/icestone0128/chezmoi-agent-sync.git`，
+  會提示輸入該機 `syncRoot` 與 `pythonToolsHome`；Python runtime 仍須由
+  Item 34 於該機重建，不從 remote 拉 venv／模型／cache。
 
 ## Blockers
 
@@ -44,3 +73,13 @@
 - 2026-08-02，Claude Code Desktop：`~/.claude/CLAUDE.md`、`~/.codex/AGENTS.md`、
   `~/.gemini/GEMINI.md` 三個 symlink 均解析到 `codex_symlink/core-rules.md`，
   新規則在三個入口都命中。
+- 2026-08-02，Claude Code Desktop：chezmoi remote 建立後
+  `gh repo view` 回報 `PRIVATE`、default branch `main`；重跑開工 checkpoint 得到
+  `CHEZMOI_STATUS=clean`、`CHEZMOI_UPDATE=complete`（`Already up to date.`），
+  入口備份寫入 `~/agent-sync-backup-20260802-115131/session-startup`；
+  bootstrap dry-run 三 Agent 9 個入口 symlink 與 Python bridge 全數 OK；
+  `bash -lc` 驗證 `doc-to-md`、`python-tools-python` 解析到共用中立入口。
+- 2026-08-02，Claude Code Desktop：`sync-health.sh` 0 failures／1 warning；
+  Arry 助手 `knowledge/` `diff -qr` 為 0，`memories/` 第一層 4 檔一致；
+  repo LazyPack 與 Obsidian `懶人包/` `diff -qr` 為 0；`git diff --check` 通過，
+  commit 前 diff secret-pattern scan 無命中。
