@@ -238,6 +238,7 @@ def main() -> None:
             "writing-great-skills",
         ],
         "41-Clasp-Apps-Script-Skill-安裝.md": ["clasp-setup"],
+        "42-Speak-Human-TW-Skill-安裝.md": ["speak-human-tw"],
     }
     for filename, skills in sections.items():
         replace_embedded_section(LAZYPACK / filename, skills)

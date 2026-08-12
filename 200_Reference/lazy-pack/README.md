@@ -1,6 +1,6 @@
 # Codex 懶人包總目錄
 
-> 版本：2026-08-12 可自行安裝版
+> 版本：2026-08-13 可自行安裝版
 > 用途：讓下載者從零開始設定 Codex、Claude、AntiGravity 共用的全域規則與 skills，以及 plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
 
@@ -11,6 +11,8 @@
 2026-07-30 更新：新增 [[40-Engineering-Methods-Skill-Suite-安裝]]，把 `mattpocock/skills` 的 22 個穩定 engineering／productivity 方法改寫成 Codex、Claude、AntiGravity 共用套件；內建 `engineering-methods` 路由、`grill-me`、規格／ticket／TDD／review／debug／handoff 等 skills，以及只讀上游版本檢查與完整 41 項 manifest。19 個 deprecated、in-progress、misc、personal 項目只追蹤、不安裝。
 
 2026-07-30 更新：Item 02 新增 Claude-first Google Workspace MCP 必要項。公開 LazyPack 內建 pinned `workspace-mcp` installer、loopback runner 與 macOS LaunchAgent template，預設只開 Drive／Gmail／Calendar core read-only；Codex 有官方 Google plugins 時不重複註冊同義 MCP，Claude 與 AntiGravity 使用各自原生 adapter。
+
+2026-08-13 更新：新增 [[42-Speak-Human-TW-Skill-安裝]]，內嵌 MIT 授權的上游 `Raymondhou0917/speak-human-tw` v1.4.0，提供繁體中文對外文字的去 AI 味審稿與改寫。內嵌 `SKILL.md`、38 種痕跡模式庫、台灣在地化層、保護清單與 42 條 benchmark；上游 README 圖片、star history 腳本與 `.github/` 不內嵌。安裝版本把上游放在 frontmatter 頂層的 `version`、`author`、`tags`、`changelog` 收進 `metadata:` 以通過 Codex skill 驗證器，正文規則一字未改。
 
 2026-08-12 更新：新增 [[41-Clasp-Apps-Script-Skill-安裝]]，將 clasp v3、Apps Script 原始碼同步、push 安全閘門與 Web App deployment 從 Item 28 抽成獨立 `clasp-setup`。Item 28 現在只負責 Netlify 與已驗證 GAS 後端的交接；預設 CLI-first，Clasp MCP 保留為明確要求才啟用的實驗路線。
 
@@ -118,6 +120,7 @@
 39. [[39-Coach-Skill-安裝]]
 40. [[40-Engineering-Methods-Skill-Suite-安裝]]
 41. [[41-Clasp-Apps-Script-Skill-安裝]]
+42. [[42-Speak-Human-TW-Skill-安裝]]
 
 ## 全域 Skills 安裝總表
 
@@ -161,6 +164,7 @@
 39：Coach Skill；Arry 私人來源橋接型安裝群組，驗證並啟用 `future-coach`、`voice-coach`、`waki-brain`、`productivity-coach`；需要私人 `{{SYNC_ROOT}}`，公開 Item 不含四套私人 corpus
 40：Engineering Methods Skill Suite；完整內嵌 `engineering-methods`、`grill-me` 與其他 20 個穩定工程／生產力 skills，追蹤 `mattpocock/skills` 全部 41 項來源，提供只讀更新檢查、跨 Agent adapters 與隔離驗證器
 41：clasp-setup；共用 clasp v3 CLI 管理 Apps Script clone／pull、manifest、push 與 Web App deployment，包含專案 target、備份、上傳清單、OAuth／憑證檔與公開存取安全閘門
+42：speak-human-tw；完整內嵌 MIT 授權上游 v1.4.0 的繁體中文去 AI 味 skill，含 38 種痕跡模式庫、誤殺邊界、台灣在地化層、五情境力度表、保護清單與 42 條 benchmark；強制「先列編號清單、等使用者勾選、才動筆或動檔案」
 ```
 
 Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人身份與記憶路由，`voice-coach`、`waki-brain`、`productivity-coach` 含私人課程或購課內容。它們只存在私人 `{{SYNC_ROOT}}/skills` 與 Obsidian 全域索引；Item 39 只提供安裝／驗證橋接，不提供可重建 corpus。這是隱私與內容權利邊界，不是 Agent 相容性限制。
@@ -173,7 +177,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 跨 Agent 全域 skills | `{{SYNC_ROOT}}/skills` | 三個 Agent 共用的 skill package 主版本 |
 | Chezmoi bootstrap | `{{CHEZMOI_SOURCE}}` | 維護三個 Agent 的原生規則／skills 入口 templates；不保存 secrets |
 | Agent 原生入口 | `{{CODEX_HOME}}/*`、`{{CLAUDE_HOME}}/*`、`{{GEMINI_HOME}}/*` | symlink 到共享主版本，不複製內容 |
-| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...41.md` | Items 01～38、40 與 41 依各文件標示內嵌公開可散布內容；Item 39 只含私人來源橋接 installer／verifier |
+| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...42.md` | Items 01～38、40～42 依各文件標示內嵌公開可散布內容；Item 39 只含私人來源橋接 installer／verifier |
 | 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每台電腦本機重建的 Python 工具 venv 與 wrapper；供 Codex／Claude／AntiGravity 和所有專案共用，Google Workspace MCP 也使用這個 runtime，不放模型或技能專屬 runtime |
 | 三 Agent Python 中立入口 | `{{HOME}}/.local/share/agent-tools/python-tools` | Item 16 的 chezmoi symlink，指向該機器的 Python tools runtime；三個 Agent 都從它的 `bin` 呼叫相同 wrapper |
 | 三 Agent Python env loader | `{{HOME}}/.config/agent-tools/python-tools.env` | Item 16 建立；透過不覆蓋既有內容的 `.zshenv`／`.zprofile`／`.profile`／`.bash_profile` 標記區塊載入 PATH |
