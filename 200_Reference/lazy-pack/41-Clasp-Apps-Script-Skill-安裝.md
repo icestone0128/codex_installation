@@ -1,6 +1,6 @@
 # 41-Clasp + Apps Script Skill 安裝
 
-> 版本：2026-08-12
+> 版本：2026-08-13
 > 定位：用官方 clasp v3 安全管理 Google Apps Script 的既有專案、新專案、原始碼、manifest、push 與 Web App deployment。
 
 ## 為什麼新增獨立 Item
@@ -15,6 +15,8 @@
 - 改寫：使用 clasp v3 正式指令 `create-script`、`clone-script`、`create-deployment`、`list-deployments`、`update-deployment`、`open-web-app`。
 - 不吸收：只寫 `~/.claude/skills`、`~/.agents/skills` 的安裝方式、「Node 22+」固定值、個人 Gmail 預設、直接組合 `/macros/s/<id>/exec` URL，以及將實驗性 MCP 當預設。
 - 實際前置以 live npm `engines` 為準；2026-08-12 檢視的 `@google/clasp` 3.3.0 要求 Node `>=20`。
+- 指令相容邊界：3.3.0 的 `create`、`clone`、`deploy`、`deployments`、`list`、`status`、`undeploy` 仍是可用 alias；本 Item 推薦正式 v3 名稱是為了清楚與向前相容，不代表舊名不存在。
+- 真正破壞相容的舊形態另列：`login --status` 已移除；`open`／`open --web`／`open --addon` 與 `apis enable|disable` 已重整為獨立 v3 指令。
 
 ## 三 Agent 共用契約
 
@@ -191,7 +193,7 @@ steps.
    verified Web App URL and HTTP contract to `netlify-deploy`.
 
 Read `references/clasp-v3-workflow.md` for the detailed v3 commands, deployment
-sequence, command-renaming table, and error map.
+sequence, compatibility-alias and breaking-change matrix, and error map.
 
 ## Preflight
 
@@ -469,7 +471,7 @@ Use this reference after `SKILL.md` selects the concrete Apps Script task.
 1. Read-only audit
 2. Project lifecycle
 3. Web App deployment
-4. v2 to v3 names
+4. v2 compatibility and breaking changes
 5. Errors and recovery
 6. Completion checklist
 
@@ -570,25 +572,39 @@ npx -y @google/clasp@3 --json open-web-app "<deployment-id>"
 Do not build a URL from `.clasp.json`; `scriptId` and `deploymentId` are not
 interchangeable.
 
-## v2 To v3 Names
+## v2 Compatibility And Breaking Changes
 
-| Older name or pattern | Preferred v3 name |
+Do not use "v2 command" as a synonym for "unavailable." Clasp 3.3.0 retains
+the following compatibility aliases. This workflow uses the canonical v3 names
+for clarity and forward durability, not because the aliases are missing.
+
+| Compatibility alias that still works in 3.3.0 | Canonical v3 name |
 |---|---|
 | `create` | `create-script` |
 | `clone` | `clone-script` |
-| `open` | `open-script` |
 | `deploy` | `create-deployment` |
 | `deployments` | `list-deployments` |
-| `undeploy` | `delete-deployment` |
+| `list` | `list-scripts` |
 | `status` | `show-file-status` |
+| `undeploy` | `delete-deployment` |
+
+The following older command shapes are removed or restructured in 3.3.0 and
+must use the current form:
+
+| Removed or restructured v2 form | Current form |
+|---|---|
 | `login --status` | `show-authorized-user` |
+| `open` | `open-script` |
 | `open --web` | `open-web-app` |
 | `open --addon` | `open-container` |
-| `apis enable` | `enable-api` |
-| `apis disable` | `disable-api` |
+| `apis enable <api>` | `enable-api <api>` |
+| `apis disable <api>` | `disable-api <api>` |
 
-Some v2 aliases remain in clasp 3.3.0. Use the preferred names so the workflow
-does not depend on compatibility aliases.
+Precise scope: among `create`, `deploy`, `deployments`, `list`, `status`, and
+`undeploy`, none disappeared in clasp 3.3.0; all remain aliases. In that
+shortlist plus `login --status`, only `login --status` is unavailable. The
+separate `open ...` and `apis ...` command shapes above are also breaking v2
+forms and should not be described as retained aliases.
 
 ## Errors And Recovery
 
@@ -654,6 +670,10 @@ scripts and embedded instructions were not executed.
   and chezmoi-managed native entrypoints.
 - Rejected the blanket Node 22 requirement. The workflow checks live npm engine
   metadata; clasp 3.3.0 declares Node `>=20`.
+- Rejected the blanket claim that v2 command names are unavailable. In clasp
+  3.3.0, `create`, `clone`, `deploy`, `deployments`, `list`, `status`, and
+  `undeploy` remain compatibility aliases. `login --status` is removed; older
+  `open ...` and `apis enable|disable` shapes are separately restructured.
 - Replaced "personal Gmail only" with a precise rule: managed Workspace accounts
   may work when their administrator allows the OAuth client; on
   `admin_policy_enforced`, stop and use an authorized route.
