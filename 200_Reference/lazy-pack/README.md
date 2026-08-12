@@ -1,6 +1,6 @@
 # Codex 懶人包總目錄
 
-> 版本：2026-07-30 可自行安裝版
+> 版本：2026-08-12 可自行安裝版
 > 用途：讓下載者從零開始設定 Codex、Claude、AntiGravity 共用的全域規則與 skills，以及 plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
 
@@ -11,6 +11,8 @@
 2026-07-30 更新：新增 [[40-Engineering-Methods-Skill-Suite-安裝]]，把 `mattpocock/skills` 的 22 個穩定 engineering／productivity 方法改寫成 Codex、Claude、AntiGravity 共用套件；內建 `engineering-methods` 路由、`grill-me`、規格／ticket／TDD／review／debug／handoff 等 skills，以及只讀上游版本檢查與完整 41 項 manifest。19 個 deprecated、in-progress、misc、personal 項目只追蹤、不安裝。
 
 2026-07-30 更新：Item 02 新增 Claude-first Google Workspace MCP 必要項。公開 LazyPack 內建 pinned `workspace-mcp` installer、loopback runner 與 macOS LaunchAgent template，預設只開 Drive／Gmail／Calendar core read-only；Codex 有官方 Google plugins 時不重複註冊同義 MCP，Claude 與 AntiGravity 使用各自原生 adapter。
+
+2026-08-12 更新：新增 [[41-Clasp-Apps-Script-Skill-安裝]]，將 clasp v3、Apps Script 原始碼同步、push 安全閘門與 Web App deployment 從 Item 28 抽成獨立 `clasp-setup`。Item 28 現在只負責 Netlify 與已驗證 GAS 後端的交接；預設 CLI-first，Clasp MCP 保留為明確要求才啟用的實驗路線。
 
 ## 先填這張設定表
 
@@ -115,6 +117,7 @@
 38. [[38-YAML-Image-Deck-Skill-安裝]]
 39. [[39-Coach-Skill-安裝]]
 40. [[40-Engineering-Methods-Skill-Suite-安裝]]
+41. [[41-Clasp-Apps-Script-Skill-安裝]]
 
 ## 全域 Skills 安裝總表
 
@@ -144,7 +147,7 @@
 25：gemini-free-api
 26：HyperFrames 官方 skill suite + 共用 `video-tool-evaluation`：`hyperframes`、`hyperframes-cli`、`hyperframes-media`、`hyperframes-registry`、`website-to-hyperframes`、`remotion-to-hyperframes`、`gsap`、`animejs`、`css-animations`、`lottie`、`tailwind`、`three`、`typegpu`、`waapi`、`contribute-catalog`
 27：video-tool-evaluation + video-spec-builder
-28：netlify-deploy
+28：netlify-deploy；官方 Netlify MCP／CLI、前端部署，以及與已驗證 Apps Script Web App 的交接邊界；不再擁有 clasp OAuth、push 或 deployment
 29：video-tool-evaluation + video-processing-automation
 30：video-tool-evaluation + video-creation-automation
 31：youtube-transcript-collector
@@ -157,6 +160,7 @@
 38：yaml-image-deck；通用 YAML-controlled image-first deck，不限定 SOIL；用固定視覺語法、受控版型、黃金樣張與逐頁 YAML 內容產生 NotebookLM-style 圖片式簡報
 39：Coach Skill；Arry 私人來源橋接型安裝群組，驗證並啟用 `future-coach`、`voice-coach`、`waki-brain`、`productivity-coach`；需要私人 `{{SYNC_ROOT}}`，公開 Item 不含四套私人 corpus
 40：Engineering Methods Skill Suite；完整內嵌 `engineering-methods`、`grill-me` 與其他 20 個穩定工程／生產力 skills，追蹤 `mattpocock/skills` 全部 41 項來源，提供只讀更新檢查、跨 Agent adapters 與隔離驗證器
+41：clasp-setup；共用 clasp v3 CLI 管理 Apps Script clone／pull、manifest、push 與 Web App deployment，包含專案 target、備份、上傳清單、OAuth／憑證檔與公開存取安全閘門
 ```
 
 Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人身份與記憶路由，`voice-coach`、`waki-brain`、`productivity-coach` 含私人課程或購課內容。它們只存在私人 `{{SYNC_ROOT}}/skills` 與 Obsidian 全域索引；Item 39 只提供安裝／驗證橋接，不提供可重建 corpus。這是隱私與內容權利邊界，不是 Agent 相容性限制。
@@ -169,7 +173,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 跨 Agent 全域 skills | `{{SYNC_ROOT}}/skills` | 三個 Agent 共用的 skill package 主版本 |
 | Chezmoi bootstrap | `{{CHEZMOI_SOURCE}}` | 維護三個 Agent 的原生規則／skills 入口 templates；不保存 secrets |
 | Agent 原生入口 | `{{CODEX_HOME}}/*`、`{{CLAUDE_HOME}}/*`、`{{GEMINI_HOME}}/*` | symlink 到共享主版本，不複製內容 |
-| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...40.md` | Items 01～38 與 40 依各文件標示內嵌公開可散布內容；Item 39 只含私人來源橋接 installer／verifier |
+| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...41.md` | Items 01～38、40 與 41 依各文件標示內嵌公開可散布內容；Item 39 只含私人來源橋接 installer／verifier |
 | 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每台電腦本機重建的 Python 工具 venv 與 wrapper；供 Codex／Claude／AntiGravity 和所有專案共用，Google Workspace MCP 也使用這個 runtime，不放模型或技能專屬 runtime |
 | 三 Agent Python 中立入口 | `{{HOME}}/.local/share/agent-tools/python-tools` | Item 16 的 chezmoi symlink，指向該機器的 Python tools runtime；三個 Agent 都從它的 `bin` 呼叫相同 wrapper |
 | 三 Agent Python env loader | `{{HOME}}/.config/agent-tools/python-tools.env` | Item 16 建立；透過不覆蓋既有內容的 `.zshenv`／`.zprofile`／`.profile`／`.bash_profile` 標記區塊載入 PATH |
@@ -218,7 +222,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 23 | `gemini-free-api` | [[25-Gemini-Free-API-Skill-安裝]] | 可直接安裝；Gemini API Free Tier、`GEMINI_API_KEY` 安全儲存、收費邊界與後端整合 |
 | 24 | HyperFrames skill suite | [[26-HyperFrames-Skill-安裝]] | 可直接安裝；含共用 `video-tool-evaluation`，新影片與多步驟 composition 在實作前逐項評估 53 個工具 route；HTML/CSS/media/seekable animation 到 MP4，實際 render 需 Node.js 22+ 與 FFmpeg |
 | 25 | Video Spec Builder | [[27-Video-Spec-Builder-Skill-安裝]] | 可直接安裝；含共用 53-route 工具評估，追問影片需求、拆分鏡、產出 `TOOL_EVALUATION.md` 與可交給 HyperFrames 的 `video-spec.md` |
-| 26 | `netlify-deploy` | [[28-Netlify-Deploy-Skill-安裝]] | 可直接安裝；官方 Netlify MCP 設定、Netlify 前端部署與 Clasp + Apps Script API 閉環部署流程 |
+| 26 | `netlify-deploy` | [[28-Netlify-Deploy-Skill-安裝]] | 可直接安裝；官方 Netlify MCP／CLI、Netlify 前端部署，以及與 Item 41 已驗證 Apps Script Web App 的交接邊界 |
 | 27 | `video-processing-automation` | [[29-Video-Processing-Automation-Skill-安裝]] | 可直接安裝；先以共用 `video-tool-evaluation` 評估 53 個 route，再把原始影片處理成上架包；正式轉錄採 Groq 優先、faster-whisper 備援，另含 Auto-Editor、FFmpeg Full 字幕／drawtext、BGM ducking、封面、metadata 與 ffprobe 驗收；不預設直式裁切 |
 | 28 | `video-creation-automation` | [[30-Video-Creation-Automation-Skill-安裝]] | 可直接安裝；沒有現成影片時先以共用 `video-tool-evaluation` 評估 53 個 route，再生成腳本、設計、素材、旁白與 HyperFrames composition；含固定 TTS route、ImageMagick 與 Pexels；不預設直式裁切，已有影片則轉用 `video-processing-automation` |
 | 29 | `youtube-transcript-collector` | [[31-YouTube-Transcript-Collector-Skill-安裝]] | 可直接安裝；頻道搜尋同時抓 `/videos` 與 `/streams` 並去重，先匯入 YouTube 影片總表，再判斷直播/中文字幕狀態，逐支抓取 `zh-TW` / `zh-Hant` 字幕 MD；web client 看不到字幕時可用 android player client fallback，並讓 `字幕 MD` 欄只放實際檔案連結 |
@@ -230,7 +234,8 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 35 | Voice Reply | [[37-Voice-Reply-Skill-安裝]] | 可直接安裝；三 Agent 共用 macOS 語音回覆 wrapper，優先 ElevenLabs，無法使用時自動切換 Edge-TTS，最後 macOS `say` 離線備援 |
 | 36 | Coach Skill | [[39-Coach-Skill-安裝]] | Arry 私人來源橋接；先同步私人 `{{SYNC_ROOT}}`，再一次驗證並啟用 `future-coach`、`voice-coach`、`waki-brain`、`productivity-coach`，不從 public repo 下載私人 corpus |
 | 37 | Engineering Methods Skill Suite | [[40-Engineering-Methods-Skill-Suite-安裝]] | 可直接安裝；22 個穩定工程／生產力 skills、跨 Agent adapters、完整上游 manifest 與只讀更新檢查；`grill-me` 是套件成員，`engineering-methods` 是統一路由 |
-| 38 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 38 | `clasp-setup` | [[41-Clasp-Apps-Script-Skill-安裝]] | 可直接安裝；clasp v3 CLI-first，支援 Apps Script 既有／新專案、原始碼同步、push 閘門、deployment 與 API 返回 Web App URL；MCP 僅為明確要求才評估的實驗路線 |
+| 39 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
@@ -296,6 +301,7 @@ rg -n "<舊使用者名稱>|<舊 GitHub 帳號>|<舊 Firebase project id>|<舊�
 - HyperFrames Skill suite 以 [[26-HyperFrames-Skill-安裝]] 為準。
 - Video Spec Builder Skill 以 [[27-Video-Spec-Builder-Skill-安裝]] 為準。
 - Netlify Deploy Skill 以 [[28-Netlify-Deploy-Skill-安裝]] 為準。
+- Clasp + Apps Script Skill 以 [[41-Clasp-Apps-Script-Skill-安裝]] 為準；Item 28 只接收已驗證 Web App URL 與 HTTP contract。
 - Video Processing Automation Skill 以 [[29-Video-Processing-Automation-Skill-安裝]] 為準。
 - Video Creation Automation Skill 以 [[30-Video-Creation-Automation-Skill-安裝]] 為準。
 - YouTube Transcript Collector Skill 以 [[31-YouTube-Transcript-Collector-Skill-安裝]] 為準。
