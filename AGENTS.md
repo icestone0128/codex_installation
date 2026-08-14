@@ -67,11 +67,11 @@ Arry 助手 AI 分身資料層：
   - `{{SYNC_ROOT}}/knowledge`
   - `{{SYNC_ROOT}}/memories`
 - Arry 助手同步採用和 LazyPack 相同的「主版本 + Obsidian 實體鏡像 + 實際 diff 驗證」模型：
-  - 主版本：上述 `knowledge/` 完整目錄與 `memories/` 根目錄第一層檔案；不是整個 `codex_symlink`。
+  - 主版本：上述 `knowledge/` 排除頂層 `visual-note-references/` 與 `.DS_Store` 後的內容，以及 `memories/` 根目錄第一層檔案；不是整個 `codex_symlink`。圖解作品只保留全域 Knowledge 與 Obsidian 創作庫兩處。
   - Obsidian 實體鏡像：`{{OBSIDIAN_PROJECTS}}/{{SETUP_PROJECT_NAME}}/Arry 助手`
   - 收工同步義務由本檔與全域 `core-rules.md` 記憶。
-  - 同步後只保留 `diff -qr` 作為一致性驗證方式；`knowledge/` 比對完整目錄，`memories/` 只比對第一層檔案清單與內容。
-  - 不使用 Obsidian symlink 當同步替代品；同步完成後 Obsidian `Arry 助手/` 必須是只包含完整 `knowledge/` 與只含第一層檔案的 `memories/` 的實體鏡像資料夾，且與主版本一致。
+  - 固定執行 `codex_symlink/skills/arry-assistant/scripts/sync_obsidian_mirror.py`；同步後由腳本以暫存的過濾來源執行 `diff -qr`，`memories/` 只比對第一層檔案清單與內容。
+  - 不使用 Obsidian symlink 當同步替代品；同步完成後 Obsidian `Arry 助手/` 必須是只包含經過濾的 `knowledge/` 與只含第一層檔案的 `memories/` 的實體鏡像資料夾，且與主版本一致。
 - 本 repo 的 `000_Agent/` 只保留指向說明，不存放真實個人記憶或偏好。
 - 跨 Agent 全域規則唯一實體主版本為 `codex_symlink/core-rules.md`；Codex、Claude 與 AntiGravity 的原生規則入口都由 Item 16 的 chezmoi bootstrap 指向它，不再使用或重建 `codex_symlink/agents/AGENTS.md`。
 - 跨 Agent skills 唯一實體主版本為 `codex_symlink/skills`；Codex 使用 `~/.codex/skills`、Claude 使用 `~/.claude/skills`、AntiGravity 使用 `~/.gemini/config/skills`。舊 AntiGravity `config/AGENTS.md` 與 `config/plugins/codex/skills` 只保留相容入口。

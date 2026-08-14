@@ -2,6 +2,8 @@
 
 ## Current state
 
+- Arry 助手 Obsidian 鏡像規則已改為排除頂層 `knowledge/visual-note-references/` 與 `.DS_Store`；圖解作品只保留全域 Knowledge 與 Obsidian 創作庫兩處。
+- `arry-assistant` 新增共用 `scripts/sync_obsidian_mirror.py`；`shutdown-sync`、`project-init-sync`、LazyPack Item 09／10、Obsidian 鏡像與全域 Skills 索引已同步。本次收工已取得使用者 commit／push 授權，提交結果以 Git 歷史為準。
 - 第三方 MIT 全域 skill `speak-human-tw`（上游 `Raymondhou0917/speak-human-tw`
   v1.4.0，commit `c8041dfc`）已安裝到共用主版本
   `codex_symlink/skills/speak-human-tw`，三個原生入口都解析得到。
@@ -20,6 +22,7 @@
 
 ## Next action
 
+- 本次同步規則提交完成後無必要後續；日後維持雙位置圖解作品路由與過濾式鏡像驗證。
 - 無必要後續。日後上游發新版時，依
   `speak-human-tw/references/agent-adapters.md` 的更新程序做 diff、
   重做 frontmatter 正規化、補回參考導航連結，再重跑
@@ -47,3 +50,4 @@
 - 2026-08-13，Claude Code：chezmoi shutdown checkpoint 全部 symlink
   與 Python bridge OK，`CHEZMOI_STATUS=clean`，未 update、
   未對既有 templates 執行 `add`。
+- 2026-08-14，Codex：同步腳本隔離正向／負向測試、正式同步、`--verify-only`、三個 skills validators、跨 Agent compatibility audit、LazyPack Item 09／10 鏡像與圖解作品雙位置 `diff -qr` 均通過。
