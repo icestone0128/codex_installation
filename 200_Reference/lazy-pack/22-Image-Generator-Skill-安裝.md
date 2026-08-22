@@ -120,12 +120,12 @@ capability or an approved shared fallback, not an automatic API-key setup.
 
 - Shared steps: use the same visual brief, source images, safety rules, output
   format, placement path, and acceptance criteria.
-- Codex adapter: use the native image generation/editing tool exposed in the
-  current Codex session.
+- Codex adapter: use the native image generation/editing tool with `imagen 2`
+  model configuration when applicable.
 - Claude adapter: use Claude's native image-capable tool when exposed; otherwise
   use the approved shared image CLI/API or browser/manual route.
-- AntiGravity adapter: use AntiGravity's native image-capable tool when exposed;
-  otherwise use the approved shared image CLI/API or browser/manual route.
+- AntiGravity adapter: use AntiGravity's native image tool (`nanobanana 2` model
+  configuration when applicable).
 - Fallback: ask before enabling a paid/API route; if no generation route is
   authorized, deliver the final prompt and exact placement/verification steps.
 - Verification: confirm subject fidelity, dimensions/aspect ratio, text policy,
@@ -298,7 +298,8 @@ Report the final path only after the file has actually been copied or created.
 
 - Keep the skill source in `{{SYNC_ROOT}}/skills/image-generator/`; each Agent
   reads it through its native skills entrypoint.
-- Use the Codex, Claude, or AntiGravity native image tool when available; use an
+- Use the Codex native image tool (`imagen 2`), Claude native image tool, or
+  AntiGravity native image tool (`nanobanana 2`) when available; use an
   approved shared CLI/API/browser route when it is not.
 - Keep native metadata and commands in the corresponding adapter without forking
   the prompt, output, safety, or verification contract.
