@@ -92,12 +92,21 @@
 - allow 清理實測後決定不做：在 `approval_policy = "never"` 下，「未命中」與「allow」行為相同，
   清理不換來防護。真正的槓桿是 `config.toml` 的 `approval_policy` 與 `sandbox_mode`，未動。
 
+- AntiGravity 攔截層查證結論：**沒有可寫入的 deny 機制**。`globalPermissionGrants` 只有 `allow`，
+  app 本地二進位查不到相關 enum（推測伺服器端定義）。未寫入任何 deny key——憑推測寫會重演
+  `deny`/`forbidden` 的錯，且 `config.json` 由 app 重寫，未知欄位可能被靜默丟棄或觸發重置。
+  查證當下 app 執行中，手動編輯會被覆蓋，因此未動該檔。
+- AntiGravity 的判斷層早已生效（`GEMINI.md`／`config/AGENTS.md` 皆 symlink 到 `core-rules.md`，
+  實測讀得到〈不可逆操作邊界〉），且它是三者中唯一 `enableTerminalSandbox = true` 的。
+
 ## Next action
 
 - 本輪 repo 無變更（改動在 `codex_symlink` 與 `~/.claude/settings.json`），前次 push 為 `85ce0fa`。
 - `~/.claude/settings.json` **不在 chezmoi 管理範圍**，deny 清單不會跟著換電腦；
   要納管需走 Item 16 受控流程，尚未執行。
-- **AntiGravity 端仍無任何攔截層**，三個 Agent 只有兩個有防護。
+- AntiGravity 剩兩個可選動作，都需要**先關掉 app** 或改用 app 內建設定介面：
+  移除 `unsandboxed(venv/bin/python)` 授權（它在 terminal sandbox 上開洞）；
+  將 `autoExecutionPolicy` 由 `EAGER` 調保守（合法值需由 app 設定介面提供，不可推測）。
 - 兩邊共同的洞：`git push origin main --force` 因前綴比對限制擋不到，已寫入知識檔備查。
 - `~/.codex/rules/default.rules` 與 `~/.claude/settings.json` 都不在 chezmoi 管理範圍，換電腦不會帶過去。
 - `rm -rf` 的路徑感知攔截需要 PreToolUse hook，本次未做；判斷層已用文字規範涵蓋。
