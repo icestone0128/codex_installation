@@ -116,7 +116,9 @@ tool_timeout_sec = 120
 這一項歸在 02，因為它是外部工具 / CLI 連線能力，不放在 01 的基礎 plugin 檢查裡。使用前請確認：
 
 - 已安裝 Heptabase desktop app。
-- Heptabase CLI 可用，並符合 skill 相容版本 `0.4.x`。
+- Heptabase CLI 可用，並符合 skill 相容版本 `0.5.x`（用 `heptabase --version` 確認）。
+  CLI 沒有自己的更新機制：PATH 上的 `heptabase` 是 wrapper，實際執行桌面 app 內的 bundle，
+  版本只會隨 app 更新而變動，Homebrew 管不到。
 - Heptabase desktop app 的 local CLI server 已啟用；如果 read-only 指令回報無法連線，先執行 `heptabase start` 或在桌面 app 的 Settings > AI Features 啟用 CLI。
 - 實際操作前先用 read-only 指令確認連線，不直接寫入。
 
@@ -363,16 +365,24 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_SKILL_MD_0E95F5A366'
 ---
 name: heptabase-cli
-description: Interact with Heptabase using the CLI to manage knowledge base content, search cards, edit properties, read parsed PDF and media transcript content, export local files, manage whiteboard cards, and browse AI Tutor goals, courses, and lessons.
+description: >-
+  Reads and edits a Heptabase knowledge base through the `heptabase` CLI. Use when the user says
+  Heptabase, 白板, whiteboard, 卡片, card library, 日記, journal, AI Tutor, 學習課程, or asks to search
+  cards, read or append notes and journals, edit card properties or tags, read parsed PDF pages,
+  read audio or video transcripts, export a file from a card, place cards on a whiteboard, or browse
+  AI Tutor goals, courses, and lessons. Requires the desktop app running with CLI enabled. Not for
+  Obsidian or other note apps, and not for Heptabase features the CLI does not expose.
 allowed-tools: Bash(heptabase *) Bash(jq *) Bash(mktemp *)
 metadata:
-  heptabase-cli-version-range: "0.4.x"
+  heptabase-cli-version-range: "0.5.x"
+  last-updated: "2026-08-26"
 ---
 
 ## Prerequisites
 
 - CLI installed from the desktop app. The command is `heptabase` on macOS/Linux; Windows installs `heptabase.cmd` for cmd/PowerShell and a `heptabase` shim for POSIX shells.
-- Check version compatibility before use with `heptabase --version`. If the installed CLI version is outside this skill's compatibility range (`0.4.x`), you MUST stop and ask the user to update either the Heptabase desktop app or this skill package before continuing.
+- Check version compatibility before use with `heptabase --version`. If the installed CLI version is outside this skill's compatibility range (`0.5.x`), you MUST stop and ask the user to update either the Heptabase desktop app or this skill package before continuing.
+- The CLI has no updater of its own. `heptabase` on PATH is a thin wrapper that runs the bundle inside the desktop app, so the CLI version moves only when the app is updated. Homebrew does not manage it.
 
 ## Command discovery
 
@@ -401,6 +411,20 @@ Use these as quick recipes for frequent requests. For less common flags or if a 
 - **Read a file by `fileId`:** first read `references/file-reading.md`, then run `mktemp -d` and pass the returned directory path to `heptabase file export <fileId> --output-dir <scratchDir>`. Read the returned `path` with your native file-reading tool.
 - **List cards on a whiteboard:** `heptabase whiteboard cards <whiteboardId>`
 - **Add a card to a whiteboard:** `heptabase whiteboard add-card --whiteboard-id <whiteboardId> --card-id <cardIdOrDate>`
+- **Add a local file to a whiteboard:** `heptabase local-file add --whiteboard-id <whiteboardId> --path <absolutePath>`. One absolute path per call; it places a placeholder, it does not copy the file into Heptabase.
+
+## AI Tutor: goals, courses, lessons
+
+Three read-only command groups, arranged as a hierarchy: a **goal** is a top-level topic, it holds **courses**, and each course holds **lessons**. Start at whichever level the user names; only walk down from `goal list` when they have not named one.
+
+- **List root goals with their courses:** `heptabase goal list` — returns each goal plus its child courses, so this alone often answers "what am I learning".
+- **List every course across all goals:** `heptabase course list` — `goalId` is the parent goal, or `null` when the course is itself a root goal.
+- **Read a course syllabus:** `heptabase course read <courseId>` — returns `overview`, `expectedOutcome`, and nested `topics`/`subtopics`. Each subtopic carries `status` (`notStarted` | `inProgress` | `covered`) and `coveredSummary`; use those to report progress rather than guessing from titles.
+- **List lessons in a course:** `heptabase lesson list <courseId>` — chronological.
+- **Read a lesson plan and its artifact card:** `heptabase lesson read <lessonId>`.
+- **Read lesson chat messages:** `heptabase lesson list-messages <lessonId> --limit 20 --offset 0` — max 100 per page; page through with `--offset` rather than raising the limit past 100.
+
+All of these take UUIDs, not titles. Resolve a title to an id with the list command one level up; do not guess an id.
 
 ## Property editing
 
