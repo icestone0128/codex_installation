@@ -1,0 +1,324 @@
+# 44-Personal Style Loop Skill 安裝
+
+> 2026-08-25 建立。整合課程 Pro-Kit 05「AI 工作法萃取器」的個人寫作風格分支，改寫為三 Agent 共用版本。
+
+## 這個 Item 解決什麼
+
+「用我的語氣寫」是最常見、也最難驗收的要求。多數做法是把一疊舊文章丟給 AI 說「學這個」，
+結果得到一個平均值，而且沒有任何方式判斷它到底有沒有變好。
+
+本 Item 安裝 `personal-style-loop`，把「像不像我」變成可驗證的迴圈：
+
+- **校準題**給 AI 的是當年的**點子或提綱**，真實發布的完整版本由使用者保留當對照。
+  AI 拿到題目但拿不到答案，所以不能靠換句話說蒙混。
+- **保留題**是還沒寫過的新點子，測規則能不能遷移到新情境，而不是只會仿寫看過的內容。
+- **收斂式回饋**：先三選一（開場與口吻／結構與推進／用詞與觀點）→ 再二選一 →
+  只追問一個具體句子 → 轉成可驗證規則。不問開放式的「哪裡不像」。
+
+## 前置條件
+
+- 已完成 README 設定表，知道 `{{SYNC_ROOT}}` 位置。
+- **2～3 篇可完整閱讀的代表作品**。這是硬門檻，不是建議：沒有作品就跑不動，
+  skill 本身會停下來要求補齊，不會用猜的開始。
+- 素材放該專案本地的 `200_Reference/writing-samples/`，不集中到全域層。
+
+## 三 Agent 共用契約
+
+- **共用步驟**：全程是對話、閱讀與寫檔，三個 Agent 行為一致。
+- **Codex adapter**：`$personal-style-loop`。訪談未完成且不在規劃模式時，先教使用者開啟規劃模式；規劃模式只訪談與整理，不寫檔。
+- **Claude adapter**：`/personal-style-loop`。使用原生選項式提問工具做收斂式追問。
+- **AntiGravity adapter**：以自然語言觸發。
+- **Fallback**：沒有選項式提問工具時改用編號純文字選項，不因此跳過收斂步驟。
+- **驗證**：三個 Agent 共用 `SKILL.md` 的〈驗收標準〉作為唯一驗證契約。
+
+## 安裝
+
+複製文末「內建 Skill 完整安裝內容」的整段腳本執行。安裝前先依 README 設定 `{{SYNC_ROOT}}`；
+package 只寫入共用主版本，Item 16 與 chezmoi 負責建立三個 Agent 的原生入口。
+
+## 安裝後預檢
+
+```bash
+test -f "{{SYNC_ROOT}}/skills/personal-style-loop/SKILL.md" && echo "SKILL.md OK"
+test -f "{{SYNC_ROOT}}/skills/personal-style-loop/references/style-library-schema.md" && echo "reference OK"
+```
+
+三個 Agent 都要能解析到同一份主版本；解析不到時看 Item 16，不要另外複製一份。
+
+## 安全邊界
+
+- 素材放進風格庫**之前**先去識別化：私人訊息、客戶資料、聯絡方式、付款與未公開價格、
+  合約條款、未經同意的他人內容、公司機密。無法安全去識別化的作品就不要收。
+- **校準題的正解不得放進風格庫或提示**。風格庫是 AI 讀得到的；正解一旦進去，
+  校準題就失去驗證力。
+- 本 skill 只學使用者自己的聲音。想借鏡他人技法時，只拆解可移植的結構、節奏與解釋方法，
+  **不得宣稱能模仿該創作者，不得照抄原句**，不把對方身份寫進個人風格規則。
+- **不得替使用者宣告觀點**。要判斷某段內容是不是他的真實立場時，停下來問他。
+- 不承諾百分之百像本人。目標是在已定義情境下，穩定少犯使用者明確指出過的錯。
+
+## 與既有 Item 的邊界
+
+| 需求 | 用哪個 |
+| :-- | :-- |
+| 學使用者自己的寫作風格 | **本 Item**（`personal-style-loop`） |
+| 去除 AI 腔、校正中國用語與半形標點 | Item 42 `speak-human-tw`。兩者互補，可先跑本 skill 再跑它 |
+| 建立非寫作類的工作方法 skill | Item 11 `codex-skill-creator` |
+| 單次潤稿或代寫 | 直接寫，不要為了產出 skill 而硬做 skill |
+
+## 驗收
+
+- 校準題的正解全程沒有進入 AI 的可見範圍。
+- 每條規則都能指回某篇作品或某次使用者回饋；推測項標為待確認。
+- 至少 1 題校準題通過使用者檢查、1 題保留題試寫並評估過。
+- 使用者能說出「這一輪改了哪些規則、為什麼」。
+- 進到建檔階段時，實際 `SKILL.md` 已寫入且能在新對話呼叫成功；否則明確標示尚未建檔。
+
+<!-- BEGIN EMBEDDED_SKILLS -->
+
+## 內建 Skill 完整安裝內容
+
+本節是自含式安裝區塊。這個序號項目會安裝：`personal-style-loop`。
+
+使用方式：把下方整段安裝腳本複製到自己的環境執行。執行前請依 README 設定 `{{SYNC_ROOT}}`；package 只寫入共用主版本，Item 16 與 chezmoi 會建立 Codex、Claude、AntiGravity 的原生入口。
+
+````bash
+set -e
+
+# ---- personal-style-loop ----
+mkdir -p "{{SYNC_ROOT}}/skills/personal-style-loop"
+# personal-style-loop/SKILL.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/personal-style-loop/SKILL.md")"
+cat > "{{SYNC_ROOT}}/skills/personal-style-loop/SKILL.md" <<'AGENT_LAZYPACK_PERSONAL_STYLE_LOOP_SKILL_MD_0E95F5A366'
+---
+name: personal-style-loop
+description: >-
+  用校準題與保留題的迴圈，把使用者的寫作風格萃取成可重複調用的個人寫作規則。當使用者說「學我的語氣」「訓練我的寫作風格」「這篇寫得不像我」「幫我建立個人寫作 skill」「用我的口吻寫」時使用。單次潤稿、去 AI 味、模仿他人品牌或風格請改用其他 skill。
+metadata:
+  short-description: 訓練個人寫作風格迴圈
+  version: "0.1.0"
+  last-updated: "2026-08-25"
+---
+
+# 個人風格訓練迴圈（Personal Style Loop）
+
+把「像不像我」從主觀感覺變成可驗證的迴圈：用你當年的點子當校準題、你手上的真實成品當答案，
+比對落差、轉成規則、再測一次。目標不是百分之百像你，是讓 AI 在**已定義的情境**下，
+穩定少犯你明確指出過的錯。
+
+## 使用時機
+
+- 想讓 AI 用你的語氣寫社群貼文、長文、電子報、講稿或工作溝通。
+- AI 寫出來「就是不像你」，但你說不清楚差在哪。
+- 你的 `200_Reference/writing-samples/` 需要建立可重複使用的規則，而不是每次臨場翻範例。
+- 已經有個人寫作規則，想用新的落差再迭代一輪。
+
+## 不適用情境
+
+- **單次潤稿或代寫**：直接寫就好，不要為了產出 skill 而硬做 skill。
+- **去除 AI 腔**：那是 `speak-human-tw` 的工作。本 skill 加的是你的聲音，不是移除 AI 味；
+  兩者互補，可先跑本 skill 再跑 `speak-human-tw`。
+- **模仿特定創作者或品牌 voice**：本 skill 只學使用者自己的聲音。想借鏡他人技法時，
+  只能拆解可移植的結構、節奏與解釋方法，不得宣稱能模仿該創作者，也不得照抄原句。
+- **建立非寫作類的工作方法 skill**：改用 `codex-skill-creator`。
+
+## 必要輸入
+
+**啟動硬門檻：2～3 篇可完整閱讀的代表作品。** 沒有就不要開始。
+
+- 不接受用三句話描述自己的風格代替作品——那不足以判斷開場、結構、節奏與用詞。
+- 不接受只有摘要、標題或社群匯出 ZIP。要能完整讀到正文。
+- 素材不足時，明說「目前做不出可信的版本」，請使用者先補齊，**不要用猜的開始**。
+
+另外需要：
+
+- 1～3 組校準題：當年的原始點子或提綱（給 AI）＋ 當年真的發布的完整版本（**你保留，不給 AI**）。
+- 1～2 個保留題：還沒寫成完整內容的新點子，用來確認規則能帶到新情境。
+
+## 判斷與工作流程
+
+### 1. 先確認目標情境
+
+一次問一題，每題 2～3 個互斥選項：先問社群貼文／長篇內容／工作溝通，再往下細分一層。
+
+同時想做很多類型時，建議先選一種。不同任務的語氣與結構不同，混在第一輪會拉低判斷品質。
+
+### 2. 盤點並去噪素材
+
+先請使用者移除私人訊息、客戶資料、電話、地址、付款資訊與未經同意的他人內容，再開始。
+
+素材分類與 `use_for` / `do_not_use_for` 標註的完整 schema 見
+`references/style-library-schema.md`。素材放該專案的 `200_Reference/writing-samples/`。
+
+### 3. 建立 Style Harness
+
+- 校準題 = 當年的點子／提綱。這一份交給 AI。
+- 正解 = 當年真的發布的版本。**由使用者保留，絕對不得放進本輪 `references`、提示或對話。**
+  AI 看過答案後只會換句話說，校準題就失效了。
+- 保留題 = 沒有標準答案的新點子，測規則能不能遷移。
+
+### 4. 整理初版規則並試寫
+
+只根據 `references` 整理規則草案，至少涵蓋：常見開場與敘事視角、段落推進與觀點轉折、
+用詞語氣與節奏、適合與不適合的表達、**仍缺證據需要確認的地方**。
+
+用校準題試寫。每篇草稿後列出：用了哪些規則、哪裡仍不確定。
+
+### 5. 跑 Feedback Loop
+
+請使用者把草稿與他保留的真實版本左右對照。**收斂式追問，不要開放式問「哪裡不像」**：
+
+1. 先三選一：最不像的是「開場與口吻」「結構與推進」還是「用詞與觀點」？
+2. 再二選一，縮小到該組其中一項。
+3. 只追問**一個**具體句子或段落。
+4. 把回饋轉成可驗證規則，寫進規則草案。
+
+規則必須來自作品或使用者明確回饋。沒有證據的推測標成待確認，不要當成已定案。
+**不要把一次回饋直接升格成長期規則**，先在下一輪校準或保留題驗證過再定案。
+
+每輪都要說清楚本輪改了哪些規則，不要默默改稿。更新後用同一批校準題重寫。
+
+### 6. 用保留題驗證
+
+校準題通過後，先把 `references` 擴充到 5～10 篇、累積至少 3 個校準題，再用保留題試寫。
+
+- 保留題反覆出錯 → 找出原因，回到步驟 5。
+- 保留題也符合期待 → 才整理成第一版個人寫作 skill。
+
+### 7. 建檔，不要停在 brief
+
+把驗證過的規則交給 `codex-skill-creator` 建立實際的個人寫作 skill，並依它的流程完成
+命名、驗證、LazyPack 與 Obsidian 同步。使用者只想要 brief 時可以停，
+但必須明說「尚未建立可調用的 skill」，不得回報完成。
+
+## 輸出格式
+
+每輪交付：
+
+1. `references` 清單，每篇標註可以學什麼／不要學什麼。
+2. Style Harness：校準題與保留題清單。
+3. 個人風格規則草案，含「仍待驗證」區。
+4. Feedback Loop 紀錄：AI 的落差 → 使用者的修正 → 規則怎麼更新。
+5. 下一輪最值得處理的一個落差。
+
+草稿寫進該專案的 `100_Todo/drafts/` 對應子資料夾，不要只留在對話裡。
+
+## 停止條件
+
+- **代表作品不足 2 篇，或只有摘要**：停止，說明做不出可信版本，請使用者補素材。
+- **使用者想用「描述風格」取代作品**：停止並說明為什麼不夠。
+- **素材含未去識別化的個資、客戶資料、未公開價格或合約**：停止，先匿名化。
+- **使用者要求模仿特定創作者或品牌**：停止，說明本 skill 只學他自己的聲音。
+- **要判斷某段內容是不是使用者的真實觀點**：停止並問他。**你不能替他宣告觀點。**
+- **規則之間互相矛盾**：停止並把矛盾攤開讓使用者裁決，不要自己選一邊。
+
+## 驗收標準
+
+- 校準題的正解全程沒有進入 AI 的可見範圍。
+- 每一條規則都能指回某篇作品或某次使用者回饋；推測項明確標為待確認。
+- 至少 1 題校準題通過使用者檢查。
+- 至少 1 題保留題試寫過，且結果有被評估。
+- 使用者能說出「這一輪改了哪些規則、為什麼」。
+- 若已進到步驟 7，實際 `SKILL.md` 已寫入且能在新對話呼叫成功；否則明確標示尚未建檔。
+
+## 三 Agent 執行
+
+- **共用步驟**：本 skill 全程是對話、閱讀與寫檔，三個 Agent 行為一致。
+- **Codex adapter**：`$personal-style-loop`。訪談尚未完成且不在規劃模式時，先教使用者開啟規劃模式再繼續；規劃模式只訪談與整理，不寫檔。
+- **Claude adapter**：`/personal-style-loop`。使用原生選項式提問工具進行收斂式追問。
+- **AntiGravity adapter**：以自然語言觸發。無選項式提問時，改列編號選項請使用者回覆編號。
+- **Fallback**：任何 Agent 沒有選項式提問時，一律改用編號純文字選項，不因此改變流程或跳過收斂步驟。
+- **驗證**：三個 Agent 都以本檔的〈驗收標準〉為唯一驗證契約。
+AGENT_LAZYPACK_PERSONAL_STYLE_LOOP_SKILL_MD_0E95F5A366
+
+# personal-style-loop/agents/openai.yaml
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/personal-style-loop/agents/openai.yaml")"
+cat > "{{SYNC_ROOT}}/skills/personal-style-loop/agents/openai.yaml" <<'AGENT_LAZYPACK_PERSONAL_STYLE_LOOP_AGENTS_OPENAI_YAML_DEB9755D27'
+interface:
+  display_name: "Personal Style Loop"
+  short_description: "Train and calibrate the user's own writing voice"
+  default_prompt: "Use $personal-style-loop to extract and calibrate my personal writing style from real samples."
+AGENT_LAZYPACK_PERSONAL_STYLE_LOOP_AGENTS_OPENAI_YAML_DEB9755D27
+
+# personal-style-loop/references/style-library-schema.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/personal-style-loop/references/style-library-schema.md")"
+cat > "{{SYNC_ROOT}}/skills/personal-style-loop/references/style-library-schema.md" <<'AGENT_LAZYPACK_PERSONAL_STYLE_LOOP_REFERENCES_STYLE_LIBRARY_SCHEMA_MD_850A5E2B7B'
+# 風格素材庫 schema 與去噪規則
+
+`200_Reference/writing-samples/` 的檔案格式與篩選規則。素材放**該專案本地**的
+`200_Reference/writing-samples/`，不集中到全域層——不同專案的語域不同。
+
+## 素材分類
+
+第一輪只收 2～3 篇。校準通過、方向確認後，才擴充到 5～10 篇。
+寧可少量高品質，不要把整包歷史貼文直接交給 AI。
+
+| 類別 | 處理方式 |
+| :-- | :-- |
+| 代表現在的使用者 | 保留為 `references` 候選 |
+| 有參考價值但已過時 | 保留，標示「僅學結構」，不學當時的資訊與 CTA |
+| 私密、臨時、純公告，或使用者不想被學 | 排除，不放進素材庫 |
+
+## 每篇的角色標註
+
+| 角色 | 用法 | 邊界 |
+| :-- | :-- | :-- |
+| `學自己的聲音` | 個人語氣、故事、觀點與常用結構的證據 | 無 |
+| `借鏡特定技法` | 只拆解可移植的結構、節奏或解釋方法 | **不宣稱能模仿該創作者，不照抄原句，不把對方身份寫進個人風格規則** |
+
+## 檔案格式
+
+每篇作品一個 `.md`，命名 `YYYY-MM-DD_簡短主題.md`，開頭加 frontmatter：
+
+```markdown
+---
+role: 學自己的聲音        # 或：借鏡特定技法
+type: 故事型觀點          # 貼文／電子報／教學文／講稿／工作溝通…
+source: 已發布            # 已發布／草稿／內部文件
+use_for:
+  - 學習從真實經驗開場
+  - 學習把踩坑轉成方法
+do_not_use_for:
+  - 不沿用過時的活動資訊
+  - 不照抄當時的 CTA
+---
+
+（作品全文）
+```
+
+`use_for` 與 `do_not_use_for` 都要寫。只寫「這篇很好」對規則萃取沒有幫助——
+要說清楚**這篇證明了什麼**，以及**哪部分不該被一起學走**。
+
+## 去識別化
+
+放進素材庫**之前**移除：
+
+- 私人訊息與對話紀錄
+- 客戶名稱、聯絡方式、地址、電話
+- 付款、報價、未公開價格與合約條款
+- 未經同意的他人內容與可識別資訊
+- 公司機密與尚未公開的計畫
+
+無法安全去識別化的作品就不要收。素材庫會被反覆讀取，一次疏漏會長期存在。
+
+## 校準題的隔離
+
+校準題的**正解**（當年真的發布的完整版本）**不得放進素材庫**。
+
+素材庫是 AI 讀得到的；正解一旦進去，AI 就是在換句話說已知答案，校準題失去驗證力。
+正解由使用者自己保留，只在 Feedback Loop 的人工對照時使用。
+
+同理，保留題的任何草稿或半成品也不要放進素材庫。
+
+## 維護
+
+- 素材過時或不再代表使用者時，改標「僅學結構」或移除，不要放著累積。
+- 新增素材後，下一輪要重跑校準題——素材變了，規則可能要跟著變。
+- 素材庫與規則不一致時，以素材為準：規則來自作品，不是反過來。
+AGENT_LAZYPACK_PERSONAL_STYLE_LOOP_REFERENCES_STYLE_LIBRARY_SCHEMA_MD_850A5E2B7B
+
+test -f "{{SYNC_ROOT}}/skills/personal-style-loop/SKILL.md" && echo "personal-style-loop installed for Codex, Claude, and AntiGravity"
+````
+
+安裝完成後，請開新 Agent 對話或重啟對應 App，再測試 skill 是否能被讀取。
+
+<!-- END EMBEDDED_SKILLS -->

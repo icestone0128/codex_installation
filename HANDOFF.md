@@ -53,9 +53,27 @@
   但 baseline 必須跑在已選定的任務上。已重排為 訪談 → 收斂 → brief → baseline → 建檔 →
   驗證 → 同步，並修好重排後失效的步驟交叉引用。
 
+- Pro-Kit 05 整合：其 `create-good-skills` 分支已於 03 完成，另一條 `personal-style-loop`
+  是本機完全沒有的能力。發現**三處指向同一個不存在的寫作風格能力**：
+  `codex-skill-creator:115`（本人稍早寫入）、`speak-human-tw` description，以及
+  `arry-assistant` 與協作偏好路由表的「動筆前先讀 `writing-samples/`」——
+  但 15 個專案的 `writing-samples/` 全部只有 `.gitkeep`。
+- 依 `codex-skill-creator` 完整流程建立全域 skill `personal-style-loop`（3 檔），
+  並新增 LazyPack **Item 44**、註冊進 `sync-lazypack-embeds.py`、補 README 目錄與安裝總表。
+  全域 skill 數 82 → 83。
+- **修正稍早造成的缺陷**：`codex-skill-creator` 的 `version`／`last-updated` 規則沿用
+  Pro-Kit 03 模板寫成頂層 frontmatter，但 `quick_validate.py` 只接受 `name`／`description`／
+  `license`／`allowed-tools`／`metadata`，會讓每個新 skill 產生無效 frontmatter。
+  已改為要求寫在 `metadata:` 內並加進驗證清單。
+- `speak-human-tw` 的懸空指向**刻意不動**：它是 MIT 上游治理 skill，改 description 會與上游分岔。
+
 ## Next action
 
-- LazyPack Item 11 待 commit／push（前次 Item 11 已於 `3f55c79` 送出，本次為 Pro-Kit 04 追加）。
+- LazyPack Item 11、44、README 與同步腳本待 commit／push。
+- **`personal-style-loop` 尚未經真實素材校準**：它的校準題與保留題無法執行，因為
+  `writing-samples/` 是空的。依該 skill 自己的停止條件，素材不足就不得開始。
+  下一步是放 2～3 篇完整代表作進某個專案的 `200_Reference/writing-samples/`，再跑第一輪校準。
+  在那之前它是 `0.1.0` 未校準初版。
 - `OUTPUT_CHANNELS` 未單獨訪談（受一次 4 題上限限制），目前在〈協作偏好〉標為推論待確認；
   下次可補問一題確定最常交付的成果型態。
 - 未來全域 skill 在其他專案（尤其 `trivial_matters_of_life`）被修改後，本專案
