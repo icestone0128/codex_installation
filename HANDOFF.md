@@ -33,9 +33,18 @@
 - Obsidian 側已全部收斂：懶人包鏡像、「全域 Skills 同步.md」、專案駕駛艙、
   Arry 助手鏡像皆已更新並驗證。
 
+- Pro-Kit 03「寫出好 Skill」啟動包同樣以整合處理，**不另裝 `create-good-skills`**
+  （會與「建立 skill 一律先用 `codex-skill-creator`」的全域規則衝突）。7 項缺口整合進
+  `codex-skill-creator`：baseline-first、雙測試 Harness（含事前保留樣本）、方法來源路線
+  分流（自己／身邊高手／團隊 SOP／公開專家）、模仿真人的誠實邊界（原本完全沒有的防線）、
+  SKILL.md 八段 body、追問上限 4 題、`version: 0.1.0`。SKILL.md 202 → 287 行，
+  Workflow 12 → 13 步。備份 `codex_symlink/backups/codex-skill-creator.SKILL.md.bak.*`。
+- LazyPack Item 11 的**說明文字也一併改寫**，不只重新內嵌 skill；第三方照該文件安裝會得到
+  與主版本一致的流程。內嵌 SKILL.md 與主版本 `diff` IDENTICAL。
+
 ## Next action
 
-- Item 09、22、43 待 commit／push 到 `origin/main`。
+- LazyPack Item 11 待 commit／push 到 `origin/main`（Item 09、22、43 已於 `3555db9` 送出）。
 - `OUTPUT_CHANNELS` 未單獨訪談（受一次 4 題上限限制），目前在〈協作偏好〉標為推論待確認；
   下次可補問一題確定最常交付的成果型態。
 - 未來全域 skill 在其他專案（尤其 `trivial_matters_of_life`）被修改後，本專案
