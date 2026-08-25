@@ -203,14 +203,39 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 有互動式提問工具就使用；一次只問一題，每題 2～3 個互斥選項，推薦項放第一個。
 **整段建立流程最多四個必要追問**，不要一次丟長問卷。已能從對話、檔案或助手記憶得到的答案不要重問。
 
-先問一題定路線——**你想留下誰的工作方法？**
+#### 入口：先確認要建的是不是工作方法
+
+```text
+你現在最想讓 AI 學會什麼？
+
+1. 我的長期寫作風格 —— 讓 AI 用你的語氣寫，可持續校準
+2. 一套會重複使用的工作方法 —— 判斷、步驟與停止條件
+3. 我不確定，先描述問題
+```
+
+- 選 1 → 轉交 Item 44 `personal-style-loop`，本流程不處理長期寫作風格。
+- 選 3 → 請使用者用**一句話**描述最近卡住的真實工作，再推薦一條請他確認。
+  若只是一次性任務，兩條都不走，直接把那件事做完。
+- 選 2 → 繼續下面的路線分流。
+
+#### 路線：你想留下誰的工作方法？
+
+```text
+這套工作方法主要來自誰？
+
+1. 我自己
+2. 身邊高手或團隊
+3. 公開專家
+```
+
+選 2 時再問一題：「一位具體高手」還是「團隊共同流程」——兩者走不同路線。
 
 | 路線 | 來源 | 要收的素材 | 第二題怎麼選 |
 | :-- | :-- | :-- | :-- |
 | A. 自己 | 你自己的做法 | 2～3 份有代表性的真實成品；你給過的修改與回饋；**另外保留 1 份不放進建立階段** | 用那份保留成品 |
 | B. 身邊高手 | 同事、主管、前輩 | 對方同意提供的訪談或工作說明；成功與失敗案例；檢查表或匿名化紀錄 | 邊界或資料不足案例，再請本人 review |
-| C. 團隊 SOP | 正在執行的共同流程 | 口述、舊文件、執行紀錄、新人常問的問題、上下游文件 | 例外情境，或讓新人試跑 |
-| D. 公開專家 | 合法取得的公開資料 | 見下方〈模仿真人的誠實邊界〉 | 專家沒公開談過的題，或爭議邊界題 |
+| C. 團隊 SOP | 正在執行的共同流程 | 口述、舊文件、截圖、執行紀錄、新人常問的問題、上下游文件 | 例外情境，**兩邊都要跑**：讓新人試跑驗證清楚度，讓資深同事檢查例外與判斷 |
+| D. 公開專家 | 多個原始公開來源、案例，以及批評與矛盾資料。見下方〈模仿真人的誠實邊界〉 | 三題各測一件事：**已知題**測方向、**未談過的題**測誠實、**爭議邊界題**測會不會過度自信 |
 
 #### 路線 A 的首要篩選：熟練度優先於頻率
 
@@ -268,6 +293,7 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 - 萃取的是選擇、判斷、順序與品質標準，不是語氣形容詞。
 - 路線 B、C 先確認同意、權限與機密邊界；路線 C 先查有沒有同名或衝突版本。
 - **要拿到素材本身**。只知道「有哪些資料」不夠；素材到手前不要進入萃取，也不要展開長訪談。
+- 素材含公司機密、客戶個資、未公開價格或合約條款時，**先匿名化再萃取**；醫療、法律、投資內容保留人工確認。skill 的素材會被反覆讀取，一次疏漏會長期存在。
 - 使用者說「不確定」時，先請他描述最近一次卡住的工作。**如果做一次性任務就能解決，就直接做**，不要為了產出 Skill 而硬做 Skill。
 
 ### 模仿真人的誠實邊界
@@ -597,20 +623,46 @@ capture the user's own method, and a source-adapter job can capture a public exp
 before collecting material, because the route changes what counts as sufficient evidence, what
 consent is required, and how the second test is designed.
 
-Ask one question: *whose way of working should this skill preserve?*
+Before the route, confirm the user wants a work method at all. Ask one at a time, two or three
+mutually exclusive options each, every option carrying a plain-language consequence:
+
+```text
+你現在最想讓 AI 學會什麼？
+
+1. 我的長期寫作風格 —— 讓 AI 用你的語氣寫，可持續校準
+2. 一套會重複使用的工作方法 —— 判斷、步驟與停止條件
+3. 我不確定，先描述問題
+```
+
+Answer 1 routes to `$personal-style-loop` and stops here. Answer 3 asks the user to describe the
+last time this work got stuck **in one sentence**, then recommends one branch for them to confirm;
+if a one-off task would settle it, do the task and build nothing. Answer 2 continues below.
+
+Then ask: *whose way of working should this skill preserve?*
+
+```text
+這套工作方法主要來自誰？
+
+1. 我自己
+2. 身邊高手或團隊
+3. 公開專家
+```
+
+Answer 2 needs one more question: 「一位具體高手」or「團隊共同流程」— they take different routes.
 
 | Route | Source | Material to collect | Second test (see `Baseline And Harness`) |
 | :-- | :-- | :-- | :-- |
 | A. The user | Their own practice | 2-3 representative real deliverables; past corrections and feedback they have given; **one held-back deliverable** | The held-back deliverable |
 | B. A colleague | A peer, manager, or mentor | Interview or work notes they agreed to share; both success and failure cases; checklists or anonymised transcripts | An edge or insufficient-data case, then have that person review |
-| C. Team SOP | A shared live process | Verbal walkthroughs, old documents, execution records, questions newcomers keep asking, upstream/downstream docs | An exception case, or a newcomer dry run |
-| D. A public figure | Lawfully obtained public material | See the ethics section below | A question the person has never publicly addressed, or a contested edge case |
+| C. Team SOP | A shared live process | Verbal walkthroughs, old documents, screenshots, execution records, questions newcomers keep asking, upstream/downstream docs | An exception case. Run it **both ways**: a newcomer dry run for clarity, and a senior colleague checking the exceptions and judgement calls |
+| D. A public figure | Multiple primary public sources, cases, plus critical and contradicting material. See the ethics section below | Three tests, each checking something different: a **known** question tests direction, an **unaddressed** question tests honesty, and a **contested edge** question tests whether it stays appropriately uncertain instead of overconfident |
 
 Route rules:
 
 - Extract choices, judgement, ordering, and quality bars, not adjectives about tone.
 - For routes B and C, confirm consent, permissions, and confidentiality before collecting anything. Check for an existing or conflicting version of the same SOP first.
 - Ask for the actual material. Knowing that material exists is not the same as having it; do not start extraction or open a long interview before it is in hand.
+- Anonymise before extraction whenever the material carries company confidential information, client personal data, unpublished pricing, or contract terms, and keep a human confirmation step for medical, legal, or financial content. A skill's material gets read repeatedly, so one lapse persists.
 - If the user is unsure which route applies, have them describe the last time this work got stuck. If a one-off task would solve it, do the task. Do not manufacture a skill to justify the workflow.
 - Long-term personal writing voice is out of scope for this skill; route it to `$personal-style-loop`, which calibrates against the user's real samples with held-back reference versions.
 
