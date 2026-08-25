@@ -107,6 +107,85 @@
 
 ## Next action
 
+### 待辦：Codex 與 AntiGravity 的防護層與 sandbox 複查（可由任一 Agent 接手）
+
+2026-08-26 已完成重查，以下是**未執行**的項目。每項都附判斷依據與驗證方式；
+動任何設定前先讀 `{{SYNC_ROOT}}/knowledge/prompt-defense-baseline.md` §4，
+並套用 `core-rules.md` 的〈不可逆操作邊界〉分級。
+
+#### 現況快照（2026-08-26 實測）
+
+| Agent | 指令攔截 | Sandbox | 自動執行 |
+| :-- | :-- | :-- | :-- |
+| Claude Code | 15 條 `permissions.deny` | 無 | bypass 模式 |
+| Codex | 10 條 `forbidden`（另有 40 條累積 `allow`） | `danger-full-access` | `approval_policy = "never"` |
+| AntiGravity | **無此機制** | `enableTerminalSandbox = true` | `CASCADE_COMMANDS_AUTO_EXECUTION_EAGER` |
+
+#### C-1【Codex，優先】`sandbox_workspace_write` 整段目前是失效的
+
+- **發現**：`~/.codex/config.toml` 有一份 26 條的 `writable_roots` 白名單，內容正好對應
+  `core-rules.md` 的沙盒規則（`.codex/python-tools`、`~/.npm`、`~/Library/Caches/pip`、
+  各專案根目錄等）。但 `sandbox_mode = "danger-full-access"` 之下，`[sandbox_workspace_write]`
+  **完全不生效**——該區段只在 `workspace-write` 模式下讀取。
+- 也就是：那份細心維護的白名單目前一行都沒有作用。
+- **合法值**（`codex --sandbox` 實測）：`read-only`、`workspace-write`、`danger-full-access`。
+- **待決定**：要不要改成 `sandbox_mode = "workspace-write"`，讓既有白名單真正生效。
+- **風險**：改了之後，白名單外的寫入會被擋。需先確認 26 條涵蓋所有實際工作路徑，
+  否則同步腳本、安裝腳本可能中斷。**改前先備份 `config.toml`，並逐一實測**
+  LazyPack 同步、Obsidian 鏡像、chezmoi checkpoint、python-tools 安裝流程。
+- **不要**在沒有實測前直接切換。
+
+#### C-2【Codex】`approval_policy = "never"` 的影響
+
+- 在 `never` 之下，未被 `forbidden` 命中的指令一律直接執行、不詢問。
+- 實測結論：清理累積的 `allow` 規則**不會**提升安全性（未命中與 allow 行為相同），
+  所以 2026-08-25 已決定不清理。真正的槓桿是本項。
+- **待決定**：是否調整為較保守的值。**代價是每個指令都可能跳確認**，會顯著改變工作方式。
+- 未取得使用者明確同意前不要改。
+
+#### A-1【AntiGravity】移除 `unsandboxed(venv/bin/python)` 授權
+
+- `~/.gemini/config/config.json` → `userSettings.globalPermissionGrants.allow` 共 114 條，
+  其中**只有 1 條**是 `unsandboxed(...)` 形式：`unsandboxed(venv/bin/python)`。
+- 它明確繞過 terminal sandbox，而 sandbox 是 AntiGravity 唯一勝過另外兩個 Agent 的防護。
+- **這是移除既有項目，不需要知道新 schema，相對安全。**
+- **前置條件：AntiGravity app 必須先關閉。** app 執行中時它會把設定保存在記憶體，
+  手動編輯會在下次寫入被覆蓋。執行前先確認：
+  `pgrep -f 'MacOS/Antigravity$'` 無輸出才可動手。
+- 改前備份到 `{{SYNC_ROOT}}/backups/gemini-config.json.bak.<時間戳>`。
+
+#### A-2【AntiGravity】`autoExecutionPolicy` 目前是最積極值
+
+- 現值 `CASCADE_COMMANDS_AUTO_EXECUTION_EAGER`。
+- **不要憑推測填其他值。** 已查證：app 本地二進位（`language_server`、`app.asar`）中
+  找不到該 enum 的任何字串，合法值很可能定義在伺服器端。寫入未知值可能被靜默丟棄
+  （看起來有裝其實無效）或觸發設定重置。
+- **正確做法：在 AntiGravity 內建設定介面調整**，那裡才會列出合法選項。
+- 同理適用 `nonWorkspaceFileAccessPolicy`（現值 `AGENT_SETTING_POLICY_ALLOW`）。
+
+#### A-3【AntiGravity】判斷層已生效，不需處理
+
+- `~/.gemini/GEMINI.md` 與 `~/.gemini/config/AGENTS.md` 皆 symlink 指向 `core-rules.md`，
+  實測讀得到〈不可逆操作邊界〉。此項僅供確認，無待辦。
+
+#### X-1【跨 Agent】兩份攔截設定都不在 chezmoi 管理範圍
+
+- `~/.claude/settings.json` 與 `~/.codex/rules/default.rules` 都不受 chezmoi 管理
+  （目前只管 `.bash_profile`、`.profile`、`.zprofile`、`.zshenv`），**換電腦不會帶過去**。
+- 要納管需走 Item 16 的受控流程：先擴充 bootstrap 白名單與 `{{ .syncRoot }}` template、
+  備份、檢查 source diff，才可 `chezmoi add`。不可對既有受管理入口直接 add。
+
+#### X-2【跨 Agent】已知且無法修補的洞
+
+- `git push origin main --force`：Claude 與 Codex 都是前綴比對，`--force` 不在固定位置就抓不到。
+  兩邊都擋不到，force push 前需人工確認。
+- 修改任一邊的攔截清單時，**兩邊必須一起改**並雙向實測：
+  Codex 用 `codex execpolicy check --pretty --rules ~/.codex/rules/default.rules -- <指令>`；
+  Claude 在拋棄式目錄實際執行該指令，看是否回 permission denied。
+  2026-08-26 就因只改一邊而產生三處不一致。
+
+
+
 - 本輪 repo 無變更（改動在 `codex_symlink` 與 `~/.claude/settings.json`），前次 push 為 `85ce0fa`。
 - `~/.claude/settings.json` **不在 chezmoi 管理範圍**，deny 清單不會跟著換電腦；
   要納管需走 Item 16 受控流程，尚未執行。
@@ -130,12 +209,21 @@
 
 ## Blockers
 
-- 無。
+- **A-1 被 app 執行狀態擋住**：AntiGravity 目前執行中（2026-08-26 查證時 PID 14677）。
+  必須先關閉 app 才能安全編輯 `~/.gemini/config/config.json`，否則改動會被覆蓋。
+- **A-2 無法由 Agent 執行**：`autoExecutionPolicy` 的合法 enum 值在本機二進位中查不到，
+  推測為伺服器端定義。只能在 AntiGravity 內建設定介面調整。
+- **C-1、C-2 需使用者決策**：兩者都會改變日常工作方式（白名單外寫入被擋／每個指令跳確認），
+  不是純加分項，未取得明確同意前不執行。
 
 ## Last verified
 
-- 2026-08-25，Claude Code：安全掃描 key/token/絕對路徑命中 0；外部個人風格庫
-  `card-style-library/` 僅以佔位符引用、實際內容未內嵌；repo LazyPack 與 Obsidian
-  懶人包 `diff -qr` 一致；Arry 助手鏡像 `diff -qr` 通過；chezmoi shutdown checkpoint
-  9 條 symlink 全 OK、`CHEZMOI_ADD=not-needed-for-existing-templates`；三個 Agent
-  全域規則入口實測仍正常解析 `core-rules.md`。
+- 2026-08-26，Claude Code：三 Agent 防護重查完成。
+  Codex `sandbox_mode = "danger-full-access"`、`approval_policy = "never"`、
+  `[sandbox_workspace_write]` 26 條 `writable_roots` 因模式不符而失效；
+  規則檔 50 條（10 forbidden／40 allow）。
+  AntiGravity `enableTerminalSandbox = true`、`autoExecutionPolicy = EAGER`、
+  `globalPermissionGrants.allow` 114 條其中 1 條 `unsandboxed(venv/bin/python)`；
+  `GEMINI.md` 與 `config/AGENTS.md` 皆 symlink 指向 `core-rules.md`，判斷層實測生效。
+  Claude Code 15 條 deny，`git clean -fd` 與 `git push --force-with-lease` 實測改為 denied。
+  正常工作流複驗全過：git status／fetch、LazyPack 同步、Obsidian 鏡像、chezmoi checkpoint。
