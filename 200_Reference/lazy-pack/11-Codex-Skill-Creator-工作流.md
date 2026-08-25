@@ -212,7 +212,51 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 | C. 團隊 SOP | 正在執行的共同流程 | 口述、舊文件、執行紀錄、新人常問的問題、上下游文件 | 例外情境，或讓新人試跑 |
 | D. 公開專家 | 合法取得的公開資料 | 見下方〈模仿真人的誠實邊界〉 | 專家沒公開談過的題，或爭議邊界題 |
 
-再問最多四題：
+#### 路線 A 的首要篩選：熟練度優先於頻率
+
+第一個 skill 必須來自使用者**已經做得好**的工作。因為校準題要求他一眼認得出輸出對不對；
+還在學的領域出不了校準題，那個 skill 只能被欣賞、不能被驗證。
+
+問這五題，一次一題：
+
+1. 最近一週或一個月，哪件事你做了 3 次以上？
+2. **哪件事你很會做，但每次都要重新想一次、或很難教別人？**
+3. 那件事裡，你固定用哪些工具、看哪些資料、產出什麼？
+4. 哪一步 AI 先做 60% 就很有幫助？哪一步一定要你本人拍板？
+5. 做錯會有什麼風險？（價格承諾、個資、合約、對外公開）
+
+**第 2 題是關鍵。**「很難教別人」代表存在值得萃取的隱性判斷；容易教的通常只需要一張檢查表。
+
+整理 3～5 個候選攤開比較，不要直接跳到結論：
+
+| 任務 | 你有多熟 | 重複性 | AI 可先做哪一段 | 風險 | 適合當第一個嗎 |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+
+#### 不該硬做成 Skill 的情況
+
+符合任一項就不要硬推：
+
+- **一次性**：未來不太會重複，skill 賺不回它的成本。
+- **高風險無專業覆核**：法律、醫療、財務、安全，且沒有合格的人在迴圈裡。
+- **具約束力的承諾**：承諾價格、合約條款、付款或人事決策。
+- **無法驗收**：沒有人說得出「做得好」長什麼樣，就寫不出驗收標準，也出不了校準題。
+- **素材不安全**：機密或個資無法在這個流程裡安全處理。
+
+改提供成本更低的東西，依序是：檢查表 → prompt 範本 → 書面 SOP → 只做 AI 輔助草稿、判斷仍由使用者做。
+**明說是哪一條踩到了**，不要照做然後附一句警語。
+
+接著推薦**一個**任務，說明為什麼它不會太大、不危險、也不是一次性。
+
+#### 使用者講不清楚自己怎麼做時
+
+放慢，改用**回溯上一個真實案例**：那件事怎麼進來的、你先看什麼、你決定了什麼、你交出什麼。
+問「你的 SOP 是什麼」只會得到一個理想化、跟實際做法不符的答案。
+
+拆解環節時逐項確認（已知的不要重問）：啟動與不該啟動的時機、必要輸入、固定步驟與判斷規則（含例外）、
+用到的工具檔案範本、輸出格式與驗收方式、必須停下來問人的紅線、
+**隱私與去識別化**（哪些要移除、遮蔽，或根本不能離開這台機器）。
+
+#### 再問最多四題
 
 1. **真實工作**：希望它反覆幫你完成哪一類工作？
 2. **成果與驗收**：完成後交付什麼？你怎麼判斷做得好？
@@ -241,19 +285,7 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 - 醫療、法律、投資等高風險領域，保留專業覆核並寫進 skill 的停止條件。
 - 聲音與肖像另有同意要求；skill 涉及任一項時，先看全域規則關於聲音克隆的規定。
 
-### 2. 先跑沒有 Skill 的 baseline
-
-**建立 skill 前**，拿一個真實任務讓目前的 AI 在**沒有載入任何 skill** 的情況下做一次。記錄：
-
-- 哪裡本來就做對了。
-- 哪裡太通用、判斷錯誤、漏掉邊界，或輸出不能用。
-- 上述哪一點是使用者真正在意的。
-
-然後**只針對觀察到的落差寫規則**。baseline 已經做好的地方寫進去就是 no-op：占 context 又不改變行為。這比「先寫完再刪」便宜，因為那一行從來不會被寫出來。
-
-**保留樣本要在萃取開始前就先留起來。** 路線 A 是先抽掉一份真實成品不給 AI 看；其他路線是事先講好哪個案例要留。事後才選的保留題不算保留題。
-
-### 3. 收斂成一個推薦 skill
+### 2. 收斂成一個推薦 skill
 
 輸出：
 
@@ -263,7 +295,46 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 
 若使用者同意，直接建立，不停在建議。
 
-### 4. 建立檔案
+### 3. 產出 Skill brief 並取得確認
+
+建檔前先寫出 brief、給使用者確認。**兩題測試要在這裡就設計好**——在 skill 還不存在的時候決定，
+才不會變成照著 skill 實際產出的東西回頭補測試。
+
+```markdown
+# Skill brief：<名稱>
+
+## 這個 Skill 解決什麼問題
+## 何時啟動
+## 不該啟動的情境
+## 必要輸入
+## 工作流程與判斷規則
+## 參考資料／工具
+## 停止條件（必須問人）
+## 輸出格式
+## 驗收標準
+## 建議的校準題（已知結果）
+## 建議的保留／邊界題
+```
+
+最後兩段直接餵給步驟 6 的雙測試。這裡指定的保留題必須在步驟 4 萃取開始前就抽起來，
+建立過程中不得讓 skill 看到。
+
+brief 副本可存 `<project-root>/100_Todo/projects/skill-candidates.md` 或使用者同意的位置；
+不要為它另建一套平行資料夾。
+
+### 4. 先跑沒有 Skill 的 baseline
+
+**建立 skill 前**，拿一個真實任務讓目前的 AI 在**沒有載入任何 skill** 的情況下做一次。記錄：
+
+- 哪裡本來就做對了。
+- 哪裡太通用、判斷錯誤、漏掉邊界，或輸出不能用。
+- 上述哪一點是使用者真正在意的。
+
+然後**只針對觀察到的落差寫規則**。baseline 已經做好的地方寫進去就是 no-op：占 context 又不改變行為。這比「先寫完再刪」便宜，因為那一行從來不會被寫出來。
+
+**保留樣本要在本步驟開始前就先留起來**（由步驟 3 的 brief 指定）。路線 A 是先抽掉一份真實成品不給 AI 看；其他路線是事先講好哪個案例要留。事後才選的保留題不算保留題。
+
+### 5. 建立檔案
 
 建立：
 
@@ -281,7 +352,7 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 
 二選一建立，不要同時建立兩份正式來源；除非是把專案 skill 升級成全域 skill，才複製到全域 skills 並同步 LazyPack。
 
-### 5. 驗證
+### 6. 驗證
 
 必查：
 
@@ -298,7 +369,7 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 **兩題測試（缺一不可）**：
 
 1. **校準題**：用已知正確結果的案例，確認 skill 能重現關鍵判斷。
-2. **保留／未知／邊界題**：用步驟 2 事先留下的那一份，依路線挑（見步驟 1 的路線表），確認 skill 是會推理而不是背答案。
+2. **保留／未知／邊界題**：用步驟 3 的 brief 指定、且在步驟 4 之前就抽起來的那一份（挑選方式見步驟 1 的路線表），確認 skill 是會推理而不是背答案。
 
 兩題都要跟 baseline 比。**若沒有變好**：找出一個最明確的落差 → 只補能解決它的規則 → 用同一題再測一次。不要因為一題失敗就塞進一整套新框架。
 
@@ -314,7 +385,7 @@ sed -n '1,20p' "{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md"
 python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" validate "{{SYNC_ROOT}}/skills/<skill-name>"
 ```
 
-### 6. 同步
+### 7. 同步
 
 每次全域 skill 變更後，更新：
 
@@ -483,7 +554,15 @@ Use this skill as Arry's required entry workflow for creating and maintaining cu
 
 ## Ownership Decision
 
-Before creating or modifying a skill, decide where it belongs:
+Before deciding where a skill belongs, decide whether it should exist. Do not build one for work
+that is one-off, that commits prices, contract terms, payment, or personnel decisions, that is
+high-stakes (legal, medical, financial, safety) without a qualified human in the loop, that no one
+can state a good result for, or that depends on confidential material this workflow cannot handle
+safely. Name the disqualifier and offer the smaller thing instead — a checklist, a prompt template,
+a written SOP, or an AI-assisted draft the user still judges. Do not build it anyway with a warning
+attached. `references/first-skill-consultation.md` has the full criteria and the fallback ladder.
+
+Then decide where it belongs:
 
 - Global: reusable across projects, should trigger from any of the three agents, or is part of Arry's standard workflow. Store in `{{SYNC_ROOT}}/skills/<skill-name>` and sync native entrypoints plus `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>`.
 - Project-local: only useful for the current project, depends on project-specific context, or is still a local draft. Store in `<project-root>/000_Agent/skills/<skill-name>`.
@@ -669,15 +748,24 @@ as unfinished rather than complete.
 
 ## Interview Pattern For A First Skill
 
-When the user wants help choosing the first skill, ask only enough to pick one practical target:
+When the user wants help choosing their first skill, screen on **fluency first, frequency second**.
+The strongest signal is work they do well but still rethink from scratch each time, or find hard to
+teach someone else: that is tacit judgement worth capturing. Work they are still learning cannot be
+tested, because the calibration case requires them to recognise a correct output on sight.
 
-1. What repeated AI request do you make most often?
-2. How often does it happen?
-3. What should the skill deliver: Markdown note, reusable text, structured data, analysis, or an action checklist?
-4. What source folder or examples should the skill read, if any?
-5. What should the skill never do?
+For anything beyond a quick pick — a user who cannot yet articulate how they work, several
+candidates to compare, or a task whose risk profile is unclear — read
+`references/first-skill-consultation.md` and run the coached flow. It covers the discovery
+questions, the candidate comparison table, the disqualifiers and their fallbacks, the step
+breakdown including privacy and de-identification, the last-real-case technique for users who
+cannot describe their own process, and the brief template.
 
-Then propose one recommended skill and two alternatives. Once the user chooses, create the skill rather than leaving them with a plan.
+The brief is confirmed before any file is written, and it names both tests from
+`Baseline And Harness` up front. Designing the calibration and holdout cases before the skill exists
+is what stops them from being shaped to fit whatever the skill turns out to produce.
+
+Then propose one recommended skill and two alternatives. Once the user chooses, create the skill
+rather than leaving them with a plan.
 
 After the first skill is built:
 
@@ -710,6 +798,9 @@ After the first skill is built:
 - The holdout was reserved before extraction began.
 - Both the calibration test and the holdout/unknown/edge test were executed, compared against the baseline, and the resulting fixes were written back; any test not run is explicitly reported as unfinished.
 - `SKILL.md` states when not to use the skill, its stopping conditions, and its acceptance criteria.
+- The task passed the disqualifier check: not one-off, not a binding commitment, not high-stakes without human review, has a stateable good result, and its material can be handled safely.
+- A first skill was screened on the user's fluency with the work, not only on how often it recurs.
+- Where a brief was produced, the user confirmed it before any file was written, and it named both test cases.
 - A new skill carries `0.1.0` and `last-updated`.
 - Complex skills received an uncontaminated forward-test when available, or the fallback and reason were reported.
 - A standalone Claude ZIP exists only when explicitly requested, contains the named skill folder at archive root, excludes local caches and likely secret files, and remains a derived artifact rather than a second source package.
@@ -1061,6 +1152,118 @@ Add `references/`, `scripts/`, or `assets/` only when the extracted workflow act
 - The skill contains no secrets, raw private chat, or one-off project state unless it is project-local and intentionally scoped.
 - The final report states whether the skill is global or project-local, where it was written, what portable copy was updated, and which agents need a fresh session or restart.
 AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_CONVERSATION_TO_SKILL_MD_4D4BF7D9EA
+
+# codex-skill-creator/references/first-skill-consultation.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/references/first-skill-consultation.md")"
+cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/references/first-skill-consultation.md" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_FIRST_SKILL_CONSULTATION_MD_96D900B837'
+# First-Skill Consultation
+
+Read this when the user wants help choosing and scoping their first skill, or when they have a
+repeated task but cannot yet articulate how they do it. It replaces the short interview in
+`SKILL.md` with a coached, one-step-at-a-time flow that ends in a confirmed brief.
+
+Act as a consultant, not an order-taker: make a judgement, then ask the user to confirm it. Advance
+one small step at a time. Use Traditional Chinese with the user unless they choose otherwise.
+
+## 1. Find work they are already expert at
+
+Screen on **fluency first, frequency second**. A first skill must come from work the user already
+does well, because the calibration test requires them to recognise a correct output on sight. A
+skill built on work they are still learning cannot be tested, only admired.
+
+Ask one at a time:
+
+1. In the last week or month, which task did you do three or more times?
+2. Which task are you good at, but still have to think through from scratch each time, or find hard to teach someone else?
+3. In that task, which tools do you always use, which material do you read, and what do you produce?
+4. Which step would help most if AI got it 60% right? Which step must you personally sign off?
+5. What is the damage if it goes wrong? (price commitments, personal data, contracts, anything published)
+
+Question 2 is the load-bearing one. "Hard to teach someone else" is the signal that tacit judgement
+exists and is worth capturing; work that is easy to teach usually just needs a checklist.
+
+Collect three to five candidates and compare them openly:
+
+| 任務 | 你有多熟 | 重複性 | AI 可先做哪一段 | 風險 | 適合當第一個嗎 |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+
+## 2. Disqualify what should not become a skill
+
+Do not push a task into a skill when any of these hold:
+
+- **One-off**: unlikely to recur, so the skill can never earn back its cost.
+- **High-stakes without professional review**: legal, medical, financial, or safety work with no qualified human in the loop.
+- **Binding commitments**: committing prices, contract terms, payment, or personnel decisions.
+- **Unverifiable**: no one can state what a good result looks like, so no acceptance criterion and no calibration test can exist.
+- **Unsafe material**: confidential or personal data that cannot be handled safely in this workflow.
+
+Offer the smaller thing instead, in increasing order of cost: a checklist, a prompt template, a
+written SOP, or an AI-assisted draft with the user still doing the judgement. Say plainly which
+disqualifier applied. Do not build the skill anyway with a warning attached.
+
+Then recommend exactly one task, and say why it is not too large, not too dangerous, and not one-off.
+
+## 3. Break the work into steps
+
+Confirm each of these for the recommended task. Skip anything already answered.
+
+- When it should start, and when it should **not** start
+- Required inputs before beginning
+- Fixed steps and judgement rules, including the exceptions
+- Tools, files, and reference templates used
+- Output format and how the user checks it
+- The red lines where it must stop and ask a person
+- Privacy and de-identification: what must be removed, masked, or never leave the machine
+
+If the user cannot describe their own steps, slow down and **walk back through their last real
+case**: what landed on their desk, what they looked at first, what they decided, what they produced.
+Asking "what is your SOP" invites an idealised answer that does not match what they actually do.
+
+## 4. Produce a brief and get it confirmed
+
+Write the brief, show it, and get explicit confirmation before any file is created. Designing the
+two tests here — before the skill exists — is what stops them from being written to match whatever
+the skill happens to produce.
+
+```markdown
+# Skill brief：<name>
+
+## 這個 Skill 解決什麼問題
+## 何時啟動
+## 不該啟動的情境
+## 必要輸入
+## 工作流程與判斷規則
+## 參考資料／工具
+## 停止條件（必須問人）
+## 輸出格式
+## 驗收標準
+## 建議的校準題（已知結果）
+## 建議的保留／邊界題
+```
+
+The last two lines feed `Baseline And Harness` directly. The holdout named here is the one reserved
+before extraction; it must not be shown to the skill during construction.
+
+## 5. Hand off to construction
+
+Return to the `SKILL.md` workflow with the method source route set to **A (the user's own practice)**
+and the brief as input. Do not re-run a long interview: the information is already gathered. Go
+straight to the baseline, then build, then run both tests.
+
+Optionally keep a copy of the brief at `<project-root>/100_Todo/projects/skill-candidates.md` or
+another location the user approves. Do not create a parallel folder structure for it.
+
+## Completion
+
+The user should be able to answer all of these:
+
+- Which real task I already know well does my first skill handle?
+- How does each step work, with what, producing what?
+- When does it start, and when must it stop and ask me?
+- Is the skill written into the skills folder rather than living in the conversation?
+- Did a baseline and at least one round of test-driven correction actually run?
+- Did I open a fresh session and successfully invoke it by name?
+AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_FIRST_SKILL_CONSULTATION_MD_96D900B837
 
 # codex-skill-creator/references/standalone-claude-package.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/references/standalone-claude-package.md")"

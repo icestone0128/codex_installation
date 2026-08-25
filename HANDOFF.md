@@ -42,9 +42,20 @@
 - LazyPack Item 11 的**說明文字也一併改寫**，不只重新內嵌 skill；第三方照該文件安裝會得到
   與主版本一致的流程。內嵌 SKILL.md 與主版本 `diff` IDENTICAL。
 
+- Pro-Kit 04 同樣不裝 skill（其 FAQ 自陳沒有 `first-personal-skill` 要裝）。上一輪整合 03 時
+  已覆蓋大半，本輪只補 4 項進 `codex-skill-creator`：熟練度優先於頻率的第一個 skill 篩選、
+  勸退清單（一次性／高風險無覆核／承諾價格合約付款人事／無法驗收／素材不安全）、
+  Skill brief 作為建檔前確認產物且兩題測試在此設計、回溯式訪談與去識別化確認項。
+  顧問流程抽到 `references/first-skill-consultation.md`；勸退條件壓縮版留在 SKILL.md
+  §Ownership Decision，因為它適用所有建 skill 情境，不能只放在單一分支的 reference 裡。
+  SKILL.md 287 → 307 行，套件 7 → 8 檔。
+- 修正既有錯誤：LazyPack Item 11 的建立流程原本把 baseline 排在「收斂成一個推薦 skill」之前，
+  但 baseline 必須跑在已選定的任務上。已重排為 訪談 → 收斂 → brief → baseline → 建檔 →
+  驗證 → 同步，並修好重排後失效的步驟交叉引用。
+
 ## Next action
 
-- LazyPack Item 11 待 commit／push 到 `origin/main`（Item 09、22、43 已於 `3555db9` 送出）。
+- LazyPack Item 11 待 commit／push（前次 Item 11 已於 `3f55c79` 送出，本次為 Pro-Kit 04 追加）。
 - `OUTPUT_CHANNELS` 未單獨訪談（受一次 4 題上限限制），目前在〈協作偏好〉標為推論待確認；
   下次可補問一題確定最常交付的成果型態。
 - 未來全域 skill 在其他專案（尤其 `trivial_matters_of_life`）被修改後，本專案
