@@ -612,7 +612,7 @@ Route rules:
 - For routes B and C, confirm consent, permissions, and confidentiality before collecting anything. Check for an existing or conflicting version of the same SOP first.
 - Ask for the actual material. Knowing that material exists is not the same as having it; do not start extraction or open a long interview before it is in hand.
 - If the user is unsure which route applies, have them describe the last time this work got stuck. If a one-off task would solve it, do the task. Do not manufacture a skill to justify the workflow.
-- Long-term personal writing voice is out of scope for this skill; route it to the dedicated writing-style workflow.
+- Long-term personal writing voice is out of scope for this skill; route it to `$personal-style-loop`, which calibrates against the user's real samples with held-back reference versions.
 
 ## Ethical Boundaries For Modelling A Person
 
@@ -641,7 +641,7 @@ guardrails, not style preferences.
 - Use progressive disclosure: metadata is always visible, `SKILL.md` is loaded on trigger, and detailed references are loaded only when needed.
 - Keep `SKILL.md` under 500 lines when practical. Move schemas, long examples, provider variants, and deep checklists into directly linked `references/` files; avoid reference chains deeper than one level.
 - Give `SKILL.md` a body the user can audit. Unless the skill's shape genuinely demands otherwise, cover: when to use it, when **not** to use it, required inputs, judgement and workflow, output format, stopping conditions, and acceptance criteria. The three most often skipped, and most often missed later, are **when not to use it**, **stopping conditions**, and **acceptance criteria**.
-- Version a new skill at `0.1.0` and record `last-updated`. Treat the first release as provisional: on each real-world failure, fix the single largest gap and re-test it, rather than bolting on a new framework.
+- Version a new skill at `0.1.0` and record `last-updated`, both **inside `metadata:`**. The built-in validator only accepts `name`, `description`, `license`, `allowed-tools`, and `metadata` at the top level, so a top-level `version`, `last-updated`, or `user-invocable` fails validation. Treat the first release as provisional: on each real-world failure, fix the single largest gap and re-test it, rather than bolting on a new framework.
 - Do not add auxiliary `README.md`, installation guides, changelogs, or placeholder resource files unless they are required by the skill's actual operation or explicitly requested.
 - Create only the resource directories the skill needs. Repeated deterministic work belongs in `scripts/`; domain guidance belongs in `references/`; output templates and media belong in `assets/`.
 - Treat `agents/openai.yaml` as a Codex UI adapter, not a package compatibility boundary. Keep it aligned with `SKILL.md`, quote string values, and make `default_prompt` explicitly mention `$<skill-name>`.
@@ -801,7 +801,7 @@ After the first skill is built:
 - The task passed the disqualifier check: not one-off, not a binding commitment, not high-stakes without human review, has a stateable good result, and its material can be handled safely.
 - A first skill was screened on the user's fluency with the work, not only on how often it recurs.
 - Where a brief was produced, the user confirmed it before any file was written, and it named both test cases.
-- A new skill carries `0.1.0` and `last-updated`.
+- A new skill carries `0.1.0` and `last-updated` inside `metadata:`, and the built-in `quick_validate.py` accepted the frontmatter.
 - Complex skills received an uncontaminated forward-test when available, or the fallback and reason were reported.
 - A standalone Claude ZIP exists only when explicitly requested, contains the named skill folder at archive root, excludes local caches and likely secret files, and remains a derived artifact rather than a second source package.
 - Obsidian mirror note is updated for global skill changes; project cockpit is updated for project-local skill changes.
@@ -1243,6 +1243,10 @@ the skill happens to produce.
 
 The last two lines feed `Baseline And Harness` directly. The holdout named here is the one reserved
 before extraction; it must not be shown to the skill during construction.
+
+If the user's real goal is a long-term personal writing voice rather than a work method, stop here
+and route them to `$personal-style-loop` instead. It calibrates against their real samples with the
+published versions held back, which this workflow does not do.
 
 ## 5. Hand off to construction
 
