@@ -200,15 +200,60 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 
 ### 1. 訪談
 
-只問足夠做決策的問題：
+有互動式提問工具就使用；一次只問一題，每題 2～3 個互斥選項，推薦項放第一個。
+**整段建立流程最多四個必要追問**，不要一次丟長問卷。已能從對話、檔案或助手記憶得到的答案不要重問。
 
-1. 最常重複交給 AI 的工作是什麼？
-2. 發生頻率是多少？
-3. 最後要交付什麼格式？
-4. 需要讀取哪些固定資料、資料夾或範例？
-5. 絕對不要做什麼？
+先問一題定路線——**你想留下誰的工作方法？**
 
-### 2. 收斂成一個推薦 skill
+| 路線 | 來源 | 要收的素材 | 第二題怎麼選 |
+| :-- | :-- | :-- | :-- |
+| A. 自己 | 你自己的做法 | 2～3 份有代表性的真實成品；你給過的修改與回饋；**另外保留 1 份不放進建立階段** | 用那份保留成品 |
+| B. 身邊高手 | 同事、主管、前輩 | 對方同意提供的訪談或工作說明；成功與失敗案例；檢查表或匿名化紀錄 | 邊界或資料不足案例，再請本人 review |
+| C. 團隊 SOP | 正在執行的共同流程 | 口述、舊文件、執行紀錄、新人常問的問題、上下游文件 | 例外情境，或讓新人試跑 |
+| D. 公開專家 | 合法取得的公開資料 | 見下方〈模仿真人的誠實邊界〉 | 專家沒公開談過的題，或爭議邊界題 |
+
+再問最多四題：
+
+1. **真實工作**：希望它反覆幫你完成哪一類工作？
+2. **成果與驗收**：完成後交付什麼？你怎麼判斷做得好？
+3. **參考資料**：目前有哪些作品、文件、案例或公開來源？
+4. **邊界**：什麼情況不能做、資料不足要問誰、有哪些敏感內容？
+
+原則：
+
+- 萃取的是選擇、判斷、順序與品質標準，不是語氣形容詞。
+- 路線 B、C 先確認同意、權限與機密邊界；路線 C 先查有沒有同名或衝突版本。
+- **要拿到素材本身**。只知道「有哪些資料」不夠；素材到手前不要進入萃取，也不要展開長訪談。
+- 使用者說「不確定」時，先請他描述最近一次卡住的工作。**如果做一次性任務就能解決，就直接做**，不要為了產出 Skill 而硬做 Skill。
+
+### 模仿真人的誠實邊界
+
+只要 skill 會編碼某個真人的判斷、語氣或人格（路線 D，以及會脫離當事人參與的路線 B），下列是硬性防線，不是風格建議：
+
+- 先縮小到**一個工作領域**，不要做完整人格。
+- 至少使用兩種不同場景的公開來源，優先本人長文、演講、訪談、決策與作品案例。
+- **刻意納入**矛盾、限制或批評資料；只收正面內容會編出一個漫畫化的版本。
+- 在 skill 內記錄來源與調研截止時間。
+- 只保存轉化後的摘要、規則與來源索引，不重新打包大量原始內容。
+- 沒有明確證據前，**不得聲稱**本人授權、合作、背書或審閱過。
+- **不假扮本人**，不把推測寫成直接引言。
+- 專家沒談過的問題，標註「以下是根據公開框架的推論」。
+- 醫療、法律、投資等高風險領域，保留專業覆核並寫進 skill 的停止條件。
+- 聲音與肖像另有同意要求；skill 涉及任一項時，先看全域規則關於聲音克隆的規定。
+
+### 2. 先跑沒有 Skill 的 baseline
+
+**建立 skill 前**，拿一個真實任務讓目前的 AI 在**沒有載入任何 skill** 的情況下做一次。記錄：
+
+- 哪裡本來就做對了。
+- 哪裡太通用、判斷錯誤、漏掉邊界，或輸出不能用。
+- 上述哪一點是使用者真正在意的。
+
+然後**只針對觀察到的落差寫規則**。baseline 已經做好的地方寫進去就是 no-op：占 context 又不改變行為。這比「先寫完再刪」便宜，因為那一行從來不會被寫出來。
+
+**保留樣本要在萃取開始前就先留起來。** 路線 A 是先抽掉一份真實成品不給 AI 看；其他路線是事先講好哪個案例要留。事後才選的保留題不算保留題。
+
+### 3. 收斂成一個推薦 skill
 
 輸出：
 
@@ -218,7 +263,7 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 
 若使用者同意，直接建立，不停在建議。
 
-### 3. 建立檔案
+### 4. 建立檔案
 
 建立：
 
@@ -236,7 +281,7 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 
 二選一建立，不要同時建立兩份正式來源；除非是把專案 skill 升級成全域 skill，才複製到全域 skills 並同步 LazyPack。
 
-### 4. 驗證
+### 5. 驗證
 
 必查：
 
@@ -247,6 +292,19 @@ python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.p
 - `references/` 內被引用的檔案真的存在。
 - 使用者在原對話中的最新可重用修正已轉成驗收條件、邊界或步驟順序，而不是遺失在聊天紀錄中。
 - 沒有誤放 來源工具專用 欄位或路徑。
+- `SKILL.md` 寫明**不適用情境**、**停止條件**與**驗收標準**這三段（最常被略過、也最常事後才發現缺）。
+- 新 skill 的 frontmatter 有 `version: 0.1.0` 與 `last-updated`。
+
+**兩題測試（缺一不可）**：
+
+1. **校準題**：用已知正確結果的案例，確認 skill 能重現關鍵判斷。
+2. **保留／未知／邊界題**：用步驟 2 事先留下的那一份，依路線挑（見步驟 1 的路線表），確認 skill 是會推理而不是背答案。
+
+兩題都要跟 baseline 比。**若沒有變好**：找出一個最明確的落差 → 只補能解決它的規則 → 用同一題再測一次。不要因為一題失敗就塞進一整套新框架。
+
+回報時要列出兩題結果，以及因為測試而修改了哪些規則。**測試沒有真的跑，就不能說完成**，要明確標示還缺哪一步。
+
+初版固定是 `0.1.0`。之後每次遇到真實失敗，只修一個最大的落差再測，不要一次重寫。
 
 範例檢查：
 
@@ -256,7 +314,7 @@ sed -n '1,20p' "{{SYNC_ROOT}}/skills/<skill-name>/SKILL.md"
 python3 "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" validate "{{SYNC_ROOT}}/skills/<skill-name>"
 ```
 
-### 5. 同步
+### 6. 同步
 
 每次全域 skill 變更後，更新：
 
@@ -384,7 +442,7 @@ Use this skill as Arry's required entry workflow for creating and maintaining cu
 
 - Explicit invocation: `$codex-skill-creator`.
 - Natural-language triggers such as "幫我建立 skill", "把這段對話變成 skill", or "更新這個 skill" must also use this workflow.
-- Ask only the questions needed to determine scope, ownership, inputs, output, and boundaries.
+- Ask only the questions needed to determine scope, ownership, inputs, output, and boundaries. Cap the whole creation flow at four essential follow-up questions; ask one at a time with two or three mutually exclusive options, and never issue a long questionnaire. Anything already answered by the conversation, the files, or the assistant memory is not a question.
 - When a structured question UI is available, use it. Otherwise present concise numbered choices or ask one short plain-text question at a time; do not stop merely because an interactive picker is unavailable.
 - If the user asks to judge first, audit and report before writing. If the user asks to implement, carry the work through skill update, portable copy, mirror note, and verification.
 - If the target skill already exists, inspect it first and state whether the task is a narrow patch, full refresh, rename, or no-op. For a full replacement or rename, make a timestamped backup or use version control before replacing files; for a narrow patch, preserve unrelated content.
@@ -452,6 +510,48 @@ disclosure, completion criteria, and pruning, consult `$writing-great-skills`.
 Treat it as design reference only; this skill remains the required creation,
 adaptation, packaging, and validation workflow.
 
+## Method Source Routing
+
+`Mode Selection` decides **what kind of source material** you are converting. This section decides
+**whose working method** you are capturing. They are independent: a conversation-extraction job can
+capture the user's own method, and a source-adapter job can capture a public expert's. Settle both
+before collecting material, because the route changes what counts as sufficient evidence, what
+consent is required, and how the second test is designed.
+
+Ask one question: *whose way of working should this skill preserve?*
+
+| Route | Source | Material to collect | Second test (see `Baseline And Harness`) |
+| :-- | :-- | :-- | :-- |
+| A. The user | Their own practice | 2-3 representative real deliverables; past corrections and feedback they have given; **one held-back deliverable** | The held-back deliverable |
+| B. A colleague | A peer, manager, or mentor | Interview or work notes they agreed to share; both success and failure cases; checklists or anonymised transcripts | An edge or insufficient-data case, then have that person review |
+| C. Team SOP | A shared live process | Verbal walkthroughs, old documents, execution records, questions newcomers keep asking, upstream/downstream docs | An exception case, or a newcomer dry run |
+| D. A public figure | Lawfully obtained public material | See the ethics section below | A question the person has never publicly addressed, or a contested edge case |
+
+Route rules:
+
+- Extract choices, judgement, ordering, and quality bars, not adjectives about tone.
+- For routes B and C, confirm consent, permissions, and confidentiality before collecting anything. Check for an existing or conflicting version of the same SOP first.
+- Ask for the actual material. Knowing that material exists is not the same as having it; do not start extraction or open a long interview before it is in hand.
+- If the user is unsure which route applies, have them describe the last time this work got stuck. If a one-off task would solve it, do the task. Do not manufacture a skill to justify the workflow.
+- Long-term personal writing voice is out of scope for this skill; route it to the dedicated writing-style workflow.
+
+## Ethical Boundaries For Modelling A Person
+
+These apply whenever a skill encodes a real person's judgement, voice, or persona, which in practice
+means route D and any route B skill that will outlive the colleague's involvement. They are hard
+guardrails, not style preferences.
+
+- Narrow the scope to one working domain before starting. Do not build a whole personality.
+- Use at least two different kinds of public source, preferring the person's own long-form writing, talks, interviews, documented decisions, and case studies.
+- Deliberately include contradicting, limiting, or critical material. A skill built only from favourable sources encodes a caricature.
+- Record the sources and the research cut-off date in the skill.
+- Store transformed summaries, rules, and a source index. Do not repackage large volumes of the original material.
+- Never claim authorisation, endorsement, partnership, or review by the person without documented evidence of it.
+- Never impersonate the person, and never present an inference as a direct quotation.
+- Mark anything the person has not addressed as an inference drawn from their public framework.
+- For medical, legal, financial, or other high-stakes domains, keep professional review in the loop and say so in the skill's stopping conditions.
+- Voice and likeness carry their own consent requirements; see the global rules on voice cloning before a skill touches either.
+
 ## Design Quality Rules
 
 - Start from concrete trigger examples and expected outputs. Skip discovery only when existing usage already makes them unambiguous.
@@ -461,9 +561,45 @@ adaptation, packaging, and validation workflow.
   - low freedom for fragile, repetitive, or safety-critical operations that need deterministic scripts
 - Use progressive disclosure: metadata is always visible, `SKILL.md` is loaded on trigger, and detailed references are loaded only when needed.
 - Keep `SKILL.md` under 500 lines when practical. Move schemas, long examples, provider variants, and deep checklists into directly linked `references/` files; avoid reference chains deeper than one level.
+- Give `SKILL.md` a body the user can audit. Unless the skill's shape genuinely demands otherwise, cover: when to use it, when **not** to use it, required inputs, judgement and workflow, output format, stopping conditions, and acceptance criteria. The three most often skipped, and most often missed later, are **when not to use it**, **stopping conditions**, and **acceptance criteria**.
+- Version a new skill at `0.1.0` and record `last-updated`. Treat the first release as provisional: on each real-world failure, fix the single largest gap and re-test it, rather than bolting on a new framework.
 - Do not add auxiliary `README.md`, installation guides, changelogs, or placeholder resource files unless they are required by the skill's actual operation or explicitly requested.
 - Create only the resource directories the skill needs. Repeated deterministic work belongs in `scripts/`; domain guidance belongs in `references/`; output templates and media belong in `assets/`.
 - Treat `agents/openai.yaml` as a Codex UI adapter, not a package compatibility boundary. Keep it aligned with `SKILL.md`, quote string values, and make `default_prompt` explicitly mention `$<skill-name>`.
+
+## Baseline And Harness
+
+A skill is only worth its context cost if it changes behaviour. Prove that with a measurement before
+you write and two tests after. This loop runs for every route in `Method Source Routing`.
+
+### Before writing: run the baseline
+
+Take one real task the skill is meant to handle and let the current agent do it with **no skill
+loaded**. Record where it was already right, where it was too generic, misjudged, missed a boundary,
+or produced something unusable, and which of those the user actually cares about.
+
+Then write rules only for the observed gaps. Anything the baseline already did well is a no-op: it
+costs context and changes nothing. This is cheaper than writing first and pruning later, because the
+line never gets written. Pruning (`$writing-great-skills`) still applies to whatever survives.
+
+Reserve the holdout **before** extraction starts. On route A that means setting aside one real
+deliverable the skill is not allowed to see; on the other routes it means agreeing up front which
+case is being kept back. A holdout chosen after the fact is not a holdout.
+
+### After writing: run both tests
+
+1. **Calibration** — a case whose correct outcome is already known. Confirms the skill reproduces the key judgement.
+2. **Holdout, unknown, or edge** — chosen by route (see the routing table). Confirms the skill generalises instead of memorising the material it was built from.
+
+Compare both against the baseline. If the skill is not better:
+
+1. Name the single clearest gap.
+2. Add only what closes that gap.
+3. Re-run the same test.
+
+Do not add a whole new framework because one case failed. Report both test results and the rules
+they caused you to change; a skill whose tests were never run is not finished, and must be reported
+as unfinished rather than complete.
 
 ## Workflow
 
@@ -476,7 +612,8 @@ adaptation, packaging, and validation workflow.
    - For a new skill, normalize the name to lowercase hyphen-case, keep it at 64 characters or fewer, reject the reserved words `claude` and `anthropic`, and use the built-in initializer when available:
      `python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/init_skill.py" <skill-name> --path <parent> [--resources ...] --interface ...`.
    - If the built-in initializer is unavailable, create the same minimal structure manually and record that fallback in the result.
-2. Extract the useful workflow from the source material:
+2. Settle the method source route and run the baseline before extracting anything. See `Method Source Routing` and `Baseline And Harness`; reserve the holdout at this point, not later.
+3. Extract the useful workflow from the source material:
    - trigger scenarios
    - repeatable steps
    - validation checks
@@ -484,19 +621,19 @@ adaptation, packaging, and validation workflow.
    - user-facing interview questions
    - failure handling
    - privacy or project-context boundaries
-3. Convert to the shared three-agent contract:
+4. Convert to the shared three-agent contract:
    - replace source-specific content roots with `{{SYNC_ROOT}}/skills` or project `000_Agent/skills`
    - preserve trigger intent in metadata and document native invocation only when it differs
    - keep shared task logic together and move only real runtime differences into the three adapter notes
    - preserve a common CLI/script route whenever native tools differ
-4. Write the skill package:
+5. Write the skill package:
    - `SKILL.md` for compact operating instructions
    - `references/` for detailed adapted source notes
    - `scripts/` only when deterministic checks are genuinely useful
    - `assets/` only when files are used in final outputs
    - `agents/openai.yaml` as optional Codex UI metadata; Claude and AntiGravity continue to use the shared `SKILL.md` plus their native discovery behavior
    - if replacing an existing package, preserve or back up the previous package before the replacement
-5. Validate:
+6. Validate:
    - `SKILL.md` exists
    - frontmatter starts and ends with `---`
    - `name` matches the folder name
@@ -513,22 +650,22 @@ adaptation, packaging, and validation workflow.
    - test every added script directly; for several similar scripts, test a representative sample
    - verify `agents/openai.yaml` still matches the skill name, purpose, and real Codex invocation without changing Claude or AntiGravity behavior
    - run `cross-device-sync/scripts/audit-agent-compatibility.py` on the changed package and portable documentation
-6. Package a standalone Claude ZIP only when explicitly requested:
+7. Package a standalone Claude ZIP only when explicitly requested:
    - follow `references/standalone-claude-package.md`
    - validate before packaging and inspect the archive after creation
    - keep the shared source package authoritative; the ZIP is a derived distribution artifact
    - do not upload it or change a Claude account without separate authorization
-7. Sync portable copies and indexes:
+8. Sync portable copies and indexes:
    - Global skill: sync `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>` and the Obsidian global skill mirror note.
    - Project skill: keep the complete portable package under `<project-root>/000_Agent/skills/<skill-name>` and update the project cockpit.
-8. Sync the Obsidian mirror note when the skill is global:
+9. Sync the Obsidian mirror note when the skill is global:
    - add or update the custom skill table row
    - add or update the skill summary section
    - append a dated sync record
-9. Report the result with exact paths, ownership level, portable-copy status, all three native entrypoints, and per-agent restart/fresh-session requirements.
-10. Test discoverability with the real skill name: use `$<skill-name>` when explicit invocation is useful, or a natural-language trigger covered by the skill description.
-11. Complete one realistic trial with representative input. Creating files without a real trigger-and-output check is not a finished skill workflow.
-12. Forward-test complex or high-impact skills with a fresh independent agent when that capability is available. Give it the raw skill and a realistic user request, not the intended answer or suspected defect. Ask the user first if the test may take substantial time, require extra approvals, or touch live systems. If independent agents are unavailable, document the local realistic trial as the fallback.
+10. Report the result with exact paths, ownership level, portable-copy status, all three native entrypoints, and per-agent restart/fresh-session requirements.
+11. Test discoverability with the real skill name: use `$<skill-name>` when explicit invocation is useful, or a natural-language trigger covered by the skill description.
+12. Run the calibration test and the holdout/unknown/edge test from `Baseline And Harness`, compare both against the baseline, and fold the resulting fixes back into the skill. One trigger-and-output check alone does not finish the workflow; files written without executed tests must be reported as unfinished.
+13. Forward-test complex or high-impact skills with a fresh independent agent when that capability is available. Give it the raw skill and a realistic user request, not the intended answer or suspected defect. Ask the user first if the test may take substantial time, require extra approvals, or touch live systems. If independent agents are unavailable, document the local realistic trial as the fallback.
 
 ## Interview Pattern For A First Skill
 
@@ -567,7 +704,13 @@ After the first skill is built:
 - The user-facing creation or maintenance route is `codex-skill-creator`, not the built-in creator.
 - Explicit invocation uses the actual folder/frontmatter name, for example `$social-cards` or `$landing-page`; do not invent aliases that are not installed.
 - Existing skill replacement has a backup or version-control recovery path; narrow updates preserve unrelated files.
-- At least one realistic trigger-and-output trial was completed or the unperformed trial is explicitly reported.
+- The method source route was settled before material was collected, and route B/C/D consent, permission, and confidentiality checks were completed.
+- A skill encoding a real person's judgement satisfies `Ethical Boundaries For Modelling A Person`: scope narrowed, at least two source kinds, contradicting material included, sources and cut-off date recorded, no claimed endorsement, no impersonation, inferences marked, high-stakes domains keep professional review.
+- A no-skill baseline was run before writing, and the written rules trace to observed gaps rather than to behaviour the baseline already produced.
+- The holdout was reserved before extraction began.
+- Both the calibration test and the holdout/unknown/edge test were executed, compared against the baseline, and the resulting fixes were written back; any test not run is explicitly reported as unfinished.
+- `SKILL.md` states when not to use the skill, its stopping conditions, and its acceptance criteria.
+- A new skill carries `0.1.0` and `last-updated`.
 - Complex skills received an uncontaminated forward-test when available, or the fallback and reason were reported.
 - A standalone Claude ZIP exists only when explicitly requested, contains the named skill folder at archive root, excludes local caches and likely secret files, and remains a derived artifact rather than a second source package.
 - Obsidian mirror note is updated for global skill changes; project cockpit is updated for project-local skill changes.
