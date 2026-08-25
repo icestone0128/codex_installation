@@ -67,6 +67,12 @@
   已改為要求寫在 `metadata:` 內並加進驗證清單。
 - `speak-human-tw` 的懸空指向**刻意不動**：它是 MIT 上游治理 skill，改 description 會與上游分岔。
 
+- 補做：05 的分流樹與所有情境式提問同步進 LazyPack。複查發現前一輪寫得不夠——
+  `personal-style-loop` 的分支選項沒列出、`codex-skill-creator` 路線 C 漏了資深同事覆核、
+  路線 D 漏了三題分工，兩者都沒有最上層的入口分流問題。已全部補上，
+  並在 Item 11 與 44 的**說明文字**中寫出完整提問樹（第三方讀的是這段，不是內嵌 skill）。
+  `personal-style-loop` 140 → 197 行、`codex-skill-creator` 307 → 333 行。
+
 ## Next action
 
 - LazyPack Item 11、44、README 與同步腳本待 commit／push。
