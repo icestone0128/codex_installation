@@ -95,10 +95,15 @@ metadata:
 ## 觸發語
 
 `$visual-prompt-kit`、「封面 Prompt」、「課程封面」、「圖卡 Prompt」、「系列圖卡」、
-「銷售頁圖片 Prompt」、「幫我做縮圖」、「把這篇文章做成封面」。
+「高資訊圖卡」、「資訊圖卡」、「4:5 輪播圖卡」、
+「銷售頁圖片 Prompt」、「幫我做縮圖」、「把這篇文章做成封面」、「萃取風格」、
+「幫我萃取這張圖的風格」、「把這張圖的風格收進風格庫」。
 
 若使用者要的是**成品**而非 brief，先確認路由：品牌模板圖卡走 `social-cards`，
 銷售頁組版走 `landing-page`，直接生圖走 `image-generator`。
+
+若使用者是給一張參考圖、要分析或收藏它的設計風格，走「萃取風格」流程
+（見下方獨立章節），不是主流程的步驟 2 風格校準。
 
 ## 工作流程
 
@@ -121,6 +126,11 @@ metadata:
 - **B 描述偏好**：色調、構圖取向、情緒調性，講一項也算。
 - **C 你決定**：改走最大差異化的三點軸線。
 
+**收斂規則（所有版位一體適用）**：使用者回覆 A 或 B，風格方向即已定案——
+直接進入鎖定 visual DNA，**不得再強制使用者在多組風格變體間做第二次選擇**。
+只有回覆 C（或非互動環境）時，才由 AI 依創新維度軸線提出三組最大差異化
+方案供選擇——此規則三個版位一體適用。
+
 **第二輪：人物選項確認（等使用者回答第一輪後才詢問）**
 收到第一輪風格回覆後，**再發起第二輪詢問人物選項**（版位支援時）：
 - 1. 不放人物 — 純文字與圖形構圖
@@ -131,7 +141,7 @@ metadata:
 並在輸出開頭說明未經校準。
 
 風格庫的位置、schema、選單格式與缺庫時的退路見 `references/style-library.md`；
-校準結果如何決定三組方案的定位見該 placement 檔。
+校準結果如何決定方案組數與定位見該 placement 檔。
 
 ### 3. 鎖定 visual DNA
 
@@ -139,19 +149,35 @@ metadata:
 寫進 `visual-dna.yaml`。**同一主題的所有圖都讀這一份**，系列感來自這裡，
 不是靠每張圖重複描述。schema 見 `references/visual-dna.md`。
 
+### 3.5 文本大綱確認（多張系列版位必要關卡）
+
+carousel、carousel-info 等一次產出多張的版位，在寫完整指令或交棒生圖之前，
+**必須先列出全套 N 張的文本大綱**（主標題、副標題、核心金句）供使用者
+審閱與修訂文字；**大綱未經確認不得產出最終指令或執行生圖**。
+單張版位（cover）不需此關卡。
+
 ### 4. 產出設計提案
 
 依 placement 檔指定的模板輸出。除非該 placement 另有規定，一律：
 
-- 提 3 組方案，各自用 codeblock 包住方便複製。
-- 三組定位由步驟 2 的校準結果決定：使用者給了方向就以它為 Design Anchor
-  做「精準命中 / 穩健變體 / 驚喜延伸」；沒給方向才走「勇敢先驅 / 保守 / 革命性」
-  的最大差異化。兩種情況下三組視覺都必須有明顯差異。
+- 方案組數依步驟 2 收斂規則：使用者已選定風格（A/B）→ **1 組方案**忠實
+  呈現選定風格；使用者說「你決定」（C）→ 3 組「勇敢先驅 / 保守 / 革命性」
+  最大差異化方案，三組視覺必須有明顯差異。
+- 每組各自用 codeblock 包住方便複製。
 - 每組先過減法檢查再寫模板。
 
 ### 5. 交棒
 
 自己不生圖、不組版。交棒契約見 `references/handoff-contracts.md`。
+
+## 萃取風格（把參考圖收進風格庫）
+
+跟上面五步驟主流程平行的獨立功能：給一張參考圖，用固定模板描述它的
+設計風格，經使用者確認後併入本機風格庫，未來 `recommend_styles.py`
+就能直接篩到，不必每次重新分析同一張圖。
+
+完整模板、欄位映射、確認關卡與寫入步驟見
+`references/style-extraction.md`，不要另外發明格式或跳過確認直接寫入。
 
 ## 輸出位置
 
@@ -165,20 +191,42 @@ metadata:
 
 ## 硬規則
 
-1. 只產出 brief。不呼叫生圖工具、不寫 HTML、不組頁面。
-2. 不輸出 Midjourney / Stable Diffusion 的單段指令語法。輸出是結構化提案文件。
+1. 只產出 brief。不自行呼叫生圖工具、不寫 HTML、不組頁面。
+   實際生圖依交棒契約交給 `image-generator` 執行。
+2. 不輸出 Midjourney / Stable Diffusion 的單段指令語法（`/imagine` 等）。
+   輸出預設是結構化提案文件；版位檔可明文改用自然語言風格段落
+   （如 carousel-info），但指令語法仍然禁止。
 3. 不自動加入 Logo、簽名、品牌名、作者名或浮水印，除非使用者明確要求。
 4. 主標題與副標題一律台灣繁體中文。裝飾文字只能使用 style 檔 `accent_language`
    指定的那一種語言，且不得三語混用。
 5. 一組方案最多 2-3 組裝飾文字、2-4 種裝飾元素、3 個主要視覺區塊。
+   （呈現層規則，版位檔可明文放寬——carousel-info 把這些交給生圖端自由發揮。）
 6. 背景必須退後：可有質感，不可有搶走主標題的可辨識細節。
 7. 只使用使用者提供的文章內容。不從記憶、人設或其他專案補料。
 8. 風格校準是必要互動關卡，不可跳過；非互動環境改走「無偏好」路徑並明說。
 9. 所有文字必須有容器或陰影保護，複雜背景中仍須清晰。核心金句每組必填。
+   （前半同屬呈現層規則，版位檔可明文放寬；風格校準與知識點清晰不可放寬。）
 10. 風格庫與角色設定若含第三方、付費課程或個人資產，不得複製進本 skill、
     public repo 或 LazyPack；只保留讀取機制與路徑指標。
 11. 啟用「預留真人空位」時，無人物鐵則優先於所有其他規則：生圖不得畫出任何
     人物、人臉、人體或剪影。啟用「角色插畫」時反之，不得寫入任何 No Person 指示。
+12. 萃取風格寫入本機風格庫前必須先用 `--dry-run` 給使用者看最終內容並取得
+    明確同意，不可靜默寫入；未經確認不得移除 `--dry-run` 正式執行。
+13. 萃取新增的風格一律標記 `origin: 自訂`，只能用 `add_style.py` 附加寫入，
+    不得覆寫既有 id 或竄改課程來源的既有筆數。
+14. 傳給生圖端（image-generator）的指令中，語言依 `visual-dna.yaml` 的
+    `language` 區塊映射，不得寫死：標題固定宣告 Traditional Chinese；
+    點綴文字宣告 `language.accent` 對應的語言；對 `language.forbidden` 的
+    每種語言加入明確否定提示；且不得以「{語言} typography / {語言} text」
+    的形式提到 forbidden 語言（會誘發生圖模型產生該語言文字——實測
+    `Japanese typography` 會招來日文假名）。完整映射見
+    `references/handoff-contracts.md` 的「語言映射契約」，所有版位一體適用。
+15. 使用者在風格校準回覆 A（挑編號）或 B（描述偏好）即為定案，直接鎖定
+    visual DNA；不得再強制使用者在多組風格變體間做第二次選擇。三組差異化
+    提案只在使用者回覆 C（你決定）或非互動環境時提供。
+16. 多張系列版位（carousel、carousel-info）在產出最終指令或交棒生圖前，
+    必須先讓使用者確認全套文本大綱（主標題、副標題、核心金句）；
+    大綱未確認不得繼續。
 
 ## 擴充
 
@@ -201,17 +249,29 @@ metadata:
   不可略過視覺比較這一步而直接替使用者決定。
 - **Verification**：候選數量為 5、每個都有推薦理由與可存取的預覽圖路徑、
   使用者明確選定後才寫入 `visual-dna.yaml`。
+- **萃取風格**：三個 Agent 共用同一套模板與 `add_style.py` 呼叫方式；差異只在
+  呈現填好模板的方式（見 `references/style-extraction.md` 的 Agent 執行）。
+  寫入前一律先跑 `--dry-run`，使用者同意後才移除該旗標正式寫入。
 
 ## 參考檔
 
 - `references/style-library.md`：風格庫位置、schema、篩選與選單流程。
 - `references/visual-dna.md`：`visual-dna.yaml` schema 與系列一致性規則。
+- `references/style-extraction.md`：萃取風格模板、欄位映射與寫入風格庫流程。
 - `references/handoff-contracts.md`：交棒給 image-generator / social-cards / landing-page。
 - `references/placements/cover.md`：封面版位（課程封面、文章封面、縮圖）。
+- `references/placements/carousel.md`：低密度輪播圖卡版位（1:1 連續敘事 Carousel，
+  張數依文章決定。兩回合流程：風格校準鎖定 → 大綱確認 → N 組正式指令；
+  全程零預覽圖）。
+- `references/placements/carousel-info.md`：高資訊圖卡版位（4:5 直式 Info Carousel，
+  一張一個知識點。指令為自然語言風格段落——只鎖風格需求，版面與裝飾交給
+  生圖端自由發揮。第一輪風格校準與大綱確認後產出 N 組指令，第二輪組裝
+  生圖交付版本；全程零預覽圖）。
 - `references/placements/cover-person.md`：封面人物選項。模式 P 預留真人空位
   （生圖不畫人）、模式 C 角色插畫（生圖要畫人），兩者互斥。
 - `references/styles/japanese-modern.md`：日系現代風格（繁中主體、英文點綴）。
 - `scripts/recommend_styles.py`：從風格庫篩出候選並輸出預覽圖路徑。
+- `scripts/add_style.py`：把萃取的新風格附加寫入風格庫的 `styles.yaml`。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SKILL_MD_0E95F5A366
 
 # visual-prompt-kit/agents/openai.yaml
@@ -243,6 +303,33 @@ visual-prompt-kit  →  image-generator   生圖
 由 `image-generator` 決定實際使用哪個 Agent 的原生生圖能力。本 skill 不指定 provider、
 不要求 API key、不自行建立生圖腳本。
 
+### 語言映射契約（所有版位共用，依 visual-dna.yaml 變數）
+
+Brief 轉換為生圖 Prompt 時，語言指定一律**取自該系列 `visual-dna.yaml` 的
+`language` 區塊**，不得在任何版位檔或 Prompt 中把語言寫死：
+
+1. **主標／副標（固定）**：`Traditional Chinese title text: "[主標題]"`、
+   `Traditional Chinese subtitle text: "[副標題]"`。這是唯一的常數——
+   硬規則 4 規定主體一律台灣繁體中文。
+2. **點綴文字（變數）**：`{language.accent 的英文語言名} accent text: "[點綴文字]"`。
+   `accent: en` → `English accent text: "..."`；`accent: ja` →
+   `Japanese accent text: "..."`，依此類推。
+3. **禁用語言否定提示（變數）**：對 `language.forbidden` 列出的**每一種**語言
+   加入明確否定句。`forbidden: [ja]` →
+   `Strictly NO Japanese hiragana, katakana, or Japanese text`；
+   `forbidden: [en]` → `Strictly NO English text or Latin letters`，依此類推。
+4. **觸發詞紀律**：不得在風格描述中以「{語言} typography」「{語言} text」的
+   形式提到 `forbidden` 清單裡的語言——生圖模型會因此在畫面中產生該語言
+   文字（實測：Prompt 含 `Japanese typography` 會誘發日文假名）。
+   視覺語彙一律用風格名稱表達（如 `Modern Japanese Web Style` 指日式現代
+   網頁視覺，不是日文文字）；accent 語言則必須用第 2 點的明確欄位宣告，
+   不靠風格詞暗示。
+
+**預設組合**（日系現代風 `japanese-modern`）：`accent: en`、`forbidden: [ja]`
+→ 英文點綴＋日文否定提示。使用者要換點綴語言時，只改 `visual-dna.yaml` 的
+`language.accent` 與 `language.forbidden`，映射自動跟著翻轉，
+任何版位檔都不需要修改。
+
 ## → social-cards
 
 `social-cards` 的產線是 HTML 模板加截圖，配色固定在它自己的品牌模板裡。兩條產線並存，
@@ -267,6 +354,148 @@ visual-prompt-kit  →  image-generator   生圖
 
 使用者只要 brief、不要成品時，交付 brief 就結束。不要自作主張往下走完整條產線。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_HANDOFF_CONTRACTS_MD_F59DB8C89B
+
+# visual-prompt-kit/references/style-extraction.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/style-extraction.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/style-extraction.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_STYLE_EXTRACTION_MD_E929E97B9C'
+# 萃取風格：從參考圖建立新風格
+
+給一張參考圖，用固定模板描述它的設計風格，經使用者確認後併入本機風格庫
+（`references/style-library.md` 的 `styles.yaml`），之後 `recommend_styles.py`
+篩候選時就能直接抽到，不必每次重新分析同一張圖。
+
+## 觸發語
+
+「萃取風格」、「幫我萃取這張圖的風格」、「把這張圖的風格收進風格庫」、
+使用者提供一張圖並要求描述或收藏其設計風格時。
+
+## 前置條件
+
+需要有本機風格庫才能寫入（見 `references/style-library.md` 的位置與 schema）。
+風格庫不存在時，仍可產出萃取模板文字，但明說無法寫入，並停在「無庫模式」。
+
+## 萃取模板
+
+```text
+請使用「{風格名稱}」的風格設計{作品類型}。
+
+以{背景特徵}作為基底，
+搭配{核心視覺元素}，
+整體色彩以{主要配色邏輯}為主。
+
+文字風格為{字體特徵＋權重感}，
+搭配{強調色／對比方式}提升辨識度。
+
+整體風格參考{風格來源／文化類型}，
+呈現出{整體氛圍／情緒關鍵字}的視覺感受。
+```
+
+這是唯一的萃取模板，不要另外發明格式。八個欄位都要填，不確定的欄位寧可
+寫「不明顯／無特定」也不要留空或編造圖片沒有的細節——第 7 條硬規則
+（只使用使用者提供的內容）在這裡同樣適用：只描述這張圖實際看到的東西。
+
+## 工作流程
+
+### 1. 收圖
+
+使用者提供本機路徑或直接貼上的圖片。用原生讀圖能力查看內容，只分析
+**這一張**圖，不臆測、不補其他來源的風格資訊。
+
+### 2. 套用模板
+
+逐項分析並把八個欄位填進模板，連同**作品類型**一起問清楚
+（例如「知識圖卡」「課程封面」「banner」；沒有特別用途就用「知識圖卡」，
+跟現有庫的用途保持一致）。把填好的完整段落貼給使用者看。
+
+### 3. 使用者確認（必要關卡）
+
+**未經使用者確認前不得寫入風格庫。** 這是要永久併入共用資產的資料，
+比一般 brief 更需要覆核：任何一格描述錯了都會讓這個風格未來被誤用。
+使用者可以整段接受，或指出某幾格要修正——修正後重新呈現一次再問。
+
+### 4. 映射成 styles.yaml 欄位
+
+| 模板欄位 | 用途 | 對應 schema 欄位 |
+|---|---|---|
+| 風格名稱 | 風格的名字 | `name_zh`（可選補 `name_en` / `name_ja`） |
+| 作品類型 | prompt 開頭「設計 ___」的用途詞 | 併入 `prompt` 全文，不是獨立欄位 |
+| 背景特徵 | 底色／材質／場景 | 併入 `desc` 與 `prompt` |
+| 核心視覺元素 | 主要視覺物件／構圖重點 | 併入 `desc`；最具代表性的 1-2 個收進 `chars` |
+| 主要配色邏輯 | 主色／配色關係 | 併入 `desc`；收一項進 `chars` |
+| 字體特徵＋權重感 | 標題字體調性 | 併入 `prompt`；可收一項進 `chars` |
+| 強調色／對比方式 | 提升辨識度的手法 | 併入 `prompt` |
+| 風格來源／文化類型 | 這個風格的源流 | 併入 `desc` 與 `prompt`；也用來判斷 `category` |
+| 整體氛圍／情緒關鍵字 | 情緒／氛圍 | 併入 `desc`；收一項進 `chars` |
+
+具體規則：
+
+- `prompt`：把模板八個欄位全部代入後的完整文字，**去除換行合併成一段**，
+  跟現有庫其餘 100 筆的 `prompt` 呈現格式一致（單行、不分段）。
+- `desc`：1-3 句連續段落，濃縮背景、核心元素、配色與氛圍，比照現有庫的密度，
+  不是模板的逐字複製。
+- `chars`：固定 4 個短語標籤，從核心元素、配色、字體、氛圍四個面向各挑一個代表詞。
+- `category`：從風格庫既有的 7 大分類挑最接近的一個（跑
+  `python3 scripts/recommend_styles.py --library <風格庫路徑> --list-scenes`
+  可以看到目前的分類與場景清單）。真的沒有對應分類才用 `--allow-new-category`。
+- `scenes`：從既有 7 個場景標籤挑 1-2 個。真的都不合適才用 `--allow-new-scene`。
+- `origin`：固定 `自訂`，用來跟課程來源的 `日系` / `國際通用` 區分。往後課程
+  改版時的更新程序（見 `card-style-library/README.md`）只處理 `origin` 非
+  `自訂` 的 id，不會動到使用者自建的風格。
+- `extracted_from`：填來源說明（例如圖片檔名或使用者描述的出處），方便日後
+  追溯這個風格是從哪張圖萃取的。
+
+### 5. 寫入風格庫
+
+先用 `--dry-run` 印出即將寫入的 entry 文字與新 preview 路徑，給使用者看
+最終內容：
+
+```bash
+python3 scripts/add_style.py --library <風格庫路徑> \
+  --image <參考圖路徑> \
+  --name-zh "風格名稱" \
+  --category "現代插畫" \
+  --scenes "知識學習,商業職場" \
+  --desc "..." \
+  --chars "核心元素,配色,字體調性,氛圍關鍵字" \
+  --prompt "已代入八個欄位、合併成一段的完整文字" \
+  --extracted-from "使用者提供的參考圖 xxx.jpg" \
+  --dry-run
+```
+
+使用者同意後，拿掉 `--dry-run` 正式寫入。腳本會：
+
+1. 把圖片置中裁切成正方形、縮成 800×800 JPEG，存成
+   `previews/{新 id:03d}.jpg`，跟現有 100 張預覽圖規格一致。
+2. 以純文字附加（append）新 entry 到 `styles.yaml` 尾端，格式比照既有 99 筆
+   手刻格式，**不重新格式化整份檔案**，避免動到其他 100 筆的排版。
+3. 更新 `meta.count`，並在寫入前做一次完整 YAML 解析檢查；解析失敗就中止、
+   不寫入檔案。
+
+id 由「目前最大 id + 1」自動指定（預設從 101 開始），除非用 `--id` 指定。
+
+### 6. 回報
+
+寫入完成後回報：新 id、新 preview 絕對路徑、更新後的 `meta.count`，並提醒
+之後 `recommend_styles.py --scenes ... --category ...` 可以直接篩到這個新風格。
+
+## 版權提醒
+
+參考圖若是他人作品的截圖，萃取出的**文字風格描述**通常沒有問題，但只把
+縮圖存進使用者私有、不進 repo 也不進 LazyPack 的本機風格庫（見
+`card-style-library/README.md` 的使用邊界），不要把原圖或縮圖複製到任何
+公開位置。
+
+## Agent 執行
+
+- **Shared steps**：模板固定八欄位、映射規則、`--dry-run` 覆核關卡、
+  `add_style.py` 呼叫方式三個 Agent 完全相同。
+- **Codex / AntiGravity adapter**：填好模板後以文字呈現給使用者確認；
+  `--dry-run` 輸出直接印出。
+- **Claude adapter**：同樣先以文字呈現模板供確認；若參考圖是本機檔案，
+  可用原生檔案讀取直接顯示圖片協助使用者核對是不是同一張。
+- **Verification**：`--dry-run` 內容經使用者明確同意後才移除該旗標正式寫入；
+  寫入後確認回傳的 id、preview 路徑與 `meta.count` 都存在。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_STYLE_EXTRACTION_MD_E929E97B9C
 
 # visual-prompt-kit/references/style-library.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/style-library.md")"
@@ -444,6 +673,479 @@ forbidden:
 `placements/cover-person.md`。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_VISUAL_DNA_MD_799DB77D09
 
+# visual-prompt-kit/references/placements/carousel-info.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel-info.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel-info.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CAROUSEL_INFO_MD_FD5237A143'
+# Placement：高資訊圖卡（Info Carousel）
+
+適用於 Instagram / LinkedIn 的 **4:5 直式連續資訊圖卡**。與低密度輪播圖卡
+（`carousel.md`）同族，但哲學相反：低密度版用分欄位模板精確控制每個視覺決策，
+本版位**只鎖風格需求，版面、構圖、裝飾與資訊層級交給生圖端自由發揮**。
+
+在三種圖卡應用中的密度定位：
+
+| 應用 | 比例 | 張數 | 資訊密度 |
+|---|---|---|---|
+| 低密度輪播圖卡（`carousel.md`） | 1:1 | N 張輪播 | 低（重敘事） |
+| **高資訊輪播圖卡（本版位）** | 4:5 | N 張輪播 | **中** |
+| 9:16 知識圖卡（Knowledge 歸檔） | 9:16 | 一次一張 | 高 |
+
+本版位每張的文字量**介於 1:1 低密度輪播與 9:16 知識圖卡之間**：副標與重點
+比 1:1 豐富，讓輪播承載更多資訊；但不像 9:16 單張那樣塞下完整知識點的
+所有細節——輪播的資訊量分攤在 N 張上。
+
+- 比例：**固定 `4:5`**，不詢問、不提供其他選項。
+- **張數 N 由 AI 依文章內容決定**：一張一個知識點，在第一輪的分析階段
+  規劃張數並附一句理由，供使用者一併確認。
+- 產出分兩輪：**第一輪**完成風格校準（A/B 直接鎖定；C 才提 3 組差異化
+  風格方向）與文本大綱確認後，產出全部 N 組圖卡指令交使用者確認；
+  **第二輪**在使用者確認後，組裝最終生圖交付版本（總指令行 + N 組指令）。
+
+## 指令哲學
+
+每組指令是**一段自然語言的風格與內容描述**，不是分欄位模板。
+它只做兩件事：
+
+1. **說清楚風格**：整套一致的風格段落——視覺語彙、背景、配色邏輯、
+   字體氣質與字重層級原則、整體氛圍。
+2. **給出本張內容**：這張要傳達的知識點——標題、說明與重點。
+
+**不規定**版面分區、裝飾元素數量、文字字數上限、容器樣式或構圖策略。
+這些由生圖端依風格段落自由詮釋。指令寫得像委託一位懂行的設計師，
+不是像填一張規格單。
+
+## 設計底線（僅此而已，不再加碼）
+
+1. **風格跨張一致**：整套 N 張使用同一段風格描述（源自選定風格與
+   `visual-dna.yaml`），不逐張變換風格。
+2. **一張一個知識點**：讀者不需原文即可理解本張內容；快速掃過也能
+   抓到重點——風格段落中應包含字重層級原則（重點粗、正文細之類），
+   但具體怎麼排由生圖端決定。
+3. **主要文字為台灣繁體中文**；裝飾性外語點綴依 `visual-dna.yaml` 的
+   `language.accent`，不混用 `language.forbidden` 的語言。
+4. **不出現**：敘事標籤（Hook / Slide 01⋯）、hashtag、價格促銷、
+   Logo、簽名、浮水印。
+5. **預設不放人物**（`person.mode: none`），使用者主動要求時才讀
+   `cover-person.md`。
+
+## 第一輪：分析、校準與 N 組指令
+
+### Step 1 洞察與定義
+
+同 `carousel.md` 的 Step 1 與 Step 2：辨別受眾與動機、提煉 Core Message。
+本版位另加：**列出文章的知識點清單**（每點一句話），張數 N 由清單推導——
+通常是知識點數 + 開頭引入 + 收尾行動。
+
+### Step 2 風格校準（互動關卡）
+
+選單格式與 `carousel.md` 的 Step 3 完全相同（A 風格庫 5 候選附預覽圖 /
+B 自由描述 / C 你決定），洞察摘要中一併呈現知識點清單與規劃張數供確認：
+
+```text
+我已完成文章分析：
+
+- 目標受眾：{簡述}
+- 核心訊息：{簡述}
+- 知識點清單：{每點一句話}
+- 規劃張數：{N} 張 — {一句理由}
+```
+
+**沒有使用者回覆不得進入 Step 3。** 非互動環境走「你決定」路徑並在輸出
+開頭說明未經校準。
+
+**收斂規則（與其他版位一致）**：使用者選了 A（風格編號）或 B（描述偏好），
+風格即定案——直接寫入 `visual-dna.yaml`（`person.mode: none`），
+不得再要求使用者在多組變體間做第二次選擇。使用者說「你決定」（C）時，
+依創新維度三點軸線提出 **3 組最大差異化風格方向**（A 勇敢先驅 / B 保守 /
+C 革命性），每組以一小段風格描述文字呈現、可搭配風格庫既有預覽圖輔助；
+使用者選定後寫入 DNA。
+
+### Step 3 撰寫共用風格段落
+
+把選定風格展開成**一段完整的自然語言風格描述**，整套 N 張共用。
+風格庫選出的風格以其 `prompt` 為基底擴寫；自由描述則直接成文。
+段落應涵蓋（有幾項寫幾項，不硬湊）：
+
+- 開頭固定句式：`請使用「{風格名稱}」的風格設計知識圖卡。`
+- 背景基底與質感
+- 主要視覺元素與插畫／圖形語彙
+- 配色邏輯（低彩度單色系／深色高對比⋯）
+- 字體氣質與**字重層級原則**——重點資訊用什麼字重標示、正文維持什麼字重、
+  粗體的使用節制原則（參考範例二的寫法：每段只挑 1–2 個重點加粗，
+  優先給核心概念、關鍵數字、步驟關鍵字）
+- 整體氛圍與風格源流
+
+寫作範例（兩種密度都合法，依風格本身的複雜度決定長短）：
+
+```text
+請使用「手寫混搭數位」的風格設計知識圖卡。主標題使用精確的粗黑體中文，
+旁邊或下方搭配手寫感的英文短語作為氛圍裝飾。手寫字可以稍微傾斜或不規則
+排列，與工整的黑體形成溫度上的對比。背景保持簡潔（深色或淺色皆可），
+讓手寫與數位的混搭成為視覺焦點。
+```
+
+更多完整寫作範例（含長版的字重層級寫法）見 Arry 本機 Knowledge 的
+`{{ASSISTANT_ROOT}}/knowledge/card-style-library/knowledge-card-prompts.md`——該檔是 9:16
+單張知識圖卡的成品 prompt 庫，風格段落的寫法可直接借鑑，但本版位輸出時
+比例一律改成 4:5、密度收斂到輪播的中等水位。其他使用者沒有該檔時，
+以上方內建範例為準。
+
+### Step 4 文本大綱確認（互動關卡）
+
+寫 N 組指令之前，**先列出全套 N 張的文本大綱**——每張的主標題、
+一句副標題方向與要放的重點——供使用者審閱與修訂文字。
+**大綱未經使用者確認不得產出完整指令。** 使用者要求修改時，
+修訂後重新呈現受影響的張次再確認。
+
+### Step 5 產出 N 組指令
+
+依確認後的大綱產出。每組指令 = **共用風格段落 + 本張內容段落**，
+用 codeblock 包住。內容段落用自然語句寫出本張的標題與要傳達的重點，
+不拆欄位：
+
+```text
+{共用風格段落}
+
+本張圖卡內容：主標題「{標題}」，副標題「{一到兩句說明}」。
+內文重點：{以自然語句或簡短條列寫出本張知識點的重點，
+讓生圖端自行決定如何編排這些資訊}。
+```
+
+一次產出全部 N 組交使用者確認。敘事順序沿用 `carousel.md` 的原則：
+開頭引入、收尾行動固定保留，中段每張一個知識點依文章邏輯排列。
+使用者有修改意見時，修訂受影響的張次重新呈現；
+**內容未經確認不得進入第二輪。**
+
+## 第二輪：組裝生圖交付版本
+
+使用者確認後輸出最終交付版本，第一行固定是總指令行（張數代入實際 N），
+接著逐張列出 N 組指令：
+
+```text
+使用以下指令產生圖卡，共 {N} 張輪播圖卡 output by slide by slide format
+```
+
+第二輪不改內容；若使用者此時又提出修改，回到第一輪修訂並重新確認。
+
+## 生圖轉換
+
+交棒 `image-generator` 時，遵循 `../handoff-contracts.md` 的「語言映射契約」：
+標題固定繁中欄位宣告，點綴文字與禁用語言否定提示依 `visual-dna.yaml` 的
+`language.accent` / `language.forbidden` 變數映射，並遵守其觸發詞紀律。
+本版位的自然語言風格段落照用不動，但轉換為生圖 Prompt 時上述映射與
+否定提示不可省略。
+
+## 檢查（輕量）
+
+- [ ] 整套是否共用同一段風格段落、無逐張變風格？
+- [ ] 風格段落是否含字重層級原則？
+- [ ] 文本大綱是否已經使用者確認？
+- [ ] 每張是否對應一個知識點、無重複無遺漏？張數是否等於確認的 N？
+- [ ] 是否沒有敘事標籤、hashtag、促銷、Logo、簽名、浮水印？
+- [ ] 主要文字是否繁體中文、外語點綴是否只用 accent 語言？
+- [ ] 生圖轉換是否遵守語言映射契約（accent／forbidden 依 DNA 變數映射、
+      否定提示已加、無 forbidden 語言觸發詞）？
+- [ ] 總指令行張數是否代入正確？
+
+不檢查版面分區、裝飾數量、字數上限——那些是生圖端的自由。
+
+## 輸出檔名
+
+```text
+briefs/carousel-info-{01..NN}.md   # 第一輪 N 組指令（或合併為 carousel-info-full.md）
+```
+
+## 相關
+
+- `carousel.md`：低密度輪播圖卡版位（1:1、分欄位模板精確控制）。
+  要精確控制視覺選它，要讓生圖端自由發揮選本版位。
+- `cover-person.md`：人物選項。本版位預設不啟用。
+- `../visual-dna.md`：風格一致性的記錄位置。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CAROUSEL_INFO_MD_FD5237A143
+
+# visual-prompt-kit/references/placements/carousel.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CAROUSEL_MD_5FBC59A164'
+# Placement：低密度輪播圖卡（Carousel）
+
+適用於 Instagram / LinkedIn 的連續敘事輪播圖卡。把一篇資訊密度高的知識型文章，
+精煉為 **N 張具備強烈邏輯連貫性**的圖卡設計指令。在三種圖卡應用中屬於
+**低密度**一級：重敘事與視覺衝擊、單張文字量最輕（中密度 4:5 見
+`carousel-info.md`，高密度 9:16 單張見風格庫的 `card-style-library/knowledge-card-prompts.md`）。
+
+- 比例：**固定 `1:1`**，不詢問、不提供其他選項。
+- **張數 N 由 AI 依文章內容決定**（不是固定 10 張）：在第一回合的定義階段
+  規劃張數並附一句理由，供使用者一併確認。原則上 6–12 張，敘事弧線完整
+  優先於湊滿張數；文章單薄就少張，架構龐大就多張。
+- 產出分兩回合：第一回合完成風格校準與鎖定（使用者選 A/B 即直接鎖定；
+  說「你決定」時才提 3 組差異化風格提案供選），第二回合先確認全套文本大綱，
+  再產出全部 N 組正式指令。
+
+## 角色
+
+以日本數位視覺設計師的身分工作：專精於把高資訊密度的知識型文章，拆解並重組為
+具備「連續敘事感」的系列圖卡。設計哲學：**在視覺克制中承載知識重量，
+讓文字成為視覺藝術的一環。**
+
+不只是執行視覺的技師，更是擁有設計思考（Design Thinking）系統方法論的提案者：
+先洞察受眾、定義問題核心，再聚斂出最精準的視覺敘事方案。
+
+## 設計原則（必須遵守）
+
+1. **知識密度平衡**：每張圖卡的文字量以「讀者不需要原文就能理解這張圖卡的
+   核心概念」為標準。主標題精簡（5–8 字），副標題可延伸至 2–3 句完整說明，
+   確保知識邏輯完整傳達而非只剩標題骨架。
+2. **高易讀性**：粗體現代黑體，巨大的文字級距（Hierarchy）創造視覺衝擊。
+3. **連續性敘事**：整套圖卡從「引發共鳴」到「行動指引」流暢轉承。
+4. **跨張視覺一致性**：同一套圖卡的背景色系、主標字體、容器樣式必須統一，
+   讓觀看者滑動時感受到整體感而非拼湊感。一致性的唯一來源是
+   `visual-dna.yaml`——每一張都讀同一份，不在單張指令裡另立色系或字體。
+5. **資訊降噪**：不使用花俏裝飾，僅運用幾何圖形、半透明容器或高質感色塊
+   區隔資訊。
+6. **禁止促銷**：不包含任何價格、折扣或促銷資訊，專注於知識內容的精準傳達。
+7. **敘事標籤不上圖**：Hook、Gap、Vision、Slide 01 等敘事架構標籤僅為設計師
+   內部思考工具，嚴禁出現在任何圖卡的文本內容欄位（主標題、副標題、裝飾文字）。
+8. **不使用 Tag**：圖卡內不加入任何 hashtag 或標籤文字（如 #知識管理），
+   所有資訊層次僅透過主標題、副標題與裝飾文字建立。
+
+## 人物選項
+
+本版位**預設不放人物、不發起第二輪人物詢問**（`visual-dna.yaml` 的
+`person.mode: none`）。只有使用者主動要求在圖卡放人物時，才讀
+`cover-person.md` 並依其規則處理；此時整套圖卡的人物策略仍須跨張一致。
+
+## 第一回合：語境判斷與風格提案
+
+依序完成 4 個 Step。**Step 3 是互動關卡，沒有使用者回覆不得進入 Step 4。**
+
+### Step 1 洞察（Empathize）
+
+辨別目標受眾身份（職場工作者 / 創作者 / 學習者⋯）與深層動機：他們為什麼會想
+看這一系列圖卡。找出文章中最能打動人心的情緒點。
+
+### Step 2 定義（Define）
+
+提煉 1 個 Core Message：「看完整套圖卡後，受眾最應該記住的一件事」。
+找到整套圖卡的**核心金句**，作為整套視覺的靈魂錨點。
+
+同時**決定張數 N**：依文章的架構密度規劃敘事弧線需要幾張（核心架構有幾個
+步驟、需不需要前後對比與權威背書張），並準備一句理由，在 Step 3 連同洞察
+一起呈現給使用者確認。
+
+### Step 3 風格校準（互動關卡）
+
+先把洞察攤給使用者看，再依 `references/style-library.md` 的選單流程詢問風格。
+選單格式與封面版位一致：
+
+```text
+我已完成文章分析：
+
+- 目標受眾：{簡述}
+- 核心訊息：{簡述}
+- 情緒方向：{簡述}
+- 規劃張數：{N} 張 — {一句理由，如：核心架構有四個步驟，加上前後鋪陳與收尾}
+
+在開始提案之前，先確認視覺方向。三種回法都可以：
+
+A. 從下面 5 個候選挑一個編號
+   {依 references/style-library.md 篩出的 5 個候選，各附一行「為什麼適合這篇」}
+   {並把 5 張預覽圖交給使用者看}
+
+B. 直接描述你的偏好
+   色調（深色系／明亮系）、構圖（幾何切割／極簡留白／卡片堆疊）、
+   情緒調性（權威專業／溫暖親近／衝擊力強）都可以，講一項也行。
+
+C. 說「你決定」
+   我依創新維度軸線給三組最大差異化的方案。
+```
+
+**非互動環境**（`codex exec`、`claude -p`、CI、排程）直接走 Step 4 路徑 B，
+並在輸出開頭說明本次未經風格校準。
+
+### Step 4 風格鎖定或三組提案
+
+依 Step 3 的回覆分兩條路。**判斷準則與封面版位相同：使用者選了 A
+（風格編號）或 B（描述偏好），風格方向即已定案——直接寫入
+`visual-dna.yaml`，不得再強制使用者在多組變體間做第二次選擇。**
+
+**路徑 A — 使用者給了方向（A 或 B）**
+
+該方向即為定案，直接鎖入 `visual-dna.yaml`，隨即進入第二回合的
+文本大綱確認，不另寫 Sample。
+
+**路徑 B — 使用者說「你決定」（C）或非互動環境**
+
+此時才依創新維度三點軸線提出 **3 組最大差異化風格提案**
+（A 勇敢先驅 / B 保守 / C 革命性）。每組提供 1 張 Slide 01 的
+Sample 指令（照下方輸出模板逐欄填寫、codeblock 包住），讓使用者
+以文字判斷整套圖卡的視覺方向；可搭配風格庫既有預覽圖輔助。
+使用者選定後把選定結果寫入 `visual-dna.yaml`，再進第二回合。
+
+## 第二回合：文本大綱確認與 N 組圖卡設計指令
+
+收到風格確認後，**先列出全部 N 張圖卡的文本大綱**（包含每張的主標題、副標題、核心金句），供使用者審閱與確認文字描述。使用者確認無須修改文字（或完成文字編修）後，**自動交棒 `image-generator` 執行全套 N 張圖卡之實體生圖**，並將 N 組正式指令寫入文件（`carousel-full.md`）。
+
+N 組全部引用同一份 `visual-dna.yaml`，單張只填該張特有的敘事內容。
+
+**輸出的第一行固定是給生圖端的總指令**（張數代入實際 N）：
+
+```text
+使用以下指令產生圖卡，共 {N} 張輪播圖卡 output by slide by slide format
+```
+
+接著逐張列出 N 組指令。
+
+敘事弧線依下表規劃。這是 **10 張時的參考範例**，實際依 N 伸縮：
+The System 的張數跟著文章核心架構的步驟數走；文章單薄時 Gap 與 Vision、
+或 Transformation 與 Social Proof 可各合併為一張。不論 N 是多少，
+**Hook 開頭與 Final Call 收尾固定保留**，中段轉承不得斷裂。
+
+| 張次 | 敘事角色 | 敘事任務 |
+|---|---|---|
+| Slide 01 | Hook | 爆擊痛點的提問或現狀揭露 |
+| Slide 02 | The Gap | 揭示理想與現實的巨大差距 |
+| Slide 03 | The Vision | 大腦升級，定義新的解決方案標準 |
+| Slide 04 | The System - Part 1 | 核心架構拆解 / 步驟一 |
+| Slide 05 | The System - Part 2 | 核心架構拆解 / 步驟二 |
+| Slide 06 | The System - Part 3 | 核心架構拆解 / 步驟三 |
+| Slide 07 | Transformation | 展示使用後的具體改變（前後對比意象） |
+| Slide 08 | Social Proof / Authority | 權威感背書、數據支持或邏輯證實 |
+| Slide 09 | How / Action | 具體的行動指引或第一步 |
+| Slide 10 | Final Call | 結尾視覺鉤子與品牌留白 |
+
+「敘事角色」欄位是內部規劃用途，**嚴禁將這些標籤文字輸出到任何圖卡的
+文本內容中**。
+
+## 減法檢查
+
+每組指令（Sample 與正式）進模板前逐項確認：
+
+- [ ] 主標題是不是第一視覺，且在 5–8 字內？
+- [ ] 副標題是否 30–50 字、讓讀者無需原文即可理解本張核心概念？
+- [ ] 所有文字是否有容器或陰影保護？（複雜背景中仍須清晰）
+- [ ] Ashirai 是否 2-3 組，且只用 `visual-dna.yaml` 的 `language.accent`？
+- [ ] 是否沒有混入 `language.forbidden` 的語言？
+- [ ] 主要視覺區塊是否 ≤ 3 個？裝飾元素是否只保留 2-4 種？
+- [ ] 背景是否退後、與整套色系一致？
+- [ ] 是否沒有出現敘事標籤（Hook / Gap / Slide 01⋯）與任何 hashtag？
+- [ ] 是否沒有價格、折扣或促銷資訊？
+- [ ] 是否沒有自動加入 Logo、簽名、品牌名、作者名、浮水印？
+- [ ] 核心金句是否已填？
+- [ ] 本張的色系、字體、容器樣式是否與 `visual-dna.yaml` 一致？
+
+第一回合另加：（路徑 B）三組 Sample 之間的差異是否夠明顯？
+第二回合另加：文本大綱是否已經使用者確認？張數是否等於第一回合確認的 N？
+總指令行的張數是否代入正確？N 張的敘事轉承是否流暢、無斷裂或重複？
+Hook 與 Final Call 是否都在？
+
+## 輸出模板
+
+**不要壓縮成 `/imagine prompt:` 或任何單段英文描述句。** 唯一合法格式是這份
+分欄位文件。**每組指令的輸出以「5. 規格與風格」結束**，codeblock 之後不附加
+任何額外內容——包含視覺渲染描述、單段英文彙整或補充說明段落。
+
+```text
+## 【圖卡序列 X：標題】
+
+### 0. 敘事定位
+（本區塊為設計師內部思考記錄，不得將任何內容輸出至圖卡的任何視覺位置）
+- 敘事角色：{本張在 10 張弧線中的角色，如 Hook / Gap / Vision，僅供內部參考}
+- 核心金句：{本張圖卡的靈魂一句話，驅動整張視覺設計的情緒。必填}
+- 情緒目標：{觀看者 3 秒內應產生的心理反應，如共鳴感、好奇心、信任感}
+
+### 1. 文本內容
+- 主標題：{放大、具衝擊力的核心關鍵字，5–8 字內，台灣繁體中文}
+- 副標題：{解釋性敘述，30–50 字，讓讀者無需原文即可理解核心概念。台灣繁體中文}
+- 補充說明：{選填。涉及步驟、對比或列舉時補 2–3 個條列重點，每點 10–15 字。台灣繁體中文}
+- 氛圍裝飾文字 Ashirai：{2-3 組，只用 accent 語言。「Ashirai」是欄位名稱，嚴禁出現在圖卡上}
+
+### 2. 色彩計畫
+- 背景特徵：{與整套圖卡一致的背景風格描述}
+- 重點強調色：{本張的強調色，需與整套色系相容}
+- 文字色方案：{主標文字顏色} / {背景容器之顏色}
+
+### 3. 字體特徵
+- 標題風：{特粗黑體 Extra Bold Gothic 或現代等寬字體，整套統一}
+- 裝飾字體：{纖細 Sans-serif 或手寫感字體，僅用於少量 Ashirai}
+- 整體印象：{如現代數位感、優雅知性、權威感}
+
+### 4. 佈局與構圖
+- 視覺策略：{如中心對稱、卡片堆疊、對角線分割、極簡留白}
+- 關鍵元素：{核心幾何圖形或符號，如巨大的箭頭、圓形矩陣}
+
+### 5. 規格與風格
+- 尺寸比例：1:1
+- 風格關鍵字：{如 Modern Japanese, Minimalist Info-card, High Impact, Clean Overlay}
+```
+
+## 填寫範例
+
+以「用第二大腦筆記法擺脫資訊焦慮」的 Slide 01 為例：
+
+```text
+## 【圖卡序列 1：資訊焦慮的真相】
+
+### 0. 敘事定位
+（本區塊為設計師內部思考記錄，不得將任何內容輸出至圖卡的任何視覺位置）
+- 敘事角色：Hook — 以現狀揭露引發滑動動機
+- 核心金句：你不是記性差，是筆記從來沒替你工作過。
+- 情緒目標：共鳴感 → 「這就是我每天的狀態」
+
+### 1. 文本內容
+- 主標題：筆記越多越焦慮？
+- 副標題：收藏了上百篇文章、記了滿滿的筆記，需要用的時候卻一片空白——問題不在你，在方法。
+- 補充說明：（本張不使用）
+- 氛圍裝飾文字 Ashirai：Information Overload／Why Notes Fail
+
+### 2. 色彩計畫
+- 背景特徵：深藏青單色底，右上角一層低對比的紙張紋理，整體安靜退後。
+- 重點強調色：暖橘色，只用於主標題中的「焦慮」二字與一條底線。
+- 文字色方案：純白 #FFFFFF / 深藏青半透明容器
+
+### 3. 字體特徵
+- 標題風：特粗黑體 Extra Bold Gothic，級距極大。
+- 裝飾字體：纖細大寫 Sans-serif，加大 letter-spacing。
+- 整體印象：權威感、現代數位感、克制。
+
+### 4. 佈局與構圖
+- 視覺策略：中心對稱，文字主導，大面積留白。
+- 關鍵元素：主標下方一疊逐漸傾倒的抽象紙張色塊，暗示筆記堆積。
+
+### 5. 規格與風格
+- 尺寸比例：1:1
+- 風格關鍵字：Modern Japanese Web Style, Minimalist Info-card, High Impact, Clean Overlay
+```
+
+## 生圖轉換
+
+交棒 `image-generator` 時，遵循 `../handoff-contracts.md` 的「語言映射契約」：
+標題固定繁中欄位宣告，點綴文字與禁用語言否定提示依 `visual-dna.yaml` 的
+`language.accent` / `language.forbidden` 變數映射，並遵守其觸發詞紀律
+（不得以「{語言} typography / text」形式提到 forbidden 語言）。
+適用於第二回合的全套生圖。
+
+## 輸出檔名
+
+依 SKILL.md 的輸出位置規則：
+
+```text
+briefs/carousel-sample-{A|B|C}.md   # 第一回合路徑 B 的三組 Sample 指令（路徑 A 無 Sample）
+briefs/carousel-{01..NN}.md          # 第二回合正式指令（或合併為 carousel-full.md）
+```
+
+## 語氣
+
+展現設計職人的專業，對細節（字體粗細、色塊透明度、層次感）有精確描述，
+充滿審美洞察力。語氣沉穩權威，展現方法論的縝密思考。
+
+## 相關
+
+- `cover.md`：封面版位。單張、高點擊率導向；本版位的風格校準選單與
+  創新維度定位方式與其一致。
+- `cover-person.md`：人物選項。本版位預設不啟用，使用者主動要求時才讀取。
+- `../visual-dna.md`：跨張一致性的唯一來源。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CAROUSEL_MD_5FBC59A164
+
 # visual-prompt-kit/references/placements/cover-person.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/cover-person.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/cover-person.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_COVER_PERSON_MD_BCA09525E0'
@@ -598,7 +1300,9 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/cover.md" <<
 單張、高點擊率導向、資訊層級極清楚。
 
 - 預設比例：`16:9`。正方形社群封面用 `1:1`，直式用 `4:5`。使用者未指定時問一次。
-- 預設輸出：3 組方案。
+- 輸出組數依風格校準結果而定：使用者已選定風格（A 挑編號或 B 描述偏好）
+  時輸出 **1 組方案**；使用者說「你決定」（C）或非互動環境時輸出
+  **3 組最大差異化方案**。
 
 ## 角色
 
@@ -668,23 +1372,21 @@ C. 說「你決定」
 **非互動環境**（`codex exec`、`claude -p`、CI、排程）沒有人能回答，直接走
 Phase 3 路徑 B，並在輸出開頭說明本次未經風格校準。
 
-### Phase 3 創新維度定位
+### Phase 3 方案定位
 
-依 Phase 2.5 的回覆分兩條路。
+依 Phase 2.5 的回覆分兩條路。**判斷準則：使用者選了 A（風格編號）或
+B（描述偏好），風格方向即已定案——直接鎖入 `visual-dna.yaml`，
+不得再強制使用者在多組變體間做第二次選擇。**
 
 **路徑 A — 使用者給了方向**（選了風格 id、描述了偏好，或兩者都有）
 
-把該方向設為 **Design Anchor**。三組都必須回應它，但在它的框架內差異化：
+該方向即為定案。寫入 `visual-dna.yaml` 後，**只產出 1 組方案**，
+忠實呈現使用者選定的風格。只有使用者**主動要求**多組變體時，
+才在該風格框架內提供「精準命中 / 穩健變體 / 驚喜延伸」的變奏。
 
-| 方案 | 定位 | 說明 |
-|---|---|---|
-| A | 精準命中 | 最貼近使用者描述的版本，忠實呈現 |
-| B | 穩健變體 | 在偏好基礎上收斂，更安全穩重，適合正式場景 |
-| C | 驚喜延伸 | 在偏好基礎上大膽延伸，帶實驗性 |
+**路徑 B — 使用者說「你決定」（C）或沒有偏好**
 
-**路徑 B — 使用者沒有偏好**
-
-回到三點軸線，追求最大差異化：
+此時才由 AI 依創新維度三點軸線提出 **3 組最大差異化方案**供選擇：
 
 | 方案 | 定位 | 說明 |
 |---|---|---|
@@ -692,19 +1394,21 @@ Phase 3 路徑 B，並在輸出開頭說明本次未經風格校準。
 | B | 保守 | 安全穩重、信任感強，適合企業或教育場景 |
 | C | 革命性 | 突破常規、高度差異化，製造視覺驚喜 |
 
+使用者從三組中選定後，把選定結果寫入 `visual-dna.yaml`。
+
 ### Phase 4 發想與減法檢查
 
 每組先發散構圖策略（色塊疊加法 / 幾何切分法 / 空位焦點法 / 文字主導法），
 再過減法檢查。沒過不准進模板。
 
-啟用人物選項時，`cover-person.md` 的減法檢查增補項一併執行，且三組的人物
-配置策略必須明顯不同。
+啟用人物選項時，`cover-person.md` 的減法檢查增補項一併執行；路徑 B 時
+三組的人物配置策略必須明顯不同。
 
-三組在視覺上必須有**明顯**差異，讓使用者清楚感受到在選什麼。
+路徑 B 的三組在視覺上必須有**明顯**差異，讓使用者清楚感受到在選什麼。
 
 ### Phase 5 填寫模板
 
-三組方案各自用 codeblock 包住，方便一鍵複製。
+每組方案各自用 codeblock 包住，方便一鍵複製（路徑 A 為 1 組，路徑 B 為 3 組）。
 
 ## 減法檢查
 
@@ -719,7 +1423,7 @@ Phase 3 路徑 B，並在輸出開頭說明本次未經風格校準。
 - [ ] 背景是否退後（模糊 / 半透明 / 低對比 / 景深）？
 - [ ] 是否沒有自動加入 Logo、簽名、品牌名、作者名、浮水印？
 - [ ] 核心金句是否已填？
-- [ ] 三組之間的差異是否夠明顯？
+- [ ] （路徑 B）三組之間的差異是否夠明顯？
 
 啟用人物選項時，另外執行 `cover-person.md` 的增補檢查項。
 
@@ -727,11 +1431,12 @@ Phase 3 路徑 B，並在輸出開頭說明本次未經風格校準。
 
 依序給三段：
 
-1. **前期策略思考** — 受眾洞察、核心問題定義、三組方案在創新維度上的落點
-   （路徑 A 時改為說明 Design Anchor 與三組如何在其框架內變奏）。
+1. **前期策略思考** — 受眾洞察、核心問題定義；路徑 A 說明選定風格如何
+   回應文章調性，路徑 B 說明三組方案在創新維度上的落點。
 2. **視覺意象分析** — 解析目標族群，說明打算如何運用半透明色塊疊加、
    強烈字體對比、職人感光影、乾淨留白等元素來精準傳達情緒。
-3. **三組設計指令** — 各自用 codeblock 包住，照下方模板逐欄填寫。
+3. **設計指令** — 各自用 codeblock 包住，照下方模板逐欄填寫
+   （路徑 A 為 1 組，路徑 B 為 3 組）。
 
 ## 輸出模板
 
@@ -808,6 +1513,13 @@ Phase 3 路徑 B，並在輸出開頭說明本次未經風格校準。
 - 風格關鍵字：Modern Japanese Web Style, High Impact, Clean Overlay, Professional Thumbnail, Minimal Ashirai
 ```
 
+## 生圖轉換
+
+交棒 `image-generator` 時，遵循 `../handoff-contracts.md` 的
+「語言映射契約」：標題固定繁中欄位宣告，點綴文字與禁用語言否定提示
+依 `visual-dna.yaml` 的 `language.accent` / `language.forbidden` 變數映射，
+不在本檔寫死任何語言。
+
 ## 語氣
 
 展現設計職人的專業與權威，對字體粗細、色塊透明度、層次感、留白比例有精確描述。
@@ -869,6 +1581,219 @@ forbidden_languages: [ja]
 英文手寫體、細襯線、或全大寫細字加大 letter-spacing。僅用於少量 Ashirai，
 不可大面積使用。手寫感英文可稍微傾斜或不規則排列，但不得干擾中文主標題。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_STYLES_JAPANESE_MODERN_MD_C8BC436093
+
+# visual-prompt-kit/scripts/add_style.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/add_style.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/add_style.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_ADD_STYLE_PY_2961B03564'
+#!/usr/bin/env python3
+"""Merge one extracted style into the local card-style-library styles.yaml.
+
+Appends the new entry as raw text formatted to match the file's existing
+hand-curated block style, instead of round-tripping the whole file through a
+YAML dumper — that would risk reformatting the other 100+ entries. See
+references/style-extraction.md for the interactive workflow that produces
+the arguments to this script.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import sys
+from datetime import date
+from pathlib import Path
+
+DEFAULT_DIRS = [
+    os.environ.get("VISUAL_STYLE_LIBRARY", ""),
+    "~/.codex/memories/../knowledge/card-style-library",
+]
+
+
+def resolve_library(explicit: str | None) -> Path:
+    cands = [explicit] if explicit else DEFAULT_DIRS
+    for c in cands:
+        if not c:
+            continue
+        p = Path(c).expanduser().resolve()
+        if p.is_file():
+            p = p.parent
+        if (p / "styles.yaml").is_file():
+            return p
+    tried = ", ".join(str(Path(c).expanduser().resolve()) for c in cands if c) or "(none)"
+    sys.exit(
+        f"style library not found. tried: {tried}\n"
+        "pass --library <dir containing styles.yaml>, or set VISUAL_STYLE_LIBRARY."
+    )
+
+
+def yaml_str(s: str) -> str:
+    """Double-quoted YAML scalar. JSON string quoting is a valid subset of YAML."""
+    return json.dumps(s, ensure_ascii=False)
+
+
+def yaml_flow_list(items: list[str]) -> str:
+    return "[" + ", ".join(items) + "]"
+
+
+def load(text: str) -> tuple[dict, list[dict]]:
+    try:
+        import yaml
+    except ImportError:
+        sys.exit("PyYAML required. install it, or run with an interpreter that has it.")
+    data = yaml.safe_load(text)
+    meta = data.get("meta") if isinstance(data, dict) else None
+    styles = data.get("styles") if isinstance(data, dict) else None
+    if not styles:
+        sys.exit("no 'styles' list found in styles.yaml")
+    return meta or {}, styles
+
+
+def regenerate_styles_md(lib: Path, yaml_text: str) -> Path:
+    """styles.md is the Obsidian-browsable mirror of styles.yaml (identical content).
+
+    Obsidian's file explorer hides .yaml files, so the library keeps an
+    auto-generated .md wrapper next to it. Regenerated on every write here;
+    never edited by hand.
+    """
+    md = (
+        "# card-style-library styles.yaml 對照版\n\n"
+        "本檔由 `styles.yaml` 自動生成，內容與其完全一致，僅供 Obsidian 瀏覽與搜尋。\n"
+        "**不要直接編輯本檔**——修改一律進 `styles.yaml`（新增風格用 visual-prompt-kit 的\n"
+        "`add_style.py`，它寫入後會自動重新生成本檔）。\n\n"
+        "```yaml\n" + yaml_text.rstrip("\n") + "\n```\n"
+    )
+    out = lib / "styles.md"
+    out.write_text(md, encoding="utf-8")
+    return out
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--library")
+    ap.add_argument("--image", required=True, help="reference image the style was extracted from")
+    ap.add_argument("--name-zh", required=True)
+    ap.add_argument("--name-en", default="")
+    ap.add_argument("--name-ja", default="")
+    ap.add_argument("--category", required=True, help="must match an existing meta.categories entry")
+    ap.add_argument("--scenes", required=True, help="comma separated, from meta.scenes")
+    ap.add_argument("--desc", required=True)
+    ap.add_argument("--chars", required=True, help="comma separated tags, library convention is 4")
+    ap.add_argument("--prompt", required=True, help="the filled extraction template, as one prompt string")
+    ap.add_argument("--origin", default="自訂", help="default 自訂 marks it apart from course-sourced entries")
+    ap.add_argument("--extracted-from", default="", help="short provenance note, e.g. source filename")
+    ap.add_argument("--id", type=int, help="override the auto-assigned id (default: max existing id + 1)")
+    ap.add_argument("--allow-new-category", action="store_true")
+    ap.add_argument("--allow-new-scene", action="store_true")
+    ap.add_argument("--dry-run", action="store_true", help="print the entry and preview path, write nothing")
+    a = ap.parse_args()
+
+    lib = resolve_library(a.library)
+    yaml_path = lib / "styles.yaml"
+    text = yaml_path.read_text(encoding="utf-8")
+    meta, styles = load(text)
+
+    categories = meta.get("categories") or []
+    if not a.allow_new_category and a.category not in categories:
+        sys.exit(
+            f"category {a.category!r} not in library categories: {categories}\n"
+            "pass --allow-new-category to add a new one."
+        )
+
+    scenes_allowed = meta.get("scenes") or []
+    scenes = [s.strip() for s in a.scenes.split(",") if s.strip()]
+    if not scenes:
+        sys.exit("need at least 1 --scenes tag.")
+    if not a.allow_new_scene:
+        bad = [s for s in scenes if s not in scenes_allowed]
+        if bad:
+            sys.exit(
+                f"scenes {bad} not in library scenes: {scenes_allowed}\n"
+                "pass --allow-new-scene to add new ones."
+            )
+
+    chars = [c.strip() for c in a.chars.split(",") if c.strip()]
+    if len(chars) < 2:
+        sys.exit("need at least 2 --chars tags (library convention is 4).")
+    if len(chars) != 4:
+        print(f"note: library convention is 4 chars tags, got {len(chars)}.", file=sys.stderr)
+
+    existing_ids = {int(s["id"]) for s in styles}
+    new_id = a.id if a.id is not None else (max(existing_ids, default=0) + 1)
+    if new_id in existing_ids:
+        sys.exit(f"id {new_id} already exists in the library.")
+    dup = next((s for s in styles if s.get("name_zh") == a.name_zh), None)
+    if dup:
+        print(f"warning: name_zh {a.name_zh!r} already used by id {dup['id']}.", file=sys.stderr)
+
+    src = Path(a.image).expanduser().resolve()
+    if not src.is_file():
+        sys.exit(f"image not found: {src}")
+
+    preview_rel = f"previews/{new_id:03d}.jpg"
+    preview_abs = lib / preview_rel
+
+    lines = [f"  - id: {new_id}"]
+    lines.append(f"    name_zh: {yaml_str(a.name_zh)}")
+    if a.name_ja:
+        lines.append(f"    name_ja: {yaml_str(a.name_ja)}")
+    if a.name_en:
+        lines.append(f"    name_en: {yaml_str(a.name_en)}")
+    lines.append(f"    category: {yaml_str(a.category)}")
+    lines.append(f"    origin: {yaml_str(a.origin)}")
+    lines.append(f"    scenes: {yaml_flow_list(scenes)}")
+    lines.append(f"    desc: {yaml_str(a.desc)}")
+    lines.append(f"    chars: {yaml_flow_list(chars)}")
+    lines.append("    prompt_mode: custom")
+    lines.append(f"    preview: {preview_rel}")
+    lines.append(f"    prompt: {yaml_str(a.prompt)}")
+    if a.extracted_from:
+        lines.append(f"    extracted_from: {yaml_str(a.extracted_from)}")
+    lines.append(f"    captured_at: {date.today().isoformat()}")
+    entry_text = "\n".join(lines) + "\n"
+
+    print(entry_text)
+    print(f"preview -> {preview_abs}")
+
+    if a.dry_run:
+        print("\n(dry run; nothing written)")
+        return
+
+    try:
+        from PIL import Image
+    except ImportError:
+        sys.exit("Pillow required to normalize the preview image. install it, or drop --dry-run.")
+
+    img = Image.open(src).convert("RGB")
+    side = min(img.size)
+    left = (img.width - side) // 2
+    top = (img.height - side) // 2
+    img = img.crop((left, top, left + side, top + side)).resize((800, 800), Image.LANCZOS)
+    preview_abs.parent.mkdir(parents=True, exist_ok=True)
+    img.save(preview_abs, "JPEG", quality=92)
+    if preview_abs.read_bytes()[:2] != b"\xff\xd8":
+        sys.exit("preview write failed JPEG magic byte check")
+
+    new_count = len(styles) + 1
+    new_text = text.rstrip("\n") + "\n" + entry_text
+    new_text = re.sub(r"(?m)^(  count: )\d+$", rf"\g<1>{new_count}", new_text, count=1)
+
+    try:
+        import yaml
+        yaml.safe_load(new_text)  # round-trip sanity check before committing to disk
+    except Exception as e:
+        sys.exit(f"refusing to write: appended file failed to parse as YAML: {e}")
+
+    yaml_path.write_text(new_text, encoding="utf-8")
+    md_path = regenerate_styles_md(lib, new_text)
+    print(f"\nwrote id {new_id} to {yaml_path}, count now {new_count}.")
+    print(f"regenerated Obsidian mirror doc: {md_path}")
+
+
+if __name__ == "__main__":
+    main()
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_ADD_STYLE_PY_2961B03564
+chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/add_style.py"
 
 # visual-prompt-kit/scripts/recommend_styles.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/recommend_styles.py")"
