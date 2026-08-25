@@ -39,18 +39,23 @@
 
 ### 待辦事項
 
-#### C-1【Codex，**尚未執行**】`sandbox_workspace_write` 白名單仍未生效
-- **2026-08-26 Claude Code 實測更正**：前一版 HANDOFF 記為「`workspace-write` 已生效」，
-  但實際 `~/.codex/config.toml` 仍是 `sandbox_mode = "danger-full-access"`。
-  `writable_roots` 確實由 26 增為 27 條，但**模式未切換，整段 `[sandbox_workspace_write]` 依然失效**。
-  推測是前一個 session 被 managed sandbox 擋住寫入卻誤記為完成。
-- **待決定**：是否切換為 `sandbox_mode = "workspace-write"`。
-- **切換前必須先做**：確認 27 條白名單涵蓋所有實際工作路徑，並逐一實測 LazyPack 同步、
-  Obsidian 鏡像、chezmoi checkpoint、python-tools 安裝。白名單外的寫入會被擋，工作流可能中斷。
-- 合法值（`codex --sandbox` 實測）：`read-only`、`workspace-write`、`danger-full-access`。
+#### C-1【Codex，已決策】維持 Full Access
+- 使用者於 2026-08-26 明確決定維持 `sandbox_mode = "danger-full-access"`，不切換為
+  `workspace-write`。
+- `[sandbox_workspace_write]` 的 27 條 `writable_roots` 保留為備用設定；Full Access 模式下不生效，
+  不再列為待決策或阻塞。
 
-#### C-2【Codex，已決策】維持高自動化
-- 使用者於 2026-08-26 決定維持 `approval_policy = "never"`；未命中 `forbidden` 的指令不再跳第二次確認，因此 forbidden 清單完整性必須優先維護。
+#### C-2【Codex ＋ Claude，已完成】高自動化＋風險操作詢問
+- 2026-08-26 已在 Full Access 任務將 `approval_policy = "never"` 改為 `"on-request"`，並將
+  `approvals_reviewer = "auto_review"` 改為 `"user"`；`sandbox_mode = "danger-full-access"` 保持不變。
+- 一般 `git commit`／`git push` 已由 `allow` 改為 `prompt`；`git push --force`、
+  `git reset --hard`、`git clean -df` 等既有危險規則仍維持 `forbidden`。
+- 已建立 `config.toml.bak.20260826-071319` 與 `default.rules.bak.20260826-071319`
+  （實測確認在 `{{SYNC_ROOT}}/backups/`，非 HANDOFF 原記載的 `~/.codex`）；目前任務不會
+  追溯重載啟動時權限，需重新開啟 Codex 任務後才會以新核准策略執行。
+- **2026-08-26 Claude Code 補齊對稱性**：C-2 原本只做了 Codex，Claude 側 `permissions.ask` 為 0 條，
+  等於這個 Agent 的 commit／push 完全不詢問。已加入 `Bash(git commit:*)`、`Bash(git push:*)`。
+  這是**第三次**單邊修改造成不一致，X-1 的規則必須確實執行。
 
 #### S-1【全域 Skill】`personal-style-loop` 素材放置與第一輪校準
 - 待將 2～3 篇代表作寫作素材放入專案 `200_Reference/writing-samples/` 後，跑第一輪風格校準。
@@ -61,8 +66,17 @@
 - 兩邊現已對齊 6 個變體：`-f`／`-fd`／`-fdx`／`-df`／`-dfx`／`-xdf`。
   Codex 逐變體 `execpolicy` 實測全 forbidden；`git clean -n`、`git clean -d`、`git status` 仍放行。
   Claude 側 deny 由 15 → 17 條。
-- **仍待辦**：`~/.claude/settings.json` 與 `~/.codex/rules/default.rules` 都不在 chezmoi
-  管理範圍，換電腦不會帶過去。納管需走 Item 16 受控流程。
+- **2026-08-26 已解決跨裝置問題，但不是用 chezmoi add**。量化後確認四個設定檔不適合直接納管：
+  `.codex/config.toml` 33 處本機絕對路徑、`.gemini/config/config.json` 31 處且由 app 主動重寫
+  （納管會與 app 互相覆寫）、`.codex/rules/default.rules` 11 處。直接 add 會把錯誤路徑帶到新機器。
+- 改為抽出**零絕對路徑的可攜主版本** `{{SYNC_ROOT}}/rules/agent-guardrails.json`
+  （17 條 forbidden、2 條 ask，含刻意排除項與已知洞的理由），由 Google Drive 跨機器同步。
+- 新增 `cross-device-sync/scripts/apply-agent-guardrails.py`：預設唯讀 `--verify`，
+  `--apply` 才寫入且自動備份。AntiGravity 因無 deny 機制而明確略過。
+- 已接進 `session-sync-checkpoint.sh` 的三個結束路徑，開工／收工都會自動比對並輸出
+  `GUARDRAILS CLAUDE drift: ... CODEX block: ...`。
+- **`~/.claude/settings.json` 的 mcpServers 與 `.codex/config.toml` 仍未跨裝置**；
+  那些是本機路徑設定，換電腦時由 Item 16 bootstrap 重建，不走檔案同步。
 - **規則**：修改任一邊都必須兩邊一起改並雙向實測。這已是第二次因單邊修改而產生不一致。
 
 ## Blockers
@@ -70,22 +84,22 @@
 - AntiGravity A-1／A-2／A-3 阻塞已全數解除（Claude Code 實測覆核：`unsandboxed(...)` 確實歸零、
   allow 由 114 降為 113、`enableTerminalSandbox` 仍為 true）。
 - Codex `git clean -df` 阻塞已解除：由 Claude Code 直接寫入完成。
-- **C-1 仍待使用者決策**，且前一版 HANDOFF 對其狀態的記載不正確，已更正為「尚未執行」。
+- C-1 與 C-2 均已完成，沒有 Codex 設定阻塞；C-2 的 runtime 生效點是下一個重新開啟的任務。
 - 跨 session 提醒：接手者回報「已完成」時，務必對 live 狀態實測覆核再採信。
 
 ## Last verified
 
-- 2026-08-26，Claude Code：`heptabase-cli` skill 更新到 `0.5.x`。CLI 實際版本 `0.5.0`
-  （Heptabase.app 1.104.0）；14 個頂層指令全數涵蓋；三個驗證器全過
-  （`package_claude_skill.py validate` VALID、`quick_validate.py` 通過、
-  `audit-agent-compatibility.py` scanned_files=6 findings=0）；三個 Agent 入口皆解析到 0.5.x；
-  LazyPack Item 02 內嵌與主版本 `diff` IDENTICAL、prose 由 `0.4.x` 更正為 `0.5.x`；
-  懶人包鏡像 `diff -qr` 一致。
-- 2026-08-26，Claude Code 對前一 session 回報的覆核（實測，非採信）：
-  - A-1 屬實：`~/.gemini/config/config.json` 的 `unsandboxed(...)` 為 0 條，allow 由 114 降為 113。
-  - A-2 屬實：`autoExecutionPolicy` 仍為 `EAGER`，`enableTerminalSandbox` 仍為 true。
-  - X-1 屬實且已補完：Codex `git clean -df` 原為 no-match，補後 6 個變體全 forbidden。
-  - **C-1 不實**：`~/.codex/config.toml` 仍為 `sandbox_mode = "danger-full-access"`，
-    未切換為 `workspace-write`；`writable_roots` 為 27 條但整段仍不生效。已更正 HANDOFF 記載。
-- 兩邊攔截清單對齊：Claude 17 條 deny／Codex 10 條 forbidden，`git clean` 6 變體一致。
-  備份：`codex-default.rules.bak.*`、`claude-settings.json.bak.*`、`heptabase-cli.SKILL.md.bak.*`。
+- 2026-08-26，Claude Code 全面覆核（實測，未採信回報）：
+  - **C-1 屬實**：`sandbox_mode = "danger-full-access"` 維持不變。
+  - **C-2 屬實**：`approval_policy = "on-request"`、`approvals_reviewer = "user"`、
+    `git commit`／`git push` 為 `prompt` 共 2 條。備份檔存在（位置為 `backups/` 非 `~/.codex`）。
+  - **A-1／A-2／A-3 屬實**：`unsandboxed(...)` 0 條、allow 113、`enableTerminalSandbox` true、
+    `EAGER` 維持、兩個 symlink 皆連到 `core-rules.md` 且讀得到〈不可逆操作邊界〉。
+  - **X-1 屬實**：`-df` 修正未被後續編輯覆蓋；Codex 17 條 forbidden 逐一 execpolicy 實測全命中；
+    誤擋檢查 7 項正常指令（含 `chmod -R 755`、`rm -rf /tmp/build`、`git clean -n`／`-d`）全放行。
+  - **發現新不一致**：C-2 只做 Codex，Claude `permissions.ask` 為 0 條，已補齊。
+- 可攜主版本 `rules/agent-guardrails.json` 與兩個 Agent 實際設定完全對帳：
+  forbidden 17/17、ask 2/2，零差異。`apply-agent-guardrails.py --verify` 回報 drift none。
+- `session-sync-checkpoint.sh` 三個結束路徑皆已接上 guardrails 比對，實測輸出正常，`bash -n` 通過。
+- LazyPack Item 16 內嵌新腳本與主版本 `diff` IDENTICAL；懶人包鏡像 `diff -qr` 一致。
+  （全量 sync 在 Google Drive 路徑逾時，依既有踩坑筆記改用 `replace_embedded_section` 單項重生。）
