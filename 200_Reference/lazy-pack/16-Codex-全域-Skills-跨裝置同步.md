@@ -1961,6 +1961,146 @@ Integrated from `mathruffian-dot/cross-device-agent-skills` at the architectural
 Do not copy the upstream lowercase paths, `git add .`, Claude-only home assumptions, or commit/push behavior literally.
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_SOURCE_ADAPTATION_MD_6047167E40
 
+# cross-device-sync/scripts/apply-agent-guardrails.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/apply-agent-guardrails.py")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/apply-agent-guardrails.py" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_APPLY_AGENT_GUARDRAILS_PY_C26E39A3E3'
+#!/usr/bin/env python3
+"""Apply or verify the portable cross-agent guardrails.
+
+Master: <SYNC_ROOT>/rules/agent-guardrails.json (no machine-specific paths).
+Targets: ~/.claude/settings.json (permissions.deny / permissions.ask)
+         ~/.codex/rules/default.rules (arry-dangerous-rules block)
+
+AntiGravity has no command-deny mechanism and is intentionally skipped.
+Default is --verify (read-only). Use --apply to write, which backs up first.
+"""
+from __future__ import annotations
+import argparse, json, os, re, shutil, sys, datetime
+from pathlib import Path
+
+BLOCK_START = "# >>> arry-dangerous-rules >>>"
+BLOCK_END = "# <<< arry-dangerous-rules <<<"
+
+
+def load_master(sync_root: Path) -> dict:
+    p = sync_root / "rules" / "agent-guardrails.json"
+    if not p.is_file():
+        sys.exit(f"ERROR master not found: {p}")
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def wanted(master: dict) -> tuple[list[str], list[str]]:
+    forbidden: list[str] = []
+    for key, val in master["forbidden"].items():
+        if key != "_comment":
+            forbidden.extend(val)
+    ask = list(master["ask"]["git_publish"])
+    return forbidden, ask
+
+
+def backup(path: Path, backups: Path) -> Path | None:
+    if not path.exists():
+        return None
+    backups.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    dest = backups / f"{path.name}.bak.{stamp}"
+    shutil.copy2(path, dest)
+    return dest
+
+
+def claude_state(path: Path) -> tuple[set[str], set[str]]:
+    if not path.is_file():
+        return set(), set()
+    perms = json.loads(path.read_text(encoding="utf-8")).get("permissions", {})
+    strip = lambda x: re.sub(r"^Bash\(|:\*\)$", "", x)
+    return {strip(x) for x in perms.get("deny", [])}, {strip(x) for x in perms.get("ask", [])}
+
+
+def apply_claude(path: Path, forbidden: list[str], ask: list[str]) -> None:
+    data = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    perms = data.setdefault("permissions", {})
+    perms["deny"] = [f"Bash({c}:*)" for c in forbidden]
+    perms["ask"] = [f"Bash({c}:*)" for c in ask]
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def render_codex_block(master: dict, ask: list[str]) -> str:
+    lines = [BLOCK_START,
+             "# Generated from <SYNC_ROOT>/rules/agent-guardrails.json. Edit the master, not this block."]
+    just = {
+        "sudo": "權限提升後所有後續指令都不受一般使用者權限限制；請自行在終端機執行。",
+        "chmod_777": "777 等於拆掉存取控制；請指定實際需要的權限。",
+        "disk": "直接動磁碟區塊，目標打錯即全部資料消失。",
+        "git_history": "覆寫遠端歷史或讓未 commit 的工作消失；請先確認並自行執行。",
+        "git_clean": "連未追蹤檔案一起刪除；請先確認清單。",
+        "system": "中斷所有進行中的工作。",
+    }
+    for key, cmds in master["forbidden"].items():
+        if key == "_comment":
+            continue
+        for cmd in cmds:
+            pat = ", ".join(f'"{t}"' for t in cmd.split())
+            lines.append(f'prefix_rule(pattern=[{pat}], decision="forbidden",')
+            lines.append(f'    justification="{just.get(key, "危險指令。")}")')
+    for cmd in ask:
+        pat = ", ".join(f'"{t}"' for t in cmd.split())
+        lines.append(f'prefix_rule(pattern=[{pat}], decision="prompt")')
+    lines.append(BLOCK_END)
+    return "\n".join(lines) + "\n"
+
+
+def apply_codex(path: Path, block: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    text = path.read_text(encoding="utf-8") if path.is_file() else ""
+    if BLOCK_START in text and BLOCK_END in text:
+        head, rest = text.split(BLOCK_START, 1)
+        _, tail = rest.split(BLOCK_END, 1)
+        text = head.rstrip("\n") + "\n\n" + block + tail.lstrip("\n")
+    else:
+        text = text.rstrip("\n") + "\n\n" + block
+    path.write_text(text, encoding="utf-8")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--sync-root", required=True)
+    ap.add_argument("--apply", action="store_true", help="write changes (default is read-only verify)")
+    args = ap.parse_args()
+
+    sync_root = Path(args.sync_root).expanduser()
+    master = load_master(sync_root)
+    forbidden, ask = wanted(master)
+    claude = Path.home() / ".claude" / "settings.json"
+    codex = Path.home() / ".codex" / "rules" / "default.rules"
+    backups = sync_root / "backups"
+
+    print(f"MASTER forbidden={len(forbidden)} ask={len(ask)}")
+
+    have_deny, have_ask = claude_state(claude)
+    drift = sorted(set(forbidden) ^ have_deny) + sorted(set(ask) ^ have_ask)
+
+    if args.apply:
+        b1 = backup(claude, backups)
+        apply_claude(claude, forbidden, ask)
+        print(f"APPLIED claude: {claude}  BACKUP={b1}")
+        b2 = backup(codex, backups)
+        apply_codex(codex, render_codex_block(master, ask))
+        print(f"APPLIED codex:  {codex}  BACKUP={b2}")
+        print("VERIFY codex with: codex execpolicy check --pretty --rules ~/.codex/rules/default.rules -- <cmd>")
+    else:
+        print("CLAUDE drift:", drift or "none")
+        has_block = codex.is_file() and BLOCK_START in codex.read_text(encoding="utf-8")
+        print("CODEX block:", "present" if has_block else "MISSING")
+        print("MODE verify-only; rerun with --apply to write")
+
+    print("ANTIGRAVITY skipped: no command-deny mechanism (see knowledge/prompt-defense-baseline.md)")
+
+
+if __name__ == "__main__":
+    main()
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_APPLY_AGENT_GUARDRAILS_PY_C26E39A3E3
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/apply-agent-guardrails.py"
+
 # cross-device-sync/scripts/audit-agent-compatibility.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-compatibility.py")"
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-compatibility.py" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_AUDIT_AGENT_COMPATIBILITY_PY_5BE365A65B'
@@ -2654,12 +2794,26 @@ fi
 if [ "$phase" != "startup" ] || [ "$run_update" -ne 1 ]; then
   printf 'CHEZMOI_UPDATE=not-requested\n'
   printf 'CHEZMOI_ADD=not-needed-for-existing-templates\n'
+guardrails_script="$sync_root/skills/cross-device-sync/scripts/apply-agent-guardrails.py"
+if [ -f "$guardrails_script" ]; then
+  guardrails_out="$(python3 "$guardrails_script" --sync-root "$sync_root" 2>&1 || true)"
+  printf 'GUARDRAILS %s\n' "$(printf '%s' "$guardrails_out" | grep -E '^CLAUDE drift:|^CODEX block:' | tr '\n' ' ')"
+else
+  printf 'GUARDRAILS=script-missing\n'
+fi
   exit 0
 fi
 
 skip_update() {
   printf 'CHEZMOI_UPDATE=skipped:%s\n' "$1"
   printf 'CHEZMOI_ADD=not-needed-for-existing-templates\n'
+guardrails_script="$sync_root/skills/cross-device-sync/scripts/apply-agent-guardrails.py"
+if [ -f "$guardrails_script" ]; then
+  guardrails_out="$(python3 "$guardrails_script" --sync-root "$sync_root" 2>&1 || true)"
+  printf 'GUARDRAILS %s\n' "$(printf '%s' "$guardrails_out" | grep -E '^CLAUDE drift:|^CODEX block:' | tr '\n' ' ')"
+else
+  printf 'GUARDRAILS=script-missing\n'
+fi
   exit 0
 }
 
@@ -2728,6 +2882,13 @@ fi
 printf 'CHEZMOI_UPDATE=complete\n'
 printf 'BACKUP=%s\n' "$backup_dir"
 printf 'CHEZMOI_ADD=not-needed-for-existing-templates\n'
+guardrails_script="$sync_root/skills/cross-device-sync/scripts/apply-agent-guardrails.py"
+if [ -f "$guardrails_script" ]; then
+  guardrails_out="$(python3 "$guardrails_script" --sync-root "$sync_root" 2>&1 || true)"
+  printf 'GUARDRAILS %s\n' "$(printf '%s' "$guardrails_out" | grep -E '^CLAUDE drift:|^CODEX block:' | tr '\n' ' ')"
+else
+  printf 'GUARDRAILS=script-missing\n'
+fi
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SESSION_SYNC_CHECKPOINT_SH_29BFBFC51C
 chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh"
 
