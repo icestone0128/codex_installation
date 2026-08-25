@@ -73,9 +73,25 @@
   並在 Item 11 與 44 的**說明文字**中寫出完整提問樹（第三方讀的是這段，不是內嵌 skill）。
   `personal-style-loop` 140 → 197 行、`codex-skill-creator` 307 → 333 行。
 
+- 索引計數修正：先前「82 個 skills」把 `README.md` 算進去了。正確為實際 skill **82 個**
+  （必裝共享 2 ＋ 自訂全域 80）。Obsidian 索引表格補上 `personal-style-loop` 並寫入計數口徑。
+- Pro-Kit 02 以**判斷層 ＋ 窄 deny** 整合，不建 skill、不裝 hook：
+  - 第一層 `rm` → 垃圾桶 alias **確認不整合**（只保護終端機手動輸入，使用者不用終端機）。
+  - 判斷層改 3 個既有檔案：`core-rules.md` 新增〈不可逆操作邊界〉四級分類並修正
+    「不可逆動作先確認」原本被埋在 Google MCP 章節、只對 Google 生效的問題；
+    `knowledge/prompt-defense-baseline.md §4` 擴充為分級細則並新增 §4.2 說明判斷層的侷限；
+    `arry-assistant` 使用流程加入指向。
+  - 攔截層寫入 `~/.claude/settings.json` 的 11 條 `permissions.deny`，每條先實測誤擋風險。
+    `rm -rf` **刻意不納入**——11 個安裝腳本在用，無差別擋會弄壞它們。
+  - 五項驗證全過：`sudo` 實測被擋、一般 git 未誤擋、三個同步腳本正常、既有設定保留、JSON 合法。
+
 ## Next action
 
-- LazyPack Item 11、44、README 與同步腳本待 commit／push。
+- 本輪 repo 無變更（改動在 `codex_symlink` 與 `~/.claude/settings.json`），前次 push 為 `85ce0fa`。
+- `~/.claude/settings.json` **不在 chezmoi 管理範圍**，deny 清單不會跟著換電腦；
+  要納管需走 Item 16 受控流程，尚未執行。
+- Codex 的 deny 規則尚未做。`~/.codex/rules/default.rules` 目前全是累積的 `allow`，0 條 deny。
+- `rm -rf` 的路徑感知攔截需要 PreToolUse hook，本次未做；判斷層已用文字規範涵蓋。
 - **`personal-style-loop` 尚未經真實素材校準**：它的校準題與保留題無法執行，因為
   `writing-samples/` 是空的。依該 skill 自己的停止條件，素材不足就不得開始。
   下一步是放 2～3 篇完整代表作進某個專案的 `200_Reference/writing-samples/`，再跑第一輪校準。
