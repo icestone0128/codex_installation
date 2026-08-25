@@ -99,6 +99,12 @@
 - AntiGravity 的判斷層早已生效（`GEMINI.md`／`config/AGENTS.md` 皆 symlink 到 `core-rules.md`，
   實測讀得到〈不可逆操作邊界〉），且它是三者中唯一 `enableTerminalSandbox = true` 的。
 
+- 修正 Claude 與 Codex 攔截清單的三處不一致（成因是我先寫 Claude 逐條列、後寫 Codex 改用
+  list 語法時補齊變體卻沒回頭同步）：Claude 漏擋 `git clean -fd` 與 `git push --force-with-lease`
+  （實測都執行成功）；Codex 的 `["chmod",["777","-R"]]` 誤擋合法的 `chmod -R 755`。
+  Claude 11 → 15 條，Codex chmod 拆成兩條。條數不同屬語法差異，涵蓋面已對齊。
+  規則寫進 `prompt-defense-baseline.md`：兩邊必須一起改並雙向實測。
+
 ## Next action
 
 - 本輪 repo 無變更（改動在 `codex_symlink` 與 `~/.claude/settings.json`），前次 push 為 `85ce0fa`。
