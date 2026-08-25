@@ -85,12 +85,21 @@
     `rm -rf` **刻意不納入**——11 個安裝腳本在用，無差別擋會弄壞它們。
   - 五項驗證全過：`sudo` 實測被擋、一般 git 未誤擋、三個同步腳本正常、既有設定保留、JSON 合法。
 
+- Codex 端攔截層補齊（前一輪只做了 Claude Code，未問使用者主力環境即動手，是判斷失誤）。
+  `~/.codex/settings.json` **不存在**，Codex 用 `rules/default.rules` 的
+  `prefix_rule(..., decision="forbidden")`——注意是 `forbidden` 不是 `deny`。
+  已寫入 9 條規則涵蓋 11 種指令形態，暫存檔實測 18 項、真實檔重跑 19 項全過。
+- allow 清理實測後決定不做：在 `approval_policy = "never"` 下，「未命中」與「allow」行為相同，
+  清理不換來防護。真正的槓桿是 `config.toml` 的 `approval_policy` 與 `sandbox_mode`，未動。
+
 ## Next action
 
 - 本輪 repo 無變更（改動在 `codex_symlink` 與 `~/.claude/settings.json`），前次 push 為 `85ce0fa`。
 - `~/.claude/settings.json` **不在 chezmoi 管理範圍**，deny 清單不會跟著換電腦；
   要納管需走 Item 16 受控流程，尚未執行。
-- Codex 的 deny 規則尚未做。`~/.codex/rules/default.rules` 目前全是累積的 `allow`，0 條 deny。
+- **AntiGravity 端仍無任何攔截層**，三個 Agent 只有兩個有防護。
+- 兩邊共同的洞：`git push origin main --force` 因前綴比對限制擋不到，已寫入知識檔備查。
+- `~/.codex/rules/default.rules` 與 `~/.claude/settings.json` 都不在 chezmoi 管理範圍，換電腦不會帶過去。
 - `rm -rf` 的路徑感知攔截需要 PreToolUse hook，本次未做；判斷層已用文字規範涵蓋。
 - **`personal-style-loop` 尚未經真實素材校準**：它的校準題與保留題無法執行，因為
   `writing-samples/` 是空的。依該 skill 自己的停止條件，素材不足就不得開始。
