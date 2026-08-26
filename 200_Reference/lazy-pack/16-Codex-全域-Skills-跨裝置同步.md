@@ -269,7 +269,7 @@ chezmoi init --apply https://github.com/<OWNER>/<YOUR_DOTFILES_REPO>.git
 可攜的是**規則本身**：
 
 ```text
-{{SYNC_ROOT}}/rules/agent-guardrails.json
+{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardrails.json
 ```
 
 零本機絕對路徑，記錄 17 條 `forbidden`、2 條 `ask`，以及刻意排除項與已知洞的理由。
@@ -306,6 +306,11 @@ codex execpolicy check --pretty --rules ~/.codex/rules/default.rules -- git stat
 > [!IMPORTANT]
 > **`rm -rf` 刻意未納入。** 11 個安裝腳本正當使用它清理自己的 `$temp_dir`／`$STAGING_DIR`／`venv`，
 > 無差別攔截會弄壞安裝流程。排除理由記在主版本的 `excluded` 欄位。
+
+> [!NOTE]
+> **權限模式（sandbox／approval）是個人選擇，本節不強制。** 攔截規則在任何權限模式下都生效；
+> 要不要讓一般指令也跳確認（Codex `approval_policy`、Claude 的權限模式、AntiGravity
+> `autoExecutionPolicy`），依自己的工作節奏在各 Agent 設定中調整。
 
 > [!WARNING]
 > **修改規則時三個 Agent 必須一起改並雙向實測。** 單邊修改已造成過三次不一致
@@ -815,6 +820,72 @@ display_name: Cross-Device & Agent Sync
 short_description: Bootstrap Claude, Codex, and AntiGravity portability.
 default_prompt: Use $cross-device-sync to audit or bootstrap a safe chezmoi-managed cross-device and cross-agent setup.
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_AGENTS_OPENAI_YAML_DEB9755D27
+
+# cross-device-sync/assets/agent-guardrails.json
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardrails.json")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardrails.json" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_ASSETS_AGENT_GUARDRAILS_JSON_3CA8879092'
+{
+  "_comment": "跨 Agent 危險指令防護的可攜主版本。零本機絕對路徑，可直接跨機器套用。本檔隨 cross-device-sync skill 發布（assets/），LazyPack Item 16 會完整內嵌。修改後三個 Agent 必須一起同步並雙向實測（見 knowledge/prompt-defense-baseline.md §4.2）。",
+  "_updated": "2026-08-26",
+  "forbidden": {
+    "_comment": "絕對不執行。Claude 寫入 permissions.deny；Codex 寫入 rules/default.rules 的 arry-dangerous-rules 區塊。",
+    "sudo": [
+      "sudo"
+    ],
+    "chmod_777": [
+      "chmod 777",
+      "chmod -R 777"
+    ],
+    "disk": [
+      "mkfs",
+      "diskutil eraseDisk"
+    ],
+    "git_history": [
+      "git push --force",
+      "git push -f",
+      "git push --force-with-lease",
+      "git reset --hard",
+      "git branch -D"
+    ],
+    "git_clean": [
+      "git clean -f",
+      "git clean -fd",
+      "git clean -fdx",
+      "git clean -df",
+      "git clean -dfx",
+      "git clean -xdf"
+    ],
+    "system": [
+      "shutdown"
+    ]
+  },
+  "ask": {
+    "_comment": "執行前詢問使用者。Claude 寫入 permissions.ask；Codex 寫成 decision=\"prompt\"。",
+    "git_publish": [
+      "git commit",
+      "git push"
+    ]
+  },
+  "excluded": {
+    "_comment": "刻意不納入，附理由。",
+    "rm -rf": "11 個安裝腳本正當使用（doc-to-md、audio-to-md、cli-anything、install_python_tools 等），刪的是 $temp_dir／$STAGING_DIR／venv。無差別擋會弄壞安裝流程。需路徑感知的 hook 才能處理。",
+    "dd": "也用於一般檔案複製與測試，誤擋率高。",
+    "chmod -R (不含 777)": "chmod -R 755、chmod -R u+x 都是正常操作。2026-08-26 曾因把 -R 當獨立條件而誤擋。"
+  },
+  "known_gaps": {
+    "_comment": "已知且目前無法修補，需人工留意。",
+    "git push origin main --force": "兩邊都是前綴比對，--force 不在固定位置就抓不到。force push 前需人工確認。",
+    "antigravity": "AntiGravity 無指令 deny 機制（globalPermissionGrants 只有 allow）。其防線是 enableTerminalSandbox 與 core-rules.md 判斷層。"
+  },
+  "apply": {
+    "claude": "~/.claude/settings.json → permissions.deny 用 \"Bash(<cmd>:*)\" 格式逐條列；permissions.ask 同格式。",
+    "codex": "~/.codex/rules/default.rules → prefix_rule(pattern=[...], decision=\"forbidden\"|\"prompt\")，包在 # >>> arry-dangerous-rules >>> 區塊內。注意值是 forbidden 不是 deny。",
+    "antigravity": "無對應機制，不套用。",
+    "verify_claude": "在拋棄式目錄實際執行該指令，看是否回 permission denied。",
+    "verify_codex": "codex execpolicy check --pretty --rules ~/.codex/rules/default.rules -- <指令>，看 decision 欄。"
+  }
+}
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_ASSETS_AGENT_GUARDRAILS_JSON_3CA8879092
 
 # cross-device-sync/references/agent-execution-compatibility.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/references/agent-execution-compatibility.md")"
@@ -2028,7 +2099,7 @@ cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/apply-agent-guardrails.py"
 #!/usr/bin/env python3
 """Apply or verify the portable cross-agent guardrails.
 
-Master: <SYNC_ROOT>/rules/agent-guardrails.json (no machine-specific paths).
+Master: <SYNC_ROOT>/skills/cross-device-sync/assets/agent-guardrails.json (no machine-specific paths; ships inside the skill so LazyPack embeds it).
 Targets: ~/.claude/settings.json (permissions.deny / permissions.ask)
          ~/.codex/rules/default.rules (arry-dangerous-rules block)
 
@@ -2044,9 +2115,12 @@ BLOCK_END = "# <<< arry-dangerous-rules <<<"
 
 
 def load_master(sync_root: Path) -> dict:
-    p = sync_root / "rules" / "agent-guardrails.json"
+    p = sync_root / "skills" / "cross-device-sync" / "assets" / "agent-guardrails.json"
+    legacy = sync_root / "rules" / "agent-guardrails.json"
     if not p.is_file():
         sys.exit(f"ERROR master not found: {p}")
+    if legacy.is_file() and legacy.read_text(encoding="utf-8") != p.read_text(encoding="utf-8"):
+        sys.exit(f"ERROR legacy copy at {legacy} differs from the master; merge or delete it before applying")
     return json.loads(p.read_text(encoding="utf-8"))
 
 
@@ -2087,7 +2161,7 @@ def apply_claude(path: Path, forbidden: list[str], ask: list[str]) -> None:
 
 def render_codex_block(master: dict, ask: list[str]) -> str:
     lines = [BLOCK_START,
-             "# Generated from <SYNC_ROOT>/rules/agent-guardrails.json. Edit the master, not this block."]
+             "# Generated from cross-device-sync/assets/agent-guardrails.json. Edit the master, not this block."]
     just = {
         "sudo": "權限提升後所有後續指令都不受一般使用者權限限制；請自行在終端機執行。",
         "chmod_777": "777 等於拆掉存取控制；請指定實際需要的權限。",
