@@ -259,6 +259,59 @@ chezmoi init --apply https://github.com/<OWNER>/<YOUR_DOTFILES_REPO>.git
 
 不要把 API key、OAuth token、session、MCP 認證或 Agent 設定資料庫加進這個 repo，即使它是 private。
 
+## 危險指令防護層（跨機器可攜）
+
+三個 Agent 的攔截設定檔（`~/.claude/settings.json`、`~/.codex/rules/default.rules`、
+`~/.gemini/config/config.json`）**刻意不納入 chezmoi**：它們合計含 75 處本機絕對路徑，
+其中 AntiGravity 的 `config.json` 還會被 app 主動重寫（納管會與 app 互相覆寫）。
+直接同步會讓新電腦拿到指向不存在路徑的設定，比不同步更糟。
+
+可攜的是**規則本身**：
+
+```text
+{{SYNC_ROOT}}/rules/agent-guardrails.json
+```
+
+零本機絕對路徑，記錄 17 條 `forbidden`、2 條 `ask`，以及刻意排除項與已知洞的理由。
+新電腦用套用腳本重建：
+
+```bash
+# 預設唯讀，只回報差異
+python3 "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/apply-agent-guardrails.py" \
+  --sync-root "{{SYNC_ROOT}}"
+
+# 確認後才寫入，會自動備份到 {{SYNC_ROOT}}/backups/
+python3 "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/apply-agent-guardrails.py" \
+  --sync-root "{{SYNC_ROOT}}" --apply
+```
+
+各 Agent 的套用方式不同，腳本會自行處理：
+
+| Agent | 機制 | 格式 |
+| :-- | :-- | :-- |
+| Claude Code | `permissions.deny` / `permissions.ask` | `"Bash(sudo:*)"` |
+| Codex | `rules/default.rules` 的 `arry-dangerous-rules` 區塊 | `prefix_rule(..., decision="forbidden"\|"prompt")`。**值是 `forbidden` 不是 `deny`** |
+| AntiGravity | **無此機制**，腳本明確略過 | 改走 sandbox 與判斷層驗證，見 `antigravity_installation` 的懶人包 |
+
+驗證：
+
+```bash
+# Codex
+codex execpolicy check --pretty --rules ~/.codex/rules/default.rules -- sudo ls   # 應為 forbidden
+codex execpolicy check --pretty --rules ~/.codex/rules/default.rules -- git status # 應未命中或 allow
+
+# Claude Code：在拋棄式目錄實際執行，被擋會回 permission denied
+```
+
+> [!IMPORTANT]
+> **`rm -rf` 刻意未納入。** 11 個安裝腳本正當使用它清理自己的 `$temp_dir`／`$STAGING_DIR`／`venv`，
+> 無差別攔截會弄壞安裝流程。排除理由記在主版本的 `excluded` 欄位。
+
+> [!WARNING]
+> **修改規則時三個 Agent 必須一起改並雙向實測。** 單邊修改已造成過三次不一致
+> （Claude 漏 `git clean -fd` 與 `--force-with-lease`、Codex 誤擋 `chmod -R 755`、
+> Claude 漏 `ask`）。已知洞：`git push origin main --force` 因前綴比對限制兩邊都擋不到。
+
 ## 開工／收工自動 checkpoint
 
 Item 10 的 `startup-sync` 與 `shutdown-sync` 固定呼叫同一支腳本；Codex、Claude、AntiGravity 都使用相同命令：
@@ -283,6 +336,14 @@ checkpoint 固定先執行 bootstrap dry-run 與 `chezmoi status`。開工加 `-
 
 `chezmoi add` 不是日常開工／收工動作。既有規則／skills 入口、Python bridge、env loader 與 shell modifier 已是受管理 templates；直接重新 add 可能移除 template 屬性，headless shell 還會因嘗試開 `/dev/tty` 失敗。只在新增白名單入口時，才先擴充 `bootstrap-agent-sync.sh` 的可攜 template、備份與 dry-run，再用受控 `chezmoi add` 檢視 diff。
 
+
+checkpoint 每次結束都會輸出防護規則的比對結果：
+
+```text
+GUARDRAILS CLAUDE drift: none CODEX block: present
+```
+
+`drift` 非 `none` 或 `block` 顯示 `MISSING` 時，表示某一邊被單獨改過，重跑套用腳本即可對齊。
 ## 實際踩坑紀錄（2026-07-20～2026-07-21 驗證）
 
 - Homebrew 第一次執行可能先自動更新，數分鐘沒有明顯輸出；不要因安靜就重複啟動另一個安裝程序。
