@@ -913,7 +913,7 @@ cat > "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardrails.json" <<'A
     "rm -rf": "11 個安裝腳本正當使用（doc-to-md、audio-to-md、cli-anything、install_python_tools 等），刪的是 $temp_dir／$STAGING_DIR／venv。無差別擋會弄壞安裝流程。需路徑感知的 hook 才能處理。",
     "dd": "也用於一般檔案複製與測試，誤擋率高。",
     "chmod -R (不含 777)": "chmod -R 755、chmod -R u+x 都是正常操作。2026-08-26 曾因把 -R 當獨立條件而誤擋。",
-    "git commit / git push": "2026-08-26 依使用者決定移除。原本兩者都是 ask，但實測發現 Claude 的 permissions.ask 優先權高於 PreToolUse hook 的 allow，無法用自動審核器取代彈窗，只能整條移除。core-rules.md 已同步把 commit/push 從 C 級移到 D 級，並在〈commit 與 push 的現行處理〉列出 Agent 執行前仍必須自行完成的檢查（掃金鑰、確認 repo 可見性與分支）。force push、reset --hard、clean -f、branch -D 仍在 forbidden，不受影響。"
+    "git commit / git push": "2026-08-26 依使用者決定，這兩條 ask 規則整條拿掉。實測發現 Claude 的 permissions.ask 優先權高於 PreToolUse hook 的 allow，無法用自動審核器取代彈窗，只能整條拿掉。core-rules.md 已同步把 commit/push 從 C 級移到 D 級，並在〈commit 與 push 的現行處理〉列出 Agent 執行前仍必須自行完成的檢查（掃金鑰、確認 repo 可見性與分支）。force push、reset --hard、clean -f、branch -D 仍在 forbidden，不受影響。"
   },
   "known_gaps": {
     "_comment": "已知且目前無法修補，需人工留意。",
