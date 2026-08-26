@@ -18,6 +18,13 @@
   個人記憶、REPOS.md、風格庫不外流。
 - 全域 skill 計數口徑：實際 82（必裝共享 2 ＋ 自訂 80），`ls` 會把 README.md 誤計。
 
+- 2026-08-26 晚間：GitHub 清理完成——刪除測試 repo `github-test`（Public）與
+  `codex-github-test`（Private），清除 3 個 repo 殘留的 `github-pages` 環境，全帳號複掃零殘留，
+  `delete_repo` 權限用畢即收回。Pages CDN 快取（github-test 網址暫回 200）會自行過期。
+- LazyPack Item 43 依收工檢查發現主版本 drift 並重新同步：`visual-prompt-kit` 當日在
+  `trivial_matters_of_life` 大幅更新（Cover／輪播四道確認關卡、6 支驗證器、確認紀錄模板），
+  內嵌與 17:35 後主版本 IDENTICAL，個資／pycache／絕對路徑皆 0。
+
 ## Next action
 
 #### S-1【唯一待辦】`personal-style-loop` 素材放置與第一輪校準
