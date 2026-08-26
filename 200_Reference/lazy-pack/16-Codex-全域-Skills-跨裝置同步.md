@@ -360,6 +360,50 @@ GUARDRAILS CLAUDE drift: none CODEX block: present
 | `~/agent-sync-backup-*`（chezmoi checkpoint 備份） | 超過保留期就刪 |
 | `__pycache__` | 一律刪（下次執行自動重生） |
 | `.DS_Store` | 一律刪（Finder metadata） |
+| 執行中 Agent 的沙盒 | 超過保留期就刪，**只清當前這一個 Agent** |
+
+### 為什麼只清當前 Agent
+
+三個 Agent 各自有自己的暫存狀態。刪掉另一個 Agent 的狀態時，那個 Agent 可能正在跑，
+會弄壞進行中的 session。所以 `--agent auto`（預設）只清偵測到正在執行的那一個；
+`--agent all` 存在但必須明確指定。當前 session 的檔案一律跳過，不看年齡。
+
+偵測依據：`CLAUDECODE`／`CLAUDE_CODE_SESSION_ID` → Claude，`CODEX_HOME` 或 `AI_AGENT` 含 codex →
+Codex，`AI_AGENT` 含 antigravity／gemini → AntiGravity。判斷不出來就不清任何沙盒。
+
+### 各 Agent 的白名單
+
+只清可重生的暫存狀態，其餘一律不碰：
+
+| Agent | 會清 |
+| :-- | :-- |
+| Claude `~/.claude` | `backups/.claude.json.backup.*`、`shell-snapshots/`、`session-env/`、`telemetry/`、`tasks/`、`sessions/` |
+| Codex `~/.codex` | `.codex-global-state.json.bak`、`.tmp/`、`ambient-suggestions/`、`config.toml.bak*` |
+| AntiGravity `~/.gemini/antigravity` | `brain/`（當前 conversation 除外） |
+
+**明確排除，因為裡面是成品或耐久資料**：
+
+- `~/.codex/generated_images`、`audio-to-md`、`doc-to-md`、`vlm-to-md`、`attachments`、
+  `dictation-history` —— 這些是產出，不是暫存
+- `~/.codex/sessions` 與 `archived_sessions` —— `memories/` 的 rollout summaries 用 id 引用這些逐字稿。
+  2026-08-27 實測確認 `MEMORY.md` 引用的一份逐字稿現在就在 `archived_sessions/`。
+  要清必須明確加 `--include-codex-archives`（可釋出約 2.4G，但會斷開記憶的稽核軌跡）
+- `~/.claude/projects` —— 逐字稿與助手記憶目錄
+- 任何 runtime、模型、快取、憑證、設定與 symlink
+
+白名單有自動檢查：實測三個 Agent 的 glob 觸及的頂層項目與 28 個受保護項目零交集。
+
+```bash
+# 只清當前執行中的 Agent（預設）
+python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}" --apply
+
+# 指定某一個；或完全不碰沙盒
+python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}" --agent codex --apply
+python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}" --agent none --apply
+
+# 連 Codex 逐字稿封存一起清（會斷開 memories 的引用）
+python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}" --agent codex --include-codex-archives --apply
+```
 
 `skills/`、`memories/`、`knowledge/`、`100_Todo/` 與任何 git 工作樹都不在範圍內。目錄年齡取「內部最新的 mtime」，所以最近被動過的備份不會因為建立日期舊而被誤刪。
 
@@ -2893,6 +2937,29 @@ Retention targets:
   2. <home>/agent-sync-backup-*       chezmoi checkpoint backups older than --days
   3. __pycache__ directories          always (regenerates on next run)
   4. .DS_Store files                  always (Finder metadata)
+  5. the running agent's sandbox      transient state older than --days
+
+Agent sandboxes
+---------------
+Each agent keeps transient state in its own config root. Only the agent that is
+actually running gets swept (--agent auto), because deleting another agent's
+state while it is live can corrupt a session in progress. --agent all is
+available but must be chosen deliberately.
+
+The per-agent lists below are allowlists of regenerable state. Everything else
+in those roots is off limits, in particular the directories that hold real
+output or durable data:
+
+  ~/.codex/generated_images, audio-to-md, doc-to-md, vlm-to-md, attachments,
+  dictation-history   -- produced work, not scratch
+  ~/.codex/sessions, archived_sessions
+                      -- referenced by rollout summaries in memories/;
+                         archived_sessions needs --include-codex-archives
+  ~/.claude/projects  -- transcripts and the assistant memory directory
+  runtimes, models, caches, credentials, config, and any symlink
+
+The current session is always protected: entries whose name carries the running
+session id are skipped regardless of age.
 
 Orphan media are a decision, not a veto
 ---------------------------------------
@@ -2936,7 +3003,118 @@ MEDIA_SUFFIXES = {
     ".srt", ".vtt", ".pdf",
 }
 SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv"}
+
+# Allowlists of regenerable per-agent state. Never widen these to a whole
+# config root: these roots also hold produced work, credentials, and runtimes.
+AGENT_TARGETS = {
+    "claude": {
+        "root": lambda: Path.home() / ".claude",
+        "globs": [
+            "backups/.claude.json.backup.*",
+            "shell-snapshots/*",
+            "session-env/*",
+            "telemetry/*",
+            "tasks/*",
+            "sessions/*",
+        ],
+        "session_env": ("CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_HOST_SESSION_ID"),
+    },
+    "codex": {
+        "root": lambda: Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex"),
+        "globs": [
+            ".codex-global-state.json.bak",
+            ".tmp/*",
+            "ambient-suggestions/*",
+            "config.toml.bak*",
+            "config.toml.backup*",
+        ],
+        # Opt-in only: rollout summaries in memories/ cite these transcripts by
+        # id, and archiving is where sessions/ files end up. Verified 2026-08-27
+        # that a transcript MEMORY.md references now lives here.
+        "opt_in_globs": {"archives": ["archived_sessions/*"]},
+        "session_env": ("CODEX_SESSION_ID",),
+    },
+    "antigravity": {
+        "root": lambda: Path.home() / ".gemini" / "antigravity",
+        "globs": ["brain/*"],
+        "session_env": ("GEMINI_SESSION_ID", "ANTIGRAVITY_CONVERSATION_ID"),
+    },
+}
+# Never delete these even if a glob would reach them.
+AGENT_NEVER = {"plugins.sync.lock", ".gitkeep", ".DS_Store"}
 CACHE_ROOT_NAMES = {"agentic_projects"}
+
+
+def detect_agent() -> str | None:
+    """Which agent is running right now? None when it cannot be determined."""
+    if os.environ.get("CLAUDECODE") or os.environ.get("CLAUDE_CODE_SESSION_ID"):
+        return "claude"
+    marker = (os.environ.get("AI_AGENT") or "").lower()
+    if "claude" in marker:
+        return "claude"
+    if "codex" in marker or os.environ.get("CODEX_HOME"):
+        return "codex"
+    if "antigravity" in marker or "gemini" in marker:
+        return "antigravity"
+    return None
+
+
+def current_session_tokens(spec: dict) -> list[str]:
+    return [v for name in spec.get("session_env", ()) if (v := os.environ.get(name))]
+
+
+def sweep_agent(agent: str, cutoff: float, args) -> tuple[int, int, int]:
+    spec = AGENT_TARGETS[agent]
+    root = spec["root"]()
+    print(f"  [{agent}] {root}")
+    if not root.is_dir():
+        print("    (不存在，略過)")
+        return 0, 0, 0
+    tokens = current_session_tokens(spec)
+    removed = removed_bytes = kept = 0
+    patterns = list(spec["globs"])
+    if args.include_codex_archives:
+        for extra in spec.get("opt_in_globs", {}).values():
+            patterns.extend(extra)
+    elif spec.get("opt_in_globs"):
+        print("    SKIP          codex/archived_sessions  "
+              "(memories 的 rollout summaries 引用這些逐字稿；要清請加 --include-codex-archives)")
+    for pattern in patterns:
+        group = pattern.split("/")[0] if "/" in pattern else pattern
+        hits, hit_bytes, skipped, current = [], 0, 0, 0
+        for entry in sorted(root.glob(pattern)):
+            if entry.name in AGENT_NEVER or entry.is_symlink():
+                continue
+            if any(token and token in entry.name for token in tokens):
+                current += 1
+                continue
+            if newest_mtime(entry) >= cutoff:
+                skipped += 1
+                continue
+            hits.append(entry)
+            hit_bytes += tree_size(entry)
+        kept += skipped + current
+        if not hits:
+            if skipped or current:
+                note = f"{skipped} 項未達保留期" + (f"、{current} 項為當前 session" if current else "")
+                print(f"    {'KEEP':<13} {agent}/{group}  ({note})")
+            continue
+        verb = "DELETE" if args.apply else "WOULD-DELETE"
+        note = f"{len(hits)} 項, {human(hit_bytes)}"
+        if skipped or current:
+            note += f"（另保留 {skipped + current} 項）"
+        print(f"    {verb:<13} {agent}/{group}  ({note})")
+        for entry in hits[:3]:
+            print(f"                    - {entry.name}")
+        if len(hits) > 3:
+            print(f"                    … 另外 {len(hits) - 3} 項")
+        for entry in hits:
+            remove(entry, args.apply)
+        removed += len(hits)
+        removed_bytes += hit_bytes
+    if removed == 0 and kept == 0:
+        print("    (無可清理項目)")
+    return removed, removed_bytes, kept
 
 
 def human(size: float) -> str:
@@ -3174,6 +3352,10 @@ def main() -> int:
     parser.add_argument("--keep-orphans", action="store_true", help="Answer 'keep' for every orphan-media entry this run.")
     parser.add_argument("--allow-orphan-media", action="store_true", help="Answer 'delete' for every orphan-media entry this run.")
     parser.add_argument("--skip-caches", action="store_true", help="Do not touch __pycache__ and .DS_Store.")
+    parser.add_argument("--include-codex-archives", action="store_true",
+                        help="Also sweep ~/.codex/archived_sessions. Rollout summaries in memories/ cite these transcripts.")
+    parser.add_argument("--agent", default="auto", choices=["auto", "codex", "claude", "antigravity", "all", "none"],
+                        help="Which agent sandbox to sweep. 'auto' (default) sweeps only the agent running now.")
     args = parser.parse_args()
 
     sync_root = Path(args.sync_root).expanduser().resolve()
@@ -3214,7 +3396,7 @@ def main() -> int:
     total_removed = total_bytes = total_kept = 0
     pending: list[Path] = []
 
-    print(f"[1/3] {backups}")
+    print(f"[1/4] {backups}")
     if backup_entries:
         r, b, k, p = sweep(backup_entries, cutoff, live_index, args, "backups", check_orphans)
         total_removed, total_bytes, total_kept = total_removed + r, total_bytes + b, total_kept + k
@@ -3222,20 +3404,39 @@ def main() -> int:
     else:
         print("  (空的，無需處理)")
 
-    print(f"[2/3] {home}/agent-sync-backup-*")
+    print(f"[2/4] {home}/agent-sync-backup-*")
     if checkpoint_backups:
         r, b, k, _ = sweep(checkpoint_backups, cutoff, live_index, args, "home", False)
         total_removed, total_bytes, total_kept = total_removed + r, total_bytes + b, total_kept + k
     else:
         print("  (無)")
 
-    print("[3/3] __pycache__ / .DS_Store")
+    print("[3/4] __pycache__ / .DS_Store")
     if args.skip_caches:
         print("  (--skip-caches，略過)")
     else:
         pycache, ds_store = prune_caches(cache_roots, args.apply)
         verb = "removed" if args.apply else "would-remove"
         print(f"  {verb} __pycache__={pycache} .DS_Store={ds_store}")
+
+    print("[4/4] Agent 沙盒")
+    if args.agent == "none":
+        print("  (--agent none，略過)")
+    else:
+        if args.agent == "all":
+            agents = list(AGENT_TARGETS)
+        elif args.agent == "auto":
+            detected = detect_agent()
+            agents = [detected] if detected else []
+            if detected:
+                print(f"  偵測到執行中的 Agent：{detected}（只清這一個；其他 Agent 的狀態可能正在使用）")
+            else:
+                print("  無法判斷執行中的 Agent，未清任何沙盒。需要時明確指定 --agent")
+        else:
+            agents = [args.agent]
+        for agent in agents:
+            r, b, k = sweep_agent(agent, cutoff, args)
+            total_removed, total_bytes, total_kept = total_removed + r, total_bytes + b, total_kept + k
 
     print(f"PRUNED={total_removed} FREED={human(total_bytes)} KEPT={total_kept} PENDING={len(pending)}")
 
