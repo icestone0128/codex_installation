@@ -35,6 +35,12 @@
   已補 `course`／`goal`／`lesson`（AI Tutor）與 `local-file`，並修掉一個既有的 description
   驗證錯誤（用備份實測確認非本次造成）。Item 02 的 prose 也一併從 `0.4.x` 改為 `0.5.x`。
 
+- 防護措施已寫入三個安裝 repo，**未新增 LazyPack Item**（Item 16 已內嵌，另兩個 repo 不是項目制，
+  且三個 Agent 需要的內容不同：Claude／Codex 套用、AntiGravity 只能驗證）。
+  `codex_installation` 補 Item 16 prose（原本 20 次 guardrails 全在內嵌區塊、說明章節隻字未提）、
+  `claude_installation` 補〈9. 危險指令攔截層〉、`antigravity_installation` 補〈8. 防護層驗證〉。
+  三個 repo 已 push：`2214cdb`／`c15e7eb`／`28e1ba7`。
+
 ## Next action
 
 ### 待辦事項
