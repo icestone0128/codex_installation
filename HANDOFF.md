@@ -38,6 +38,25 @@
   edge test 另修兩個 validator 缺口：模糊詞漏抓「要好／很高」等寫法、schema 失敗會傾印整份 schema。
   全域 skill 計數 82 → **83**（自訂 80 → 81）。
 
+- 2026-08-27 06:0x 清理：依使用者要求清空過程檔與備份。已刪 `codex_symlink/backups/` 全部
+  83 檔（含 **56 張生成圖**）、130 個 `.bak.*`、8 個整包備份、37 份 `~/agent-sync-backup-*`、
+  396 個 `__pycache__`、78 個 `.DS_Store`，共釋出約 96M。
+  **盤點時發現 `visual-prompt-kit-cleanup-20260826-223500` 與 `carousel-renders.bak` 存著
+  56 張圖的唯一副本**（當初「清理」把成品移出 live 後沒放回），已完整列清單、兩度提示不可逆，
+  使用者確認後刪除。這些圖已不存在，同系列若要重做需重新定義 `visual-dna.yaml` 規格。
+  `drafts/` 依使用者選擇未動（tech_job 252M 的 114 個 podcast MP3、voice_coach 58M 課程素材）。
+- `3827515`：新增 `cross-device-sync/scripts/prune-session-artifacts.py`（保留期 7 天）
+  並掛進收工 checkpoint。白名單範圍：`backups/*`、`~/agent-sync-backup-*`、`__pycache__`、
+  `.DS_Store`；不碰 skills／memories／knowledge／`100_Todo/`／git 工作樹。
+  **孤兒媒體防線**：刪備份前建立 live 媒體索引，同名同大小在備份區外存在才算有副本，
+  比不到就標 `ORPHAN-MEDIA` 保留、`--apply` 也不刪（逃生門 `--allow-orphan-media`）。
+  預設 dry-run。實測索引 2480 個媒體檔 0.44 秒。checkpoint 新增 `--prune-days N`／`--no-prune`，
+  開工不觸發。Item 16 已重生並補 prose。
+- `e8e29d2`：`agent-guardrails.json` 的 `excluded` 說明原本只寫「移除」沒有受詞，
+  被 compatibility audit 的 `(清除|移除|排除)…Claude` 規則命中。改寫為
+  「這兩條 ask 規則整條拿掉」，語意更明確且不再誤觸。**只動說明文字**，
+  `forbidden` 17 條與 `ask.git_publish: []` 皆未變動。
+
 ## Next action
 
 #### S-0【已結案】guardrails drift
@@ -74,18 +93,15 @@
 
 ## Last verified
 
-- 2026-08-27 00:06，Claude Code：`codex_installation` 0 未提交、與遠端 0/0 同步，HEAD `734ae5d`。
-- 本次開工 checkpoint：九個 Agent 入口 symlink 全 OK、Python bridge／runtime 正常、
-  `CHEZMOI_STATUS=clean`、guarded update 執行後 `Already up to date`，
-  備份於 `~/agent-sync-backup-20260826-234458/session-startup`。
-- Item 45 第三方可重現性實測：從 Item 45 抽出安裝腳本（1044 行）在乾淨 `SYNC_ROOT` 執行，
-  `diff -r` 對主版本 **IDENTICAL**，且該份第三方安裝實跑第 2 關 `PASS`。
-  三驗證器全過（`quick_validate` valid／`package_claude_skill validate` VALID／
-  compatibility audit 11 檔 0 findings）。個資、絕對路徑、secret 掃描皆 0。
-- 懶人包 Obsidian 鏡像 `diff -qr` 一致；全域 Skills 索引已更新（表格列＋計數口徑＋同步紀錄）。
-- 收工：Arry 助手鏡像 `sync_obsidian_mirror.py` 執行完成（copied=0, removed=0，`diff -qr` 通過）。
-- 收工 chezmoi checkpoint：`CHEZMOI_STATUS=clean`、`CHEZMOI_UPDATE=not-requested`、
-  `CHEZMOI_ADD=not-needed-for-existing-templates`、`GUARDRAILS drift: none`。
-- 收工全量 LazyPack 重生：只有 Item 16 有 drift（見 S-0），其餘 44 項零差異。
-- 三 repo 收工狀態：codex `7c42ca6`、claude `5e5492f` 皆 0 未提交且與遠端同步；
-  antigravity `4328ac6` 本次未動。
+- 2026-08-27 06:40，Claude Code 收工：`codex_installation` 0 未提交、與遠端同步，HEAD `e8e29d2`；
+  `claude_installation` `5e5492f`、`antigravity_installation` `4328ac6` 皆 0 未提交。
+- 收工 checkpoint：`CHEZMOI_STATUS=clean`、`GUARDRAILS drift: none CODEX block: present`、
+  `PRUNE PRUNED=0 FREED=0B KEPT=1`（KEPT 是 1 小時前建的 guardrails 備份，未達 7 天保留期，
+  行為正確）。這是保留期機制第一次在正式收工流程執行。
+- compatibility audit 掃 `skills/` 678 檔，**findings=0**。
+- Item 16 內嵌 13 檔與主版本逐檔比對 IDENTICAL 且無遺漏；懶人包鏡像 `diff -qr` 一致；
+  Arry 助手鏡像 copied=0 removed=0，`diff -qr` 通過。
+- prune 腳本夾具驗收 9 項全過（含唯一副本被擋下、dry-run 零刪除），邊界退出碼正確，
+  `bash -n` 通過，checkpoint 三條路徑實測正確。
+- **不可回復**：本次刪除的 56 張圖與 `2026-08-25-six-learning-bottlenecks` 的
+  `visual-dna.yaml` 全 Drive 已無副本。
