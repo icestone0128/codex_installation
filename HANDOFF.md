@@ -60,6 +60,23 @@
   收工 checkpoint 在 `PENDING>0` 時把項目與 `--interactive` 指令推到眼前。
   測試中發現 `ask()` 原本只讀 `/dev/tty`，在有 pty 但無 controlling terminal 的環境會失敗，
   已改為 stdin 優先、`/dev/tty` 備援、EOF 視為 pending（不謊報「你選擇保留」）。
+- `17af917`：保留期清理擴及 **Agent 沙盒**。新增 `--agent auto|codex|claude|antigravity|all|none`，
+  預設 `auto`＝只清當前執行中的那一個（刪別的 Agent 狀態時它可能正在跑，會弄壞進行中 session）。
+  當前 session 的檔案一律跳過，不看年齡。checkpoint 不傳 `--agent`，收工自動生效。
+  白名單：Claude `backups/.claude.json.backup.*`／`shell-snapshots`／`session-env`／`telemetry`／
+  `tasks`／`sessions`；Codex `.codex-global-state.json.bak`／`.tmp`／`ambient-suggestions`／
+  `config.toml.bak*`；AntiGravity `brain/`（當前 conversation 除外）。
+  實測三個 Agent 的 glob 與 28 個受保護項目零交集。
+- **兩處刻意排除，理由要留給下一手**：
+  1. `~/.codex/archived_sessions`（2.4G／221 逾期）改為 opt-in `--include-codex-archives`。
+     `memories/` 的 rollout summaries 用 id 引用這些逐字稿，實測 `MEMORY.md` 引用的一份
+     就在 `archived_sessions/`（`01a00cba…` 命中）。archive 是搬家不是垃圾桶，清掉會斷稽核軌跡。
+  2. `~/.codex/generated_images`（178M/112）、`audio-to-md`（231M/6336）、`doc-to-md`（95M/1242）、
+     `attachments`、`dictation-history`、`~/.claude/projects`（15G，含助手記憶目錄）永久排除——
+     這些是產出不是暫存。沙盒內產物是否已依 core-rules 複製到專案目錄無法回溯查證。
+- 驗證期間 checkpoint 實跑（帶 `--apply`）清掉 Claude 沙盒 1019 項／6.1M：
+  `session-env` 993、`shell-snapshots` 2、`telemetry` 23、`tasks` 1，皆逾期且在白名單內；
+  輸出顯示 `session-env` 有「1 項為當前 session」被跳過，當前 session 保護確認有效。
 - `e8e29d2`：`agent-guardrails.json` 的 `excluded` 說明原本只寫「移除」沒有受詞，
   被 compatibility audit 的 `(清除|移除|排除)…Claude` 規則命中。改寫為
   「這兩條 ask 規則整條拿掉」，語意更明確且不再誤觸。**只動說明文字**，
@@ -102,15 +119,12 @@
 
 ## Last verified
 
-- 2026-08-27 06:40，Claude Code 收工：`codex_installation` 0 未提交、與遠端同步，HEAD `e8e29d2`；
+- 2026-08-27 07:0x，Claude Code 收工：`codex_installation` 0 未提交、與遠端同步，HEAD `17af917`；
   `claude_installation` `5e5492f`、`antigravity_installation` `4328ac6` 皆 0 未提交。
 - 收工 checkpoint：`CHEZMOI_STATUS=clean`、`GUARDRAILS drift: none CODEX block: present`、
-  `PRUNE PRUNED=0 FREED=0B KEPT=1`（KEPT 是 1 小時前建的 guardrails 備份，未達 7 天保留期，
-  行為正確）。這是保留期機制第一次在正式收工流程執行。
-- compatibility audit 掃 `skills/` 678 檔，**findings=0**。
+  `PRUNE PRUNED=… PENDING=0`。保留期清理現涵蓋 backups、chezmoi 備份、快取與當前 Agent 沙盒。
+- prune 白名單安全檢查：三個 Agent 的 glob 觸及頂層項目與 28 個受保護項目零交集。
 - Item 16 內嵌 13 檔與主版本逐檔比對 IDENTICAL 且無遺漏；懶人包鏡像 `diff -qr` 一致；
-  Arry 助手鏡像 copied=0 removed=0，`diff -qr` 通過。
-- prune 腳本夾具驗收 9 項全過（含唯一副本被擋下、dry-run 零刪除），邊界退出碼正確，
-  `bash -n` 通過，checkpoint 三條路徑實測正確。
-- **不可回復**：本次刪除的 56 張圖與 `2026-08-25-six-learning-bottlenecks` 的
+  Arry 助手鏡像通過；compatibility audit findings=0。
+- **不可回復**：2026-08-27 稍早刪除的 56 張圖與 `2026-08-25-six-learning-bottlenecks` 的
   `visual-dna.yaml` 全 Drive 已無副本。
