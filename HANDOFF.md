@@ -25,12 +25,39 @@
   `trivial_matters_of_life` 大幅更新（Cover／輪播四道確認關卡、6 支驗證器、確認紀錄模板），
   內嵌與 17:35 後主版本 IDENTICAL，個資／pycache／絕對路徑皆 0。
 
+- 2026-08-26 23:24 `a6286af`：新增「全文章最高密度知識圖卡（9:16）」工作流。
+  `image-generator` 加 `references/high-density-knowledge-card.md` 與
+  `scripts/validate_high_density_knowledge_card_plan.py`，LazyPack Item 22（+342 行）與
+  Item 43 同步。先做內容覆蓋計畫再生圖，含外語白名單驗收。
+- 2026-08-27 00:01 `734ae5d`：新增全域 skill `agent-dev-coach`＋LazyPack **Item 45**
+  （agent 開發五關教練：拷問→規格→切票→TDD→雙軸審查，另附隨時可用的 PRD 打包）。
+  來源為第三方 zip，依 `codex-skill-creator` source-adapter 路線轉三 Agent 共用版。
+  **修掉上游必然失敗的缺陷**：原版用相對路徑呼叫 `scripts/`，教練工作目錄是學員專案、
+  腳本在 skill 套件，第 2 關實測 `No such file or directory`。改為腳本自我定位
+  ＋`SKILL.md` 先解析 skill root（一段 `ls -d` 涵蓋三入口）。
+  edge test 另修兩個 validator 缺口：模糊詞漏抓「要好／很高」等寫法、schema 失敗會傾印整份 schema。
+  全域 skill 計數 82 → **83**（自訂 80 → 81）。
+
 ## Next action
 
-#### S-1【唯一待辦】`personal-style-loop` 素材放置與第一輪校準
+#### S-0【新增】guardrails master 與實際設定 drift
+- checkpoint 每次輸出 `GUARDRAILS CLAUDE drift: ['git commit', 'git push']`。實測釐清是
+  **主版本落後、不是設定被破壞**：08-26 已決定 commit/push 改由 Agent 自行判斷、不再逐次彈窗，
+  `~/.claude/settings.json` 的 `ask` 已清空、`~/.codex/config.toml` 也無對應 prompt 規則，
+  只有 `cross-device-sync/assets/agent-guardrails.json` 仍留 `ask.git_publish`。
+- 要修就是把 `git_publish` 從 master 的 `ask` 拿掉，並同步 Item 16 內嵌版與三個安裝 repo 的
+  防護節。依既有規範：三 Agent 一起改、雙向實測。不修的話真 drift 會被誤報淹沒。
+
+#### S-1【待辦】`personal-style-loop` 素材放置與第一輪校準
 - 待使用者放 2～3 篇代表作進某專案 `200_Reference/writing-samples/`
   （schema 見 Item 44：`use_for`／`do_not_use_for` frontmatter、去識別化）後，
   跑第一輪校準。在此之前該 skill 是 `0.1.0` 未校準初版，其停止條件禁止無素材啟動。
+
+#### S-2【可選，需使用者決策】Item 40 與 Item 45 是否併存
+- 兩者底層方法重疊（拷問／規格／切票／TDD／審查），但使用情境不同：
+  Item 40 是使用者自己做事的工具箱、各 skill 獨立呼叫；Item 45 是帶人的單一連續流程，
+  多了教練話術、HC 標籤、`.agent-flow/` 狀態機與每關必須明確同意才前進的閘門。
+- 已在 Item 45 寫明邊界並保留併存。若日後判定只需一套，這是可收掉的候選，但屬使用者決策。
 
 ## Blockers
 
@@ -42,7 +69,14 @@
 
 ## Last verified
 
-- 2026-08-26，Claude Code 收工：三 repo 皆 0 未提交、與遠端同步
-  （codex `a311071`／claude `725d135`／antigravity `a08ce12`）。
-  guardrails `--verify` drift none；checkpoint `GUARDRAILS CLAUDE drift: none CODEX block: present`；
-  Item 16 內嵌 JSON 與腳本皆與主版本 IDENTICAL；懶人包鏡像與 Arry 助手鏡像 `diff -qr` 一致。
+- 2026-08-27 00:06，Claude Code：`codex_installation` 0 未提交、與遠端 0/0 同步，HEAD `734ae5d`。
+- 本次開工 checkpoint：九個 Agent 入口 symlink 全 OK、Python bridge／runtime 正常、
+  `CHEZMOI_STATUS=clean`、guarded update 執行後 `Already up to date`，
+  備份於 `~/agent-sync-backup-20260826-234458/session-startup`。
+- Item 45 第三方可重現性實測：從 Item 45 抽出安裝腳本（1044 行）在乾淨 `SYNC_ROOT` 執行，
+  `diff -r` 對主版本 **IDENTICAL**，且該份第三方安裝實跑第 2 關 `PASS`。
+  三驗證器全過（`quick_validate` valid／`package_claude_skill validate` VALID／
+  compatibility audit 11 檔 0 findings）。個資、絕對路徑、secret 掃描皆 0。
+- 懶人包 Obsidian 鏡像 `diff -qr` 一致；全域 Skills 索引已更新（表格列＋計數口徑＋同步紀錄）。
+- **未複核**：Arry 助手 `knowledge/`／`memories/` 鏡像本次未執行 `sync_obsidian_mirror.py`
+  （本次未動這兩處，留給收工正式跑）。guardrails drift 見 S-0，尚未修。
