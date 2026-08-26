@@ -41,6 +41,12 @@
   `claude_installation` 補〈9. 危險指令攔截層〉、`antigravity_installation` 補〈8. 防護層驗證〉。
   三個 repo 已 push：`2214cdb`／`c15e7eb`／`28e1ba7`。
 
+- Pro-Kit 01–05 完整性複查完成。修復第三方安裝的關鍵缺口：guardrails 主檔原不在 skill 套件內、
+  不會被 LazyPack 內嵌，第三方會 `ERROR master not found`。已移入
+  `cross-device-sync/assets/`（自動內嵌，Item 16 重生後 IDENTICAL），apply 腳本改讀新路徑
+  並加舊副本分岔防護，三 repo 文件路徑引用已更新。Item 09 補「新對話驗收指令」。
+  刻意跳過項（記憶 hook、rm→trash、PreToolUse hook、comparison reference）皆有記錄理由。
+
 ## Next action
 
 ### 待辦事項
@@ -75,7 +81,7 @@
 - **2026-08-26 已解決跨裝置問題，但不是用 chezmoi add**。量化後確認四個設定檔不適合直接納管：
   `.codex/config.toml` 33 處本機絕對路徑、`.gemini/config/config.json` 31 處且由 app 主動重寫
   （納管會與 app 互相覆寫）、`.codex/rules/default.rules` 11 處。直接 add 會把錯誤路徑帶到新機器。
-- 改為抽出**零絕對路徑的可攜主版本** `{{SYNC_ROOT}}/rules/agent-guardrails.json`
+- 改為抽出**零絕對路徑的可攜主版本** `{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardrails.json`
   （17 條 forbidden、2 條 ask，含刻意排除項與已知洞的理由），由 Google Drive 跨機器同步。
 - 新增 `cross-device-sync/scripts/apply-agent-guardrails.py`：預設唯讀 `--verify`，
   `--apply` 才寫入且自動備份。AntiGravity 因無 deny 機制而明確略過。
