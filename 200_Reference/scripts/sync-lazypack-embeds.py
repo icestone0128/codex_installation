@@ -241,6 +241,7 @@ def main() -> None:
         "42-Speak-Human-TW-Skill-安裝.md": ["speak-human-tw"],
         "43-Visual-Prompt-Kit-Skill-安裝.md": ["visual-prompt-kit"],
         "44-Personal-Style-Loop-Skill-安裝.md": ["personal-style-loop"],
+        "45-Agent-Dev-Coach-Skill-安裝.md": ["agent-dev-coach"],
     }
     for filename, skills in sections.items():
         replace_embedded_section(LAZYPACK / filename, skills)

@@ -12,6 +12,8 @@
 
 2026-07-30 更新：Item 02 新增 Claude-first Google Workspace MCP 必要項。公開 LazyPack 內建 pinned `workspace-mcp` installer、loopback runner 與 macOS LaunchAgent template，預設只開 Drive／Gmail／Calendar core read-only；Codex 有官方 Google plugins 時不重複註冊同義 MCP，Claude 與 AntiGravity 使用各自原生 adapter。
 
+2026-08-26 更新：新增 [[45-Agent-Dev-Coach-Skill-安裝]]，把「我想做一個 agent」帶成能跑的程式型 agent。五關各有出口交付物：需求拷問（一次一題、附建議答案）→ 規格書（成功標準可驗證、禁模糊詞）→ 切票（tracer bullet 垂直切片、標 `Blocked by`）→ TDD 實作（在工具與 prompt-vs-code 的縫上先寫失敗測試）→ 雙軸審查（Standards 與 Spec 分開審、不跨軸重排序），另附隨時可用的 PRD 打包。內嵌 `SKILL.md`、六份關卡 reference、spec schema、HTML 樣板、renderer／validator 與 Codex UI adapter。**相對上游來源修正了腳本路徑**：原版用相對路徑呼叫 `scripts/`，在學員專案內必定解析失敗；本 Item 改為腳本自我定位＋`SKILL.md` 先解析 skill root，三個 Agent 共用同一段解析法。
+
 2026-08-25 更新：新增 [[44-Personal-Style-Loop-Skill-安裝]]，把「用我的語氣寫」變成可驗證的迴圈。校準題給 AI 的是當年的點子或提綱，真實發布版本由使用者保留當對照，AI 拿到題目但拿不到答案；保留題是沒寫過的新點子，測規則能否遷移。回饋採收斂式追問（三選一 → 二選一 → 只問一個具體句子），不問開放式的「哪裡不像」。內嵌 `SKILL.md`、風格素材庫 schema 與 Codex UI adapter。**使用者的作品本身不內嵌**：素材放各專案本地 `200_Reference/writing-samples/`，安裝時是空的，skill 會要求先補齊 2～3 篇再開始。
 
 2026-08-22 更新：新增 [[43-Visual-Prompt-Kit-Skill-安裝]]，把文章轉成可直接生圖的視覺設計提案。以版位 × 風格 × 裝飾語言三個獨立維度組合，並用 `visual-dna.yaml` 鎖住整個系列的配色、字體階層與構圖上限；新增版位或風格是新增檔案，`SKILL.md` 不需要動。內嵌 `SKILL.md`、封面版位、日系現代風格、visual DNA schema、交棒契約與風格推薦腳本。**風格庫本身不內嵌**：skill 讀取的是使用者自備的外部風格庫，缺庫時走內建風格的無庫模式；受授權限制的風格資料不得放進本 repo。
@@ -127,6 +129,7 @@
 42. [[42-Speak-Human-TW-Skill-安裝]]
 43. [[43-Visual-Prompt-Kit-Skill-安裝]]
 44. [[44-Personal-Style-Loop-Skill-安裝]]
+45. [[45-Agent-Dev-Coach-Skill-安裝]]
 
 ## 全域 Skills 安裝總表
 
@@ -173,6 +176,7 @@
 42：speak-human-tw；完整內嵌 MIT 授權上游 v1.4.0 的繁體中文去 AI 味 skill，含 38 種痕跡模式庫、誤殺邊界、台灣在地化層、五情境力度表、保護清單與 42 條 benchmark；強制「先列編號清單、等使用者勾選、才動筆或動檔案」
 43：visual-prompt-kit；完整內嵌文章轉視覺設計提案的 skill，含封面版位、日系現代風格（繁中主體＋英文點綴）、visual DNA schema、交棒契約與風格推薦腳本；只出 brief 不出圖，生圖交 image-generator、組版交 social-cards／landing-page。**風格庫為外部依賴、不內嵌**，缺庫時走內建風格的無庫模式
 44：personal-style-loop；完整內嵌個人寫作風格訓練迴圈，含校準題／保留題的 Style Harness、收斂式回饋協議、風格素材庫 schema（`use_for`／`do_not_use_for` 與去識別化規則）與 Codex UI adapter；只學使用者自己的聲音，不模仿特定創作者。**使用者作品為外部依賴、不內嵌**，素材放各專案本地 `200_Reference/writing-samples/`，不足 2 篇時 skill 會停下來要求補齊
+45：agent-dev-coach；完整內嵌 agent 開發五關教練，含六份關卡 reference（拷問／規格／切票／TDD／雙軸審查／PRD 打包）、`spec.schema.json`、HTML 樣板、renderer 與 validator（模糊詞與 schema 雙重把關）與 Codex UI adapter；腳本已改為自我定位，可從學員專案任意工作目錄以絕對路徑呼叫。與 Item 40 的邊界：Item 40 是使用者自己做事的工具箱，本 Item 是帶人的單一連續流程，多了教練話術、HC 標籤、`.agent-flow/` 狀態機與每關必須明確同意才前進的閘門
 ```
 
 Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人身份與記憶路由，`voice-coach`、`waki-brain`、`productivity-coach` 含私人課程或購課內容。它們只存在私人 `{{SYNC_ROOT}}/skills` 與 Obsidian 全域索引；Item 39 只提供安裝／驗證橋接，不提供可重建 corpus。這是隱私與內容權利邊界，不是 Agent 相容性限制。
