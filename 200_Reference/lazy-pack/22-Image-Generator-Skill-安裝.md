@@ -168,6 +168,33 @@ tool is more appropriate before using image generation.
 5. After generation, report the useful result and any local path or project
    placement action that was actually completed.
 
+### 全文章最高密度知識圖卡（9:16）
+
+當使用者提供完整文章並明確要求「知識圖卡」、「盡量全部包含」或「最高密度」時，預設是
+**單張 9:16 直式深度知識圖卡**，不是只放標題、金句與三個摘要的語錄卡。若使用者已指定
+風格，直接沿用；未指定時才由上游視覺提案流程完成風格選擇。
+
+生成前必須先建立可讀的內容覆蓋計畫，至少涵蓋原文中實際存在的：
+
+1. 故事或問題情境；
+2. 原因、心理機制或矛盾；
+3. 核心框架、判斷法或關鍵區辨；
+4. 行動方法、步驟或資源；
+5. 結論或核心金句。
+
+不可因插畫美感把其中任何一類縮成一句泛泛摘要。把所有會出現在卡上的文字以逐字清單放進
+Prompt；插畫、分隔線、箭頭與小圖示只服務於閱讀順序，不得覆蓋、擠壓或取代知識文字。
+使用 `scripts/validate_high_density_knowledge_card_plan.py` 先驗證計畫結構，再生成。
+
+生成後依序檢查：文章五類內容是否真的都被呈現、逐字文本是否可讀且無憑空增寫、只有明列的
+外語點綴文字、沒有敘事頁碼／Logo／浮水印，及實際像素是否符合目標比例。目標為 9:16 時，
+使用 `scripts/validate_image_aspect.py --ratio 9:16 <image.png>`；不通過時只重生失敗成品，
+不得裁切、拉伸或靜默交付。
+
+三個 Agent 共用同一份內容覆蓋計畫、Prompt 與驗收結果：Codex 使用原生 image tool、Claude
+使用其原生 image tool、AntiGravity 使用其原生 image tool；原生工具不可用時才依既有規則取得
+使用者同意後走 shared fallback。工具不同不改變文字覆蓋、比例與驗收契約。
+
 ## Prompt Template
 
 ```text
@@ -207,8 +234,121 @@ When the user provides or references an image:
 ## Reference
 
 Read `references/imagegen-codex-workflow.md` for examples, native adapter guidance,
-and common pitfalls.
+and common pitfalls. For full-article 9:16 knowledge cards, read
+`references/high-density-knowledge-card.md` and use its content-coverage template.
 AGENT_LAZYPACK_IMAGE_GENERATOR_SKILL_MD_0E95F5A366
+
+# image-generator/references/high-density-knowledge-card.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/references/high-density-knowledge-card.md")"
+cat > "{{SYNC_ROOT}}/skills/image-generator/references/high-density-knowledge-card.md" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_HIGH_DENSITY_KNOWLEDGE_CARD_MD_1A517138D5'
+# 全文章最高密度知識圖卡契約
+
+適用於使用者提供一篇完整文章，並要求「知識圖卡」、「盡量全部包含」或「最高密度」時。
+成品是**一張 9:16 直式、可獨立閱讀的深度知識圖卡**；它不是輪播圖卡，也不是只放一則
+金句的海報。
+
+## 先做內容覆蓋，而非先想插畫
+
+先從原文抽出所有可獨立理解的論點，按下列五類映射到圖卡。若原文沒有某一類，可明確標記
+「原文無此類」，不可捏造；若有，就不能為了畫面簡潔而刪成泛泛摘要。
+
+| 覆蓋類別 | 要回答的問題 |
+|---|---|
+| 故事或問題情境 | 發生了什麼？讀者正卡在哪裡？ |
+| 原因／心理機制 | 為什麼會發生？彼此各處於什麼狀態？ |
+| 核心框架／判斷法 | 用什麼概念重新理解問題？ |
+| 行動方法 | 下一步怎麼做？順序或邊界是什麼？ |
+| 結論／核心金句 | 最後必須帶走的判斷或提醒是什麼？ |
+
+## 生成前計畫檔
+
+在任務目錄建立 `briefs/knowledge-card-content.md`，再執行：
+
+```text
+scripts/validate_high_density_knowledge_card_plan.py briefs/knowledge-card-content.md
+```
+
+使用下列格式；每個區塊都要有具體內容。卡片文字可以依讀性拆成多個小段，但必須忠於下方
+覆蓋內容。
+
+```markdown
+# 全文章最高密度 9:16 知識圖卡計畫
+
+## 文章內容覆蓋
+
+### 故事或問題情境
+- {從原文保留的情境、衝突或痛點}
+
+### 心理機制或原因
+- {從原文保留的因果、心理狀態或矛盾}
+
+### 核心框架或判斷法
+- {從原文保留的概念、模型、區辨或原則}
+
+### 行動方法
+- {從原文保留的具體步驟、順序、資源或邊界}
+
+### 結論或核心金句
+- {從原文保留的最終結論}
+
+## 卡片文字（逐字）
+
+- 主標題：{台灣繁體中文}
+- 副標題：{台灣繁體中文}
+- 內文區塊：{依五類覆蓋整理的所有正文、對比、步驟與金句}
+- 允許的外語點綴：{若無則寫「無」}
+
+## 視覺裝飾與閱讀順序
+
+- {由上到下的閱讀順序；每個插畫／箭頭／分隔線如何協助哪一段文字}
+
+## 生成限制與驗收
+
+- 目標比例：9:16
+- 文字規則：台灣繁體中文；只允許上方明列的外語點綴。
+- 禁止：不在清單內的外語招牌或文字、敘事頁碼、hashtag、Logo、簽名、浮水印、價格、促銷。
+- 驗收：五類文章內容均可在成品中讀到；圖像不遮文字；逐字文本、禁項與實際像素比例均已檢查。
+```
+
+## 生圖 Prompt 的必要結構
+
+用可讀的標示區塊寫 Prompt，而非單段堆疊形容詞：
+
+1. **Use case / Asset type**：明示「ultra-high-density 9:16 knowledge card」。
+2. **文章內容完整性**：列出五類內容與它們的關係；說明這是可獨立閱讀的完整論述。
+3. **風格與插畫**：描述風格、色彩、紙張／材質；逐項說明裝飾只協助閱讀。
+4. **構圖與文字層級**：指定連續閱讀順序與高密度、但不可犧牲可讀性的原則。
+5. **Text (verbatim)**：列出每一段實際文字；不能只說「加上本文重點」。
+6. **Constraints**：外語白名單、禁止項、無額外招牌文字、比例與驗收。
+
+可用細線、留白、分隔線、箭頭、器物、抽象符號、人物或空間插畫作裝飾；人物只有在原文情境
+或使用者方向確實需要時才加入。**插畫是閱讀導航，不是主角。**
+
+## 生成後驗收與修正
+
+1. 逐區對照內容覆蓋計畫，確認五類內容沒有缺漏或被錯誤合併。
+2. 檢視可讀性：主標／區塊標／正文／步驟有明顯層級，線稿與裝飾不蓋住文字。
+3. 對照 `Text (verbatim)`：不得有錯字、任意改寫、額外英文／日文招牌，或未核准的頁碼、Logo、
+   浮水印。
+4. 以實際檔案驗證比例：
+
+   ```text
+   scripts/validate_image_aspect.py --ratio 9:16 assets/images/<filename>.png
+   ```
+
+5. 缺的是內容或文字 → 以完整文字／內容覆蓋為唯一目標重生；缺的是比例 → 以畫布比例為唯一目標
+   重生。一次只修正一個明確問題，避免把已正確的內容帶偏。
+
+## 三 Agent 執行契約
+
+- **Shared steps**：同一份計畫、同一份逐字文字、同一個比例與同一套驗收。
+- **Codex adapter**：使用原生 image tool；輸出後保存到任務目錄並跑驗證。
+- **Claude adapter**：使用原生 image tool；輸出後保存到任務目錄並跑同一驗證。
+- **AntiGravity adapter**：使用原生 image tool；輸出後保存到任務目錄並跑同一驗證。
+- **Fallback**：原生工具不可用時，保留同一份 Prompt 與驗收清單，取得使用者同意後才走已核准的
+  shared fallback。
+- **Verification**：沒有通過內容覆蓋、可讀性、文字白名單與實際比例，不得稱為正式交付。
+AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_HIGH_DENSITY_KNOWLEDGE_CARD_MD_1A517138D5
 
 # image-generator/references/imagegen-codex-workflow.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/references/imagegen-codex-workflow.md")"
@@ -274,7 +414,10 @@ Use these fields when the user needs help writing a prompt:
 | Problem | Cause | Practical fix |
 |---|---|---|
 | User is unsure which quota is used | built-in image generation and API billing are separate systems | Use built-in image generation by default; API is only for explicit automation |
-| Image contains poor text | image models may render text inaccurately | Generate with no text, then add text later in slides or design tools |
+| Image contains poor text | image models may render text inaccurately | 一般圖片可改為無文字後製；但使用者明確要求高密度知識圖卡時，必須保留逐字文字、逐區檢視並重生有缺字／錯字的成品，不可未經同意把文字改交外部排版 |
+| 完整文章被做成少量摘要 | 先想畫面、沒有逐段盤點文章論點 | 建立五類內容覆蓋與逐字文本計畫；缺少故事、原因、框架、行動、結論任一類即重生 |
+| Prompt 寫了比例但成品不對 | 只相信模型理解，沒有讀檔驗證 | 生成後以 `scripts/validate_image_aspect.py --ratio <比例>` 驗證實際 PNG 像素 |
+| 出現未要求的英文／日文招牌 | 插畫場景自行補出環境文字 | 在 Prompt 建立外語白名單；生成後逐一檢視，未核准文字不可交付 |
 | Transparent edges look messy | hair, smoke, glass, or semi-transparent objects are hard | Use a clean isolated subject and simple edges |
 | Asset is hard to reuse | image stays only in generated output location | Copy it into the project or Obsidian attachment folder when requested |
 | Prompt is too detailed without purpose | image loses focus | Start from purpose and composition, then add style and constraints |
@@ -304,7 +447,202 @@ Report the final path only after the file has actually been copied or created.
 - Keep native metadata and commands in the corresponding adapter without forking
   the prompt, output, safety, or verification contract.
 - Do not require API keys for normal image work.
+- 當使用者要求全文章最高密度 9:16 知識圖卡時，三個 Agent 必須共用
+  `references/high-density-knowledge-card.md` 的內容覆蓋、逐字文本與驗收契約；不可因原生工具不同
+  而改成摘要卡或跳過實際比例驗證。
 AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_IMAGEGEN_CODEX_WORKFLOW_MD_502FEBA26E
+
+# image-generator/scripts/validate_high_density_knowledge_card_plan.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/scripts/validate_high_density_knowledge_card_plan.py")"
+cat > "{{SYNC_ROOT}}/skills/image-generator/scripts/validate_high_density_knowledge_card_plan.py" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_SCRIPTS_VALIDATE_HIGH_DENSITY_KNOWLEDGE_CARD_PLAN_PY_D146D4A14F'
+#!/usr/bin/env python3
+"""Validate that a full-article 9:16 knowledge-card plan has all coverage sections."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+REQUIRED_SECTIONS = (
+    "## 文章內容覆蓋",
+    "### 故事或問題情境",
+    "### 心理機制或原因",
+    "### 核心框架或判斷法",
+    "### 行動方法",
+    "### 結論或核心金句",
+    "## 卡片文字（逐字）",
+    "## 視覺裝飾與閱讀順序",
+    "## 生成限制與驗收",
+)
+
+REQUIRED_TEXT_FIELDS = (
+    "主標題：",
+    "副標題：",
+    "內文區塊：",
+    "允許的外語點綴：",
+)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證全文章最高密度 9:16 知識圖卡的內容覆蓋與逐字文本計畫。"
+    )
+    parser.add_argument("plan_file", type=Path, help="knowledge-card-content.md 計畫檔。")
+    return parser.parse_args()
+
+
+def section_body(content: str, heading: str) -> str:
+    heading_level = len(heading.split(maxsplit=1)[0])
+    lines = content.splitlines()
+    for start_index, line in enumerate(lines):
+        if line.strip() != heading:
+            continue
+        body: list[str] = []
+        for candidate in lines[start_index + 1 :]:
+            stripped = candidate.lstrip()
+            if stripped.startswith("#"):
+                candidate_level = len(stripped) - len(stripped.lstrip("#"))
+                if candidate_level <= heading_level:
+                    break
+            body.append(candidate)
+        return "\n".join(body).strip()
+    return ""
+
+
+def main() -> int:
+    args = parse_args()
+    path = args.plan_file.resolve()
+    if not path.is_file():
+        print(f"知識圖卡計畫驗證失敗：找不到檔案：{path}")
+        return 1
+
+    content = path.read_text(encoding="utf-8")
+    errors: list[str] = []
+    for heading in REQUIRED_SECTIONS:
+        body = section_body(content, heading)
+        if not body:
+            errors.append(f"缺少或留白必要區塊：{heading}")
+
+    card_text = section_body(content, "## 卡片文字（逐字）")
+    for field in REQUIRED_TEXT_FIELDS:
+        if field not in card_text:
+            errors.append(f"`## 卡片文字（逐字）` 缺少欄位：{field}")
+
+    constraints = section_body(content, "## 生成限制與驗收")
+    if "9:16" not in constraints:
+        errors.append("`## 生成限制與驗收` 必須明示目標比例 `9:16`。")
+    if "五類" not in constraints and "故事" not in constraints:
+        errors.append("`## 生成限制與驗收` 必須包含文章內容覆蓋的驗收說明。")
+
+    if errors:
+        print("知識圖卡計畫驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("PASS：全文章最高密度知識圖卡計畫具備五類內容覆蓋、逐字文本與 9:16 驗收條件。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_IMAGE_GENERATOR_SCRIPTS_VALIDATE_HIGH_DENSITY_KNOWLEDGE_CARD_PLAN_PY_D146D4A14F
+
+# image-generator/scripts/validate_image_aspect.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/scripts/validate_image_aspect.py")"
+cat > "{{SYNC_ROOT}}/skills/image-generator/scripts/validate_image_aspect.py" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_SCRIPTS_VALIDATE_IMAGE_ASPECT_PY_825F866365'
+#!/usr/bin/env python3
+"""Validate PNG image dimensions against a requested aspect ratio."""
+
+from __future__ import annotations
+
+import argparse
+import struct
+from pathlib import Path
+
+
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+
+def parse_ratio(value: str) -> tuple[int, int]:
+    try:
+        numerator_text, denominator_text = value.split(":", maxsplit=1)
+        numerator = int(numerator_text)
+        denominator = int(denominator_text)
+    except (ValueError, TypeError) as error:
+        raise argparse.ArgumentTypeError("比例必須是 `9:16` 形式的正整數比。") from error
+    if numerator <= 0 or denominator <= 0:
+        raise argparse.ArgumentTypeError("比例的兩個數字都必須大於 0。")
+    return numerator, denominator
+
+
+def read_png_dimensions(path: Path) -> tuple[int, int]:
+    with path.open("rb") as image_file:
+        header = image_file.read(24)
+    if len(header) < 24 or not header.startswith(PNG_SIGNATURE) or header[12:16] != b"IHDR":
+        raise ValueError("只支援可讀取 IHDR 的 PNG 檔案。")
+    return struct.unpack(">II", header[16:24])
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="以實際 PNG 像素尺寸驗證圖片比例；容許原生工具整數像素四捨五入。"
+    )
+    parser.add_argument("images", nargs="+", type=Path, help="待驗證的 PNG 圖片。")
+    parser.add_argument("--ratio", type=parse_ratio, required=True, help="目標比例，例如 9:16。")
+    parser.add_argument(
+        "--tolerance-pixels",
+        type=float,
+        default=1.0,
+        help="容許相對於目標寬度的像素誤差；預設 1.0。",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    numerator, denominator = args.ratio
+    if args.tolerance_pixels < 0:
+        print("比例驗證失敗：`--tolerance-pixels` 不得小於 0。")
+        return 1
+
+    errors: list[str] = []
+    for image_path in args.images:
+        path = image_path.resolve()
+        if not path.is_file():
+            errors.append(f"找不到圖片：{path}")
+            continue
+        try:
+            width, height = read_png_dimensions(path)
+        except (OSError, ValueError) as error:
+            errors.append(f"無法讀取 {path.name}：{error}")
+            continue
+
+        expected_width = height * numerator / denominator
+        delta = abs(width - expected_width)
+        if delta > args.tolerance_pixels:
+            errors.append(
+                f"{path.name} 為 {width}×{height}；目標 {numerator}:{denominator} 應為寬 "
+                f"{expected_width:.2f}px，誤差 {delta:.2f}px 超過 {args.tolerance_pixels:.2f}px。"
+            )
+
+    if errors:
+        print("比例驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print(
+        f"PASS：{len(args.images)} 張 PNG 均符合 {numerator}:{denominator}，"
+        f"容許整數像素誤差 {args.tolerance_pixels:.2f}px。"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_IMAGE_GENERATOR_SCRIPTS_VALIDATE_IMAGE_ASPECT_PY_825F866365
 
 test -f "{{SYNC_ROOT}}/skills/image-generator/SKILL.md" && echo "image-generator installed for Codex, Claude, and AntiGravity"
 ````
