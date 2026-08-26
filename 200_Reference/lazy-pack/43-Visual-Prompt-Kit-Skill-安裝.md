@@ -68,7 +68,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SKILL_MD_0E95F5A366'
 ---
 name: visual-prompt-kit
-description: Use when the user wants to turn an article, note, or topic into visual design briefs for AI image generation, including 封面 Prompt, 課程封面, 圖卡 Prompt, 系列圖卡, 銷售頁圖片 Prompt, 縮圖, thumbnail, banner, or explicit $visual-prompt-kit invocation. Reads a local style library to recommend candidate styles with preview images, locks a shared visual DNA so a series stays consistent, and emits structured design briefs. This skill produces briefs only; image generation is handed to image-generator and page or carousel assembly to social-cards or landing-page.
+description: "Use when the user wants to turn an article, note, or topic into visual design briefs for AI image generation, including 封面 Prompt, 課程封面, 圖卡 Prompt, 系列圖卡, 銷售頁圖片 Prompt, 縮圖, thumbnail, banner, or explicit $visual-prompt-kit invocation. Reads a local style library to recommend candidate styles with preview images, locks shared visual DNA, and enforces final-prompt approval gates for Cover and carousel image generation."
 metadata:
   short-description: Article to visual design briefs
 ---
@@ -77,8 +77,10 @@ metadata:
 
 把一篇文章變成可直接生圖的**視覺設計提案**。
 
-這個 skill 只產出 brief，不產圖、不組版。單一職責讓同一份視覺 DNA 能同時餵給封面、
-系列圖卡與銷售頁圖，不必每個版位重講一次風格。
+這個 skill 負責 brief、確認關卡與交棒，不自行選擇生圖 provider，也不組版。Cover 與
+輪播圖卡都必須先完成對應的確認紀錄與驗證器；輪播的第一關可交棒 `image-generator` 產出
+首張展示圖，Cover 則先確認最終提案與提示詞，通過後才可交棒正式生圖。這讓同一份視覺
+DNA 能同時餵給封面、系列圖卡與銷售頁圖，不必每個版位重講一次風格。
 
 ## 三個維度
 
@@ -95,7 +97,7 @@ metadata:
 ## 觸發語
 
 `$visual-prompt-kit`、「封面 Prompt」、「課程封面」、「圖卡 Prompt」、「系列圖卡」、
-「高資訊圖卡」、「資訊圖卡」、「4:5 輪播圖卡」、
+「高密度輪播圖卡」、「4:5 輪播圖卡」、
 「銷售頁圖片 Prompt」、「幫我做縮圖」、「把這篇文章做成封面」、「萃取風格」、
 「幫我萃取這張圖的風格」、「把這張圖的風格收進風格庫」。
 
@@ -137,8 +139,9 @@ metadata:
 - 2. 預留真人空位 — 生圖時不畫人，預留乾淨區域供事後貼入真人照片
 - 3. 放角色插畫 — 依角色設定資產把角色畫進去
 
-**沒有使用者回覆不得進入下一步**，非互動環境除外——那時直接走 C、不放人物，
-並在輸出開頭說明未經校準。
+**沒有使用者回覆不得進入下一步**。非互動環境可走 C、不放人物，並在輸出開頭說明
+未經校準；但輪播圖卡只能停在未確認的第 1 關提案，Cover 只能停在未確認的最終提案與
+提示詞，兩者都不能視為已確認或進入正式生圖。
 
 風格庫的位置、schema、選單格式與缺庫時的退路見 `references/style-library.md`；
 校準結果如何決定方案組數與定位見該 placement 檔。
@@ -149,16 +152,95 @@ metadata:
 寫進 `visual-dna.yaml`。**同一主題的所有圖都讀這一份**，系列感來自這裡，
 不是靠每張圖重複描述。schema 見 `references/visual-dna.md`。
 
-### 3.5 文本大綱確認（多張系列版位必要關卡）
+### 3.5 輪播圖卡的四道確認關卡（多張系列版位必要）
 
-carousel、carousel-info 等一次產出多張的版位，在寫完整指令或交棒生圖之前，
-**必須先列出全套 N 張的文本大綱**（主標題、副標題、核心金句）供使用者
-審閱與修訂文字；**大綱未經確認不得產出最終指令或執行生圖**。
-單張版位（cover）不需此關卡。
+`carousel`（低密度輪播圖卡）與 `carousel-info`（高密度輪播圖卡）必須依下列順序
+執行。**前一關未獲使用者明確確認，不得進入下一關。**
+
+1. **首張展示提案確認**：A（挑編號）或 B（描述偏好）各提供 **1 組** Slide 01
+   展示圖與完整提示詞；C（你決定）提供 **3 組**最大差異化的 Slide 01 展示圖與
+   完整提示詞，使用者選定其中一組後才鎖定 `visual-dna.yaml`。首張展示圖是最終
+   全套生圖前唯一允許的圖片產出，必須透過 `image-generator` 交棒產生。
+2. **文本大綱確認**：依文章結構或知識點決定 N，先在內部一次完成全部 N 張提示詞計畫，
+   但只向使用者列出可校稿的文本大綱。每張不可只給標題或方向，欄位契約見
+   〈輪播文本大綱共同欄位〉。
+3. **全套提示詞確認**：若第 2 關文字未改，直接提出同一份已完成的提示詞計畫做總檢；
+   若文字有改，只重算受影響張次後，再提出整套更新版。這不是第二次規劃；此階段不得
+   產出正式成品圖。高密度 `carousel-info` 的每組提示詞另須使用六段輕量結構，讓畫布、
+   共用 DNA、逐字文本與禁項可被逐段校稿，但不把構圖鎖成固定模板。
+4. **正式生圖**：只有第 3 關獲確認後，先以
+   `scripts/validate_carousel_approvals.py` 驗證 `briefs/approval-log.md`，通過後才交棒
+   `image-generator` 產出整套 N 張成品；高密度每張生成後必須再以
+   `scripts/validate_image_aspect.py --ratio 4:5` 檢查實際像素比例。若首張展示圖的文字與
+   視覺 DNA 未改，可直接納入成品；否則重生 Slide 01。
+
+每個輪播任務從 `assets/carousel-approval-log-template.md` 建立
+`briefs/approval-log.md`，記錄第 1–3 關的 `pending`、`confirmed` 或
+`revisions-requested` 狀態與確認日期。單張版位（cover）不採用這套四關流程。
+
+### 3.5.1 輪播文本大綱共同欄位與一次規劃規則
+
+第 2 關的目的，是讓使用者在提示詞與生圖之前，逐張校訂所有會出現在圖卡上的文字。
+因此 `carousel` 與 `carousel-info` 的每一張文本大綱都**必須**使用相同五欄位：
+
+1. **主標題**：本張第一閱讀層。
+2. **副標題**：讓讀者不讀原文也能理解本張命題。
+3. **核心金句**：本張最應被記住的一句話。
+4. **內文重點／內容說明**：2–3 個可編修的重點或說明句。
+5. **氣氛裝飾文字**：2–3 組、只用 `visual-dna.yaml` 的 `language.accent`；它是文字內容，
+   不是事後由生圖端任意補的裝飾。
+
+文本大綱以 `## Slide 01` 這類逐張區塊呈現；不得只給表格欄位名稱或「副標題方向」。
+低密度 `carousel` 的第 2 關另有固定格式：每張必須明示六段正式輸出結構中的第 2 項
+`### 1. 文本內容`，並在該段填完以上五欄。色彩、字體、佈局與規格則留到第 3 關的完整
+五層 Brief，不在第 2 關混入，以便使用者專注修文字。
+
+低密度 `carousel` 的 N 固定為 **8–12 張**：Hook、The Gap、The Vision、Transformation、
+Social Proof／Authority、How／Action、Final Call 七個敘事角色不可合併；只有 The System
+可依文章的獨立知識點收斂為 1 張或擴展為 5 張。因此 8 張是有效下限，10 張是 The System
+有 3 個知識點時的預設，12 張是有效上限。高密度 `carousel-info` 仍依知識點決定張數，
+不沿用這個固定區間。
+
+**一次規劃、兩段式揭露**：第 2 關開始前，AI 必須依已鎖定的 `visual-dna.yaml` 與全套
+文本內容，在內部完成 N 張提示詞計畫並存為 `briefs/.{placement}-prompt-plan.md`；該檔不在
+第 2 關展示。若使用者確認文本無修改，第 3 關直接把同一份計畫轉成
+`briefs/{placement}-full.md` 提出總檢，不得再另起一輪重新規劃。若使用者修改某張文字，
+只更新該張（以及確實受共用內容影響的張次）的計畫，然後仍將全套最新版本提出整體確認。
+
+呈現第 2 關前必須執行兩個結構驗證：
+
+```text
+scripts/validate_carousel_outline.py --placement carousel briefs/carousel-outline.md
+scripts/validate_carousel_prompt_plan.py --placement carousel briefs/carousel-outline.md briefs/.carousel-prompt-plan.md
+scripts/validate_carousel_outline.py --placement carousel-info briefs/carousel-info-outline.md
+scripts/validate_carousel_prompt_plan.py --placement carousel-info --require-structured-high-density briefs/carousel-info-outline.md briefs/.carousel-info-prompt-plan.md
+```
+
+驗證通過只代表欄位與提示詞計畫齊全，不代表已獲使用者確認；仍須等使用者明確確認後，
+才可把 `briefs/approval-log.md` 的 `文本大綱` 更新為 `confirmed`。
+
+### 3.6 Cover 封面的兩道確認關卡（單張版位必要）
+
+`cover` 是單張最終成品，不需要輪播的文本大綱或首張展示圖；風格庫預覽圖已在
+Phase 2.5 提供視覺校準。**不得為了確認而先產出一張 Cover 展示圖**，以免重複使用
+生圖額度。Cover 必須依序完成：
+
+1. **視覺方向與人物確認**：完成 Phase 2.5 的風格與人物選項。A／B 直接鎖定方向；
+   C（你決定）確認委託視覺方向，並在下一關以最終提案選定其中一組。
+2. **最終 Cover 提案與提示詞確認**：A／B 提供 1 組完整提案與提示詞；C 提供 3 組
+   最大差異化的完整提案與提示詞。使用者明確確認（C 為選定其中一組）後，才能鎖定
+   最終 `visual-dna.yaml` 與生圖內容。
+3. **正式生圖**：先以 `scripts/validate_cover_approvals.py` 驗證
+   `briefs/cover-approval-log.md`，通過後才交棒 `image-generator`。提案或提示詞一經
+   修訂，必須回到第 2 關重新確認。
+
+每個 Cover 任務從 `assets/cover-approval-log-template.md` 建立
+`briefs/cover-approval-log.md`，記錄兩道確認關卡與正式生圖狀態。
 
 ### 4. 產出設計提案
 
-依 placement 檔指定的模板輸出。除非該 placement 另有規定，一律：
+依 placement 檔指定的模板輸出。輪播版位必須優先遵守上述四道確認關卡；Cover 必須優先
+遵守上述兩道確認關卡；除非該 placement 另有規定，一律：
 
 - 方案組數依步驟 2 收斂規則：使用者已選定風格（A/B）→ **1 組方案**忠實
   呈現選定風格；使用者說「你決定」（C）→ 3 組「勇敢先驅 / 保守 / 革命性」
@@ -168,7 +250,11 @@ carousel、carousel-info 等一次產出多張的版位，在寫完整指令或�
 
 ### 5. 交棒
 
-自己不生圖、不組版。交棒契約見 `references/handoff-contracts.md`。
+除輪播第一關的首張展示、輪播第四關與 Cover 最終確認後的正式生圖交棒外，不生圖、不
+組版。輪播第四關前必須通過 `scripts/validate_carousel_approvals.py briefs/approval-log.md`；
+Cover 正式生圖前必須通過
+`scripts/validate_cover_approvals.py briefs/cover-approval-log.md`。交棒契約見
+`references/handoff-contracts.md`。
 
 ## 萃取風格（把參考圖收進風格庫）
 
@@ -191,11 +277,13 @@ carousel、carousel-info 等一次產出多張的版位，在寫完整指令或�
 
 ## 硬規則
 
-1. 只產出 brief。不自行呼叫生圖工具、不寫 HTML、不組頁面。
-   實際生圖依交棒契約交給 `image-generator` 執行。
+1. 只產出 brief、確認狀態與交棒資料；不自行選擇生圖 provider、不寫 HTML、不組頁面。
+   輪播版位僅可在第 1 關透過交棒產出首張展示圖，整套正式生圖一律等第 3 關確認後
+   才交給 `image-generator` 執行；Cover 一律等最終提案與提示詞確認、確認驗證器通過後
+   才交棒正式生圖。
 2. 不輸出 Midjourney / Stable Diffusion 的單段指令語法（`/imagine` 等）。
-   輸出預設是結構化提案文件；版位檔可明文改用自然語言風格段落
-   （如 carousel-info），但指令語法仍然禁止。
+   輸出預設是結構化提案文件；高密度 `carousel-info` 以六段輕量結構保留自然語言彈性，
+   但指令語法仍然禁止。
 3. 不自動加入 Logo、簽名、品牌名、作者名或浮水印，除非使用者明確要求。
 4. 主標題與副標題一律台灣繁體中文。裝飾文字只能使用 style 檔 `accent_language`
    指定的那一種語言，且不得三語混用。
@@ -203,7 +291,8 @@ carousel、carousel-info 等一次產出多張的版位，在寫完整指令或�
    （呈現層規則，版位檔可明文放寬——carousel-info 把這些交給生圖端自由發揮。）
 6. 背景必須退後：可有質感，不可有搶走主標題的可辨識細節。
 7. 只使用使用者提供的文章內容。不從記憶、人設或其他專案補料。
-8. 風格校準是必要互動關卡，不可跳過；非互動環境改走「無偏好」路徑並明說。
+8. 風格校準是必要互動關卡，不可跳過；非互動環境可改走「無偏好」草案並明說，
+   但輪播圖卡與 Cover 都不得自動跨越任何確認關卡或正式生圖。
 9. 所有文字必須有容器或陰影保護，複雜背景中仍須清晰。核心金句每組必填。
    （前半同屬呈現層規則，版位檔可明文放寬；風格校準與知識點清晰不可放寬。）
 10. 風格庫與角色設定若含第三方、付費課程或個人資產，不得複製進本 skill、
@@ -224,9 +313,25 @@ carousel、carousel-info 等一次產出多張的版位，在寫完整指令或�
 15. 使用者在風格校準回覆 A（挑編號）或 B（描述偏好）即為定案，直接鎖定
     visual DNA；不得再強制使用者在多組風格變體間做第二次選擇。三組差異化
     提案只在使用者回覆 C（你決定）或非互動環境時提供。
-16. 多張系列版位（carousel、carousel-info）在產出最終指令或交棒生圖前，
-    必須先讓使用者確認全套文本大綱（主標題、副標題、核心金句）；
-    大綱未確認不得繼續。
+16. **多張系列版位四關流程**：`carousel` 與 `carousel-info` 必須依序完成：首張展示
+    提案與提示詞確認 → 全套文本大綱確認 → 全套 N 張正式提示詞確認 → 正式生圖。
+    第 2 關每張均須完整列出「主標題／副標題／核心金句／內文重點／氣氛裝飾文字」；
+    低密度並須使用六段結構中的 `### 1. 文本內容`、固定 8–12 張，且只能伸縮 The System
+    的 1–5 張知識段落，不得只給標題或方向；高密度每張提示詞必須有「任務與畫布／共用
+    視覺 DNA／本張文字（逐字）／本張視覺方向／設計自由度／不可違反與驗收」六段，
+    不限制固定版面。第 2 關先完成
+    全套提示詞計畫，只延後對使用者揭露；文字未改時第 3 關直接提同一份計畫，有改才更新
+    受影響提示詞。A／B 在第一關提供 1 組展示提案；C 在第一關提供 3 組展示提案並由
+    使用者選定 1 組；**不得跳過任何確認關卡，也不得在第 3 關前產出正式成品圖。**
+    高密度正式 PNG 生成後另須以 `validate_image_aspect.py --ratio 4:5` 驗收實際像素比例；
+    不通過時不可靜默交付、裁切或拉伸。
+17. **Cover 單張兩關流程**：`cover` 必須依序完成視覺方向與人物確認 → 最終 Cover
+    提案與提示詞確認 → `validate_cover_approvals.py` 通過 → 正式生圖。A／B 第二關提供
+    1 組完整提案；C 提供 3 組並由使用者選定 1 組。**Cover 不產出展示圖，也不得在
+    最終提案與提示詞確認前生圖。**
+18. **風格庫對齊與自由發揮分流（路徑 A/B vs 路徑 C）**：
+    - **路徑 A（挑編號 #001–#100）與路徑 B（描述偏好）**：AI 必須嚴格對齊既定風格庫 `knowledge/card-style-library/styles.yaml` 中的文檔描述 (`desc`)、特徵 (`chars`) 與 Prompt，並調閱 `previews/{id:03d}.jpg` 實體預覽圖檔（路徑 A 對應指定編號；路徑 B 搜尋比對最近似的風格編號 #N），據以建立 `visual-dna.yaml`、Briefs 與 Prompt，嚴禁脫離參考資料自創不相干的風格或構圖元素。
+    - **路徑 C（「你決定」）**：由 AI 完全自由發揮設計創意，依據創新維度軸線設計 3 組最大差異化（勇敢先驅 / 保守 / 革命性）的創新視覺提案，不受風格庫既有文檔與圖像約束。
 
 ## 擴充
 
@@ -247,8 +352,13 @@ carousel、carousel-info 等一次產出多張的版位，在寫完整指令或�
 - **AntiGravity adapter**：同 Codex，以編號清單加絕對路徑呈現。
 - **Fallback**：任一 Agent 無法內嵌顯示圖片時，仍必須給出預覽圖的絕對路徑，
   不可略過視覺比較這一步而直接替使用者決定。
-- **Verification**：候選數量為 5、每個都有推薦理由與可存取的預覽圖路徑、
-  使用者明確選定後才寫入 `visual-dna.yaml`。
+- **Verification**：候選數量為 5、每個都有推薦理由與可存取的預覽圖路徑；輪播第 2 關
+  必須先以 `validate_carousel_outline.py` 驗證每張五個文本欄位（低密度另驗證
+  `### 1. 文本內容`），再以 `validate_carousel_prompt_plan.py` 驗證提示詞計畫與大綱張次
+  一一對應（高密度加 `--require-structured-high-density` 驗證六段提示詞）；並保留首張展示、
+  文本大綱、全套提示詞三次明確確認紀錄；Cover 任務必須有視覺方向與人物、最終提案與
+  提示詞兩次明確確認紀錄。兩者各自的生圖前驗證器通過後才可交棒；高密度正式 PNG 另須
+  通過 `validate_image_aspect.py --ratio 4:5` 才可交付。
 - **萃取風格**：三個 Agent 共用同一套模板與 `add_style.py` 呼叫方式；差異只在
   呈現填好模板的方式（見 `references/style-extraction.md` 的 Agent 執行）。
   寫入前一律先跑 `--dry-run`，使用者同意後才移除該旗標正式寫入。
@@ -261,17 +371,26 @@ carousel、carousel-info 等一次產出多張的版位，在寫完整指令或�
 - `references/handoff-contracts.md`：交棒給 image-generator / social-cards / landing-page。
 - `references/placements/cover.md`：封面版位（課程封面、文章封面、縮圖）。
 - `references/placements/carousel.md`：低密度輪播圖卡版位（1:1 連續敘事 Carousel，
-  張數依文章決定。兩回合流程：風格校準鎖定 → 大綱確認 → N 組正式指令；
-  全程零預覽圖）。
-- `references/placements/carousel-info.md`：高資訊圖卡版位（4:5 直式 Info Carousel，
-  一張一個知識點。指令為自然語言風格段落——只鎖風格需求，版面與裝飾交給
-  生圖端自由發揮。第一輪風格校準與大綱確認後產出 N 組指令，第二輪組裝
-  生圖交付版本；全程零預覽圖）。
+  固定 8–12 張；只伸縮 The System 的 1–5 張知識段落。固定四關：首張展示提案 →
+  文本大綱 → 全套五層提示詞 → 正式生圖）。
+- `references/placements/carousel-info.md`：高密度輪播圖卡版位（4:5 直式 Info Carousel，
+  一張一個知識點。固定四關：首張展示提案 → 文本大綱 → 全套六段輕量結構提示詞 →
+  正式生圖；鎖畫布／文字／風格／禁項，版面與裝飾交給生圖端自由發揮）。
 - `references/placements/cover-person.md`：封面人物選項。模式 P 預留真人空位
   （生圖不畫人）、模式 C 角色插畫（生圖要畫人），兩者互斥。
 - `references/styles/japanese-modern.md`：日系現代風格（繁中主體、英文點綴）。
 - `scripts/recommend_styles.py`：從風格庫篩出候選並輸出預覽圖路徑。
 - `scripts/add_style.py`：把萃取的新風格附加寫入風格庫的 `styles.yaml`。
+- `scripts/validate_carousel_workflow.py`：驗證兩種輪播圖卡都保有四道確認關卡。
+- `scripts/validate_carousel_outline.py`：驗證第 2 關逐張文本大綱的共同五欄位；低密度
+  另驗證六段結構中的 `### 1. 文本內容`。
+- `scripts/validate_carousel_prompt_plan.py`：驗證內部提示詞計畫與文本大綱的張次完全對應。
+- `scripts/validate_image_aspect.py`：驗證正式圖片的實際像素比例；高密度輪播固定 4:5。
+- `scripts/validate_carousel_approvals.py`：正式生圖前驗證任務的前三次使用者確認。
+- `scripts/validate_cover_workflow.py`：驗證 Cover 封面保有兩道確認關卡與生圖驗證器。
+- `scripts/validate_cover_approvals.py`：正式生圖前驗證 Cover 的兩次使用者確認。
+- `assets/carousel-approval-log-template.md`：輪播任務的三次確認紀錄模板。
+- `assets/cover-approval-log-template.md`：Cover 任務的兩次確認紀錄模板。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SKILL_MD_0E95F5A366
 
 # visual-prompt-kit/agents/openai.yaml
@@ -279,16 +398,66 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/agents/openai.yaml")
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/agents/openai.yaml" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "視覺提案套件"
-  short_description: "文章轉視覺設計提案，附風格候選與預覽圖，只出 brief 不出圖"
-  default_prompt: "Use $visual-prompt-kit to turn an article into visual design briefs."
+  short_description: "文章轉視覺提案；Cover與輪播皆先確認再生圖"
+  default_prompt: "使用 $visual-prompt-kit 將文章轉成具確認關卡的 Cover 或輪播圖卡視覺提案。"
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_AGENTS_OPENAI_YAML_DEB9755D27
+
+# visual-prompt-kit/assets/carousel-approval-log-template.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/carousel-approval-log-template.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/carousel-approval-log-template.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_CAROUSEL_APPROVAL_LOG_TEMPLATE_MD_7479854BD7'
+# 輪播圖卡確認紀錄
+
+- 首張展示提案：pending
+  - 確認日期：
+  - 使用者回覆：
+- 文本大綱：pending
+  - 確認日期：
+  - 使用者回覆：
+- 全套提示詞：pending
+  - 確認日期：
+  - 使用者回覆：
+- 正式生圖：not-started
+  - 產出日期：
+  - 備註：
+
+使用規則：每一關只能在使用者明確確認後改為 `confirmed`。若使用者要求修訂，改為
+`revisions-requested`；不得在前三關全部為 `confirmed` 前將「正式生圖」改為進行中。
+正式交棒前必須使用 `scripts/validate_carousel_approvals.py` 驗證本檔並取得 `PASS`。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_CAROUSEL_APPROVAL_LOG_TEMPLATE_MD_7479854BD7
+
+# visual-prompt-kit/assets/cover-approval-log-template.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/cover-approval-log-template.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/cover-approval-log-template.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_COVER_APPROVAL_LOG_TEMPLATE_MD_C3FC5A8FF1'
+# Cover 封面確認紀錄
+
+- 視覺方向與人物：pending
+  - 確認日期：
+  - 使用者回覆：
+- 最終 Cover 提案與提示詞：pending
+  - 確認日期：
+  - 使用者回覆：
+- 正式生圖：not-started
+  - 產出日期：
+  - 備註：
+
+使用規則：
+
+- 收到使用者的風格方向與人物選項後，才把「視覺方向與人物」改為 `confirmed`。
+  使用者選 C（你決定）時，C 本身是委託視覺方向的確認；最終仍須在下一關選定或確認提案。
+- A／B 只能提供 1 組最終 Cover 提案與提示詞；C 提供 3 組最大差異化提案與提示詞，
+  使用者選定其中一組才把「最終 Cover 提案與提示詞」改為 `confirmed`。
+- 使用者要求修改最終提案或提示詞時，將該欄改為 `revisions-requested`；修訂後必須再次獲得
+  明確確認，才可改回 `confirmed`。
+- 正式交棒前必須使用 `scripts/validate_cover_approvals.py` 驗證本檔並取得 `PASS`；
+  不得在前兩項皆為 `confirmed` 前將「正式生圖」改為進行中。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_COVER_APPROVAL_LOG_TEMPLATE_MD_C3FC5A8FF1
 
 # visual-prompt-kit/references/handoff-contracts.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/handoff-contracts.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/handoff-contracts.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_HANDOFF_CONTRACTS_MD_F59DB8C89B'
 # 交棒契約
 
-本 skill 只產出 brief。實際產圖與組版一律交給下游，呼叫方向單向，不會循環。
+本 skill 只產出 brief 與確認狀態。實際產圖與組版一律交給下游，呼叫方向單向，不會循環。
 
 ```text
 visual-prompt-kit  →  image-generator   生圖
@@ -298,7 +467,33 @@ visual-prompt-kit  →  image-generator   生圖
 
 ## → image-generator
 
-交出：`visual-dna.yaml` 路徑、選定 brief 的完整內容、目標比例、輸出檔名與存放路徑。
+Cover 與輪播圖卡的確認關卡不同，交棒時不可混淆：
+
+1. **Cover 正式生圖**：Cover 不產出展示圖。只有
+   `briefs/cover-approval-log.md` 的「視覺方向與人物」與「最終 Cover 提案與提示詞」都標為
+   `confirmed` 時，才交出選定的 `visual-dna.yaml` 路徑、單組已確認 brief／提示詞、目標比例、
+   輸出檔名與存放路徑。交棒前必須執行
+   `scripts/validate_cover_approvals.py briefs/cover-approval-log.md` 並取得 `PASS`。
+2. **輪播第 1 關首張展示**：交出 Slide 01 的展示 brief、對應完整提示詞、目標比例與
+   輸出路徑。A／B 只交 1 組；C 交 3 組最大差異化提案。這是全套正式生圖前唯一
+   允許的圖片產出。
+3. **輪播第 4 關正式生圖**：只有 `briefs/approval-log.md` 的「首張展示提案」、「文本大綱」、
+   「全套提示詞」都標為 `confirmed` 時，才交出 `visual-dna.yaml` 路徑、全套 N 張
+   已確認 brief／提示詞、目標比例、輸出檔名與存放路徑。交棒前必須執行
+   `scripts/validate_carousel_approvals.py briefs/approval-log.md` 並取得 `PASS`。
+
+所有帶有指定比例的交棒，在生成後都要由下游回傳實際像素尺寸並完成比例驗收，不能只看
+Prompt 中的比例文字。高密度 `carousel-info` 固定執行：
+
+```text
+scripts/validate_image_aspect.py --ratio 4:5 assets/images/slide-*.png
+```
+
+若任何一張不通過，下游只重生該張並再次驗證；不得用裁切、拉伸或口頭宣稱符合比例取代
+驗收。第二次仍不通過時，停在未交付狀態，向使用者說明原生工具限制並請其決定替代路徑。
+
+若輪播第 2 或第 3 關調整了 Slide 01 的文字或視覺 DNA，展示圖不可直接當成正式成品，
+必須在第 4 關重生。使用者只要 brief、不要展示圖或成品時，不進行任何圖片交棒。
 
 由 `image-generator` 決定實際使用哪個 Agent 的原生生圖能力。本 skill 不指定 provider、
 不要求 API key、不自行建立生圖腳本。
@@ -676,18 +871,19 @@ AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_VISUAL_DNA_MD_799DB77D09
 # visual-prompt-kit/references/placements/carousel-info.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel-info.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel-info.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CAROUSEL_INFO_MD_FD5237A143'
-# Placement：高資訊圖卡（Info Carousel）
+# Placement：高密度輪播圖卡（Info Carousel）
 
 適用於 Instagram / LinkedIn 的 **4:5 直式連續資訊圖卡**。與低密度輪播圖卡
-（`carousel.md`）同族，但哲學相反：低密度版用分欄位模板精確控制每個視覺決策，
-本版位**只鎖風格需求，版面、構圖、裝飾與資訊層級交給生圖端自由發揮**。
+（`carousel.md`）同族，但控制程度不同：低密度版用完整分欄位模板精確控制視覺決策；
+本版位用可校稿的**輕量結構化提示詞**鎖住畫布、文字、風格與底線，版面、構圖、裝飾與
+資訊層級仍交給生圖端自由發揮。
 
 在三種圖卡應用中的密度定位：
 
 | 應用 | 比例 | 張數 | 資訊密度 |
 |---|---|---|---|
 | 低密度輪播圖卡（`carousel.md`） | 1:1 | N 張輪播 | 低（重敘事） |
-| **高資訊輪播圖卡（本版位）** | 4:5 | N 張輪播 | **中** |
+| **高密度輪播圖卡（本版位）** | 4:5 | N 張輪播 | **中** |
 | 9:16 知識圖卡（Knowledge 歸檔） | 9:16 | 一次一張 | 高 |
 
 本版位每張的文字量**介於 1:1 低密度輪播與 9:16 知識圖卡之間**：副標與重點
@@ -695,24 +891,56 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel-inf
 所有細節——輪播的資訊量分攤在 N 張上。
 
 - 比例：**固定 `4:5`**，不詢問、不提供其他選項。
-- **張數 N 由 AI 依文章內容決定**：一張一個知識點，在第一輪的分析階段
-  規劃張數並附一句理由，供使用者一併確認。
-- 產出分兩輪：**第一輪**完成風格校準（A/B 直接鎖定；C 才提 3 組差異化
-  風格方向）與文本大綱確認後，產出全部 N 組圖卡指令交使用者確認；
-  **第二輪**在使用者確認後，組裝最終生圖交付版本（總指令行 + N 組指令）。
+- **張數 N 由 AI 依文章內容決定**：一張一個知識點，在前置分析暫定張數並附理由；
+  最終張數與文字在文本大綱關卡確認。
+- 固定四道確認關卡：**首張展示提案確認 → 文本大綱確認 → 全套提示詞確認 →
+  正式生圖**。前一關未經使用者明確確認，不得進入下一關。
+- A／B 與 C 的後續流程完全相同；唯一差異是第一關的展示提案數量：A／B 是 1 組，
+  C 是 3 組最大差異化提案。
 
-## 指令哲學
+## 指令哲學：輕量結構化，而非版面規格化
 
-每組指令是**一段自然語言的風格與內容描述**，不是分欄位模板。
-它只做兩件事：
+每組指令都採用下列 **6 段人可讀區塊**。目的不是要求模型照欄位排版，而是讓 Agent
+與使用者能逐段校稿、讓畫布比例不再藏在自然語言段落裡。每個區塊內仍以自然語言描述，
+不必硬湊字數或子欄位。
 
-1. **說清楚風格**：整套一致的風格段落——視覺語彙、背景、配色邏輯、
-   字體氣質與字重層級原則、整體氛圍。
-2. **給出本張內容**：這張要傳達的知識點——標題、說明與重點。
+1. **任務與畫布**：用途、固定 4:5 直式畫布、比例優先權。
+2. **共用視覺 DNA**：整套不變的視覺語彙、配色、背景、字體氣質與字重原則。
+3. **本張文字（逐字）**：所有需出現在本張的繁中主文字與允許的點綴文字。
+4. **本張視覺方向**：本張唯一的知識意象、情緒或閱讀重心。
+5. **設計自由度**：明確授權生圖端自行決定版面、資訊層級、容器、留白與裝飾。
+6. **不可違反與驗收**：語言、人物、品牌／標籤禁令，以及正式輸出後的比例驗收。
 
-**不規定**版面分區、裝飾元素數量、文字字數上限、容器樣式或構圖策略。
-這些由生圖端依風格段落自由詮釋。指令寫得像委託一位懂行的設計師，
-不是像填一張規格單。
+這不是低密度版的完整五層 Brief：**不規定**版面分區、裝飾元素數量、文字字數上限、
+容器樣式或構圖策略。指令寫得像委託一位懂行的設計師，不是像填一張規格單。
+
+每張提示詞的最低結構如下；第 2、4、5 段可依風格與知識點長短調整，但六個段名不可省略：
+
+```text
+【任務與畫布】
+為 Instagram／LinkedIn 產生一張高密度輪播圖卡。畫布必須是 4:5 直式；優先遵守此比例，
+不可輸出為正方形、3:4 或 2:3。
+
+【共用視覺 DNA】
+{全套共用的自然語言風格段落}
+
+【本張文字（逐字）】
+主標題：「{主標題}」
+副標題：「{副標題}」
+核心金句：「{核心金句}」
+內文重點：{2–3 點}
+氣氛裝飾文字：{2–3 組 accent 語言文字}
+
+【本張視覺方向】
+{只描述本張的知識意象、情緒與閱讀重心}
+
+【設計自由度】
+請自行決定文字層級、留白、容器、圖形與構圖；不要受固定欄位或固定格線限制。
+
+【不可違反與驗收】
+{依 visual-dna.yaml 映射語言與人物限制；不出現敘事標籤、頁碼、hashtag、Logo、簽名、
+浮水印、價格或促銷文字。完成後以實際像素比例驗收為 4:5。}
+```
 
 ## 設計底線（僅此而已，不再加碼）
 
@@ -728,7 +956,7 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel-inf
 5. **預設不放人物**（`person.mode: none`），使用者主動要求時才讀
    `cover-person.md`。
 
-## 第一輪：分析、校準與 N 組指令
+## 前置分析與風格校準
 
 ### Step 1 洞察與定義
 
@@ -750,17 +978,31 @@ B 自由描述 / C 你決定），洞察摘要中一併呈現知識點清單與�
 - 規劃張數：{N} 張 — {一句理由}
 ```
 
-**沒有使用者回覆不得進入 Step 3。** 非互動環境走「你決定」路徑並在輸出
-開頭說明未經校準。
+**沒有使用者回覆不得進入第 1 關。** 非互動環境只可輸出 C 的未確認草案，並在
+輸出開頭說明缺少使用者確認；不得自動跨越第 1–3 關或生圖。
 
 **收斂規則（與其他版位一致）**：使用者選了 A（風格編號）或 B（描述偏好），
-風格即定案——直接寫入 `visual-dna.yaml`（`person.mode: none`），
-不得再要求使用者在多組變體間做第二次選擇。使用者說「你決定」（C）時，
-依創新維度三點軸線提出 **3 組最大差異化風格方向**（A 勇敢先驅 / B 保守 /
-C 革命性），每組以一小段風格描述文字呈現、可搭配風格庫既有預覽圖輔助；
-使用者選定後寫入 DNA。
+以該方向建立一組首張展示提案；使用者說「你決定」（C）時，依創新維度三點軸線
+建立 **3 組最大差異化首張展示提案**（A 勇敢先驅 / B 保守 / C 革命性）。A／B
+在展示提案前可先寫入暫定 DNA；C 在使用者選定展示提案後才寫入正式 DNA。兩種
+路徑都必須在第 1 關確認後，才可進入相同的第 2–4 關流程。
 
-### Step 3 撰寫共用風格段落
+### 第 1 關：首張展示提案確認
+
+風格校準後，先產出首張展示提案，不得直接列出全套文本大綱或提示詞。
+
+- A／B：先依選定風格寫入 `visual-dna.yaml`（`person.mode: none`），提供 **1 組**
+  Slide 01 展示圖與對應完整提示詞。
+- C：依三點軸線建立 **3 組**暫定視覺 DNA，各提供 Slide 01 展示圖與對應完整提示詞；
+  使用者選定其中一組後才寫入正式 `visual-dna.yaml`。
+- 展示圖一律交棒 `image-generator` 產生，是第 3 關確認前唯一可產出的圖片；展示提示詞
+  也必須使用本版位的六段輕量結構。
+
+從 `assets/carousel-approval-log-template.md` 建立 `briefs/approval-log.md`，並把
+`首張展示提案` 設為 `pending`。只有使用者確認展示圖與
+對應提示詞後，更新為 `confirmed`，才可進入第 2 關。
+
+#### 共用視覺 DNA 段落寫法
 
 把選定風格展開成**一段完整的自然語言風格描述**，整套 N 張共用。
 風格庫選出的風格以其 `prompt` 為基底擴寫；自由描述則直接成文。
@@ -790,75 +1032,143 @@ C 革命性），每組以一小段風格描述文字呈現、可搭配風格庫
 比例一律改成 4:5、密度收斂到輪播的中等水位。其他使用者沒有該檔時，
 以上方內建範例為準。
 
-### Step 4 文本大綱確認（互動關卡）
+### 第 2 關：文本大綱確認
 
-寫 N 組指令之前，**先列出全套 N 張的文本大綱**——每張的主標題、
-一句副標題方向與要放的重點——供使用者審閱與修訂文字。
-**大綱未經使用者確認不得產出完整指令。** 使用者要求修改時，
-修訂後重新呈現受影響的張次再確認。
+首張展示提案獲確認後，先在內部依已鎖定的 `visual-dna.yaml` 與全套內容完成 N 張
+六段輕量結構的提示詞計畫；此時只向使用者列出文本大綱，供逐張審閱與修訂文字。張數 N 依
+知識點推導，通常是知識點數 + 開頭引入 + 收尾行動，不限於 10 張。每張以
+`## Slide 01` 這類區塊完整填入以下共同五欄位，不能只寫「副標題方向」或摘要：
 
-### Step 5 產出 N 組指令
+- 主標題
+- 副標題
+- 核心金句
+- 內文重點／內容說明（2–3 個可校稿重點）
+- 氣氛裝飾文字（2–3 組，只用 `visual-dna.yaml` 的 `language.accent`）
 
-依確認後的大綱產出。每組指令 = **共用風格段落 + 本張內容段落**，
-用 codeblock 包住。內容段落用自然語句寫出本張的標題與要傳達的重點，
-不拆欄位：
+本版位在第 2 關只確認文字，不限制生圖端的版面、構圖或裝飾做法；這些仍在第 3 關的
+輕量結構化提示詞中保有自由。呈現文本前必須執行：
 
 ```text
-{共用風格段落}
-
-本張圖卡內容：主標題「{標題}」，副標題「{一到兩句說明}」。
-內文重點：{以自然語句或簡短條列寫出本張知識點的重點，
-讓生圖端自行決定如何編排這些資訊}。
+scripts/validate_carousel_outline.py --placement carousel-info briefs/carousel-info-outline.md
+scripts/validate_carousel_prompt_plan.py --placement carousel-info --require-structured-high-density briefs/carousel-info-outline.md briefs/.carousel-info-prompt-plan.md
 ```
 
-一次產出全部 N 組交使用者確認。敘事順序沿用 `carousel.md` 的原則：
-開頭引入、收尾行動固定保留，中段每張一個知識點依文章邏輯排列。
-使用者有修改意見時，修訂受影響的張次重新呈現；
-**內容未經確認不得進入第二輪。**
+把 `briefs/approval-log.md` 的 `文本大綱` 設為 `pending`。大綱未經使用者確認不得
+提出完整指令；文字未修改時，第 3 關直接提出同一份已完成的提示詞計畫。使用者要求
+修改時，只重算受影響張次後，重新提出整套更新版供總檢。確認後更新為 `confirmed`，
+才可進入第 3 關；兩支驗證器通過只代表結構完整，不代表使用者已確認。
 
-## 第二輪：組裝生圖交付版本
+### 第 3 關：全套提示詞確認
 
-使用者確認後輸出最終交付版本，第一行固定是總指令行（張數代入實際 N），
-接著逐張列出 N 組指令：
+依已確認文本，將第 2 關已完成的提示詞計畫直接寫入 `briefs/carousel-info-full.md`；
+文字未修改時不得另起一輪規劃。若第 2 關曾修改文字，先只重算受影響張次，再將更新後的
+全套 N 組提示詞寫入同一檔。每組指令都用 codeblock 包住，並沿用第 2 關已完成的
+**六段輕量結構**。其中「共用視覺 DNA」跨張完全一致；「本張文字（逐字）」完全對應
+已確認的文本大綱；「本張視覺方向」才依張次改變：
+
+```text
+【任務與畫布】
+為 Instagram／LinkedIn 產生一張高密度輪播圖卡。畫布必須是 4:5 直式；優先遵守此比例，
+不可輸出為正方形、3:4 或 2:3。
+
+【共用視覺 DNA】
+{全套共用的自然語言風格段落}
+
+【本張文字（逐字）】
+主標題：「{標題}」
+副標題：「{一到兩句說明}」
+核心金句：「{核心金句}」
+內文重點：{2–3 點}
+氣氛裝飾文字：{accent 語言文字}
+
+【本張視覺方向】
+{本張知識意象、情緒與閱讀重心}
+
+【設計自由度】
+請自行決定文字層級、留白、容器、圖形與構圖；不要受固定欄位或固定格線限制。
+
+【不可違反與驗收】
+{依 visual-dna.yaml 的語言／人物限制；無敘事標籤、頁碼、hashtag、Logo、簽名、浮水印、
+價格或促銷文字。完成後以實際像素比例驗收為 4:5。}
+```
+
+一次產出全部 N 組交使用者確認。敘事順序沿用 `carousel.md` 的原則：開頭引入、
+收尾行動固定保留，中段每張一個知識點依文章邏輯排列。使用者有修改意見時，修訂
+受影響提示詞後重新呈現；**全套提示詞未經確認不得生圖。** 全套獲確認後，將
+`briefs/approval-log.md` 的 `全套提示詞` 更新為 `confirmed`。呈現第 3 關前，必須以同一支
+驗證器確認 `briefs/carousel-info-full.md` 仍保有逐張對應與六段結構：
+
+```text
+scripts/validate_carousel_prompt_plan.py --placement carousel-info --require-structured-high-density briefs/carousel-info-outline.md briefs/carousel-info-full.md
+```
+
+### 第 4 關：正式生圖
+
+第 3 關確認後，先以本 skill 的 `scripts/validate_carousel_approvals.py` 驗證
+`briefs/approval-log.md`；通過後才交棒 `image-generator` 產出最終交付版本，第一行固定
+是總指令行（張數代入實際 N），接著逐張列出已確認的 N 組指令：
 
 ```text
 使用以下指令產生圖卡，共 {N} 張輪播圖卡 output by slide by slide format
 ```
 
-第二輪不改內容；若使用者此時又提出修改，回到第一輪修訂並重新確認。
+第 4 關不改內容；若使用者此時又提出修改，回到第 2 或第 3 關修訂並重新確認。
+首張展示圖只有在文字與視覺 DNA 都未變動時，才能直接納入正式成品；否則重生 Slide 01。
 
-## 生圖轉換
+每張 PNG 生成完成後，**尚未通過比例驗收前不得交付為正式成品**。對全套圖片執行：
+
+```text
+scripts/validate_image_aspect.py --ratio 4:5 assets/images/slide-*.png
+```
+
+原生生圖工具的輸出尺寸可以是接近 4:5 的整數像素（例如四捨五入後的尺寸），但不得是
+其他比例。若某張未通過，先只重生該張並在「任務與畫布」段重申 4:5；第二次仍失敗時，
+不得裁切、拉伸或靜默交付，應回報原生工具限制並請使用者決定是否授權改用可控畫布的
+替代生圖／組版路徑。
+
+## 生圖轉換（僅第 4 關）
 
 交棒 `image-generator` 時，遵循 `../handoff-contracts.md` 的「語言映射契約」：
 標題固定繁中欄位宣告，點綴文字與禁用語言否定提示依 `visual-dna.yaml` 的
 `language.accent` / `language.forbidden` 變數映射，並遵守其觸發詞紀律。
-本版位的自然語言風格段落照用不動，但轉換為生圖 Prompt 時上述映射與
-否定提示不可省略。
+本版位的六段輕量結構照用不動，但轉換為生圖 Prompt 時上述映射與否定提示不可省略；
+不能把「任務與畫布」或「不可違反與驗收」為了縮短 Prompt 而刪除。
 
 ## 檢查（輕量）
 
-- [ ] 整套是否共用同一段風格段落、無逐張變風格？
+- [ ] 每張提示詞是否都有六段輕量結構，並由驗證器通過？
+- [ ] 整套是否共用同一段視覺 DNA、無逐張變風格？
 - [ ] 風格段落是否含字重層級原則？
+- [ ] 第 1 關是否提供首張展示圖與對應提示詞？A／B 是否為 1 組、C 是否為 3 組？
 - [ ] 文本大綱是否已經使用者確認？
+- [ ] 全套 N 組提示詞是否已經使用者確認？
 - [ ] 每張是否對應一個知識點、無重複無遺漏？張數是否等於確認的 N？
 - [ ] 是否沒有敘事標籤、hashtag、促銷、Logo、簽名、浮水印？
 - [ ] 主要文字是否繁體中文、外語點綴是否只用 accent 語言？
 - [ ] 生圖轉換是否遵守語言映射契約（accent／forbidden 依 DNA 變數映射、
       否定提示已加、無 forbidden 語言觸發詞）？
 - [ ] 總指令行張數是否代入正確？
+- [ ] `briefs/approval-log.md` 的首張展示提案、文本大綱、全套提示詞是否皆為 `confirmed`？
+- [ ] 每張正式 PNG 是否已由 `validate_image_aspect.py --ratio 4:5` 通過？
 
-不檢查版面分區、裝飾數量、字數上限——那些是生圖端的自由。
+不檢查版面分區、裝飾數量、字數上限——那些是生圖端的自由；但畫布比例、逐字文本、
+語言與禁項是驗收條件，不屬於自由範圍。
 
 ## 輸出檔名
 
 ```text
-briefs/carousel-info-{01..NN}.md   # 第一輪 N 組指令（或合併為 carousel-info-full.md）
+briefs/carousel-info-proposal-{01|A|B|C}.md  # 第 1 關：A/B 一組，C 三組 Slide 01 展示提案
+briefs/carousel-info-outline.md               # 第 2 關：全套文本大綱
+briefs/carousel-info-full.md                  # 第 3 關：全套 N 組六段輕量結構化提示詞
+briefs/approval-log.md                        # 第 1–3 關確認狀態
 ```
+
+`approval-log.md` 一律由本 skill 的 `assets/carousel-approval-log-template.md` 複製後填寫。
 
 ## 相關
 
-- `carousel.md`：低密度輪播圖卡版位（1:1、分欄位模板精確控制）。
-  要精確控制視覺選它，要讓生圖端自由發揮選本版位。
+- `carousel.md`：低密度輪播圖卡版位（1:1、完整分欄位模板精確控制）。
+  要精確控制視覺選它；要保留構圖自由、但仍需可校稿 Prompt 選本版位。
 - `cover-person.md`：人物選項。本版位預設不啟用。
 - `../visual-dna.md`：風格一致性的記錄位置。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CAROUSEL_INFO_MD_FD5237A143
@@ -874,12 +1184,24 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel.md"
 `carousel-info.md`，高密度 9:16 單張見風格庫的 `card-style-library/knowledge-card-prompts.md`）。
 
 - 比例：**固定 `1:1`**，不詢問、不提供其他選項。
-- **張數 N 由 AI 依文章內容決定**（不是固定 10 張）：在第一回合的定義階段
-  規劃張數並附一句理由，供使用者一併確認。原則上 6–12 張，敘事弧線完整
-  優先於湊滿張數；文章單薄就少張，架構龐大就多張。
-- 產出分兩回合：第一回合完成風格校準與鎖定（使用者選 A/B 即直接鎖定；
-  說「你決定」時才提 3 組差異化風格提案供選），第二回合先確認全套文本大綱，
-  再產出全部 N 組正式指令。
+- **張數 N 固定為 8–12 張**（不是固定 10 張）：在第一回合的定義階段規劃張數並附一句理由，
+  供使用者一併確認。Hook、The Gap、The Vision、Transformation、Social Proof／Authority、
+  How／Action、Final Call 七段固定保留；**只有 The System 可從 1 張擴展為 5 張**，所以
+  8 張是最少、10 張是預設、12 張是最多。敘事弧線完整優先於湊滿張數。
+- 固定四道確認關卡：**首張展示提案確認 → 文本大綱確認 → 全套提示詞確認 →
+  正式生圖**。前一關未經使用者明確確認，不得進入下一關。
+- A／B 與 C 的後續流程完全相同；唯一差異是第一關的展示提案數量：A／B 是 1 組，
+  C 是 3 組最大差異化提案。
+
+## 原始腳本的繼承與後續覆寫
+
+本規格繼承使用者提供的原始腳本之角色設定、日系數位設計語彙、1:1 比例、知識密度、
+十張預設敘事弧線與六段結構化輸出格式；下列是使用者後續明確確認、優先於原始腳本的規則：
+
+- 原本固定 10 張，改為 **8–12 張**；僅 The System 可由 1 張伸縮到 5 張。
+- 原本兩回合確認後直接交付全套，改為四關流程，並採「一次完整規劃、兩段式揭露」。
+- 原本風格校準後一律提供三案，改為 A／B 提供 1 組、C 提供 3 組首張展示提案。
+- 原本將核心金句置於敘事定位，改為 `### 1. 文本內容` 的可編輯共同欄位，與其他文本一併確認。
 
 ## 角色
 
@@ -914,7 +1236,7 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel.md"
 `person.mode: none`）。只有使用者主動要求在圖卡放人物時，才讀
 `cover-person.md` 並依其規則處理；此時整套圖卡的人物策略仍須跨張一致。
 
-## 第一回合：語境判斷與風格提案
+## 前置分析與第 1 關展示提案
 
 依序完成 4 個 Step。**Step 3 是互動關卡，沒有使用者回覆不得進入 Step 4。**
 
@@ -928,9 +1250,9 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel.md"
 提煉 1 個 Core Message：「看完整套圖卡後，受眾最應該記住的一件事」。
 找到整套圖卡的**核心金句**，作為整套視覺的靈魂錨點。
 
-同時**決定張數 N**：依文章的架構密度規劃敘事弧線需要幾張（核心架構有幾個
+同時**暫定張數 N**：依文章的架構密度規劃敘事弧線需要幾張（核心架構有幾個
 步驟、需不需要前後對比與權威背書張），並準備一句理由，在 Step 3 連同洞察
-一起呈現給使用者確認。
+呈現；最終張數與文字在第 2 關文本大綱才確認。
 
 ### Step 3 風格校準（互動關卡）
 
@@ -959,55 +1281,98 @@ C. 說「你決定」
    我依創新維度軸線給三組最大差異化的方案。
 ```
 
-**非互動環境**（`codex exec`、`claude -p`、CI、排程）直接走 Step 4 路徑 B，
-並在輸出開頭說明本次未經風格校準。
+**非互動環境**（`codex exec`、`claude -p`、CI、排程）只可走 Step 4 路徑 C 的
+未確認草案，並在輸出開頭說明缺少使用者確認；不得自動跨越第 1–3 關或生圖。
 
-### Step 4 風格鎖定或三組提案
+### Step 4 首張展示提案確認（第 1 關）
 
-依 Step 3 的回覆分兩條路。**判斷準則與封面版位相同：使用者選了 A
-（風格編號）或 B（描述偏好），風格方向即已定案——直接寫入
-`visual-dna.yaml`，不得再強制使用者在多組變體間做第二次選擇。**
+依 Step 3 的回覆分兩條路進行：
 
-**路徑 A — 使用者給了方向（A 或 B）**
+**路徑 A / B — 使用者給了方向（選擇 A 風格編號 或 B 描述偏好）**
 
-該方向即為定案，直接鎖入 `visual-dna.yaml`，隨即進入第二回合的
-文本大綱確認，不另寫 Sample。
+1. 鎖定該風格寫入 `visual-dna.yaml`。
+2. 依據選定風格產出 **1 組專屬設計提案**：提供 **1 張 Slide 01 展示圖**（交棒
+   `image-generator` 生圖）與 **1 組 Slide 01 完整五層架構 Sample Brief**（包含 1.
+   文本內容、2. 色彩計畫、3. 字體特徵、4. 佈局構圖、5. 規格風格）供使用者審閱。
+3. 從 `assets/carousel-approval-log-template.md` 建立 `briefs/approval-log.md`，並將
+   `首張展示提案` 設為 `pending`。**展示提案未經確認，
+   不得列出文本大綱、產出全套提示詞或生圖其餘頁面。**
+4. 使用者確認展示提案後，把此關更新為 `confirmed`，才可進入第 2 關。
 
-**路徑 B — 使用者說「你決定」（C）或非互動環境**
+**路徑 C — 使用者說「你決定」（選擇 C）或非互動環境**
 
-此時才依創新維度三點軸線提出 **3 組最大差異化風格提案**
-（A 勇敢先驅 / B 保守 / C 革命性）。每組提供 1 張 Slide 01 的
-Sample 指令（照下方輸出模板逐欄填寫、codeblock 包住），讓使用者
-以文字判斷整套圖卡的視覺方向；可搭配風格庫既有預覽圖輔助。
-使用者選定後把選定結果寫入 `visual-dna.yaml`，再進第二回合。
+1. 依創新維度三點軸線提出 **3 組最大差異化風格提案**（A 勇敢先驅 / B 保守 / C 革命性）。
+2. 每組各自提供 **1 張 Slide 01 展示圖**（共 3 張 1:1 展示圖）與 **1 組 Slide 01 完整
+   五層架構 Sample Brief** 供使用者比較與選定。
+3. 在 `briefs/approval-log.md` 將 `首張展示提案` 設為 `pending`。使用者選定其中一組後，
+   才鎖定寫入 `visual-dna.yaml`，並把此關更新為 `confirmed`；後續與 A／B 完全相同。
 
-## 第二回合：文本大綱確認與 N 組圖卡設計指令
+## 第 2 關：文本大綱確認
 
-收到風格確認後，**先列出全部 N 張圖卡的文本大綱**（包含每張的主標題、副標題、核心金句），供使用者審閱與確認文字描述。使用者確認無須修改文字（或完成文字編修）後，**自動交棒 `image-generator` 執行全套 N 張圖卡之實體生圖**，並將 N 組正式指令寫入文件（`carousel-full.md`）。
+首張展示提案獲確認後，先在內部依已鎖定的 `visual-dna.yaml` 與全套內容完成 N 張
+五層 Brief 的提示詞計畫；此時只向使用者列出文本大綱，供逐張審閱與修訂文字。N 由
+文章的敘事結構決定，但固定為 8–12 張；不得為了湊數而改變敘事弧線。
 
-N 組全部引用同一份 `visual-dna.yaml`，單張只填該張特有的敘事內容。
+低密度的文本大綱**固定先列出六段正式輸出結構中的第 2 項**：`### 1. 文本內容`。
+每張以 `## Slide 01` 這類區塊呈現，且 `### 1. 文本內容` 必須完整填入以下共同五欄位：
 
-**輸出的第一行固定是給生圖端的總指令**（張數代入實際 N）：
+- 主標題
+- 副標題
+- 核心金句
+- 內文重點／內容說明（2–3 個可校稿重點）
+- 氣氛裝飾文字（2–3 組，只用 `visual-dna.yaml` 的 `language.accent`）
+
+第 2 關只呈現可修改的文字；不得提早附上色彩、字體、佈局、構圖或規格。核心金句在
+第 3 關同樣保留在 `### 1. 文本內容`，讓文本大綱與正式五層 Brief 的文字欄位一致。
+呈現文本前必須執行：
+
+```text
+scripts/validate_carousel_outline.py --placement carousel briefs/carousel-outline.md
+scripts/validate_carousel_prompt_plan.py --placement carousel briefs/carousel-outline.md briefs/.carousel-prompt-plan.md
+```
+
+把 `briefs/approval-log.md` 的 `文本大綱` 設為 `pending`。使用者確認無須修改文字時，
+第 3 關直接提出同一份已完成的提示詞計畫；若修改文字，只重算受影響張次後，提出全套
+更新版供總檢。完成文字編修並明確確認後，更新為 `confirmed`，才可進入第 3 關。
+兩支驗證器通過只代表結構完整，不代表使用者已確認。
+
+## 第 3 關：全套提示詞確認
+
+文本大綱確認後，將第 2 關已完成的提示詞計畫直接寫入 `briefs/carousel-full.md`，交給
+使用者逐張確認；文字無修改時不得另起一輪規劃。若第 2 關曾修改文字，先只重算受影響
+張次，再將更新後的完整 N 組提示詞寫入同一檔。N 組全部引用同一份 `visual-dna.yaml`，
+單張只填該張特有的敘事內容。**此階段只審閱提示詞，不得產出正式成品圖。**
+
+若使用者要求修改任何頁面，修訂受影響的提示詞後再次呈現確認；只有全套提示詞獲得
+明確確認，才把 `briefs/approval-log.md` 的 `全套提示詞` 更新為 `confirmed`。
+
+## 第 4 關：正式生圖
+
+第 3 關確認後，先以本 skill 的 `scripts/validate_carousel_approvals.py` 驗證
+`briefs/approval-log.md`；通過後才交棒 `image-generator` 產出全套 N 張實體圖卡。交棒
+總指令第一行固定為：
 
 ```text
 使用以下指令產生圖卡，共 {N} 張輪播圖卡 output by slide by slide format
 ```
 
-接著逐張列出 N 組指令。
+接著逐張交出已確認的 N 組指令。首張展示圖只有在文字與視覺 DNA 都未變動時，才能直接
+納入正式成品；否則必須重生 Slide 01。
 
-敘事弧線依下表規劃。這是 **10 張時的參考範例**，實際依 N 伸縮：
-The System 的張數跟著文章核心架構的步驟數走；文章單薄時 Gap 與 Vision、
-或 Transformation 與 Social Proof 可各合併為一張。不論 N 是多少，
-**Hook 開頭與 Final Call 收尾固定保留**，中段轉承不得斷裂。
+敘事弧線依下表規劃。這是 **10 張時的預設結構**：The System 有 3 張知識段落。
+N 的伸縮**只能**發生在 The System：文章沒有可分開講的知識點時，將 Part 1–3 收斂為
+一張，形成 8 張；文章有 2／4 個獨立知識點時，形成 9／11 張；有 5 個獨立知識點時，
+擴展為 12 張。Hook、The Gap、The Vision、Transformation、Social Proof／Authority、
+How／Action 與 Final Call 一律保留、不得合併，且 Final Call 永遠是最後一張。
 
 | 張次 | 敘事角色 | 敘事任務 |
 |---|---|---|
 | Slide 01 | Hook | 爆擊痛點的提問或現狀揭露 |
 | Slide 02 | The Gap | 揭示理想與現實的巨大差距 |
 | Slide 03 | The Vision | 大腦升級，定義新的解決方案標準 |
-| Slide 04 | The System - Part 1 | 核心架構拆解 / 步驟一 |
-| Slide 05 | The System - Part 2 | 核心架構拆解 / 步驟二 |
-| Slide 06 | The System - Part 3 | 核心架構拆解 / 步驟三 |
+| Slide 04 | The System - Part 1 | 核心架構拆解 / 步驟一（The System 可為 1–5 張） |
+| Slide 05 | The System - Part 2 | 核心架構拆解 / 步驟二（預設結構） |
+| Slide 06 | The System - Part 3 | 核心架構拆解 / 步驟三（預設結構） |
 | Slide 07 | Transformation | 展示使用後的具體改變（前後對比意象） |
 | Slide 08 | Social Proof / Authority | 權威感背書、數據支持或邏輯證實 |
 | Slide 09 | How / Action | 具體的行動指引或第一步 |
@@ -1033,10 +1398,14 @@ The System 的張數跟著文章核心架構的步驟數走；文章單薄時 Ga
 - [ ] 核心金句是否已填？
 - [ ] 本張的色系、字體、容器樣式是否與 `visual-dna.yaml` 一致？
 
-第一回合另加：（路徑 B）三組 Sample 之間的差異是否夠明顯？
-第二回合另加：文本大綱是否已經使用者確認？張數是否等於第一回合確認的 N？
-總指令行的張數是否代入正確？N 張的敘事轉承是否流暢、無斷裂或重複？
-Hook 與 Final Call 是否都在？
+第 1 關另加：A／B 是否只提供 1 組首張展示提案？C 的 3 組 Sample 差異是否夠明顯？
+第 2 關另加：張數是否在 8–12 張？The System 是否依獨立知識點在 1–5 張間伸縮，
+且其他七個固定敘事角色均已保留？每張是否都有 `### 1. 文本內容` 的五個共同欄位？
+`validate_carousel_outline.py` 與 `validate_carousel_prompt_plan.py` 是否通過？
+文本大綱是否已獲使用者確認？張數是否與確認後的大綱一致？
+第 3 關另加：是否已提供全部 N 組五層提示詞並獲確認？
+第 4 關另加：總指令行的張數是否代入正確？N 張的敘事轉承是否流暢、無斷裂或重複？
+Hook 與 Final Call 是否都在？`briefs/approval-log.md` 的第 1–3 關是否皆為 `confirmed`？
 
 ## 輸出模板
 
@@ -1050,14 +1419,14 @@ Hook 與 Final Call 是否都在？
 ### 0. 敘事定位
 （本區塊為設計師內部思考記錄，不得將任何內容輸出至圖卡的任何視覺位置）
 - 敘事角色：{本張在 10 張弧線中的角色，如 Hook / Gap / Vision，僅供內部參考}
-- 核心金句：{本張圖卡的靈魂一句話，驅動整張視覺設計的情緒。必填}
 - 情緒目標：{觀看者 3 秒內應產生的心理反應，如共鳴感、好奇心、信任感}
 
 ### 1. 文本內容
 - 主標題：{放大、具衝擊力的核心關鍵字，5–8 字內，台灣繁體中文}
 - 副標題：{解釋性敘述，30–50 字，讓讀者無需原文即可理解核心概念。台灣繁體中文}
-- 補充說明：{選填。涉及步驟、對比或列舉時補 2–3 個條列重點，每點 10–15 字。台灣繁體中文}
-- 氛圍裝飾文字 Ashirai：{2-3 組，只用 accent 語言。「Ashirai」是欄位名稱，嚴禁出現在圖卡上}
+- 核心金句：{本張圖卡最應被記住的一句話，驅動整張視覺設計的情緒。必填}
+- 內文重點／內容說明：{2–3 個可校稿條列重點；涉及步驟、對比或列舉時，每點 10–15 字。台灣繁體中文}
+- 氣氛裝飾文字：{2–3 組，只用 accent 語言；欄位名稱本身嚴禁出現在圖卡上}
 
 ### 2. 色彩計畫
 - 背景特徵：{與整套圖卡一致的背景風格描述}
@@ -1088,14 +1457,14 @@ Hook 與 Final Call 是否都在？
 ### 0. 敘事定位
 （本區塊為設計師內部思考記錄，不得將任何內容輸出至圖卡的任何視覺位置）
 - 敘事角色：Hook — 以現狀揭露引發滑動動機
-- 核心金句：你不是記性差，是筆記從來沒替你工作過。
 - 情緒目標：共鳴感 → 「這就是我每天的狀態」
 
 ### 1. 文本內容
 - 主標題：筆記越多越焦慮？
 - 副標題：收藏了上百篇文章、記了滿滿的筆記，需要用的時候卻一片空白——問題不在你，在方法。
-- 補充說明：（本張不使用）
-- 氛圍裝飾文字 Ashirai：Information Overload／Why Notes Fail
+- 核心金句：你不是記性差，是筆記從來沒替你工作過。
+- 內文重點／內容說明：（本張不使用）
+- 氣氛裝飾文字：Information Overload／Why Notes Fail
 
 ### 2. 色彩計畫
 - 背景特徵：深藏青單色底，右上角一層低對比的紙張紋理，整體安靜退後。
@@ -1122,16 +1491,33 @@ Hook 與 Final Call 是否都在？
 標題固定繁中欄位宣告，點綴文字與禁用語言否定提示依 `visual-dna.yaml` 的
 `language.accent` / `language.forbidden` 變數映射，並遵守其觸發詞紀律
 （不得以「{語言} typography / text」形式提到 forbidden 語言）。
-適用於第二回合的全套生圖。
+適用於第 4 關的全套正式生圖。
+
+## 跨頁視覺一致性生圖規範（Visual DNA Prompt Stacking）
+
+為了確保從 Slide 01 到 Slide NN 整套圖卡的視覺深度、容器質感與配色 100% 一致，交棒 `image-generator` 生成每一頁 Prompt 時，必須採用 **三段式 Prompt 堆疊結構**：
+
+1. **固定 Visual DNA 前綴 (Visual DNA Prefix)**：
+   包含從 `visual-dna.yaml` 繼承的完整視覺基底——精確背景色碼（如 `#F7F5F0`）、卡片容器材質（如 `rounded soft translucent frosted glass card #FFFFFFCC`）、莫蘭迪配色方案（`#2C3E50` 與 `#E6A15C`）、以及抽象幾何構圖聲明（`Minimalist abstract geometric shapes only, strictly NO human illustrations, NO face avatars`）。
+2. **單頁結構化內容與佈局 (Page Specific Content)**：
+   包含該頁特有的文本（`Traditional Chinese title text: "..."`）、副標題或條列點，以及該頁的微觀元件佈局。
+3. **固定風格與否定限制後綴 (Style & Negative Suffix)**：
+   包含標準風格關鍵字（`Modern Japanese Web Style, Soft Flat Illustration, Warm Pastel, Clean Overlay, High Consistency`）與否定提示（`Strictly NO Japanese hiragana, NO katakana, NO Japanese text, NO human figures`）。
+
+每一頁都必須完整攜帶第一段與第三段，絕不可在 Slide 02..NN 簡化或刪減視覺基底描述，否則會導致各頁材質、容器、配色與插畫元素飄移（例如誤產出人物插畫或遺失玻璃卡片容器）。
 
 ## 輸出檔名
 
 依 SKILL.md 的輸出位置規則：
 
 ```text
-briefs/carousel-sample-{A|B|C}.md   # 第一回合路徑 B 的三組 Sample 指令（路徑 A 無 Sample）
-briefs/carousel-{01..NN}.md          # 第二回合正式指令（或合併為 carousel-full.md）
+briefs/carousel-proposal-{01|A|B|C}.md  # 第 1 關：A/B 一組，C 三組 Slide 01 展示提案
+briefs/carousel-outline.md               # 第 2 關：全套文本大綱
+briefs/carousel-full.md                  # 第 3 關：全套 N 組五層提示詞
+briefs/approval-log.md                   # 第 1–3 關確認狀態
 ```
+
+`approval-log.md` 一律由本 skill 的 `assets/carousel-approval-log-template.md` 複製後填寫。
 
 ## 語氣
 
@@ -1302,7 +1688,7 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/cover.md" <<
 - 預設比例：`16:9`。正方形社群封面用 `1:1`，直式用 `4:5`。使用者未指定時問一次。
 - 輸出組數依風格校準結果而定：使用者已選定風格（A 挑編號或 B 描述偏好）
   時輸出 **1 組方案**；使用者說「你決定」（C）或非互動環境時輸出
-  **3 組最大差異化方案**。
+  **3 組最大差異化方案**。不論路徑，都須完成最終提案與提示詞確認後才正式生圖。
 
 ## 角色
 
@@ -1314,9 +1700,10 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/cover.md" <<
 高點擊率不來自裝飾多，而來自主標清楚、視覺焦點明確、資訊層級乾淨、裝飾文字剛好。
 你是懂得取捨的視覺編輯，不是把元素堆滿畫面的技師。
 
-## 五個思考階段
+## 六個思考階段
 
-依序完成，不可跳過。**Phase 2.5 是互動關卡，沒有使用者回覆不得進入 Phase 3。**
+依序完成，不可跳過。**Phase 2.5 與 Phase 6 都是互動關卡；沒有使用者明確確認不得
+進入下一個生圖動作。**
 
 ### Phase 1 洞察（Empathize）
 
@@ -1370,7 +1757,8 @@ C. 說「你決定」
 選 2 時「無人物鐵則」的優先級高於本檔所有敘述。
 
 **非互動環境**（`codex exec`、`claude -p`、CI、排程）沒有人能回答，直接走
-Phase 3 路徑 B，並在輸出開頭說明本次未經風格校準。
+Phase 3 路徑 B，並在輸出開頭說明本次未經風格校準。只能產出未確認的最終 Cover
+提案與提示詞；不得進入 Phase 6 或正式生圖。
 
 ### Phase 3 方案定位
 
@@ -1394,7 +1782,8 @@ B（描述偏好），風格方向即已定案——直接鎖入 `visual-dna.yam
 | B | 保守 | 安全穩重、信任感強，適合企業或教育場景 |
 | C | 革命性 | 突破常規、高度差異化，製造視覺驚喜 |
 
-使用者從三組中選定後，把選定結果寫入 `visual-dna.yaml`。
+三組都要完成 Phase 4、Phase 5 的完整提案與提示詞，留待 Phase 6 讓使用者選定其中一組；
+選定後才把該組寫入正式 `visual-dna.yaml`。
 
 ### Phase 4 發想與減法檢查
 
@@ -1409,6 +1798,24 @@ B（描述偏好），風格方向即已定案——直接鎖入 `visual-dna.yam
 ### Phase 5 填寫模板
 
 每組方案各自用 codeblock 包住，方便一鍵複製（路徑 A 為 1 組，路徑 B 為 3 組）。
+
+## Phase 6 最終確認與正式生圖
+
+Cover 是單張最終成品，**不產出展示圖**：Phase 2.5 的風格庫預覽圖已負責視覺校準，
+額外先生成展示圖只會重複耗用生圖額度。
+
+1. 從 `assets/cover-approval-log-template.md` 建立
+   `briefs/cover-approval-log.md`。完成使用者的風格與人物回覆後，把「視覺方向與人物」
+   更新為 `confirmed`。
+2. 呈現 Phase 5 的完整提案與提示詞，請使用者確認：A／B 必須明確確認唯一提案；
+   C 必須從 3 組完整提案中選定 1 組。只有明確回覆後，才能把「最終 Cover 提案與提示詞」
+   更新為 `confirmed`。
+3. 執行本 skill 的
+   `scripts/validate_cover_approvals.py briefs/cover-approval-log.md`。通過並取得 `PASS` 後，
+   才交棒 `image-generator` 產出最終 Cover。
+
+若使用者要求更改主標、副標、構圖、人物或任何提示詞內容，將「最終 Cover 提案與提示詞」
+改為 `revisions-requested`，回到本階段修訂並再次確認。不得以舊的確認紀錄直接生圖。
 
 ## 減法檢查
 
@@ -1515,7 +1922,8 @@ B（描述偏好），風格方向即已定案——直接鎖入 `visual-dna.yam
 
 ## 生圖轉換
 
-交棒 `image-generator` 時，遵循 `../handoff-contracts.md` 的
+只在 Phase 6 通過 `validate_cover_approvals.py` 後才可交棒 `image-generator`。交棒時遵循
+`../handoff-contracts.md` 的
 「語言映射契約」：標題固定繁中欄位宣告，點綴文字與禁用語言否定提示
 依 `visual-dna.yaml` 的 `language.accent` / `language.forbidden` 變數映射，
 不在本檔寫死任何語言。
@@ -1939,6 +2347,710 @@ if __name__ == "__main__":
     main()
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_RECOMMEND_STYLES_PY_9BAF6A1A56
 chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/recommend_styles.py"
+
+# visual-prompt-kit/scripts/validate_carousel_approvals.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_approvals.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_approvals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CAROUSEL_APPROVALS_PY_26251E7F86'
+#!/usr/bin/env python3
+"""Block a carousel final-image handoff until its three approvals are recorded."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+REQUIRED_APPROVALS = ("首張展示提案", "文本大綱", "全套提示詞")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證輪播圖卡是否已完成前三道使用者確認，可進入正式生圖。"
+    )
+    parser.add_argument(
+        "approval_log",
+        type=Path,
+        help="任務的 briefs/approval-log.md 路徑。",
+    )
+    return parser.parse_args()
+
+
+def approval_status(content: str, label: str) -> str | None:
+    match = re.search(rf"(?m)^- {re.escape(label)}：([^\s]+)\s*$", content)
+    return match.group(1) if match else None
+
+
+def main() -> int:
+    approval_log = parse_args().approval_log
+    if not approval_log.is_file():
+        print(f"無法正式生圖：找不到確認紀錄：{approval_log}")
+        return 1
+
+    content = approval_log.read_text(encoding="utf-8")
+    incomplete = [
+        label
+        for label in REQUIRED_APPROVALS
+        if approval_status(content, label) != "confirmed"
+    ]
+    if incomplete:
+        print("無法正式生圖：以下關卡尚未獲使用者明確確認：")
+        for label in incomplete:
+            print(f"- {label}")
+        return 1
+
+    final_status = approval_status(content, "正式生圖")
+    if final_status != "not-started":
+        print(
+            "無法啟動新的正式生圖交棒："
+            f"「正式生圖」目前狀態為 {final_status or '缺少狀態'}。"
+        )
+        return 1
+
+    print("PASS：前三道確認均已完成，可交棒 image-generator 正式生圖。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CAROUSEL_APPROVALS_PY_26251E7F86
+chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_approvals.py"
+
+# visual-prompt-kit/scripts/validate_carousel_outline.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_outline.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_outline.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CAROUSEL_OUTLINE_PY_140BB2E0D3'
+#!/usr/bin/env python3
+"""Validate the editable text-outline contract for carousel Gate 2."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+REQUIRED_FIELDS = (
+    "主標題",
+    "副標題",
+    "核心金句",
+    "內文重點／內容說明",
+    "氣氛裝飾文字",
+)
+LOW_DENSITY_MIN_SLIDES = 8
+LOW_DENSITY_MAX_SLIDES = 12
+SLIDE_HEADER = re.compile(r"(?m)^## Slide (\d{2})\s*$")
+TEXT_SECTION = re.compile(r"(?m)^### 1\. 文本內容\s*$")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證輪播圖卡第 2 關的逐張可校稿文本大綱。"
+    )
+    parser.add_argument(
+        "outline_file",
+        type=Path,
+        help="第 2 關文本大綱 Markdown 檔案。",
+    )
+    parser.add_argument(
+        "--placement",
+        choices=("carousel", "carousel-info"),
+        required=True,
+        help="carousel 為低密度；carousel-info 為高密度。",
+    )
+    return parser.parse_args()
+
+
+def split_slides(content: str) -> list[tuple[str, str]]:
+    matches = list(SLIDE_HEADER.finditer(content))
+    slides: list[tuple[str, str]] = []
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(content)
+        slides.append((match.group(1), content[match.end() : end]))
+    return slides
+
+
+def validate_slides(placement: str, slides: list[tuple[str, str]]) -> list[str]:
+    errors: list[str] = []
+    if not slides:
+        return ["找不到 `## Slide 01` 格式的逐張文本大綱。"]
+    if placement == "carousel" and not (
+        LOW_DENSITY_MIN_SLIDES <= len(slides) <= LOW_DENSITY_MAX_SLIDES
+    ):
+        errors.append(
+            "低密度輪播圖卡必須為 "
+            f"{LOW_DENSITY_MIN_SLIDES}–{LOW_DENSITY_MAX_SLIDES} 張；目前為 {len(slides)} 張。"
+        )
+
+    for slide_number, body in slides:
+        prefix = f"Slide {slide_number}"
+        if placement == "carousel" and not TEXT_SECTION.search(body):
+            errors.append(f"{prefix} 缺少六段結構中的 `### 1. 文本內容`。")
+        for field in REQUIRED_FIELDS:
+            inline_value = re.compile(
+                rf"(?m)^[ \t]*-[ \t]*{re.escape(field)}：[ \t]*\S+"
+            )
+            nested_value = re.compile(
+                rf"(?m)^[ \t]*-[ \t]*{re.escape(field)}：[ \t]*$\n^[ \t]+-[ \t]+\S+"
+            )
+            if not inline_value.search(body) and not nested_value.search(body):
+                errors.append(f"{prefix} 缺少或留白必要欄位：{field}。")
+    return errors
+
+
+def main() -> int:
+    args = parse_args()
+    outline_path = args.outline_file.resolve()
+    if not outline_path.is_file():
+        print(f"文本大綱驗證失敗：找不到檔案：{outline_path}")
+        return 1
+
+    slides = split_slides(outline_path.read_text(encoding="utf-8"))
+    errors = validate_slides(args.placement, slides)
+    if errors:
+        print("文本大綱驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    density = "低密度" if args.placement == "carousel" else "高密度"
+    range_note = "，符合 8–12 張範圍" if args.placement == "carousel" else ""
+    print(
+        f"PASS：{density}輪播圖卡第 2 關共有 {len(slides)} 張{range_note}，"
+        "逐張五個文本欄位完整。"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CAROUSEL_OUTLINE_PY_140BB2E0D3
+
+# visual-prompt-kit/scripts/validate_carousel_prompt_plan.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_prompt_plan.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_prompt_plan.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CAROUSEL_PROMPT_PLAN_PY_4EE16C84BE'
+#!/usr/bin/env python3
+"""Verify that a Gate 2 text outline and its internal prompt plan cover the same slides."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+SLIDE_HEADER = re.compile(r"(?m)^## Slide (\d{2})\s*$")
+PROMPT_BLOCK = re.compile(r"(?ms)^## Slide (\d{2})\s*$.*?^```text\s*$.*?^```\s*$")
+PROMPT_BODY_BLOCK = re.compile(
+    r"(?ms)^## Slide (?P<number>\d{2})\s*$.*?^```text\s*$\n(?P<body>.*?)^```\s*$"
+)
+
+HIGH_DENSITY_PROMPT_SECTIONS = (
+    "【任務與畫布】",
+    "【共用視覺 DNA】",
+    "【本張文字（逐字）】",
+    "【本張視覺方向】",
+    "【設計自由度】",
+    "【不可違反與驗收】",
+)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證輪播第 2 關內部提示詞計畫與文本大綱張次一致。"
+    )
+    parser.add_argument(
+        "outline_file",
+        type=Path,
+        help="第 2 關文本大綱 Markdown 檔案。",
+    )
+    parser.add_argument(
+        "prompt_plan_file",
+        type=Path,
+        help="未展示給使用者的完整提示詞計畫檔案。",
+    )
+    parser.add_argument(
+        "--placement",
+        choices=("carousel", "carousel-info"),
+        required=True,
+        help="carousel 為低密度；carousel-info 為高密度。",
+    )
+    parser.add_argument(
+        "--require-structured-high-density",
+        action="store_true",
+        help=(
+            "要求高密度提示詞的每張 text codeblock 都使用六段輕量結構；"
+            "既有舊任務未指定此旗標時仍可做張次相容性驗證。"
+        ),
+    )
+    return parser.parse_args()
+
+
+def slide_numbers(content: str) -> list[str]:
+    return SLIDE_HEADER.findall(content)
+
+
+def main() -> int:
+    args = parse_args()
+    outline_path = args.outline_file.resolve()
+    plan_path = args.prompt_plan_file.resolve()
+    errors: list[str] = []
+    if not outline_path.is_file():
+        errors.append(f"找不到文本大綱：{outline_path}")
+    if not plan_path.is_file():
+        errors.append(f"找不到內部提示詞計畫：{plan_path}")
+    if errors:
+        print("提示詞計畫驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    outline_numbers = slide_numbers(outline_path.read_text(encoding="utf-8"))
+    plan_content = plan_path.read_text(encoding="utf-8")
+    plan_numbers = slide_numbers(plan_content)
+    complete_prompt_numbers = PROMPT_BLOCK.findall(plan_content)
+    prompt_bodies = re.findall(r"(?ms)^```text\s*$\n(.*?)^```\s*$", plan_content)
+
+    if not outline_numbers:
+        errors.append("文本大綱沒有任何 `## Slide 01` 區塊。")
+    if args.placement == "carousel" and not (8 <= len(outline_numbers) <= 12):
+        errors.append(
+            "低密度輪播圖卡必須為 8–12 張；"
+            f"文本大綱目前為 {len(outline_numbers)} 張。"
+        )
+    if outline_numbers != plan_numbers:
+        errors.append(
+            "文本大綱與內部提示詞計畫的張次不一致："
+            f"大綱={outline_numbers}；計畫={plan_numbers}。"
+        )
+    if plan_numbers != complete_prompt_numbers:
+        errors.append("每張內部提示詞計畫都必須有一個完整的 `text` codeblock。")
+    if len(prompt_bodies) != len(plan_numbers) or any(not body.strip() for body in prompt_bodies):
+        errors.append("每張內部提示詞計畫的 `text` codeblock 都必須包含完整提示詞。")
+    if args.placement == "carousel" and "### 5. 規格與風格" not in plan_content:
+        errors.append("低密度內部提示詞計畫缺少五層 Brief 的 `### 5. 規格與風格`。")
+    if args.require_structured_high_density:
+        if args.placement != "carousel-info":
+            errors.append("`--require-structured-high-density` 只適用於 carousel-info。")
+        else:
+            prompt_by_slide = {
+                match.group("number"): match.group("body")
+                for match in PROMPT_BODY_BLOCK.finditer(plan_content)
+            }
+            for number in plan_numbers:
+                body = prompt_by_slide.get(number, "")
+                missing_sections = [
+                    section
+                    for section in HIGH_DENSITY_PROMPT_SECTIONS
+                    if section not in body
+                ]
+                if missing_sections:
+                    errors.append(
+                        f"Slide {number} 缺少高密度六段提示詞區塊："
+                        + "、".join(missing_sections)
+                    )
+
+    if errors:
+        print("提示詞計畫驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    structure_note = (
+        "，並符合高密度六段輕量結構"
+        if args.require_structured_high_density
+        else ""
+    )
+    print(
+        f"PASS：{args.placement} 的 {len(plan_numbers)} 張內部提示詞計畫已與文本大綱逐張對應"
+        f"{structure_note}。"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CAROUSEL_PROMPT_PLAN_PY_4EE16C84BE
+
+# visual-prompt-kit/scripts/validate_carousel_workflow.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_workflow.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_workflow.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CAROUSEL_WORKFLOW_PY_02DAF407B1'
+#!/usr/bin/env python3
+"""Validate the mandatory four-gate workflow for both carousel placements."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+REQUIRED_MARKERS = {
+    "SKILL.md": (
+        "首張展示提案確認",
+        "文本大綱確認",
+        "全套提示詞確認",
+        "正式生圖",
+        "不得跳過任何確認關卡",
+        "briefs/approval-log.md",
+        "輪播文本大綱共同欄位與一次規劃規則",
+        "scripts/validate_carousel_outline.py",
+        "scripts/validate_carousel_prompt_plan.py",
+        "固定 8–12 張",
+        "scripts/validate_carousel_approvals.py",
+        "validate_image_aspect.py --ratio 4:5",
+    ),
+    "references/placements/carousel.md": (
+        "Slide 01 展示圖",
+        "## 第 2 關：文本大綱確認",
+        "## 第 3 關：全套提示詞確認",
+        "## 第 4 關：正式生圖",
+        "briefs/approval-log.md",
+        "六段正式輸出結構中的第 2 項",
+        "scripts/validate_carousel_outline.py",
+        "scripts/validate_carousel_prompt_plan.py",
+        "scripts/validate_carousel_approvals.py",
+    ),
+    "references/placements/carousel-info.md": (
+        "Slide 01 展示圖",
+        "### 第 2 關：文本大綱確認",
+        "### 第 3 關：全套提示詞確認",
+        "### 第 4 關：正式生圖",
+        "briefs/approval-log.md",
+        "共同五欄位",
+        "scripts/validate_carousel_outline.py",
+        "scripts/validate_carousel_prompt_plan.py",
+        "scripts/validate_carousel_approvals.py",
+        "六段輕量結構",
+        "--require-structured-high-density",
+        "validate_image_aspect.py --ratio 4:5",
+    ),
+    "references/handoff-contracts.md": (
+        "第 1 關首張展示",
+        "第 4 關正式生圖",
+        "都標為 `confirmed`",
+        "scripts/validate_carousel_approvals.py",
+    ),
+    "assets/carousel-approval-log-template.md": (
+        "首張展示提案：pending",
+        "文本大綱：pending",
+        "全套提示詞：pending",
+        "正式生圖：not-started",
+        "scripts/validate_carousel_approvals.py",
+    ),
+}
+
+FORBIDDEN_MARKERS = {
+    "references/placements/carousel.md": (
+        "自動交棒 `image-generator` 執行全套實體生圖",
+        "大綱確認 ➔ 產出全套 N 張五層架構 Briefs 文件（`carousel-full.md`） ➔ 自動交棒",
+    ),
+    "references/placements/carousel-info.md": (
+        "## 第二輪：組裝生圖交付版本",
+        "內容未經確認不得進入第二輪",
+    ),
+}
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證低密度與高密度輪播圖卡的四道確認關卡。"
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1],
+        help="visual-prompt-kit 套件根目錄；預設為本腳本所在套件。",
+    )
+    return parser.parse_args()
+
+
+def validate_required_markers(root: Path) -> list[str]:
+    errors: list[str] = []
+    for relative_path, markers in REQUIRED_MARKERS.items():
+        path = root / relative_path
+        if not path.is_file():
+            errors.append(f"缺少檔案：{relative_path}")
+            continue
+
+        content = path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in content:
+                errors.append(f"{relative_path} 缺少必要標記：{marker}")
+    return errors
+
+
+def validate_forbidden_markers(root: Path) -> list[str]:
+    errors: list[str] = []
+    for relative_path, markers in FORBIDDEN_MARKERS.items():
+        content = (root / relative_path).read_text(encoding="utf-8")
+        for marker in markers:
+            if marker in content:
+                errors.append(f"{relative_path} 仍保留過時流程：{marker}")
+    return errors
+
+
+def main() -> int:
+    root = parse_args().root.resolve()
+    errors = validate_required_markers(root) + validate_forbidden_markers(root)
+    if errors:
+        print("輪播流程驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("PASS：輪播圖卡保有四道確認關卡、可校稿文本大綱與一次規劃規則；低密度固定 8–12 張。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CAROUSEL_WORKFLOW_PY_02DAF407B1
+chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_workflow.py"
+
+# visual-prompt-kit/scripts/validate_cover_approvals.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_approvals.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_approvals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_COVER_APPROVALS_PY_7C257F0127'
+#!/usr/bin/env python3
+"""Block a Cover final-image handoff until its two approvals are recorded."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+REQUIRED_APPROVALS = ("視覺方向與人物", "最終 Cover 提案與提示詞")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證 Cover 封面是否已完成兩道使用者確認，可進入正式生圖。"
+    )
+    parser.add_argument(
+        "approval_log",
+        type=Path,
+        help="任務的 briefs/cover-approval-log.md 路徑。",
+    )
+    return parser.parse_args()
+
+
+def approval_status(content: str, label: str) -> str | None:
+    match = re.search(rf"(?m)^- {re.escape(label)}：([^\s]+)\s*$", content)
+    return match.group(1) if match else None
+
+
+def main() -> int:
+    approval_log = parse_args().approval_log
+    if not approval_log.is_file():
+        print(f"無法正式生圖：找不到 Cover 確認紀錄：{approval_log}")
+        return 1
+
+    content = approval_log.read_text(encoding="utf-8")
+    incomplete = [
+        label
+        for label in REQUIRED_APPROVALS
+        if approval_status(content, label) != "confirmed"
+    ]
+    if incomplete:
+        print("無法正式生圖：以下 Cover 關卡尚未獲使用者明確確認：")
+        for label in incomplete:
+            print(f"- {label}")
+        return 1
+
+    final_status = approval_status(content, "正式生圖")
+    if final_status != "not-started":
+        print(
+            "無法啟動新的 Cover 正式生圖交棒："
+            f"「正式生圖」目前狀態為 {final_status or '缺少狀態'}。"
+        )
+        return 1
+
+    print("PASS：Cover 的兩道確認均已完成，可交棒 image-generator 正式生圖。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_COVER_APPROVALS_PY_7C257F0127
+chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_approvals.py"
+
+# visual-prompt-kit/scripts/validate_cover_workflow.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_workflow.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_workflow.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_COVER_WORKFLOW_PY_FF3C911020'
+#!/usr/bin/env python3
+"""Validate the mandatory two-gate Cover workflow and its final-image guard."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+REQUIRED_MARKERS = {
+    "SKILL.md": (
+        "Cover 封面的兩道確認關卡",
+        "最終 Cover 提案與提示詞確認",
+        "scripts/validate_cover_approvals.py",
+        "assets/cover-approval-log-template.md",
+    ),
+    "references/placements/cover.md": (
+        "## Phase 6 最終確認與正式生圖",
+        "briefs/cover-approval-log.md",
+        "scripts/validate_cover_approvals.py",
+        "不產出展示圖",
+    ),
+    "references/handoff-contracts.md": (
+        "Cover 正式生圖",
+        "cover-approval-log.md",
+        "scripts/validate_cover_approvals.py",
+    ),
+    "assets/cover-approval-log-template.md": (
+        "視覺方向與人物：pending",
+        "最終 Cover 提案與提示詞：pending",
+        "正式生圖：not-started",
+    ),
+}
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證 Cover 封面的兩道確認關卡與正式生圖驗證器。"
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1],
+        help="visual-prompt-kit 套件根目錄；預設為本腳本所在套件。",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    root = parse_args().root.resolve()
+    errors: list[str] = []
+    for relative_path, markers in REQUIRED_MARKERS.items():
+        path = root / relative_path
+        if not path.is_file():
+            errors.append(f"缺少檔案：{relative_path}")
+            continue
+        content = path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in content:
+                errors.append(f"{relative_path} 缺少必要標記：{marker}")
+
+    if errors:
+        print("Cover 流程驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("PASS：Cover 封面保有兩道確認關卡與正式生圖驗證器。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_COVER_WORKFLOW_PY_FF3C911020
+chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_workflow.py"
+
+# visual-prompt-kit/scripts/validate_image_aspect.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_image_aspect.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_image_aspect.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_IMAGE_ASPECT_PY_825F866365'
+#!/usr/bin/env python3
+"""Validate PNG image dimensions against a requested aspect ratio."""
+
+from __future__ import annotations
+
+import argparse
+import struct
+from pathlib import Path
+
+
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+
+def parse_ratio(value: str) -> tuple[int, int]:
+    try:
+        numerator_text, denominator_text = value.split(":", maxsplit=1)
+        numerator = int(numerator_text)
+        denominator = int(denominator_text)
+    except (ValueError, TypeError) as error:
+        raise argparse.ArgumentTypeError("比例必須是 `4:5` 形式的正整數比。") from error
+    if numerator <= 0 or denominator <= 0:
+        raise argparse.ArgumentTypeError("比例的兩個數字都必須大於 0。")
+    return numerator, denominator
+
+
+def read_png_dimensions(path: Path) -> tuple[int, int]:
+    with path.open("rb") as image_file:
+        header = image_file.read(24)
+    if len(header) < 24 or not header.startswith(PNG_SIGNATURE) or header[12:16] != b"IHDR":
+        raise ValueError("只支援可讀取 IHDR 的 PNG 檔案。")
+    return struct.unpack(">II", header[16:24])
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="以實際 PNG 像素尺寸驗證圖片比例；容許原生工具整數像素四捨五入。"
+    )
+    parser.add_argument("images", nargs="+", type=Path, help="待驗證的 PNG 圖片。")
+    parser.add_argument("--ratio", type=parse_ratio, required=True, help="目標比例，例如 4:5。")
+    parser.add_argument(
+        "--tolerance-pixels",
+        type=float,
+        default=1.0,
+        help="容許相對於目標寬度的像素誤差；預設 1.0。",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    numerator, denominator = args.ratio
+    if args.tolerance_pixels < 0:
+        print("比例驗證失敗：`--tolerance-pixels` 不得小於 0。")
+        return 1
+
+    errors: list[str] = []
+    passed: list[str] = []
+    for image_path in args.images:
+        path = image_path.resolve()
+        if not path.is_file():
+            errors.append(f"找不到圖片：{path}")
+            continue
+        try:
+            width, height = read_png_dimensions(path)
+        except (OSError, ValueError) as error:
+            errors.append(f"無法讀取 {path.name}：{error}")
+            continue
+
+        expected_width = height * numerator / denominator
+        delta = abs(width - expected_width)
+        if delta <= args.tolerance_pixels:
+            passed.append(f"{path.name}（{width}×{height}，誤差 {delta:.2f}px）")
+        else:
+            errors.append(
+                f"{path.name} 為 {width}×{height}；目標 {numerator}:{denominator} "
+                f"應為寬 {expected_width:.2f}px，誤差 {delta:.2f}px 超過 "
+                f"{args.tolerance_pixels:.2f}px。"
+            )
+
+    if errors:
+        print("比例驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print(
+        f"PASS：{len(passed)} 張 PNG 均符合 {numerator}:{denominator}，"
+        f"容許整數像素誤差 {args.tolerance_pixels:.2f}px。"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_IMAGE_ASPECT_PY_825F866365
 
 test -f "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md" && echo "visual-prompt-kit installed for Codex, Claude, and AntiGravity"
 ````
