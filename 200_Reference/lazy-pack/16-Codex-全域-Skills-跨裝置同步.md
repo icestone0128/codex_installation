@@ -349,6 +349,51 @@ GUARDRAILS CLAUDE drift: none CODEX block: present
 ```
 
 `drift` 非 `none` 或 `block` 顯示 `MISSING` 時，表示某一邊被單獨改過，重跑套用腳本即可對齊。
+
+## 收工保留期清理（session artifacts retention）
+
+收工 checkpoint 會順手清掉超過保留期的過程檔，預設保留 **7 天**。清理範圍是寫死的白名單，腳本不接受任意目錄：
+
+| 對象 | 規則 |
+| :-- | :-- |
+| `{{SYNC_ROOT}}/backups/*` | 超過保留期就刪 |
+| `~/agent-sync-backup-*`（chezmoi checkpoint 備份） | 超過保留期就刪 |
+| `__pycache__` | 一律刪（下次執行自動重生） |
+| `.DS_Store` | 一律刪（Finder metadata） |
+
+`skills/`、`memories/`、`knowledge/`、`100_Todo/` 與任何 git 工作樹都不在範圍內。目錄年齡取「內部最新的 mtime」，所以最近被動過的備份不會因為建立日期舊而被誤刪。
+
+### 孤兒媒體防線（這條是有來歷的）
+
+2026-08-26 發現一個名為 `cleanup` 的備份裡，存著 49 張生成圖的**唯一副本**——當初「清理」把成品移出 live 位置後沒有放回去，備份事實上變成正本。照字面清備份就會永久損失。
+
+因此刪除 `backups/` 內任何項目之前，腳本會先建立一份 live 媒體索引，把備份裡的每個媒體檔拿去比對。**同名且同大小**在備份區以外存在，才算有副本；只要有一個比不到，整個項目標記為 `ORPHAN-MEDIA` 並保留，`--apply` 也不會刪。
+
+```text
+PRUNE PRUNED=3 FREED=4.9K KEPT=1
+  ORPHAN-MEDIA  backups/carousel-renders.bak  (26.2d, 7 個媒體檔在別處找不到副本，保留)
+                  - carousel-01.jpg
+```
+
+看到 `ORPHAN-MEDIA` 就是要你決定：把那些檔案搬回正式作品庫，或確認可拋棄後加 `--allow-orphan-media` 再跑一次。
+
+### 手動執行
+
+```bash
+PRUNE="{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prune-session-artifacts.py"
+
+# 預設 dry run，只列出會刪什麼，不動任何檔案
+python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}"
+
+# 確認後才實際刪除
+python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}" --apply
+
+# 改保留期；停用整個清理
+python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}" --days 30 --apply
+bash "$CHECKPOINT" --phase shutdown --sync-root "{{SYNC_ROOT}}" --no-prune
+```
+
+checkpoint 也接受 `--prune-days N`。開工階段不會執行清理，只有收工會。
 ## 實際踩坑紀錄（2026-07-20～2026-07-21 驗證）
 
 - Homebrew 第一次執行可能先自動更新，數分鐘沒有明顯輸出；不要因安靜就重複啟動另一個安裝程序。
@@ -2804,6 +2849,294 @@ printf 'Run: chezmoi diff && chezmoi status && chezmoi doctor\n'
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_BOOTSTRAP_AGENT_SYNC_SH_E2A05A691B
 chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/bootstrap-agent-sync.sh"
 
+# cross-device-sync/scripts/prune-session-artifacts.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prune-session-artifacts.py")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prune-session-artifacts.py" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PRUNE_SESSION_ARTIFACTS_PY_17EFC2D8E4'
+#!/usr/bin/env python3
+"""Prune session artifacts (backups and regenerable caches) past a retention window.
+
+Scope is a hardcoded whitelist. The script never accepts an arbitrary directory
+to delete, and never touches skills/, memories/, knowledge/, 100_Todo/, or any
+git working tree.
+
+Retention targets:
+  1. <sync-root>/backups/*            entries older than --days
+  2. <home>/agent-sync-backup-*       chezmoi checkpoint backups older than --days
+  3. __pycache__ directories          always (regenerates on next run)
+  4. .DS_Store files                  always (Finder metadata)
+
+Orphan-media guard
+------------------
+2026-08-26 a cleanup backup turned out to hold the only copy of 49 generated
+images: the "cleanup" had moved them out of their live location and nothing put
+them back. Deleting the backup would have destroyed real work.
+
+So before removing anything under backups/, every media file inside it is
+checked against a live index built from --live-root. A media file counts as
+duplicated only when a file with the same name AND the same byte size exists
+outside the backup locations. Any entry holding at least one unmatched media
+file is kept and reported as ORPHAN-MEDIA, and --apply will not remove it.
+Pass --allow-orphan-media only after deciding those files are expendable.
+
+Usage:
+  prune-session-artifacts.py --sync-root PATH [--days 7] [--apply]
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
+import sys
+import time
+from pathlib import Path
+
+MEDIA_SUFFIXES = {
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".heic",
+    ".mp4", ".mov", ".m4v", ".webm",
+    ".wav", ".m4a", ".mp3", ".aac", ".flac",
+    ".srt", ".vtt", ".pdf",
+}
+SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv"}
+CACHE_ROOT_NAMES = {"agentic_projects"}
+
+
+def human(size: float) -> str:
+    for unit in ("B", "K", "M", "G"):
+        if size < 1024 or unit == "G":
+            return f"{size:.0f}{unit}" if unit == "B" else f"{size:.1f}{unit}"
+        size /= 1024
+    return f"{size:.1f}G"
+
+
+def tree_size(path: Path) -> int:
+    if path.is_file():
+        return path.stat().st_size
+    total = 0
+    for current, directories, filenames in os.walk(path, onerror=lambda _: None):
+        directories[:] = [d for d in directories if d not in SKIP_DIRS]
+        for name in filenames:
+            try:
+                total += (Path(current) / name).stat().st_size
+            except OSError:
+                pass
+    return total
+
+
+def newest_mtime(path: Path) -> float:
+    """Newest mtime anywhere inside, so recently touched trees are kept."""
+    try:
+        newest = path.stat().st_mtime
+    except OSError:
+        return time.time()
+    if path.is_file():
+        return newest
+    for current, directories, filenames in os.walk(path, onerror=lambda _: None):
+        directories[:] = [d for d in directories if d not in SKIP_DIRS]
+        for name in list(directories) + filenames:
+            try:
+                newest = max(newest, (Path(current) / name).stat().st_mtime)
+            except OSError:
+                pass
+    return newest
+
+
+def media_files(path: Path) -> list[Path]:
+    if path.is_file():
+        return [path] if path.suffix.lower() in MEDIA_SUFFIXES else []
+    found = []
+    for current, directories, filenames in os.walk(path, onerror=lambda _: None):
+        directories[:] = [d for d in directories if d not in SKIP_DIRS]
+        for name in filenames:
+            if Path(name).suffix.lower() in MEDIA_SUFFIXES:
+                found.append(Path(current) / name)
+    return found
+
+
+def build_live_index(roots: list[Path], excluded: list[Path]) -> set[tuple[str, int]]:
+    """Index (name, size) of every media file that lives outside the backup areas."""
+    index: set[tuple[str, int]] = set()
+    excluded_resolved = [e.resolve() for e in excluded if e.exists()]
+    for root in roots:
+        if not root.exists():
+            continue
+        for current, directories, filenames in os.walk(root, onerror=lambda _: None):
+            current_path = Path(current)
+            directories[:] = [d for d in directories if d not in SKIP_DIRS]
+            try:
+                resolved = current_path.resolve()
+            except OSError:
+                continue
+            if any(resolved == e or e in resolved.parents for e in excluded_resolved):
+                directories[:] = []
+                continue
+            for name in filenames:
+                if Path(name).suffix.lower() not in MEDIA_SUFFIXES:
+                    continue
+                try:
+                    index.add((name, (current_path / name).stat().st_size))
+                except OSError:
+                    pass
+    return index
+
+
+def orphan_media(entry: Path, live: set[tuple[str, int]]) -> list[Path]:
+    orphans = []
+    for item in media_files(entry):
+        try:
+            key = (item.name, item.stat().st_size)
+        except OSError:
+            continue
+        if key not in live:
+            orphans.append(item)
+    return orphans
+
+
+def remove(path: Path, apply: bool) -> None:
+    if not apply:
+        return
+    if path.is_dir() and not path.is_symlink():
+        shutil.rmtree(path)
+    else:
+        path.unlink()
+
+
+def prune_aged(
+    entries: list[Path],
+    cutoff: float,
+    live: set[tuple[str, int]],
+    apply: bool,
+    allow_orphan: bool,
+    label: str,
+) -> tuple[int, int, int]:
+    removed = removed_bytes = kept = 0
+    for entry in sorted(entries):
+        age_days = (time.time() - newest_mtime(entry)) / 86400
+        if newest_mtime(entry) >= cutoff:
+            print(f"  {'KEEP':<13} {label}/{entry.name}  ({age_days:.1f}d, 未達保留期)")
+            kept += 1
+            continue
+        orphans = [] if allow_orphan else orphan_media(entry, live)
+        if orphans:
+            print(
+                f"  {'ORPHAN-MEDIA':<13} {label}/{entry.name}  "
+                f"({age_days:.1f}d, {len(orphans)} 個媒體檔在別處找不到副本，保留)"
+            )
+            for item in orphans[:5]:
+                print(f"                  - {item.name}")
+            if len(orphans) > 5:
+                print(f"                  … 另外 {len(orphans) - 5} 個")
+            kept += 1
+            continue
+        size = tree_size(entry)
+        verb = "DELETE" if apply else "WOULD-DELETE"
+        print(f"  {verb:<13} {label}/{entry.name}  ({age_days:.1f}d, {human(size)})")
+        remove(entry, apply)
+        removed += 1
+        removed_bytes += size
+    return removed, removed_bytes, kept
+
+
+def prune_caches(roots: list[Path], apply: bool) -> tuple[int, int]:
+    pycache = 0
+    ds_store = 0
+    for root in roots:
+        if not root.exists():
+            continue
+        for current, directories, filenames in os.walk(root, topdown=True, onerror=lambda _: None):
+            if ".git" in directories:
+                directories.remove(".git")
+            current_path = Path(current)
+            for name in list(directories):
+                if name == "__pycache__":
+                    remove(current_path / name, apply)
+                    directories.remove(name)
+                    pycache += 1
+            for name in filenames:
+                if name == ".DS_Store":
+                    remove(current_path / name, apply)
+                    ds_store += 1
+    return pycache, ds_store
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--sync-root", required=True, help="Shared assistant root holding backups/.")
+    parser.add_argument("--days", type=int, default=7, help="Retention window in days (default 7).")
+    parser.add_argument("--home", default=os.path.expanduser("~"), help="Home holding agent-sync-backup-* (default $HOME).")
+    parser.add_argument("--live-root", action="append", default=[], help="Where live copies may exist; repeatable.")
+    parser.add_argument("--apply", action="store_true", help="Actually delete. Without it the run is a dry run.")
+    parser.add_argument("--allow-orphan-media", action="store_true", help="Delete backups even when they hold the only copy of a media file.")
+    parser.add_argument("--skip-caches", action="store_true", help="Do not touch __pycache__ and .DS_Store.")
+    args = parser.parse_args()
+
+    sync_root = Path(args.sync_root).expanduser().resolve()
+    if not sync_root.is_dir():
+        print(f"ERROR sync-root 不存在：{sync_root}", file=sys.stderr)
+        return 1
+    if args.days < 1:
+        print("ERROR --days 至少為 1", file=sys.stderr)
+        return 1
+
+    home = Path(args.home).expanduser()
+    backups = sync_root / "backups"
+    checkpoint_backups = sorted(home.glob("agent-sync-backup-*"))
+
+    drive = sync_root.parent
+    live_roots = [Path(p).expanduser() for p in args.live_root] or [
+        sync_root,
+        drive / "agentic_projects",
+        drive / "secondbrain",
+    ]
+    cache_roots = [sync_root] + [drive / name for name in CACHE_ROOT_NAMES]
+
+    cutoff = time.time() - args.days * 86400
+    mode = "APPLY" if args.apply else "DRY-RUN"
+    print(f"MODE={mode}  RETENTION={args.days}d  SYNC_ROOT={sync_root}")
+
+    backup_entries = sorted(backups.iterdir()) if backups.is_dir() else []
+    need_index = bool(backup_entries) and not args.allow_orphan_media
+    live_index: set[tuple[str, int]] = set()
+    if need_index:
+        print("建立 live 媒體索引…", flush=True)
+        live_index = build_live_index(live_roots, excluded=[backups] + checkpoint_backups)
+        print(f"  索引 {len(live_index)} 個媒體檔")
+
+    total_removed = total_bytes = total_kept = 0
+
+    print(f"[1/3] {backups}")
+    if backup_entries:
+        r, b, k = prune_aged(backup_entries, cutoff, live_index, args.apply, args.allow_orphan_media, "backups")
+        total_removed, total_bytes, total_kept = total_removed + r, total_bytes + b, total_kept + k
+    else:
+        print("  (空的，無需處理)")
+
+    print(f"[2/3] {home}/agent-sync-backup-*")
+    if checkpoint_backups:
+        r, b, k = prune_aged(checkpoint_backups, cutoff, live_index, args.apply, True, "home")
+        total_removed, total_bytes, total_kept = total_removed + r, total_bytes + b, total_kept + k
+    else:
+        print("  (無)")
+
+    print("[3/3] __pycache__ / .DS_Store")
+    if args.skip_caches:
+        print("  (--skip-caches，略過)")
+    else:
+        pycache, ds_store = prune_caches(cache_roots, args.apply)
+        verb = "removed" if args.apply else "would-remove"
+        print(f"  {verb} __pycache__={pycache} .DS_Store={ds_store}")
+
+    print(f"PRUNED={total_removed} FREED={human(total_bytes)} KEPT={total_kept}")
+    if not args.apply:
+        print("這是 dry run，沒有刪除任何東西。加 --apply 才會實際執行。")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PRUNE_SESSION_ARTIFACTS_PY_17EFC2D8E4
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prune-session-artifacts.py"
+
 # cross-device-sync/scripts/session-sync-checkpoint.sh
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh")"
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SESSION_SYNC_CHECKPOINT_SH_29BFBFC51C'
@@ -2822,7 +3155,16 @@ Options:
                       Default: ~
   --update            On startup, run chezmoi update only when the source has
                       a commit, a remote, and a clean working tree.
+  --prune-days N      Retention window for session artifacts on shutdown.
+                      Default: 7
+  --no-prune          Skip the shutdown retention sweep entirely.
   -h, --help          Show this help.
+
+On shutdown the checkpoint prunes session artifacts past the retention window:
+<sync-root>/backups entries, ~/agent-sync-backup-* checkpoints, and regenerable
+__pycache__ and .DS_Store. A backup holding a media file with no copy anywhere
+else is reported as ORPHAN-MEDIA and kept, so a "cleanup" backup that became the
+only copy of real work is never swept away.
 
 The checkpoint never runs chezmoi add for existing managed templates. Adding
 an already managed symlink can remove its template attribute and hardcode a
@@ -2838,6 +3180,8 @@ sync_root=""
 source_dir="${CHEZMOI_SOURCE:-$HOME/.local/share/chezmoi}"
 backup_root="${BACKUP_ROOT:-$HOME}"
 run_update=0
+prune_days="${PRUNE_DAYS:-7}"
+run_prune=1
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -2856,6 +3200,14 @@ while [ "$#" -gt 0 ]; do
     --backup-root)
       backup_root="${2:?--backup-root requires a path}"
       shift 2
+      ;;
+    --prune-days)
+      prune_days="${2:?--prune-days requires a number}"
+      shift 2
+      ;;
+    --no-prune)
+      run_prune=0
+      shift
       ;;
     --update)
       run_update=1
@@ -2906,6 +3258,22 @@ if [ ! -x "$bootstrap" ]; then
   exit 1
 fi
 
+run_prune_sweep() {
+  [ "$phase" = "shutdown" ] || return 0
+  if [ "$run_prune" -ne 1 ]; then
+    printf 'PRUNE=skipped\n'
+    return 0
+  fi
+  prune_script="$sync_root/skills/cross-device-sync/scripts/prune-session-artifacts.py"
+  if [ ! -f "$prune_script" ]; then
+    printf 'PRUNE=script-missing\n'
+    return 0
+  fi
+  prune_out="$(python3 "$prune_script" --sync-root "$sync_root" --days "$prune_days" --apply 2>&1 || true)"
+  printf 'PRUNE %s\n' "$(printf '%s' "$prune_out" | grep -E '^PRUNED=' | head -1)"
+  printf '%s\n' "$prune_out" | grep -E 'ORPHAN-MEDIA' || true
+}
+
 printf 'Session sync checkpoint\n'
 printf 'PHASE=%s\n' "$phase"
 printf 'SYNC_ROOT=<configured>\n'
@@ -2934,6 +3302,7 @@ if [ -f "$guardrails_script" ]; then
 else
   printf 'GUARDRAILS=script-missing\n'
 fi
+  run_prune_sweep
   exit 0
 fi
 
