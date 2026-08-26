@@ -40,13 +40,18 @@
 
 ## Next action
 
-#### S-0【新增】guardrails master 與實際設定 drift
-- checkpoint 每次輸出 `GUARDRAILS CLAUDE drift: ['git commit', 'git push']`。實測釐清是
-  **主版本落後、不是設定被破壞**：08-26 已決定 commit/push 改由 Agent 自行判斷、不再逐次彈窗，
-  `~/.claude/settings.json` 的 `ask` 已清空、`~/.codex/config.toml` 也無對應 prompt 規則，
-  只有 `cross-device-sync/assets/agent-guardrails.json` 仍留 `ask.git_publish`。
-- 要修就是把 `git_publish` 從 master 的 `ask` 拿掉，並同步 Item 16 內嵌版與三個安裝 repo 的
-  防護節。依既有規範：三 Agent 一起改、雙向實測。不修的話真 drift 會被誤報淹沒。
+#### S-0【已結案】guardrails drift
+- 開工時 checkpoint 報 `drift: ['git commit', 'git push']`。查證後為主版本落後，非設定被破壞。
+- 本 session 期間（23:47）主版本已被修好：`agent-guardrails.json` 的 `ask.git_publish` 清空，
+  並補上 `excluded` 說明（`permissions.ask` 優先權高於 PreToolUse hook 的 `allow`，
+  無法用自動審核器取代彈窗，只能整條移除）。**非本 session 所為**，來源未確認。
+- 但修的人漏了兩處，已由本次收工補完：
+  1. LazyPack Item 16 內嵌 JSON 仍是舊版 → 收工全量重生時抓到並修正（`7c42ca6`），
+     內嵌與主版本逐字比對 IDENTICAL，懶人包鏡像已同步。
+  2. `claude_installation/200_Reference/lazy-pack/01-claude-lazypack.md:109` 仍寫
+     「執行前詢問 git commit、git push」→ 已改寫為現況（`5e5492f`）。
+- 收工 checkpoint 覆核：`GUARDRAILS CLAUDE drift: none CODEX block: present`。
+- **這是「攔截清單單邊修改導致不一致」第 4 次**。既有規範仍然有效：三 Agent 一起改、雙向實測。
 
 #### S-1【待辦】`personal-style-loop` 素材放置與第一輪校準
 - 待使用者放 2～3 篇代表作進某專案 `200_Reference/writing-samples/`
@@ -78,5 +83,9 @@
   三驗證器全過（`quick_validate` valid／`package_claude_skill validate` VALID／
   compatibility audit 11 檔 0 findings）。個資、絕對路徑、secret 掃描皆 0。
 - 懶人包 Obsidian 鏡像 `diff -qr` 一致；全域 Skills 索引已更新（表格列＋計數口徑＋同步紀錄）。
-- **未複核**：Arry 助手 `knowledge/`／`memories/` 鏡像本次未執行 `sync_obsidian_mirror.py`
-  （本次未動這兩處，留給收工正式跑）。guardrails drift 見 S-0，尚未修。
+- 收工：Arry 助手鏡像 `sync_obsidian_mirror.py` 執行完成（copied=0, removed=0，`diff -qr` 通過）。
+- 收工 chezmoi checkpoint：`CHEZMOI_STATUS=clean`、`CHEZMOI_UPDATE=not-requested`、
+  `CHEZMOI_ADD=not-needed-for-existing-templates`、`GUARDRAILS drift: none`。
+- 收工全量 LazyPack 重生：只有 Item 16 有 drift（見 S-0），其餘 44 項零差異。
+- 三 repo 收工狀態：codex `7c42ca6`、claude `5e5492f` 皆 0 未提交且與遠端同步；
+  antigravity `4328ac6` 本次未動。
