@@ -363,19 +363,44 @@ GUARDRAILS CLAUDE drift: none CODEX block: present
 
 `skills/`、`memories/`、`knowledge/`、`100_Todo/` 與任何 git 工作樹都不在範圍內。目錄年齡取「內部最新的 mtime」，所以最近被動過的備份不會因為建立日期舊而被誤刪。
 
-### 孤兒媒體防線（這條是有來歷的）
+### 孤兒媒體：提出決策，不代為處置
 
 2026-08-26 發現一個名為 `cleanup` 的備份裡，存著 49 張生成圖的**唯一副本**——當初「清理」把成品移出 live 位置後沒有放回去，備份事實上變成正本。照字面清備份就會永久損失。
 
-因此刪除 `backups/` 內任何項目之前，腳本會先建立一份 live 媒體索引，把備份裡的每個媒體檔拿去比對。**同名且同大小**在備份區以外存在，才算有副本；只要有一個比不到，整個項目標記為 `ORPHAN-MEDIA` 並保留，`--apply` 也不會刪。
+因此刪除 `backups/` 內任何項目之前，腳本會先建立 live 媒體索引，把備份裡的每個媒體檔拿去比對。**同名且同大小**在備份區以外存在，才算有副本。
+
+比不到副本的項目，腳本**不會替你決定**——不刪，也不會就這樣永遠擋著變成堆積，而是列為待決策，等一個明確的答覆：
+
+| 答覆方式 | 意思 |
+| :-- | :-- |
+| `--interactive` | 逐一詢問，一次問一個（直接按 Enter 是保留） |
+| `--approve-delete NAME` | 不用互動，直接同意刪除指定的那一個 |
+| `--keep-orphans` | 本次全部保留 |
+| `--allow-orphan-media` | 本次全部刪除 |
+
+沒有答覆時就報 `PENDING` 並原地保留，所以無人看顧的收工掃描既不會偷刪、也不會擅自替你結案。
+
+收工 checkpoint 的輸出會直接把待決策項目推到你面前：
 
 ```text
-PRUNE PRUNED=3 FREED=4.9K KEPT=1
-  ORPHAN-MEDIA  backups/carousel-renders.bak  (26.2d, 7 個媒體檔在別處找不到副本，保留)
-                  - carousel-01.jpg
+PRUNE PRUNED=0 FREED=0B KEPT=4 PENDING=1
+  ORPHAN-MEDIA  backups/_t  (26.2d, 2.9K)
+PRUNE 需要你決定去留，收工不會代為處理。逐一詢問：
+  python3 ".../prune-session-artifacts.py" --sync-root "{{SYNC_ROOT}}" --interactive --apply
 ```
 
-看到 `ORPHAN-MEDIA` 就是要你決定：把那些檔案搬回正式作品庫，或確認可拋棄後加 `--allow-orphan-media` 再跑一次。
+手動執行時，結尾會列出每個待決項目的 `open` 指令讓你先看內容，再附上三種處理方式的完整指令。
+
+互動提示長這樣，直接按 Enter 等於保留：
+
+```text
+  ORPHAN-MEDIA  backups/carousel-renders.bak  (26.2d, 900K)
+                  7 個媒體檔在備份區以外找不到同名同大小的副本：
+                  - carousel-01.jpg
+                  刪除 carousel-renders.bak？ [d]刪除 / [k]保留(預設) / [D]全部刪除 / [K]全部保留 >
+```
+
+沒有可用終端機時（例如被包在自動化流程裡），`--interactive` 不會假裝問過，而是照樣報 `PENDING` 留待下次。
 
 ### 手動執行
 
@@ -388,12 +413,16 @@ python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}"
 # 確認後才實際刪除
 python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}" --apply
 
+# 逐一處理待決策項目
+python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}" --interactive --apply
+
 # 改保留期；停用整個清理
 python3 "$PRUNE" --sync-root "{{SYNC_ROOT}}" --days 30 --apply
 bash "$CHECKPOINT" --phase shutdown --sync-root "{{SYNC_ROOT}}" --no-prune
 ```
 
 checkpoint 也接受 `--prune-days N`。開工階段不會執行清理，只有收工會。
+
 ## 實際踩坑紀錄（2026-07-20～2026-07-21 驗證）
 
 - Homebrew 第一次執行可能先自動更新，數分鐘沒有明顯輸出；不要因安靜就重複啟動另一個安裝程序。
@@ -2865,8 +2894,8 @@ Retention targets:
   3. __pycache__ directories          always (regenerates on next run)
   4. .DS_Store files                  always (Finder metadata)
 
-Orphan-media guard
-------------------
+Orphan media are a decision, not a veto
+---------------------------------------
 2026-08-26 a cleanup backup turned out to hold the only copy of 49 generated
 images: the "cleanup" had moved them out of their live location and nothing put
 them back. Deleting the backup would have destroyed real work.
@@ -2874,9 +2903,18 @@ them back. Deleting the backup would have destroyed real work.
 So before removing anything under backups/, every media file inside it is
 checked against a live index built from --live-root. A media file counts as
 duplicated only when a file with the same name AND the same byte size exists
-outside the backup locations. Any entry holding at least one unmatched media
-file is kept and reported as ORPHAN-MEDIA, and --apply will not remove it.
-Pass --allow-orphan-media only after deciding those files are expendable.
+outside the backup locations.
+
+An entry holding unmatched media is never deleted on the owner's behalf. It is
+raised as a pending decision and waits for an explicit answer:
+
+  --interactive           ask about each one, one at a time (default: keep)
+  --approve-delete NAME   answer for one entry without a prompt
+  --keep-orphans          answer "keep everything" for this run
+  --allow-orphan-media    answer "delete everything" for this run
+
+Without an answer the entry is reported as PENDING and left alone, so an
+unattended sweep can never quietly resolve it either way.
 
 Usage:
   prune-session-artifacts.py --sync-root PATH [--days 7] [--apply]
@@ -3001,40 +3039,105 @@ def remove(path: Path, apply: bool) -> None:
         path.unlink()
 
 
-def prune_aged(
+def show_orphan(entry: Path, label: str, age_days: float, orphans: list[Path], size: int) -> None:
+    print(f"  {'ORPHAN-MEDIA':<13} {label}/{entry.name}  ({age_days:.1f}d, {human(size)})")
+    print(f"                  {len(orphans)} 個媒體檔在備份區以外找不到同名同大小的副本：")
+    for item in orphans[:8]:
+        print(f"                  - {item.name}")
+    if len(orphans) > 8:
+        print(f"                  … 另外 {len(orphans) - 8} 個")
+
+
+def ask(entry_name: str) -> str:
+    """Ask the owner what to do.
+
+    Returns delete/keep/all-delete/all-keep, or "pending" when no terminal is
+    attached: an unattended run must not report a decision nobody made.
+    """
+    prompt = (
+        f"                  刪除 {entry_name}？"
+        " [d]刪除 / [k]保留(預設) / [D]全部刪除 / [K]全部保留 > "
+    )
+    answer = None
+    # stdin first: a pty without a controlling terminal cannot open /dev/tty.
+    if sys.stdin is not None and sys.stdin.isatty():
+        try:
+            print(prompt, end="", flush=True)
+            answer = sys.stdin.readline()
+        except (OSError, KeyboardInterrupt):
+            answer = None
+    if answer is None:
+        try:
+            with open("/dev/tty", "r+") as tty:
+                tty.write(prompt)
+                tty.flush()
+                answer = tty.readline()
+        except (OSError, KeyboardInterrupt):
+            return "pending"
+    if answer == "":          # EOF, not an answer
+        return "pending"
+    return {"d": "delete", "D": "all-delete", "k": "keep", "K": "all-keep"}.get(answer.strip(), "keep")
+
+
+def sweep(
     entries: list[Path],
     cutoff: float,
     live: set[tuple[str, int]],
-    apply: bool,
-    allow_orphan: bool,
+    args,
     label: str,
-) -> tuple[int, int, int]:
+    check_orphans: bool,
+) -> tuple[int, int, int, list[Path]]:
     removed = removed_bytes = kept = 0
+    pending: list[Path] = []
+    blanket = "all-delete" if args.allow_orphan_media else ("all-keep" if args.keep_orphans else None)
+
     for entry in sorted(entries):
-        age_days = (time.time() - newest_mtime(entry)) / 86400
-        if newest_mtime(entry) >= cutoff:
+        entry_mtime = newest_mtime(entry)
+        age_days = (time.time() - entry_mtime) / 86400
+        if entry_mtime >= cutoff:
             print(f"  {'KEEP':<13} {label}/{entry.name}  ({age_days:.1f}d, 未達保留期)")
             kept += 1
             continue
-        orphans = [] if allow_orphan else orphan_media(entry, live)
-        if orphans:
-            print(
-                f"  {'ORPHAN-MEDIA':<13} {label}/{entry.name}  "
-                f"({age_days:.1f}d, {len(orphans)} 個媒體檔在別處找不到副本，保留)"
-            )
-            for item in orphans[:5]:
-                print(f"                  - {item.name}")
-            if len(orphans) > 5:
-                print(f"                  … 另外 {len(orphans) - 5} 個")
-            kept += 1
-            continue
+
         size = tree_size(entry)
-        verb = "DELETE" if apply else "WOULD-DELETE"
+        orphans = orphan_media(entry, live) if check_orphans else []
+
+        if orphans:
+            decision = blanket
+            if decision is None and entry.name in args.approve_delete:
+                decision = "delete"
+            if decision is None and args.interactive:
+                show_orphan(entry, label, age_days, orphans, size)
+                answer = ask(entry.name)
+                if answer == "pending":
+                    print("                  → 沒有可用的終端機，無法詢問；本次保留待決")
+                    pending.append(entry)
+                    kept += 1
+                    continue
+                if answer in ("all-delete", "all-keep"):
+                    blanket = answer
+                    decision = answer
+                else:
+                    decision = answer
+            elif decision is None:
+                show_orphan(entry, label, age_days, orphans, size)
+                print("                  → 需要你決定，本次保留（見結尾的處理方式）")
+                pending.append(entry)
+                kept += 1
+                continue
+
+            if decision in ("keep", "all-keep"):
+                print(f"  {'KEEP':<13} {label}/{entry.name}  (你選擇保留)")
+                kept += 1
+                continue
+            print(f"  {'APPROVED':<13} {label}/{entry.name}  (你同意刪除 {len(orphans)} 個唯一媒體檔)")
+
+        verb = "DELETE" if args.apply else "WOULD-DELETE"
         print(f"  {verb:<13} {label}/{entry.name}  ({age_days:.1f}d, {human(size)})")
-        remove(entry, apply)
+        remove(entry, args.apply)
         removed += 1
         removed_bytes += size
-    return removed, removed_bytes, kept
+    return removed, removed_bytes, kept, pending
 
 
 def prune_caches(roots: list[Path], apply: bool) -> tuple[int, int]:
@@ -3066,7 +3169,10 @@ def main() -> int:
     parser.add_argument("--home", default=os.path.expanduser("~"), help="Home holding agent-sync-backup-* (default $HOME).")
     parser.add_argument("--live-root", action="append", default=[], help="Where live copies may exist; repeatable.")
     parser.add_argument("--apply", action="store_true", help="Actually delete. Without it the run is a dry run.")
-    parser.add_argument("--allow-orphan-media", action="store_true", help="Delete backups even when they hold the only copy of a media file.")
+    parser.add_argument("--interactive", action="store_true", help="Ask about each orphan-media entry, one at a time.")
+    parser.add_argument("--approve-delete", action="append", default=[], metavar="NAME", help="Approve deleting one orphan-media entry by name; repeatable.")
+    parser.add_argument("--keep-orphans", action="store_true", help="Answer 'keep' for every orphan-media entry this run.")
+    parser.add_argument("--allow-orphan-media", action="store_true", help="Answer 'delete' for every orphan-media entry this run.")
     parser.add_argument("--skip-caches", action="store_true", help="Do not touch __pycache__ and .DS_Store.")
     args = parser.parse_args()
 
@@ -3076,6 +3182,9 @@ def main() -> int:
         return 1
     if args.days < 1:
         print("ERROR --days 至少為 1", file=sys.stderr)
+        return 1
+    if args.allow_orphan_media and args.keep_orphans:
+        print("ERROR --allow-orphan-media 與 --keep-orphans 互斥", file=sys.stderr)
         return 1
 
     home = Path(args.home).expanduser()
@@ -3095,25 +3204,27 @@ def main() -> int:
     print(f"MODE={mode}  RETENTION={args.days}d  SYNC_ROOT={sync_root}")
 
     backup_entries = sorted(backups.iterdir()) if backups.is_dir() else []
-    need_index = bool(backup_entries) and not args.allow_orphan_media
+    check_orphans = bool(backup_entries) and not args.allow_orphan_media
     live_index: set[tuple[str, int]] = set()
-    if need_index:
+    if check_orphans:
         print("建立 live 媒體索引…", flush=True)
         live_index = build_live_index(live_roots, excluded=[backups] + checkpoint_backups)
         print(f"  索引 {len(live_index)} 個媒體檔")
 
     total_removed = total_bytes = total_kept = 0
+    pending: list[Path] = []
 
     print(f"[1/3] {backups}")
     if backup_entries:
-        r, b, k = prune_aged(backup_entries, cutoff, live_index, args.apply, args.allow_orphan_media, "backups")
+        r, b, k, p = sweep(backup_entries, cutoff, live_index, args, "backups", check_orphans)
         total_removed, total_bytes, total_kept = total_removed + r, total_bytes + b, total_kept + k
+        pending += p
     else:
         print("  (空的，無需處理)")
 
     print(f"[2/3] {home}/agent-sync-backup-*")
     if checkpoint_backups:
-        r, b, k = prune_aged(checkpoint_backups, cutoff, live_index, args.apply, True, "home")
+        r, b, k, _ = sweep(checkpoint_backups, cutoff, live_index, args, "home", False)
         total_removed, total_bytes, total_kept = total_removed + r, total_bytes + b, total_kept + k
     else:
         print("  (無)")
@@ -3126,7 +3237,23 @@ def main() -> int:
         verb = "removed" if args.apply else "would-remove"
         print(f"  {verb} __pycache__={pycache} .DS_Store={ds_store}")
 
-    print(f"PRUNED={total_removed} FREED={human(total_bytes)} KEPT={total_kept}")
+    print(f"PRUNED={total_removed} FREED={human(total_bytes)} KEPT={total_kept} PENDING={len(pending)}")
+
+    if pending:
+        script = Path(__file__).resolve()
+        print()
+        print(f"有 {len(pending)} 個項目存著在別處找不到副本的媒體檔，需要你決定去留。")
+        print("先看過內容再決定：")
+        for entry in pending:
+            print(f"  open \"{entry}\"")
+        print()
+        print("逐一詢問後處理：")
+        print(f'  python3 "{script}" --sync-root "{sync_root}" --interactive --apply')
+        print("同意刪除其中某一個：")
+        print(f'  python3 "{script}" --sync-root "{sync_root}" --approve-delete "{pending[0].name}" --apply')
+        print("決定全部留著（本次不再提示）：")
+        print(f'  python3 "{script}" --sync-root "{sync_root}" --keep-orphans --apply')
+
     if not args.apply:
         print("這是 dry run，沒有刪除任何東西。加 --apply 才會實際執行。")
     return 0
@@ -3270,8 +3397,14 @@ run_prune_sweep() {
     return 0
   fi
   prune_out="$(python3 "$prune_script" --sync-root "$sync_root" --days "$prune_days" --apply 2>&1 || true)"
-  printf 'PRUNE %s\n' "$(printf '%s' "$prune_out" | grep -E '^PRUNED=' | head -1)"
-  printf '%s\n' "$prune_out" | grep -E 'ORPHAN-MEDIA' || true
+  prune_summary="$(printf '%s' "$prune_out" | grep -E '^PRUNED=' | head -1)"
+  printf 'PRUNE %s\n' "$prune_summary"
+  pending_count="$(printf '%s' "$prune_summary" | sed -n 's/.*PENDING=\([0-9]*\).*/\1/p')"
+  if [ -n "$pending_count" ] && [ "$pending_count" -gt 0 ] 2>/dev/null; then
+    printf '%s\n' "$prune_out" | grep -E 'ORPHAN-MEDIA' || true
+    printf 'PRUNE 需要你決定去留，收工不會代為處理。逐一詢問：\n'
+    printf '  python3 "%s" --sync-root "%s" --interactive --apply\n' "$prune_script" "$sync_root"
+  fi
 }
 
 printf 'Session sync checkpoint\n'

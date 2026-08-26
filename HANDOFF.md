@@ -52,6 +52,14 @@
   比不到就標 `ORPHAN-MEDIA` 保留、`--apply` 也不刪（逃生門 `--allow-orphan-media`）。
   預設 dry-run。實測索引 2480 個媒體檔 0.44 秒。checkpoint 新增 `--prune-days N`／`--no-prune`，
   開工不觸發。Item 16 已重生並補 prose。
+- 保留期機制改版（同日稍後，依使用者回饋）：孤兒媒體從「一律擋下」改為**提出決策等同意**。
+  原設計會讓待決項目永遠卡著、沒有 resolution path，只會變成永久堆積。
+  新增 `--interactive`（逐一詢問，Enter 等於保留）、`--approve-delete NAME`（單項同意）、
+  `--keep-orphans`（本次全留）；`--allow-orphan-media` 保留為「本次全刪」。
+  沒有答覆就報 `PENDING=n` 原地保留，無人看顧的收工掃描既不偷刪也不擅自結案。
+  收工 checkpoint 在 `PENDING>0` 時把項目與 `--interactive` 指令推到眼前。
+  測試中發現 `ask()` 原本只讀 `/dev/tty`，在有 pty 但無 controlling terminal 的環境會失敗，
+  已改為 stdin 優先、`/dev/tty` 備援、EOF 視為 pending（不謊報「你選擇保留」）。
 - `e8e29d2`：`agent-guardrails.json` 的 `excluded` 說明原本只寫「移除」沒有受詞，
   被 compatibility audit 的 `(清除|移除|排除)…Claude` 規則命中。改寫為
   「這兩條 ask 規則整條拿掉」，語意更明確且不再誤觸。**只動說明文字**，
@@ -77,11 +85,12 @@
   （schema 見 Item 44：`use_for`／`do_not_use_for` frontmatter、去識別化）後，
   跑第一輪校準。在此之前該 skill 是 `0.1.0` 未校準初版，其停止條件禁止無素材啟動。
 
-#### S-2【可選，需使用者決策】Item 40 與 Item 45 是否併存
-- 兩者底層方法重疊（拷問／規格／切票／TDD／審查），但使用情境不同：
-  Item 40 是使用者自己做事的工具箱、各 skill 獨立呼叫；Item 45 是帶人的單一連續流程，
-  多了教練話術、HC 標籤、`.agent-flow/` 狀態機與每關必須明確同意才前進的閘門。
-- 已在 Item 45 寫明邊界並保留併存。若日後判定只需一套，這是可收掉的候選，但屬使用者決策。
+#### S-2【已結案】Item 40 與 Item 45 長期併存
+- 2026-08-27 使用者確認：兩者長期併存，不合併也不收掉其中一套。
+- 分工：Item 40 是使用者自己動手的工具箱（各 skill 獨立呼叫、順序自由、無前進閘門）；
+  Item 45 是帶人的單一連續流程（五關固定順序、每關須明確同意才前進、`.agent-flow/` 狀態機、
+  教練話術與 HC 標籤）。可接力使用：Item 45 想清楚需求與切票，日常實作與審查回到 Item 40。
+- 邊界已寫進 Item 45 與 LazyPack README，無後續動作。
 
 ## Blockers
 
