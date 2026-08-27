@@ -82,6 +82,24 @@
   「這兩條 ask 規則整條拿掉」，語意更明確且不再誤觸。**只動說明文字**，
   `forbidden` 17 條與 `ask.git_publish: []` 皆未變動。
 
+- 2026-08-27 `b61682f`：修好 `sync-lazypack-embeds.py`，整批重生恢復可用。
+  兩個缺陷：(1) `SYNC_SKILLS` 預設用 `REPO.parent`，解析到不存在的
+  `agentic_projects/codex_symlink/skills`，主版本其實在雲端硬碟根層 → 改 `REPO.parents[1]`，
+  並加 `--sync-root`／`--skills-root` 與 `SYNC_ROOT`，找不到 exit 2。
+  (2) skill 缺套件直接 `FileNotFoundError` 中斷整批 → 改 `MissingSkill`，
+  **跳過整個 Item 檔**（只跳過單一 skill 會靜默刪掉已發布的安裝內容）、逐筆回報、exit 1。
+  **sections 表本身沒錯**：81 筆引用、78 個不重複 skill 全部存在，先前的 `pdf` 錯誤
+  只是缺陷 1 的第一個受害者（排在第一個項目第一位），不是 plugin skill 混入。
+  另把 UTF-8 來源的 CRLF 正規化成 LF——`playwright/LICENSE.txt` 是唯一受影響檔案，
+  不正規化會把 201 個 CR 寫進 public repo；二進位檔仍走 base64，維持 byte-exact。
+  新增 `--dry-run`／`--show-diff`，只比對不寫檔。
+- `verify-lazypack-embeds.py` 的 docstring 說 generator「目前無法整批重跑」已過時，一併更新為
+  「整批驗證用 `--dry-run`，這支做單一 Item 細部檢查」。兩支的 delimiter 演算法一致，結果交叉吻合。
+- **未引用的全域 skill 4 個**：`future-coach`（依規則不進公開 LazyPack）、`productivity-coach`、
+  `voice-coach`、`waki-brain`。後三個待確認是刻意還是漏列。
+- 併發踩坑：本 session 期間另一個 session 併行提交了 `4e6ef86`（含 Item 14／45），
+  導致 `git status` 中途自行變動。Drive 同步的 repo 收工前務必重新確認工作樹，不能沿用開場快照。
+
 ## Next action
 
 #### S-0【已結案】guardrails drift
@@ -119,12 +137,18 @@
 
 ## Last verified
 
-- 2026-08-27 07:0x，Claude Code 收工：`codex_installation` 0 未提交、與遠端同步，HEAD `17af917`；
-  `claude_installation` `5e5492f`、`antigravity_installation` `4328ac6` 皆 0 未提交。
-- 收工 checkpoint：`CHEZMOI_STATUS=clean`、`GUARDRAILS drift: none CODEX block: present`、
-  `PRUNE PRUNED=… PENDING=0`。保留期清理現涵蓋 backups、chezmoi 備份、快取與當前 Agent 沙盒。
-- prune 白名單安全檢查：三個 Agent 的 glob 觸及頂層項目與 28 個受保護項目零交集。
-- Item 16 內嵌 13 檔與主版本逐檔比對 IDENTICAL 且無遺漏；懶人包鏡像 `diff -qr` 一致；
-  Arry 助手鏡像通過；compatibility audit findings=0。
+- 2026-08-27 Claude Code 收工：`codex_installation` HEAD `b61682f`，已推 `origin/main`，
+  工作樹 0 未提交。提交前掃描：secret pattern 0、`/Users/arrywu` 等個人絕對路徑 0（public repo）。
+- `sync-lazypack-embeds.py --dry-run`：**40 identical、0 changed、0 skipped、exit 0**。
+  dry-run 前後 45 個 LazyPack 檔案 SHA-256 全等，確認未寫檔。
+- Item 16 內嵌 **15 檔**（前次紀錄寫 13，已過時）與主版本逐檔 IDENTICAL；
+  `verify-lazypack-embeds.py` 獨立覆核 `IDENTICAL=15 DIFFERS=0 MISSING=0`。
+- 缺 skill 的跳過路徑用空 skills root 實測：41 檔全部乾淨跳過、不中斷、exit 1；
+  root 不存在時 exit 2。
+- 收工 checkpoint：`CHEZMOI_STATUS=clean`、`CHEZMOI_ADD=not-needed-for-existing-templates`、
+  `GUARDRAILS CLAUDE drift: none CODEX block: present`、`PRUNE PRUNED=0 PENDING=0`。
+  九個 Agent 入口 symlink 與 Python tools bridge 皆 OK。
+- Arry 助手鏡像：`copied=0, removed=0`，`diff -qr` 通過（本 session 未動 knowledge／memories）。
+- 本 session 沙盒產物皆為驗證用暫存（原檔備份、SHA 清單、diff、空 skills root），無需歸檔。
 - **不可回復**：2026-08-27 稍早刪除的 56 張圖與 `2026-08-25-six-learning-bottlenecks` 的
   `visual-dna.yaml` 全 Drive 已無副本。
