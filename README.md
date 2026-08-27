@@ -21,7 +21,8 @@
 - `200_Reference/writing-samples/`：寫作與語氣參考。
 - `200_Reference/templates/`：模板與安全範本；環境變數範本為 `200_Reference/templates/env.example`。
 - `200_Reference/past-work/`：歷史參考成果。
-- `200_Reference/scripts/`：只放可版本化腳本；runtime 與工具虛擬環境若需要，放 `200_Reference/scripts/runtime/` 並排除 Git。
+- `200_Reference/scripts/`：只放可版本化腳本與 `requirements.txt`；腳本執行期快取放 `200_Reference/scripts/runtime/` 並排除 Git。
+- Python 虛擬環境**不在專案資料結構內**；一律建在本機 `~/.local/share/agent-tools/project-runtimes/<專案名>/.venv`，用共用腳本 `cross-device-sync/scripts/project-venv.sh ensure --project-root .` 建立。repo 內只留 `200_Reference/scripts/requirements.txt`。
 
 本 repo 不使用專案根目錄 `src/`、`tests/`、`assets/`、`working/`、`output/` 作為固定結構；需要程式碼、素材、工作檔或成品時，依用途放入 `100_Todo/` 或 `200_Reference/` 下的標準資料夾。
 

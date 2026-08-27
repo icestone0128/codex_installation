@@ -2922,6 +2922,159 @@ printf 'Run: chezmoi diff && chezmoi status && chezmoi doctor\n'
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_BOOTSTRAP_AGENT_SYNC_SH_E2A05A691B
 chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/bootstrap-agent-sync.sh"
 
+# cross-device-sync/scripts/project-venv.sh
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/project-venv.sh")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/project-venv.sh" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PROJECT_VENV_SH_C6AE258E40'
+#!/usr/bin/env bash
+# Shared project virtualenv entry point for Codex, Claude, and AntiGravity.
+#
+# A virtualenv pins absolute interpreter paths and holds thousands of tiny
+# files, so it is machine-local by nature and must never sit inside a synced
+# project folder. On Google Drive, iCloud, or Dropbox the provider evicts cold
+# file content and keeps only metadata; the next import then re-downloads the
+# tree file by file, which has been measured at minutes per run. Only
+# requirements.txt belongs in the project repository.
+#
+# Every machine and every agent resolves the same path, so no environment
+# variable is needed to share a runtime between Codex, Claude, and AntiGravity.
+
+set -euo pipefail
+
+runtime_root="${AGENT_PROJECT_RUNTIMES:-$HOME/.local/share/agent-tools/project-runtimes}"
+
+usage() {
+  cat <<'EOF'
+Usage: project-venv.sh <command> [options]
+
+Commands:
+  path      Print the interpreter path for the project runtime.
+  ensure    Create the runtime if missing, install requirements, print the path.
+  list      List every project runtime on this machine.
+  remove    Delete one project runtime (it can always be rebuilt).
+
+Options:
+  --project NAME        Runtime name. Default: basename of --project-root.
+  --project-root PATH   Project directory. Default: current directory.
+  --requirements PATH   Requirements file.
+                        Default: <project-root>/200_Reference/scripts/requirements.txt
+  --python BIN          Interpreter used to create the venv. Default: python3
+  --agent NAME          auto|codex|claude|antigravity. Accepted for cross-agent
+                        contract parity; the resolved path is identical for all.
+  -h, --help            Show this help.
+
+Runtime root: $AGENT_PROJECT_RUNTIMES, or ~/.local/share/agent-tools/project-runtimes
+EOF
+}
+
+command_name="${1:-}"
+[ "$#" -gt 0 ] && shift || true
+
+project=""
+project_root="$PWD"
+requirements=""
+python_bin="python3"
+agent="auto"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --project)       project="${2:?--project requires a name}"; shift 2 ;;
+    --project-root)  project_root="${2:?--project-root requires a path}"; shift 2 ;;
+    --requirements)  requirements="${2:?--requirements requires a path}"; shift 2 ;;
+    --python)        python_bin="${2:?--python requires an interpreter}"; shift 2 ;;
+    --agent)         agent="${2:?--agent requires a name}"; shift 2 ;;
+    -h|--help)       usage; exit 0 ;;
+    *) printf 'ERROR unknown argument: %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+case "$agent" in
+  auto|codex|claude|antigravity) ;;
+  *) printf 'ERROR --agent must be auto, codex, claude, or antigravity\n' >&2; exit 2 ;;
+esac
+
+case "$command_name" in
+  path|ensure|list|remove) ;;
+  "") usage >&2; exit 2 ;;
+  *) printf 'ERROR unknown command: %s\n' "$command_name" >&2; usage >&2; exit 2 ;;
+esac
+
+if [ "$command_name" = "list" ]; then
+  if [ ! -d "$runtime_root" ]; then
+    printf 'RUNTIME_ROOT=%s (none yet)\n' "$runtime_root"
+    exit 0
+  fi
+  printf 'RUNTIME_ROOT=%s\n' "$runtime_root"
+  for entry in "$runtime_root"/*/; do
+    [ -d "$entry" ] || continue
+    name="$(basename "$entry")"
+    if [ -x "$entry/.venv/bin/python" ]; then
+      printf '  %-32s %s\n' "$name" "$("$entry/.venv/bin/python" --version 2>&1)"
+    else
+      printf '  %-32s (incomplete)\n' "$name"
+    fi
+  done
+  exit 0
+fi
+
+if [ -z "$project" ]; then
+  case "$project_root" in
+    /*) ;;
+    *) project_root="$PWD/$project_root" ;;
+  esac
+  project="$(basename "$project_root")"
+fi
+
+case "$project" in
+  ""|*/*|.|..) printf 'ERROR --project must be a plain directory name\n' >&2; exit 2 ;;
+esac
+
+venv_dir="$runtime_root/$project/.venv"
+venv_python="$venv_dir/bin/python"
+
+if [ "$command_name" = "remove" ]; then
+  if [ -d "$runtime_root/$project" ]; then
+    rm -rf "${runtime_root:?}/$project"
+    printf 'REMOVED=%s\n' "$runtime_root/$project"
+  else
+    printf 'REMOVED=none (%s did not exist)\n' "$runtime_root/$project"
+  fi
+  exit 0
+fi
+
+if [ "$command_name" = "path" ]; then
+  printf '%s\n' "$venv_python"
+  [ -x "$venv_python" ] || { printf 'ERROR runtime missing; run: project-venv.sh ensure --project %s\n' "$project" >&2; exit 1; }
+  exit 0
+fi
+
+# ensure
+if [ ! -x "$venv_python" ]; then
+  command -v "$python_bin" >/dev/null 2>&1 || {
+    printf 'ERROR interpreter not found: %s\n' "$python_bin" >&2; exit 1; }
+  mkdir -p "$runtime_root/$project"
+  "$python_bin" -m venv "$venv_dir"
+  printf 'CREATED=%s\n' "$venv_dir"
+else
+  printf 'EXISTS=%s\n' "$venv_dir"
+fi
+
+if [ -z "$requirements" ]; then
+  requirements="$project_root/200_Reference/scripts/requirements.txt"
+fi
+
+if [ -f "$requirements" ]; then
+  "$venv_python" -m pip install --quiet --upgrade pip
+  "$venv_python" -m pip install --quiet -r "$requirements"
+  printf 'REQUIREMENTS=%s\n' "$requirements"
+else
+  printf 'REQUIREMENTS=none (%s not found)\n' "$requirements"
+fi
+
+printf 'PYTHON=%s\n' "$venv_python"
+"$venv_python" --version
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PROJECT_VENV_SH_C6AE258E40
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/project-venv.sh"
+
 # cross-device-sync/scripts/prune-session-artifacts.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prune-session-artifacts.py")"
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prune-session-artifacts.py" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PRUNE_SESSION_ARTIFACTS_PY_17EFC2D8E4'
@@ -3480,7 +3633,7 @@ Options:
   --source PATH       Chezmoi source directory.
                       Default: ~/.local/share/chezmoi
   --backup-root PATH  Backup parent used before an automatic update.
-                      Default: ~
+                      Default: <sync-root>/backups
   --update            On startup, run chezmoi update only when the source has
                       a commit, a remote, and a clean working tree.
   --prune-days N      Retention window for session artifacts on shutdown.
@@ -3506,7 +3659,7 @@ EOF
 phase=""
 sync_root=""
 source_dir="${CHEZMOI_SOURCE:-$HOME/.local/share/chezmoi}"
-backup_root="${BACKUP_ROOT:-$HOME}"
+backup_root="${BACKUP_ROOT:-}"
 run_update=0
 prune_days="${PRUNE_DAYS:-7}"
 run_prune=1
@@ -3573,6 +3726,11 @@ if [ ! -f "$sync_root/core-rules.md" ] || [ ! -d "$sync_root/skills" ]; then
   printf 'ERROR sync root must contain core-rules.md and skills/\n' >&2
   exit 1
 fi
+
+# Keep entrypoint backups on the shared root so all three agents and every
+# machine restore from one place, as core-rules requires. Flat naming keeps
+# each checkpoint a separate <sync-root>/backups/* entry for the prune sweep.
+[ -n "$backup_root" ] || backup_root="$sync_root/backups"
 
 if ! command -v chezmoi >/dev/null 2>&1; then
   printf 'ERROR chezmoi is required; install it through LazyPack Item 16\n' >&2
@@ -3670,7 +3828,7 @@ if [ -z "$remote_name" ]; then
   skip_update 'no-remote'
 fi
 
-stamp="$(date +%Y%m%d-%H%M%S)"
+stamp="$(hostname -s)-$(date +%Y%m%d-%H%M%S)"
 backup_dir="$backup_root/agent-sync-backup-$stamp/session-startup"
 mkdir -p "$backup_dir"
 
