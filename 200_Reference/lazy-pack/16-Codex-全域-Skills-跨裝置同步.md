@@ -3662,6 +3662,233 @@ if __name__ == "__main__":
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PRUNE_SESSION_ARTIFACTS_PY_17EFC2D8E4
 chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prune-session-artifacts.py"
 
+# cross-device-sync/scripts/scan-unarchived-artifacts.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/scan-unarchived-artifacts.py")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/scan-unarchived-artifacts.py" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SCAN_UNARCHIVED_ARTIFACTS_PY_9046016D36'
+#!/usr/bin/env python3
+"""回報停留在 Agent 私有沙盒、尚未歸檔的任務產物。
+
+core-rules〈跨 Agent 任務生成檔案強制歸檔專案目錄〉要求任務產生的中間檔與成品
+必須落在專案資料夾，讓另一個 Agent 或另一台機器接得下去。沙盒只能當本次執行的
+暫存。這支腳本在收工時掃描三個 Agent 的沙盒，把「像是任務產物、又還留在沙盒裡」
+的檔案列出來。
+
+只回報，不搬也不刪。搬到哪裡要看任務脈絡，那是 Agent 與使用者的判斷，不是腳本的。
+
+明確不列入（不是漏掉，是刻意排除）：
+  * Agent 自身的 session 逐字稿與紀錄（`.jsonl`、`.log`）。那是 Agent 的執行紀錄，
+    不是任務產物；搬走會讓 --continue／--resume 失效。
+  * metadata、cache、鎖檔、`.DS_Store` 等可重生或無意義的附屬檔。
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+import time
+from pathlib import Path
+
+# 看起來像「任務產物」的副檔名：文件、素材、程式、資料。
+ARTIFACT_SUFFIXES = {
+    ".md", ".txt", ".html", ".htm", ".pdf", ".csv", ".tsv", ".json", ".yaml", ".yml",
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".heic",
+    ".mp3", ".wav", ".m4a", ".aac", ".flac",
+    ".mp4", ".mov", ".mkv", ".webm",
+    ".docx", ".xlsx", ".pptx", ".key", ".pages", ".numbers",
+    ".py", ".sh", ".js", ".ts", ".css", ".sql",
+    ".zip", ".tar", ".gz", ".srt", ".vtt",
+}
+
+# 即使副檔名符合也要跳過的檔名樣式。
+SKIP_NAMES = {".DS_Store", ".gitkeep"}
+SKIP_SUFFIX_CHAINS = (".metadata.json", ".lock", ".tmp", ".part")
+SKIP_DIR_PARTS = {"__pycache__", ".git", "node_modules", ".venv", "cache", ".cache"}
+
+
+def agent_roots(home: Path, agent: str) -> list[tuple[str, Path]]:
+    """回傳 (agent, 沙盒根目錄)。不存在的路徑由呼叫端過濾。"""
+    uid = os.getuid()
+    roots: list[tuple[str, Path]] = []
+    if agent in ("claude", "all"):
+        roots.append(("claude", Path(f"/private/tmp/claude-{uid}")))
+        roots.append(("claude", home / ".claude" / "projects"))
+    if agent in ("antigravity", "all"):
+        roots.append(("antigravity", home / ".gemini" / "antigravity" / "brain"))
+        roots.append(("antigravity", home / ".gemini" / "tmp"))
+    if agent in ("codex", "all"):
+        roots.append(("codex", home / ".codex" / "tmp"))
+        roots.append(("codex", home / ".codex" / "generated_images"))
+        roots.append(("codex", home / ".codex" / "attachments"))
+    return roots
+
+
+def detect_agent() -> str:
+    """猜目前執行中的 Agent；猜不到就掃全部，寧可多報不要漏報。"""
+    if os.environ.get("CLAUDE_CODE_SESSION") or os.environ.get("CLAUDECODE"):
+        return "claude"
+    if os.environ.get("CODEX_HOME") or os.environ.get("CODEX_SESSION_ID"):
+        return "codex"
+    if os.environ.get("GEMINI_CLI") or os.environ.get("ANTIGRAVITY_SESSION"):
+        return "antigravity"
+    return "all"
+
+
+def is_artifact(path: Path) -> bool:
+    name = path.name
+    if name in SKIP_NAMES or name.startswith("."):
+        return False
+    if any(name.endswith(chain) for chain in SKIP_SUFFIX_CHAINS):
+        return False
+    if SKIP_DIR_PARTS & set(path.parts):
+        return False
+    return path.suffix.lower() in ARTIFACT_SUFFIXES
+
+
+def scan(root: Path, cutoff: float) -> list[Path]:
+    found: list[Path] = []
+    for current, directories, filenames in os.walk(root, followlinks=False):
+        directories[:] = [d for d in directories if d not in SKIP_DIR_PARTS]
+        current_path = Path(current)
+        for filename in filenames:
+            candidate = current_path / filename
+            try:
+                if candidate.stat().st_mtime < cutoff:
+                    continue
+            except OSError:
+                continue
+            if is_artifact(candidate):
+                found.append(candidate)
+    return found
+
+
+def build_live_index(roots: list[Path]) -> set[tuple[str, int]]:
+    """(檔名, 大小) 索引。在專案或 Drive 找得到同名同大小的副本，就不算未歸檔。
+
+    沿用 prune-session-artifacts.py 的判準。沙盒裡大量出現的是既有內容的解壓副本或
+    驗證用暫存，逐檔列出只會淹沒真正沒歸檔的那幾筆。
+    """
+    index: set[tuple[str, int]] = set()
+    for root in roots:
+        if not root.is_dir():
+            continue
+        for current, directories, filenames in os.walk(root, followlinks=False):
+            directories[:] = [d for d in directories if d not in SKIP_DIR_PARTS]
+            current_path = Path(current)
+            for filename in filenames:
+                if Path(filename).suffix.lower() not in ARTIFACT_SUFFIXES:
+                    continue
+                try:
+                    index.add((filename, (current_path / filename).stat().st_size))
+                except OSError:
+                    continue
+    return index
+
+
+def session_bucket(path: Path) -> Path:
+    """把檔案歸到它所屬的 session 暫存目錄，讓輸出以工作為單位而非逐檔。"""
+    for parent in path.parents:
+        if parent.name in {"scratchpad", "tool-results", "scratch"}:
+            return parent
+    return path.parent
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--sync-root", required=True, help="共用助手根目錄，同時作為 live 索引來源之一。")
+    parser.add_argument("--hours", type=float, default=24.0,
+                        help="只看這段時間內改過的檔案，代表本次工作區間。預設 24。")
+    parser.add_argument("--agent", default="auto",
+                        choices=["auto", "codex", "claude", "antigravity", "all"],
+                        help="掃哪個 Agent 的沙盒。auto 會偵測目前執行中的 Agent。")
+    parser.add_argument("--live-root", action="append", default=[],
+                        help="額外的 live 索引來源，可重複指定。")
+    parser.add_argument("--limit", type=int, default=15, help="最多列出幾個目錄群組。預設 15。")
+    parser.add_argument("--all-files", action="store_true",
+                        help="逐檔列出，不做目錄分組。")
+    args = parser.parse_args()
+
+    sync_root = Path(args.sync_root).expanduser()
+    if not (sync_root / "core-rules.md").is_file():
+        print(f"ERROR sync-root 不含 core-rules.md：{sync_root}", file=sys.stderr)
+        return 1
+    if args.hours <= 0:
+        print("ERROR --hours 必須大於 0", file=sys.stderr)
+        return 1
+
+    agent = detect_agent() if args.agent == "auto" else args.agent
+    cutoff = time.time() - args.hours * 3600
+    home = Path.home()
+
+    candidates: list[tuple[str, Path]] = []
+    for owner, root in agent_roots(home, agent):
+        if not root.is_dir():
+            continue
+        for path in scan(root, cutoff):
+            candidates.append((owner, path))
+
+    if not candidates:
+        print(f"UNARCHIVED=0 AGENT={agent} WINDOW={args.hours:g}h")
+        return 0
+
+    drive = sync_root.parent
+    live_roots = [Path(p).expanduser() for p in args.live_root] or [
+        sync_root,
+        drive / "agentic_projects",
+        drive / "secondbrain",
+    ]
+    live = build_live_index(live_roots)
+
+    hits = []
+    for owner, path in candidates:
+        try:
+            size = path.stat().st_size
+        except OSError:
+            continue
+        if (path.name, size) in live:
+            continue
+        hits.append((owner, path, size))
+
+    skipped = len(candidates) - len(hits)
+    print(f"UNARCHIVED={len(hits)} AGENT={agent} WINDOW={args.hours:g}h "
+          f"MATCHED_ELSEWHERE={skipped}")
+    if not hits:
+        print("沙盒內的檔案在專案或 Drive 都找得到副本，沒有未歸檔產物。")
+        return 0
+
+    print("以下產物只存在於 Agent 沙盒，core-rules 要求歸檔到專案資料夾後才收工：")
+    if args.all_files:
+        for owner, path, size in sorted(hits, key=lambda item: item[1])[: args.limit]:
+            print(f"  [{owner}] {path}  ({size / 1024:.0f} KB)")
+        remaining = len(hits) - args.limit
+    else:
+        groups: dict[Path, list[tuple[str, Path, int]]] = {}
+        for owner, path, size in hits:
+            groups.setdefault(session_bucket(path), []).append((owner, path, size))
+        ordered = sorted(groups.items(), key=lambda item: -sum(h[2] for h in item[1]))
+        for bucket, members in ordered[: args.limit]:
+            total = sum(h[2] for h in members) / 1024
+            print(f"  [{members[0][0]}] {bucket}")
+            print(f"      {len(members)} 個檔案，共 {total:.0f} KB，例如："
+                  f" {', '.join(sorted(m[1].name for m in members)[:3])}")
+        remaining = len(ordered) - args.limit
+    if remaining > 0:
+        print(f"  …另有 {remaining} 筆未列出（--limit 可調整，--all-files 可逐檔列出）")
+    print()
+    print("歸檔落點（core-rules〈落點三分法〉）：")
+    print("  中間草稿與工程檔  → <專案>/100_Todo/drafts/<任務名>/")
+    print("  正式交付與成品    → <專案>/100_Todo/projects/<任務名>/")
+    print("  已完成封存        → <專案>/100_Todo/archive/<類別>/<任務名>/")
+    print("純屬本次驗證、不需保留的暫存，說明一句即可；這支腳本只回報，不搬也不刪。")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SCAN_UNARCHIVED_ARTIFACTS_PY_9046016D36
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/scan-unarchived-artifacts.py"
+
 # cross-device-sync/scripts/session-sync-checkpoint.sh
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh")"
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SESSION_SYNC_CHECKPOINT_SH_29BFBFC51C'
@@ -3683,6 +3910,9 @@ Options:
   --prune-days N      Retention window for session artifacts on shutdown.
                       Default: 7
   --no-prune          Skip the shutdown retention sweep entirely.
+  --scan-hours N      Window for the shutdown unarchived-artifact scan.
+                      Default: 24
+  --no-scan           Skip the shutdown unarchived-artifact scan.
   -h, --help          Show this help.
 
 On shutdown the checkpoint prunes session artifacts past the retention window:
@@ -3707,6 +3937,8 @@ backup_root="${BACKUP_ROOT:-}"
 run_update=0
 prune_days="${PRUNE_DAYS:-7}"
 run_prune=1
+run_scan=1
+scan_hours="${SCAN_HOURS:-24}"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -3732,6 +3964,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --no-prune)
       run_prune=0
+      shift
+      ;;
+    --scan-hours)
+      scan_hours="${2:?--scan-hours requires a number}"
+      shift 2
+      ;;
+    --no-scan)
+      run_scan=0
       shift
       ;;
     --update)
@@ -3810,6 +4050,25 @@ run_prune_sweep() {
   fi
 }
 
+run_unarchived_scan() {
+  [ "$phase" = "shutdown" ] || return 0
+  if [ "$run_scan" -ne 1 ]; then
+    printf 'UNARCHIVED=skipped\n'
+    return 0
+  fi
+  scan_script="$sync_root/skills/cross-device-sync/scripts/scan-unarchived-artifacts.py"
+  if [ ! -f "$scan_script" ]; then
+    printf 'UNARCHIVED=script-missing\n'
+    return 0
+  fi
+  scan_out="$(python3 "$scan_script" --sync-root "$sync_root" --hours "$scan_hours" 2>&1 || true)"
+  printf '%s\n' "$scan_out" | grep -E '^UNARCHIVED=' | head -1
+  scan_count="$(printf '%s' "$scan_out" | sed -n 's/^UNARCHIVED=\([0-9]*\).*/\1/p' | head -1)"
+  if [ -n "$scan_count" ] && [ "$scan_count" -gt 0 ] 2>/dev/null; then
+    printf '%s\n' "$scan_out" | sed -n '2,$p'
+  fi
+}
+
 printf 'Session sync checkpoint\n'
 printf 'PHASE=%s\n' "$phase"
 printf 'SYNC_ROOT=<configured>\n'
@@ -3839,6 +4098,7 @@ else
   printf 'GUARDRAILS=script-missing\n'
 fi
   run_prune_sweep
+  run_unarchived_scan
   exit 0
 fi
 
