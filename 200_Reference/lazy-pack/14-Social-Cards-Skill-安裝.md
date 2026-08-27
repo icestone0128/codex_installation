@@ -7,7 +7,7 @@
 > 用途：把 Raymond Hou／雷蒙的 `skills/social-cards` 來源工具安裝劇本，改寫為 Codex、Claude、AntiGravity 共用全域 Skill。
 > 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/social-cards/`，再安裝 Playwright 依賴後使用。
 
-> 本機特例：使用者指定 `social-cards/node_modules/` 保留為可攜式執行依賴，避免未來每次使用本 skill 都重新安裝 Playwright / Chromium 相關依賴。全域相容性掃描可排除這個第三方依賴目錄；若要分享給其他使用者，仍可只帶 `package.json` / `package-lock.json` 並在新環境重建。
+> 本機特例：使用者指定 `social-cards/node_modules/` 的 JS 套件（約 14MB）保留為可攜式執行依賴，避免每次使用本 skill 都重新安裝。瀏覽器本體不放這裡——Chromium 一律裝在本機 Playwright 預設快取 `~/Library/Caches/ms-playwright`，三個 Agent 入口都會自動解析到同一份。全域相容性掃描可排除這個第三方依賴目錄；若要分享給其他使用者，仍可只帶 `package.json` / `package-lock.json` 並在新環境重建。
 
 ## 來源與授權
 
@@ -40,7 +40,7 @@ mkdir -p "{{SYNC_ROOT}}/skills/social-cards"
 # 請使用本文文末「內建 Skill 完整安裝內容」；不需要額外複製舊版獨立 skills 子目錄。
 cd "{{SYNC_ROOT}}/skills/social-cards"
 NPM_CONFIG_CACHE=/private/tmp/npm-cache npm install
-NPM_CONFIG_CACHE=/private/tmp/npm-cache PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
+NPM_CONFIG_CACHE=/private/tmp/npm-cache npx playwright install chromium
 ```
 
 若你不是 macOS，也可以先拿掉 `NPM_CONFIG_CACHE=/private/tmp/npm-cache`，只有遇到 npm cache 權限錯誤時再加回來。
@@ -86,7 +86,7 @@ mkdir -p /tmp/social-cards-test
 cp "{{SYNC_ROOT}}/skills/social-cards/assets/orange-light/cover.html" /tmp/social-cards-test/01-cover.html
 cp "{{SYNC_ROOT}}/skills/social-cards/assets/blue-dark/content-text.html" /tmp/social-cards-test/02-content.html
 cd "{{SYNC_ROOT}}/skills/social-cards"
-PLAYWRIGHT_BROWSERS_PATH=0 node scripts/screenshot.mjs /tmp/social-cards-test
+node scripts/screenshot.mjs /tmp/social-cards-test
 find /tmp/social-cards-test -maxdepth 1 -name "*.png" -print
 ```
 
@@ -152,15 +152,17 @@ Social Cards
 NPM_CONFIG_CACHE=/private/tmp/npm-cache npm install
 ```
 
-### 5. Playwright 瀏覽器最好安裝在 skill 本地
+### 5. Playwright 瀏覽器裝在本機共用快取，不要裝進 skill 資料夾
 
-使用：
+使用預設路徑即可：
 
 ```bash
-PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
+npx playwright install chromium
 ```
 
-這會讓 Chromium 跟著 skill 的 `node_modules` 放在一起，比較可移植。
+Chromium 會裝到本機 Playwright 預設快取（macOS 是 `~/Library/Caches/ms-playwright`）。因為 `PLAYWRIGHT_BROWSERS_PATH` 未設定，Codex、Claude、AntiGravity 三個 skills 入口都會自動解析到同一份，不需任何環境變數。
+
+**不要**加 `PLAYWRIGHT_BROWSERS_PATH=0`。那會把約 339MB 的 Chromium 灌進 `node_modules/playwright-core/.local-browsers/`；若 `{{SYNC_ROOT}}` 位於 Google Drive、iCloud 或 Dropbox，這份 compiled 產物會被整包同步，而且每次 skills 掃描都要走過它。
 
 ### 6. node_modules 內可能帶有上游範例 `SKILL.md`
 
@@ -312,7 +314,9 @@ Only apply this preset when the user explicitly says `手寫混搭數位風格`.
 - 不依賴 來源工具 slash-command 系統；`/cards` 只是使用者可能輸入的觸發語。
 - 不使用 來源工具 專用 frontmatter 或工具欄位。
 - 若 Playwright、Chromium 或 `node_modules/` 尚未安裝，先告知需要安裝本 skill 的截圖依賴，再於本 skill 資料夾執行 `npm install` 並驗證。
-- `node_modules/` 是本使用者保留的可攜式執行依賴特例；本機全域 skill 可保留並同步它，避免每次使用 Social Cards 都重新安裝 Playwright / Chromium 依賴。
+- `node_modules/` 的 JS 套件（約 14MB）是本使用者保留的可攜式執行依賴特例；全域 skill 保留並同步它，避免每次使用 Social Cards 都重新安裝。
+- **瀏覽器本體不放 Google Drive。** Chromium 一律裝在本機 Playwright 預設快取 `~/Library/Caches/ms-playwright`，屬「本機 runtime、共用入口」模式（與 `~/.codex/python-tools` 同一原則）。因為 `PLAYWRIGHT_BROWSERS_PATH` 未設定，Codex、Claude、AntiGravity 三個入口都會自動解析到同一份，不需任何環境變數。
+- 安裝或修復瀏覽器一律用 `npx playwright install chromium`。**不要**加 `PLAYWRIGHT_BROWSERS_PATH=0`——那會把約 339MB 的 Chromium 灌進 `node_modules/playwright-core/.local-browsers/` 並同步上雲端硬碟，違反 core-rules「不把 compiled 產物與 cache 放進 Drive」。
 - 若複製給其他使用者或其他電腦時不想攜帶大型依賴，仍可只保留 `package.json` 與 `package-lock.json`，在新環境重新安裝依賴。
 - 匯出後可刪除中間 HTML，保留 PNG；除非使用者要求保留可編輯 HTML。
 AGENT_LAZYPACK_SOCIAL_CARDS_SKILL_MD_0E95F5A366
