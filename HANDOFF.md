@@ -96,7 +96,8 @@
 - `verify-lazypack-embeds.py` 的 docstring 說 generator「目前無法整批重跑」已過時，一併更新為
   「整批驗證用 `--dry-run`，這支做單一 Item 細部檢查」。兩支的 delimiter 演算法一致，結果交叉吻合。
 - **未引用的全域 skill 4 個**：`future-coach`（依規則不進公開 LazyPack）、`productivity-coach`、
-  `voice-coach`、`waki-brain`。後三個待確認是刻意還是漏列。
+  `voice-coach`、`waki-brain`。**2026-08-27 使用者裁示：忽略，維持不引用。**
+  下一手不需要再提出這件事，也不要「順手」把它們加進 sections 表。
 - 併發踩坑：本 session 期間另一個 session 併行提交了 `4e6ef86`（含 Item 14／45），
   導致 `git status` 中途自行變動。Drive 同步的 repo 收工前務必重新確認工作樹，不能沿用開場快照。
 
