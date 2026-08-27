@@ -2948,6 +2948,9 @@ Usage: project-venv.sh <command> [options]
 
 Commands:
   path      Print the interpreter path for the project runtime.
+  cache     Print the machine-local cache root for the project.
+  env       Print shell exports for the runtime and its caches.
+            Use as: eval "$(project-venv.sh env --project-root .)"
   ensure    Create the runtime if missing, install requirements, print the path.
   list      List every project runtime on this machine.
   remove    Delete one project runtime (it can always be rebuilt).
@@ -2993,7 +2996,7 @@ case "$agent" in
 esac
 
 case "$command_name" in
-  path|ensure|list|remove) ;;
+  path|cache|env|ensure|list|remove) ;;
   "") usage >&2; exit 2 ;;
   *) printf 'ERROR unknown command: %s\n' "$command_name" >&2; usage >&2; exit 2 ;;
 esac
@@ -3030,6 +3033,9 @@ esac
 
 venv_dir="$runtime_root/$project/.venv"
 venv_python="$venv_dir/bin/python"
+# Regenerable caches belong next to the venv, never inside the synced project.
+# Work products another agent must resume stay in the project instead.
+cache_dir="$runtime_root/$project/cache"
 
 if [ "$command_name" = "remove" ]; then
   if [ -d "$runtime_root/$project" ]; then
@@ -3044,6 +3050,20 @@ fi
 if [ "$command_name" = "path" ]; then
   printf '%s\n' "$venv_python"
   [ -x "$venv_python" ] || { printf 'ERROR runtime missing; run: project-venv.sh ensure --project %s\n' "$project" >&2; exit 1; }
+  exit 0
+fi
+
+if [ "$command_name" = "cache" ]; then
+  printf '%s\n' "$cache_dir"
+  exit 0
+fi
+
+if [ "$command_name" = "env" ]; then
+  printf 'export PROJECT_RUNTIME_HOME=%s\n' "\"$runtime_root/$project\""
+  printf 'export PROJECT_VENV_PYTHON=%s\n' "\"$venv_python\""
+  printf 'export PROJECT_CACHE_HOME=%s\n' "\"$cache_dir\""
+  printf 'export PYTHONPYCACHEPREFIX=%s\n' "\"$cache_dir/python\""
+  printf 'export PYTEST_ADDOPTS=%s\n' "\"-o cache_dir=$cache_dir/pytest\""
   exit 0
 fi
 
@@ -3070,6 +3090,8 @@ else
   printf 'REQUIREMENTS=none (%s not found)\n' "$requirements"
 fi
 
+mkdir -p "$cache_dir/python" "$cache_dir/pytest"
+printf 'CACHE=%s\n' "$cache_dir"
 printf 'PYTHON=%s\n' "$venv_python"
 "$venv_python" --version
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PROJECT_VENV_SH_C6AE258E40
