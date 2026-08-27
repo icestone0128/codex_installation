@@ -316,7 +316,7 @@ Only apply this preset when the user explicitly says `手寫混搭數位風格`.
 - 若 Playwright、Chromium 或 `node_modules/` 尚未安裝，先告知需要安裝本 skill 的截圖依賴，再於本 skill 資料夾執行 `npm install` 並驗證。
 - `node_modules/` 的 JS 套件（約 14MB）是本使用者保留的可攜式執行依賴特例；全域 skill 保留並同步它，避免每次使用 Social Cards 都重新安裝。
 - **瀏覽器本體不放 Google Drive。** Chromium 一律裝在本機 Playwright 預設快取 `~/Library/Caches/ms-playwright`，屬「本機 runtime、共用入口」模式（與 `~/.codex/python-tools` 同一原則）。因為 `PLAYWRIGHT_BROWSERS_PATH` 未設定，Codex、Claude、AntiGravity 三個入口都會自動解析到同一份，不需任何環境變數。
-- 安裝或修復瀏覽器一律用 `npx playwright install chromium`。**不要**加 `PLAYWRIGHT_BROWSERS_PATH=0`——那會把約 339MB 的 Chromium 灌進 `node_modules/playwright-core/.local-browsers/` 並同步上雲端硬碟，違反 core-rules「不把 compiled 產物與 cache 放進 Drive」。
+- 安裝或修復瀏覽器一律用 `npx playwright install chromium`。**不要**加 `PLAYWRIGHT_BROWSERS_PATH=0`——那會把約 339MB 的 Chromium 灌進 `node_modules/playwright-core/.local-browsers/` 並同步上 Google Drive，違反 core-rules「不把 compiled 產物與 cache 放進 Drive」。
 - 若複製給其他使用者或其他電腦時不想攜帶大型依賴，仍可只保留 `package.json` 與 `package-lock.json`，在新環境重新安裝依賴。
 - 匯出後可刪除中間 HTML，保留 PNG；除非使用者要求保留可編輯 HTML。
 AGENT_LAZYPACK_SOCIAL_CARDS_SKILL_MD_0E95F5A366
