@@ -100,6 +100,29 @@
   下一手不需要再提出這件事，也不要「順手」把它們加進 sections 表。
 - 併發踩坑：本 session 期間另一個 session 併行提交了 `4e6ef86`（含 Item 14／45），
   導致 `git status` 中途自行變動。Drive 同步的 repo 收工前務必重新確認工作樹，不能沿用開場快照。
+- `4e6ef86` 的內容（Claude Code 同日另一 session）：依使用者提供的第三方使用說明 README
+  （v1.2）補齊 `agent-dev-coach` 的行為缺口，`0.1.0` → **`0.2.0`**。README 九成內容已在套件內
+  且多在 `references/`（正確分層，不搬），真正要補的是 README 對使用者承諾、但 `SKILL.md`
+  接不住的行為：
+  1. **「先到這裡」停不下來，而且會反向失敗**：辨識表沒有這個詞，只有
+     `references/06-package.md` 有，而該檔只在 PRD 打包時載入，走第 1～5 關讀不到；
+     結果會踩到「不屬於任何一關就回答完主動問要不要開始第 1 關」——學員說想停，
+     教練反問要不要開始。已補暫停規則並在該條加明確例外。
+  2. **第二次回來不會續跑**：啟動原本先自我介紹＋問「你手上現在有什麼」，
+     沒先看 `.agent-flow/state.json`。改為啟動先查 state：存在走續跑分支
+     （回報進度、問從哪接），不存在才走開場；辨識表補「先到這裡」「繼續」兩列。
+  3. **`engineering-methods` 邊界只寫在 LazyPack**，但跑起來的 agent 讀 `SKILL.md`，
+     等於邊界沒生效 → 已補進「什麼時候不要用」。
+  4. **套件 12 檔無任何 attribution** → 新增〈方法來源〉具名 Matt Pocock 的
+     `mattpocock/skills`，並點明 Item 40 與本 skill 同源不同封裝。
+  另修掉一個上游殘留：`assets/agent_spec_template.html` 產出的規格書尾巴寫
+  「下次開新對話請帶上我」「續關時請直接上傳交付 zip 或 spec.json」——那是上游 claude.ai
+  桌面版模型（無檔案系統，每次重新上傳）的遺留，與〈狀態（單一真相）〉直接矛盾，
+  會教學員做一件多餘且錯誤的事。已改為「進度存在 `.agent-flow/`，說『繼續』即可接回」。
+  Item 45 prose 同步補：具名來源、**Claude 兩種安裝面的分岔**（桌面版／網頁版讀 claude.ai
+  帳號技能，放 `~/.claude/skills/` 不生效）、續跑與暫停規則。
+  同批順手修掉 Item 14 既有 drift（`social-cards` 主版本「雲端硬碟」→「Google Drive」
+  未回寫內嵌，1 行）——「主版本改了沒回寫內嵌」第 5 次。
 
 ## Next action
 
@@ -126,7 +149,9 @@
 - 分工：Item 40 是使用者自己動手的工具箱（各 skill 獨立呼叫、順序自由、無前進閘門）；
   Item 45 是帶人的單一連續流程（五關固定順序、每關須明確同意才前進、`.agent-flow/` 狀態機、
   教練話術與 HC 標籤）。可接力使用：Item 45 想清楚需求與切票，日常實作與審查回到 Item 40。
-- 邊界已寫進 Item 45 與 LazyPack README，無後續動作。
+- 邊界原本只寫在 Item 45 與 LazyPack README；2026-08-27 已補進 `SKILL.md` 的
+  「什麼時候不要用」——**跑起來的 agent 讀的是 `SKILL.md`，不是 LazyPack**，
+  只寫在 LazyPack 等於邊界沒生效。無後續動作。
 
 ## Blockers
 
@@ -138,18 +163,23 @@
 
 ## Last verified
 
-- 2026-08-27 Claude Code 收工：`codex_installation` HEAD `b61682f`，已推 `origin/main`，
-  工作樹 0 未提交。提交前掃描：secret pattern 0、`/Users/arrywu` 等個人絕對路徑 0（public repo）。
-- `sync-lazypack-embeds.py --dry-run`：**40 identical、0 changed、0 skipped、exit 0**。
-  dry-run 前後 45 個 LazyPack 檔案 SHA-256 全等，確認未寫檔。
-- Item 16 內嵌 **15 檔**（前次紀錄寫 13，已過時）與主版本逐檔 IDENTICAL；
-  `verify-lazypack-embeds.py` 獨立覆核 `IDENTICAL=15 DIFFERS=0 MISSING=0`。
-- 缺 skill 的跳過路徑用空 skills root 實測：41 檔全部乾淨跳過、不中斷、exit 1；
-  root 不存在時 exit 2。
-- 收工 checkpoint：`CHEZMOI_STATUS=clean`、`CHEZMOI_ADD=not-needed-for-existing-templates`、
-  `GUARDRAILS CLAUDE drift: none CODEX block: present`、`PRUNE PRUNED=0 PENDING=0`。
-  九個 Agent 入口 symlink 與 Python tools bridge 皆 OK。
-- Arry 助手鏡像：`copied=0, removed=0`，`diff -qr` 通過（本 session 未動 knowledge／memories）。
-- 本 session 沙盒產物皆為驗證用暫存（原檔備份、SHA 清單、diff、空 skills root），無需歸檔。
+- 2026-08-27 23:2x～收工，Claude Code：`codex_installation` HEAD `a5eac75`，工作樹 0 未提交、
+  與 `origin/main` 同步；`claude_installation` `f672e7f`、`antigravity_installation` `92d08ce`
+  皆 0 未提交。提交前掃描：secret／token／私鑰 0，家目錄絕對路徑 0（public repo）。
+- `sync-lazypack-embeds.py --dry-run`（修好後的新版）：**40 identical、0 to change、0 skipped**，
+  含本次改動的 Item 45；`verify-lazypack-embeds.py` 獨立覆核 `agent-dev-coach IDENTICAL=12`、
+  `social-cards IDENTICAL=23`，DIFFERS 皆 0。
+- `agent-dev-coach` 實跑驗收：renderer 退出碼 0、validator 印出 `PASS 所有檢查通過`；
+  進度卡輸出確認為新文案；Codex／Claude／AntiGravity 三個入口都解析到 `0.2.0`。
+- 收工 checkpoint：`CHEZMOI_STATUS=clean`、`CHEZMOI_UPDATE=not-requested`、
+  `CHEZMOI_ADD=not-needed-for-existing-templates`、
+  `GUARDRAILS CLAUDE drift: none CODEX block: present`、`PRUNE PRUNED=0 KEPT=860 PENDING=0`。
+- Arry 助手鏡像：`copied=0, removed=0`，`diff -qr` 通過（本次未動 knowledge／memories）。
+  懶人包鏡像 `diff -qr` 一致。
+- `UNARCHIVED=173`（`MATCHED_ELSEWHERE=23`）**全部屬於 `readmoo_exporter` 的其他 Claude session
+  裁切截圖**，不是本 session 產物，留給該專案自行判斷。本 session 的沙盒產物只有內嵌抽取檔、
+  smoke-test spec 與 staged diff 三項驗證用暫存，未被掃描標記，無需歸檔。
+- 備份：`codex_symlink/backups/*.bak.20260827-231322`（`SKILL.md`、template、Item 45）
+  與同日 `HANDOFF.md.bak.*`。
 - **不可回復**：2026-08-27 稍早刪除的 56 張圖與 `2026-08-25-six-learning-bottlenecks` 的
   `visual-dna.yaml` 全 Drive 已無副本。
