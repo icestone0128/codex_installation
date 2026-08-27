@@ -2467,7 +2467,8 @@ Options:
                       Default: codex,claude,antigravity
   --source PATH       Chezmoi source directory
                       Default: ~/.local/share/chezmoi
-  --backup-root PATH  Backup parent directory. Default: ~
+  --backup-root PATH  Backup parent directory.
+                      Default: <sync-root>/backups
   --python-tools-home PATH
                       Shared local Python tools runtime
                       Default: $CODEX_HOME/python-tools
@@ -2488,7 +2489,7 @@ install_chezmoi=0
 agents="codex,claude,antigravity"
 sync_root=""
 source_dir="${CHEZMOI_SOURCE:-$HOME/.local/share/chezmoi}"
-backup_root="${BACKUP_ROOT:-$HOME}"
+backup_root="${BACKUP_ROOT:-}"
 python_tools_home=""
 
 while [ "$#" -gt 0 ]; do
@@ -2549,6 +2550,10 @@ case "$sync_root" in
     exit 2
     ;;
 esac
+
+# Keep entrypoint backups on the shared root, matching core-rules and the
+# session checkpoint, so every agent and machine restores from one place.
+[ -n "$backup_root" ] || backup_root="$sync_root/backups"
 
 if [ ! -f "$sync_root/core-rules.md" ] || [ ! -d "$sync_root/skills" ]; then
   printf 'ERROR sync root must contain core-rules.md and skills/\n' >&2
@@ -2731,7 +2736,7 @@ fi
 install_chezmoi_now
 
 stamp="$(date +%Y%m%d-%H%M%S)"
-backup_dir="$backup_root/agent-sync-backup-$stamp"
+backup_dir="$backup_root/agent-sync-backup-$(hostname -s)-$stamp"
 mkdir -p "$backup_dir/entrypoints"
 for spec in "${targets[@]}"; do
   target="${spec%%|*}"
@@ -2796,7 +2801,24 @@ if [ -d "$AGENT_PYTHON_TOOLS_HOME/bin" ]; then
   PATH="$AGENT_PYTHON_TOOLS_BIN$(printf '\''%s'\'' "$PATH" | awk -v managed="$AGENT_PYTHON_TOOLS_BIN" '\''BEGIN { RS = ":" } $0 != managed { printf ":%s", $0 }'\'')"
   export PATH
   unset AGENT_PYTHON_TOOLS_BIN
-fi'
+fi
+
+# Shared machine-local data root. Every agent writes regenerable machine-local
+# data here rather than into its own sandbox, so Codex, Claude, and AntiGravity
+# can pick up each other work on this computer. Project-scoped work products
+# still belong in the project folder, not here.
+AGENT_DATA_HOME="${AGENT_DATA_HOME:-$HOME/.local/share/agent-tools}"
+export AGENT_DATA_HOME
+AGENT_CACHE_HOME="${AGENT_CACHE_HOME:-$AGENT_DATA_HOME/cache}"
+export AGENT_CACHE_HOME
+AGENT_SHARED_WORK="${AGENT_SHARED_WORK:-$AGENT_DATA_HOME/shared-work}"
+export AGENT_SHARED_WORK
+
+# Keep Python bytecode out of synced project folders on every project, not just
+# the ones whose scripts remember to set it. A project runtime overrides this
+# through: eval "$(project-venv.sh env --project-root .)"
+PYTHONPYCACHEPREFIX="${PYTHONPYCACHEPREFIX:-$AGENT_CACHE_HOME/python}"
+export PYTHONPYCACHEPREFIX'
 
 profile_modifier='#!/bin/sh
 set -eu
