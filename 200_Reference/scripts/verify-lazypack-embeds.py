@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """驗證 LazyPack 內嵌的 skill 檔案是否與 codex_symlink 主版本逐字相同。
 
-`sync-lazypack-embeds.py` 負責產生內嵌內容，但目前無法整批重跑（見該檔）。在它修好之前，
-手動同步某個 Item 的內嵌區塊之後，用這支確認沒有漏檔或內容漂移。
+`sync-lazypack-embeds.py` 負責產生內嵌內容，整批驗證請用它的 `--dry-run`。這支是單一 Item
+的細部檢查：手動同步某個 Item 的內嵌區塊之後，用它逐檔確認沒有漏檔或內容漂移。
 
 delimiter 演算法與 `sync-lazypack-embeds.py` 的 `delimiter()` 相同，所以驗證通過就代表
-未來 generator 修好後重跑會產生一致的結果。
+generator 重跑會產生一致的結果。
 
 用法：
     python3 verify-lazypack-embeds.py --skill cross-device-sync \\
