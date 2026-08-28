@@ -3152,7 +3152,12 @@ output or durable data:
   ~/.codex/sessions, archived_sessions
                       -- referenced by rollout summaries in memories/;
                          archived_sessions needs --include-codex-archives
-  ~/.claude/projects  -- transcripts and the assistant memory directory
+  ~/.claude/projects  -- interactive-session transcripts (human-origin) and
+                         the assistant memory directory; HEADLESS print-mode
+                         transcripts (claude -p pipeline calls, plan mode, no
+                         human-origin record) ARE swept past the window --
+                         they are machine scratch whose results persist in
+                         the invoking pipeline's own reports
   runtimes, models, caches, credentials, config, and any symlink
 
 The current session is always protected: entries whose name carries the running
@@ -3260,6 +3265,86 @@ def current_session_tokens(spec: dict) -> list[str]:
     return [v for name in spec.get("session_env", ()) if (v := os.environ.get(name))]
 
 
+HEADLESS_PROBE_LINES = 20
+HEADLESS_RECENT_GUARD_SECONDS = 30 * 60
+
+
+def transcript_is_headless(path: Path) -> bool:
+    """True only for a print-mode pipeline transcript, never an interactive one.
+
+    A human-driven session records origin {kind: human} on its user turns and
+    is protected no matter what mode it ran in.  Headless `claude -p` calls
+    (verified against 9,913 pipeline transcripts, 2026-08-28) run in plan mode
+    and carry no human-origin record.  Unreadable files are treated as
+    interactive: deletion needs positive evidence.
+    """
+    import json
+    permission_mode = None
+    try:
+        with path.open(encoding="utf-8", errors="replace") as handle:
+            for index, line in enumerate(handle):
+                if index >= HEADLESS_PROBE_LINES:
+                    break
+                try:
+                    record = json.loads(line)
+                except Exception:
+                    continue
+                origin = record.get("origin")
+                if isinstance(origin, dict) and origin.get("kind") == "human":
+                    return False
+                permission_mode = permission_mode or record.get("permissionMode")
+    except OSError:
+        return False
+    return permission_mode == "plan"
+
+
+def sweep_claude_headless_transcripts(
+    cutoff: float, tokens: list[str], args
+) -> tuple[int, int, int]:
+    projects_root = Path.home() / ".claude" / "projects"
+    if not projects_root.is_dir():
+        return 0, 0, 0
+    import time as _time
+    recent_guard = _time.time() - HEADLESS_RECENT_GUARD_SECONDS
+    hits, hit_bytes, kept = [], 0, 0
+    for project_dir in sorted(projects_root.iterdir()):
+        if not project_dir.is_dir() or project_dir.is_symlink():
+            continue
+        for entry in sorted(project_dir.glob("*.jsonl")):
+            if entry.is_symlink():
+                continue
+            if any(token and token in entry.name for token in tokens):
+                kept += 1
+                continue
+            try:
+                stat = entry.lstat()
+            except OSError:
+                continue
+            if stat.st_mtime >= cutoff or stat.st_mtime >= recent_guard:
+                kept += 1
+                continue
+            if not transcript_is_headless(entry):
+                kept += 1
+                continue
+            hits.append(entry)
+            hit_bytes += stat.st_size
+    if not hits:
+        print(f"    {'KEEP':<13} claude/projects headless transcripts  ({kept} 項保留)")
+        return 0, 0, kept
+    verb = "DELETE" if args.apply else "WOULD-DELETE"
+    print(
+        f"    {verb:<13} claude/projects headless transcripts  "
+        f"({len(hits)} 項, {human(hit_bytes)}；另保留 {kept} 項)"
+    )
+    for entry in hits[:3]:
+        print(f"                    - {entry.parent.name[:24]}…/{entry.name}")
+    if len(hits) > 3:
+        print(f"                    … 另外 {len(hits) - 3} 項")
+    for entry in hits:
+        remove(entry, args.apply)
+    return len(hits), hit_bytes, kept
+
+
 def sweep_agent(agent: str, cutoff: float, args) -> tuple[int, int, int]:
     spec = AGENT_TARGETS[agent]
     root = spec["root"]()
@@ -3309,6 +3394,20 @@ def sweep_agent(agent: str, cutoff: float, args) -> tuple[int, int, int]:
             remove(entry, args.apply)
         removed += len(hits)
         removed_bytes += hit_bytes
+    if agent == "claude":
+        headless_days = (
+            args.headless_transcript_days
+            if args.headless_transcript_days is not None
+            else args.days
+        )
+        import time as _time
+        headless_cutoff = _time.time() - headless_days * 86400
+        t_removed, t_bytes, t_kept = sweep_claude_headless_transcripts(
+            headless_cutoff, tokens, args
+        )
+        removed += t_removed
+        removed_bytes += t_bytes
+        kept += t_kept
     if removed == 0 and kept == 0:
         print("    (無可清理項目)")
     return removed, removed_bytes, kept
@@ -3541,6 +3640,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--sync-root", required=True, help="Shared assistant root holding backups/.")
     parser.add_argument("--days", type=int, default=7, help="Retention window in days (default 7).")
+    parser.add_argument(
+        "--headless-transcript-days",
+        type=int,
+        default=None,
+        help=(
+            "Retention window for headless claude -p transcripts under "
+            "~/.claude/projects (default: same as --days; 0 sweeps all)."
+        ),
+    )
     parser.add_argument("--home", default=os.path.expanduser("~"), help="Home holding agent-sync-backup-* (default $HOME).")
     parser.add_argument("--live-root", action="append", default=[], help="Where live copies may exist; repeatable.")
     parser.add_argument("--apply", action="store_true", help="Actually delete. Without it the run is a dry run.")
