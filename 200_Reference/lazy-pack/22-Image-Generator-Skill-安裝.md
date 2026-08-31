@@ -120,8 +120,9 @@ capability or an approved shared fallback, not an automatic API-key setup.
 
 - Shared steps: use the same visual brief, source images, safety rules, output
   format, placement path, and acceptance criteria.
-- Codex adapter: use the native image generation/editing tool with `imagen 2`
-  model configuration when applicable.
+- Codex adapter: use the active native image generation/editing tool. Do not
+  require the user to select a model name or configure an API key for this
+  route.
 - Claude adapter: use Claude's native image-capable tool when exposed; otherwise
   use the approved shared image CLI/API or browser/manual route.
 - AntiGravity adapter: use AntiGravity's native image tool (`nanobanana 2` model
@@ -167,6 +168,30 @@ tool is more appropriate before using image generation.
    or another editor.
 5. After generation, report the useful result and any local path or project
    placement action that was actually completed.
+
+### Visual Prompt Kit｜Concept Card（1:1）
+
+當上游 `visual-prompt-kit` 交出「Concept Card 正式生圖」時，這不是一般封面或長內容知識圖卡。
+它只生成 **1 張 1:1 的極簡手繪概念圖卡**，必須保持一個核心命題、單一視覺隱喻與大量留白。
+
+開始前必須檢查交接包中的 `briefs/concept-card-approval-log.md`，並執行：
+
+```text
+{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_approvals.py \
+  briefs/concept-card-approval-log.md
+```
+
+只有 `PASS` 才能啟動原生生圖；缺少交接包、三道確認未完成，或 `person.mode` 不是 `none` 時，
+停止並回到上游確認流程。不得用未確認的提案、預覽圖或其他 Concept Card 的內容代替。
+
+交接包必須包含 `visual-dna.yaml`、唯一的 `briefs/concept-card-final.md`、圖中文字白名單、
+目標比例和指定輸出路徑。這條路徑是「文字例外」：主標、副標與最多三個必要標籤必須依白名單
+逐字生成，不能因一般圖片的無文字偏好而移除或自行改寫；其他文字一律排除。
+
+生成後必須驗收：實際像素為 1:1、白名單以外的文字不存在、沒有任何人物／人臉／手部／剪影／人形
+輪廓、沒有多欄資訊圖或複雜流程圖，且遮住文字後仍能看懂物件、動作與結果。任何一項失敗時，
+只針對失敗項重生，不得裁切、拉伸或靜默交付。完整交接與驗收規格見
+`references/concept-card-generation.md`。
 
 ### 全文章最高密度知識圖卡（9:16）
 
@@ -236,7 +261,85 @@ When the user provides or references an image:
 Read `references/imagegen-codex-workflow.md` for examples, native adapter guidance,
 and common pitfalls. For full-article 9:16 knowledge cards, read
 `references/high-density-knowledge-card.md` and use its content-coverage template.
+For an approved single-concept 1:1 card from `visual-prompt-kit`, read
+`references/concept-card-generation.md`.
 AGENT_LAZYPACK_IMAGE_GENERATOR_SKILL_MD_0E95F5A366
+
+# image-generator/references/concept-card-generation.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/references/concept-card-generation.md")"
+cat > "{{SYNC_ROOT}}/skills/image-generator/references/concept-card-generation.md" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_CONCEPT_CARD_GENERATION_MD_7ED610DB59'
+# Concept Card 正式生圖交接規格
+
+此規格只處理由 `visual-prompt-kit` 已確認後交出的 **單張 1:1 極簡概念圖卡**。它不是 Cover，
+不保留封面人物；也不是高密度知識圖卡，不摘要全文或加入步驟、列表與多欄資訊。
+
+## 啟動閘門
+
+下游只接受下列任務結構：
+
+```text
+100_Todo/projects/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/
+├── visual-dna.yaml
+├── briefs/
+│   ├── concept-card-final.md
+│   └── concept-card-approval-log.md
+└── assets/images/
+```
+
+執行前在任務目錄中驗證：
+
+```text
+{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_approvals.py \
+  briefs/concept-card-approval-log.md
+```
+
+預期輸出必須是 `PASS：Concept Card 三道確認均已完成，可交棒 image-generator 正式生圖。`。
+若不通過、缺少 `concept-card-final.md`、缺少 `visual-dna.yaml`，或 `person.mode` 不是 `none`，
+不得生成；清楚指出哪個閘門未通過，回到上游流程。
+
+## 生圖輸入契約
+
+以 `concept-card-final.md` 為唯一內容來源，不自行擴寫文章。原生生圖 Prompt 至少逐項轉入：
+
+- 核心命題、核心視覺隱喻、主要物體、動作／變化與語意驗證；
+- 1:1 畫布、中央或中段單一圖解、大量乾淨留白；
+- 背景、手繪線條、色彩與字體的 Design Anchor；
+- 主標、副標、必要標籤的逐字繁中白名單；
+- `person.mode: none` 與所有排除項目。
+
+Prompt 必須明示：只有白名單的台灣繁體中文文字可以出現；禁止英文、日文、Logo、署名、
+浮水印、假文字與未核准標籤。主標與副標不是選配，不得因「少文字」而省略；然而不得加入
+完整段落、方法清單、案例、日期或促銷資訊。
+
+## 原生生圖與檔案落點
+
+1. 預設使用當前 Agent 的原生生圖工具；不要求 API key、模型名稱或 CLI fallback。
+2. 一次只生成 1 張最終圖。Concept Card 沒有示意圖或多方案生圖階段。
+3. 若使用者指定存檔，或成品將被專案引用，將選定成品放到：
+
+   ```text
+   100_Todo/projects/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/assets/images/
+   ```
+
+   不得覆寫同名既有圖檔；重生使用版本化檔名。
+4. 若原生工具無法直接保留指定文字、比例或無人物規格，回報限制並等待使用者決定是否改用已核准
+   的 fallback；不得私自換用付費 API 或改變已確認內容。
+
+## 驗收與重生
+
+完成後依序檢查：
+
+1. 以 `scripts/validate_image_aspect.py --ratio 1:1 <image.png>` 驗證實際像素。
+2. 只出現白名單內的繁體中文字；沒有英文、日文、亂碼或假文字。
+3. 沒有任何人物、人臉、手部、剪影或人形輪廓。
+4. 只有一個主要物件或不可拆分的一組場景；沒有多欄資訊圖、心智圖、Dashboard、複雜流程圖。
+5. 畫面保留大量留白，具備黑／深灰手繪線條與最多兩種有語意的強調色；沒有寫實光影、3D、漸層
+   或無關裝飾。
+6. 遮住文字後，仍可從物件、動作與結果讀出核心命題。
+
+有任一失敗時，僅重生該張圖片並重做完整驗收。不得以裁切、拉伸、人工補入未確認文字或
+口頭聲稱通過取代驗收。
+AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_CONCEPT_CARD_GENERATION_MD_7ED610DB59
 
 # image-generator/references/high-density-knowledge-card.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/references/high-density-knowledge-card.md")"
@@ -414,7 +517,7 @@ Use these fields when the user needs help writing a prompt:
 | Problem | Cause | Practical fix |
 |---|---|---|
 | User is unsure which quota is used | built-in image generation and API billing are separate systems | Use built-in image generation by default; API is only for explicit automation |
-| Image contains poor text | image models may render text inaccurately | 一般圖片可改為無文字後製；但使用者明確要求高密度知識圖卡時，必須保留逐字文字、逐區檢視並重生有缺字／錯字的成品，不可未經同意把文字改交外部排版 |
+| Image contains poor text | image models may render text inaccurately | 一般圖片可改為無文字後製；但高密度知識圖卡或已確認的 Concept Card，必須保留逐字文字、逐區檢視並重生有缺字／錯字的成品，不可未經同意把文字改交外部排版 |
 | 完整文章被做成少量摘要 | 先想畫面、沒有逐段盤點文章論點 | 建立五類內容覆蓋與逐字文本計畫；缺少故事、原因、框架、行動、結論任一類即重生 |
 | Prompt 寫了比例但成品不對 | 只相信模型理解，沒有讀檔驗證 | 生成後以 `scripts/validate_image_aspect.py --ratio <比例>` 驗證實際 PNG 像素 |
 | 出現未要求的英文／日文招牌 | 插畫場景自行補出環境文字 | 在 Prompt 建立外語白名單；生成後逐一檢視，未核准文字不可交付 |
@@ -441,8 +544,8 @@ Report the final path only after the file has actually been copied or created.
 
 - Keep the skill source in `{{SYNC_ROOT}}/skills/image-generator/`; each Agent
   reads it through its native skills entrypoint.
-- Use the Codex native image tool (`imagen 2`), Claude native image tool, or
-  AntiGravity native image tool (`nanobanana 2`) when available; use an
+- Use the active Codex native image tool, Claude native image tool, or
+  AntiGravity native image tool when available; use an
   approved shared CLI/API/browser route when it is not.
 - Keep native metadata and commands in the corresponding adapter without forking
   the prompt, output, safety, or verification contract.
@@ -450,6 +553,9 @@ Report the final path only after the file has actually been copied or created.
 - 當使用者要求全文章最高密度 9:16 知識圖卡時，三個 Agent 必須共用
   `references/high-density-knowledge-card.md` 的內容覆蓋、逐字文本與驗收契約；不可因原生工具不同
   而改成摘要卡或跳過實際比例驗證。
+- 當上游 `visual-prompt-kit` 交出已確認的 Concept Card 時，三個 Agent 必須共用
+  `references/concept-card-generation.md` 的三道確認、繁中白名單、無人物與 1:1 實際像素驗收；
+  不可先生成示意圖，也不可把它改成封面或長內容資訊圖。
 AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_IMAGEGEN_CODEX_WORKFLOW_MD_502FEBA26E
 
 # image-generator/scripts/validate_high_density_knowledge_card_plan.py
