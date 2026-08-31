@@ -29,6 +29,11 @@
   `image-generator` 加 `references/high-density-knowledge-card.md` 與
   `scripts/validate_high_density_knowledge_card_plan.py`，LazyPack Item 22（+342 行）與
   Item 43 同步。先做內容覆蓋計畫再生圖，含外語白名單驗收。
+- 2026-08-31：`image-generator` 補上 `visual-prompt-kit` Concept Card 的正式交接規格與
+  `references/concept-card-generation.md`。生圖前必須驗證三道確認，保持 1:1、繁中白名單、
+  `person.mode: none` 與單一視覺隱喻；Codex adapter 改為使用可用原生圖像工具，不指定過時模型。
+  技術煙霧測試已用原生圖像工具成功產生 1254×1254 PNG，比例 validator 通過；Item 22 與
+  Obsidian 鏡像已完成逐字比對，待本輪提交。
 - 2026-08-27 00:01 `734ae5d`：新增全域 skill `agent-dev-coach`＋LazyPack **Item 45**
   （agent 開發五關教練：拷問→規格→切票→TDD→雙軸審查，另附隨時可用的 PRD 打包）。
   來源為第三方 zip，依 `codex-skill-creator` source-adapter 路線轉三 Agent 共用版。
