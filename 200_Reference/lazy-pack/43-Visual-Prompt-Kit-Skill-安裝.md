@@ -68,7 +68,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SKILL_MD_0E95F5A366'
 ---
 name: visual-prompt-kit
-description: "Use when the user wants to turn an article, note, or topic into visual design briefs for AI image generation, including 封面 Prompt, 課程封面, 圖卡 Prompt, 系列圖卡, 銷售頁圖片 Prompt, 縮圖, thumbnail, banner, or explicit $visual-prompt-kit invocation. Reads a local style library to recommend candidate styles with preview images, locks shared visual DNA, and enforces final-prompt approval gates for Cover and carousel image generation."
+description: "Use when the user wants to turn an article, note, topic, or Landing Page copy into visual design briefs for AI image generation, including 封面 Prompt, 課程封面, Concept Card, 極簡概念圖卡, 圖卡 Prompt, 系列圖卡, Landing Page 圖卡, 銷售頁圖片 Prompt, 縮圖, thumbnail, banner, or explicit $visual-prompt-kit invocation. It first collects or creates source copy for Landing Page graphics, locks shared visual DNA, and enforces approval gates before image generation."
 metadata:
   short-description: Article to visual design briefs
 ---
@@ -79,8 +79,11 @@ metadata:
 
 這個 skill 負責 brief、確認關卡與交棒，不自行選擇生圖 provider，也不組版。Cover 與
 輪播圖卡都必須先完成對應的確認紀錄與驗證器；輪播的第一關可交棒 `image-generator` 產出
-首張展示圖，Cover 則先確認最終提案與提示詞，通過後才可交棒正式生圖。這讓同一份視覺
-DNA 能同時餵給封面、系列圖卡與銷售頁圖，不必每個版位重講一次風格。
+首張展示圖，Cover 則先確認最終提案與提示詞，通過後才可交棒正式生圖。Landing Page 圖卡
+則必須先確認是否已有文案，沒有才完成 Mini-Landing Page 訪談；之後才可分析現有內容並規劃
+分區圖像。Concept Card 則把文章濃縮為一個可見的視覺隱喻：它沿用 Cover 的風格校準與最終
+確認，但固定不畫人物、不是文章封面，也不做長內容摘要。這讓同一份視覺 DNA 能同時餵給封面、
+系列圖卡與銷售頁圖，不必每個版位重講一次風格。
 
 ## 三個維度
 
@@ -98,7 +101,9 @@ DNA 能同時餵給封面、系列圖卡與銷售頁圖，不必每個版位重�
 
 `$visual-prompt-kit`、「封面 Prompt」、「課程封面」、「圖卡 Prompt」、「系列圖卡」、
 「高密度輪播圖卡」、「4:5 輪播圖卡」、
-「銷售頁圖片 Prompt」、「幫我做縮圖」、「把這篇文章做成封面」、「萃取風格」、
+「Landing Page 圖卡」、「Landing Page 視覺」、「銷售頁圖卡」、「銷售頁圖片 Prompt」、
+「Concept Card」、「極簡概念圖卡」、「手繪概念圖卡」、「視覺隱喻圖卡」、
+「幫我做縮圖」、「把這篇文章做成封面」、「萃取風格」、
 「幫我萃取這張圖的風格」、「把這張圖的風格收進風格庫」。
 
 若使用者要的是**成品**而非 brief，先確認路由：品牌模板圖卡走 `social-cards`，
@@ -107,6 +112,24 @@ DNA 能同時餵給封面、系列圖卡與銷售頁圖，不必每個版位重�
 若使用者是給一張參考圖、要分析或收藏它的設計風格，走「萃取風格」流程
 （見下方獨立章節），不是主流程的步驟 2 風格校準。
 
+## Landing Page 圖卡的文案入口
+
+當使用者要求 Landing Page／銷售頁圖片、圖卡或分區視覺時，**第一個主要問題只能確認
+是否已有文案**，不得先問風格、人物、圖片比例、受眾或區塊：
+
+> 你目前有 Landing Page 文案嗎？有的話，請直接貼給我；如果還沒有，我會先透過 Mini-Landing Page 訪談整理一份可供視覺規劃使用的文案。
+
+- 使用者已在同一則訊息貼上完整文案或提供可讀取的文案檔時，視為已回答「有」，直接記錄，
+  不重問。
+- 回答「有」後，讀 `references/placements/landing-page.md`，只依既有內容執行它的三階段
+  圖片規劃。不可把一般銷售頁慣例當成原文缺漏。
+- 回答「沒有」後，先讀 `references/landing-page-mini-copy.md` 並嚴格完成 Mini-Landing Page
+  訪談；產出文案才是接下來 `landing-page` placement 的唯一來源。
+- `landing-page` placement 有自己的第三階段風格校準與確認節奏，因此**不套用**本 skill 通用的
+  第二輪人物選項；使用者只有明確提及人物或角色時，才把它當成已提供的視覺偏好處理。
+- 使用者要完整的 HTML 銷售頁或文案健檢時，分別交棒 `landing-page` 或在視覺規劃外獨立處理；
+  不可把那些工作自動混進 Landing Page 圖卡流程。
+
 ## 工作流程
 
 ### 1. 取得文章與版位
@@ -114,6 +137,10 @@ DNA 能同時餵給封面、系列圖卡與銷售頁圖，不必每個版位重�
 - 收文章（貼上、檔案路徑或網址）。網址優先用可用的網頁讀取工具擷取正文。
 - 確認 placement。使用者沒說時依語意判斷並複述一次，不要靜默假設。
 - 讀取 `references/placements/<placement>.md` 再繼續。
+- `landing-page` placement 必須先完成上方「Landing Page 圖卡的文案入口」，再讀
+  `references/placements/landing-page.md`；其三階段確認流程優先於下方 Cover／輪播的通用描述。
+- `concept-card` placement 必須讀 `references/placements/concept-card.md`；它使用風格校準與
+  三個「視覺隱喻」方案，但**不得**套用下方通用人物選項或 Cover 的高點擊率構圖慣例。
 
 ### 2. 風格與人物校準（分階段互動關卡）
 
@@ -237,7 +264,28 @@ Phase 2.5 提供視覺校準。**不得為了確認而先產出一張 Cover 展�
 每個 Cover 任務從 `assets/cover-approval-log-template.md` 建立
 `briefs/cover-approval-log.md`，記錄兩道確認關卡與正式生圖狀態。
 
-### 3.7 全文章最高密度知識圖卡（9:16）
+### 3.7 極簡概念知識圖卡（Concept Card，1:1）
+
+`concept-card` 是「一個主標題＋一句副標題＋一個核心視覺隱喻」的單張 1:1 圖卡。它的目的
+是讓讀者一眼理解原文的一個抽象原理，而不是吸引點擊的文章封面，也不是涵蓋全文的知識摘要。
+
+1. 先依 `references/placements/concept-card.md` 完成文章分析，定義唯一核心命題與必須畫出的
+   語意；原文其餘案例、步驟、工具與背景明確列為不放入的資訊。
+2. **視覺風格校準**：使用者有參考圖時，以參考圖作為最高風格錨點，不再強制列出 5 個風格庫
+   候選；沒有參考圖時，提供 5 個 Card Style Library 候選與預覽圖，並保留自由描述與
+   「由設計師決定」兩路。這一輪只決定畫面語言，不決定隱喻。
+3. 在鎖定的風格下，固定提出同一核心命題的 3 個**真正不同的視覺隱喻**方案 A／B／C。
+   不得把 Cover 的三組風格變體與 Concept Card 的三個隱喻混為一談，避免製造 3×3 的選擇矩陣。
+4. 使用者選定隱喻後，提出唯一一組完整結構化 Prompt 供最終確認；確認前不生成圖片。
+   Concept Card 不產出圖面示意，因為風格庫預覽與三個隱喻方案已分別完成風格與語意校準。
+5. 正式生圖前以 `scripts/validate_concept_card_approvals.py`
+   驗證 `briefs/concept-card-approval-log.md`；通過後才交棒 `image-generator` 生成最終 1 張。
+
+Concept Card 的 `visual-dna.yaml` 強制 `person.mode: none`；不得詢問人物、預留真人空位或畫
+角色插畫。圖內只允許繁體中文主標題、副標題與最多 3 個必要標籤；無英文、日文 Ashirai、
+Logo、簽名、浮水印或額外文案。
+
+### 3.8 全文章最高密度知識圖卡（9:16）
 
 使用者提供完整文章並要求「知識圖卡」、「盡量全部包含」或「最高密度」時，路由為單張
 **9:16 全文章知識圖卡**，不是 `carousel`／`carousel-info`，不套用輪播的四關流程。若使用者
@@ -265,11 +313,16 @@ Phase 2.5 提供視覺校準。**不得為了確認而先產出一張 Cover 展�
 
 ### 5. 交棒
 
-除輪播第一關的首張展示、輪播第四關與 Cover 最終確認後的正式生圖交棒外，不生圖、不
-組版。輪播第四關前必須通過 `scripts/validate_carousel_approvals.py briefs/approval-log.md`；
-Cover 正式生圖前必須通過
-`scripts/validate_cover_approvals.py briefs/cover-approval-log.md`。交棒契約見
-`references/handoff-contracts.md`。
+除輪播第一關的首張展示、輪播第四關、Cover 最終確認後的正式生圖交棒，以及 Landing Page
+圖卡已通過「結構與優先順序／圖片數量／風格與圖面示意／全套 Prompt」四項確認後的示意與
+正式生圖交棒、Concept Card 完成其風格錨點／視覺隱喻／最終 Prompt 三項確認後的正式生圖
+交棒外，不生圖、不組版。輪播第四關前必須通過
+`scripts/validate_carousel_approvals.py briefs/approval-log.md`；Cover 正式生圖前必須通過
+`scripts/validate_cover_approvals.py briefs/cover-approval-log.md`。Landing Page 圖卡的確認
+記錄與驗收詳見 `references/placements/landing-page.md`。Landing Page 圖卡交棒前必須通過
+`scripts/validate_landing_page_approvals.py briefs/landing-page-approval-log.md`；交棒契約見
+`references/handoff-contracts.md`。Concept Card 交棒前必須通過
+`scripts/validate_concept_card_approvals.py briefs/concept-card-approval-log.md`。
 
 ## 萃取風格（把參考圖收進風格庫）
 
@@ -295,7 +348,8 @@ Cover 正式生圖前必須通過
 1. 只產出 brief、確認狀態與交棒資料；不自行選擇生圖 provider、不寫 HTML、不組頁面。
    輪播版位僅可在第 1 關透過交棒產出首張展示圖，整套正式生圖一律等第 3 關確認後
    才交給 `image-generator` 執行；Cover 一律等最終提案與提示詞確認、確認驗證器通過後
-   才交棒正式生圖。
+   才交棒正式生圖；Landing Page 圖卡則必須先確認文案、區塊、圖片數量與 A／B／C 風格路徑，
+   再交棒生成最高優先區塊的圖面示意，並在全套 Prompt 確認後才交棒正式生成全部圖片。
 2. 不輸出 Midjourney / Stable Diffusion 的單段指令語法（`/imagine` 等）。
    輸出預設是結構化提案文件；高密度 `carousel-info` 以六段輕量結構保留自然語言彈性，
    但指令語法仍然禁止。
@@ -345,10 +399,15 @@ Cover 正式生圖前必須通過
     提案與提示詞確認 → `validate_cover_approvals.py` 通過 → 正式生圖。A／B 第二關提供
     1 組完整提案；C 提供 3 組並由使用者選定 1 組。**Cover 不產出展示圖，也不得在
     最終提案與提示詞確認前生圖。**
-18. **風格庫對齊與自由發揮分流（路徑 A/B vs 路徑 C）**：
+18. **Concept Card 單張三關流程**：`concept-card` 必須依序完成風格錨點 → 同一命題的三個
+    視覺隱喻方案 → 最終 Concept Card Prompt → `validate_concept_card_approvals.py` 通過 →
+    正式生圖。參考圖存在時優先作為風格錨點；沒有參考圖時才提供 5 個風格庫候選與預覽圖。
+    它固定 `person.mode: none`，不詢問人物；不產出展示圖；不得把 Cover 的高點擊率任務、
+    風格三變體或長內容知識圖卡的全文覆蓋要求帶入。
+19. **風格庫對齊與自由發揮分流（路徑 A/B vs 路徑 C）**：
     - **路徑 A（挑編號 #001–#100）與路徑 B（描述偏好）**：AI 必須嚴格對齊既定風格庫 `knowledge/card-style-library/styles.yaml` 中的文檔描述 (`desc`)、特徵 (`chars`) 與 Prompt，並調閱 `previews/{id:03d}.jpg` 實體預覽圖檔（路徑 A 對應指定編號；路徑 B 搜尋比對最近似的風格編號 #N），據以建立 `visual-dna.yaml`、Briefs 與 Prompt，嚴禁脫離參考資料自創不相干的風格或構圖元素。
     - **路徑 C（「你決定」）**：由 AI 完全自由發揮設計創意，依據創新維度軸線設計 3 組最大差異化（勇敢先驅 / 保守 / 革命性）的創新視覺提案，不受風格庫既有文檔與圖像約束。
-19. **全文章最高密度知識圖卡**：完整文章的 9:16 知識圖卡必須先有五類內容覆蓋與逐字文本計畫，
+20. **全文章最高密度知識圖卡**：完整文章的 9:16 知識圖卡必須先有五類內容覆蓋與逐字文本計畫，
     再交棒 `image-generator`；不可把原文改成只含標題、金句與少數摘要的圖卡。生成後須檢查五類
     覆蓋、文字白名單、閱讀層級與實際 9:16 比例；缺一類內容、出現未核准外語招牌、或比例不符都
     不得交付。詳細契約由 `image-generator/references/high-density-knowledge-card.md` 定義，三個
@@ -390,6 +449,11 @@ Cover 正式生圖前必須通過
 - `references/visual-dna.md`：`visual-dna.yaml` schema 與系列一致性規則。
 - `references/style-extraction.md`：萃取風格模板、欄位映射與寫入風格庫流程。
 - `references/handoff-contracts.md`：交棒給 image-generator / social-cards / landing-page。
+- `references/landing-page-mini-copy.md`：沒有既有文案時的 Mini-Landing Page 逐題訪談與短版文案契約。
+- `references/placements/landing-page.md`：Landing Page 圖卡版位；既有文案的結構解讀、圖片數量確認、
+  風格校準與結構化 Prompt 契約。
+- `references/placements/concept-card.md`：極簡概念知識圖卡版位；參考圖／風格庫校準、三個視覺隱喻
+  方案、最終 Prompt 確認與 1:1 正式生圖契約。
 - `references/placements/cover.md`：封面版位（課程封面、文章封面、縮圖）。
 - `references/placements/carousel.md`：低密度輪播圖卡版位（1:1 連續敘事 Carousel，
   固定 8–12 張；只伸縮 The System 的 1–5 張知識段落。固定四關：首張展示提案 →
@@ -412,8 +476,14 @@ Cover 正式生圖前必須通過
 - `scripts/validate_carousel_approvals.py`：正式生圖前驗證任務的前三次使用者確認。
 - `scripts/validate_cover_workflow.py`：驗證 Cover 封面保有兩道確認關卡與生圖驗證器。
 - `scripts/validate_cover_approvals.py`：正式生圖前驗證 Cover 的兩次使用者確認。
+- `scripts/validate_concept_card_workflow.py`：驗證 Concept Card 的風格錨點、視覺隱喻與最終 Prompt 三關流程。
+- `scripts/validate_concept_card_approvals.py`：正式生圖前驗證 Concept Card 的三次確認。
+- `scripts/validate_landing_page_workflow.py`：驗證 Landing Page 圖卡的文案入口、四道確認與圖面示意流程。
+- `scripts/validate_landing_page_approvals.py`：正式生圖前驗證 Landing Page 圖卡的四次確認。
 - `assets/carousel-approval-log-template.md`：輪播任務的三次確認紀錄模板。
 - `assets/cover-approval-log-template.md`：Cover 任務的兩次確認紀錄模板。
+- `assets/concept-card-approval-log-template.md`：Concept Card 任務的三次確認紀錄模板。
+- `assets/landing-page-approval-log-template.md`：Landing Page 圖卡任務的四次確認紀錄模板。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SKILL_MD_0E95F5A366
 
 # visual-prompt-kit/agents/openai.yaml
@@ -421,8 +491,8 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/agents/openai.yaml")
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/agents/openai.yaml" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_AGENTS_OPENAI_YAML_DEB9755D27'
 interface:
   display_name: "視覺提案套件"
-  short_description: "文章轉視覺提案；Cover與輪播皆先確認再生圖"
-  default_prompt: "使用 $visual-prompt-kit 將文章轉成具確認關卡的 Cover 或輪播圖卡視覺提案。"
+  short_description: "文章或 Landing Page 文案轉成具確認關卡的視覺提案"
+  default_prompt: "使用 $visual-prompt-kit 將文章或 Landing Page 文案轉成具確認關卡的 Cover、Concept Card、輪播或分區圖卡視覺提案。"
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_AGENTS_OPENAI_YAML_DEB9755D27
 
 # visual-prompt-kit/assets/carousel-approval-log-template.md
@@ -447,6 +517,31 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/carousel-approval-log-templ
 `revisions-requested`；不得在前三關全部為 `confirmed` 前將「正式生圖」改為進行中。
 正式交棒前必須使用 `scripts/validate_carousel_approvals.py` 驗證本檔並取得 `PASS`。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_CAROUSEL_APPROVAL_LOG_TEMPLATE_MD_7479854BD7
+
+# visual-prompt-kit/assets/concept-card-approval-log-template.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/concept-card-approval-log-template.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/concept-card-approval-log-template.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_CONCEPT_CARD_APPROVAL_LOG_TEMPLATE_MD_86F5656336'
+# Concept Card 確認紀錄
+
+> 每次使用者明確確認後才更新對應狀態；未確認一律維持 `pending`。
+
+- 風格錨點：pending
+- 視覺隱喻方案：pending
+- 最終 Concept Card Prompt：pending
+- 正式生圖：not-started
+
+## 確認紀錄
+
+- 日期：
+- 使用者回覆：
+- 備註：
+
+## 正式生成驗收
+
+- 圖檔路徑與像素尺寸：
+- 繁中白名單與文字可讀性：
+- 無人物、單一隱喻與減法檢查：
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_CONCEPT_CARD_APPROVAL_LOG_TEMPLATE_MD_86F5656336
 
 # visual-prompt-kit/assets/cover-approval-log-template.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/cover-approval-log-template.md")"
@@ -474,6 +569,32 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/cover-approval-log-template
 - 正式交棒前必須使用 `scripts/validate_cover_approvals.py` 驗證本檔並取得 `PASS`；
   不得在前兩項皆為 `confirmed` 前將「正式生圖」改為進行中。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_COVER_APPROVAL_LOG_TEMPLATE_MD_C3FC5A8FF1
+
+# visual-prompt-kit/assets/landing-page-approval-log-template.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/landing-page-approval-log-template.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/landing-page-approval-log-template.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_LANDING_PAGE_APPROVAL_LOG_TEMPLATE_MD_155A802142'
+# Landing Page 圖卡確認紀錄
+
+> 每次使用者明確確認後才更新對應狀態；未確認一律維持 `pending`。
+
+- 結構與優先順序：pending
+- 圖片數量：pending
+- 風格與圖面示意：pending
+- 全套 Prompt：pending
+- 正式生圖：not-started
+
+## 確認紀錄
+
+- 日期：
+- 使用者回覆：
+- 備註：
+
+## 正式生成驗收
+
+- 逐張檔案路徑與像素尺寸：
+- 文字可讀性與白名單：
+- 具體視覺錨點與減法檢查：
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_LANDING_PAGE_APPROVAL_LOG_TEMPLATE_MD_155A802142
 
 # visual-prompt-kit/references/handoff-contracts.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/handoff-contracts.md")"
@@ -504,6 +625,20 @@ Cover 與輪播圖卡的確認關卡不同，交棒時不可混淆：
    「全套提示詞」都標為 `confirmed` 時，才交出 `visual-dna.yaml` 路徑、全套 N 張
    已確認 brief／提示詞、目標比例、輸出檔名與存放路徑。交棒前必須執行
    `scripts/validate_carousel_approvals.py briefs/approval-log.md` 並取得 `PASS`。
+4. **Landing Page 圖卡**：先確認文案存在；無文案時先完成 Mini-Landing Page 訪談。再依序完成
+   「結構與優先順序」、「圖片數量」、「風格與圖面示意」、「全套 Prompt」四項確認。圖面示意時，
+   A／B 路徑交出 1 張最高優先區塊的示意；C 路徑交出 3 張同一具體視覺錨點、但風格差異明確的
+   示意。全套 Prompt 已確認後，先執行
+   `scripts/validate_landing_page_approvals.py briefs/landing-page-approval-log.md` 並取得 `PASS`，
+   才交出 `visual-dna.yaml`、每張已確認的結構化 brief、尺寸比例與輸出路徑。正式交棒文件首行
+   必須是「使用以下指令產生圖卡，共 N 張輪播圖卡 output by slide by slide format」，N 替換為已確認
+   的總張數，並以逐張方式生成。
+5. **Concept Card 正式生圖**：只接收已確認的 1:1 單張 Concept Card。交棒前必須確認
+   `briefs/concept-card-approval-log.md` 的「風格錨點」、「視覺隱喻方案」、「最終 Concept Card
+   Prompt」皆為 `confirmed`，並執行
+   `scripts/validate_concept_card_approvals.py briefs/concept-card-approval-log.md` 取得 `PASS`。
+   交出 `visual-dna.yaml`、唯一的結構化 Prompt、實際圖中文字白名單、目標比例與輸出路徑；
+   `person.mode` 必須是 `none`。只生成 1 張最終圖，不能因為確認而先產出示意圖。
 
 所有帶有指定比例的交棒，在生成後都要由下游回傳實際像素尺寸並完成比例驗收，不能只看
 Prompt 中的比例文字。高密度 `carousel-info` 固定執行：
@@ -572,6 +707,144 @@ Brief 轉換為生圖 Prompt 時，語言指定一律**取自該系列 `visual-d
 
 使用者只要 brief、不要成品時，交付 brief 就結束。不要自作主張往下走完整條產線。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_HANDOFF_CONTRACTS_MD_F59DB8C89B
+
+# visual-prompt-kit/references/landing-page-mini-copy.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/landing-page-mini-copy.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/landing-page-mini-copy.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_LANDING_PAGE_MINI_COPY_MD_191003BDD3'
+# Mini-Landing Page 文案訪談
+
+## 用途與邊界
+
+只有使用者在 Landing Page 圖卡入口明確表示「沒有文案」時才使用本流程。它的任務是建立
+約 900 字、可供後續分區視覺規劃使用的 Mini-Landing Page 文案；它**不是**完整銷售頁，
+不補講師介紹、見證、FAQ、贈品、價格方案或複雜方案。
+
+只使用使用者已提供或明確確認的資料。不得虛構經歷、數字、日期、價格、名額、保證或
+其他事實；次要資訊不足時省略，不留下「待補」字樣。
+
+本訪談完成前，不進行風格校準、圖片數量判斷、視覺提案或生圖。
+
+## 第一題（固定且唯一）
+
+第一則回覆只能是以下文字，不加選項、不推測方向：
+
+> 我們先從主題開始。你這次想介紹或教學的主題是什麼？請直接用一句話告訴我，例如：「用 Obsidian 實作卡片盒筆記法」。
+
+主題確認前，不得詢問類型、活動形式、工具、目標讀者、課程內容或預期成果。
+
+## 後續訪談共同格式
+
+從第二題開始，每一輪都遵守：
+
+1. 先用一句話承接上一個答案。
+2. 一次只問一個主要問題，問完必須等待回答。
+3. 問題下方提供 5 個根據前文推估的實質選項，標示「單選」或「可複選」。
+4. 第 6 項固定為「其他：請自行補充」；不得把「其他」、「以上皆非」或同義內容放進前五項。
+5. 告訴使用者可只回覆選項編號，例如 `2` 或 `1、3、5`。
+6. 使用者已提前提供的事實直接記錄，後續不可重問。
+
+## 訪談順序
+
+### 2. 類型與名稱
+
+- 先依已確認主題提出 5 個可能類型，請使用者單選；第 6 項保留其他。
+- 類型確認後，再依主題與類型提出 5 個名稱選項，請使用者單選；第 6 項保留其他。
+- 若第一題已包含類型或名稱，直接記錄，不重問。
+
+### 3. 主要目標讀者
+
+提出 5 個具體人選，並標註「根據目前資訊提出的假設」。請使用者選 1 個或改成自己的版本。
+
+### 4. 三個痛點
+
+提出 5 個可能痛點，每個以一句具體情境描述。請使用者可複選 3 個或自行修改。
+
+### 5. 三個具體成果
+
+根據已確認的痛點提出 5 個成果。每項都必須能完成、理解、帶走或開始執行，並清楚對應至少
+一個痛點。請使用者可複選 3 個或自行修改。
+
+### 6. 補齊真實資訊
+
+以下四題必須分成四個回合，一次只問一題：
+
+1. 實際包含哪些內容？（可複選）
+2. 會用什麼方式進行？（可複選）
+3. 希望讀者採取哪一個下一步行動？（單選）
+4. 還有哪些已確定且要公開的資訊？（可複選）
+
+每題同樣提供 5 個符合前文的實質選項與第 6 個「其他：請自行補充」。第 4 題的前五項
+固定為日期、時間、地點、價格、名額；這些資料不可自行猜測。使用者可在選項後直接補上
+確定內容，例如 `1：2026 年 8 月 7 日、4：新台幣 1,200 元`；若都不需要，可回答「無」。
+
+## 完稿
+
+資料足夠後直接寫作，不另輸出確認摘要。若資料矛盾或缺少不可省略的關鍵資訊，只追問一題；
+次要資訊不足則省略。
+
+正文必須為 800–1,000 個中文字（不含 Markdown 標題），使用台灣繁體中文，口語、自然、具體，
+不煽動焦慮、不過度承諾；不得使用 emoji、Hashtag、簡體字，以及「一定」、「保證」、
+「立刻成功」等承諾語。三個痛點與三個成果各一小段，單段不超過 80 個中文字。
+
+輸出格式固定如下：
+
+```markdown
+# {名稱｜核心承諾}
+
+{1 至 2 句副標題}
+
+## 這個活動／課程／產品在說什麼
+
+{簡介主題、讀者狀態與活動目的}
+
+## 你是不是也遇到這 3 個問題
+
+### 01｜{痛點標題}
+{一小段具體情境}
+
+### 02｜{痛點標題}
+{一小段具體情境}
+
+### 03｜{痛點標題}
+{一小段具體情境}
+
+## 你將帶走的 3 個成果
+
+### 01｜{成果標題}
+{一小段具體說明}
+
+### 02｜{成果標題}
+{一小段具體說明}
+
+### 03｜{成果標題}
+{一小段具體說明}
+
+## 誰適合參加／使用
+
+- {適合對象 1}
+- {適合對象 2}
+- {適合對象 3}
+
+## 你會經歷的內容與方式
+
+- {內容或流程 1}
+- {內容或流程 2}
+- {內容或流程 3}
+
+## 下一步行動
+
+{行動邀請，以及已確認的日期、地點、價格或名額資訊}
+```
+
+完稿前自行檢查：字數、7 個主要區塊、三個痛點與三個成果的對應關係，以及所有事實都有
+使用者來源。
+
+## 交棒
+
+把完稿視為 Landing Page 圖卡 `landing-page` placement 的唯一原文來源，接著讀
+`placements/landing-page.md` 並由它的 Phase 1 開始。不要因 Mini-Landing Page 缺少
+講師、見證、FAQ、價格或贈品而要求補件，或把它們帶進任何後續圖片規劃。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_LANDING_PAGE_MINI_COPY_MD_191003BDD3
 
 # visual-prompt-kit/references/style-extraction.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/style-extraction.md")"
@@ -1555,6 +1828,225 @@ briefs/approval-log.md                   # 第 1–3 關確認狀態
 - `../visual-dna.md`：跨張一致性的唯一來源。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CAROUSEL_MD_5FBC59A164
 
+# visual-prompt-kit/references/placements/concept-card.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/concept-card.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/concept-card.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CONCEPT_CARD_MD_EEEA5C4B21'
+# Placement：極簡概念知識圖卡（Concept Card）
+
+適用於「把一篇文章中的一個抽象觀點畫懂」、「極簡手繪概念圖卡」與「視覺隱喻圖卡」；
+成品是 1 張 1:1、可獨立閱讀的繁體中文圖卡。
+
+它不是文章封面：不以點擊率、人物、品牌感或強烈標題感為首要任務。它也不是長內容知識圖卡：
+不摘要全文、不覆蓋步驟、不做資訊圖或教學流程。唯一任務是讓讀者一眼理解**一個核心命題**。
+
+## 輸入與停止條件
+
+- 必要輸入：一篇文章或一段文字。
+- 可選輸入：一張或多張明確指定的參考圖、既有風格偏好。
+- 尚未有文章時，**只能**回覆：`了解，請提供文章內容。`
+- 使用者尚未選定視覺隱喻方案或未確認最終 Prompt 時，停止在對應關卡，不得生成圖片。
+- 使用者只要分析或方案、不需要成品時，交付分析與方案即結束，不交棒生圖。
+
+## 輸出位置與確認紀錄
+
+```text
+100_Todo/projects/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/
+├── source.md
+├── visual-dna.yaml
+├── briefs/
+│   ├── concept-card-analysis.md
+│   ├── concept-card-proposals.md
+│   ├── concept-card-final.md
+│   └── concept-card-approval-log.md
+└── assets/images/
+```
+
+每個任務從 `assets/concept-card-approval-log-template.md` 建立確認紀錄。下列三項必須依序獲得
+使用者明確確認：`風格錨點`、`視覺隱喻方案`、`最終 Concept Card Prompt`。
+
+## 版位不變規格
+
+- 尺寸：固定 `1:1`。
+- 畫面文字：主標題 4–10 個中文字、副標題 12–28 個中文字、最多 3 個必要標籤（每個 2–5 字）。
+- 僅使用台灣繁體中文；不使用英文、日文 Ashirai、Logo、簽名、浮水印、品牌名或其他文案。
+- `visual-dna.yaml` 固定 `person.mode: none`；不得出現人物、人臉、剪影、手部或人形輪廓。
+- 只用一個核心視覺隱喻，以及 1–2 個主要物體或不可拆開的一組場景。
+- 大量乾淨留白、灰白背景、黑色／深灰手繪線條與最多兩種有語意的強調色。
+
+## 風格優先順序
+
+1. 使用者明確提供的參考圖；它決定線條、留白、色彩克制與構圖語彙。
+2. 使用者明確描述的風格偏好。
+3. Card Style Library 的選定風格。
+4. 本版位的極簡 Excalidraw 手繪原則。
+
+參考圖只能覆蓋一般手繪風格描述；它**不能**覆蓋來源忠實性、繁中白名單、無人物、單一命題與
+資訊減法規則。
+
+## 工作流程
+
+### Phase 1｜文章分析與命題定義
+
+收到文章後，依序輸出：
+
+1. **文章主要在談什麼**：1–3 句。
+2. **作者最想讓讀者記住什麼**：1–2 句。
+3. **建議保留的核心命題**：一句、忠於原文、只含一個主要觀點，並且可表現動作、變化、關係或結果。
+4. **不放進圖卡的資訊**：列出被捨棄的案例、步驟、工具、背景或次要觀點，並說明其不影響核心命題。
+5. **必須被畫出來的語意**：只列出必要的主體、起點、行動／過程、結果、關係；不必要即省略。
+
+不可虛構原文未說明的因果、數字、案例或結果。核心命題不成立時，只追問一個與命題直接相關的問題。
+
+### Phase 2｜視覺風格校準（必要互動）
+
+這一關只回答「這張圖長什麼樣子」，**不**回答「這個概念畫成什麼」。兩個決策不得混為一談。
+
+#### 路徑 R｜使用者已提供參考圖
+
+- 先用一句話重述參考圖的可見特徵：線條、留白、色彩、文字與構圖。
+- 將該參考圖記為 Design Anchor，直接記錄「風格錨點：confirmed」；不重問，也不強迫提供 5 個風格庫候選。
+- 使用者另有偏好或要求偏離參考圖時，以其最新明確指示優先。
+
+#### 路徑 1／2／3｜使用者尚未提供參考圖
+
+先給下列三種回法，等待回答：
+
+```text
+文章的核心命題已確定。在提出視覺隱喻前，先確認這張圖的視覺語言：
+
+1. 從 Card Style Library 的 5 個候選挑一個
+   {執行 scripts/recommend_styles.py 後，列出 5 個候選、各一行推薦理由，並呈現 5 張預覽圖}
+
+2. 直接描述偏好
+   例如線條粗細、背景、強調色、手繪程度或想參考的作品。
+
+3. 由設計師決定
+   我會先鎖定一套最適合核心命題的極簡手繪視覺 DNA，再提出 3 個不同的視覺隱喻。
+```
+
+- 路徑 1：執行 `scripts/recommend_styles.py --scenes 知識學習,社群圖卡 --count 5`；每個候選都要有
+  與本文相關的推薦理由與可見預覽圖。使用者選定編號後，記錄「風格錨點：confirmed」。
+- 路徑 2：使用者描述即為 Design Anchor；記錄「風格錨點：confirmed」。
+- 路徑 3：由設計師選定**一套**視覺 DNA，並在下一關顯示其摘要。不得把這一關展開成 3 組風格
+  變體，因為下一關已必須提供 3 個視覺隱喻；兩者相乘會製造無法有效比較的 3×3 選擇矩陣。
+
+風格庫不可用時，說明已查找的路徑，改用內建風格候選並說明沒有預覽圖；使用者同意才繼續。
+
+### Phase 3｜三個視覺隱喻方案（必要互動）
+
+風格錨點已鎖定後，固定提出方案 A、B、C。三案使用**同一個核心命題與同一套視覺 DNA**，但必須有
+真正不同的主要物體、動作與因果呈現；不得只更換顏色、標題、位置或物件外觀。
+
+```text
+## 三個視覺方案
+
+### 方案 A：{方案名稱}
+- 核心視覺隱喻：
+- 主要物體：
+- 動作與變化：
+- 構圖：
+- Excalidraw 表現方式：
+- 主標題：
+- 副標題：
+- 必要標籤：
+- 優點：
+- 可能的理解風險：
+
+### 方案 B：{同上}
+### 方案 C：{同上}
+
+## 方案比較
+| 方案 | 語意完整 | 一眼可懂 | 畫面精簡 | 參考圖適配度 | 誤解風險 | 適合表達重點 |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | {高／中／低＋短說明} | | | | | |
+| B | | | | | | |
+| C | | | | | | |
+```
+
+比較後說明最推薦方案、推薦原因，以及另外兩案各自適合的偏好。最後**只問**：
+
+`請選擇方案 A、B 或 C。你也可以在選擇時附上想調整的文字或畫面細節。`
+
+使用者未選定以前，不得生成圖片。使用者只修改提案而未選定時，更新該提案後繼續等待。
+
+### Phase 4｜最終 Prompt 確認（必要互動）
+
+使用者選定 A／B／C 後，保留其視覺隱喻並套用明確修改；不重新提出三案、不擅自混合其他方案。
+將「視覺隱喻方案」更新為 `confirmed`，再提出**唯一**一組完整指令，以使用者明確確認為止。
+
+```text
+## 【Concept Card：{主題名稱}】
+
+### 0. 設計定位
+- 核心命題：{唯一要傳達的原文命題}
+- 閱讀任務：{讀者在 3 秒內需要理解的關係、變化或結果}
+- 原文依據：{對應的原文觀點，不擴寫}
+- 核心視覺隱喻：{唯一隱喻，以及它如何讓讀者遮住文字後仍看懂概念}
+
+### 1. 文字內容
+- 主標題：{4–10 個台灣繁體中文字}
+- 副標題：{12–28 個台灣繁體中文字}
+- 必要標籤：{0–3 個，每個 2–5 個台灣繁體中文字；沒有則填「不使用」}
+- 禁止文字：{英文、日文 Ashirai、Logo、署名、浮水印、完整段落、未確認文字}
+
+### 2. 視覺主體與語意
+- 主要物體：{1–2 個主要物體或一組不可拆開場景}
+- 動作／變化：{把核心關係實際畫出來}
+- 語意驗證：{即使遮住文字，讀者仍能從＿＿＿看出＿＿＿}
+- 不放入：{步驟清單、案例、工具、人物、無關裝飾}
+
+### 3. 視覺語言
+- Design Anchor：{參考圖／選定風格庫 id／使用者偏好／設計師決定}
+- 背景：{純白、淡灰白或微暖灰白；無紙張紋理、網格、漸層、桌面或場景背景}
+- 線條：{黑色或深灰黑、不規則 Excalidraw 手繪感；不可為精準向量或寫實素描}
+- 色彩：{黑線＋灰白背景＋1 種主強調色；必要時最多再 1 種有語意的重點色}
+- 字體：{粗黑手寫／白板註記感；主標第一視覺，副標次之，標籤靠近物件}
+
+### 4. 構圖與減法
+- 畫布：{固定 1:1}
+- 構圖：{中央或中段單一圖解；閱讀順序為 A→B／上→下／左→右等最簡單關係}
+- 留白：{四周保留的大面積乾淨留白}
+- 標示：{必要時只用箭頭、引線、括號或簡單框線}
+- 排除項目：{no people, no faces, no hands, no silhouettes, no mind map, no dashboard, no multi-column infographic, no complex flowchart, no 3D, no gradient, no realistic lighting, no random text}
+
+### 5. 生圖與驗收規格
+- 尺寸比例：1:1
+- 最多視覺主體：1 組（或不可拆分的 1 組場景）
+- 圖中文字白名單：{主標題／副標題／必要標籤的逐字內容}
+- 必做檢查：{單一命題、具體隱喻、無人物、文字字數、留白、線條、色彩、白名單與 1:1 像素比例}
+```
+
+最終 Prompt 未獲明確確認時，將「最終 Concept Card Prompt」保持 `pending` 或標為
+`revisions-requested`，停止在此關。
+
+### Phase 5｜正式生圖與驗收
+
+確認「最終 Concept Card Prompt」後，執行：
+
+```text
+scripts/validate_concept_card_approvals.py briefs/concept-card-approval-log.md
+```
+
+只有取得 `PASS` 後才交棒 `image-generator`，生成 1 張最終圖。生成後檢查：
+
+1. 實際像素為 1:1。
+2. 文字只含白名單中的繁體中文內容。
+3. 沒有任何人物、人臉、手部、剪影或人形輪廓。
+4. 圖像遮住文字後仍能看出主體、行動與結果。
+5. 沒有多欄資訊圖、流程圖、心智圖、Dashboard、寫實光影、3D、漸層或無關裝飾。
+
+不通過時只針對失敗項重生；不得裁切、拉伸、靜默交付或改寫已確認的視覺隱喻。
+
+## Agent execution notes
+
+- **Shared steps**：文章分析、風格錨點、三個隱喻方案、最終 Prompt 確認、確認驗證與 1:1 驗收。
+- **Codex adapter**：用原生圖片工具呈現風格庫預覽；正式圖片使用可用的原生生圖工具。
+- **Claude adapter**：用原生圖片工具或檔案預覽呈現相同候選；正式圖片使用可用的原生生圖工具。
+- **AntiGravity adapter**：用原生圖片工具或檔案預覽呈現相同候選；正式圖片使用可用的原生生圖工具。
+- **Fallback**：無法內嵌預覽時提供預覽圖絕對路徑；無法生圖時停在已確認的 Prompt，不改用未核准 provider。
+- **Verification**：三個 Agent 都必須保有相同的三次確認、繁中白名單、無人物與實際 1:1 像素驗收。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CONCEPT_CARD_MD_EEEA5C4B21
+
 # visual-prompt-kit/references/placements/cover-person.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/cover-person.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/cover-person.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_COVER_PERSON_MD_BCA09525E0'
@@ -1961,6 +2453,252 @@ Cover 是單張最終成品，**不產出展示圖**：Phase 2.5 的風格庫預
 - `cover-person.md`：封面人物選項。模式 P 預留真人空位（生圖不畫人）、
   模式 C 角色插畫（生圖要畫人）。兩者互斥。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_COVER_MD_8E3587E5D5
+
+# visual-prompt-kit/references/placements/landing-page.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/landing-page.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/landing-page.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_LANDING_PAGE_MD_A1A1ED9027'
+# Landing Page 圖卡版位
+
+## 定位與輸入
+
+本版位將使用者提供的 Landing Page 文案（完整銷售頁或 Mini-Landing Page）轉為**為轉換率服務的
+分區視覺提案**。它不寫 HTML、不組版、不自行補文案，也不把一般銷售頁慣例當成原文的缺漏。
+
+使用時先確認已完成主 Skill 的「Landing Page 圖卡的文案入口」：
+
+- 已有文案：只分析那份文案或使用者明確指向的可讀取內容。
+- 沒有文案：必須先完成 `../landing-page-mini-copy.md`，再把成稿當唯一原文。
+
+Mini-Landing Page 刻意不含講師、FAQ、見證、贈品或價格方案時，這是正常範圍；不得要求補件、
+健檢缺口，或把那些不存在的區塊放進結構解讀、圖片數量表或 Prompt。只有使用者明確要求
+「健檢銷售頁是否完整」時，才可在三階段圖像流程**之外**另列選配建議；除非再次確認加入，
+不得帶入本次圖片規劃。
+
+設計角色是熟悉 SaaS、知識型產品與線上課程的日本數位視覺設計師：每張圖片都必須對應一個
+閱讀停留點與情緒推進任務，服務轉換，而不是裝飾版面。
+
+## 任務檔案與確認紀錄
+
+在專案輸出目錄建立：
+
+```text
+100_Todo/projects/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/
+├── source-copy.md                         # 原始或 Mini 文案
+├── visual-dna.yaml                         # 風格確認後建立
+└── briefs/
+    ├── landing-page-structure.md
+    ├── landing-page-image-counts.md
+    ├── landing-page-approval-log.md
+    ├── landing-page-sample.md
+    └── landing-page-full.md
+```
+
+`landing-page-approval-log.md` 至少記錄下列狀態：`結構與優先順序`、`圖片數量`、
+`風格與圖面示意`、`全套 Prompt`。每項只能是 `pending`、`confirmed` 或
+`revisions-requested`。未明確確認，不得進入下一階段或正式生圖。
+
+每個任務從 `assets/landing-page-approval-log-template.md` 建立這份確認紀錄；正式生圖前必須執行：
+
+```text
+scripts/validate_landing_page_approvals.py briefs/landing-page-approval-log.md
+```
+
+## 必守的設計原則
+
+1. **忠於現有內容**：每一張圖片、結構名稱與優先順序都能在原文找到依據；可拆分、合併或
+   重新命名已有區塊，但不能補價值、承諾、規格或新區塊。
+2. **功能優先**：每張圖先回答「它要解決什麼閱讀問題」，再談美感。
+3. **一圖一訊息**：主標題預設是唯一必填圖內文字；副標、結構文字與 Ashirai 都是選配。
+4. **高易讀性**：所有文字都有色塊、容器、陰影、描邊或留白保護；主標是第一視覺。
+5. **具體視覺優先**：先完成「即使遮住文字，讀者仍能從＿＿＿看出這張圖在談＿＿＿。」
+   的遮字測試。主要視覺只能是可辨識的人物動作、工具、物件、工作場景、成果或因果流程。
+   沒有合格具象主體時，使用文字主導與有意識留白，不可硬塞抽象符號。
+6. **資訊降噪**：每張最多 2–3 個主要視覺區塊；背景退後，裝飾預設不用，必要時最多 1–2 種。
+   不用發光圓球、漂浮線條、無意義箭頭、抽象節點、裝飾性假 UI 或幾何圖形擔任主視覺。
+7. **圖片與 HTML 分工**：HTML 承載完整說明；圖片只濃縮最值得記住的一件事，不搬運整段文案。
+8. **一致性**：同頁所有圖共用色系、光感、構圖語彙與字體系統，但不強迫固定的左文右圖、
+   上文下圖等模板。
+9. **禁忌**：除非使用者明確指定，圖片不放價格、折扣、優惠碼、倒數、名額、Logo、簽名、
+   作者名、浮水印、Hashtag、英文標籤或功能區塊名稱；不放亂碼、假文字、lorem ipsum 或假 UI 字串。
+
+## 圖內文字配額
+
+| 圖片功能 | 預設圖內文字 |
+| --- | --- |
+| Hero Banner | 主標題＋可選副標題＋最多 1 組日文 Ashirai |
+| 單一痛點／成果／對象 | 主標題＋可選 1 句輔助短句 |
+| 流程／比較／清單 | 主標題＋必要的步驟或項目關鍵字 |
+| CTA | 主標題＋可選 1 句行動短句 |
+
+- Hero 主標原則不超過 18 個中文字，副標不超過 24 個中文字。
+- 單張圖卡主標原則不超過 12 個中文字，輔助短句不超過 18 個中文字。
+- 流程或清單的每個節點原則不超過 8 個中文字。
+- 除流程、比較與清單外，非 Hero 圖最多 2 層文字。
+- 除非使用者指定純視覺或不要文字，至少保留一個台灣繁體中文主標。
+- Ashirai 預設不使用；需要時每張最多一組日文短詞。此 placement 若使用 Ashirai，
+  在 `visual-dna.yaml` 設定 `language.accent: ja`；未明確要求英文時，將英文字列入禁用語言。
+
+## Phase 1｜結構解讀與插圖優先順序
+
+先說明：「以下只分析原文實際存在的區塊，不新增銷售頁內容。」
+
+### 1.1 結構解讀
+
+辨識原文實際存在的區塊。Hero、介紹、痛點、成果、適合對象、內容方式與 CTA 只是常見名稱，
+不是必備清單。每個區塊都用下表記錄：
+
+| 區塊名稱 | 閱讀停留點 | 情緒推進任務 | 原文依據 | 具體視覺錨點 | 是否需要圖片 | 圖內文案適合度 |
+| --- | --- | --- | --- | --- | --- | --- |
+
+原文中的模板、工具、操作、成果或並列內容可獨立成更清楚的既有區塊；沒有原文依據就不得列入。
+
+### 1.2 圖片優先順序
+
+只從 1.1 已辨識且原文存在的區塊，挑出 3–8 個最需要視覺強化的位置：
+
+| 優先順序 | 區塊名稱 | 建議圖片功能 | 具體視覺錨點 | 是否需要圖內文案 | 優先順序理由 |
+| --- | --- | --- | --- | --- | --- |
+
+完成後停止，等待使用者確認清單。不得輸出缺少區塊、補強銷售頁結構或任何完整性健檢。
+
+## Phase 2｜圖片數量與比例確認
+
+只處理使用者已確認的 Phase 1 清單，提出數量建議：
+
+| 區塊名稱 | 建議數量 | 拆解邏輯 | 建議比例 | 圖內文案形式 |
+| --- | --- | --- | --- | --- |
+
+判斷原則：Hero、CTA、整體流程或只有一個重點的區塊通常一張即可；痛點、成果、課程週次、
+功能說明、Before／After 或其他原文中多項並列內容，才依每個獨立訊息拆成多張。每張都必須有
+獨立主標、視覺主體與情緒任務，不能為了數量重複。
+
+比例依功能決定：Hero 通常 16:9；痛點常用 1:1 或 4:5；成果通常 1:1；流程總覽通常 16:9；
+內容或知識圖卡常用 1:1 或 4:5。這是建議，不是強制套版。
+
+結尾固定詢問使用者是否要增加／減少數量、調整比例、調整文字量，或回覆「OK」。只有得到
+明確確認後，才進入 Phase 3。
+
+## Phase 3｜風格、圖面示意、Prompt 與正式生圖
+
+Phase 1 的結構確認與 Phase 2 的數量確認，承接了輪播圖卡的文本／範圍確認；後段則**比照
+輪播圖卡**，先用一張圖面示意驗證視覺語彙，再產生整套圖片。絕不可先寫完 Prompt 就直接整批生圖。
+
+### 3.1 風格選擇（必要互動）
+
+先告知已確認的總圖片數量，再只問使用者選哪一種方式：
+
+1. **從 Card Style Library 挑選**：執行 `scripts/recommend_styles.py`，提出 5 個合適風格，
+   每個附推薦理由與可檢視預覽圖；使用者選定一個編號後才鎖定 DNA。
+2. **描述想要的風格**：請使用者說明色調、構圖、情緒、字體或媒材偏好；收到後直接以該偏好
+   鎖定 DNA，不強迫第二次多方案選擇。
+3. **由設計師提案**：以同一個已確認的最高優先視覺錨點，準備「勇敢先驅／保守穩重／革命性」
+   三組最大差異化方向；差異只能來自色彩、光感、媒材和構圖表現，不能換掉原文依據或主視覺。
+
+在 DNA 鎖定後，所有圖片共用日本現代數位產業、SaaS 官網與高質感知識產品的設計語彙；
+不得用「日系」當成在圖片中自動生成日文或抽象科技符號的理由。
+
+### 3.2 首張圖面示意與 Prompt 確認（必要互動）
+
+選擇 Phase 1 最高優先的區塊作為圖面示意：有 Hero 時優先 Hero；沒有 Hero 時選第一名。
+
+- 路徑 1 或 2：交給 `image-generator` 產出 **1 張**圖面示意，並附該張完整結構化 Prompt。
+- 路徑 3：交給 `image-generator` 產出 **3 張**最大差異化的圖面示意，每張各附完整結構化 Prompt；
+  使用者選定一張後才鎖定最終 DNA。
+
+所有示意圖都只是風格、字體保護、圖文關係與具體視覺錨點的驗證，不是整套正式交付。使用者
+明確確認前，不得進入全套 Prompt，也不得生成其他分區圖片。若示意的文字或 DNA 在後續改動，
+它不可直接納入正式成品，必須在正式生成時重生。
+
+### 3.3 全套 Prompt 確認（必要互動）
+
+依已確認的數量、比例與 DNA，一次提出所有圖片的結構化 Prompt，逐張獨立 codeblock 包住。
+全套指令前固定先輸出下列一行，其中 `N` 替換為本次已確認的總圖片數：
+
+```text
+使用以下指令產生圖卡，共 N 張輪播圖卡 output by slide by slide format
+```
+
+使用者可只要求修改某一張；修改後應回送最新的全套版本供總確認。未得到明確確認前，不得正式
+生成任何一張。
+
+### 3.4 正式生成與驗收
+
+只有 `結構與優先順序`、`圖片數量`、`風格與圖面示意`、`全套 Prompt` 全部為 `confirmed`，且
+`scripts/validate_landing_page_approvals.py` 通過時，才把已確認的完整 Prompt 交給 `image-generator`
+逐張生成全部圖片。每張回傳實際檔案路徑與
+像素尺寸，並驗證尺寸比例、文字可讀性、圖內文字白名單、具體視覺錨點、共用 DNA 與元素減法。
+不合格時只重生該張；不得裁切、拉伸或靜默交付。
+
+## 每張 Prompt 的輸出格式
+
+每張圖片使用獨立 codeblock，並採用下列六段結構。區塊功能名稱只供設計思考，不得出現在
+圖面文字中。
+
+```markdown
+## 【區塊 X：{區塊名稱} - 圖 {n}/{total}】
+
+### 0. 設計定位（Design Positioning）
+- 區塊功能：{內部閱讀角色}
+- 情緒推進任務：{觀看後應產生的反應}
+- 原文依據：{原文概念、動作、物件或成果}
+- 具體視覺錨點：{唯一主要的人物動作、物件、場景、成果或流程}
+- 與 CTA 的關係：{如何輔助閱讀引導}
+- 在區塊內的相對位置：{順序與功能差異}
+
+### 1. 文本內容（Text Content）
+- 核心訊息：{僅供設計判斷，不直接上圖}
+- 主標題：{台灣繁體中文短標題}
+- 輔助短句：{不需要時明填「不使用」}
+- 結構文字：{僅流程、比較、清單使用；其餘填「不使用」}
+- 氛圍裝飾文字（Ashirai）：{預設「不使用」；需要時最多一組日文短詞}
+- 文字排版要求：{層級、位置、大小對比、容器與閱讀順序}
+
+### 2. 色彩計畫（Color Palette）
+- 背景特徵：{低干擾場景或純色背景＋有意識留白}
+- 主色／重點強調色／文字色方案／光感方向：{與共用 DNA 一致}
+
+### 3. 字體特徵（Typography）
+- 主標題字體：{易讀的日系 Gothic、特粗黑體、粗圓體等}
+- 輔助文字字體／裝飾字體：{不使用時明填「不使用」}
+- 整體印象：{現代數位感、專業、溫暖等}
+
+### 4. 佈局與構圖（Layout & Composition）
+- 主體物件：{唯一主要視覺錨點，不是抽象符號}
+- 語意對應：{完成遮字測試的句子}
+- 場景脈絡／文字容器／視覺焦點／構圖策略／留白策略：{具體描述}
+- 裝飾元素：{預設「不使用」；必要時最多 1–2 種小面積輔助}
+
+### 5. 規格與風格（Specs & Style）
+- 尺寸比例：{16:9／1:1／4:5}
+- 設計語彙／質感描述：{日本現代數位設計，但以具體內容為主}
+- 排除項目：no abstract filler, no meaningless symbols, no floating geometric objects,
+  no random arrows, no decorative fake UI, no dense text, no repeated message, no random text,
+  no lorem ipsum, no English labels, no logo, no signature, no hashtag, no price, no discount code
+```
+
+寫 Prompt 前必做遮字測試與減法檢查：刪掉不影響理解的文字或裝飾就不要寫入。所有實際圖片文字
+必須是台灣繁體中文；除非明確指定，禁止英文點綴字。日文只可作已確認的單組 Ashirai，不可取代
+中文主文案，也不可同時混用中文、英文、日文三種文字。
+
+## 交棒與驗收
+
+`image-generator` 接收已確認的 `visual-dna.yaml`、每張完整 Prompt、目標比例、輸出檔名與路徑。
+`landing-page` 接收 `[IMG-Hero]`、`[IMG-Pain]` 等佔位符 ID、對應圖檔路徑與比例；HTML 組版仍是
+`landing-page` 的工作，不是本 placement 的工作。
+
+交付前確認：所有圖只取材自原文、每張只有一個核心訊息、主視覺可通過遮字測試、文字受保護、
+比例正確、共用 DNA 一致，且沒有未確認的促銷資訊、假文字或無關裝飾。
+
+## Agent execution notes
+
+- **Shared steps**：文案入口、三階段確認、A／B／C 風格選擇、圖面示意、全套 Prompt、正式生圖與驗收。
+- **Codex adapter**：使用可用的原生圖片工具呈現風格庫預覽與圖面示意；無法內嵌時提供絕對檔案路徑。
+- **Claude adapter**：以原生圖片工具或檔案預覽呈現同一批風格庫預覽與圖面示意。
+- **AntiGravity adapter**：以原生圖片工具或檔案預覽呈現同一批風格庫預覽與圖面示意。
+- **Fallback**：任一 Agent 無法顯示預覽時，提供預覽與示意圖的絕對路徑，維持相同確認順序；
+  無法生圖時停在已確認的 Prompt，不改用未核准的 provider。
+- **Verification**：三個 Agent 都必須保留四項確認狀態、回傳圖片像素尺寸，並依相同驗收條件交付。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_LANDING_PAGE_MD_A1A1ED9027
 
 # visual-prompt-kit/references/styles/japanese-modern.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/styles/japanese-modern.md")"
@@ -2829,6 +3567,158 @@ if __name__ == "__main__":
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CAROUSEL_WORKFLOW_PY_02DAF407B1
 chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_workflow.py"
 
+# visual-prompt-kit/scripts/validate_concept_card_approvals.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_approvals.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_approvals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_APPROVALS_PY_48A1C5983B'
+#!/usr/bin/env python3
+"""Block Concept Card image handoff until all three approvals are recorded."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+REQUIRED_APPROVALS = ("風格錨點", "視覺隱喻方案", "最終 Concept Card Prompt")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證 Concept Card 是否完成三道確認，可進入正式生圖。"
+    )
+    parser.add_argument(
+        "approval_log",
+        type=Path,
+        help="任務的 briefs/concept-card-approval-log.md 路徑。",
+    )
+    return parser.parse_args()
+
+
+def approval_status(content: str, label: str) -> str | None:
+    match = re.search(rf"(?m)^- {re.escape(label)}：([^\s]+)\s*$", content)
+    return match.group(1) if match else None
+
+
+def main() -> int:
+    approval_log = parse_args().approval_log
+    if not approval_log.is_file():
+        print(f"無法正式生圖：找不到確認紀錄：{approval_log}")
+        return 1
+
+    content = approval_log.read_text(encoding="utf-8")
+    incomplete = [
+        label
+        for label in REQUIRED_APPROVALS
+        if approval_status(content, label) != "confirmed"
+    ]
+    if incomplete:
+        print("無法正式生圖：以下關卡尚未獲使用者明確確認：")
+        for label in incomplete:
+            print(f"- {label}")
+        return 1
+
+    final_status = approval_status(content, "正式生圖")
+    if final_status != "not-started":
+        print(
+            "無法啟動新的正式生圖交棒："
+            f"「正式生圖」目前狀態為 {final_status or '缺少狀態'}。"
+        )
+        return 1
+
+    print("PASS：Concept Card 三道確認均已完成，可交棒 image-generator 正式生圖。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_APPROVALS_PY_48A1C5983B
+
+# visual-prompt-kit/scripts/validate_concept_card_workflow.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_workflow.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_workflow.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_WORKFLOW_PY_083D248B36'
+#!/usr/bin/env python3
+"""Validate the Concept Card style, metaphor, and final-prompt workflow."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+REQUIRED_MARKERS = {
+    "SKILL.md": (
+        "「Concept Card」、「極簡概念圖卡」、「手繪概念圖卡」、「視覺隱喻圖卡」",
+        "### 3.7 極簡概念知識圖卡（Concept Card，1:1）",
+        "scripts/validate_concept_card_approvals.py",
+        "Concept Card 不產出圖面示意",
+        "person.mode: none",
+    ),
+    "references/placements/concept-card.md": (
+        "了解，請提供文章內容。",
+        "### Phase 2｜視覺風格校準（必要互動）",
+        "從 Card Style Library 的 5 個候選挑一個",
+        "不得把這一關展開成 3 組風格",
+        "### Phase 3｜三個視覺隱喻方案（必要互動）",
+        "### Phase 4｜最終 Prompt 確認（必要互動）",
+        "### Phase 5｜正式生圖與驗收",
+        "no people, no faces, no hands, no silhouettes",
+        "scripts/validate_concept_card_approvals.py",
+    ),
+    "references/handoff-contracts.md": (
+        "**Concept Card 正式生圖**",
+        "scripts/validate_concept_card_approvals.py",
+        "person.mode` 必須是 `none`",
+    ),
+    "assets/concept-card-approval-log-template.md": (
+        "風格錨點：pending",
+        "視覺隱喻方案：pending",
+        "最終 Concept Card Prompt：pending",
+        "正式生圖：not-started",
+    ),
+}
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證 Concept Card 的風格錨點、視覺隱喻與最終生圖流程。"
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1],
+        help="visual-prompt-kit 套件根目錄；預設為本腳本所在套件。",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    root = parse_args().root.resolve()
+    errors: list[str] = []
+    for relative_path, markers in REQUIRED_MARKERS.items():
+        path = root / relative_path
+        if not path.is_file():
+            errors.append(f"缺少檔案：{relative_path}")
+            continue
+        content = path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in content:
+                errors.append(f"{relative_path} 缺少必要標記：{marker}")
+
+    if errors:
+        print("Concept Card 流程驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("PASS：Concept Card 保有風格錨點、三個視覺隱喻、最終 Prompt 與無人物生圖契約。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_WORKFLOW_PY_083D248B36
+
 # visual-prompt-kit/scripts/validate_cover_approvals.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_approvals.py")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_approvals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_COVER_APPROVALS_PY_7C257F0127'
@@ -3074,6 +3964,168 @@ def main() -> int:
 if __name__ == "__main__":
     raise SystemExit(main())
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_IMAGE_ASPECT_PY_825F866365
+
+# visual-prompt-kit/scripts/validate_landing_page_approvals.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_approvals.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_approvals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_APPROVALS_PY_7D174C9CCF'
+#!/usr/bin/env python3
+"""Block Landing Page final-image handoff until all required approvals exist."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+REQUIRED_APPROVALS = ("結構與優先順序", "圖片數量", "風格與圖面示意", "全套 Prompt")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證 Landing Page 圖卡是否完成四道確認，可進入逐張正式生圖。"
+    )
+    parser.add_argument(
+        "approval_log",
+        type=Path,
+        help="任務的 briefs/landing-page-approval-log.md 路徑。",
+    )
+    return parser.parse_args()
+
+
+def approval_status(content: str, label: str) -> str | None:
+    match = re.search(rf"(?m)^- {re.escape(label)}：([^\s]+)\s*$", content)
+    return match.group(1) if match else None
+
+
+def main() -> int:
+    approval_log = parse_args().approval_log
+    if not approval_log.is_file():
+        print(f"無法正式生圖：找不到確認紀錄：{approval_log}")
+        return 1
+
+    content = approval_log.read_text(encoding="utf-8")
+    incomplete = [
+        label
+        for label in REQUIRED_APPROVALS
+        if approval_status(content, label) != "confirmed"
+    ]
+    if incomplete:
+        print("無法正式生圖：以下關卡尚未獲使用者明確確認：")
+        for label in incomplete:
+            print(f"- {label}")
+        return 1
+
+    final_status = approval_status(content, "正式生圖")
+    if final_status != "not-started":
+        print(
+            "無法啟動新的正式生圖交棒："
+            f"「正式生圖」目前狀態為 {final_status or '缺少狀態'}。"
+        )
+        return 1
+
+    print("PASS：四道確認均已完成，可交棒 image-generator 逐張正式生圖。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_APPROVALS_PY_7D174C9CCF
+
+# visual-prompt-kit/scripts/validate_landing_page_workflow.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_workflow.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_workflow.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_WORKFLOW_PY_0EEE253C04'
+#!/usr/bin/env python3
+"""Validate the mandatory copy gate and four approval gates for Landing Page graphics."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+REQUIRED_MARKERS = {
+    "SKILL.md": (
+        "Landing Page 圖卡的文案入口",
+        "你目前有 Landing Page 文案嗎？有的話，請直接貼給我",
+        "references/landing-page-mini-copy.md",
+        "references/placements/landing-page.md",
+        "結構與優先順序／圖片數量／風格與圖面示意／全套 Prompt",
+        "scripts/validate_landing_page_approvals.py",
+    ),
+    "references/landing-page-mini-copy.md": (
+        "我們先從主題開始。你這次想介紹或教學的主題是什麼？",
+        "一次只問一個主要問題",
+        "第 6 項固定為「其他：請自行補充」",
+        "800–1,000 個中文字",
+    ),
+    "references/placements/landing-page.md": (
+        "以下只分析原文實際存在的區塊，不新增銷售頁內容。",
+        "## Phase 1｜結構解讀與插圖優先順序",
+        "## Phase 2｜圖片數量與比例確認",
+        "### 3.1 風格選擇（必要互動）",
+        "從 Card Style Library 挑選",
+        "勇敢先驅／保守穩重／革命性",
+        "### 3.2 首張圖面示意與 Prompt 確認（必要互動）",
+        "### 3.3 全套 Prompt 確認（必要互動）",
+        "使用以下指令產生圖卡，共 N 張輪播圖卡 output by slide by slide format",
+        "### 3.4 正式生成與驗收",
+        "scripts/validate_landing_page_approvals.py",
+    ),
+    "references/handoff-contracts.md": (
+        "**Landing Page 圖卡**",
+        "scripts/validate_landing_page_approvals.py",
+        "output by slide by slide format",
+    ),
+    "assets/landing-page-approval-log-template.md": (
+        "結構與優先順序：pending",
+        "圖片數量：pending",
+        "風格與圖面示意：pending",
+        "全套 Prompt：pending",
+        "正式生圖：not-started",
+    ),
+}
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證 Landing Page 圖卡的文案入口、四道確認與逐張生圖契約。"
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1],
+        help="visual-prompt-kit 套件根目錄；預設為本腳本所在套件。",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    root = parse_args().root.resolve()
+    errors: list[str] = []
+    for relative_path, markers in REQUIRED_MARKERS.items():
+        path = root / relative_path
+        if not path.is_file():
+            errors.append(f"缺少檔案：{relative_path}")
+            continue
+        content = path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in content:
+                errors.append(f"{relative_path} 缺少必要標記：{marker}")
+
+    if errors:
+        print("Landing Page 圖卡流程驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("PASS：Landing Page 圖卡保有文案入口、四道確認、圖面示意與逐張正式生圖契約。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_WORKFLOW_PY_0EEE253C04
 
 test -f "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md" && echo "visual-prompt-kit installed for Codex, Claude, and AntiGravity"
 ````
