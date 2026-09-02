@@ -1,6 +1,6 @@
 # 43-Visual Prompt Kit Skill 安裝
 
-> 版本：2026-08-22
+> 版本：2026-09-02
 > 定位：把文章轉成可直接生圖的視覺設計提案；只出 brief，不出圖、不組版。
 
 ## 這個 Item 解決什麼
@@ -8,6 +8,8 @@
 要做課程封面、系列知識圖卡或銷售頁圖片時，常見的失敗是每張圖各自為政：這張用日系極簡、下一張變成賽博龐克，十張放在一起看不出是同一套。原因是風格決策散在每一次對話裡，沒有被固定下來。
 
 `visual-prompt-kit` 把視覺決策拆成三個獨立維度——**版位（placement）× 風格（style）× 裝飾語言（accent language）**——並用一份 `visual-dna.yaml` 鎖住整個系列的配色、字體階層與構圖上限。之後不論做封面、圖卡還是銷售頁圖，都讀同一份 DNA，系列感不靠人工盯。
+
+Concept Card 的決策順序例外採 DNA 優先：先確認完整視覺 DNA，才用同一份 DNA 提出三個含可修改文字腳本的圖像方案與比例；確認後產出一張真正反映內容的示意，最後才確認中文格式化 Prompt。
 
 新增版位或風格是新增一個檔案，`SKILL.md` 不需要動。
 
@@ -77,13 +79,15 @@ metadata:
 
 把一篇文章變成可直接生圖的**視覺設計提案**。
 
-這個 skill 負責 brief、確認關卡與交棒，不自行選擇生圖 provider，也不組版。Cover 與
-輪播圖卡都必須先完成對應的確認紀錄與驗證器；輪播的第一關可交棒 `image-generator` 產出
-首張展示圖，Cover 則先確認最終提案與提示詞，通過後才可交棒正式生圖。Landing Page 圖卡
-則必須先確認是否已有文案，沒有才完成 Mini-Landing Page 訪談；之後才可分析現有內容並規劃
-分區圖像。Concept Card 則把文章濃縮為一個可見的視覺隱喻：它沿用 Cover 的風格校準與最終
-確認，但固定不畫人物、不是文章封面，也不做長內容摘要。這讓同一份視覺 DNA 能同時餵給封面、
-系列圖卡與銷售頁圖，不必每個版位重講一次風格。
+這個 skill 負責 brief、確認關卡與交棒，不自行選擇生圖 provider，也不組版。所有圖卡版位都遵守
+一般圖卡共用主幹是：**內容／語意範圍 → 三條風格路徑 → 圖面示意 → 完整 Prompt → 正式生圖**；
+但單張 Concept Card 是例外：它以完整的 DNA 合併方案與最終 Prompt 取代內容預覽生圖，避免產出與正式圖幾乎相同的草稿。
+Cover 的人物策略、輪播的文本大綱、Landing Page 的區塊與數量、Concept Card 的無人物單一隱喻，
+以及 9:16 高密度卡的全文覆蓋，都是版位差異。詳見
+`references/card-generation-flow.md`。其中 Concept Card 固定採 **文章命題 → 視覺語言 DNA → DNA 合併圖像方案與比例
+→ 中文格式化最終 Prompt → 正式生圖**，不套用「先選隱喻、再看風格」的舊順序。
+這讓同一份視覺 DNA 能同時餵給封面、系列圖卡與銷售頁圖，
+不必每個版位重講一次風格。
 
 ## 三個維度
 
@@ -139,8 +143,9 @@ metadata:
 - 讀取 `references/placements/<placement>.md` 再繼續。
 - `landing-page` placement 必須先完成上方「Landing Page 圖卡的文案入口」，再讀
   `references/placements/landing-page.md`；其三階段確認流程優先於下方 Cover／輪播的通用描述。
-- `concept-card` placement 必須讀 `references/placements/concept-card.md`；它使用風格校準與
-  三個「視覺隱喻」方案，但**不得**套用下方通用人物選項或 Cover 的高點擊率構圖慣例。
+- `concept-card` placement 必須讀 `references/placements/concept-card.md`；它先完成視覺語言 DNA，
+  才提出三個 DNA 合併圖像方案，且**不得**套用下方通用人物選項、A／B／C 的 1／3 張風格示意
+  或 Cover 的高點擊率構圖慣例。
 
 ### 2. 風格與人物校準（分階段互動關卡）
 
@@ -155,10 +160,10 @@ metadata:
 - **B 描述偏好**：色調、構圖取向、情緒調性，講一項也算。
 - **C 你決定**：改走最大差異化的三點軸線。
 
-**收斂規則（所有版位一體適用）**：使用者回覆 A 或 B，風格方向即已定案——
-直接進入鎖定 visual DNA，**不得再強制使用者在多組風格變體間做第二次選擇**。
-只有回覆 C（或非互動環境）時，才由 AI 依創新維度軸線提出三組最大差異化
-方案供選擇——此規則三個版位一體適用。
+**收斂規則（所有版位一體適用）**：A／B 先取得一個暫定風格方向，C 則產出三個最大差異化
+方向；但三條路徑都必須用圖面示意完成視覺確認。A／B（或參考圖）產出 1 張、C 產出 3 張；
+使用者確認示意後才鎖定最終 visual DNA，**不得只憑文字宣稱風格已定案**。C 的三張示意使用
+同一個已確認內容與視覺錨點，僅比較風格；不得與下一關的內容／隱喻方案混成 3×3 矩陣。
 
 **第二輪：人物選項確認（等使用者回答第一輪後才詢問）**
 收到第一輪風格回覆後，**再發起第二輪詢問人物選項**（版位支援時）：
@@ -175,9 +180,16 @@ metadata:
 
 ### 3. 鎖定 visual DNA
 
-使用者選定後，把風格 id、配色、字體階層、`accent_language`、構圖原則與禁止項
-寫進 `visual-dna.yaml`。**同一主題的所有圖都讀這一份**，系列感來自這裡，
-不是靠每張圖重複描述。schema 見 `references/visual-dna.md`。
+除 `concept-card` 外，使用者確認圖面示意後，先建立唯一的最終 `visual-dna.yaml`；示意前可使用暫定 DNA 或候選 DNA。
+`concept-card` 則在「視覺語言與 DNA」確認後鎖定有效 DNA，並在 DNA 合併圖像方案確認後寫入比例。
+選擇風格庫編號時，必須把完整的
+來源記錄（名稱、分類、場景、`desc`、`chars`、原始 `prompt`、預覽資訊）保留為
+`style.library_record`，並將原始 `prompt` 不改寫地寫入 `style.reference_prompt`；不能只留下
+id 或由 Agent 濃縮成一句風格摘要。接著寫入配色、字體階層、裝飾語言、構圖原則、人物策略與
+禁止項。Cover、Carousel 與 Landing Page 的每張示意圖與正式圖都帶入固定 Visual DNA 前綴與後綴；
+Concept Card 若與來源衝突，必須另寫 `style.resolved_design`，原始記錄僅供稽核、正式生圖只讀有效 DNA。
+系列感不能靠每張圖重新猜測。schema、來源忠實度與 Prompt Stack 見
+`references/visual-dna.md`。
 
 ### 3.5 輪播圖卡的四道確認關卡（多張系列版位必要）
 
@@ -198,8 +210,8 @@ metadata:
 4. **正式生圖**：只有第 3 關獲確認後，先以
    `scripts/validate_carousel_approvals.py` 驗證 `briefs/approval-log.md`，通過後才交棒
    `image-generator` 產出整套 N 張成品；高密度每張生成後必須再以
-   `scripts/validate_image_aspect.py --ratio 4:5` 檢查實際像素比例。若首張展示圖的文字與
-   視覺 DNA 未改，可直接納入成品；否則重生 Slide 01。
+   `scripts/validate_image_aspect.py --ratio 4:5` 檢查實際像素比例。首張展示圖只用於確認；
+   無論文字與視覺 DNA 是否改動，正式生成都必須重生 Slide 01。
 
 每個輪播任務從 `assets/carousel-approval-log-template.md` 建立
 `briefs/approval-log.md`，記錄第 1–3 關的 `pending`、`confirmed` 或
@@ -246,38 +258,41 @@ scripts/validate_carousel_prompt_plan.py --placement carousel-info --require-str
 驗證通過只代表欄位與提示詞計畫齊全，不代表已獲使用者確認；仍須等使用者明確確認後，
 才可把 `briefs/approval-log.md` 的 `文本大綱` 更新為 `confirmed`。
 
-### 3.6 Cover 封面的兩道確認關卡（單張版位必要）
+### 3.6 Cover 封面的三道確認關卡（單張版位必要）
 
-`cover` 是單張最終成品，不需要輪播的文本大綱或首張展示圖；風格庫預覽圖已在
-Phase 2.5 提供視覺校準。**不得為了確認而先產出一張 Cover 展示圖**，以免重複使用
-生圖額度。Cover 必須依序完成：
+`cover` 是單張最終成品，不需要輪播的文本大綱，但與其他圖卡一樣必須先完成圖面示意。
+Cover 必須依序完成：
 
-1. **視覺方向與人物確認**：完成 Phase 2.5 的風格與人物選項。A／B 直接鎖定方向；
-   C（你決定）確認委託視覺方向，並在下一關以最終提案選定其中一組。
-2. **最終 Cover 提案與提示詞確認**：A／B 提供 1 組完整提案與提示詞；C 提供 3 組
-   最大差異化的完整提案與提示詞。使用者明確確認（C 為選定其中一組）後，才能鎖定
-   最終 `visual-dna.yaml` 與生圖內容。
-3. **正式生圖**：先以 `scripts/validate_cover_approvals.py` 驗證
+1. **視覺方向與人物確認**：完成 Phase 2.5 的風格與人物選項。
+2. **Cover 圖面示意確認**：A／B 各提供 1 張、C 提供 3 張同一內容錨點的 Cover 示意與完整提示詞；
+   選定或確認後才鎖定最終 DNA。
+3. **最終 Cover 提案與提示詞確認**：依已確認示意提出唯一完整 Prompt，取得明確確認。
+4. **正式生圖**：先以 `scripts/validate_cover_approvals.py` 驗證
    `briefs/cover-approval-log.md`，通過後才交棒 `image-generator`。提案或提示詞一經
-   修訂，必須回到第 2 關重新確認。
+   修訂，必須回到圖面示意或最終 Prompt 關重新確認。
 
 每個 Cover 任務從 `assets/cover-approval-log-template.md` 建立
-`briefs/cover-approval-log.md`，記錄兩道確認關卡與正式生圖狀態。
+`briefs/cover-approval-log.md`，記錄三道確認關卡與正式生圖狀態。
 
-### 3.7 極簡概念知識圖卡（Concept Card，1:1）
+### 3.7 極簡概念知識圖卡（Concept Card，可選比例）
 
-`concept-card` 是「一個主標題＋一句副標題＋一個核心視覺隱喻」的單張 1:1 圖卡。它的目的
+`concept-card` 是「一個主標題＋一句副標題＋一個核心視覺隱喻」的單張圖卡；比例由使用者選定。它的目的
 是讓讀者一眼理解原文的一個抽象原理，而不是吸引點擊的文章封面，也不是涵蓋全文的知識摘要。
 
 1. 先依 `references/placements/concept-card.md` 完成文章分析，定義唯一核心命題與必須畫出的
    語意；原文其餘案例、步驟、工具與背景明確列為不放入的資訊。
-2. **視覺風格校準**：使用者有參考圖時，以參考圖作為最高風格錨點，不再強制列出 5 個風格庫
-   候選；沒有參考圖時，提供 5 個 Card Style Library 候選與預覽圖，並保留自由描述與
-   「由設計師決定」兩路。這一輪只決定畫面語言，不決定隱喻。
-3. 在鎖定的風格下，固定提出同一核心命題的 3 個**真正不同的視覺隱喻**方案 A／B／C。
-   不得把 Cover 的三組風格變體與 Concept Card 的三個隱喻混為一談，避免製造 3×3 的選擇矩陣。
-4. 使用者選定隱喻後，提出唯一一組完整結構化 Prompt 供最終確認；確認前不生成圖片。
-   Concept Card 不產出圖面示意，因為風格庫預覽與三個隱喻方案已分別完成風格與語意校準。
+2. **先確認視覺語言與有效 DNA**：使用者選擇 Style Library、描述偏好或請設計師提案時，
+   每個候選都必須以中文呈現完整 DNA 摘要（色彩、線條、字體、構圖語彙、保留與排除特徵），
+   不是只有「勇敢先驅」之類的名稱。Style Library 必須附既有預覽圖；設計師提案必須附三張
+   可比較的 DNA 卡。使用者確認後才鎖定風格 DNA。
+3. **再提出 DNA 合併的三個圖像方案與比例**：三案都必須把已確認 DNA、不同視覺隱喻、
+   可編輯的繁中圖中文字腳本、具體物件、動作、遮字語意與構圖策略放在同一份格式化方案內。
+   使用者在此關同時選定方案與 `16:9／1:1／4:5／9:16` 或自訂比例；不得先用脫離 DNA 的
+   隱喻名稱要求選擇，也不得形成 3×3 矩陣。
+4. **中文格式化最終 Prompt 確認**：以輪播／Landing Page 同樣可校稿的輕量結構，提出
+   任務與畫布、文字腳本、有效 DNA、視覺語意、設計自由度、禁止項與驗收；格式化是為了核對，
+   不是把生圖模型鎖成僵硬版型。這張單一圖卡不另產生內容預覽圖；已確認的合併方案與最終 Prompt
+   已完整揭露圖文腳本、視覺隱喻、構圖和比例。
 5. 正式生圖前以 `scripts/validate_concept_card_approvals.py`
    驗證 `briefs/concept-card-approval-log.md`；通過後才交棒 `image-generator` 生成最終 1 張。
 
@@ -285,25 +300,33 @@ Concept Card 的 `visual-dna.yaml` 強制 `person.mode: none`；不得詢問人�
 角色插畫。圖內只允許繁體中文主標題、副標題與最多 3 個必要標籤；無英文、日文 Ashirai、
 Logo、簽名、浮水印或額外文案。
 
+若 Concept Card 選定 Style Library，保留完整 `style.library_record`／`style.reference_prompt` 作為
+不可改寫的來源稽核層；在使用者確認視覺語言、提出 DNA 合併方案前，另完成 `style.resolved_design` 的保留特徵、排除特徵、
+優先權與有效風格描述。正式生圖只能使用有效 DNA，不能把原始 Prompt 與 Concept Card 硬限制
+同時注入、再期待下游自行判斷。
+
 ### 3.8 全文章最高密度知識圖卡（9:16）
 
 使用者提供完整文章並要求「知識圖卡」、「盡量全部包含」或「最高密度」時，路由為單張
-**9:16 全文章知識圖卡**，不是 `carousel`／`carousel-info`，不套用輪播的四關流程。若使用者
-已指定風格，可直接進入內容計畫；未指定時，仍先完成本 skill 的風格校準。
+**9:16 全文章知識圖卡**，不是 `carousel`／`carousel-info`，不套用輪播的敘事張數規則，但仍
+套用共同的內容範圍 → 三條風格路徑 → 1／3 張圖面示意 → 完整 Prompt → 正式生圖流程。
 
-生成前必須建立 `briefs/knowledge-card-content.md`，以故事／問題情境、心理機制／原因、核心框架／
-判斷法、行動方法、結論／核心金句五類完整映射原文。接著交給 `image-generator`，並要求其依
+生成前必須讀 `references/placements/high-density-knowledge-card.md`，並建立
+`briefs/knowledge-card-content.md`，以故事／問題情境、心理機制／原因、核心框架／判斷法、行動方法、
+結論／核心金句五類完整映射原文。接著交給 `image-generator`，並要求其依
 `references/high-density-knowledge-card.md` 建立逐字 Prompt、執行內容計畫驗證與實際 9:16 像素
-驗收。插畫、箭頭、分隔線與器物只能導引閱讀，不能取代原文的重要論點。
+驗收。需要既有風格段落時，讀 `references/prompts/high-density-knowledge-card-prompts.md`；插畫、
+箭頭、分隔線與器物只能導引閱讀，不能取代原文的重要論點。
 
-這個版位可直接生成，**但不得把完整文章縮成標題、金句和三個泛泛摘要**。生成後若發現缺漏
+這個版位必須完成共同流程後才可正式生成，**但不得把完整文章縮成標題、金句和三個泛泛摘要**。生成後若發現缺漏
 故事、原因、框架、行動或結論其中任何一類，或比例／文字白名單不通過，必須只針對該缺口重生，
 不得靜默交付。
 
 ### 4. 產出設計提案
 
-依 placement 檔指定的模板輸出。輪播版位必須優先遵守上述四道確認關卡；Cover 必須優先
-遵守上述兩道確認關卡；除非該 placement 另有規定，一律：
+依 placement 檔指定的模板輸出。輪播版位必須優先遵守上述四道確認關卡；Cover 與 9:16 高密度知識圖卡
+必須優先遵守各自的三道確認關卡；Concept Card 必須遵守 DNA、合併方案與比例、中文最終 Prompt
+三道確認關卡；除非該 placement 另有規定，一律：
 
 - 方案組數依步驟 2 收斂規則：使用者已選定風格（A/B）→ **1 組方案**忠實
   呈現選定風格；使用者說「你決定」（C）→ 3 組「勇敢先驅 / 保守 / 革命性」
@@ -313,16 +336,18 @@ Logo、簽名、浮水印或額外文案。
 
 ### 5. 交棒
 
-除輪播第一關的首張展示、輪播第四關、Cover 最終確認後的正式生圖交棒，以及 Landing Page
-圖卡已通過「結構與優先順序／圖片數量／風格與圖面示意／全套 Prompt」四項確認後的示意與
-正式生圖交棒、Concept Card 完成其風格錨點／視覺隱喻／最終 Prompt 三項確認後的正式生圖
-交棒外，不生圖、不組版。輪播第四關前必須通過
+除共同流程的 1／3 張圖面示意、輪播第四關、Cover 完成三項確認後、Landing Page 圖卡已通過
+「結構與優先順序／圖片數量／風格與圖面示意／全套 Prompt」四項確認後、Concept Card 完成
+「視覺語言與 DNA／DNA 合併圖像方案與比例／最終 Concept Card Prompt」三項確認後，以及 9:16 高密度卡完成其內容覆蓋、
+風格與圖面示意、完整 Prompt 三項確認後的正式生圖交棒外，不生圖、不組版。輪播第四關前必須通過
 `scripts/validate_carousel_approvals.py briefs/approval-log.md`；Cover 正式生圖前必須通過
 `scripts/validate_cover_approvals.py briefs/cover-approval-log.md`。Landing Page 圖卡的確認
 記錄與驗收詳見 `references/placements/landing-page.md`。Landing Page 圖卡交棒前必須通過
 `scripts/validate_landing_page_approvals.py briefs/landing-page-approval-log.md`；交棒契約見
 `references/handoff-contracts.md`。Concept Card 交棒前必須通過
-`scripts/validate_concept_card_approvals.py briefs/concept-card-approval-log.md`。
+`scripts/validate_concept_card_approvals.py briefs/concept-card-approval-log.md`。9:16 高密度卡
+交棒前必須通過 `scripts/validate_high_density_knowledge_card_approvals.py`
+`briefs/knowledge-card-approval-log.md`。
 
 ## 萃取風格（把參考圖收進風格庫）
 
@@ -346,10 +371,9 @@ Logo、簽名、浮水印或額外文案。
 ## 硬規則
 
 1. 只產出 brief、確認狀態與交棒資料；不自行選擇生圖 provider、不寫 HTML、不組頁面。
-   輪播版位僅可在第 1 關透過交棒產出首張展示圖，整套正式生圖一律等第 3 關確認後
-   才交給 `image-generator` 執行；Cover 一律等最終提案與提示詞確認、確認驗證器通過後
-   才交棒正式生圖；Landing Page 圖卡則必須先確認文案、區塊、圖片數量與 A／B／C 風格路徑，
-   再交棒生成最高優先區塊的圖面示意，並在全套 Prompt 確認後才交棒正式生成全部圖片。
+   所有版位僅能在完成內容／語意範圍與暫定風格後，交棒產出 A／B 的 1 張或 C 的 3 張圖面示意；
+   示意確認與完整 Prompt 確認前，不得交棒正式成品圖。版位個別的額外確認由
+   `references/card-generation-flow.md` 與各 placement 檔定義。
 2. 不輸出 Midjourney / Stable Diffusion 的單段指令語法（`/imagine` 等）。
    輸出預設是結構化提案文件；高密度 `carousel-info` 以六段輕量結構保留自然語言彈性，
    但指令語法仍然禁止。
@@ -380,9 +404,10 @@ Logo、簽名、浮水印或額外文案。
     的形式提到 forbidden 語言（會誘發生圖模型產生該語言文字——實測
     `Japanese typography` 會招來日文假名）。完整映射見
     `references/handoff-contracts.md` 的「語言映射契約」，所有版位一體適用。
-15. 使用者在風格校準回覆 A（挑編號）或 B（描述偏好）即為定案，直接鎖定
-    visual DNA；不得再強制使用者在多組風格變體間做第二次選擇。三組差異化
-    提案只在使用者回覆 C（你決定）或非互動環境時提供。
+15. 使用者在風格校準回覆 A（挑編號）或 B（描述偏好）後，先建立暫定 DNA 並產出 1 張
+    圖面示意；C（你決定）產出 3 張最大差異化示意。只有使用者確認示意後才能鎖定
+    最終 DNA；不得只用文字提案跳過可見比較。**Concept Card 例外**：DNA 先以 Style Library 既有預覽圖
+    或完整 DNA 卡確認，之後以三個 DNA 合併方案與最終 Prompt 校稿，不產生內容圖面示意。
 16. **多張系列版位四關流程**：`carousel` 與 `carousel-info` 必須依序完成：首張展示
     提案與提示詞確認 → 全套文本大綱確認 → 全套 N 張正式提示詞確認 → 正式生圖。
     第 2 關每張均須完整列出「主標題／副標題／核心金句／內文重點／氣氛裝飾文字」；
@@ -395,23 +420,30 @@ Logo、簽名、浮水印或額外文案。
     使用者選定 1 組；**不得跳過任何確認關卡，也不得在第 3 關前產出正式成品圖。**
     高密度正式 PNG 生成後另須以 `validate_image_aspect.py --ratio 4:5` 驗收實際像素比例；
     不通過時不可靜默交付、裁切或拉伸。
-17. **Cover 單張兩關流程**：`cover` 必須依序完成視覺方向與人物確認 → 最終 Cover
-    提案與提示詞確認 → `validate_cover_approvals.py` 通過 → 正式生圖。A／B 第二關提供
-    1 組完整提案；C 提供 3 組並由使用者選定 1 組。**Cover 不產出展示圖，也不得在
-    最終提案與提示詞確認前生圖。**
-18. **Concept Card 單張三關流程**：`concept-card` 必須依序完成風格錨點 → 同一命題的三個
-    視覺隱喻方案 → 最終 Concept Card Prompt → `validate_concept_card_approvals.py` 通過 →
-    正式生圖。參考圖存在時優先作為風格錨點；沒有參考圖時才提供 5 個風格庫候選與預覽圖。
-    它固定 `person.mode: none`，不詢問人物；不產出展示圖；不得把 Cover 的高點擊率任務、
-    風格三變體或長內容知識圖卡的全文覆蓋要求帶入。
+17. **Cover 單張三關流程**：`cover` 必須依序完成視覺方向與人物確認 → 1／3 張 Cover
+    圖面示意確認 → 最終 Cover 提案與提示詞確認 → `validate_cover_approvals.py` 通過 → 正式生圖。
+    A／B 產出 1 張示意；C 產出 3 張。示意不是正式成品，不得在最終 Prompt 確認前生圖。
+18. **Concept Card DNA 優先三關流程**：`concept-card` 必須依序完成完整中文 DNA 的風格確認（Library 的
+    5 個候選與預覽、使用者偏好、或三張完整 DNA 卡）→ 同一 DNA 合併的三個可修改圖像方案與比例
+    → 中文格式化最終 Concept Card Prompt →
+    `validate_concept_card_approvals.py` 通過 → 正式生圖。它固定 `person.mode: none`，不詢問人物；
+    不得在 DNA 確認前要求選擇脫離視覺語言的隱喻，也不得把風格、隱喻混成 3×3 矩陣，或把長內容
+    知識圖卡的全文覆蓋要求帶入。Concept Card 不產生內容預覽圖，也不得用同內容草稿要求第二次視覺確認。
+    若來自 Style Library，原始記錄只作稽核，必須以
+    `style.resolved_design` 先完成衝突解析，並以 `validate_visual_dna.py --placement concept-card`
+    驗證後才可提出最終 Prompt 或正式生圖。
 19. **風格庫對齊與自由發揮分流（路徑 A/B vs 路徑 C）**：
     - **路徑 A（挑編號 #001–#100）與路徑 B（描述偏好）**：AI 必須嚴格對齊既定風格庫 `knowledge/card-style-library/styles.yaml` 中的文檔描述 (`desc`)、特徵 (`chars`) 與 Prompt，並調閱 `previews/{id:03d}.jpg` 實體預覽圖檔（路徑 A 對應指定編號；路徑 B 搜尋比對最近似的風格編號 #N），據以建立 `visual-dna.yaml`、Briefs 與 Prompt，嚴禁脫離參考資料自創不相干的風格或構圖元素。
     - **路徑 C（「你決定」）**：由 AI 完全自由發揮設計創意，依據創新維度軸線設計 3 組最大差異化（勇敢先驅 / 保守 / 革命性）的創新視覺提案，不受風格庫既有文檔與圖像約束。
-20. **全文章最高密度知識圖卡**：完整文章的 9:16 知識圖卡必須先有五類內容覆蓋與逐字文本計畫，
-    再交棒 `image-generator`；不可把原文改成只含標題、金句與少數摘要的圖卡。生成後須檢查五類
-    覆蓋、文字白名單、閱讀層級與實際 9:16 比例；缺一類內容、出現未核准外語招牌、或比例不符都
-    不得交付。詳細契約由 `image-generator/references/high-density-knowledge-card.md` 定義，三個
-    Agent 共用同一份計畫與驗收。
+    - **來源忠實度與跨版位一致性**：路徑 A 的 `visual-dna.yaml` 必須以 `style.library_record` 保留完整風格庫記錄，並以 `style.reference_prompt` 保存原始 Prompt；Cover、Carousel、Landing Page 的示意圖與所有正式圖都必須使用同一份三段式 Prompt Stack（固定 DNA 前綴／本張內容／固定風格與否定後綴）。在第一張示意或任何正式生圖前，先以 `scripts/validate_visual_dna.py --library <styles.yaml> <visual-dna.yaml>` 驗證來源內容未漂移。
+    - **Concept Card 的來源／有效 DNA 分層**：選定 Style Library 時同樣完整保留原始記錄，但它們為 `audit-only`；先依 Concept Card 硬限制、使用者已確認錨點、來源相容特徵、通用規則建立 `style.resolved_design`。Concept Card 生圖只帶入有效 DNA，且必須以 `scripts/validate_visual_dna.py --placement concept-card --library <styles.yaml> <visual-dna.yaml>` 通過驗證。
+20. **全文章最高密度知識圖卡**：完整文章的 9:16 知識圖卡必須先讀
+    `references/placements/high-density-knowledge-card.md`、完成五類內容覆蓋與逐字文本計畫、風格
+    與 1／3 張圖面示意、完整 Prompt 確認後才交棒 `image-generator`；不可把原文改成只含標題、
+    金句與少數摘要的圖卡。生成後須檢查五類覆蓋、文字白名單、閱讀層級與實際 9:16 比例；
+    缺一類內容、出現未核准外語招牌、或比例不符都不得交付。
+    詳細契約由 `image-generator/references/high-density-knowledge-card.md` 定義，三個 Agent 共用同一份
+    計畫與驗收。
 
 ## 擴充
 
@@ -424,20 +456,23 @@ Logo、簽名、浮水印或額外文案。
 
 ## Agent 執行
 
-- **Shared steps**：文章解析、風格篩選與選單、visual DNA、提案模板、減法檢查、
-  輸出路徑與驗證標準三個 Agent 完全相同。
+- **Shared steps**：文章解析、內容／語意範圍、三條風格路徑、圖面示意、visual DNA、
+  提案模板、減法檢查、輸出路徑與驗證標準三個 Agent 完全相同；Concept Card 的差異是先鎖 DNA，
+  再交出可修改的合併方案與最終 Prompt，不產生內容預覽圖。
 - **Codex adapter**：以編號清單呈現 5 個候選，並附預覽圖的絕對路徑供使用者開啟。
 - **Claude adapter**：同樣輸出編號清單，並額外用原生檔案傳送把 5 張預覽圖直接呈現；
   結果契約與編號清單一致。
 - **AntiGravity adapter**：同 Codex，以編號清單加絕對路徑呈現。
 - **Fallback**：任一 Agent 無法內嵌顯示圖片時，仍必須給出預覽圖的絕對路徑，
   不可略過視覺比較這一步而直接替使用者決定。
-- **Verification**：候選數量為 5、每個都有推薦理由與可存取的預覽圖路徑；輪播第 2 關
+- **Verification**：候選數量為 5、每個都有推薦理由與可存取的預覽圖路徑；除 Concept Card 外的版位均有
+  A／B 的 1 張或 C 的 3 張圖面示意與明確確認；Concept Card 必須驗證完整 DNA、三個格式化合併方案與
+  中文最終 Prompt，且只生成一次正式圖；輪播第 2 關
   必須先以 `validate_carousel_outline.py` 驗證每張五個文本欄位（低密度另驗證
   `### 1. 文本內容`），再以 `validate_carousel_prompt_plan.py` 驗證提示詞計畫與大綱張次
   一一對應（高密度加 `--require-structured-high-density` 驗證六段提示詞）；並保留首張展示、
-  文本大綱、全套提示詞三次明確確認紀錄；Cover 任務必須有視覺方向與人物、最終提案與
-  提示詞兩次明確確認紀錄。兩者各自的生圖前驗證器通過後才可交棒；高密度正式 PNG 另須
+  文本大綱、全套提示詞三次明確確認紀錄；Cover 與 9:16 高密度卡保留內容／方案、圖面示意、最終 Prompt 的確認紀錄；
+  Concept Card 保留 DNA、合併方案與比例、最終 Prompt 的確認紀錄。各自的生圖前驗證器通過後才可交棒；高密度正式 PNG 另須
   通過 `validate_image_aspect.py --ratio 4:5` 才可交付。
 - **萃取風格**：三個 Agent 共用同一套模板與 `add_style.py` 呼叫方式；差異只在
   呈現填好模板的方式（見 `references/style-extraction.md` 的 Agent 執行）。
@@ -445,6 +480,8 @@ Logo、簽名、浮水印或額外文案。
 
 ## 參考檔
 
+- `references/README.md`：依版位、共用設計系統、Prompt 資產與工具分類的完整索引。
+- `references/card-generation-flow.md`：一般圖卡的三條風格路徑、圖面示意、Prompt 確認與正式生圖主幹，以及 Concept Card 的 DNA 優先例外。
 - `references/style-library.md`：風格庫位置、schema、篩選與選單流程。
 - `references/visual-dna.md`：`visual-dna.yaml` schema 與系列一致性規則。
 - `references/style-extraction.md`：萃取風格模板、欄位映射與寫入風格庫流程。
@@ -452,8 +489,12 @@ Logo、簽名、浮水印或額外文案。
 - `references/landing-page-mini-copy.md`：沒有既有文案時的 Mini-Landing Page 逐題訪談與短版文案契約。
 - `references/placements/landing-page.md`：Landing Page 圖卡版位；既有文案的結構解讀、圖片數量確認、
   風格校準與結構化 Prompt 契約。
-- `references/placements/concept-card.md`：極簡概念知識圖卡版位；參考圖／風格庫校準、三個視覺隱喻
-  方案、最終 Prompt 確認與 1:1 正式生圖契約。
+- `references/placements/concept-card.md`：極簡概念知識圖卡版位；完整 DNA、DNA 合併的三個可修改圖像方案與可選比例、
+  中文最終 Prompt 確認與單次正式生圖契約。
+- `references/placements/high-density-knowledge-card.md`：全文章最高密度 9:16 知識圖卡的版位邊界、
+  必讀順序與 Card Style Library 分類界線。
+- `references/prompts/high-density-knowledge-card-prompts.md`：9:16 高密度知識圖卡可選用的兩段既有
+  風格 Prompt。
 - `references/placements/cover.md`：封面版位（課程封面、文章封面、縮圖）。
 - `references/placements/carousel.md`：低密度輪播圖卡版位（1:1 連續敘事 Carousel，
   固定 8–12 張；只伸縮 The System 的 1–5 張知識段落。固定四關：首張展示提案 →
@@ -474,15 +515,21 @@ Logo、簽名、浮水印或額外文案。
 - `scripts/validate_carousel_prompt_plan.py`：驗證內部提示詞計畫與文本大綱的張次完全對應。
 - `scripts/validate_image_aspect.py`：驗證正式圖片的實際像素比例；高密度輪播固定 4:5。
 - `scripts/validate_carousel_approvals.py`：正式生圖前驗證任務的前三次使用者確認。
-- `scripts/validate_cover_workflow.py`：驗證 Cover 封面保有兩道確認關卡與生圖驗證器。
-- `scripts/validate_cover_approvals.py`：正式生圖前驗證 Cover 的兩次使用者確認。
-- `scripts/validate_concept_card_workflow.py`：驗證 Concept Card 的風格錨點、視覺隱喻與最終 Prompt 三關流程。
+- `scripts/validate_cover_workflow.py`：驗證 Cover 封面保有風格、圖面示意與最終 Prompt 三道確認關卡。
+- `scripts/validate_cover_approvals.py`：正式生圖前驗證 Cover 的三次使用者確認。
+- `scripts/validate_concept_card_workflow.py`：驗證 Concept Card 的 DNA 優先、可修改合併方案、可選比例、中文最終 Prompt 與單次正式生圖流程。
+- `scripts/validate_concept_card_proposals.py`：驗證每個 Concept Card 合併方案都具有可修改的文字腳本、視覺語意、DNA、比例與修改影響欄位。
 - `scripts/validate_concept_card_approvals.py`：正式生圖前驗證 Concept Card 的三次確認。
 - `scripts/validate_landing_page_workflow.py`：驗證 Landing Page 圖卡的文案入口、四道確認與圖面示意流程。
 - `scripts/validate_landing_page_approvals.py`：正式生圖前驗證 Landing Page 圖卡的四次確認。
+- `scripts/validate_high_density_knowledge_card_workflow.py`：驗證 9:16 高密度知識圖卡的風格、圖面示意與最終 Prompt 流程。
+- `scripts/validate_high_density_knowledge_card_approvals.py`：正式生圖前驗證 9:16 高密度知識圖卡的三次確認。
+- `scripts/validate_visual_dna.py`：驗證 library 選擇的完整來源記錄、原始 Prompt 與共用 DNA schema，避免風格在示意或正式生圖前漂移。
 - `assets/carousel-approval-log-template.md`：輪播任務的三次確認紀錄模板。
-- `assets/cover-approval-log-template.md`：Cover 任務的兩次確認紀錄模板。
+- `assets/cover-approval-log-template.md`：Cover 任務的三次確認紀錄模板。
 - `assets/concept-card-approval-log-template.md`：Concept Card 任務的三次確認紀錄模板。
+- `assets/concept-card-proposals-template.md`：Concept Card DNA 合併圖像方案與可修改圖中文字腳本模板。
+- `assets/high-density-knowledge-card-approval-log-template.md`：9:16 高密度知識圖卡任務的三次確認紀錄模板。
 - `assets/landing-page-approval-log-template.md`：Landing Page 圖卡任務的四次確認紀錄模板。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SKILL_MD_0E95F5A366
 
@@ -525,8 +572,9 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/concept-card-approval-log-t
 
 > 每次使用者明確確認後才更新對應狀態；未確認一律維持 `pending`。
 
-- 風格錨點：pending
-- 視覺隱喻方案：pending
+- 流程版本：v4
+- 視覺語言與 DNA：pending
+- DNA 合併圖像方案與比例：pending
 - 最終 Concept Card Prompt：pending
 - 正式生圖：not-started
 
@@ -536,12 +584,155 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/concept-card-approval-log-t
 - 使用者回覆：
 - 備註：
 
+## 視覺語言與 DNA
+
+- 路徑：1／2／3／R
+- 已確認 DNA 摘要：
+- Style Library 來源記錄（若有）：
+
+## DNA 合併圖像方案與比例
+
+- 已選方案：
+- 已確認比例：
+- 圖中文字腳本：
+
 ## 正式生成驗收
 
 - 圖檔路徑與像素尺寸：
 - 繁中白名單與文字可讀性：
 - 無人物、單一隱喻與減法檢查：
+
+使用規則：
+
+- 視覺語言與 DNA 已確認後，才將「視覺語言與 DNA」改為 `confirmed`。
+- DNA 合併圖像方案與比例已確認後，才將「DNA 合併圖像方案與比例」改為 `confirmed`，並寫入
+  `composition.aspect_ratio` 與圖中文字腳本。
+- 最終 Prompt 有任何修訂時，將「最終 Concept Card Prompt」改為 `revisions-requested`；若改動比例、
+  隱喻、視覺錨點、文字腳本或 DNA，將受影響的前置關卡改為 `revisions-requested`，重新確認。Concept Card
+  不產生內容預覽圖；正式 PNG 是唯一一次生圖，不能用任何草稿示意取代。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_CONCEPT_CARD_APPROVAL_LOG_TEMPLATE_MD_86F5656336
+
+# visual-prompt-kit/assets/concept-card-proposals-template.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/concept-card-proposals-template.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/concept-card-proposals-template.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_CONCEPT_CARD_PROPOSALS_TEMPLATE_MD_8AC6E9113B'
+# Concept Card DNA 合併圖像方案
+
+> 此檔是使用者選擇方案、比例與修改文字時的可核對文件。三個方案都必須使用同一套已確認的 Visual DNA；只有視覺隱喻、物件、動作與構圖可以不同。
+
+## 方案 A｜
+
+### 0. 設計定位
+
+- 核心命題：
+- 閱讀任務：
+- 原文依據：
+
+### 1. 圖中文字腳本
+
+- 主標題：
+- 副標題：
+- 必要標籤：
+- 不使用的文字：
+
+### 2. 視覺隱喻與語意
+
+- 主要物體：
+- 動作／變化：
+- 遮字語意：
+- 不放入：
+
+### 3. 已合併的 Visual DNA
+
+- 色彩、線條、字體與留白：
+- 構圖策略：
+- 需要排除：
+
+### 4. 比例適配
+
+- 適合比例：
+- 不同於建議比例時的調整原則：
+
+### 5. 修改風險
+
+- 可能誤解：
+- 若要修改文字，會影響：
+
+## 方案 B｜
+
+### 0. 設計定位
+
+- 核心命題：
+- 閱讀任務：
+- 原文依據：
+
+### 1. 圖中文字腳本
+
+- 主標題：
+- 副標題：
+- 必要標籤：
+- 不使用的文字：
+
+### 2. 視覺隱喻與語意
+
+- 主要物體：
+- 動作／變化：
+- 遮字語意：
+- 不放入：
+
+### 3. 已合併的 Visual DNA
+
+- 色彩、線條、字體與留白：
+- 構圖策略：
+- 需要排除：
+
+### 4. 比例適配
+
+- 適合比例：
+- 不同於建議比例時的調整原則：
+
+### 5. 修改風險
+
+- 可能誤解：
+- 若要修改文字，會影響：
+
+## 方案 C｜
+
+### 0. 設計定位
+
+- 核心命題：
+- 閱讀任務：
+- 原文依據：
+
+### 1. 圖中文字腳本
+
+- 主標題：
+- 副標題：
+- 必要標籤：
+- 不使用的文字：
+
+### 2. 視覺隱喻與語意
+
+- 主要物體：
+- 動作／變化：
+- 遮字語意：
+- 不放入：
+
+### 3. 已合併的 Visual DNA
+
+- 色彩、線條、字體與留白：
+- 構圖策略：
+- 需要排除：
+
+### 4. 比例適配
+
+- 適合比例：
+- 不同於建議比例時的調整原則：
+
+### 5. 修改風險
+
+- 可能誤解：
+- 若要修改文字，會影響：
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_CONCEPT_CARD_PROPOSALS_TEMPLATE_MD_8AC6E9113B
 
 # visual-prompt-kit/assets/cover-approval-log-template.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/cover-approval-log-template.md")"
@@ -551,6 +742,10 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/cover-approval-log-template
 - 視覺方向與人物：pending
   - 確認日期：
   - 使用者回覆：
+- 風格與圖面示意：pending
+  - 確認日期：
+  - 使用者回覆：
+  - 示意圖檔與像素尺寸：
 - 最終 Cover 提案與提示詞：pending
   - 確認日期：
   - 使用者回覆：
@@ -561,14 +756,49 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/cover-approval-log-template
 使用規則：
 
 - 收到使用者的風格方向與人物選項後，才把「視覺方向與人物」改為 `confirmed`。
-  使用者選 C（你決定）時，C 本身是委託視覺方向的確認；最終仍須在下一關選定或確認提案。
-- A／B 只能提供 1 組最終 Cover 提案與提示詞；C 提供 3 組最大差異化提案與提示詞，
-  使用者選定其中一組才把「最終 Cover 提案與提示詞」改為 `confirmed`。
+- A／B 必須產出 1 張、C 必須產出 3 張 Cover 圖面示意與 Sample Prompt；使用者確認或選定其中一張後，
+  才把「風格與圖面示意」改為 `confirmed`。示意只存 drafts，不能當成正式成品。
+- 示意確認後才可提出唯一最終 Cover Prompt；使用者確認後才把「最終 Cover 提案與提示詞」改為 `confirmed`。
 - 使用者要求修改最終提案或提示詞時，將該欄改為 `revisions-requested`；修訂後必須再次獲得
   明確確認，才可改回 `confirmed`。
 - 正式交棒前必須使用 `scripts/validate_cover_approvals.py` 驗證本檔並取得 `PASS`；
-  不得在前兩項皆為 `confirmed` 前將「正式生圖」改為進行中。
+  不得在前三項皆為 `confirmed` 前將「正式生圖」改為進行中。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_COVER_APPROVAL_LOG_TEMPLATE_MD_C3FC5A8FF1
+
+# visual-prompt-kit/assets/high-density-knowledge-card-approval-log-template.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/high-density-knowledge-card-approval-log-template.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/high-density-knowledge-card-approval-log-template.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_HIGH_DENSITY_KNOWLEDGE_CARD_APPROVAL_LOG_TEMPLATE_MD_BDF981183F'
+# 全文章高密度知識圖卡確認紀錄
+
+> 每次使用者明確確認後才更新對應狀態；未確認一律維持 `pending`。
+
+- 內容覆蓋與逐字文字：pending
+- 風格與圖面示意：pending
+- 完整 Prompt：pending
+- 正式生圖：not-started
+
+## 確認紀錄
+
+- 日期：
+- 使用者回覆：
+- 備註：
+
+## 圖面示意
+
+- 路徑：1／2／3／R
+- 圖檔路徑與像素尺寸：
+- 使用者確認：
+
+## 正式生成驗收
+
+- 圖檔路徑與像素尺寸：
+- 五類內容覆蓋與逐字文字：
+- 文字白名單與閱讀層級：
+
+使用規則：內容覆蓋與逐字文字確認後，才可產出圖面示意；路徑 1／2／R 產出 1 張、路徑 3 產出 3 張。
+示意確認後才可確認完整 Prompt。正式生圖前必須使用
+`scripts/validate_high_density_knowledge_card_approvals.py` 取得 `PASS`。示意只存 drafts，正式圖一律重新生成。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_HIGH_DENSITY_KNOWLEDGE_CARD_APPROVAL_LOG_TEMPLATE_MD_BDF981183F
 
 # visual-prompt-kit/assets/landing-page-approval-log-template.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/landing-page-approval-log-template.md")"
@@ -596,6 +826,97 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/landing-page-approval-log-t
 - 具體視覺錨點與減法檢查：
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_LANDING_PAGE_APPROVAL_LOG_TEMPLATE_MD_155A802142
 
+# visual-prompt-kit/references/README.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/README.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/README.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_README_MD_21F1A85950'
+# Visual Prompt Kit 參考索引
+
+本目錄依「版位、共用設計系統、Prompt 資產、驗證與交棒」分類。選定任務後，先讀對應的
+版位檔，再讀它指定的共用規格；不要把不同版位的流程混用。
+
+## 版位
+
+| 任務 | 主要檔案 | 核心產出 |
+| --- | --- | --- |
+| Cover | `placements/cover.md` | 單張封面／縮圖 |
+| 低密度 Carousel | `placements/carousel.md` | 1:1、8–12 張敘事輪播 |
+| 高密度 Info Carousel | `placements/carousel-info.md` | 4:5、多張知識輪播 |
+| Concept Card | `placements/concept-card.md` | 可選比例、單一視覺隱喻圖卡 |
+| 全文章高密度知識圖卡 | `placements/high-density-knowledge-card.md` | 9:16、單張完整知識圖卡 |
+| Landing Page 圖卡 | `placements/landing-page.md` | 依既有文案分區規劃的多張圖片 |
+
+## 共用設計系統
+
+- `card-generation-flow.md`：一般圖卡共同遵守的內容範圍 → 三條風格路徑 → 圖面示意 → 完整 Prompt → 正式生圖主幹；Concept Card 則以 DNA 合併方案與最終 Prompt 取代內容預覽圖。
+- `visual-dna.md`：跨示意圖與正式圖共用的 `visual-dna.yaml`、來源忠實度與 Prompt Stack。
+- `style-library.md`：讀取 100 種風格資料庫、篩選候選與建立 DNA 的規則。
+- `style-extraction.md`：從參考圖萃取自訂風格的確認與附加寫入流程。
+- `handoff-contracts.md`：交棒給 `image-generator`、`social-cards` 與 `landing-page` 的契約。
+
+## Prompt 資產
+
+- `prompts/high-density-knowledge-card-prompts.md`：9:16 全文章高密度知識圖卡可選用的兩段風格 Prompt。
+  它不是 Card Style Library 的第 101 種風格，也不是 1:1／4:5 輪播規格。
+
+## 其他輸入與工具
+
+- `landing-page-mini-copy.md`：沒有既有 Landing Page 文案時的逐題訪談與短版文案契約。
+- `../scripts/`：風格推薦、DNA、確認紀錄、文本大綱與圖片比例的固定驗證腳本。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_README_MD_21F1A85950
+
+# visual-prompt-kit/references/card-generation-flow.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/card-generation-flow.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/card-generation-flow.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_CARD_GENERATION_FLOW_MD_4B9FC82981'
+# 共用圖卡生成流程
+
+本流程適用於 Visual Prompt Kit 的 Cover、低密度 Carousel、高密度 Info Carousel、Landing Page 圖卡、
+Concept Card 與全文章高密度知識圖卡。每種版位可以有不同的內容規格、比例、人物策略與確認欄位，
+但**不得跳過下列共同決策順序**。Concept Card 的「風格」必須先被寫成完整 DNA，並在選定 DNA 後才
+提出內容圖像方案；它的差異在本文件的「版位特有差異」表與 `placements/concept-card.md` 中明定。
+
+## 共同主幹
+
+1. **內容／語意範圍**：先依版位定義要傳達的內容、文字與視覺錨點；不得先挑風格後才補內容。
+2. **三條風格路徑**：使用者每次都可選擇：
+   - **路徑 1：Card Style Library**：提出 5 個候選、推薦理由與可見的既有預覽圖。
+   - **路徑 2：直接描述偏好**：由使用者指定色調、構圖、媒材、情緒或字體感。
+   - **路徑 3：設計師提案**：以同一個已確認的內容與視覺錨點，提出勇敢先驅／保守穩重／革命性三組最大差異化方向。
+   - **Concept Card 例外**：三條路徑先輸出完整 Visual DNA（Library 附預覽圖；路徑 3 為三張完整 DNA 卡），
+     而不是先叫使用者選風格名稱或脫離 DNA 的視覺隱喻。
+3. **圖面示意**：一般版位無論使用哪一條路徑，都必須在正式生圖前呈現可視覺比較的圖面示意與其完整 Prompt：
+   - 路徑 1、2 與使用者提供參考圖的路徑：1 張示意。
+   - 路徑 3：3 張示意；三張使用相同內容與視覺錨點，只能在色彩、光感、媒材、字體感與構圖語彙上差異化。
+4. **示意確認與 DNA 鎖定**：一般版位使用者明確確認示意後，才將選定版本視為最終 Visual DNA。示意未確認時，不得進入完整 Prompt 或正式圖。Concept Card 則在 DNA 卡確認後鎖定有效 DNA，再確認 DNA 合併圖像方案與比例，接著提出可校稿的最終 Prompt；不另產出內容圖面示意。
+5. **完整 Prompt 確認**：依版位需求提出單張／全套結構化 Prompt。使用者明確確認後，才可正式生成。
+6. **正式生圖與驗收**：正式圖必須由已確認的 DNA 與 Prompt 重新生成、驗收比例與文字；圖面示意不可自動視為正式成品。
+
+## 圖面示意的界線
+
+- 圖面示意是檢查風格、字級層次、文字保護、圖文關係與具體視覺錨點的可見樣本，不是草率縮圖，也不是正式交付。
+- 每張示意都必須使用最終比例、既有內容白名單與同一條 DNA／有效 DNA 路徑；不得以抽象佔位圖或無關素材取代。
+- Cover 的人物選項必須在產出示意前確認；Concept Card 固定無人物；其他版位依其人物規則處理。
+- 路徑 3 的三張示意不可形成不同內容方案或 3×3 矩陣。內容與視覺錨點固定，只有風格方向可比較。
+- 示意圖一律保存到 `100_Todo/drafts/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/assets/style-samples/`，不可混入
+  `projects/.../assets/images/` 或 Archive。正式圖通過驗收後，除非使用者明確要求保留，移除該任務的示意檔。
+
+## 版位特有差異
+
+| 版位 | 內容／語意範圍 | 圖面示意 | 正式生成前的額外確認 |
+| --- | --- | --- | --- |
+| Cover | 單張核心訊息與人物策略 | 1／3 張 Cover 示意 | 人物策略、最終 Cover Prompt |
+| Carousel／Info Carousel | 敘事弧線與 Slide 01 | 1／3 張 Slide 01 示意 | 文本大綱、全套 Prompt |
+| Landing Page | 原文區塊、優先順序與數量 | 1／3 張最高優先區塊示意 | 全套 Prompt |
+| Concept Card | 先選視覺語言 DNA，再以 DNA 合併隱喻與比例 | 不產生內容預覽圖；以完整合併方案與最終 Prompt 核對 | DNA、合併方案與比例、最終 Concept Prompt |
+| 9:16 高密度知識圖卡 | 五類內容覆蓋與逐字文字 | 1／3 張 9:16 全文內容示意 | 完整逐字 Prompt |
+
+## 驗證與交棒
+
+- 每個一般版位都要在「圖面示意」與「正式生圖」兩次交棒前驗證 Visual DNA；Concept Card 在
+  「DNA 合併方案」與「正式生圖」兩次交棒前驗證 `validate_visual_dna.py --placement concept-card` 的有效 DNA。
+- 下游 `image-generator` 的圖面示意交棒只能寫入 drafts，且不得把預覽輸出標示為正式成品；Concept Card 不走此圖面示意交棒。
+- 使用者只要 brief、不要示意或成品時，停止在上游；不因共用流程而自動生圖。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_CARD_GENERATION_FLOW_MD_4B9FC82981
+
 # visual-prompt-kit/references/handoff-contracts.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/handoff-contracts.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/handoff-contracts.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_HANDOFF_CONTRACTS_MD_F59DB8C89B'
@@ -611,11 +932,12 @@ visual-prompt-kit  →  image-generator   生圖
 
 ## → image-generator
 
-Cover 與輪播圖卡的確認關卡不同，交棒時不可混淆：
+各版位的內容確認不同，但皆先經圖面示意、再進行正式生圖，交棒時不可混淆：
 
-1. **Cover 正式生圖**：Cover 不產出展示圖。只有
-   `briefs/cover-approval-log.md` 的「視覺方向與人物」與「最終 Cover 提案與提示詞」都標為
-   `confirmed` 時，才交出選定的 `visual-dna.yaml` 路徑、單組已確認 brief／提示詞、目標比例、
+1. **Cover 圖面示意與正式生圖**：先依使用者的風格與人物選項，A／B 交出 1 張、C 交出 3 張
+   同一內容錨點的 Cover 示意與 Sample Prompt，且只寫入 drafts。只有
+   `briefs/cover-approval-log.md` 的「視覺方向與人物」、「風格與圖面示意」與「最終 Cover 提案與提示詞」
+   都標為 `confirmed` 時，才交出選定的 `visual-dna.yaml` 路徑、單組已確認 brief／提示詞、目標比例、
    輸出檔名與存放路徑。交棒前必須執行
    `scripts/validate_cover_approvals.py briefs/cover-approval-log.md` 並取得 `PASS`。
 2. **輪播第 1 關首張展示**：交出 Slide 01 的展示 brief、對應完整提示詞、目標比例與
@@ -626,19 +948,31 @@ Cover 與輪播圖卡的確認關卡不同，交棒時不可混淆：
    已確認 brief／提示詞、目標比例、輸出檔名與存放路徑。交棒前必須執行
    `scripts/validate_carousel_approvals.py briefs/approval-log.md` 並取得 `PASS`。
 4. **Landing Page 圖卡**：先確認文案存在；無文案時先完成 Mini-Landing Page 訪談。再依序完成
-   「結構與優先順序」、「圖片數量」、「風格與圖面示意」、「全套 Prompt」四項確認。圖面示意時，
-   A／B 路徑交出 1 張最高優先區塊的示意；C 路徑交出 3 張同一具體視覺錨點、但風格差異明確的
-   示意。全套 Prompt 已確認後，先執行
+    「結構與優先順序」、「圖片數量」、「風格與圖面示意」、「全套 Prompt」四項確認。圖面示意時，
+    A／B 路徑交出 1 張最高優先區塊的示意；C 路徑交出 3 張同一具體視覺錨點、但風格差異明確的
+   示意。使用風格庫時，圖面示意前與正式生圖前都必須先執行
+   `scripts/validate_visual_dna.py --library <風格庫>/styles.yaml visual-dna.yaml`，確認完整
+   `style.library_record` 與原始 `style.reference_prompt` 都沒有漂移。每張示意與正式圖的交棒都
+   必須攜帶三段式 Prompt Stack：固定 Visual DNA 前綴（含原始 reference_prompt）／本張內容與
+   佈局／固定風格與否定後綴（含 chars、語言與禁項）。全套 Prompt 已確認後，先執行
    `scripts/validate_landing_page_approvals.py briefs/landing-page-approval-log.md` 並取得 `PASS`，
    才交出 `visual-dna.yaml`、每張已確認的結構化 brief、尺寸比例與輸出路徑。正式交棒文件首行
    必須是「使用以下指令產生圖卡，共 N 張輪播圖卡 output by slide by slide format」，N 替換為已確認
    的總張數，並以逐張方式生成。
-5. **Concept Card 正式生圖**：只接收已確認的 1:1 單張 Concept Card。交棒前必須確認
-   `briefs/concept-card-approval-log.md` 的「風格錨點」、「視覺隱喻方案」、「最終 Concept Card
-   Prompt」皆為 `confirmed`，並執行
+5. **Concept Card 正式生圖**：先確認視覺語言與有效 DNA，再確認 DNA 合併的圖像方案與比例，並確認唯一的
+   中文格式化最終 Prompt。Concept Card 不產生內容示意；正式交棒前必須確認
+   `briefs/concept-card-approval-log.md` 的「視覺語言與 DNA」、「DNA 合併圖像方案與比例」、
+   「最終 Concept Card Prompt」皆為 `confirmed`，並執行
    `scripts/validate_concept_card_approvals.py briefs/concept-card-approval-log.md` 取得 `PASS`。
-   交出 `visual-dna.yaml`、唯一的結構化 Prompt、實際圖中文字白名單、目標比例與輸出路徑；
-   `person.mode` 必須是 `none`。只生成 1 張最終圖，不能因為確認而先產出示意圖。
+   交出 `visual-dna.yaml`、唯一的結構化 Prompt、實際圖中文字白名單、已確認比例與輸出路徑；
+   `person.mode` 必須是 `none`。若 `style.source=library`，另須先以
+   `scripts/validate_visual_dna.py --placement concept-card --library <風格庫>/styles.yaml visual-dna.yaml`
+   驗證完整來源記錄與有效 DNA。通過閘門後才執行單次正式生圖，沒有可轉交或封存的內容示意圖。
+6. **9:16 高密度知識圖卡**：內容覆蓋與逐字文字確認後，路徑 1／2／R 交出 1 張、路徑 3 交出 3 張
+   同一份全文內容與 9:16 比例的示意，且只寫入 drafts。只有「內容覆蓋與逐字文字」、「風格與圖面示意」、
+   「完整 Prompt」皆為 `confirmed`，並通過 `scripts/validate_high_density_knowledge_card_plan.py` 與
+   `scripts/validate_high_density_knowledge_card_approvals.py briefs/knowledge-card-approval-log.md` 後，
+   才能正式生成。正式圖一律重生，並回傳 9:16 像素驗收。
 
 所有帶有指定比例的交棒，在生成後都要由下游回傳實際像素尺寸並完成比例驗收，不能只看
 Prompt 中的比例文字。高密度 `carousel-info` 固定執行：
@@ -650,11 +984,33 @@ scripts/validate_image_aspect.py --ratio 4:5 assets/images/slide-*.png
 若任何一張不通過，下游只重生該張並再次驗證；不得用裁切、拉伸或口頭宣稱符合比例取代
 驗收。第二次仍不通過時，停在未交付狀態，向使用者說明原生工具限制並請其決定替代路徑。
 
-若輪播第 2 或第 3 關調整了 Slide 01 的文字或視覺 DNA，展示圖不可直接當成正式成品，
-必須在第 4 關重生。使用者只要 brief、不要展示圖或成品時，不進行任何圖片交棒。
+所有版位的圖面示意都不可直接當成正式成品；正式生圖一律依最終確認的 Prompt 重生。使用者只要 brief、
+不要展示圖或成品時，不進行任何圖片交棒。
 
 由 `image-generator` 決定實際使用哪個 Agent 的原生生圖能力。本 skill 不指定 provider、
 不要求 API key、不自行建立生圖腳本。
+
+### Style Library DNA 交棒契約（Cover／Carousel／Landing Page 共用）
+
+只要 `visual-dna.yaml` 的 `style.source` 為 `library`，下游不得把它當成「可自由詮釋的參考」。
+交棒包必須包含完整 YAML、來源驗證 PASS，以及每張已展開的三段式 Prompt Stack：
+
+1. 固定前綴逐字含 `style.reference_prompt`；
+2. 中段只含本張的內容與構圖；
+3. 固定後綴逐字含 `style.library_record.chars`、`forbidden` 和本節語言映射的否定提示。
+
+任何一張缺少前綴或後綴、以「同上 DNA」縮寫，或用 Agent 摘要取代來源 Prompt，都視為未完成交棒，
+不得生成。
+
+### Concept Card 有效 DNA 交棒契約
+
+Concept Card 使用 Style Library 時，完整 `style.reference_prompt` 與 `style.library_record` 仍必須保存，
+但它們僅供來源追溯，**不得**放進實際生圖 Prompt。交棒包還必須包含通過驗證的
+`style.resolved_design`，下游只可採用其中的 `active_reference_prompt`、`retained_traits`，以及
+共用 DNA 的 `language`、`palette`、`typography`、`composition`、`person`、`forbidden`。
+
+若缺少有效 DNA、把原始來源 Prompt 直接送入生圖，或以最終 Brief 臨時覆寫來源衝突，皆視為
+未完成交棒，不得生成。
 
 ### 語言映射契約（所有版位共用，依 visual-dna.yaml 變數）
 
@@ -1085,8 +1441,8 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/visual-dn
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/visual-dna.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_VISUAL_DNA_MD_799DB77D09'
 # visual-dna.yaml
 
-系列一致性的**唯一來源**。同一主題底下的所有圖都讀這一份，不要在每個 brief 裡
-重複描述風格——那是系列感失控的主因。
+系列一致性的**唯一來源**。同一主題底下的 Cover、Carousel、Landing Page 圖面示意與正式圖
+都讀這一份。每張圖可以有自己的內容與構圖，但不得各自重新解讀已選風格。
 
 ## 產生時機
 
@@ -1100,12 +1456,39 @@ slug: topic-slug
 created: YYYY-MM-DD
 
 style:
-  source: library | builtin        # 來自風格庫或內建 style 檔
+  source: library | builtin | user-description | design-proposal
   id: 7                            # source=library 時必填
   name: 手寫混搭數位風
   visual_grammar: japanese-modern
-  reference_prompt: >              # 風格庫的 prompt 或 style 檔摘要
+  reference_prompt: >              # library 原始 prompt；來源追溯用，不可改寫
     ...
+  # source=library 時必填。保留 styles.yaml 的完整選定記錄，不能手動摘要或刪欄位。
+  library_record:
+    id: 7
+    name_zh: 手寫混搭數位風
+    category: ...
+    scenes: [...]
+    desc: ...
+    chars: [...]
+    prompt: ...
+    preview: previews/007.jpg
+  # 只有 placement=concept-card 時必填。這是實際生圖可用的有效 DNA；
+  # library 原始記錄仍完整保留在上方，但不直接注入 Concept Card 的生圖 Prompt。
+  resolved_design:
+    placement: concept-card
+    source_record_usage: audit-only
+    active_reference_prompt: >
+      對本版位保留後的風格描述；只能含相容的來源特徵與本版位硬限制。
+    precedence:
+      - concept-card-hard-constraints
+      - user-confirmed-design-anchor
+      - library-compatible-traits
+      - generic-visual-rules
+    retained_traits:
+      - 來源中可保留的視覺特徵
+    excluded_traits:
+      - trait: 與版位衝突的來源特徵
+        reason: 排除的具體原因
 
 language:
   primary: zh-TW                   # 主標題與副標題
@@ -1123,6 +1506,7 @@ typography:
   scale_contrast: ...              # 主副標級距對比
 
 composition:
+  aspect_ratio: "1:1"              # 最終圖的已確認比例；Concept Card 可為 16:9 / 1:1 / 4:5 / 9:16 或自訂 a:b
   blocks_max: 3                    # 主要視覺區塊上限
   ashirai_max: 3                   # 裝飾文字組數上限
   decoration_max: 4                # 裝飾元素種類上限
@@ -1144,12 +1528,77 @@ forbidden:
   - 作者名
 ```
 
+`source: library` 時，`style.id`、`style.name`、`style.reference_prompt` 與
+`style.library_record` 必須能逐一回查到選定的 `styles.yaml`：
+
+- `style.id` 等於來源 `id`；`style.name` 等於來源 `name_zh`。
+- `style.reference_prompt` 等於來源 `prompt`，不得濃縮、翻譯或另寫近似版本。
+- `style.library_record` 保留來源該筆全部欄位；`name_ja`、`name_en`、`origin`、`prompt_mode`
+  等有出現就必須保留。
+- 寫完後、寫第一份 brief 前，執行：
+
+```text
+scripts/validate_visual_dna.py --library <風格庫>/styles.yaml visual-dna.yaml
+```
+
+未通過不得產出圖面示意或交棒生圖。
+
+## 三段式 Prompt Stack（Cover／Carousel／Landing Page）
+
+所有由 library 或 builtin anchor 產生的**示意圖與正式圖**，都必須以同一套三段式結構交棒；
+這是輸出給生圖端的完整控制條件，不取代 placement 的結構化 Brief。
+
+1. **固定 Visual DNA 前綴**：逐字帶入 `style.reference_prompt`，再帶入 `visual_grammar`、
+   `palette`、`typography`、`composition`、`person` 與固定文字容器規則。不得把完整來源 Prompt
+   改成 Agent 自己的摘要。
+2. **本張特有內容與佈局**：只放本張原文依據、唯一具體視覺錨點、已核准的繁中白名單文字、
+   比例與為閱讀任務設計的構圖。這一段可以變化，但不能覆寫第一段的 DNA。
+3. **固定風格與否定後綴**：再次約束 `style.chars`、`forbidden`、`language.forbidden`、
+   無假文字、無 Logo／簽名／浮水印等跨張禁項。語言否定提示依
+   `handoff-contracts.md` 的語言映射產生。
+
+每一張都必須完整帶入第一段與第三段；不得只在第一張或示意圖中使用。當來源是
+`user-description` 或 `design-proposal`，仍使用三段式，但 `reference_prompt` 是使用者已確認的
+描述或已選定提案，而非不存在的風格庫記錄。
+
+## Concept Card：來源記錄與有效 DNA
+
+Concept Card 同樣必須完整保存選定 Style Library 的 `style.reference_prompt` 與
+`style.library_record`；兩者是**來源記錄層**，供追溯與 `validate_visual_dna.py` 驗證，不能改寫或刪除。
+但原始風格常含人物、滿版場景、密集裝飾或多語文字等內容，可能與 Concept Card 的無人物、單一命題、
+大量留白與繁中白名單衝突。因此，`style.resolved_design` 是本版位唯一可供生圖使用的**有效 DNA 層**。
+
+解析必須在使用者確認視覺語言後、提出 DNA 合併的圖像方案前完成，且明確記錄：
+
+1. `retained_traits`：原始風格中可保留、且確實服務核心命題的特徵。
+2. `excluded_traits`：每個被排除的來源特徵與具體衝突原因；不得只寫「不適合」。
+3. `precedence`：固定為 Concept Card 硬限制 → 使用者已確認的 Design Anchor → 來源相容特徵 → 通用設計規則。
+4. `active_reference_prompt`：依上述順序組成的有效風格描述；不得直接複製原始 `reference_prompt`。
+
+Concept Card 的正式生圖 Prompt 只可使用 `style.resolved_design.active_reference_prompt`、共用
+`language`／`palette`／`typography`／`composition`／`person`／`forbidden`，再加上已確認的單一視覺隱喻。
+原始 `style.reference_prompt` 與 `style.library_record` 一律是 `audit-only`，不得直接帶入生圖 Prompt，
+也不得由最終 Brief 以自然語言覆寫或壓住它們。
+
+Concept Card 的 `composition.aspect_ratio` 是使用者在選定 DNA 合併圖像方案時確認的輸出比例。允許
+`16:9`、`1:1`、`4:5`、`9:16` 或正整數的自訂 `a:b`；最終 Prompt 與正式圖必須使用同一個值，
+不得由任何下游工具預設回 `1:1`。Concept Card 不產生內容圖面示意。
+
+在 Phase 2 剛確認視覺語言、尚未進入比例選擇時，Concept Card 可暫填 `pending`，但只能配合：
+
+```text
+scripts/validate_visual_dna.py --placement concept-card --allow-pending-ratio [--library <風格庫>/styles.yaml] visual-dna.yaml
+```
+
+它只證明有效 DNA 已經完成，不授權生圖。Phase 3 收到使用者選定比例後，必須改寫為實際 `a:b` 並使用一般
+`--placement concept-card` 驗證；`pending` 不能流入最終 Prompt 或正式圖片。
+
 ## 使用規則
 
-1. 每個 placement 的 brief 都引用同一份 `visual-dna.yaml`，只補該版位特有的內容。
+1. 每個 placement 的 brief 都引用同一份 `visual-dna.yaml`，只補該版位特有的內容；示意圖也不能例外。
 2. `language`、`palette`、`typography` 跨版位一致。要改就改這份，不要在單一 brief 裡覆寫。
 3. `composition` 的上限是硬上限，不是建議值。
-4. 使用者中途要換風格時，更新這份並明說哪些既有 brief 會受影響。
+4. 使用者中途要換風格時，更新這份並明說哪些既有 brief 與示意圖會受影響；先前示意圖不得直接當作正式圖。
 
 ## person 欄位
 
@@ -1322,11 +1771,10 @@ B 自由描述 / C 你決定），洞察摘要中一併呈現知識點清單與�
 讓手寫與數位的混搭成為視覺焦點。
 ```
 
-更多完整寫作範例（含長版的字重層級寫法）見 Arry 本機 Knowledge 的
-`{{ASSISTANT_ROOT}}/knowledge/card-style-library/knowledge-card-prompts.md`——該檔是 9:16
-單張知識圖卡的成品 prompt 庫，風格段落的寫法可直接借鑑，但本版位輸出時
-比例一律改成 4:5、密度收斂到輪播的中等水位。其他使用者沒有該檔時，
-以上方內建範例為準。
+更多完整寫作範例（含長版的字重層級寫法）見本 Skill 的
+`references/prompts/high-density-knowledge-card-prompts.md`——該檔是 9:16 單張知識圖卡的
+成品 Prompt 資產，風格段落的寫法可直接借鑑，但本版位輸出時比例一律改成 4:5、密度收斂到
+輪播的中等水位。其他 Agent 沒有該資產時，以上方內建範例為準。
 
 ### 第 2 關：文本大綱確認
 
@@ -1409,7 +1857,7 @@ scripts/validate_carousel_prompt_plan.py --placement carousel-info --require-str
 ```
 
 第 4 關不改內容；若使用者此時又提出修改，回到第 2 或第 3 關修訂並重新確認。
-首張展示圖只有在文字與視覺 DNA 都未變動時，才能直接納入正式成品；否則重生 Slide 01。
+首張展示圖只用於確認風格與圖文關係，正式生成時必須重生 Slide 01，使所有正式圖都由最終確認的 Prompt 一起生成。
 
 每張 PNG 生成完成後，**尚未通過比例驗收前不得交付為正式成品**。對全套圖片執行：
 
@@ -1477,7 +1925,7 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/carousel.md"
 適用於 Instagram / LinkedIn 的連續敘事輪播圖卡。把一篇資訊密度高的知識型文章，
 精煉為 **N 張具備強烈邏輯連貫性**的圖卡設計指令。在三種圖卡應用中屬於
 **低密度**一級：重敘事與視覺衝擊、單張文字量最輕（中密度 4:5 見
-`carousel-info.md`，高密度 9:16 單張見風格庫的 `card-style-library/knowledge-card-prompts.md`）。
+`carousel-info.md`，高密度 9:16 單張見 `high-density-knowledge-card.md`）。
 
 - 比例：**固定 `1:1`**，不詢問、不提供其他選項。
 - **張數 N 固定為 8–12 張**（不是固定 10 張）：在第一回合的定義階段規劃張數並附一句理由，
@@ -1652,8 +2100,8 @@ scripts/validate_carousel_prompt_plan.py --placement carousel briefs/carousel-ou
 使用以下指令產生圖卡，共 {N} 張輪播圖卡 output by slide by slide format
 ```
 
-接著逐張交出已確認的 N 組指令。首張展示圖只有在文字與視覺 DNA 都未變動時，才能直接
-納入正式成品；否則必須重生 Slide 01。
+接著逐張交出已確認的 N 組指令。首張展示圖只用於確認風格與圖文關係，正式生成時必須重生
+Slide 01，使所有正式圖都由最終確認的 Prompt 一起生成。
 
 敘事弧線依下表規劃。這是 **10 張時的預設結構**：The System 有 3 張知識段落。
 N 的伸縮**只能**發生在 The System：文章沒有可分開講的知識點時，將 Part 1–3 收斂為
@@ -1833,21 +2281,23 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placement
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/concept-card.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CONCEPT_CARD_MD_EEEA5C4B21'
 # Placement：極簡概念知識圖卡（Concept Card）
 
-適用於「把一篇文章中的一個抽象觀點畫懂」、「極簡手繪概念圖卡」與「視覺隱喻圖卡」；
-成品是 1 張 1:1、可獨立閱讀的繁體中文圖卡。
+適用於「把文章的一個抽象觀點畫懂」、「極簡手繪概念圖卡」與「視覺隱喻圖卡」。成品是 1 張可獨立閱讀的繁體中文圖卡；它不是文章封面、不是長內容摘要、不是資訊圖或教學流程。
 
-它不是文章封面：不以點擊率、人物、品牌感或強烈標題感為首要任務。它也不是長內容知識圖卡：
-不摘要全文、不覆蓋步驟、不做資訊圖或教學流程。唯一任務是讓讀者一眼理解**一個核心命題**。
+唯一任務是讓讀者一眼理解**一個核心命題**。流程的決策順序固定為：
+
+**文章命題 → 視覺語言 DNA → DNA 合併圖像方案與比例 → 中文格式化最終 Prompt → 正式生圖**。
+
+不得先用脫離風格的隱喻名稱要求使用者選擇，再反過來補 DNA；那會讓早期選擇沒有可檢查的設計意義。
 
 ## 輸入與停止條件
 
 - 必要輸入：一篇文章或一段文字。
-- 可選輸入：一張或多張明確指定的參考圖、既有風格偏好。
+- 可選輸入：參考圖、既有 Style Library 編號或風格偏好。
 - 尚未有文章時，**只能**回覆：`了解，請提供文章內容。`
-- 使用者尚未選定視覺隱喻方案或未確認最終 Prompt 時，停止在對應關卡，不得生成圖片。
-- 使用者只要分析或方案、不需要成品時，交付分析與方案即結束，不交棒生圖。
+- 每一關都必須等待使用者明確確認；只要任一關尚未確認，停止在該關，不得生成正式圖。
+- 使用者只要分析、DNA 卡、方案或 Prompt 時，只交付指定階段，不自動生圖。
 
-## 輸出位置與確認紀錄
+## 任務檔案與確認紀錄
 
 ```text
 100_Todo/projects/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/
@@ -1855,196 +2305,240 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/concept-card
 ├── visual-dna.yaml
 ├── briefs/
 │   ├── concept-card-analysis.md
+│   ├── concept-card-style-dna.md
 │   ├── concept-card-proposals.md
 │   ├── concept-card-final.md
 │   └── concept-card-approval-log.md
 └── assets/images/
 ```
 
-每個任務從 `assets/concept-card-approval-log-template.md` 建立確認紀錄。下列三項必須依序獲得
-使用者明確確認：`風格錨點`、`視覺隱喻方案`、`最終 Concept Card Prompt`。
+確認紀錄使用 `assets/concept-card-approval-log-template.md`，依序記錄三個狀態：
 
-## 版位不變規格
+1. `視覺語言與 DNA`
+2. `DNA 合併圖像方案與比例`
+3. `最終 Concept Card Prompt`
 
-- 尺寸：固定 `1:1`。
-- 畫面文字：主標題 4–10 個中文字、副標題 12–28 個中文字、最多 3 個必要標籤（每個 2–5 字）。
-- 僅使用台灣繁體中文；不使用英文、日文 Ashirai、Logo、簽名、浮水印、品牌名或其他文案。
-- `visual-dna.yaml` 固定 `person.mode: none`；不得出現人物、人臉、剪影、手部或人形輪廓。
-- 只用一個核心視覺隱喻，以及 1–2 個主要物體或不可拆開的一組場景。
-- 大量乾淨留白、灰白背景、黑色／深灰手繪線條與最多兩種有語意的強調色。
+只有三項均為 `confirmed`，才能正式交棒。Concept Card 不產生內容預覽圖；確認後的正式 PNG 是唯一一次生圖，直接寫入 `assets/images/`，不得先產出同內容草稿再重生。
 
-## 風格優先順序
+## 不變邊界
 
-1. 使用者明確提供的參考圖；它決定線條、留白、色彩克制與構圖語彙。
-2. 使用者明確描述的風格偏好。
-3. Card Style Library 的選定風格。
-4. 本版位的極簡 Excalidraw 手繪原則。
+- 比例由使用者在「DNA 合併圖像方案」關選擇：`16:9`、`1:1`、`4:5`、`9:16` 或正整數自訂 `a:b`。
+- 圖內文字只使用台灣繁體中文：主標 4–10 字、副標 12–28 字、最多 3 個必要標籤（各 2–5 字）。
+- 固定 `person.mode: none`；不得出現人物、人臉、手部、剪影或人形輪廓。
+- 每張圖只保留一個核心視覺隱喻，以及 1–2 個主要物體或不可拆開的一組場景。
+- 背景採純白、淡灰白或微暖灰白；大量留白；黑／深灰手繪線條與最多兩種有語意的強調色。
+- 不使用 Logo、簽名、浮水印、英文、日文 Ashirai、假 UI、心智圖、多欄資訊圖、複雜流程圖、寫實光影、3D、漸層或抽象填充。
 
-參考圖只能覆蓋一般手繪風格描述；它**不能**覆蓋來源忠實性、繁中白名單、無人物、單一命題與
-資訊減法規則。
+## Phase 1｜文章分析與命題定義
 
-## 工作流程
-
-### Phase 1｜文章分析與命題定義
-
-收到文章後，依序輸出：
+收到文章後，依序輸出並等待下一關：
 
 1. **文章主要在談什麼**：1–3 句。
 2. **作者最想讓讀者記住什麼**：1–2 句。
-3. **建議保留的核心命題**：一句、忠於原文、只含一個主要觀點，並且可表現動作、變化、關係或結果。
-4. **不放進圖卡的資訊**：列出被捨棄的案例、步驟、工具、背景或次要觀點，並說明其不影響核心命題。
-5. **必須被畫出來的語意**：只列出必要的主體、起點、行動／過程、結果、關係；不必要即省略。
+3. **核心命題**：一句，忠於原文，只含一個主要觀點，能呈現行動、變化、關係或結果。
+4. **不放進圖卡的資訊**：列出案例、步驟、工具、背景或次要觀點，以及捨棄原因。
+5. **必須被畫出來的語意**：只列主體、起點、行動／過程、結果、關係；不必要即省略。
 
-不可虛構原文未說明的因果、數字、案例或結果。核心命題不成立時，只追問一個與命題直接相關的問題。
+不得捏造原文沒有的因果、數字、案例或結果。核心命題不成立時，只追問一個與命題直接相關的問題。
 
-### Phase 2｜視覺風格校準（必要互動）
+## Phase 2｜視覺語言與 DNA（必要互動）
 
-這一關只回答「這張圖長什麼樣子」，**不**回答「這個概念畫成什麼」。兩個決策不得混為一談。
+先讓使用者選擇視覺語言來源；這一關確認「這套圖用什麼視覺系統說話」，還**不**選擇最終視覺隱喻。
 
-#### 路徑 R｜使用者已提供參考圖
-
-- 先用一句話重述參考圖的可見特徵：線條、留白、色彩、文字與構圖。
-- 將該參考圖記為 Design Anchor，直接記錄「風格錨點：confirmed」；不重問，也不強迫提供 5 個風格庫候選。
-- 使用者另有偏好或要求偏離參考圖時，以其最新明確指示優先。
-
-#### 路徑 1／2／3｜使用者尚未提供參考圖
-
-先給下列三種回法，等待回答：
+先詢問：
 
 ```text
-文章的核心命題已確定。在提出視覺隱喻前，先確認這張圖的視覺語言：
+先確認這套圖的視覺語言。你想走哪一條路徑？
 
-1. 從 Card Style Library 的 5 個候選挑一個
-   {執行 scripts/recommend_styles.py 後，列出 5 個候選、各一行推薦理由，並呈現 5 張預覽圖}
-
-2. 直接描述偏好
-   例如線條粗細、背景、強調色、手繪程度或想參考的作品。
-
-3. 由設計師決定
-   我會先鎖定一套最適合核心命題的極簡手繪視覺 DNA，再提出 3 個不同的視覺隱喻。
+1. 從 Card Style Library 選擇
+2. 直接描述你的偏好
+3. 由設計師提出三套完整 Visual DNA
 ```
 
-- 路徑 1：執行 `scripts/recommend_styles.py --scenes 知識學習,社群圖卡 --count 5`；每個候選都要有
-  與本文相關的推薦理由與可見預覽圖。使用者選定編號後，記錄「風格錨點：confirmed」。
-- 路徑 2：使用者描述即為 Design Anchor；記錄「風格錨點：confirmed」。
-- 路徑 3：由設計師選定**一套**視覺 DNA，並在下一關顯示其摘要。不得把這一關展開成 3 組風格
-  變體，因為下一關已必須提供 3 個視覺隱喻；兩者相乘會製造無法有效比較的 3×3 選擇矩陣。
+### 路徑 1｜Card Style Library
 
-風格庫不可用時，說明已查找的路徑，改用內建風格候選並說明沒有預覽圖；使用者同意才繼續。
-
-### Phase 3｜三個視覺隱喻方案（必要互動）
-
-風格錨點已鎖定後，固定提出方案 A、B、C。三案使用**同一個核心命題與同一套視覺 DNA**，但必須有
-真正不同的主要物體、動作與因果呈現；不得只更換顏色、標題、位置或物件外觀。
+執行 `scripts/recommend_styles.py --scenes 知識學習,社群圖卡 --count 5`。每個候選都必須包含可見的既有預覽圖，以及下列**中文 DNA 摘要**；不得只列風格名稱。
 
 ```text
-## 三個視覺方案
+### 風格 {編號}｜{中文名稱}
+- 適合本文的原因：
+- 色彩計畫：
+- 線條／媒材：
+- 字體與文字容器：
+- 構圖語彙與留白：
+- 可保留特徵：
+- 必須排除的特徵：
+- 來源預覽圖：
+```
 
-### 方案 A：{方案名稱}
-- 核心視覺隱喻：
-- 主要物體：
-- 動作與變化：
-- 構圖：
-- Excalidraw 表現方式：
+使用者選定編號後，完整保存 `style.library_record` 與 `style.reference_prompt`，並建立
+`style.resolved_design`。原始記錄是 `audit-only`；有效 DNA 必須逐項寫出保留特徵、排除特徵、優先權與中文有效風格描述。
+
+### 路徑 2｜使用者直接描述偏好
+
+先取得使用者對色彩、線條、媒材、字體、情緒、留白或參考作品的描述；再提出一張中文 DNA 卡供確認：
+
+```text
+### 暫定 Visual DNA
+- 色彩計畫：
+- 線條／媒材：
+- 字體與文字容器：
+- 構圖語彙與留白：
+- 情緒與閱讀感受：
+- 必須排除：
+```
+
+### 路徑 3｜設計師提出三套完整 Visual DNA
+
+提出 A／B／C 三張**完整中文 DNA 卡**，每張均依上列六欄填寫，且必須在色彩、線條、字體、留白與構圖語彙上真正不同。禁止只用「勇敢先驅／保守穩重／革命性」等名稱讓使用者盲選；名稱只能作為摘要，不能取代 DNA 內容。
+
+此關尚未鎖定視覺隱喻，所以不生成假裝是最終內容的圖片。Style Library 的既有預覽圖只用於判讀來源；Concept Card 後續不另產生內容預覽圖。
+
+使用者確認一套 DNA 後，將「視覺語言與 DNA」更新為 `confirmed`，建立或更新 `visual-dna.yaml` 的有效風格欄位。此時比例尚未由使用者決定，`composition.aspect_ratio` **必須明確填為** `pending`，並執行：
+
+```text
+scripts/validate_visual_dna.py --placement concept-card --allow-pending-ratio [--library <風格庫>/styles.yaml] visual-dna.yaml
+```
+
+`--allow-pending-ratio` 只允許這個 DNA 確認關使用；它不是 1:1 的替代預設值。進入 Phase 3、使用者選定比例後，必須把 `pending` 改為實際 `a:b`，並以**不帶**此旗標的驗證重新通過，才能提出最終 Prompt 或生成正式圖。
+
+## Phase 3｜DNA 合併圖像方案與比例（必要互動）
+
+以**同一套已確認 DNA**提出三個不同的視覺隱喻方案。每案都是可以核對與修改的完整設計方案，而不是只給一個標題。三案可改變隱喻、主要物體、動作與構圖；不得改變已確認 DNA 或自行增加原文外的價值主張。
+
+```text
+## 方案 {A／B／C}｜{中文名稱}
+
+### 0. 設計定位
+- 核心命題：
+- 閱讀任務：
+- 原文依據：
+
+### 1. 圖中文字腳本
 - 主標題：
 - 副標題：
 - 必要標籤：
-- 優點：
-- 可能的理解風險：
+- 不使用的文字：
 
-### 方案 B：{同上}
-### 方案 C：{同上}
+### 2. 視覺隱喻與語意
+- 主要物體：
+- 動作／變化：
+- 遮字語意：即使遮住文字，讀者仍能從＿＿＿看出＿＿＿。
+- 不放入：
 
-## 方案比較
-| 方案 | 語意完整 | 一眼可懂 | 畫面精簡 | 參考圖適配度 | 誤解風險 | 適合表達重點 |
-| --- | --- | --- | --- | --- | --- | --- |
-| A | {高／中／低＋短說明} | | | | | |
-| B | | | | | | |
-| C | | | | | | |
+### 3. 已合併的 Visual DNA
+- 色彩、線條、字體與留白：{只引用已確認 DNA}
+- 構圖策略：
+- 需要排除：
+
+### 4. 比例適配
+- 適合比例：
+- 不同於建議比例時的調整原則：
+
+### 5. 修改風險
+- 可能誤解：
+- 若要修改文字，會影響：
 ```
 
-比較後說明最推薦方案、推薦原因，以及另外兩案各自適合的偏好。最後**只問**：
+再提供方案比較表，指出各案的語意完整度、一眼可懂性、畫面精簡度、DNA 適配度與誤解風險。最後請使用者同時選擇方案與比例：
 
-`請選擇方案 A、B 或 C。你也可以在選擇時附上想調整的文字或畫面細節。`
+```text
+請選擇圖像方案與比例：
 
-使用者未選定以前，不得生成圖片。使用者只修改提案而未選定時，更新該提案後繼續等待。
+比例選項：
+1. 16:9
+2. 1:1
+3. 4:5
+4. 9:16
+5. 自訂比例，例如 3:2
 
-### Phase 4｜最終 Prompt 確認（必要互動）
+例如：B，3。
+```
 
-使用者選定 A／B／C 後，保留其視覺隱喻並套用明確修改；不重新提出三案、不擅自混合其他方案。
-將「視覺隱喻方案」更新為 `confirmed`，再提出**唯一**一組完整指令，以使用者明確確認為止。
+選定後，把 `composition.aspect_ratio` 寫入 DNA，並將「DNA 合併圖像方案與比例」更新為 `confirmed`。DNA、隱喻與比例在本關合併；不得產生 3×3 選擇矩陣。
+
+寫入實際比例後，重新執行：
+
+```text
+scripts/validate_visual_dna.py --placement concept-card [--library <風格庫>/styles.yaml] visual-dna.yaml
+```
+
+此時不得使用 `--allow-pending-ratio`；若比例仍是 `pending`，不得提出最終 Prompt 或生成正式圖。
+
+在呈現前與提出最終 Prompt 前，都要執行：
+
+```text
+scripts/validate_concept_card_proposals.py briefs/concept-card-proposals.md
+```
+
+未通過時，不得要求使用者選方案，也不得以只含標題的方案代替可核對的圖中文字腳本與圖面內容。
+
+## Phase 4｜中文格式化最終 Prompt（必要互動）
+
+使用者選定方案與比例後，直接提出一組唯一的繁體中文 Prompt。它取代內容預覽圖：方案本身已提供可編輯文字腳本、具體物件、動作、遮字語意、構圖與比例，最終 Prompt 則讓使用者逐欄核對生成條件。使用下列六段輕量結構，確保可校稿但不把模型鎖死為左文右圖等制式模板：
 
 ```text
 ## 【Concept Card：{主題名稱}】
 
-### 0. 設計定位
-- 核心命題：{唯一要傳達的原文命題}
-- 閱讀任務：{讀者在 3 秒內需要理解的關係、變化或結果}
-- 原文依據：{對應的原文觀點，不擴寫}
-- 核心視覺隱喻：{唯一隱喻，以及它如何讓讀者遮住文字後仍看懂概念}
+### 1. 任務與畫布
+- 核心命題：
+- 圖片比例：
+- 閱讀任務：
 
-### 1. 文字內容
-- 主標題：{4–10 個台灣繁體中文字}
-- 副標題：{12–28 個台灣繁體中文字}
-- 必要標籤：{0–3 個，每個 2–5 個台灣繁體中文字；沒有則填「不使用」}
-- 禁止文字：{英文、日文 Ashirai、Logo、署名、浮水印、完整段落、未確認文字}
+### 2. 圖中文字腳本
+- 主標題：
+- 副標題：
+- 必要標籤：
+- 逐字白名單：
 
-### 2. 視覺主體與語意
-- 主要物體：{1–2 個主要物體或一組不可拆開場景}
-- 動作／變化：{把核心關係實際畫出來}
-- 語意驗證：{即使遮住文字，讀者仍能從＿＿＿看出＿＿＿}
-- 不放入：{步驟清單、案例、工具、人物、無關裝飾}
+### 3. 有效 Visual DNA
+- 已確認的中文 Design Anchor：
+- 色彩、線條、字體與文字容器：
+- 必須排除的來源特徵與原因：
 
-### 3. 視覺語言
-- Design Anchor：{參考圖／選定風格庫 id／使用者偏好／設計師決定}
-- 背景：{純白、淡灰白或微暖灰白；無紙張紋理、網格、漸層、桌面或場景背景}
-- 線條：{黑色或深灰黑、不規則 Excalidraw 手繪感；不可為精準向量或寫實素描}
-- 色彩：{黑線＋灰白背景＋1 種主強調色；必要時最多再 1 種有語意的重點色}
-- 字體：{粗黑手寫／白板註記感；主標第一視覺，副標次之，標籤靠近物件}
+### 4. 視覺語意與主體
+- 核心視覺隱喻：
+- 主要物體與動作：
+- 遮字語意：
 
-### 4. 構圖與減法
-- 畫布：{固定 1:1}
-- 構圖：{中央或中段單一圖解；閱讀順序為 A→B／上→下／左→右等最簡單關係}
-- 留白：{四周保留的大面積乾淨留白}
-- 標示：{必要時只用箭頭、引線、括號或簡單框線}
-- 排除項目：{no people, no faces, no hands, no silhouettes, no mind map, no dashboard, no multi-column infographic, no complex flowchart, no 3D, no gradient, no realistic lighting, no random text}
+### 5. 構圖方向與設計自由度
+- 構圖方向：
+- 留白與閱讀順序：
+- 可自由發揮：{只要不違反核心命題、文字腳本、DNA 與禁止項，模型可調整局部細節與非必要構圖}
 
-### 5. 生圖與驗收規格
-- 尺寸比例：1:1
-- 最多視覺主體：1 組（或不可拆分的 1 組場景）
-- 圖中文字白名單：{主標題／副標題／必要標籤的逐字內容}
-- 必做檢查：{單一命題、具體隱喻、無人物、文字字數、留白、線條、色彩、白名單與 1:1 像素比例}
+### 6. 禁止項與驗收
+- 禁止項：
+- 正式圖驗收：比例、繁中白名單、無人物、單一隱喻、遮字語意與減法檢查。
 ```
 
-最終 Prompt 未獲明確確認時，將「最終 Concept Card Prompt」保持 `pending` 或標為
-`revisions-requested`，停止在此關。
+Prompt 一律用中文給使用者核對。使用者確認後，將「最終 Concept Card Prompt」更新為 `confirmed`。若修改 DNA、隱喻、比例或文字腳本，必須回到受影響的 Phase 2 或 Phase 3；若只修改 Prompt 的非內容表述，重新確認本關即可。
 
-### Phase 5｜正式生圖與驗收
+## Phase 5｜正式生圖與驗收
 
-確認「最終 Concept Card Prompt」後，執行：
+正式交棒前執行：
 
 ```text
+scripts/validate_visual_dna.py --placement concept-card [--library <風格庫>/styles.yaml] visual-dna.yaml
 scripts/validate_concept_card_approvals.py briefs/concept-card-approval-log.md
 ```
 
-只有取得 `PASS` 後才交棒 `image-generator`，生成 1 張最終圖。生成後檢查：
+兩者都取得 `PASS` 後才交棒 `image-generator`。正式圖是唯一一次生圖，不得先產出同內容預覽或草稿。生成後驗收：
 
-1. 實際像素為 1:1。
-2. 文字只含白名單中的繁體中文內容。
+1. 實際像素符合已確認比例。
+2. 只有白名單中的繁體中文字；沒有英文、日文、亂碼或假文字。
 3. 沒有任何人物、人臉、手部、剪影或人形輪廓。
-4. 圖像遮住文字後仍能看出主體、行動與結果。
-5. 沒有多欄資訊圖、流程圖、心智圖、Dashboard、寫實光影、3D、漸層或無關裝飾。
+4. 遮住文字後仍能讀出主要物件、動作與結果。
+5. 沒有多欄資訊圖、心智圖、Dashboard、複雜流程圖、寫實光影、3D、漸層或無關裝飾。
 
 不通過時只針對失敗項重生；不得裁切、拉伸、靜默交付或改寫已確認的視覺隱喻。
 
 ## Agent execution notes
 
-- **Shared steps**：文章分析、風格錨點、三個隱喻方案、最終 Prompt 確認、確認驗證與 1:1 驗收。
-- **Codex adapter**：用原生圖片工具呈現風格庫預覽；正式圖片使用可用的原生生圖工具。
-- **Claude adapter**：用原生圖片工具或檔案預覽呈現相同候選；正式圖片使用可用的原生生圖工具。
-- **AntiGravity adapter**：用原生圖片工具或檔案預覽呈現相同候選；正式圖片使用可用的原生生圖工具。
-- **Fallback**：無法內嵌預覽時提供預覽圖絕對路徑；無法生圖時停在已確認的 Prompt，不改用未核准 provider。
-- **Verification**：三個 Agent 都必須保有相同的三次確認、繁中白名單、無人物與實際 1:1 像素驗收。
+- **共用步驟**：所有 Agent 必須依本文件完成五個關卡、中文方案與 Prompt、確認紀錄、DNA 驗證與像素驗收。
+- **Codex adapter**：Style Library 以既有預覽圖呈現；方案與最終 Prompt 確認後，才使用原生生圖工具生成唯一正式圖。
+- **Claude adapter**：以原生圖片工具或檔案預覽呈現相同來源預覽；方案與最終 Prompt 確認後，才使用原生生圖工具生成唯一正式圖。
+- **AntiGravity adapter**：以原生圖片工具或檔案預覽呈現相同來源預覽；方案與最終 Prompt 確認後，才使用原生生圖工具生成唯一正式圖。
+- **Fallback**：無法內嵌來源預覽時提供絕對路徑；無法生圖時停在已確認的中文 Prompt，不自行改用未核准 provider。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_CONCEPT_CARD_MD_EEEA5C4B21
 
 # visual-prompt-kit/references/placements/cover-person.md
@@ -2314,22 +2808,24 @@ B（描述偏好），風格方向即已定案——直接鎖入 `visual-dna.yam
 
 每組方案各自用 codeblock 包住，方便一鍵複製（路徑 A 為 1 組，路徑 B 為 3 組）。
 
-## Phase 6 最終確認與正式生圖
+## Phase 6 圖面示意、最終確認與正式生圖
 
-Cover 是單張最終成品，**不產出展示圖**：Phase 2.5 的風格庫預覽圖已負責視覺校準，
-額外先生成展示圖只會重複耗用生圖額度。
+Cover 與其他圖卡採相同的「先看圖面示意、再正式生圖」流程。風格庫預覽圖只用來選擇來源風格，
+不能取代本篇內容的實際 Cover 示意。
 
-1. 從 `assets/cover-approval-log-template.md` 建立
-   `briefs/cover-approval-log.md`。完成使用者的風格與人物回覆後，把「視覺方向與人物」
+1. 從 `assets/cover-approval-log-template.md` 建立 `briefs/cover-approval-log.md`。收到使用者的
+   風格路徑與人物選項後，把「視覺方向與人物」更新為 `confirmed`。
+2. 以 Phase 5 的內容產出圖面示意與完整 Sample Prompt：A／B 各 **1 張**；C 各 **3 張**。
+   C 的三張必須使用同一個核心訊息、文字白名單、比例與人物策略，只能在色彩、光感、媒材與構圖
+   語彙上比較。所有示意寫入 `100_Todo/drafts/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/assets/style-samples/`。
+3. 使用者確認 A／B 的唯一示意，或選定 C 的其中一張後，把「風格與圖面示意」更新為 `confirmed`，
+   並鎖定最終 `visual-dna.yaml`。示意不屬於正式成品；即使內容未改，正式生圖仍須重新生成。
+4. 依已確認的示意提出唯一完整 Cover Prompt。使用者明確確認後，才把「最終 Cover 提案與提示詞」
    更新為 `confirmed`。
-2. 呈現 Phase 5 的完整提案與提示詞，請使用者確認：A／B 必須明確確認唯一提案；
-   C 必須從 3 組完整提案中選定 1 組。只有明確回覆後，才能把「最終 Cover 提案與提示詞」
-   更新為 `confirmed`。
-3. 執行本 skill 的
-   `scripts/validate_cover_approvals.py briefs/cover-approval-log.md`。通過並取得 `PASS` 後，
+5. 執行 `scripts/validate_cover_approvals.py briefs/cover-approval-log.md`。通過並取得 `PASS` 後，
    才交棒 `image-generator` 產出最終 Cover。
 
-若使用者要求更改主標、副標、構圖、人物或任何提示詞內容，將「最終 Cover 提案與提示詞」
+若使用者要求更改主標、副標、構圖、人物、比例或 DNA，將「風格與圖面示意」與「最終 Cover 提案與提示詞」
 改為 `revisions-requested`，回到本階段修訂並再次確認。不得以舊的確認紀錄直接生圖。
 
 ## 減法檢查
@@ -2437,7 +2933,8 @@ Cover 是單張最終成品，**不產出展示圖**：Phase 2.5 的風格庫預
 
 ## 生圖轉換
 
-只在 Phase 6 通過 `validate_cover_approvals.py` 後才可交棒 `image-generator`。交棒時遵循
+圖面示意可在 Phase 6 第 2 步交棒 `image-generator`；正式圖只在 Phase 6 第 5 步通過
+`validate_cover_approvals.py` 後才可交棒。交棒時遵循
 `../handoff-contracts.md` 的
 「語言映射契約」：標題固定繁中欄位宣告，點綴文字與禁用語言否定提示
 依 `visual-dna.yaml` 的 `language.accent` / `language.forbidden` 變數映射，
@@ -2453,6 +2950,85 @@ Cover 是單張最終成品，**不產出展示圖**：Phase 2.5 的風格庫預
 - `cover-person.md`：封面人物選項。模式 P 預留真人空位（生圖不畫人）、
   模式 C 角色插畫（生圖要畫人）。兩者互斥。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_COVER_MD_8E3587E5D5
+
+# visual-prompt-kit/references/placements/high-density-knowledge-card.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/high-density-knowledge-card.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/high-density-knowledge-card.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_HIGH_DENSITY_KNOWLEDGE_CARD_MD_F4FAE80B0F'
+# Placement：全文章高密度知識圖卡（9:16）
+
+適用於使用者提供完整文章，並要求「知識圖卡」、「盡量全部包含」或「最高密度」的單張
+9:16 圖卡。它不是 1:1 低密度 Carousel、不是 4:5 Info Carousel，也不是只傳達一個命題的
+Concept Card。
+
+## 必讀順序
+
+1. `SKILL.md` 的〈3.8 全文章最高密度知識圖卡（9:16）〉：確認路由與內容覆蓋要求。
+2. `image-generator/references/high-density-knowledge-card.md`：建立五類內容覆蓋、逐字文本、
+   生成指令與生成後驗收。
+3. `../prompts/high-density-knowledge-card-prompts.md`：需要時選用其中一段既有風格 Prompt；
+   它只補充畫面語彙，不得取代完整文章的內容計畫。
+
+## 分類邊界
+
+- 內容完整性、文字白名單與實際 9:16 比例以 `image-generator` 的高密度卡契約為準。
+- 風格校準、Visual DNA 與跨 Agent 流程仍以本 Skill 為準。
+- 100 種 Card Style Library 資料維持在 `knowledge/card-style-library/`；本版位的兩段 Prompt
+  不屬於該資料庫。
+
+## 必要互動流程
+
+本版位雖是單張 9:16，但和所有圖卡一樣遵守「內容範圍 → 三條風格路徑 → 圖面示意 → 完整 Prompt →
+正式生圖」主幹；不得因為內容已完整就直接生圖。
+
+### Phase 1｜內容覆蓋與逐字文字確認
+
+依 `image-generator/references/high-density-knowledge-card.md` 建立 `briefs/knowledge-card-content.md`，完整映射
+故事或問題情境、原因／心理機制、核心框架／判斷法、行動方法、結論／核心金句五類內容與所有圖中文字。
+先執行 `scripts/validate_high_density_knowledge_card_plan.py briefs/knowledge-card-content.md`，再讓使用者確認。
+確認後將 `briefs/knowledge-card-approval-log.md` 的「內容覆蓋與逐字文字」更新為 `confirmed`。
+
+### Phase 2｜風格與圖面示意確認
+
+提供與其他圖卡相同的三條路徑：
+
+1. **Card Style Library**：使用 `scripts/recommend_styles.py` 提出 5 個候選、推薦理由與可見預覽圖。
+2. **直接描述偏好**：記錄使用者的色調、構圖、媒材、字體或情緒偏好。
+3. **設計師提案**：以相同五類內容、逐字文字、9:16 畫布與閱讀順序，產出勇敢先驅／保守穩重／革命性三種差異化方向。
+
+路徑 1／2（或使用者參考圖）必須交棒 `image-generator` 產出 **1 張**9:16 圖面示意；路徑 3 必須產出
+**3 張**。三張示意只能在色彩、光感、媒材、字體感與構圖語彙不同，不能變更文章內容、逐字文字、比例、
+閱讀順序或內容覆蓋。示意使用暫定／候選 DNA，先通過 `validate_visual_dna.py`，只寫入
+`100_Todo/drafts/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/assets/style-samples/`。
+
+使用者確認一張示意後，鎖定最終 DNA，並將「風格與圖面示意」改為 `confirmed`。未確認前不得提出
+最終 Prompt 或正式生圖。
+
+### Phase 3｜完整 Prompt 確認與正式生圖
+
+依已確認內容、DNA 與示意，產出包含五類內容、逐字文字、9:16 比例與排除項目的完整結構化 Prompt。
+使用者確認後將「完整 Prompt」改為 `confirmed`，並執行：
+
+```text
+scripts/validate_high_density_knowledge_card_plan.py briefs/knowledge-card-content.md
+scripts/validate_high_density_knowledge_card_approvals.py briefs/knowledge-card-approval-log.md
+```
+
+兩者皆為 `PASS` 後才交棒正式生圖。正式圖必須重新生成，不可直接使用示意；驗收後，除非使用者要求
+保留，移除 drafts 的示意圖。
+
+## 輸出位置
+
+```text
+100_Todo/projects/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/
+├── visual-dna.yaml
+├── briefs/
+│   ├── knowledge-card-content.md
+│   ├── knowledge-card-preview.md
+│   ├── knowledge-card-final.md
+│   └── knowledge-card-approval-log.md
+└── assets/images/
+```
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_HIGH_DENSITY_KNOWLEDGE_CARD_MD_F4FAE80B0F
 
 # visual-prompt-kit/references/placements/landing-page.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/landing-page.md")"
@@ -2594,8 +3170,11 @@ Phase 1 的結構確認與 Phase 2 的數量確認，承接了輪播圖卡的文
 3. **由設計師提案**：以同一個已確認的最高優先視覺錨點，準備「勇敢先驅／保守穩重／革命性」
    三組最大差異化方向；差異只能來自色彩、光感、媒材和構圖表現，不能換掉原文依據或主視覺。
 
-在 DNA 鎖定後，所有圖片共用日本現代數位產業、SaaS 官網與高質感知識產品的設計語彙；
-不得用「日系」當成在圖片中自動生成日文或抽象科技符號的理由。
+選定風格庫編號後，必須先依 `../visual-dna.md` 寫入完整的 `style.library_record`，將來源
+`prompt` 原樣寫入 `style.reference_prompt`，再以
+`scripts/validate_visual_dna.py --library <風格庫>/styles.yaml visual-dna.yaml` 驗證。只有 PASS
+才可產生圖面示意。不得以「日本現代數位產業」等泛化描述取代使用者選定的 Style Library DNA，
+也不得用「日系」當成在圖片中自動生成日文或抽象科技符號的理由。
 
 ### 3.2 首張圖面示意與 Prompt 確認（必要互動）
 
@@ -2605,13 +3184,22 @@ Phase 1 的結構確認與 Phase 2 的數量確認，承接了輪播圖卡的文
 - 路徑 3：交給 `image-generator` 產出 **3 張**最大差異化的圖面示意，每張各附完整結構化 Prompt；
   使用者選定一張後才鎖定最終 DNA。
 
-所有示意圖都只是風格、字體保護、圖文關係與具體視覺錨點的驗證，不是整套正式交付。使用者
-明確確認前，不得進入全套 Prompt，也不得生成其他分區圖片。若示意的文字或 DNA 在後續改動，
-它不可直接納入正式成品，必須在正式生成時重生。
+所有示意圖都只是風格、字體保護、圖文關係與具體視覺錨點的驗證，不是整套正式交付。示意一律
+存入 `100_Todo/drafts/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/assets/style-samples/`，使用者明確確認前
+不得進入全套 Prompt，也不得生成其他分區圖片。正式生成時一律重生示意對應圖，不能將示意直接
+納入正式成品；最終圖驗收後，除非使用者要求保留，清除 drafts 的示意圖。
+
+**示意圖與正式圖使用完全同一條 Style Library DNA 路徑**：每一張示意圖都必須先通過
+`validate_visual_dna.py`，並在對 `image-generator` 的交棒中攜帶
+「固定 Visual DNA 前綴／本張內容與佈局／固定風格與否定後綴」三段式 Prompt Stack。前綴要逐字
+使用 `style.reference_prompt`，後綴要逐字帶入來源 `chars`、`forbidden` 與語言映射；不得只在
+`visual-dna.yaml` 存檔、卻沒有實際交給生圖端。
 
 ### 3.3 全套 Prompt 確認（必要互動）
 
 依已確認的數量、比例與 DNA，一次提出所有圖片的結構化 Prompt，逐張獨立 codeblock 包住。
+每張的「生圖交棒 Prompt Stack」都要完整重複同一份固定前綴與後綴；只允許中段的原文依據、
+具體視覺錨點、核准文字、比例與構圖改變。不得用「同上 DNA」縮寫，避免第 2 張後風格漂移。
 全套指令前固定先輸出下列一行，其中 `N` 替換為本次已確認的總圖片數：
 
 ```text
@@ -2670,10 +3258,15 @@ Phase 1 的結構確認與 Phase 2 的數量確認，承接了輪播圖卡的文
 
 ### 5. 規格與風格（Specs & Style）
 - 尺寸比例：{16:9／1:1／4:5}
-- 設計語彙／質感描述：{日本現代數位設計，但以具體內容為主}
+- 設計語彙／質感描述：{從 visual-dna.yaml 的 style.visual_grammar 與 style.library_record 取用，不自行泛化}
 - 排除項目：no abstract filler, no meaningless symbols, no floating geometric objects,
   no random arrows, no decorative fake UI, no dense text, no repeated message, no random text,
   no lorem ipsum, no English labels, no logo, no signature, no hashtag, no price, no discount code
+
+### 6. 生圖交棒 Prompt Stack（Generation Handoff，必填）
+- 固定 Visual DNA 前綴：{逐字帶入 style.reference_prompt，並明列 palette、typography、composition、person 與文字容器；不得摘要}
+- 本張內容與佈局：{本張唯一具體視覺錨點、已確認文字白名單、比例、閱讀停留點與構圖}
+- 固定風格與否定後綴：{逐字帶入 style.library_record.chars、forbidden、language.forbidden 對應否定提示與跨張禁項}
 ```
 
 寫 Prompt 前必做遮字測試與減法檢查：刪掉不影響理解的文字或裝飾就不要寫入。所有實際圖片文字
@@ -2682,7 +3275,9 @@ Phase 1 的結構確認與 Phase 2 的數量確認，承接了輪播圖卡的文
 
 ## 交棒與驗收
 
-`image-generator` 接收已確認的 `visual-dna.yaml`、每張完整 Prompt、目標比例、輸出檔名與路徑。
+`image-generator` 接收已確認的 `visual-dna.yaml`、`validate_visual_dna.py` 的 PASS、每張完整
+Prompt Stack、目標比例、輸出檔名與路徑。每張 Prompt Stack 都必須實際帶入
+`style.reference_prompt` 與 `style.library_record.chars`，不可只交出 YAML 檔案路徑。
 `landing-page` 接收 `[IMG-Hero]`、`[IMG-Pain]` 等佔位符 ID、對應圖檔路徑與比例；HTML 組版仍是
 `landing-page` 的工作，不是本 placement 的工作。
 
@@ -2697,8 +3292,27 @@ Phase 1 的結構確認與 Phase 2 的數量確認，承接了輪播圖卡的文
 - **AntiGravity adapter**：以原生圖片工具或檔案預覽呈現同一批風格庫預覽與圖面示意。
 - **Fallback**：任一 Agent 無法顯示預覽時，提供預覽與示意圖的絕對路徑，維持相同確認順序；
   無法生圖時停在已確認的 Prompt，不改用未核准的 provider。
-- **Verification**：三個 Agent 都必須保留四項確認狀態、回傳圖片像素尺寸，並依相同驗收條件交付。
+- **Verification**：三個 Agent 都必須保留四項確認狀態、在示意與正式生圖前執行
+  `validate_visual_dna.py`、回傳圖片像素尺寸，並依相同驗收條件交付。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_LANDING_PAGE_MD_A1A1ED9027
+
+# visual-prompt-kit/references/prompts/high-density-knowledge-card-prompts.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/prompts/high-density-knowledge-card-prompts.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/prompts/high-density-knowledge-card-prompts.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PROMPTS_HIGH_DENSITY_KNOWLEDGE_CARD_PROMPTS_MD_375D97A5F6'
+# 9:16 高密度知識圖卡風格 Prompt
+
+## 手寫混搭數位
+
+```text
+請使用「手寫混搭數位」的風格設計知識圖卡。主標題使用精確的粗黑體中文，旁邊或下方搭配手寫感的英文短語作為氛圍裝飾。手寫字可以稍微傾斜或不規則排列，與工整的黑體形成溫度上的對比。背景保持簡潔（深色或淺色皆可），讓手寫與數位的混搭成為視覺焦點。圖卡比例為 9:16 直式。
+```
+
+## 日系極簡線稿插畫
+
+```text
+請使用「日系極簡線稿插畫」的風格設計知識圖卡。以帶有紙張纖維、鉛筆掃描感與些微灰階顆粒的米白色背景作為基底，搭配細線手繪建築空間、店內陳列、家具與器物等生活場景插畫，並保留大量留白，整體色彩以黑、灰、米白的低彩度單色系配色邏輯為主。文字風格為纖細、帶有人文書籍氣質的日系明體與簡潔無襯線字，整體字重偏輕。請根據內容的重要程度建立清楚的文字層級。重要資訊、關鍵字、數字、步驟名稱或核心結論，使用明顯較粗的黑體字重標示；一般說明文字則維持纖細字重，形成自然的粗細對比。粗體只用於真正需要讀者第一眼注意到的資訊，不要過度使用。每個段落原則上只挑選 1–2 個重點，讓粗體自然分散在整個版面中，避免整句、整段或大量文字全部加粗。判斷粗體時，優先考慮：核心概念、關鍵動作、重要數字、步驟關鍵字、可獨立成立的結論，以及希望讀者快速掃讀時能抓住的資訊。搭配深灰線條、大面積淺色留白，以及「纖細正文 × 粗體重點」的字重差異建立資訊層級，讓讀者即使快速掃過圖卡，也能掌握主要內容。整體風格參考日本獨立出版物、文具店品牌視覺、生活雜誌、建築速寫與鉛筆線稿插畫，呈現出安靜、質樸、細膩、文藝、懷舊且帶有手作溫度的視覺感受。圖卡比例為 9:16 直式。
+```
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PROMPTS_HIGH_DENSITY_KNOWLEDGE_CARD_PROMPTS_MD_375D97A5F6
 
 # visual-prompt-kit/references/styles/japanese-modern.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/styles/japanese-modern.md")"
@@ -3571,7 +4185,7 @@ chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_carousel_workf
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_approvals.py")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_approvals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_APPROVALS_PY_48A1C5983B'
 #!/usr/bin/env python3
-"""Block Concept Card image handoff until all three approvals are recorded."""
+"""Block Concept Card image handoff until all required approvals are recorded."""
 
 from __future__ import annotations
 
@@ -3580,12 +4194,24 @@ import re
 from pathlib import Path
 
 
-REQUIRED_APPROVALS = ("風格錨點", "視覺隱喻方案", "最終 Concept Card Prompt")
+V4_REQUIRED_APPROVALS = (
+    "視覺語言與 DNA",
+    "DNA 合併圖像方案與比例",
+    "最終 Concept Card Prompt",
+)
+V3_REQUIRED_APPROVALS = (
+    "視覺語言與 DNA",
+    "DNA 合併圖像方案與比例",
+    "內容圖面示意",
+    "最終 Concept Card Prompt",
+)
+V2_REQUIRED_APPROVALS = ("視覺隱喻方案", "風格與圖面示意", "最終 Concept Card Prompt")
+LEGACY_REQUIRED_APPROVALS = ("風格錨點", "視覺隱喻方案", "最終 Concept Card Prompt")
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="驗證 Concept Card 是否完成三道確認，可進入正式生圖。"
+        description="驗證 Concept Card 是否完成必要確認，可進入正式生圖。"
     )
     parser.add_argument(
         "approval_log",
@@ -3607,9 +4233,17 @@ def main() -> int:
         return 1
 
     content = approval_log.read_text(encoding="utf-8")
+    if "流程版本：v4" in content:
+        required_approvals = V4_REQUIRED_APPROVALS
+    elif "流程版本：v3" in content:
+        required_approvals = V3_REQUIRED_APPROVALS
+    elif "流程版本：v2" in content:
+        required_approvals = V2_REQUIRED_APPROVALS
+    else:
+        required_approvals = LEGACY_REQUIRED_APPROVALS
     incomplete = [
         label
-        for label in REQUIRED_APPROVALS
+        for label in required_approvals
         if approval_status(content, label) != "confirmed"
     ]
     if incomplete:
@@ -3626,7 +4260,7 @@ def main() -> int:
         )
         return 1
 
-    print("PASS：Concept Card 三道確認均已完成，可交棒 image-generator 正式生圖。")
+    print("PASS：Concept Card 所有必要確認均已完成，可交棒 image-generator 正式生圖。")
     return 0
 
 
@@ -3634,11 +4268,105 @@ if __name__ == "__main__":
     raise SystemExit(main())
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_APPROVALS_PY_48A1C5983B
 
+# visual-prompt-kit/scripts/validate_concept_card_proposals.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_proposals.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_proposals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_PROPOSALS_PY_B65D68375D'
+#!/usr/bin/env python3
+"""Validate reviewable Concept Card DNA-merged proposals before preview generation."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+REQUIRED_SECTIONS = (
+    "### 0. 設計定位",
+    "### 1. 圖中文字腳本",
+    "### 2. 視覺隱喻與語意",
+    "### 3. 已合併的 Visual DNA",
+    "### 4. 比例適配",
+    "### 5. 修改風險",
+)
+REQUIRED_FIELDS = (
+    "核心命題",
+    "閱讀任務",
+    "原文依據",
+    "主標題",
+    "副標題",
+    "必要標籤",
+    "主要物體",
+    "動作／變化",
+    "遮字語意",
+    "色彩、線條、字體與留白",
+    "構圖策略",
+    "適合比例",
+    "可能誤解",
+    "若要修改文字，會影響",
+)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證 Concept Card 的三個方案均含可核對文字腳本、視覺語意、DNA、比例與修改影響。"
+    )
+    parser.add_argument("proposal_file", type=Path, help="briefs/concept-card-proposals.md 路徑。")
+    return parser.parse_args()
+
+
+def find_plan(content: str, label: str) -> str | None:
+    match = re.search(
+        rf"(?ms)^## 方案 {label}｜.*?(?=^## 方案 [ABC]｜|\Z)", content
+    )
+    return match.group(0) if match else None
+
+
+def field_value(plan: str, field: str) -> str | None:
+    match = re.search(rf"(?m)^[-*] {re.escape(field)}：\s*(.+?)\s*$", plan)
+    return match.group(1).strip() if match else None
+
+
+def main() -> int:
+    proposal_file = parse_args().proposal_file
+    if not proposal_file.is_file():
+        print(f"Concept Card 方案驗證失敗：找不到檔案：{proposal_file}")
+        return 1
+
+    content = proposal_file.read_text(encoding="utf-8")
+    errors: list[str] = []
+    for label in "ABC":
+        plan = find_plan(content, label)
+        if plan is None:
+            errors.append(f"缺少方案 {label}")
+            continue
+        for section in REQUIRED_SECTIONS:
+            if section not in plan:
+                errors.append(f"方案 {label} 缺少區段：{section}")
+        for field in REQUIRED_FIELDS:
+            value = field_value(plan, field)
+            if value is None or value in {"", "待補", "TODO", "未定"}:
+                errors.append(f"方案 {label} 缺少可核對內容：{field}")
+
+    if errors:
+        print("Concept Card 方案驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("PASS：三個 Concept Card 方案都具備可修改文字腳本、視覺語意、有效 DNA、比例與修改影響。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_PROPOSALS_PY_B65D68375D
+
 # visual-prompt-kit/scripts/validate_concept_card_workflow.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_workflow.py")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_workflow.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_WORKFLOW_PY_083D248B36'
 #!/usr/bin/env python3
-"""Validate the Concept Card style, metaphor, and final-prompt workflow."""
+"""Validate the DNA-first Concept Card workflow and its reviewable artifacts."""
 
 from __future__ import annotations
 
@@ -3649,39 +4377,78 @@ from pathlib import Path
 REQUIRED_MARKERS = {
     "SKILL.md": (
         "「Concept Card」、「極簡概念圖卡」、「手繪概念圖卡」、「視覺隱喻圖卡」",
-        "### 3.7 極簡概念知識圖卡（Concept Card，1:1）",
+        "### 3.7 極簡概念知識圖卡（Concept Card，可選比例）",
         "scripts/validate_concept_card_approvals.py",
-        "Concept Card 不產出圖面示意",
+        "先確認視覺語言與有效 DNA",
+        "DNA 合併的三個圖像方案與比例",
+        "中文格式化最終 Prompt 確認",
+        "不產生內容預覽圖",
+        "16:9／1:1／4:5／9:16",
         "person.mode: none",
+        "style.resolved_design",
     ),
     "references/placements/concept-card.md": (
         "了解，請提供文章內容。",
-        "### Phase 2｜視覺風格校準（必要互動）",
-        "從 Card Style Library 的 5 個候選挑一個",
-        "不得把這一關展開成 3 組風格",
-        "### Phase 3｜三個視覺隱喻方案（必要互動）",
-        "### Phase 4｜最終 Prompt 確認（必要互動）",
-        "### Phase 5｜正式生圖與驗收",
-        "no people, no faces, no hands, no silhouettes",
+        "## Phase 2｜視覺語言與 DNA（必要互動）",
+        "## Phase 3｜DNA 合併圖像方案與比例（必要互動）",
+        "## Phase 4｜中文格式化最終 Prompt（必要互動）",
+        "composition.aspect_ratio",
+        "3×3 選擇矩陣",
+        "由設計師提出三套完整 Visual DNA",
+        "圖中文字腳本",
+        "## Phase 5｜正式生圖與驗收",
         "scripts/validate_concept_card_approvals.py",
+        "scripts/validate_concept_card_proposals.py",
+        "style.resolved_design",
+        "validate_visual_dna.py --placement concept-card",
+        "--allow-pending-ratio",
     ),
     "references/handoff-contracts.md": (
         "**Concept Card 正式生圖**",
         "scripts/validate_concept_card_approvals.py",
         "person.mode` 必須是 `none`",
+        "### Concept Card 有效 DNA 交棒契約",
+        "style.resolved_design",
     ),
     "assets/concept-card-approval-log-template.md": (
-        "風格錨點：pending",
-        "視覺隱喻方案：pending",
+        "視覺語言與 DNA：pending",
+        "DNA 合併圖像方案與比例：pending",
         "最終 Concept Card Prompt：pending",
         "正式生圖：not-started",
+    ),
+    "assets/concept-card-proposals-template.md": (
+        "## 方案 A｜",
+        "## 方案 B｜",
+        "## 方案 C｜",
+        "### 1. 圖中文字腳本",
+        "### 3. 已合併的 Visual DNA",
+        "### 5. 修改風險",
+    ),
+    "scripts/validate_concept_card_proposals.py": (
+        "REQUIRED_SECTIONS",
+        "REQUIRED_FIELDS",
+        "三個 Concept Card 方案",
+    ),
+}
+
+FORBIDDEN_MARKERS = {
+    "SKILL.md": (
+        "Concept Card DNA 優先四關流程",
+    ),
+    "references/placements/concept-card.md": (
+        "## Phase 4｜內容圖面示意（必要互動）",
+        "## Phase 5｜中文格式化最終 Prompt（必要互動）",
+        "## Phase 6｜正式生圖與驗收",
+    ),
+    "assets/concept-card-approval-log-template.md": (
+        "內容圖面示意：pending",
     ),
 }
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="驗證 Concept Card 的風格錨點、視覺隱喻與最終生圖流程。"
+        description="驗證 Concept Card 的 DNA、合併方案、最終 Prompt 與單次正式生圖流程。"
     )
     parser.add_argument(
         "--root",
@@ -3704,6 +4471,9 @@ def main() -> int:
         for marker in markers:
             if marker not in content:
                 errors.append(f"{relative_path} 缺少必要標記：{marker}")
+        for marker in FORBIDDEN_MARKERS.get(relative_path, ()):
+            if marker in content:
+                errors.append(f"{relative_path} 仍保留已淘汰標記：{marker}")
 
     if errors:
         print("Concept Card 流程驗證失敗：")
@@ -3711,7 +4481,7 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
-    print("PASS：Concept Card 保有風格錨點、三個視覺隱喻、最終 Prompt 與無人物生圖契約。")
+    print("PASS：Concept Card 保有 DNA 優先、合併方案、中文 Prompt 與無人物單次正式生圖契約。")
     return 0
 
 
@@ -3723,7 +4493,7 @@ AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_CONCEPT_CARD_WORKFLOW_PY_083D2
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_approvals.py")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_approvals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_COVER_APPROVALS_PY_7C257F0127'
 #!/usr/bin/env python3
-"""Block a Cover final-image handoff until its two approvals are recorded."""
+"""Block a Cover final-image handoff until its three approvals are recorded."""
 
 from __future__ import annotations
 
@@ -3732,12 +4502,12 @@ import re
 from pathlib import Path
 
 
-REQUIRED_APPROVALS = ("視覺方向與人物", "最終 Cover 提案與提示詞")
+REQUIRED_APPROVALS = ("視覺方向與人物", "風格與圖面示意", "最終 Cover 提案與提示詞")
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="驗證 Cover 封面是否已完成兩道使用者確認，可進入正式生圖。"
+        description="驗證 Cover 封面是否已完成三道使用者確認，可進入正式生圖。"
     )
     parser.add_argument(
         "approval_log",
@@ -3778,7 +4548,7 @@ def main() -> int:
         )
         return 1
 
-    print("PASS：Cover 的兩道確認均已完成，可交棒 image-generator 正式生圖。")
+    print("PASS：Cover 的三道確認均已完成，可交棒 image-generator 正式生圖。")
     return 0
 
 
@@ -3791,7 +4561,7 @@ chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_approval
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_workflow.py")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_workflow.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_COVER_WORKFLOW_PY_FF3C911020'
 #!/usr/bin/env python3
-"""Validate the mandatory two-gate Cover workflow and its final-image guard."""
+"""Validate the mandatory three-gate Cover workflow and its final-image guard."""
 
 from __future__ import annotations
 
@@ -3801,24 +4571,26 @@ from pathlib import Path
 
 REQUIRED_MARKERS = {
     "SKILL.md": (
-        "Cover 封面的兩道確認關卡",
+        "Cover 封面的三道確認關卡",
+        "Cover 單張三關流程",
         "最終 Cover 提案與提示詞確認",
         "scripts/validate_cover_approvals.py",
         "assets/cover-approval-log-template.md",
     ),
     "references/placements/cover.md": (
-        "## Phase 6 最終確認與正式生圖",
         "briefs/cover-approval-log.md",
         "scripts/validate_cover_approvals.py",
-        "不產出展示圖",
+        "## Phase 6 圖面示意、最終確認與正式生圖",
+        "風格與圖面示意",
     ),
     "references/handoff-contracts.md": (
-        "Cover 正式生圖",
+        "**Cover 圖面示意與正式生圖**",
         "cover-approval-log.md",
         "scripts/validate_cover_approvals.py",
     ),
     "assets/cover-approval-log-template.md": (
         "視覺方向與人物：pending",
+        "風格與圖面示意：pending",
         "最終 Cover 提案與提示詞：pending",
         "正式生圖：not-started",
     ),
@@ -3827,7 +4599,7 @@ REQUIRED_MARKERS = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="驗證 Cover 封面的兩道確認關卡與正式生圖驗證器。"
+        description="驗證 Cover 封面的三道確認關卡與正式生圖驗證器。"
     )
     parser.add_argument(
         "--root",
@@ -3857,7 +4629,7 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
-    print("PASS：Cover 封面保有兩道確認關卡與正式生圖驗證器。")
+    print("PASS：Cover 封面保有三道確認關卡、圖面示意與正式生圖驗證器。")
     return 0
 
 
@@ -3865,6 +4637,131 @@ if __name__ == "__main__":
     raise SystemExit(main())
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_COVER_WORKFLOW_PY_FF3C911020
 chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_cover_workflow.py"
+
+# visual-prompt-kit/scripts/validate_high_density_knowledge_card_approvals.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_high_density_knowledge_card_approvals.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_high_density_knowledge_card_approvals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_HIGH_DENSITY_KNOWLEDGE_CARD_APPROVALS_PY_ED3533CDA4'
+#!/usr/bin/env python3
+"""Block high-density knowledge-card final generation until all approvals are recorded."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+REQUIRED_APPROVALS = ("內容覆蓋與逐字文字", "風格與圖面示意", "完整 Prompt")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證 9:16 高密度知識圖卡是否完成三道確認，可進入正式生圖。"
+    )
+    parser.add_argument("approval_log", type=Path, help="任務的 briefs/knowledge-card-approval-log.md 路徑。")
+    return parser.parse_args()
+
+
+def approval_status(content: str, label: str) -> str | None:
+    match = re.search(rf"(?m)^- {re.escape(label)}：([^\s]+)\s*$", content)
+    return match.group(1) if match else None
+
+
+def main() -> int:
+    approval_log = parse_args().approval_log
+    if not approval_log.is_file():
+        print(f"無法正式生圖：找不到確認紀錄：{approval_log}")
+        return 1
+
+    content = approval_log.read_text(encoding="utf-8")
+    incomplete = [label for label in REQUIRED_APPROVALS if approval_status(content, label) != "confirmed"]
+    if incomplete:
+        print("無法正式生圖：以下高密度知識圖卡關卡尚未獲使用者明確確認：")
+        for label in incomplete:
+            print(f"- {label}")
+        return 1
+
+    final_status = approval_status(content, "正式生圖")
+    if final_status != "not-started":
+        print(f"無法啟動新的正式生圖交棒：「正式生圖」目前狀態為 {final_status or '缺少狀態'}。")
+        return 1
+
+    print("PASS：高密度知識圖卡三道確認均已完成，可交棒 image-generator 正式生圖。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_HIGH_DENSITY_KNOWLEDGE_CARD_APPROVALS_PY_ED3533CDA4
+
+# visual-prompt-kit/scripts/validate_high_density_knowledge_card_workflow.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_high_density_knowledge_card_workflow.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_high_density_knowledge_card_workflow.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_HIGH_DENSITY_KNOWLEDGE_CARD_WORKFLOW_PY_401180FE3C'
+#!/usr/bin/env python3
+"""Validate the shared preview and approval workflow for a 9:16 knowledge card."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+REQUIRED_MARKERS = {
+    "SKILL.md": (
+        "全文章最高密度知識圖卡",
+        "1／3 張圖面示意",
+        "validate_high_density_knowledge_card_approvals.py",
+    ),
+    "references/placements/high-density-knowledge-card.md": (
+        "## 必要互動流程",
+        "### Phase 1｜內容覆蓋與逐字文字確認",
+        "### Phase 2｜風格與圖面示意確認",
+        "### Phase 3｜完整 Prompt 確認與正式生圖",
+        "產出 **1 張**9:16 圖面示意",
+        "**3 張**",
+        "validate_high_density_knowledge_card_approvals.py",
+    ),
+    "assets/high-density-knowledge-card-approval-log-template.md": (
+        "內容覆蓋與逐字文字：pending",
+        "風格與圖面示意：pending",
+        "完整 Prompt：pending",
+        "正式生圖：not-started",
+    ),
+}
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="驗證 9:16 高密度知識圖卡的共同圖面示意流程。")
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    return parser.parse_args()
+
+
+def main() -> int:
+    root = parse_args().root.resolve()
+    errors: list[str] = []
+    for relative_path, markers in REQUIRED_MARKERS.items():
+        path = root / relative_path
+        if not path.is_file():
+            errors.append(f"缺少檔案：{relative_path}")
+            continue
+        content = path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in content:
+                errors.append(f"{relative_path} 缺少必要標記：{marker}")
+
+    if errors:
+        print("高密度知識圖卡流程驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("PASS：9:16 高密度知識圖卡保有內容覆蓋、圖面示意、完整 Prompt 與正式生圖關卡。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_HIGH_DENSITY_KNOWLEDGE_CARD_WORKFLOW_PY_401180FE3C
 
 # visual-prompt-kit/scripts/validate_image_aspect.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_image_aspect.py")"
@@ -4065,9 +4962,14 @@ REQUIRED_MARKERS = {
         "## Phase 2｜圖片數量與比例確認",
         "### 3.1 風格選擇（必要互動）",
         "從 Card Style Library 挑選",
+        "style.library_record",
+        "scripts/validate_visual_dna.py",
         "勇敢先驅／保守穩重／革命性",
         "### 3.2 首張圖面示意與 Prompt 確認（必要互動）",
+        "固定 Visual DNA 前綴",
+        "固定風格與否定後綴",
         "### 3.3 全套 Prompt 確認（必要互動）",
+        "生圖交棒 Prompt Stack",
         "使用以下指令產生圖卡，共 N 張輪播圖卡 output by slide by slide format",
         "### 3.4 正式生成與驗收",
         "scripts/validate_landing_page_approvals.py",
@@ -4075,6 +4977,8 @@ REQUIRED_MARKERS = {
     "references/handoff-contracts.md": (
         "**Landing Page 圖卡**",
         "scripts/validate_landing_page_approvals.py",
+        "Style Library DNA 交棒契約",
+        "scripts/validate_visual_dna.py",
         "output by slide by slide format",
     ),
     "assets/landing-page-approval-log-template.md": (
@@ -4126,6 +5030,269 @@ def main() -> int:
 if __name__ == "__main__":
     raise SystemExit(main())
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_WORKFLOW_PY_0EEE253C04
+
+# visual-prompt-kit/scripts/validate_visual_dna.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_visual_dna.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_visual_dna.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_VISUAL_DNA_PY_39432C00D7'
+#!/usr/bin/env python3
+"""Validate that a visual-dna.yaml faithfully preserves a selected library style."""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+
+REQUIRED_TOP_LEVEL = (
+    "topic",
+    "slug",
+    "created",
+    "style",
+    "language",
+    "palette",
+    "typography",
+    "composition",
+    "person",
+    "forbidden",
+)
+REQUIRED_LIBRARY_STYLE = (
+    "id",
+    "name",
+    "visual_grammar",
+    "reference_prompt",
+    "library_record",
+)
+CONCEPT_RESOLVED_FIELDS = (
+    "placement",
+    "source_record_usage",
+    "active_reference_prompt",
+    "precedence",
+    "retained_traits",
+    "excluded_traits",
+)
+CONCEPT_PRECEDENCE = (
+    "concept-card-hard-constraints",
+    "user-confirmed-design-anchor",
+    "library-compatible-traits",
+    "generic-visual-rules",
+)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證 visual-dna.yaml 的來源忠實度與指定版位的有效 DNA 契約。"
+    )
+    parser.add_argument("visual_dna", type=Path, help="要驗證的 visual-dna.yaml。")
+    parser.add_argument(
+        "--library",
+        type=Path,
+        help="Style Library 的 styles.yaml；style.source=library 時必填。",
+    )
+    parser.add_argument(
+        "--placement",
+        choices=("concept-card",),
+        help="套用指定版位的額外 DNA 契約；目前支援 concept-card。",
+    )
+    parser.add_argument(
+        "--allow-pending-ratio",
+        action="store_true",
+        help="只供 Concept Card 的 DNA 確認關使用；允許 composition.aspect_ratio 暫填 pending，供下一關由使用者選定。",
+    )
+    return parser.parse_args()
+
+
+def load_yaml(path: Path) -> Any:
+    try:
+        return yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as error:
+        raise ValueError(f"無法讀取 YAML：{path}（{error}）") from error
+
+
+def validate_concept_card_resolution(
+    dna: dict[str, Any],
+    style: dict[str, Any],
+    errors: list[str],
+    *,
+    allow_pending_ratio: bool,
+) -> None:
+    resolved = style.get("resolved_design")
+    if not isinstance(resolved, dict):
+        errors.append("Concept Card 必須有 style.resolved_design mapping。")
+        return
+
+    for field in CONCEPT_RESOLVED_FIELDS:
+        if field not in resolved or resolved[field] in (None, ""):
+            errors.append(f"Concept Card 缺少必要有效 DNA 欄位：style.resolved_design.{field}")
+
+    if resolved.get("placement") != "concept-card":
+        errors.append("style.resolved_design.placement 必須是 concept-card。")
+
+    active_prompt = resolved.get("active_reference_prompt")
+    if not isinstance(active_prompt, str) or not active_prompt.strip():
+        errors.append("style.resolved_design.active_reference_prompt 必須是非空字串。")
+    elif style.get("source") == "library":
+        raw_prompt = style.get("reference_prompt")
+        if resolved.get("source_record_usage") != "audit-only":
+            errors.append("Concept Card 的 library 來源必須設定 source_record_usage: audit-only。")
+        if isinstance(raw_prompt, str) and raw_prompt.strip() and raw_prompt.strip() in active_prompt:
+            errors.append("Concept Card 的有效 Prompt 不得直接帶入完整 style.reference_prompt。")
+
+    if resolved.get("precedence") != list(CONCEPT_PRECEDENCE):
+        errors.append(
+            "style.resolved_design.precedence 必須依序為 "
+            + " → ".join(CONCEPT_PRECEDENCE)
+            + "。"
+        )
+
+    retained = resolved.get("retained_traits")
+    if not isinstance(retained, list) or not all(isinstance(item, str) and item.strip() for item in retained):
+        errors.append("style.resolved_design.retained_traits 必須是非空字串組成的 list。")
+
+    excluded = resolved.get("excluded_traits")
+    if not isinstance(excluded, list):
+        errors.append("style.resolved_design.excluded_traits 必須是 list。")
+    else:
+        for index, item in enumerate(excluded, start=1):
+            if not isinstance(item, dict):
+                errors.append(f"excluded_traits 第 {index} 項必須是 mapping。")
+                continue
+            if not isinstance(item.get("trait"), str) or not item["trait"].strip():
+                errors.append(f"excluded_traits 第 {index} 項缺少 trait。")
+            if not isinstance(item.get("reason"), str) or not item["reason"].strip():
+                errors.append(f"excluded_traits 第 {index} 項缺少 reason。")
+
+    language = dna.get("language")
+    if not isinstance(language, dict) or language.get("primary") != "zh-TW":
+        errors.append("Concept Card 的 language.primary 必須是 zh-TW。")
+    elif language.get("accent") != "none":
+        errors.append("Concept Card 的 language.accent 必須是 none。")
+    elif not {"en", "ja"}.issubset(set(language.get("forbidden", []))):
+        errors.append("Concept Card 的 language.forbidden 必須包含 en 與 ja。")
+
+    person = dna.get("person")
+    if not isinstance(person, dict) or person.get("mode") != "none":
+        errors.append("Concept Card 的 person.mode 必須是 none。")
+
+    composition = dna.get("composition")
+    if not isinstance(composition, dict):
+        errors.append("Concept Card 的 composition 必須是 mapping。")
+    else:
+        aspect_ratio = composition.get("aspect_ratio")
+        if allow_pending_ratio and aspect_ratio == "pending":
+            pass
+        elif not isinstance(aspect_ratio, str) or not re.fullmatch(r"[1-9]\d*:[1-9]\d*", aspect_ratio):
+            errors.append(
+                "Concept Card 的 composition.aspect_ratio 必須是正整數比例，例如 16:9、1:1、4:5、9:16 或 3:2。"
+            )
+        if not isinstance(composition.get("blocks_max"), int) or composition["blocks_max"] > 3:
+            errors.append("Concept Card 的 composition.blocks_max 不得大於 3。")
+        if composition.get("ashirai_max") != 0:
+            errors.append("Concept Card 的 composition.ashirai_max 必須是 0。")
+        if not isinstance(composition.get("decoration_max"), int) or composition["decoration_max"] > 2:
+            errors.append("Concept Card 的 composition.decoration_max 不得大於 2。")
+
+
+def main() -> int:
+    args = parse_args()
+    errors: list[str] = []
+    if args.allow_pending_ratio and args.placement != "concept-card":
+        errors.append("--allow-pending-ratio 只能與 --placement concept-card 一起使用。")
+    if not args.visual_dna.is_file():
+        print(f"驗證失敗：找不到 visual DNA：{args.visual_dna}")
+        return 1
+
+    try:
+        dna = load_yaml(args.visual_dna)
+    except ValueError as error:
+        print(f"驗證失敗：{error}")
+        return 1
+
+    if not isinstance(dna, dict):
+        print("驗證失敗：visual-dna.yaml 根節點必須是 mapping。")
+        return 1
+
+    for field in REQUIRED_TOP_LEVEL:
+        if field not in dna:
+            errors.append(f"缺少必要欄位：{field}")
+
+    style = dna.get("style")
+    if not isinstance(style, dict):
+        errors.append("style 必須是 mapping。")
+    elif style.get("source") == "library":
+        for field in REQUIRED_LIBRARY_STYLE:
+            if field not in style or style[field] in (None, ""):
+                errors.append(f"style.source=library 時缺少必要欄位：style.{field}")
+        if args.library is None:
+            errors.append("style.source=library 時必須提供 --library <styles.yaml>。")
+        elif not args.library.is_file():
+            errors.append(f"找不到 Style Library：{args.library}")
+        elif not errors:
+            try:
+                library = load_yaml(args.library)
+            except ValueError as error:
+                errors.append(str(error))
+            else:
+                styles = library.get("styles") if isinstance(library, dict) else None
+                selected = next(
+                    (item for item in styles or [] if isinstance(item, dict) and item.get("id") == style["id"]),
+                    None,
+                )
+                if selected is None:
+                    errors.append(f"Style Library 找不到 id={style['id']}。")
+                else:
+                    if style.get("name") != selected.get("name_zh"):
+                        errors.append("style.name 必須等於來源 name_zh。")
+                    if style.get("reference_prompt") != selected.get("prompt"):
+                        errors.append("style.reference_prompt 必須逐字等於來源 prompt。")
+                    if style.get("library_record") != selected:
+                        errors.append("style.library_record 必須逐欄等於來源完整 style record。")
+    elif style.get("source") not in {"builtin", "user-description", "design-proposal"}:
+        errors.append("style.source 必須是 library、builtin、user-description 或 design-proposal。")
+
+    if not isinstance(dna.get("language"), dict):
+        errors.append("language 必須是 mapping。")
+    if not isinstance(dna.get("palette"), dict):
+        errors.append("palette 必須是 mapping。")
+    if not isinstance(dna.get("typography"), dict):
+        errors.append("typography 必須是 mapping。")
+    if not isinstance(dna.get("composition"), dict):
+        errors.append("composition 必須是 mapping。")
+    if not isinstance(dna.get("person"), dict):
+        errors.append("person 必須是 mapping。")
+    if not isinstance(dna.get("forbidden"), list):
+        errors.append("forbidden 必須是 list。")
+
+    if args.placement == "concept-card" and isinstance(style, dict):
+        validate_concept_card_resolution(
+            dna,
+            style,
+            errors,
+            allow_pending_ratio=args.allow_pending_ratio,
+        )
+
+    if errors:
+        print("Visual DNA 驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    if args.placement == "concept-card" and args.allow_pending_ratio and dna.get("composition", {}).get("aspect_ratio") == "pending":
+        print("PASS：Concept Card 視覺 DNA 已確認；比例仍待下一關由使用者選定。")
+    elif args.placement == "concept-card":
+        print("PASS：Concept Card 同時保留完整來源記錄與可生圖的有效 DNA。")
+    else:
+        print("PASS：visual-dna.yaml 完整保留已選 Style Library 記錄、原始 Prompt 與共用 DNA schema。")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_VISUAL_DNA_PY_39432C00D7
 
 test -f "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md" && echo "visual-prompt-kit installed for Codex, Claude, and AntiGravity"
 ````
