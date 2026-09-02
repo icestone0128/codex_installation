@@ -1,6 +1,6 @@
 # 22-Image-Generator-Skill-安裝
 
-> 版本：2026-05-25 三 Agent 共用版
+> 版本：2026-09-02 三 Agent 共用版
 > 用途：建立 `image-generator` 全域 skill，讓使用者用自然語句在 Codex、Claude、AntiGravity 裡生圖、修圖、寫圖像提示與整理圖片資產。
 > 成品：下載者可直接使用本文文末「內建 Skill 完整安裝內容」建立 `{{SYNC_ROOT}}/skills/image-generator/`；預設優先當前 Agent 的原生生圖通道，缺少時再使用已核准 API／CLI／手動 fallback。
 
@@ -10,6 +10,7 @@
 - 來源文件：`08-用Image Gen Skill在Codex生圖.md`。
 - 三 Agent 共用全域 skill：`{{SYNC_ROOT}}/skills/image-generator/SKILL.md`。
 - 這版定位：以當前 Agent 的原生 image generation capability 作為一般生圖與修圖入口；若該 Agent 沒有原生通道，依序改走已核准 API／CLI／手動流程。
+- 2026-09-02：Concept Card 改採 DNA 優先交棒：四道確認（DNA、DNA 合併方案與比例、內容示意、中文最終 Prompt）完成後，才可正式生圖；內容示意一律是已選方案的單張樣本。
 
 ## 這版和來源文件的差異
 
@@ -169,10 +170,38 @@ tool is more appropriate before using image generation.
 5. After generation, report the useful result and any local path or project
    placement action that was actually completed.
 
-### Visual Prompt Kit｜Concept Card（1:1）
+### Visual Prompt Kit｜Landing Page 圖卡
+
+當上游 `visual-prompt-kit` 交出 Landing Page 圖卡的圖面示意或正式生圖時，先讀任務的
+`visual-dna.yaml` 與對應 brief。這條路徑的目的不是把每張圖片重新設計一次，而是讓 Hero、
+痛點、成果與流程圖在不同尺寸中保持同一個已確認的 Style Library DNA。
+
+- **圖面示意**：只接收最高優先區塊的已選風格示意。`style.source=library` 時，先執行
+  `validate_visual_dna.py --library <styles.yaml> visual-dna.yaml`；未 PASS、缺少完整
+  `style.library_record` 或缺少逐字 `style.reference_prompt` 時，不得生成。
+- **正式生圖**：先執行 `validate_landing_page_approvals.py`
+  驗證四道確認，再執行相同的 DNA 驗證。僅接收每張都完整展開的 Prompt Stack，不能接受
+  「同上 DNA」或只有 YAML 路徑的交棒。
+- **每張 Prompt Stack** 必須具備：固定 Visual DNA 前綴（原始 `reference_prompt`、配色、字體、
+  構圖與人物策略）／本張內容與佈局／固定風格與否定後綴（來源 `chars`、語言否定提示與共用禁項）。
+  前綴與後綴必須逐張完全一致；中段才可隨區塊功能、比例和具體視覺錨點改變。
+- **驗收**：回傳實際像素尺寸，逐張檢查比例、核准文字白名單、具體視覺錨點、完整 DNA 前後綴與
+  無假文字。任一張偏離時，只重生該張，不裁切、拉伸或用下一張的風格覆蓋它。
+
+此路徑沿用原生生圖工具；不因驗證需求改用 API、CLI 或新 provider。
+
+### Visual Prompt Kit｜圖面示意（所有圖卡共用）
+
+除 Concept Card 外，所有由 `visual-prompt-kit` 交出的圖卡都先依
+`references/visual-prompt-kit-preview-generation.md` 生成圖面示意：路徑 1／2／參考圖是 1 張、
+路徑 3 是 3 張。示意只寫入 drafts，必須沿用已確認內容、比例、文字白名單與暫定 DNA，不能當成
+正式圖或直接放進 Archive。使用者確認後，正式圖仍依最終 Prompt 重新生成。Concept Card 不走這個圖面示意
+路徑：它先確認 DNA、DNA 合併方案與比例、中文格式化最終 Prompt，然後才單次生成正式圖。
+
+### Visual Prompt Kit｜Concept Card（可選比例）
 
 當上游 `visual-prompt-kit` 交出「Concept Card 正式生圖」時，這不是一般封面或長內容知識圖卡。
-它只生成 **1 張 1:1 的極簡手繪概念圖卡**，必須保持一個核心命題、單一視覺隱喻與大量留白。
+它只生成 **1 張使用者已確認比例的極簡手繪概念圖卡**，必須保持一個核心命題、單一視覺隱喻與大量留白。
 
 開始前必須檢查交接包中的 `briefs/concept-card-approval-log.md`，並執行：
 
@@ -182,13 +211,19 @@ tool is more appropriate before using image generation.
 ```
 
 只有 `PASS` 才能啟動原生生圖；缺少交接包、三道確認未完成，或 `person.mode` 不是 `none` 時，
-停止並回到上游確認流程。不得用未確認的提案、預覽圖或其他 Concept Card 的內容代替。
+停止並回到上游確認流程。不得用未確認的提案或其他 Concept Card 的內容代替。
 
-交接包必須包含 `visual-dna.yaml`、唯一的 `briefs/concept-card-final.md`、圖中文字白名單、
-目標比例和指定輸出路徑。這條路徑是「文字例外」：主標、副標與最多三個必要標籤必須依白名單
+交接包必須包含 `visual-dna.yaml`、已確認的 `briefs/concept-card-proposals.md`、唯一的
+`briefs/concept-card-final.md`、圖中文字白名單、目標比例和指定輸出路徑。最終 Prompt 必須依同一份 DNA、
+選定方案、比例與文字腳本完成確認，且不另產生內容示意。這條路徑是「文字例外」：主標、副標與最多三個必要標籤必須依白名單
 逐字生成，不能因一般圖片的無文字偏好而移除或自行改寫；其他文字一律排除。
 
-生成後必須驗收：實際像素為 1:1、白名單以外的文字不存在、沒有任何人物／人臉／手部／剪影／人形
+若 Concept Card 選定 Style Library，先以 `validate_visual_dna.py --placement concept-card` 驗證。
+原始 `style.reference_prompt` 與完整 `style.library_record` 是稽核資料，生圖只使用
+`style.resolved_design` 的有效風格描述、保留特徵與硬性排除；不得把相互衝突的原始風格特徵
+直接送入 Prompt，再用後段文字嘗試覆寫。
+
+生成後必須驗收：實際像素符合 `composition.aspect_ratio`、白名單以外的文字不存在、沒有任何人物／人臉／手部／剪影／人形
 輪廓、沒有多欄資訊圖或複雜流程圖，且遮住文字後仍能看懂物件、動作與結果。任何一項失敗時，
 只針對失敗項重生，不得裁切、拉伸或靜默交付。完整交接與驗收規格見
 `references/concept-card-generation.md`。
@@ -209,7 +244,10 @@ tool is more appropriate before using image generation.
 
 不可因插畫美感把其中任何一類縮成一句泛泛摘要。把所有會出現在卡上的文字以逐字清單放進
 Prompt；插畫、分隔線、箭頭與小圖示只服務於閱讀順序，不得覆蓋、擠壓或取代知識文字。
-使用 `scripts/validate_high_density_knowledge_card_plan.py` 先驗證計畫結構，再生成。
+使用 `scripts/validate_high_density_knowledge_card_plan.py` 先驗證計畫結構。接著依共同流程產出
+路徑 1／2／參考圖的 1 張、或路徑 3 的 3 張 9:16 圖面示意；使用者確認後才接受完整 Prompt。
+正式生圖前另執行 `scripts/validate_high_density_knowledge_card_approvals.py`
+`briefs/knowledge-card-approval-log.md`。示意只能放 drafts，正式圖必須重新生成。
 
 生成後依序檢查：文章五類內容是否真的都被呈現、逐字文本是否可讀且無憑空增寫、只有明列的
 外語點綴文字、沒有敘事頁碼／Logo／浮水印，及實際像素是否符合目標比例。目標為 9:16 時，
@@ -261,7 +299,7 @@ When the user provides or references an image:
 Read `references/imagegen-codex-workflow.md` for examples, native adapter guidance,
 and common pitfalls. For full-article 9:16 knowledge cards, read
 `references/high-density-knowledge-card.md` and use its content-coverage template.
-For an approved single-concept 1:1 card from `visual-prompt-kit`, read
+For a Concept Card with approved visual DNA, a DNA-merged proposal, and ratio from `visual-prompt-kit`, read
 `references/concept-card-generation.md`.
 AGENT_LAZYPACK_IMAGE_GENERATOR_SKILL_MD_0E95F5A366
 
@@ -270,8 +308,22 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/references/concept-car
 cat > "{{SYNC_ROOT}}/skills/image-generator/references/concept-card-generation.md" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_CONCEPT_CARD_GENERATION_MD_7ED610DB59'
 # Concept Card 正式生圖交接規格
 
-此規格只處理由 `visual-prompt-kit` 已確認後交出的 **單張 1:1 極簡概念圖卡**。它不是 Cover，
+此規格只處理由 `visual-prompt-kit` 已確認後交出的 **單張、使用者已確認比例的極簡概念圖卡**。它不是 Cover，
 不保留封面人物；也不是高密度知識圖卡，不摘要全文或加入步驟、列表與多欄資訊。
+
+## 最終 Prompt 交接（正式生圖前）
+
+Concept Card 的風格確認不是直接生圖。上游必須先確認完整有效 DNA，再以同一份 DNA 提出三個含
+文字腳本的圖像方案，並由使用者選定方案與 `composition.aspect_ratio`，最後確認唯一的中文格式化
+最終 Prompt。Concept Card 不產生內容圖面示意；完成三道確認後才可進行**1 張**正式生圖。
+
+- 只讀已確認的 `briefs/concept-card-proposals.md` 中之已選方案、`visual-dna.yaml`、比例與圖中文字白名單；
+  不得用未選方案、只有風格名稱的描述或其他任務內容補足。
+- 不依路徑 1／2／3 分別產出 1／3 張內容圖。路徑差異已在 DNA 選擇階段結束；這一關只核對**已選內容方案的唯一最終 Prompt**。
+- 先執行 `validate_concept_card_proposals.py briefs/concept-card-proposals.md` 與
+  `validate_visual_dna.py --placement concept-card`；使用風格庫時加上 `--library`。
+- 遮字語意、無人物、逐字文字白名單與已確認比例必須寫入最終 Prompt，並在正式圖完成後驗收。
+- 使用者未確認「最終 Concept Card Prompt」前，停止在此關；不得先生成草稿、預覽圖或 Archive 圖檔。
 
 ## 啟動閘門
 
@@ -282,6 +334,7 @@ cat > "{{SYNC_ROOT}}/skills/image-generator/references/concept-card-generation.m
 ├── visual-dna.yaml
 ├── briefs/
 │   ├── concept-card-final.md
+│   ├── concept-card-proposals.md
 │   └── concept-card-approval-log.md
 └── assets/images/
 ```
@@ -289,12 +342,19 @@ cat > "{{SYNC_ROOT}}/skills/image-generator/references/concept-card-generation.m
 執行前在任務目錄中驗證：
 
 ```text
+{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_visual_dna.py \
+  --placement concept-card \
+  [--library <風格庫>/styles.yaml] \
+  visual-dna.yaml
+
+{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_proposals.py \
+  briefs/concept-card-proposals.md
+
 {{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_concept_card_approvals.py \
   briefs/concept-card-approval-log.md
 ```
 
-預期輸出必須是 `PASS：Concept Card 三道確認均已完成，可交棒 image-generator 正式生圖。`。
-若不通過、缺少 `concept-card-final.md`、缺少 `visual-dna.yaml`，或 `person.mode` 不是 `none`，
+三個驗證都必須通過。若不通過、缺少 `concept-card-final.md`、缺少 `concept-card-proposals.md`、缺少 `visual-dna.yaml`，或 `person.mode` 不是 `none`，
 不得生成；清楚指出哪個閘門未通過，回到上游流程。
 
 ## 生圖輸入契約
@@ -302,10 +362,15 @@ cat > "{{SYNC_ROOT}}/skills/image-generator/references/concept-card-generation.m
 以 `concept-card-final.md` 為唯一內容來源，不自行擴寫文章。原生生圖 Prompt 至少逐項轉入：
 
 - 核心命題、核心視覺隱喻、主要物體、動作／變化與語意驗證；
-- 1:1 畫布、中央或中段單一圖解、大量乾淨留白；
+- `composition.aspect_ratio` 的畫布、依比例調整的單一圖解與大量乾淨留白；
 - 背景、手繪線條、色彩與字體的 Design Anchor；
 - 主標、副標、必要標籤的逐字繁中白名單；
 - `person.mode: none` 與所有排除項目。
+
+若 `style.source=library`，原始 `style.reference_prompt` 與 `style.library_record` 只供稽核，
+不得直接放進生圖 Prompt。必須使用 `style.resolved_design.active_reference_prompt`、
+`retained_traits` 與共用 DNA 欄位作為有效視覺來源；`excluded_traits` 是強制排除清單，
+不得以最後一段自然語言覆寫取代。
 
 Prompt 必須明示：只有白名單的台灣繁體中文文字可以出現；禁止英文、日文、Logo、署名、
 浮水印、假文字與未核准標籤。主標與副標不是選配，不得因「少文字」而省略；然而不得加入
@@ -314,7 +379,7 @@ Prompt 必須明示：只有白名單的台灣繁體中文文字可以出現；�
 ## 原生生圖與檔案落點
 
 1. 預設使用當前 Agent 的原生生圖工具；不要求 API key、模型名稱或 CLI fallback。
-2. 一次只生成 1 張最終圖。Concept Card 沒有示意圖或多方案生圖階段。
+2. 一次只生成 1 張最終圖。正式圖是唯一一次內容生圖，沒有可轉交、封存或重用的內容示意圖。
 3. 若使用者指定存檔，或成品將被專案引用，將選定成品放到：
 
    ```text
@@ -329,7 +394,7 @@ Prompt 必須明示：只有白名單的台灣繁體中文文字可以出現；�
 
 完成後依序檢查：
 
-1. 以 `scripts/validate_image_aspect.py --ratio 1:1 <image.png>` 驗證實際像素。
+1. 以 `scripts/validate_image_aspect.py --ratio <composition.aspect_ratio> <image.png>` 驗證實際像素。
 2. 只出現白名單內的繁體中文字；沒有英文、日文、亂碼或假文字。
 3. 沒有任何人物、人臉、手部、剪影或人形輪廓。
 4. 只有一個主要物件或不可拆分的一組場景；沒有多欄資訊圖、心智圖、Dashboard、複雜流程圖。
@@ -427,6 +492,22 @@ scripts/validate_high_density_knowledge_card_plan.py briefs/knowledge-card-conte
 可用細線、留白、分隔線、箭頭、器物、抽象符號、人物或空間插畫作裝飾；人物只有在原文情境
 或使用者方向確實需要時才加入。**插畫是閱讀導航，不是主角。**
 
+## 圖面示意與正式生圖
+
+依 `visual-prompt-kit` 的共同圖卡流程，內容覆蓋與逐字文字確認後，必須先完成風格圖面示意：
+
+- 路徑 1、2 或參考圖：1 張；路徑 3：3 張同一份內容、逐字文字、比例與閱讀順序的 9:16 示意。
+- 示意只寫入 `100_Todo/drafts/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/assets/style-samples/`，並回傳像素尺寸；
+  不能放入正式圖目錄或 Archive。
+- 使用者確認示意後，才提出完整 Prompt 並確認。正式圖必須以最終 Prompt 重新生成，示意不能直接升格。
+- 正式生成前，除了內容計畫驗證，還要執行：
+
+  ```text
+  scripts/validate_high_density_knowledge_card_approvals.py briefs/knowledge-card-approval-log.md
+  ```
+
+  未取得 `PASS` 不得正式生成。
+
 ## 生成後驗收與修正
 
 1. 逐區對照內容覆蓋計畫，確認五類內容沒有缺漏或被錯誤合併。
@@ -444,7 +525,7 @@ scripts/validate_high_density_knowledge_card_plan.py briefs/knowledge-card-conte
 
 ## 三 Agent 執行契約
 
-- **Shared steps**：同一份計畫、同一份逐字文字、同一個比例與同一套驗收。
+- **Shared steps**：同一份計畫、同一份逐字文字、同一個比例、1／3 張圖面示意與同一套驗收。
 - **Codex adapter**：使用原生 image tool；輸出後保存到任務目錄並跑驗證。
 - **Claude adapter**：使用原生 image tool；輸出後保存到任務目錄並跑同一驗證。
 - **AntiGravity adapter**：使用原生 image tool；輸出後保存到任務目錄並跑同一驗證。
@@ -554,9 +635,49 @@ Report the final path only after the file has actually been copied or created.
   `references/high-density-knowledge-card.md` 的內容覆蓋、逐字文本與驗收契約；不可因原生工具不同
   而改成摘要卡或跳過實際比例驗證。
 - 當上游 `visual-prompt-kit` 交出已確認的 Concept Card 時，三個 Agent 必須共用
-  `references/concept-card-generation.md` 的三道確認、繁中白名單、無人物與 1:1 實際像素驗收；
-  不可先生成示意圖，也不可把它改成封面或長內容資訊圖。
+  `references/concept-card-generation.md` 的三道確認、DNA 合併方案、繁中白名單、無人物、已確認比例、單次正式生圖與實際像素驗收；
+  不產生內容圖面示意，也不可把最終圖改成封面或長內容資訊圖。
 AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_IMAGEGEN_CODEX_WORKFLOW_MD_502FEBA26E
+
+# image-generator/references/visual-prompt-kit-preview-generation.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/references/visual-prompt-kit-preview-generation.md")"
+cat > "{{SYNC_ROOT}}/skills/image-generator/references/visual-prompt-kit-preview-generation.md" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_VISUAL_PROMPT_KIT_PREVIEW_GENERATION_MD_23FB568095'
+# Visual Prompt Kit 圖面示意交接規格
+
+適用於 Cover、Carousel、Info Carousel、Landing Page 圖卡與 9:16 高密度知識圖卡。Concept Card 不使用本內容
+示意流程；它採 DNA 優先、方案與最終 Prompt 確認後單次正式生圖，另依 `concept-card-generation.md` 執行。
+圖面示意是正式生圖前的可見校準樣本，不是正式成品，也不能寫入正式 `assets/images/` 或 Archive。
+
+## 可接受的交接
+
+上游必須交出：
+
+- 已確認的內容／語意範圍、具體視覺錨點、比例與圖中文字白名單；
+- 完整 Preview Prompt；
+- 暫定 Visual DNA 或 C 路徑的候選 DNA；
+- 圖面示意的輸出路徑：
+
+  ```text
+  100_Todo/drafts/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/assets/style-samples/
+  ```
+
+- 路徑 1、2 或參考圖：1 張示意；路徑 3：3 張同一內容錨點的差異化示意。
+
+若是 Style Library，先執行 `validate_visual_dna.py`。未通過時不得生成。
+
+## 生成邊界
+
+- 三個路徑中的 Preview Prompt 均使用最終比例，且所有圖中文字只能使用上游白名單。
+- 路徑 3 的三張不可以改變內容、視覺隱喻、比例、人物策略或文字；只比較色彩、光感、媒材、字體感與構圖語彙。
+- 回傳每張示意的實際檔案路徑與像素尺寸，並檢查比例、文字白名單、具體視覺錨點與 DNA 是否相符。
+- 不以「preview」「sample」等字樣寫入圖面，也不得標示為正式成品。
+- 使用者未確認圖面示意前，禁止產出其他正式圖或全套成品。
+
+## 完成後清理
+
+正式圖通過驗收後，預設移除該任務的 drafts 圖面示意；使用者明確要求保留時才留存。正式圖必須以
+最終確認的 Prompt 重新生成，示意不可自動轉為正式圖。
+AGENT_LAZYPACK_IMAGE_GENERATOR_REFERENCES_VISUAL_PROMPT_KIT_PREVIEW_GENERATION_MD_23FB568095
 
 # image-generator/scripts/validate_high_density_knowledge_card_plan.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/scripts/validate_high_density_knowledge_card_plan.py")"
