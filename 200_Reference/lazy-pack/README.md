@@ -174,7 +174,7 @@
 40：Engineering Methods Skill Suite；完整內嵌 `engineering-methods`、`grill-me` 與其他 20 個穩定工程／生產力 skills，追蹤 `mattpocock/skills` 全部 41 項來源，提供只讀更新檢查、跨 Agent adapters 與隔離驗證器
 41：clasp-setup；共用 clasp v3 CLI 管理 Apps Script clone／pull、manifest、push 與 Web App deployment，包含專案 target、備份、上傳清單、OAuth／憑證檔與公開存取安全閘門
 42：speak-human-tw；完整內嵌 MIT 授權上游 v1.4.0 的繁體中文去 AI 味 skill，含 38 種痕跡模式庫、誤殺邊界、台灣在地化層、五情境力度表、保護清單與 42 條 benchmark；強制「先列編號清單、等使用者勾選、才動筆或動檔案」
-43：visual-prompt-kit；完整內嵌文章轉視覺設計提案的 skill，含封面版位、日系現代風格（繁中主體＋英文點綴）、visual DNA schema、交棒契約與風格推薦腳本；只出 brief 不出圖，生圖交 image-generator、組版交 social-cards／landing-page。**風格庫為外部依賴、不內嵌**，缺庫時走內建風格的無庫模式
+43：visual-prompt-kit；完整內嵌文章轉視覺設計提案的 skill，含封面、輪播、Concept Card、Landing Page 圖卡與第四週 HTML 版位；一般版位只出 brief，生圖交 image-generator。第四週直接繼承第三週已確認的文案、圖片配置、正式圖像與 visual DNA，不重複詢問上游內容或風格；Part 僅作內部防漏，會自動完成全部 Part、合併、圖片置換與驗收，只交付完整單一 CMS HTML，成品完成後才詢問一次發布目標。**風格庫為外部依賴、不內嵌**，缺庫時走內建風格的無庫模式
 44：personal-style-loop；完整內嵌個人寫作風格訓練迴圈，含校準題／保留題的 Style Harness、收斂式回饋協議、風格素材庫 schema（`use_for`／`do_not_use_for` 與去識別化規則）與 Codex UI adapter；只學使用者自己的聲音，不模仿特定創作者。**使用者作品為外部依賴、不內嵌**，素材放各專案本地 `200_Reference/writing-samples/`，不足 2 篇時 skill 會停下來要求補齊
 45：agent-dev-coach；完整內嵌 agent 開發五關教練，含六份關卡 reference（拷問／規格／切票／TDD／雙軸審查／PRD 打包）、`spec.schema.json`、HTML 樣板、renderer 與 validator（模糊詞與 schema 雙重把關）與 Codex UI adapter；腳本已改為自我定位，可從學員專案任意工作目錄以絕對路徑呼叫。與 Item 40 的邊界：Item 40 是使用者自己做事的工具箱，本 Item 是帶人的單一連續流程，多了教練話術、HC 標籤、`.agent-flow/` 狀態機與每關必須明確同意才前進的閘門
 ```
