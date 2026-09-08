@@ -1,7 +1,7 @@
 # 43-Visual Prompt Kit Skill 安裝
 
-> 版本：2026-09-02
-> 定位：把文章轉成可直接生圖的視覺設計提案；只出 brief，不出圖、不組版。
+> 版本：2026-09-09
+> 定位：把文章轉成可直接生圖的視覺設計提案；Landing Page 第四週可把既有文案、配置與圖片合成完整 HTML。
 
 ## 這個 Item 解決什麼
 
@@ -9,14 +9,19 @@
 
 `visual-prompt-kit` 把視覺決策拆成三個獨立維度——**版位（placement）× 風格（style）× 裝飾語言（accent language）**——並用一份 `visual-dna.yaml` 鎖住整個系列的配色、字體階層與構圖上限。之後不論做封面、圖卡還是銷售頁圖，都讀同一份 DNA，系列感不靠人工盯。
 
+Landing Page 第三週會先判定視覺密度，對整頁做圖片覆蓋稽核，並在配置表記錄圖片於 HTML
+中的角色。第四週自動繼承第三週 DNA 與正式圖片，完成色彩、字體、表面、留白及圖片處理的
+風格校準；CMS 與排版模式仍詢問一次，選定後自動完成全部 Part、合併與圖片置換。
+
 Concept Card 的決策順序例外採 DNA 優先：先確認完整視覺 DNA，才用同一份 DNA 提出三個含可修改文字腳本的圖像方案與比例；確認後產出一張真正反映內容的示意，最後才確認中文格式化 Prompt。
 
 新增版位或風格是新增一個檔案，`SKILL.md` 不需要動。
 
 ## 邊界
 
-- 只產出結構化設計提案文件，**不輸出 Midjourney / Stable Diffusion 的單段指令語法**。
-- 不呼叫生圖工具、不寫 HTML、不組頁面。生圖交 `image-generator`，圖卡組版交 `social-cards`，銷售頁組版交 `landing-page`。
+- 圖卡版位產出結構化設計提案文件，**不輸出 Midjourney / Stable Diffusion 的單段指令語法**。
+- 生圖交 `image-generator`，品牌圖卡組版交 `social-cards`。`landing-page-html` 是唯一 HTML
+  例外，負責把第三週已確認的文案、圖片配置與正式圖片合成完整單檔。
 - 不自動加入 Logo、簽名、品牌名、作者名或浮水印。
 
 ## 外部依賴：風格庫（不內嵌）
@@ -70,7 +75,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SKILL_MD_0E95F5A366'
 ---
 name: visual-prompt-kit
-description: "Use when the user wants to turn an article, note, topic, or Landing Page copy into visual design briefs for AI image generation, including 封面 Prompt, 課程封面, Concept Card, 極簡概念圖卡, 圖卡 Prompt, 系列圖卡, Landing Page 圖卡, 銷售頁圖片 Prompt, 縮圖, thumbnail, banner, or explicit $visual-prompt-kit invocation. It first collects or creates source copy for Landing Page graphics, locks shared visual DNA, and enforces approval gates before image generation."
+description: "Use when the user wants to turn an article, note, topic, or Landing Page copy into visual design briefs for AI image generation, including 封面 Prompt, 課程封面, Concept Card, 極簡概念圖卡, 圖卡 Prompt, 系列圖卡, Landing Page 圖卡, 銷售頁圖片 Prompt, 縮圖, thumbnail, banner, or explicit $visual-prompt-kit invocation. It first collects or creates source copy for Landing Page graphics, locks shared visual DNA, and enforces approval gates before image generation. A dedicated landing-page-html placement then merges the approved graphics and image placement table with the original copy into segmented, CMS-ready semantic HTML."
 metadata:
   short-description: Article to visual design briefs
 ---
@@ -108,10 +113,19 @@ Cover 的人物策略、輪播的文本大綱、Landing Page 的區塊與數量�
 「Landing Page 圖卡」、「Landing Page 視覺」、「銷售頁圖卡」、「銷售頁圖片 Prompt」、
 「Concept Card」、「極簡概念圖卡」、「手繪概念圖卡」、「視覺隱喻圖卡」、
 「幫我做縮圖」、「把這篇文章做成封面」、「萃取風格」、
-「幫我萃取這張圖的風格」、「把這張圖的風格收進風格庫」。
+「幫我萃取這張圖的風格」、「把這張圖的風格收進風格庫」、
+「Landing Page 排版」、「銷售頁 HTML」、「文案轉 HTML」、「CMS HTML」、
+「圖片配置表轉 HTML」、「第四週」、「把圖跟文案合起來」。
 
 若使用者要的是**成品**而非 brief，先確認路由：品牌模板圖卡走 `social-cards`，
-銷售頁組版走 `landing-page`，直接生圖走 `image-generator`。
+直接生圖走 `image-generator`。
+
+銷售頁分兩條路由，不可混用：
+
+- **已有文案與圖片配置表，要把它們合成 HTML**（第四週）→ 本 skill 的 `landing-page-html`
+  版位，見「3.9 Landing Page HTML 排版」。
+- **只有一個粗略構想，要從訪談開始生出一整份新銷售頁**（含撰寫文案、CTA、倒數與部署）
+  → 全域 `landing-page` skill 的引導模式。
 
 若使用者是給一張參考圖、要分析或收藏它的設計風格，走「萃取風格」流程
 （見下方獨立章節），不是主流程的步驟 2 風格校準。
@@ -143,6 +157,10 @@ Cover 的人物策略、輪播的文本大綱、Landing Page 的區塊與數量�
 - 讀取 `references/placements/<placement>.md` 再繼續。
 - `landing-page` placement 必須先完成上方「Landing Page 圖卡的文案入口」，再讀
   `references/placements/landing-page.md`；其三階段確認流程優先於下方 Cover／輪播的通用描述。
+- `landing-page-html` placement（第四週）必須讀 `references/placements/landing-page-html.md`；
+  完整第三週交付存在時，自動繼承文案、圖片配置、正式圖像與視覺 DNA，並在內部完成色彩、
+  字體、表面、留白與圖片處理的風格校準，不詢問風格 A／B／C。CMS 與排版模式仍須詢問一次；
+  選定後一路完成。缺少上游產物時才對無法推定的必要缺項進行補確認。
 - `concept-card` placement 必須讀 `references/placements/concept-card.md`；它先完成視覺語言 DNA，
   才提出三個 DNA 合併圖像方案，且**不得**套用下方通用人物選項、A／B／C 的 1／3 張風格示意
   或 Cover 的高點擊率構圖慣例。
@@ -322,6 +340,58 @@ Logo、簽名、浮水印或額外文案。
 故事、原因、框架、行動或結論其中任何一類，或比例／文字白名單不通過，必須只針對該缺口重生，
 不得靜默交付。
 
+### 3.9 Landing Page HTML 排版（第四週，上游自動繼承）
+
+`landing-page-html` 是 Landing Page 流程的**第四週**：把第三週已確認的 Landing Page 圖像與
+圖片配置表，與原始文案合併成可直接貼入 CMS 的**完整單一 HTML**。Part 只作內部防漏與檢查。
+它是本 skill 唯一允許輸出
+HTML 的版位，設計哲學固定為 **Every Section Serves Reading Flow**：每個區塊的排版型態都
+服務該區塊的閱讀停留點與轉換推進任務，不是美學裝飾。
+
+第一階段先驗證第三週交付。`source-copy.md`、confirmed 圖片配置表、配置表列出的正式圖像與
+confirmed `visual-dna.yaml` 齊全時，前三項直接自動產生並記為 `inherited`，不得停下來提問：
+
+1. **區塊清單**：解讀文案結構，列出順序、區塊名稱、區塊功能與閱讀停留點；只列原文實際
+   存在的區塊。
+2. **站位符命名**：對照圖片配置表補上 `[IMG-Hero]`、`[IMG-Pain-01]` 這類命名，並列出數量、
+   視覺功能、比例、`placement_role`、`html_relationship`、`text_ownership` 與
+   `mobile_behavior`；第三週已有正式圖時另附檔案路徑。
+3. **自動風格校準**：由 `visual-dna.yaml`、正式圖片、配置角色與參考頁推導五色票，以及字體、
+   表面、圓角、邊框、陰影、留白與圖片處理，寫入 `landing-page-html-style-calibration.md`；
+   不再詢問風格校準 A／B／C 或色票確認。
+4. **CMS 與排版模式**：CMS 部署模式 A 內嵌 `<style>`／B inline style／C 兩種都產出；排版模式
+   A 互動（逐區塊、每區塊 2 種型態建議）／B 一鍵（AI 自動配置並補上可調整提示）。
+5. **排版型態配置**：從 Z-Pattern／F-Pattern／Split-Screen／Asymmetric／Card Grid／Zig-Zag／
+   單欄卡片列表中，為每個區塊指定型態；相鄰區塊不得同型態。
+
+缺少完整第三週交付時，只對缺項使用原有確認流程；已驗證項目仍記為 `inherited`。第四週只需
+確認 CMS 與排版模式及排版型態配置。前三項為 `inherited` 或 `confirmed`，後兩項為
+`confirmed` 後，先建立 Part 計畫，執行
+
+```text
+scripts/validate_landing_page_html_approvals.py briefs/landing-page-html-approval-log.md
+```
+
+取得 `PASS` 後，把 Part 當成內部防漏單位依序寫入檔案；每段輸出前完成文案完整性、CMS
+相容性、可維護性、風格與圖片角色四項自我檢查。**不得把中間 HTML codeblock 貼進對話，不得等待使用者回覆
+「繼續」**；應自動完成全部 Part、合併單一 HTML、置換正式圖像並驗收後，才回報最終檔案。
+
+分段輸出完成後，依序執行：**宣告全部 Part 完成 → 合併存檔 → 圖片置換 → 完整單檔驗收**。
+合併只串接已確認的 Part 並補上文件外殼，不重寫
+內容；圖片置換後必須驗收站位符全數對應、無殘留 `placehold.co`、無中文 `src`、數量與比例
+符合配置表。完成後只回報成品摘要、檔案路徑、大小與驗收結果。
+
+發布詢問放在完整 HTML 與圖片驗收完成之後，**不得打斷 HTML 生成流程**。最終成品回報後，
+詢問一次是否發布，並提供 A 原生 Site／B Netlify／C Firebase Hosting／D GitHub Pages／
+E 不發布五個選項；使用者選定前不得建立任何遠端資源或執行部署指令。Netlify 交棒全域
+`netlify-deploy`；Firebase 與 GitHub Pages 直接用各自 CLI，沒有既有專案或 repo 時先問。
+**發佈與存取權限變更一律需要使用者明確同意**：原生 Site 預設私有、事後可改公開；
+Netlify／Firebase／GitHub Pages 部署即公開，同意閘門必須在**部署前**完成。
+
+每個任務從 `assets/landing-page-html-approval-log-template.md` 建立
+`briefs/landing-page-html-approval-log.md`。完整流程、排版型態選擇庫、輸出範例與硬限制見
+`references/placements/landing-page-html.md`。
+
 ### 4. 產出設計提案
 
 依 placement 檔指定的模板輸出。輪播版位必須優先遵守上述四道確認關卡；Cover 與 9:16 高密度知識圖卡
@@ -349,6 +419,12 @@ Logo、簽名、浮水印或額外文案。
 交棒前必須通過 `scripts/validate_high_density_knowledge_card_approvals.py`
 `briefs/knowledge-card-approval-log.md`。
 
+`landing-page-html`（第四週）是本 skill 內部的下游，不對外交棒：它接收第三週的
+`source-copy.md`、`briefs/landing-page-image-counts.md`、正式圖檔路徑與 `visual-dna.yaml`，
+完整時自動繼承上游並完成完整風格校準；CMS 與排版模式仍須詢問一次，選定後持續完成。
+缺項才補確認。通過
+`scripts/validate_landing_page_html_approvals.py` 的實際檔案證據檢查後，直接輸出分段 HTML。
+
 ## 萃取風格（把參考圖收進風格庫）
 
 跟上面五步驟主流程平行的獨立功能：給一張參考圖，用固定模板描述它的
@@ -371,6 +447,8 @@ Logo、簽名、浮水印或額外文案。
 ## 硬規則
 
 1. 只產出 brief、確認狀態與交棒資料；不自行選擇生圖 provider、不寫 HTML、不組頁面。
+   **唯一例外是 `landing-page-html`（第四週）**：該版位以內部 Part 防漏，正式產出為已置換圖片的完整單一 HTML，受硬規則 21
+   與 `references/placements/landing-page-html.md` 的獨立限制約束；其餘版位不得援引此例外。
    所有版位僅能在完成內容／語意範圍與暫定風格後，交棒產出 A／B 的 1 張或 C 的 3 張圖面示意；
    示意確認與完整 Prompt 確認前，不得交棒正式成品圖。版位個別的額外確認由
    `references/card-generation-flow.md` 與各 placement 檔定義。
@@ -385,8 +463,9 @@ Logo、簽名、浮水印或額外文案。
    把構圖區塊與裝飾數量交給生圖端自由發揮，但文字覆蓋與可讀性不可放寬。）
 6. 背景必須退後：可有質感，不可有搶走主標題的可辨識細節。
 7. 只使用使用者提供的文章內容。不從記憶、人設或其他專案補料。
-8. 風格校準是必要互動關卡，不可跳過；非互動環境可改走「無偏好」草案並明說，
-   但輪播圖卡與 Cover 都不得自動跨越任何確認關卡或正式生圖。
+8. 風格校準是必要步驟；圖卡生圖版位依各自關卡互動確認。`landing-page-html` 例外採內部
+   自動風格校準：沿用第三週 DNA、正式圖片、配置角色與參考頁，不為校準停下詢問。
+   非互動環境可改走「無偏好」草案並明說，但輪播圖卡與 Cover 都不得自動跨越任何確認關卡或正式生圖。
 9. 所有文字必須有容器或陰影保護，複雜背景中仍須清晰。核心金句每組必填。
    （前半同屬呈現層規則，版位檔可明文放寬；風格校準與知識點清晰不可放寬。）
 10. 風格庫與角色設定若含第三方、付費課程或個人資產，不得複製進本 skill、
@@ -444,6 +523,28 @@ Logo、簽名、浮水印或額外文案。
     缺一類內容、出現未核准外語招牌、或比例不符都不得交付。
     詳細契約由 `image-generator/references/high-density-knowledge-card.md` 定義，三個 Agent 共用同一份
     計畫與驗收。
+21. **Landing Page HTML 排版（第四週）**：`landing-page-html` 先檢查第三週交付契約。若
+    `source-copy.md`、已確認的圖片配置表、配置表列出的正式圖像與已確認的 `visual-dna.yaml`
+    都存在，直接自動產生區塊清單、站位符對照、五色票與完整風格校準檔；校準必須涵蓋字體、
+    表面、圓角、邊框、陰影、留白、圖片處理與配置表的四個角色欄位，將上游衍生狀態記為
+    `inherited` 或 `auto-completed`；**不得要求使用者再次確認，也不得再詢問風格校準 A／B／C**。
+    CMS 與排版模式仍須詢問一次；使用者已選定時不得重問。選定後不再逐區確認或在 Part 之間
+    停等。缺少完整第三週產物時，才針對無法從現有檔案推定的必要缺項走
+    補缺確認流程。通過 `validate_landing_page_html_approvals.py` 後才開始分段輸出 HTML；驗證器
+    必須實查 `inherited` 所引用的上游檔案，不得把狀態字串本身當成證據。使用者提供的文案必須
+    100% 保留：禁止摘要、濃縮、改寫、刪段、合併、補寫原文沒有的銷售文案，或用「以下略」
+    「其餘同上」「請自行補上」取代內容。HTML 必須語義化（濫用 `<div>` 視為失敗）、禁止任何
+    CSS 框架、採緊湊間距、相鄰區塊不同排版型態；圖片站位符 `src` 必須是英文 URL 並附
+    `<!-- [IMG-XXX] | 比例 | 視覺功能 -->` 註解。Part 只作內部防漏與檢查，不在對話貼程式碼或
+    等待「繼續」；C 模式先完成全部內嵌 style 再做 inline style。自動完成全部 Part 後，合併
+    單一 HTML 並置換正式圖像；合併只串接已檢查的 Part 並補文件外殼，不重寫內容。圖片置換後必須驗收站位符對應、
+    無殘留 `placehold.co`、無中文 `src`、數量與比例符合配置表。完成單一 HTML 並回報成品後，
+    才詢問一次發布目標
+    （A 原生 Site／B Netlify／C Firebase Hosting／D GitHub Pages／E 不發布），選定前不得建立
+    任何遠端資源或執行部署指令。**發佈與存取權限變更需使用者明確同意**：原生 Site 預設私有；
+    Netlify／Firebase／GitHub Pages 部署即公開，同意閘門必須在部署前完成。不代為串接網域、
+    金流、表單後端或追蹤碼。
+    硬規則 4、5、9 的圖內文字配額與生圖語言映射不適用本版位——它處理的是 HTML 上的原文。
 
 ## 擴充
 
@@ -472,7 +573,8 @@ Logo、簽名、浮水印或額外文案。
   `### 1. 文本內容`），再以 `validate_carousel_prompt_plan.py` 驗證提示詞計畫與大綱張次
   一一對應（高密度加 `--require-structured-high-density` 驗證六段提示詞）；並保留首張展示、
   文本大綱、全套提示詞三次明確確認紀錄；Cover 與 9:16 高密度卡保留內容／方案、圖面示意、最終 Prompt 的確認紀錄；
-  Concept Card 保留 DNA、合併方案與比例、最終 Prompt 的確認紀錄。各自的生圖前驗證器通過後才可交棒；高密度正式 PNG 另須
+  Concept Card 保留 DNA、合併方案與比例、最終 Prompt 的確認紀錄；`landing-page-html` 保留上游繼承證據與第四週決策紀錄，
+  並在輸出第一段 HTML 前通過 `validate_landing_page_html_approvals.py`。各自的生圖前驗證器通過後才可交棒；高密度正式 PNG 另須
   通過 `validate_image_aspect.py --ratio 4:5` 才可交付。
 - **萃取風格**：三個 Agent 共用同一套模板與 `add_style.py` 呼叫方式；差異只在
   呈現填好模板的方式（見 `references/style-extraction.md` 的 Agent 執行）。
@@ -487,8 +589,11 @@ Logo、簽名、浮水印或額外文案。
 - `references/style-extraction.md`：萃取風格模板、欄位映射與寫入風格庫流程。
 - `references/handoff-contracts.md`：交棒給 image-generator / social-cards / landing-page。
 - `references/landing-page-mini-copy.md`：沒有既有文案時的 Mini-Landing Page 逐題訪談與短版文案契約。
-- `references/placements/landing-page.md`：Landing Page 圖卡版位；既有文案的結構解讀、圖片數量確認、
-  風格校準與結構化 Prompt 契約。
+- `references/placements/landing-page.md`：Landing Page 圖卡版位（第三週）；既有文案的結構解讀、
+  圖片數量確認、風格校準與結構化 Prompt 契約。
+- `references/placements/landing-page-html.md`：Landing Page HTML 排版版位（第四週）；把已確認的
+  圖像與圖片配置表和原始文案合併成完整單一 CMS HTML，含完整第三週自動繼承、缺項補確認、排版型態選擇庫、
+  內部分段檢查與文案完整性硬限制。
 - `references/placements/concept-card.md`：極簡概念知識圖卡版位；完整 DNA、DNA 合併的三個可修改圖像方案與可選比例、
   中文最終 Prompt 確認與單次正式生圖契約。
 - `references/placements/high-density-knowledge-card.md`：全文章最高密度 9:16 知識圖卡的版位邊界、
@@ -522,6 +627,9 @@ Logo、簽名、浮水印或額外文案。
 - `scripts/validate_concept_card_approvals.py`：正式生圖前驗證 Concept Card 的三次確認。
 - `scripts/validate_landing_page_workflow.py`：驗證 Landing Page 圖卡的文案入口、四道確認與圖面示意流程。
 - `scripts/validate_landing_page_approvals.py`：正式生圖前驗證 Landing Page 圖卡的四次確認。
+- `scripts/validate_landing_page_html_workflow.py`：驗證第四週 HTML 排版保有上游自動繼承、
+  缺項補確認、排版型態決策與分段輸出契約。
+- `scripts/validate_landing_page_html_approvals.py`：輸出第一段 HTML 前驗證上游繼承證據與第四週決策。
 - `scripts/validate_high_density_knowledge_card_workflow.py`：驗證 9:16 高密度知識圖卡的風格、圖面示意與最終 Prompt 流程。
 - `scripts/validate_high_density_knowledge_card_approvals.py`：正式生圖前驗證 9:16 高密度知識圖卡的三次確認。
 - `scripts/validate_visual_dna.py`：驗證 library 選擇的完整來源記錄、原始 Prompt 與共用 DNA schema，避免風格在示意或正式生圖前漂移。
@@ -531,6 +639,8 @@ Logo、簽名、浮水印或額外文案。
 - `assets/concept-card-proposals-template.md`：Concept Card DNA 合併圖像方案與可修改圖中文字腳本模板。
 - `assets/high-density-knowledge-card-approval-log-template.md`：9:16 高密度知識圖卡任務的三次確認紀錄模板。
 - `assets/landing-page-approval-log-template.md`：Landing Page 圖卡任務的四次確認紀錄模板。
+- `assets/landing-page-html-approval-log-template.md`：第四週 HTML 排版任務的上游繼承與必要決策紀錄、
+  設定摘要與分段輸出進度模板。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SKILL_MD_0E95F5A366
 
 # visual-prompt-kit/agents/openai.yaml
@@ -819,12 +929,90 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/landing-page-approval-log-t
 - 使用者回覆：
 - 備註：
 
+## 視覺密度與整頁覆蓋
+
+- 視覺密度：minimal-support／image-led-full-page
+- 參考頁配置比較：
+- 連續純文字區塊檢查：
+- 平行項目拆圖檢查：
+- 每張圖的 placement_role／html_relationship／text_ownership／mobile_behavior：
+
 ## 正式生成驗收
 
 - 逐張檔案路徑與像素尺寸：
 - 文字可讀性與白名單：
 - 具體視覺錨點與減法檢查：
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_LANDING_PAGE_APPROVAL_LOG_TEMPLATE_MD_155A802142
+
+# visual-prompt-kit/assets/landing-page-html-approval-log-template.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/landing-page-html-approval-log-template.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/assets/landing-page-html-approval-log-template.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_LANDING_PAGE_HTML_APPROVAL_LOG_TEMPLATE_MD_17413BE0B1'
+# Landing Page HTML 排版確認紀錄
+
+> 完整第三週交付可把前三項記為 `inherited`，並由驗證器實查上游檔案；第四週新增決策才需要使用者確認。
+
+- 上游素材模式：pending
+- 區塊清單：pending
+- 站位符命名：pending
+- 色票：pending
+- 自動風格校準：pending
+- CMS 與排版模式：pending
+- 排版型態配置：pending
+- 分段輸出：not-started
+- 合併存檔：not-started
+- 圖片置換：not-started
+- 發布目標：pending
+- 建立網站：not-started
+- 發佈：not-started
+
+## 設定摘要
+
+- CMS 部署模式：（A 內嵌 style／B inline style／C 兩種）
+- 排版模式：（A 互動／B 一鍵）
+- 風格校準路徑：（完整第三週交付時填「inherited from visual-dna.yaml」；補缺模式才填 A／B／C）
+- 執行模式：interactive／direct
+- 色票：--color-bg / --color-text / --color-accent / --color-muted / --color-placeholder-bg
+- 自動風格校準檔：`briefs/landing-page-html-style-calibration.md`
+
+## 確認紀錄
+
+- 日期：
+- 使用者回覆：
+- 備註：
+
+## 上游繼承證據
+
+- `source-copy.md`：
+- `briefs/landing-page-image-counts.md`：
+- 正式圖像數量與路徑：
+- `visual-dna.yaml`：
+- 自動產生的區塊清單／站位符對照／五色票：
+- 正式圖片與參考頁的風格校準證據：
+
+## 分段輸出進度
+
+| Part | 區塊範圍 | 內嵌 style | inline style |
+| --- | --- | --- | --- |
+| Part 1 |  | not-started | not-started |
+
+## 合併、圖片置換與完整單檔驗收
+
+- 全部 Part 已完成並明確宣告（共 __ 段）：
+- 合併檔實際路徑與大小：
+- 圖片置換：站位符全數對應／無殘留 placehold.co／無中文 src／數量與比例相符：
+- 發布目標（A 原生 Site／B Netlify／C Firebase Hosting／D GitHub Pages／E 不發布）：
+- 選定目標的前置檢查結果（登入、既有專案或 repo、可見性）：
+- 建立網站方式與實際網址或本機路徑：
+- 發佈同意：原生 Site 記錄改公開的同意；Netlify／Firebase／GitHub Pages 記錄**部署前**同意的
+  日期與使用者原話：
+- 最終網址與實際權限狀態：
+
+## 完整單檔交付前自我檢查
+
+- 文案完整性（無摘要、無刪段、無「以下略」）：
+- CMS 相容性（模式正確、無 CSS 框架、站位符 src 為英文 URL）：
+- 可維護性（區塊註解、站位符註解、Part 順序與最終合併）：
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_ASSETS_LANDING_PAGE_HTML_APPROVAL_LOG_TEMPLATE_MD_17413BE0B1
 
 # visual-prompt-kit/references/README.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/README.md")"
@@ -843,7 +1031,8 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/README.md" <<'AGENT_LAZ
 | 高密度 Info Carousel | `placements/carousel-info.md` | 4:5、多張知識輪播 |
 | Concept Card | `placements/concept-card.md` | 可選比例、單一視覺隱喻圖卡 |
 | 全文章高密度知識圖卡 | `placements/high-density-knowledge-card.md` | 9:16、單張完整知識圖卡 |
-| Landing Page 圖卡 | `placements/landing-page.md` | 依既有文案分區規劃的多張圖片 |
+| Landing Page 圖卡（第三週） | `placements/landing-page.md` | 依既有文案分區規劃的多張圖片 |
+| Landing Page HTML 排版（第四週） | `placements/landing-page-html.md` | 文案＋圖片配置表合併成分段 CMS HTML |
 
 ## 共用設計系統
 
@@ -851,7 +1040,8 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/README.md" <<'AGENT_LAZ
 - `visual-dna.md`：跨示意圖與正式圖共用的 `visual-dna.yaml`、來源忠實度與 Prompt Stack。
 - `style-library.md`：讀取 100 種風格資料庫、篩選候選與建立 DNA 的規則。
 - `style-extraction.md`：從參考圖萃取自訂風格的確認與附加寫入流程。
-- `handoff-contracts.md`：交棒給 `image-generator`、`social-cards` 與 `landing-page` 的契約。
+- `handoff-contracts.md`：交棒給 `image-generator`、`social-cards` 與 `landing-page` 的契約，
+  以及第三週圖卡到第四週 HTML 排版的內部銜接。
 
 ## Prompt 資產
 
@@ -927,8 +1117,11 @@ cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/handoff-contracts.md" <
 ```text
 visual-prompt-kit  →  image-generator   生圖
                    →  social-cards      圖卡組版與匯出
-                   →  landing-page      銷售頁組版
+                   →  landing-page      從訪談開始的全新銷售頁（含撰寫文案）
 ```
+
+例外：**第四週的 Landing Page HTML 排版留在本 skill 內部**，由 `landing-page-html` 版位執行，
+不對外交棒。銜接契約見本檔最後一節。
 
 ## → image-generator
 
@@ -956,7 +1149,8 @@ visual-prompt-kit  →  image-generator   生圖
    必須攜帶三段式 Prompt Stack：固定 Visual DNA 前綴（含原始 reference_prompt）／本張內容與
    佈局／固定風格與否定後綴（含 chars、語言與禁項）。全套 Prompt 已確認後，先執行
    `scripts/validate_landing_page_approvals.py briefs/landing-page-approval-log.md` 並取得 `PASS`，
-   才交出 `visual-dna.yaml`、每張已確認的結構化 brief、尺寸比例與輸出路徑。正式交棒文件首行
+   才交出 `visual-dna.yaml`、每張已確認的結構化 brief、尺寸比例、輸出路徑，以及
+   `placement_role`、`html_relationship`、`text_ownership`、`mobile_behavior`。正式交棒文件首行
    必須是「使用以下指令產生圖卡，共 N 張輪播圖卡 output by slide by slide format」，N 替換為已確認
    的總張數，並以逐張方式生成。
 5. **Concept Card 正式生圖**：先確認視覺語言與有效 DNA，再確認 DNA 合併的圖像方案與比例，並確認唯一的
@@ -1062,6 +1256,31 @@ Brief 轉換為生圖 Prompt 時，語言指定一律**取自該系列 `visual-d
 ## 不交棒的情況
 
 使用者只要 brief、不要成品時，交付 brief 就結束。不要自作主張往下走完整條產線。
+
+## 內部銜接：第三週圖卡 → 第四週 HTML 排版
+
+`landing-page`（第三週）完成逐張正式生圖與驗收後，接續本 skill 的 `landing-page-html`
+（第四週）。這是 skill 內部銜接，不是對外交棒，因此不需要另一個下游 skill。
+
+交出的內容固定為：
+
+1. `source-copy.md`：原始或 Mini-Landing Page 文案，作為 HTML 的唯一內容來源。
+2. `briefs/landing-page-image-counts.md`：已確認的圖片配置表（視覺密度、整頁覆蓋稽核、數量、
+   拆解邏輯、比例、`placement_role`、`html_relationship`、`text_ownership`、`mobile_behavior`）。
+3. 每張正式圖的實際檔案路徑與像素尺寸。
+4. `visual-dna.yaml`：供第四週自動風格校準取用已確認的 palette 與視覺語彙。
+5. `briefs/landing-page-approval-log.md`：證明第三週四道確認皆為 `confirmed`。
+
+第四週收到完整交付後，直接驗證檔案並自動繼承文案、圖片配置、正式圖像與視覺 DNA；
+自動建立區塊清單、站位符對照、五色票與完整風格校準檔，不再要求使用者確認，也不再詢問
+風格校準 A／B／C。CMS 與排版模式仍須詢問一次；使用者選定後，不再逐區或在 Part 之間停等，
+自動完成到單一 HTML。通過
+`scripts/validate_landing_page_html_approvals.py` 的上游證據檢查後，自動完成內部分段、合併、正式
+圖像置換與驗收，只向使用者交付完整單一 HTML 檔；成品回報後再詢問一次發布目標，不得把發布
+問題插入 Part 生成、合併或圖片置換途中。
+
+使用者手上只有文案與圖片配置表、沒有做過第三週時，同樣可直接執行第四週；缺少的正式圖以
+站位符保留，不強制回頭補做第三週。
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_HANDOFF_CONTRACTS_MD_F59DB8C89B
 
 # visual-prompt-kit/references/landing-page-mini-copy.md
@@ -3030,6 +3249,748 @@ scripts/validate_high_density_knowledge_card_approvals.py briefs/knowledge-card-
 ```
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_HIGH_DENSITY_KNOWLEDGE_CARD_MD_F4FAE80B0F
 
+# visual-prompt-kit/references/placements/landing-page-html.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/landing-page-html.md")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/landing-page-html.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_LANDING_PAGE_HTML_MD_55ECC7D222'
+# Landing Page HTML 排版版位（第四週）
+
+## 定位與輸入
+
+本版位是 Landing Page 流程的**第四週**：把第三週已完成的 Landing Page 圖像與圖片配置表，
+與原始文案合併成**可直接貼入 CMS 的完整單一 HTML**。Part 僅作內部防漏與檢查。
+
+它是 `visual-prompt-kit` 唯一允許輸出 HTML 的版位。其餘版位仍受主 SKILL 硬規則 1 約束，
+不寫 HTML、不組頁面。
+
+設計角色是**日本數位視覺設計師 × Frontend Layout Strategist**，專精 SaaS、知識型產品與線上
+課程的 Landing Page 排版策略與 HTML 結構實作。設計哲學固定為：
+
+> **每一個區塊都必須為閱讀流動服務（Every Section Serves Reading Flow）。**
+
+排版型態（Z-Pattern／F-Pattern／Split-Screen／Card Grid 等）是為該區塊的閱讀停留點與轉換
+推進任務服務的功能決策，不是美學裝飾。
+
+### 上游銜接
+
+| 上游產物 | 來源 | 在本版位的用途 |
+| --- | --- | --- |
+| Landing Page 文案 | `source-copy.md`（原始或 Mini-Landing Page 成稿） | HTML 的唯一內容來源 |
+| 圖片配置表 | `briefs/landing-page-image-counts.md` | 站位符命名、數量、比例與圖片版位角色 |
+| 正式圖像 | 第三週 `image-generator` 交付的檔案路徑 | 替換站位符時的對應清單 |
+| `visual-dna.yaml` | 第三週已鎖定的視覺 DNA | 自動風格校準的視覺來源 |
+
+上游資產齊全時，**直接驗證並自動繼承，不得重問已知資訊，也不得要求使用者再次確認取用**。
+使用者是從別的流程直接進來、手上只有文案與配置表時，同樣可執行本版位，不強制回頭補做
+第三週；只對真正缺少、且無法從現有檔案判定的資料提問。
+
+### 直接執行模式
+
+使用者說「直接做」、「不要詢問」、「請繼續」、「一路完成」或等義指令時，設定
+`execution_mode: direct`。這代表上游繼承與風格校準在內部完成：
+
+- 以 `visual-dna.yaml`、正式圖片、圖片配置表與使用者提供的參考頁完成自動風格校準。
+- 不停下來顯示風格 A／B／C 選單或要求風格 `OK`。
+- CMS 部署模式與排版模式仍是第四週唯一必要的中途詢問；使用者已選過時直接沿用，不重問。
+- CMS 與排版模式選定後，不再逐區詢問、列出中間程式碼或停在 Part 之間；自動完成全部 Part、
+  合併、圖片置換與驗收，再回報單一 HTML 成品。
+
+發布仍是外部狀態變更，維持在完整 HTML 交付後單獨詢問。
+
+### 不屬於本版位的工作
+
+- 重寫、健檢或補寫銷售文案。文案完整性是本版位最高優先級的限制。
+- 從零產生一份新的銷售頁（含訪談與文案生成）。那是全域 `landing-page` skill 的引導模式。
+- 部署、串金流、建立正式表單或填入未經確認的 CTA 目標網址。
+
+## 任務檔案與確認紀錄
+
+在專案輸出目錄建立：
+
+```text
+100_Todo/projects/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/
+├── source-copy.md
+├── visual-dna.yaml
+└── briefs/
+    ├── landing-page-image-counts.md              # 第三週產物
+    ├── landing-page-html-sections.md             # 區塊清單
+    ├── landing-page-html-placeholders.md         # 站位符命名對照
+    ├── landing-page-html-palette.md              # 5 個色彩變數
+    ├── landing-page-html-style-calibration.md    # 色彩、字體、表面、留白與圖片處理
+    ├── landing-page-html-layout-plan.md          # 排版型態配置與 Part 計畫
+    ├── landing-page-html-approval-log.md
+    └── html/
+        ├── embedded-part-01.html
+        └── inline-part-01.html
+└── site/                                          # 第四、第五階段產物
+    ├── index.html
+    ├── index-inline.html                          # 僅 C 模式
+    └── assets/images/
+```
+
+`landing-page-html-approval-log.md` 至少記錄下列狀態：`上游素材模式`、`區塊清單`、`站位符命名`、
+`色票`、`自動風格校準`、`CMS 與排版模式`、`排版型態配置`。上游素材與自動衍生結果可記為
+`inherited` 或 `auto-completed`；驗證器會
+實查第三週上游檔案。CMS 與排版模式只能是 `pending`、`confirmed` 或
+`revisions-requested`；未選定時不得開始 HTML。自動風格校準可依既有證據記為
+`auto-completed`，不等待人工確認。
+
+第四、第五階段另記錄 `分段輸出`、`合併存檔`、`圖片置換`、`發布目標`、`建立網站`、`發佈`
+的進度。`發布目標` 必須記下使用者選定的 A／B／C／D／E；`發佈` 只有在使用者明確同意
+（原生 Site 為改公開、其餘為部署前同意）後才可離開 `not-started`。
+
+每個任務從 `assets/landing-page-html-approval-log-template.md` 建立這份確認紀錄；輸出第一段
+HTML 前必須執行：
+
+```text
+scripts/validate_landing_page_html_approvals.py briefs/landing-page-html-approval-log.md
+```
+
+## 第一階段：上游繼承或補缺
+
+### 完整第三週銜接：自動繼承模式
+
+先檢查下列四項，不以對話中的「OK」代替檔案證據：
+
+1. `source-copy.md` 存在且非空。
+2. `briefs/landing-page-image-counts.md` 狀態為 `confirmed`，並含正式圖像對照。
+3. 正式圖像對照列出的每張檔案都存在；數量與配置表一致。
+4. `visual-dna.yaml` 存在且狀態為 `confirmed`。
+
+四項齊全時，直接完成下列動作，不停下來詢問：
+
+- 依原文產生 `landing-page-html-sections.md`。
+- 沿用配置表的站位符與正式圖檔對應，產生 `landing-page-html-placeholders.md`。
+- 由 `visual-dna.yaml`、正式圖片、圖片配置表與參考頁完成自動風格校準；除五個 CSS 色彩變數外，
+  同時推導字體層級、表面質感、圓角、邊框、陰影、留白節奏與圖片處理，產生
+  `landing-page-html-style-calibration.md`。
+- 將 `上游素材模式`、`區塊清單`、`站位符命名`、`色票` 記為 `inherited`，將
+  `自動風格校準` 記為 `auto-completed`，並寫入檔案證據。
+- 直接進入步驟 4。不得再詢問文案、區塊清單、站位符、風格校準 A／B／C 或色票確認。
+
+### 缺少上游產物：補缺模式
+
+只有上列任一項缺少或無法驗證時，才執行步驟 1～3，而且只詢問缺項；已從檔案確認的項目直接
+記為 `inherited`。每個需要人工判斷的缺項確認後記為 `confirmed`。
+
+### 步驟 1｜接收 Landing Page 文案並解讀區塊（補缺模式）
+
+還沒有文案時，主動請使用者貼上：
+
+> 我們開始進行 Landing Page 的排版設計。請先貼上你的 **Landing Page 文案**（純文字或 Markdown 皆可）。
+>
+> 我會先解讀文案結構，列出區塊清單給你確認。確認後再請你提供「圖片配置表」、「風格校準資訊」、「CMS 部署模式」。
+>
+> 後續產出 HTML 時，我會採用分段輸出，確保完整保留你的原文，不會因為篇幅太長而自行摘要。
+
+收到文案後解讀整體結構，以表格呈現：
+
+| 順序 | 區塊名稱 | 區塊功能 | 閱讀停留點 |
+| --- | --- | --- | --- |
+| 1 | Hero | 抓住注意力、傳達核心價值主張 | 標題 + 主視覺 + 首個 CTA |
+| 2 | 痛點區 | 建立共鳴、放大問題痛感 | 痛點清單 |
+
+只列原文實際存在的區塊；不補常見銷售頁慣例的缺漏區塊。完成後請使用者確認區塊清單，並請
+對方貼上圖片配置表（第三週已完成時，直接引用 `briefs/landing-page-image-counts.md` 並請其
+確認取用正確）。
+
+### 步驟 2｜接收圖片配置表並補上站位符命名（補缺模式）
+
+對照步驟 1 已確認的區塊清單，為每張圖片補上站位符命名：
+
+- 該區塊只有 1 張圖：`[IMG-{區塊英文名}]`，例如 `[IMG-Hero]`。
+- 該區塊有多張圖：`[IMG-{區塊英文名}-01]`、`[IMG-{區塊英文名}-02]`，例如 `[IMG-Pain-01]`。
+- 區塊英文名以簡短語意化為原則：Hero／Pain／Result／Audience／Process／Bonus／FAQ／CTA。
+
+第三週新版配置表應直接帶入 `placement_role`、`html_relationship`、`text_ownership` 與
+`mobile_behavior`。舊任務缺少這四欄時，依區塊功能、圖片數量、正式圖片與參考頁自動補齊並
+寫入站位符對照，不為相容性補欄停下詢問。
+
+以表格呈現：
+
+| 區塊名稱 | 圖片數量 | 站位符命名 | 視覺功能 | 比例 | placement_role | html_relationship | text_ownership | mobile_behavior |
+| --- | ---: | --- | --- | --- | --- | --- | --- | --- |
+| Hero | 1 | `[IMG-Hero]` | 主視覺、抓住注意力 | 16:9 | hero-visual | image-beside-copy | html | vertical-stack |
+| 4 個 AI 設計卡關問題 | 4 | `[IMG-Pain-01]`～`[IMG-Pain-04]` | 痛點代入 | 1:1 | content-card | image-is-card | mixed | vertical-stack |
+
+第三週的正式圖像已存在時，另加一欄記錄對應檔案路徑，方便使用者事後替換站位符。
+完成後請使用者確認站位符命名，再進入下一步。
+
+### 步驟 3｜風格校準（補缺模式）
+
+主動詢問使用者選擇 A／B／C 三條路徑之一，**三條路徑都必須提供，不可省略任何一條**：
+
+> 站位符已確認，接下來進行 **風格校準**。為了讓產出的 HTML 色調能與你先前生成的圖片保持一致，請選擇一種方式提供風格資訊：
+>
+> ▋ **A. 上傳一張代表性圖片**（如 Hero 主視覺、知識圖卡）
+> 我會分析這張圖的主色、輔色、強調色，提取出 5 個色彩變數套用到 HTML。**這是最精準、最不容易出錯的方式。**
+>
+> ▋ **B. 用文字描述風格**（如：「深紫黑底 + 霓虹紫 CTA + 白色文字」）
+> 我會根據你的描述對應 5 個色彩變數。適合已經有明確品牌色的人。
+>
+> ▋ **C. 跳過，使用日系知識型預設配色**（米色底 + 深咖啡文字 + 豆沙色 CTA）
+> 適合不在意精細色調、想快速產出的人。
+>
+> 請回覆「A」「B」或「C」。
+
+第三週已鎖定 `visual-dna.yaml` 時不執行本步驟；自動取用其中已確認的 palette 並記為
+`inherited`，再結合正式圖片與配置表完成下列自動風格校準，不詢問 A／B／C。
+
+無論走哪條路徑，最終都收斂為 5 個色彩變數：
+
+| 變數 | 用途 | HEX | 視覺說明 |
+| --- | --- | --- | --- |
+| `--color-bg` | 整頁主背景 | `#XXXXXX` | 從圖片背景色提取 |
+| `--color-text` | 主要文字色 | `#XXXXXX` | 從圖片主文字色提取 |
+| `--color-accent` | CTA 與重點強調 | `#XXXXXX` | 從圖片中視覺最跳的元素提取 |
+| `--color-muted` | 輔助文字、副標題 | `#XXXXXX` | 介於 text 與 bg 之間的中性色 |
+| `--color-placeholder-bg` | 圖片站位符底色 | `#XXXXXX` | 比 bg 略深的同色系 |
+
+路徑 C 的預設值：`#F5EFE6` / `#3E2723` / `#A0522D` / `#7B6F5E` / `#EBE3D5`。
+
+風格校準不只包含色票，還要寫入 `landing-page-html-style-calibration.md`：
+
+| 校準項目 | 必須記錄的結果 |
+| --- | --- |
+| Color | 五色票、對比度與用途 |
+| Typography | 標題、內文、數字與 CTA 的字重和尺度 |
+| Surface | 背景、卡片、邊框、圓角與陰影 |
+| Spacing | 區塊垂直節奏、卡片間距與內容最大寬度 |
+| Image treatment | 裁切、留白、比例、邊框、圓角與滿版策略 |
+| Placement mapping | 每張圖的 `placement_role` 與 `html_relationship` 如何轉成 HTML |
+| Mobile | 每張圖的 `mobile_behavior` 與堆疊順序 |
+| Reference relationship | 參考頁提供哪些節奏或版位依據，哪些仍沿用第三週 DNA |
+
+路徑 A 必須說明校準結果是從圖片推論而來。一般互動模式可請使用者確認補缺結果；直接執行模式
+採最佳判斷並記為 `auto-completed`，不停止。
+
+### 步驟 4｜選擇 CMS 部署模式與排版模式
+
+CMS 與排版模式是第四週唯一必要的中途詢問，可在同一次提問中收斂。即使使用者要求直接執行，
+未選定時仍須顯示下列選單；若已在同一對話或任務紀錄中選定，直接沿用，不重問：
+
+> 色票已確認，最後一步：**選擇 CMS 部署模式**。
+>
+> ▋ **A. 內嵌 `<style>` 版本**：樣式集中在 `<style>` 區塊內，使用 5 個 CSS 變數管理色彩。HTML 乾淨易讀，想改色只要改 5 個變數。
+> 適用：自架站點、WordPress 自訂 HTML 區塊、Ghost HTML 卡片、Netlify Drop。
+>
+> ▋ **B. Inline Style 版本**：所有樣式直接寫在每個元素的 `style="..."` 屬性上。HTML 較長，但跨平台通用性最高。
+> 適用：限制較多的 CMS、不確定 CMS 能否支援 `<style>` 標籤時。
+>
+> ▋ **C. 兩種版本都產出**：我會產出兩份 HTML，你當場試哪份能用就好。
+> 適用：完全不確定 CMS 能力的情況。
+>
+> 接著請選擇排版模式：
+>
+> ▋ **A. 互動模式（Interactive Mode）**：我會逐個區塊與你討論，每個區塊提供 2 種排版型態建議讓你挑選。
+>
+> ▋ **B. 一鍵模式（Express Mode）**：我直接根據你的文案與圖片配置，自動配置每個區塊的排版型態。
+>
+> 請一次回覆「CMS A／B／C＋排版 A／B」，例如「A＋B」。
+
+## 第二階段：排版型態決策
+
+排版型態選擇庫：
+
+| 排版型態 | 視覺結構 | 適合區塊類型 |
+| --- | --- | --- |
+| **Z-Pattern** | 文字、圖片沿 Z 字形交錯 | Hero、CTA、單行動區塊 |
+| **F-Pattern** | 圖片靠左，文字大段落往下延伸 | 痛點區、課程介紹、長文段 |
+| **Split-Screen** | 畫面左右各佔一半 | Hero、講師介紹、Before-After |
+| **Asymmetric** | 一大一小、視覺重心偏向其中一側 | 痛點、解方對比、特色說明 |
+| **Card Grid** | 2×2／3×1／4×1 等格狀重複單元 | 多項並列的功能、模組、見證、贈品 |
+| **Zig-Zag** | 多列、圖片左右輪流 | 多個功能逐一說明、流程展示 |
+| **單欄卡片列表** | 窄閱讀欄、卡片堆疊 | FAQ、密集的疑慮處理 |
+
+### 步驟 5（路徑 A：互動模式）｜逐區塊確認排版型態
+
+**每次只詢問一個區塊，不可一次列出所有區塊讓使用者一起選。** 每次推薦時：
+
+1. 主動避開前一個區塊已使用的型態。
+2. 推薦理由結合該區塊的「區塊功能」與「圖片數量」。
+3. 多張圖（≥3 張）的區塊優先推薦 Card Grid 或 Zig-Zag。
+4. 單張圖的區塊優先推薦 Z-Pattern／F-Pattern／Split-Screen／Asymmetric。
+5. 每個區塊固定提供 **2 種**排版型態建議，並各給一句排版邏輯理由。
+
+互動格式範例：
+
+> 現在進入第二階段（互動模式），我們逐個區塊確認排版型態。
+>
+> ▋ **第 1 個區塊：Hero**
+>
+> - 區塊功能：抓住注意力、傳達核心價值主張
+> - 站位符配置：`[IMG-Hero]`（16:9，1 張）
+>
+> 我建議使用 **Split-Screen** 或 **Z-Pattern**：
+>
+> - **Split-Screen**：畫面左右各半，左側放標題＋副標題＋CTA，右側放主視覺。視覺衝擊強，適合需要立即傳達品牌調性的高客單課程。
+> - **Z-Pattern**：標題從左上開始，視覺往右上、CTA 在右下。引導視線自然流動，適合內容較簡潔的課程。
+>
+> 你想用哪一種？或想用其他型態？
+
+所有區塊的排版型態都確認完畢，才進入第三階段。
+
+### 步驟 5（路徑 B：一鍵模式）｜自動配置排版型態
+
+不詢問使用者，直接依下列邏輯配置：
+
+- Hero 區塊 → Split-Screen 或 Z-Pattern。
+- 痛點區（多張圖）→ Card Grid；痛點區（單張圖）→ F-Pattern 或 Asymmetric。
+- 解方／課程介紹（單張圖）→ F-Pattern 或 Split-Screen。
+- 多項並列區塊（功能、成果、贈品、適合對象，3 張以上）→ Card Grid。
+- 流程／步驟區塊 → Zig-Zag。
+- 講師／見證區塊 → Split-Screen 或 Asymmetric。
+- CTA 區塊 → Z-Pattern 或置中單欄。
+- FAQ 區塊 → 單欄卡片列表或 Accordion-like Cards（不寫 JavaScript）。
+- `placement_role=content-card` 且 `html_relationship=image-is-card` → 圖片本身作為主要卡片內容，
+  避免縮成文字旁的小型輔助圖。
+- `placement_role=step-panel` → 每一步保留獨立面板與順序，不合併成一張流程總覽。
+- `placement_role=supporting-visual` → 可使用 Split-Screen、F-Pattern 或 Asymmetric。
+- `placement_role=section-bridge` → 使用較寬的跨區塊視覺，避免與資訊卡混用。
+
+跨區塊節奏感原則：
+
+- 相鄰區塊不使用相同排版型態。
+- 整頁不超過連續 2 個 Card Grid。
+- 多張圖區塊密集時，中間插入單張圖區塊的型態變化。
+
+以表格呈現配置結果：
+
+| 區塊名稱 | 配置型態 | 配置理由 |
+| --- | --- | --- |
+| Hero | Split-Screen | 主視覺與標題並列，強化首屏衝擊 |
+| 痛點區 | Card Grid | 多張痛點圖並列，讀者快速對號入座 |
+
+接著把可調整方式記入交付回報，不停下來詢問：
+
+> 排版型態已自動配置；完整 HTML 交付後，若要調整可指定「{區塊名稱} 改用 {型態名稱}」。
+
+## 第三階段：內部分段生成 HTML
+
+### 步驟 6｜建立 HTML 分段輸出計畫
+
+依文案長度與區塊數建立 Part 計畫並寫入任務 brief，供內部防漏與驗收；不需要在對話列出：
+
+| Part | 區塊範圍 | 輸出內容 |
+| --- | --- | --- |
+| Part 1 | Hero + 課程說明 + 痛點區 | HTML |
+| Part 2 | 成果區 + 適合對象 | HTML |
+| Part 3 | 流程 + 課程細節 | HTML |
+| Part 4 | 講師 + 收穫 + 贈品 + CTA | HTML |
+| Part 5 | FAQ | HTML |
+
+建立計畫後立刻依序生成全部 Part。Part 是檔案層級的內部單位，不能成為對話中的停等關卡。
+
+### 步驟 7｜依序寫入全部 Part
+
+依步驟 4 選定的 CMS 部署模式產出：
+
+- 選 A → 內嵌 `<style>` 版本。Part 1 包含 `<style>`，後續 Part 不重複（除非使用者要求每段可獨立貼上）。
+- 選 B → inline style 版本，分段輸出。開頭註解必須提示「響應式效果有限」，因 inline style 無法寫 `@media`。
+- 選 C → **先完成內嵌 `<style>` 版本的全部 Part，再開始 inline style 版本**；不可在同一個回覆中混合兩個版本。
+
+每個 Part 開頭加 HTML 註解，標註 Part 編號、範圍、模式與合併順序；依序寫入
+`briefs/html/`，生成下一段前先完成步驟 8。對話中不列出 HTML 程式碼或中間 Part。
+
+### 步驟 8｜每次輸出前自我檢查
+
+**文案完整性**
+
+- 是否完整保留該段所有原文？
+- 是否有刪段、摘要、改寫、合併？
+- 是否有省略 FAQ 或列表？
+- 是否有「以下略」「其餘同上」「請自行補上」？
+
+**CMS 相容性**
+
+- 是否依使用者選擇的模式輸出？
+- 是否避免使用任何 CSS 框架（Tailwind／Bootstrap／Bulma 等）？
+- 圖片 placeholder 的 `src` 是否為英文 URL，沒有中文？
+- 重要文字顏色是否直接寫在元素上（inline 模式）？
+
+**可維護性**
+
+- 每個區塊是否有註解？
+- 圖片是否有清楚代號、比例與視覺功能註解？
+- Part 編號、範圍與合併順序是否清楚？
+
+**風格與圖片角色**
+
+- 是否完整套用 `landing-page-html-style-calibration.md` 的字體、表面、留白與圖片處理？
+- `placement_role`、`html_relationship`、`text_ownership` 與 `mobile_behavior` 是否落實？
+- 圖片被指定為 `image-is-card` 時，是否仍是主要內容卡，而非被縮成裝飾性縮圖？
+
+只要任何一項不符合，就必須重新輸出該 Part。
+
+## 第四階段：合併與存檔
+
+### 步驟 9｜確認全部 Part 已完成
+
+依 Part 計畫檢查每個檔案都存在、順序連續且自我檢查已通過，將確認紀錄寫成「所有 Part 已完成
+（共 {N} 段）」。不等待使用者指示，立即進入合併。C 模式先完成內嵌 style 全部 Part，再完成
+inline style 全部 Part，兩個版本各自檢查一次。
+
+### 步驟 10｜合併全部 Part 並儲存
+
+合併規則：
+
+1. 依 Part 順序串接，**不得重新改寫、重新排版或再次摘要**任何一段已確認的 HTML。
+2. 補上完整文件外殼：`<!doctype html>`、`<html lang="zh-Hant">`、`<head>`（含 `charset`、
+   `viewport`、`<title>`）與 `<body>`。分段輸出時省略的外殼在這一步才補。
+3. 內嵌 style 版本：`<style>` 只保留一份，放在 `<head>`。
+4. inline style 版本：不新增 `<style>`，維持逐元素 style。
+5. 合併後重跑步驟 8 的三項自我檢查，另加：所有 Part 都在、順序正確、沒有重複區塊、
+   沒有遺留的分段註解矛盾。
+
+輸出位置：
+
+```text
+100_Todo/projects/visual-prompt-kit/YYYY-MM-DD-{topic-slug}/site/
+├── index.html                 # 內嵌 style 版本（或使用者選定的唯一版本）
+├── index-inline.html          # 僅 C 模式：inline style 版本
+└── assets/images/             # 步驟 11 置換用的正式圖
+```
+
+合併完成後不先回報，直接進入步驟 11 置換正式圖像；全部驗收完成才給出最終絕對路徑與檔案大小。
+
+## 第五階段：完成單一 HTML
+
+### 步驟 11｜把圖片放進站位符
+
+依步驟 2 已確認的站位符命名對照表逐一置換：
+
+1. 把第三週正式圖複製到 `site/assets/images/`，檔名採站位符小寫（`img-hero.png`、
+   `img-pain-01.png`），不使用中文檔名。
+2. 將 `src` 的 `https://placehold.co/...` 換成相對路徑 `assets/images/img-hero.png`。
+3. **保留原本的 `<!-- [IMG-XXX] | 比例 | 視覺功能 -->` 註解**，方便日後追溯與再置換。
+4. `alt` 沿用原本的視覺功能描述，不留空。
+
+置換後必須逐項驗收，任一項不過就不算完成：
+
+- 每個站位符都有對應圖檔，且檔案實際存在。
+- HTML 中沒有殘留的 `placehold.co`。
+- 沒有中文 `src`。
+- 圖片數量與圖片配置表一致。
+- 圖檔比例與配置表登記的比例相符（可用 `scripts/validate_image_aspect.py` 逐張確認）。
+
+圖片數量不足時，缺的站位符**保留佔位圖並明確列出缺哪幾張**，不得靜默拿其他圖頂替。
+
+完成步驟 11 的圖片置換與驗收後，即完成本版位的正式交付。只向使用者回報成品摘要、最終
+HTML 的絕對路徑、檔案大小與驗收結果，不貼中間 Part 或整份程式碼。完成交付後才進入步驟 12，
+詢問一次是否發布。
+
+## 第六階段：詢問是否建立網站與發佈
+
+### 步驟 12｜選擇發布目標（完整 HTML 完成後的互動關卡）
+
+觸發語：「幫我建立成網站」、「幫我用 sites 技能建立成網站」、「幫我發布」。
+
+這個步驟只能在完整 HTML、圖片置換與驗收全部完成後啟動，不得插入 Part 生成途中。先確認素材
+齊全，再詢問一次發布目標；在使用者選定前，不得建立任何遠端資源（site、Netlify
+site、Firebase project、GitHub repo 或分支），也不得執行任何部署指令。
+
+前置檢查（唯讀）：`site/index.html` 存在、圖片已置換完成、本機開啟後版面與圖片正常。
+
+接著詢問：
+
+> 網站檔案已就緒。請選擇要發布到哪裡：
+>
+> ▋ **A. Agent 原生 Site**：最快，不需額外帳號或 CLI。適合先給少數人看、之後還會改。
+> 預設私有，之後可再改成任何有連結的人都能看。
+>
+> ▋ **B. Netlify**：走既有的 `netlify-deploy` 流程，拿到 `*.netlify.app` 網址，可綁自訂網域。
+> 適合正式對外的銷售頁。**部署完成當下網址即為公開。**
+>
+> ▋ **C. Firebase Hosting**：需要既有的 Firebase 專案與 `firebase` CLI。適合已經在用 Firebase 的專案。
+> **部署完成當下網址即為公開。**
+>
+> ▋ **D. GitHub Pages**：需要一個 GitHub repo。適合想順便版本控管頁面的情況。
+> **public repo 的 Pages 一律公開；private repo 需付費方案才能發布 Pages。**
+>
+> ▋ **E. 先不發布**：只要本機可雙擊開啟的 `site/index.html`。
+>
+> 請回覆 A、B、C、D 或 E。
+
+| 目標 | 前置條件 | 網址型態 | 部署當下的可見性 | 使用的工具 |
+| --- | --- | --- | --- | --- |
+| A 原生 Site | 無 | Agent 平台網址 | **私有**，可事後改公開 | 各 Agent 原生能力 |
+| B Netlify | Netlify 帳號 | `*.netlify.app` | **公開** | 全域 `netlify-deploy` skill |
+| C Firebase Hosting | Firebase 專案＋CLI | `*.web.app` | **公開** | `firebase` CLI |
+| D GitHub Pages | GitHub repo | `*.github.io` | **公開**（public repo） | `gh` CLI＋repo 設定 |
+| E 不發布 | 無 | 無 | 只在本機 | 無 |
+
+只有 A 具備「先私有、之後再公開」的預設。B、C、D **部署本身就是公開行為**，因此同意閘門必須
+在部署前完成，不能等部署後再問。
+
+### 步驟 13｜依選定目標建立網站
+
+共用步驟：確認 `site/index.html` 與 `site/assets/images/` 齊全 → 本機開啟驗證 → 依選定目標執行 →
+回報實際網址或路徑。任一目標都不把 API key、service account、token 或憑證寫進 `site/`、repo
+或回報內容。
+
+**A. Agent 原生 Site**
+
+- **Claude adapter**：以原生 Artifact 發布 `site/index.html`。Artifact 的 CSP 會擋掉外部圖片，
+  因此圖片必須改成 Artifact 資產（發布時宣告 `assets` capability 並上傳圖檔，改用回傳的 URL）
+  或內嵌為 `data:` URI；不可留相對路徑。
+- **Codex adapter**：使用可用的原生 site／預覽能力；沒有時交付本機單檔網站並說明。
+- **AntiGravity adapter**：同 Codex。
+
+**B. Netlify**
+
+- 交棒全域 `netlify-deploy` skill，不自建部署腳本、不改用其他平台。
+- 先以唯讀方式確認登入狀態與既有 site 清單；沒有可用 site 時，**先問使用者要新建還是沿用**，
+  不自行建立。
+- 部署前必須完成步驟 14 的同意閘門。
+
+**C. Firebase Hosting**
+
+- 目前沒有對應的全域 skill，直接使用 `firebase` CLI。
+- 先唯讀確認：`firebase --version`、`firebase projects:list`、既有 `firebase.json` 與 `public` 目錄設定。
+- **沒有既有 Firebase 專案時不自行建立**，先問使用者要用哪一個。
+- `firebase.json` 的 hosting `public` 指向 `site/`；缺少設定檔時先給使用者看內容再寫入。
+- 部署指令固定為 `firebase deploy --only hosting`，不順帶部署 Functions、Firestore rules 或其他資源。
+
+**D. GitHub Pages**
+
+- 先唯讀確認：目前 repo、遠端、分支、可見性（`gh repo view`）與 Pages 是否已啟用。
+- **public repo 的 Pages 一律公開**；private repo 需付費方案。可見性與方案不符時先說明，不硬推。
+- 沒有 repo 時不自行建立；先問使用者要用哪一個既有 repo，或是否要新建。
+- 依全域規則，push 前掃描待推送內容有無 key、token、密碼、私鑰、憑證，並確認分支與遠端正確。
+- 啟用 Pages 屬於公開動作，必須完成步驟 14 的同意閘門後才執行。
+
+**E. 先不發布**
+
+- 交付 `site/index.html` 的絕對路徑，說明可直接雙擊開啟，流程到此結束。
+
+**Fallback**：任一 Agent 無法完成選定目標時（CLI 未安裝、未登入、無權限），停在本機單檔網站，
+明確說明卡在哪一步與需要的前置條件，**不改用未經使用者選定的其他平台**，也不宣稱已上線。
+
+### 步驟 14｜發佈與存取權限
+
+**發佈與存取權限變更一律需要使用者明確同意，不得自動執行。**
+
+1. **目標 A（原生 Site）**：預設維持私有。使用者要求公開時，先複述再確認：
+   > 我要把這個網站的存取權限從「僅限你」改成「任何擁有連結的人」，改完後任何拿到連結的人
+   > 都能看到頁面。確認要公開嗎？
+2. **目標 B／C／D（Netlify／Firebase／GitHub Pages）**：部署即公開，因此同意閘門在**部署前**：
+   > 這次部署到 {平台} 完成後，網址會是公開的，任何拿到連結的人都能看到整頁內容。
+   > 頁面目前包含 {價格／名額／講師資訊／⋯}。確認要現在部署嗎？
+3. 頁面含未公開的價格、名單、個資、未定案文案或他人素材時，先提醒再問一次；不因使用者
+   先前說過「幫我發佈」就跳過這一次確認。
+4. 變更或部署後回報最終網址與實際權限狀態；無法確認權限狀態時明說，不猜測。
+5. 不代為串接網域、金流、表單後端或分析追蹤碼。
+6. 使用者要求下架時，依平台方式停止發布或改回私有，不刪除本機 `site/` 檔案。
+
+## 輸出範例
+
+### 範例 1：內嵌 `<style>` 版本（Part 1，含全站 CSS）
+
+```html
+<!--
+Landing Page HTML｜Part 1
+模式：標準語義化 HTML + 內嵌 style
+使用方式：
+1. 請先貼上 Part 1，因為 Part 1 內含全站 CSS
+2. 後續 Part 2、Part 3... 請接在 Part 1 後面
+3. 若 CMS 會移除 <style>，請改選 Inline Style 版本
+4. 圖片 placeholder 請依照註解中的 [IMG-XXX] 替換為真實圖片網址
+-->
+<style>
+:root {
+  --color-bg: #0B0828;
+  --color-text: #F3F1FA;
+  --color-accent: #8C4DFF;
+  --color-muted: #9A96B8;
+  --color-placeholder-bg: #161233;
+}
+* { box-sizing: border-box; }
+.lp-section {
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: 48px 20px;
+}
+.lp-container { max-width: 1120px; margin: 0 auto; }
+.lp-title { color: var(--color-accent); margin: 0 0 16px; line-height: 1.3; }
+.lp-text { color: var(--color-text); margin: 0 0 12px; line-height: 1.8; }
+.layout-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+.image-placeholder {
+  background: var(--color-placeholder-bg);
+  color: var(--color-muted);
+  border-radius: 16px;
+  width: 100%;
+}
+.ratio-16-9 { aspect-ratio: 16 / 9; }
+.cta-button {
+  display: inline-block;
+  background: var(--color-accent);
+  color: #fff;
+  padding: 14px 32px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+}
+@media (max-width: 768px) {
+  .lp-section { padding: 36px 20px; }
+  .layout-split { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- 區塊 1：Hero｜排版型態：Split-Screen -->
+<section class="lp-section">
+  <div class="lp-container layout-split">
+    <header>
+      <h1 class="lp-title">使用者原始標題完整放在這裡</h1>
+      <p class="lp-text">使用者原始副標題完整放在這裡。</p>
+      <a href="#cta" class="cta-button">立即報名</a>
+    </header>
+    <figure>
+      <!-- [IMG-Hero] | 16:9 | Hero 主視覺，建立第一印象 -->
+      <img src="https://placehold.co/1600x900/161233/9A96B8?text=IMG-Hero" alt="Hero 主視覺" class="image-placeholder ratio-16-9">
+    </figure>
+  </div>
+</section>
+```
+
+### 範例 2：Inline Style 版本
+
+```html
+<!--
+Landing Page HTML｜Part 1
+模式：Inline Style 版本
+使用方式：
+1. 此版本所有樣式都寫在元素 style 屬性中，相容性最高
+2. 適合不確定 CMS 是否支援 <style> 的情況
+3. 注意：inline style 無法寫 @media，因此響應式效果有限
+4. 圖片 placeholder 請依照註解中的 [IMG-XXX] 替換為真實圖片網址
+-->
+<section style="background-color: #0B0828; padding: 36px 20px 12px;">
+  <div style="max-width: 1120px; margin: 0 auto;">
+    <h2 style="color: #8C4DFF !important; margin: 0 0 12px; line-height: 1.3;">
+      使用者原始標題完整放在這裡
+    </h2>
+    <p style="color: #F3F1FA !important; margin: 0 0 12px; line-height: 1.8;">
+      使用者原始段落完整放在這裡。
+    </p>
+  </div>
+</section>
+```
+
+### 範例 3：圖片站位符（正確 vs 錯誤）
+
+正確：
+
+```html
+<!-- [IMG-Pain-01] | 1:1 | 痛點 01：能生出漂亮圖，但不像課程封面 -->
+<img src="https://placehold.co/800x800/161233/9A96B8?text=IMG-Pain-01" alt="痛點 01：能生出漂亮圖，但不像課程封面">
+```
+
+錯誤（中文 `src` 會被 CMS 自動轉碼導致圖片失效）：
+
+```html
+<img src="請替換為 IMG-Pain-01 圖片網址">
+```
+
+## 硬限制
+
+### 文案完整性（最高優先級）
+
+1. 使用者提供的 Landing Page 文案必須 **100% 保留**。
+2. **可以做**：Markdown 標題轉 HTML 標題、段落轉 `<p>`、條列轉 `<ul>`／`<ol>`、
+   引用轉 `<blockquote>` 或強調卡片、連結轉 `<a>`、圖片位置轉站位符。
+3. **不可以做**：摘要、濃縮、改寫、刪除段落、合併多段、把完整文案改成重點版、自行補寫原文
+   沒有的銷售文案、用「以下略」「其餘同上」「請自行補上」取代內容、因 Token 太長就自行省略
+   FAQ／列表／長段落、未經確認就重排銷售敘事順序。
+4. 文案很長時必須建立內部 Part 計畫逐段寫檔與檢查；不得因此省略文案，也不得把 Part 變成對話停等關卡。
+
+### 流程順序
+
+5. 三階段順序不可顛倒：上游驗證或補缺 → CMS 與排版模式 → 排版型態決策 → 分段 HTML。
+6. 完整第三週上游存在時，區塊清單、站位符命名、色票與完整風格校準必須自動完成；不得重問、
+   不得要求確認，也不得再次提供風格校準 A／B／C。只有缺少上游證據時，才針對缺項進行補缺確認。
+7. 補缺模式需要風格校準時，必須提供 A／B／C 三條路徑，不可省略任何一條。
+8. 無論從 `visual-dna.yaml` 自動繼承或走補缺校準，最終都必須收斂為 5 個色彩變數：`--color-bg`／`--color-text`／
+   `--color-accent`／`--color-muted`／`--color-placeholder-bg`，並另記錄字體、表面、留白、
+   圖片處理、圖片角色與行動裝置策略。
+9. CMS 部署模式必須提供 A／B／C 三個選項，排版模式必須提供 A／B 兩個選項；兩者仍須詢問一次。
+10. 互動模式必須逐區塊互動，一次只問一個區塊，每個區塊提供 2 種型態建議。
+11. 一鍵模式不再詢問排版選擇，但產出後必須補上「{區塊名稱} 改用 {型態名稱}」的可調整提示。
+
+### HTML 結構與樣式
+
+12. HTML 必須語義化：以 `<section>` 為基礎，配合 `<header>`、`<article>`、`<aside>`、
+    `<figure>`、`<nav>`、`<footer>`。**濫用 `<div>` 視為失敗。**
+13. 禁止使用任何 CSS 框架（Tailwind、Bootstrap、Bulma 等），一律標準 CSS。
+14. 跨區塊節奏感：相鄰區塊不可使用相同排版型態。
+15. 緊湊間距：避免大量使用 60px、80px 以上的上下 padding，不要讓 section 之間產生過大空白。
+16. Class 命名語意化（內嵌 style 版本）：使用 `.lp-section`／`.lp-container`／`.layout-split`／
+    `.layout-grid`／`.cta-button`／`.image-placeholder`，避免 utility class 風格。
+
+### 圖片站位符
+
+17. 圖片 placeholder 不可使用中文 `src`，必須使用英文 placeholder URL。
+18. 每個站位符必須加 HTML 註解，格式：`<!-- [IMG-XXX] | 比例 | 視覺功能 -->`。
+19. 站位符命名規則：單張圖用 `[IMG-{區塊名}]`，多張圖用 `[IMG-{區塊名}-{編號}]`。
+
+### 分段輸出
+
+20. 第三階段必須以 Part 作為內部防漏單位依序寫檔、檢查，再自動合併成完整 HTML。
+21. 不得在對話中貼出中間 HTML codeblock、Part 程式碼或要求使用者回覆「繼續」。
+22. 使用者選定 CMS 與排版模式後，自動完成全部 Part、合併存檔、正式圖像置換與驗收。
+23. 最終回報只提供成品摘要、檔案路徑、大小與驗收結果；使用者要求查看程式碼時才展示。
+24. inline style 版本必須在開頭註解中提示「響應式效果有限」。
+25. 內嵌 style 版本的 `<style>` 只放在 Part 1，後續 Part 不重複；合併後移入 `<head>`。
+26. C 模式先完成全部內嵌 style 的 Part，再開始 inline style；兩個版本都完成後一起回報。
+
+### 平台與邊界
+
+27. 平台中立：不綁定任何特定 CMS，但要在註解中說明如何部署。
+28. 不自動部署、不串金流、不建立正式表單、不填入未經使用者提供的 CTA 目標網址。
+29. 合併存檔時只串接已檢查的 Part，補上文件外殼即可；不得趁合併重寫、重排或再次摘要 HTML。
+    確認紀錄必須寫明「所有 Part 已完成（共 N 段）」。
+30. 圖片置換後必須驗收：站位符全數對應、無殘留 `placehold.co`、無中文 `src`、數量與比例
+    符合圖片配置表。缺圖時保留佔位圖並列出缺項，不得拿其他圖頂替。
+31. 發布目標只能在完成單一 HTML 與圖片驗收後詢問，不得在 HTML 生成、合併與圖片置換途中
+    打斷流程。完成成品回報後，詢問一次並提供 A 原生 Site／B Netlify／C Firebase Hosting／
+    D GitHub Pages／E 不發布五個選項，使用者選定前不得建立任何遠端資源或執行部署指令。
+    Netlify 走全域 `netlify-deploy`；Firebase 與 GitHub Pages 直接用各自 CLI，且沒有既有專案或
+    repo 時先問，不自行建立。無法完成選定目標時停在本機單檔網站，不改用未經選定的其他平台。
+32. **發佈與存取權限變更需使用者明確同意**：原生 Site 預設私有，改為「任何擁有連結的人」前
+    必須複述變更內容並取得確認；Netlify／Firebase／GitHub Pages 部署即公開，同意閘門必須在
+    **部署前**完成。不代為串接網域、金流、表單後端或追蹤碼。
+33. 主 SKILL 的圖內文字配額、Ashirai 與生圖語言映射契約**不適用**本版位：那些規則約束的是
+    圖片內部的文字，本版位處理的是 HTML 上的原文。原文本身是什麼語言就保留什麼語言。
+
+## 語氣
+
+- **整體基調**：展現排版策略師的專業，對閱讀流動、視覺節奏與區塊呼吸感有精確描述。
+  語氣沉穩權威，展現方法論的縝密思考。
+- **互動模式**：簡潔有效率，避免拖沓。
+- **一鍵模式**：精煉果斷，直接給出配置決策與理由。
+- **風格校準**：對色彩有專業的洞察與描述。
+- **第三階段 HTML 輸出**：務實、清楚、可執行，不要多餘說明。
+
+## Agent execution notes
+
+- **Shared steps**：完整第三週上游自動繼承、缺項補確認、第四週必要決策、排版型態決策、Part 計畫、內部分段生成、合併與每段
+  自我檢查、合併存檔、圖片置換驗收、完整單檔交付，以及成品完成後的發布目標詢問，Codex、
+  Claude、AntiGravity 完全相同。發布同意閘門仍在使用者選定目標後執行；步驟 13 目標 A（原生 Site）的
+  實作路徑允許各自使用原生能力，B／C／D 三個
+  目標三個 Agent 走同一條 CLI 路線。
+- **Codex adapter**：把 Part 與最終 HTML 寫入專案，只回報最終檔案絕對路徑，不主動貼程式碼。
+- **Claude adapter**：同樣寫入專案並交付最終檔案；可用原生檔案傳送成品，結果契約與 Codex 一致。
+- **AntiGravity adapter**：同 Codex。
+- **Fallback**：任一 Agent 無法寫檔時，明確回報阻塞並保留可重跑步驟；不得以對話中的大量程式碼
+  取代使用者要求的完整本機檔案。
+- **Verification**：三個 Agent 都必須保留上游繼承證據與第四週決策狀態，在輸出第一段 HTML 前執行
+  `scripts/validate_landing_page_html_approvals.py`；`inherited` 必須通過實際檔案檢查，並在每個 Part
+  輸出前完成步驟 8 自我檢查。
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_LANDING_PAGE_HTML_MD_55ECC7D222
+
 # visual-prompt-kit/references/placements/landing-page.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/landing-page.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/references/placements/landing-page.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_REFERENCES_PLACEMENTS_LANDING_PAGE_MD_A1A1ED9027'
@@ -3118,6 +4079,18 @@ scripts/validate_landing_page_approvals.py briefs/landing-page-approval-log.md
 
 先說明：「以下只分析原文實際存在的區塊，不新增銷售頁內容。」
 
+### 1.0 視覺密度與參考頁判讀
+
+先依使用者目標、既有素材與參考頁，在內部判定本頁的視覺密度；這是配置依據，不另增一個
+必須停等的確認關卡：
+
+- `minimal-support`：圖片只支援少數關鍵段落，正文仍由 HTML 文字主導。
+- `image-led-full-page`：圖片承擔內容卡、受眾辨識與流程說明，整頁維持連續的視覺節奏。
+
+使用者提供參考頁時，至少比較有圖片的區塊數、平行項目的拆圖粒度、圖片在版面中的角色與
+行動裝置呈現方式；不可只擷取配色或媒材風格。使用者說「直接做」、「你決定」或「不要詢問」
+時，依現有證據選定密度並記入 `landing-page-structure.md`，不為此停下提問。
+
 ### 1.1 結構解讀
 
 辨識原文實際存在的區塊。Hero、介紹、痛點、成果、適合對象、內容方式與 CTA 只是常見名稱，
@@ -3130,26 +4103,55 @@ scripts/validate_landing_page_approvals.py briefs/landing-page-approval-log.md
 
 ### 1.2 圖片優先順序
 
-只從 1.1 已辨識且原文存在的區塊，挑出 3–8 個最需要視覺強化的位置：
+只從 1.1 已辨識且原文存在的區塊，挑出 3–8 個最需要優先生產的視覺位置：
 
 | 優先順序 | 區塊名稱 | 建議圖片功能 | 具體視覺錨點 | 是否需要圖內文案 | 優先順序理由 |
 | --- | --- | --- | --- | --- | --- |
 
-完成後停止，等待使用者確認清單。不得輸出缺少區塊、補強銷售頁結構或任何完整性健檢。
+這份 3–8 項清單只決定生產優先順序，**不是整頁圖片覆蓋上限**。完成清單後仍須把所有原文
+區塊帶入 Phase 2 的整頁覆蓋稽核；不得因某區塊未進優先清單，就直接判定它不需要圖片。
+完成後停止，等待使用者確認清單。不得輸出缺少區塊、補強銷售頁結構或銷售文案完整性健檢。
 
 ## Phase 2｜圖片數量與比例確認
 
-只處理使用者已確認的 Phase 1 清單，提出數量建議：
+以使用者已確認的 Phase 1 清單為生產優先順序，並涵蓋 1.1 的全部原文區塊，提出數量建議：
 
-| 區塊名稱 | 建議數量 | 拆解邏輯 | 建議比例 | 圖內文案形式 |
-| --- | --- | --- | --- | --- |
+| 區塊名稱 | 建議數量 | 拆解邏輯 | 建議比例 | `placement_role` | `html_relationship` | `text_ownership` | `mobile_behavior` | 圖內文案形式 |
+| --- | ---: | --- | --- | --- | --- | --- | --- | --- |
 
 判斷原則：Hero、CTA、整體流程或只有一個重點的區塊通常一張即可；痛點、成果、課程週次、
 功能說明、Before／After 或其他原文中多項並列內容，才依每個獨立訊息拆成多張。每張都必須有
 獨立主標、視覺主體與情緒任務，不能為了數量重複。
 
+在 `image-led-full-page` 模式中，痛點、成果、適合對象、功能、課程模組與流程步驟若有
+3 個以上平行項目，預設一項一圖。只有這些項目共同描述同一個連續場景，或拆開會破壞理解時，
+才使用一張整合圖。流程型內容必須同時評估「一張整合總覽」與「每一步各一張面板」，再依
+HTML 閱讀節奏選擇。
+
+圖片角色只使用下列語意：
+
+- `placement_role`：`hero-visual`、`content-card`、`supporting-visual`、`step-panel`、
+  `section-bridge`。
+- `html_relationship`：`full-bleed`、`image-above-copy`、`image-beside-copy`、
+  `image-is-card`、`background-layer`。
+- `text_ownership`：`html`、`baked-in-image`、`mixed`。
+- `mobile_behavior`：`scale`、`crop`、`horizontal-scroll`、`vertical-stack`。
+
 比例依功能決定：Hero 通常 16:9；痛點常用 1:1 或 4:5；成果通常 1:1；流程總覽通常 16:9；
 內容或知識圖卡常用 1:1 或 4:5。這是建議，不是強制套版。
+
+### 2.1 整頁覆蓋稽核
+
+確認總張數前逐區檢查：
+
+1. 是否出現兩個以上連續純文字區塊，造成視覺節奏中斷。
+2. 三個以上平行項目是否具有足夠的視覺辨識。
+3. 每張圖片是否都有明確的 `placement_role` 與 `html_relationship`。
+4. 桌機與手機是否都有可執行的 `mobile_behavior`。
+5. 圖片是否承擔資訊理解、辨識或轉換功能，而非裝飾。
+
+把稽核結果與視覺密度寫入 `landing-page-image-counts.md`。Prompt 中的示例數量只能說明格式，
+不得作為本次圖片總數或固定配置答案。
 
 結尾固定詢問使用者是否要增加／減少數量、調整比例、調整文字量，或回覆「OK」。只有得到
 明確確認後，才進入 Phase 3。
@@ -3232,6 +4234,10 @@ Phase 1 的結構確認與 Phase 2 的數量確認，承接了輪播圖卡的文
 - 具體視覺錨點：{唯一主要的人物動作、物件、場景、成果或流程}
 - 與 CTA 的關係：{如何輔助閱讀引導}
 - 在區塊內的相對位置：{順序與功能差異}
+- placement_role：{hero-visual／content-card／supporting-visual／step-panel／section-bridge}
+- html_relationship：{full-bleed／image-above-copy／image-beside-copy／image-is-card／background-layer}
+- text_ownership：{html／baked-in-image／mixed}
+- mobile_behavior：{scale／crop／horizontal-scroll／vertical-stack}
 
 ### 1. 文本內容（Text Content）
 - 核心訊息：{僅供設計判斷，不直接上圖}
@@ -3278,8 +4284,12 @@ Phase 1 的結構確認與 Phase 2 的數量確認，承接了輪播圖卡的文
 `image-generator` 接收已確認的 `visual-dna.yaml`、`validate_visual_dna.py` 的 PASS、每張完整
 Prompt Stack、目標比例、輸出檔名與路徑。每張 Prompt Stack 都必須實際帶入
 `style.reference_prompt` 與 `style.library_record.chars`，不可只交出 YAML 檔案路徑。
-`landing-page` 接收 `[IMG-Hero]`、`[IMG-Pain]` 等佔位符 ID、對應圖檔路徑與比例；HTML 組版仍是
-`landing-page` 的工作，不是本 placement 的工作。
+HTML 組版不是本 placement 的工作。正式圖完成後，接續**第四週**的
+`landing-page-html` 版位（見 `landing-page-html.md`）：把 `[IMG-Hero]`、`[IMG-Pain-01]` 等站位符
+ID、對應圖檔路徑、比例、四個版位角色欄位、`briefs/landing-page-image-counts.md` 與
+`visual-dna.yaml` 一併帶過去，
+合併原始文案輸出分段 CMS HTML。若使用者要的是從訪談開始的全新銷售頁（含撰寫文案），
+才交棒全域 `landing-page` skill 的引導模式。
 
 交付前確認：所有圖只取材自原文、每張只有一個核心訊息、主視覺可通過遮字測試、文字受保護、
 比例正確、共用 DNA 一致，且沒有未確認的促銷資訊、假文字或無關裝飾。
@@ -4929,6 +5939,336 @@ if __name__ == "__main__":
     raise SystemExit(main())
 AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_APPROVALS_PY_7D174C9CCF
 
+# visual-prompt-kit/scripts/validate_landing_page_html_approvals.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_html_approvals.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_html_approvals.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_HTML_APPROVALS_PY_7F9A81197B'
+#!/usr/bin/env python3
+"""Validate inherited week-3 evidence and required week-4 decisions."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from pathlib import Path
+
+
+UPSTREAM_RESULTS = ("區塊清單", "站位符命名", "色票")
+AUTO_RESULTS = ("自動風格校準",)
+WEEK4_DECISIONS = ("CMS 與排版模式", "排版型態配置")
+PALETTE_VARIABLES = (
+    "--color-bg",
+    "--color-text",
+    "--color-accent",
+    "--color-muted",
+    "--color-placeholder-bg",
+)
+STYLE_CALIBRATION_MARKERS = (
+    "Color",
+    "Typography",
+    "Surface",
+    "Spacing",
+    "Image treatment",
+    "Placement mapping",
+    "Mobile",
+)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證第三週繼承證據與第四週必要決策，可開始或已完成自動 HTML 流程。"
+    )
+    parser.add_argument(
+        "approval_log",
+        type=Path,
+        help="任務的 briefs/landing-page-html-approval-log.md 路徑。",
+    )
+    return parser.parse_args()
+
+
+def approval_status(content: str, label: str) -> str | None:
+    match = re.search(rf"(?m)^- {re.escape(label)}：([^\s]+)\s*$", content)
+    return match.group(1) if match else None
+
+
+def validate_inherited_evidence(approval_log: Path) -> list[str]:
+    task_root = approval_log.parent.parent
+    source_copy = task_root / "source-copy.md"
+    image_counts = task_root / "briefs" / "landing-page-image-counts.md"
+    visual_dna = task_root / "visual-dna.yaml"
+    derived_files = (
+        task_root / "briefs" / "landing-page-html-sections.md",
+        task_root / "briefs" / "landing-page-html-placeholders.md",
+        task_root / "briefs" / "landing-page-html-palette.md",
+        task_root / "briefs" / "landing-page-html-style-calibration.md",
+    )
+    errors: list[str] = []
+
+    if not source_copy.is_file() or not source_copy.read_text(encoding="utf-8").strip():
+        errors.append("上游繼承失敗：source-copy.md 不存在或內容為空。")
+
+    if not image_counts.is_file():
+        errors.append("上游繼承失敗：找不到 briefs/landing-page-image-counts.md。")
+    else:
+        image_content = image_counts.read_text(encoding="utf-8")
+        if not re.search(r"(?im)^狀態：\s*confirmed\b", image_content):
+            errors.append("上游繼承失敗：圖片配置表不是 confirmed。")
+        image_paths = sorted(
+            set(re.findall(r"`(assets/images/[^`]+\.(?:png|jpg|jpeg|webp))`", image_content, re.I))
+        )
+        if not image_paths:
+            errors.append("上游繼承失敗：圖片配置表沒有正式圖像路徑。")
+        for relative_path in image_paths:
+            if not (task_root / relative_path).is_file():
+                errors.append(f"上游繼承失敗：找不到正式圖像 {relative_path}。")
+
+    if not visual_dna.is_file():
+        errors.append("上游繼承失敗：找不到 visual-dna.yaml。")
+    else:
+        dna_content = visual_dna.read_text(encoding="utf-8")
+        if not re.search(r"(?im)^status:\s*confirmed\s*$", dna_content):
+            errors.append("上游繼承失敗：visual-dna.yaml 不是 confirmed。")
+
+    for path in derived_files:
+        if not path.is_file():
+            errors.append(f"上游繼承失敗：找不到自動產物 briefs/{path.name}。")
+
+    palette_file = derived_files[2]
+    if palette_file.is_file():
+        palette_content = palette_file.read_text(encoding="utf-8")
+        missing_variables = [item for item in PALETTE_VARIABLES if item not in palette_content]
+        if missing_variables:
+            errors.append("上游繼承失敗：五色票缺少 " + "、".join(missing_variables) + "。")
+
+    style_calibration_file = derived_files[3]
+    if style_calibration_file.is_file():
+        style_content = style_calibration_file.read_text(encoding="utf-8")
+        missing_markers = [
+            item for item in STYLE_CALIBRATION_MARKERS if item not in style_content
+        ]
+        if missing_markers:
+            errors.append(
+                "自動風格校準不完整：缺少 " + "、".join(missing_markers) + "。"
+            )
+
+    return errors
+
+
+def main() -> int:
+    approval_log = parse_args().approval_log.resolve()
+    if not approval_log.is_file():
+        print(f"無法輸出 HTML：找不到確認紀錄：{approval_log}")
+        return 1
+
+    content = approval_log.read_text(encoding="utf-8")
+    errors: list[str] = []
+
+    upstream_statuses = {label: approval_status(content, label) for label in UPSTREAM_RESULTS}
+    invalid_upstream = [
+        label for label, status in upstream_statuses.items() if status not in {"confirmed", "inherited"}
+    ]
+    if invalid_upstream:
+        errors.append("以下上游結果尚未確認或繼承：" + "、".join(invalid_upstream) + "。")
+
+    inherited_labels = [label for label, status in upstream_statuses.items() if status == "inherited"]
+    if inherited_labels:
+        errors.extend(validate_inherited_evidence(approval_log))
+
+    incomplete_auto_results = [
+        label
+        for label in AUTO_RESULTS
+        if approval_status(content, label) not in {"confirmed", "inherited", "auto-completed"}
+    ]
+    if incomplete_auto_results:
+        errors.append("以下自動校準結果尚未完成：" + "、".join(incomplete_auto_results) + "。")
+
+    incomplete_decisions = [
+        label for label in WEEK4_DECISIONS if approval_status(content, label) != "confirmed"
+    ]
+    if incomplete_decisions:
+        errors.append("以下第四週決策尚未確認：" + "、".join(incomplete_decisions) + "。")
+
+    final_status = approval_status(content, "分段輸出")
+    if final_status not in {"not-started", "in-progress", "complete"} and not (
+        final_status and final_status.startswith("complete")
+    ):
+        errors.append(
+            "無法開始分段輸出："
+            f"「分段輸出」目前狀態為 {final_status or '缺少狀態'}。"
+        )
+
+    if errors:
+        print("無法輸出 HTML：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    completion_note = "完整 HTML 流程已完成。" if final_status and final_status.startswith("complete") else "可開始自動完成 HTML。"
+    if inherited_labels:
+        print(f"PASS：第三週上游證據完整，第四週必要決策已確認，{completion_note}")
+    else:
+        print(f"PASS：補缺確認與第四週必要決策均已完成，{completion_note}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_HTML_APPROVALS_PY_7F9A81197B
+chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_html_approvals.py"
+
+# visual-prompt-kit/scripts/validate_landing_page_html_workflow.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_html_workflow.py")"
+cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_html_workflow.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_HTML_WORKFLOW_PY_4149129969'
+#!/usr/bin/env python3
+"""Validate the week-4 Landing Page HTML layout workflow contract."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+REQUIRED_MARKERS = {
+    "SKILL.md": (
+        "landing-page-html",
+        "references/placements/landing-page-html.md",
+        "將上游衍生狀態記為",
+        "不得要求使用者再次確認，也不得再詢問風格校準 A／B／C",
+        "CMS 與排版模式仍須詢問一次",
+        "不得把中間 HTML codeblock 貼進對話",
+        "自動完成全部 Part、合併單一 HTML、置換正式圖像",
+        "scripts/validate_landing_page_html_approvals.py",
+        "Every Section Serves Reading Flow",
+    ),
+    "references/placements/landing-page-html.md": (
+        "# Landing Page HTML 排版版位（第四週）",
+        "Every Section Serves Reading Flow",
+        "## 第一階段：上游繼承或補缺",
+        "### 完整第三週銜接：自動繼承模式",
+        "### 直接執行模式",
+        "landing-page-html-style-calibration.md",
+        "自動風格校準",
+        "### 缺少上游產物：補缺模式",
+        "### 步驟 1｜接收 Landing Page 文案並解讀區塊（補缺模式）",
+        "### 步驟 2｜接收圖片配置表並補上站位符命名（補缺模式）",
+        "### 步驟 3｜風格校準（補缺模式）",
+        "### 步驟 4｜選擇 CMS 部署模式與排版模式",
+        "第四週唯一必要的中途詢問",
+        "## 第二階段：排版型態決策",
+        "### 步驟 5（路徑 A：互動模式）｜逐區塊確認排版型態",
+        "### 步驟 5（路徑 B：一鍵模式）｜自動配置排版型態",
+        "## 第三階段：內部分段生成 HTML",
+        "### 步驟 6｜建立 HTML 分段輸出計畫",
+        "### 步驟 7｜依序寫入全部 Part",
+        "### 步驟 8｜每次輸出前自我檢查",
+        "--color-placeholder-bg",
+        "#F5EFE6",
+        "Z-Pattern",
+        "F-Pattern",
+        "Split-Screen",
+        "Asymmetric",
+        "Card Grid",
+        "Zig-Zag",
+        "濫用 `<div>` 視為失敗",
+        "禁止使用任何 CSS 框架",
+        "避免大量使用 60px、80px 以上的上下 padding",
+        "不可使用中文 `src`",
+        "<!-- [IMG-XXX] | 比例 | 視覺功能 -->",
+        "不得在對話中貼出中間 HTML codeblock",
+        "最終回報只提供成品摘要、檔案路徑、大小與驗收結果",
+        "響應式效果有限",
+        "## 第四階段：合併與存檔",
+        "### 步驟 9｜確認全部 Part 已完成",
+        "### 步驟 10｜合併全部 Part 並儲存",
+        "## 第五階段：完成單一 HTML",
+        "## 第六階段：詢問是否建立網站與發佈",
+        "### 步驟 11｜把圖片放進站位符",
+        "### 步驟 12｜選擇發布目標（完整 HTML 完成後的互動關卡）",
+        "### 步驟 13｜依選定目標建立網站",
+        "### 步驟 14｜發佈與存取權限",
+        "A. Agent 原生 Site",
+        "B. Netlify",
+        "C. Firebase Hosting",
+        "D. GitHub Pages",
+        "E. 先不發布",
+        "在使用者選定前，不得建立任何遠端資源",
+        "部署本身就是公開行為",
+        "firebase deploy --only hosting",
+        "gh repo view",
+        "所有 Part 已完成",
+        "不貼中間 Part 或整份程式碼",
+        "詢問一次是否發布",
+        "沒有殘留的 `placehold.co`",
+        "netlify-deploy",
+        "發佈與存取權限變更一律需要使用者明確同意",
+        "scripts/validate_landing_page_html_approvals.py",
+    ),
+    "references/placements/landing-page.md": (
+        "landing-page-html",
+    ),
+    "references/handoff-contracts.md": (
+        "landing-page-html",
+        "第四週",
+    ),
+    "assets/landing-page-html-approval-log-template.md": (
+        "上游素材模式：pending",
+        "完整第三週交付可把前三項記為 `inherited`",
+        "區塊清單：pending",
+        "站位符命名：pending",
+        "色票：pending",
+        "CMS 與排版模式：pending",
+        "排版型態配置：pending",
+        "分段輸出：not-started",
+        "合併存檔：not-started",
+        "圖片置換：not-started",
+        "自動風格校準：pending",
+        "發布目標：pending",
+        "建立網站：not-started",
+        "發佈：not-started",
+    ),
+}
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="驗證第四週 Landing Page HTML 排版的上游繼承、內部分段與完整單檔交付契約。"
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1],
+        help="visual-prompt-kit 套件根目錄；預設為本腳本所在套件。",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    root = parse_args().root.resolve()
+    errors: list[str] = []
+    for relative_path, markers in REQUIRED_MARKERS.items():
+        path = root / relative_path
+        if not path.is_file():
+            errors.append(f"缺少檔案：{relative_path}")
+            continue
+        content = path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in content:
+                errors.append(f"{relative_path} 缺少必要標記：{marker}")
+
+    if errors:
+        print("Landing Page HTML 排版流程驗證失敗：")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("PASS：Landing Page HTML 排版保有上游自動繼承、缺項補確認、內部分段、自動合併與完整單檔交付契約。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_HTML_WORKFLOW_PY_4149129969
+chmod +x "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_html_workflow.py"
+
 # visual-prompt-kit/scripts/validate_landing_page_workflow.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_workflow.py")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/scripts/validate_landing_page_workflow.py" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SCRIPTS_VALIDATE_LANDING_PAGE_WORKFLOW_PY_0EEE253C04'
@@ -4959,7 +6299,17 @@ REQUIRED_MARKERS = {
     "references/placements/landing-page.md": (
         "以下只分析原文實際存在的區塊，不新增銷售頁內容。",
         "## Phase 1｜結構解讀與插圖優先順序",
+        "### 1.0 視覺密度與參考頁判讀",
+        "minimal-support",
+        "image-led-full-page",
+        "不是整頁圖片覆蓋上限",
         "## Phase 2｜圖片數量與比例確認",
+        "### 2.1 整頁覆蓋稽核",
+        "placement_role",
+        "html_relationship",
+        "text_ownership",
+        "mobile_behavior",
+        "Prompt 中的示例數量只能說明格式",
         "### 3.1 風格選擇（必要互動）",
         "從 Card Style Library 挑選",
         "style.library_record",
@@ -4987,6 +6337,8 @@ REQUIRED_MARKERS = {
         "風格與圖面示意：pending",
         "全套 Prompt：pending",
         "正式生圖：not-started",
+        "## 視覺密度與整頁覆蓋",
+        "placement_role／html_relationship／text_ownership／mobile_behavior",
     ),
 }
 
@@ -5023,7 +6375,7 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
-    print("PASS：Landing Page 圖卡保有文案入口、四道確認、圖面示意與逐張正式生圖契約。")
+    print("PASS：Landing Page 圖卡保有視覺密度、整頁覆蓋、版位角色、四道確認與逐張正式生圖契約。")
     return 0
 
 
