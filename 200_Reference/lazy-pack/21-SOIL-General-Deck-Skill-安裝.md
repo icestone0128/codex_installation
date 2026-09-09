@@ -100,13 +100,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-general-deck/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/soil-general-deck/SKILL.md" <<'AGENT_LAZYPACK_SOIL_GENERAL_DECK_SKILL_MD_0E95F5A366'
 ---
 name: soil-general-deck
-description: >
-  Create, analyze, or improve SOIL-style general PowerPoint decks. Use when the
-  user asks for general slides, presentation decks, material-to-slides,
-  SOIL slides, presentation design, or a review of an existing
-  general deck's information clarity and narrative flow. Produces editable .pptx
-  slides with PowerPoint text objects, optional AI illustrations, optional
-  geometry diagrams, and a SOIL presentation structure.
+description: "建立、分析或改進 SOIL 風格一般 PowerPoint 簡報。觸發：一般簡報、簡報設計、素材轉簡報、SOIL slides、檢視既有簡報的資訊清晰度與敘事流。輸出可編輯 .pptx。"
 metadata:
   short-description: SOIL editable general PPTX deck
 ---

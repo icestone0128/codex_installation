@@ -75,7 +75,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-prompt-kit/SKILL.md" <<'AGENT_LAZYPACK_VISUAL_PROMPT_KIT_SKILL_MD_0E95F5A366'
 ---
 name: visual-prompt-kit
-description: "Use when the user wants to turn an article, note, topic, or Landing Page copy into visual design briefs for AI image generation, including 封面 Prompt, 課程封面, Concept Card, 極簡概念圖卡, 圖卡 Prompt, 系列圖卡, Landing Page 圖卡, 銷售頁圖片 Prompt, 縮圖, thumbnail, banner, or explicit $visual-prompt-kit invocation. It first collects or creates source copy for Landing Page graphics, locks shared visual DNA, and enforces approval gates before image generation. A dedicated landing-page-html placement then merges the approved graphics and image placement table with the original copy into segmented, CMS-ready semantic HTML."
+description: "把文章、筆記、主題或 Landing Page 文案轉成 AI 生圖 brief。觸發：封面 Prompt、課程封面、Concept Card、極簡概念圖卡、圖卡 Prompt、系列圖卡、Landing Page 圖卡、縮圖、thumbnail、banner、$visual-prompt-kit。"
 metadata:
   short-description: Article to visual design briefs
 ---

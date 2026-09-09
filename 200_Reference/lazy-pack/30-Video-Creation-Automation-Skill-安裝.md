@@ -108,7 +108,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366'
 ---
 name: video-tool-evaluation
-description: Use when Codex, Claude, or AntiGravity plans a video workflow, chooses among video tools/providers, creates or processes a multi-step video, writes a VideoSpec/storyboard, builds a HyperFrames composition, converts a website or Remotion project into video, or needs to confirm that every available video route was considered. Produces and validates TOOL_EVALUATION.md before implementation. Direct one-command execution with an already specified tool may consume an existing approved evaluation instead of creating a new one.
+description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard、把網站或 Remotion 專案轉成影片時使用。實作前先產出並驗證 TOOL_EVALUATION.md。"
 ---
 
 # Video Tool Evaluation
@@ -676,14 +676,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-creation-automation/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-creation-automation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_SKILL_MD_0E95F5A366'
 ---
 name: video-creation-automation
-description: >
-  Use when the user asks Codex, Claude, or AntiGravity to create a video from scratch when there is no
-  existing edited video: choose a video type, interview for topic/materials,
-  evaluate every available video tool in TOOL_EVALUATION.md, write SCRIPT.md
-  and DESIGN.md, create a HyperFrames-style HTML video plan, prepare
-  TTS/assets, render or hand off to rendering tools, and package the result. If
-  the user already has a finished or raw video file, route to
-  video-processing-automation instead.
+description: "從零開始做影片、沒有現成素材時使用：選型、訪談素材、評估工具、寫 SCRIPT.md 與 DESIGN.md、備素材、算圖、打包。已有影片檔改用 video-processing-automation。"
 metadata:
   short-description: Create videos from scratch when no video exists
 ---

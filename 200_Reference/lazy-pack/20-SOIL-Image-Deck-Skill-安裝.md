@@ -120,7 +120,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_SKILL_MD_0E95F5A366'
 ---
 name: soil-image-deck
-description: Create SOIL-style image-first teaching presentations in which every slide is driven by an AI-generated full-page visual. Use when the user asks for a SOIL image deck, pure-image teaching slides, NotebookLM-style educational slides, a YAML-driven SOIL deck, visual-impact teacher training slides, or a baked/plate PPTX that follows 引起動機、維持注意、喚起行動 and the SOIL six-engine workflow.
+description: "SOIL 圖像優先教學簡報，每頁由 AI 生成整頁視覺驅動。觸發：SOIL 圖像簡報、純圖教學投影片、NotebookLM 風格教育簡報、YAML 驅動 SOIL deck、baked／plate PPTX。"
 ---
 
 # SOIL Image Deck

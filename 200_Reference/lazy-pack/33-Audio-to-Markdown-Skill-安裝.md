@@ -113,7 +113,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SKILL_MD_0E95F5A366'
 ---
 name: audio-to-md
-description: 用 Groq Whisper 優先、本機 faster-whisper 備援，把「音訊或影片」轉成帶時間戳的逐字稿 Markdown 知識庫。當需要：(1) 把錄音／podcast／會議／訪談音檔轉成逐字稿 (2) 把影片（演講、課程、Zoom 錄影）抽音軌轉逐字稿 (3) 比較雲端 Groq 與本機 faster-whisper 轉錄品質 (4) 把逐字稿整理成可檢索、含段落摘要與重點的知識庫 (5) 為 RAG 補上「聲音」這一塊時使用。Phase 1 正式轉錄預設使用 Groq `whisper-large-v3-turbo`；缺少或無效 key、API／網路／額度／模型／上傳失敗，或素材明確要求 local-only 時，立即改用本機 faster-whisper `large-v3-turbo`。Groq 需要既有的雲端上傳同意與 GROQ_API_KEY 或 ~/.codex/secrets/groq_api_key。Phase 2 由當前 Agent 校稿（簡繁／錯字／斷句）＋寫摘要與重點，Codex、Claude、AntiGravity 使用同一套契約。
+description: "把音訊或影片轉成帶時間戳的逐字稿 Markdown：錄音、podcast、會議、訪談、演講與課程錄影。Groq whisper-large-v3-turbo 優先，失敗或需 local-only 改用本機 faster-whisper，再校稿產出摘要。"
 ---
 
 # audio-to-md Skill

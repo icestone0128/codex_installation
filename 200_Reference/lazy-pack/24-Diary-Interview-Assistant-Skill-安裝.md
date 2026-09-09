@@ -108,7 +108,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md" <<'AGENT_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_SKILL_MD_0E95F5A366'
 ---
 name: diary-interview-assistant
-description: Use when the user asks for 日記訪談助手, Daily Interview Assistant, diary interview assistant, 間歇式日記訪談, daily journal interview, learning journal, or wants to turn either a time-block diary or an empty-start reflection into 3 publishable writing insights. This skill interviews the user one question at a time in Traditional Chinese, then outputs 3 highlights with explanations, writing ideas, next actions, and article draft prompts.
+description: "觸發：日記訪談助手、Daily Interview Assistant、間歇式日記訪談、learning journal。逐題訪談後輸出 3 個可發表的寫作亮點、寫作點子與文章草稿提示。"
 metadata:
   short-description: Interview diaries or empty-start reflections into writing insights
 ---

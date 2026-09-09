@@ -678,7 +678,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_0E95F5A366'
 ---
 name: cross-device-sync
-description: Use when the user asks to install, bootstrap, audit, repair, or document cross-device and cross-agent synchronization for Claude Code, Codex, AntiGravity/Gemini, chezmoi/dotfiles, shared local Python tools, global skills, AGENTS.md or CLAUDE.md rules, shared core-rules.md, Arry Assistant data, Obsidian cockpits, AI assistant memory, cloud sync, GitHub backups, or a new-computer migration across macOS, Windows, Linux, Google Drive, iCloud, Dropbox, or OneDrive.
+description: "安裝、bootstrap、稽核、修復或記錄跨裝置與跨 Agent 同步：chezmoi、dotfiles、全域 skills、core-rules、AGENTS.md、Arry 助手資料、Obsidian 駕駛艙、記憶、雲端同步、GitHub 備份、換新電腦。"
 metadata:
   short-description: Bootstrap and verify cross-agent portability
 ---

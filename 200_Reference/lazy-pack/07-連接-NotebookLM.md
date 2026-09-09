@@ -141,7 +141,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/notebooklm-architecture/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/notebooklm-architecture/SKILL.md" <<'AGENT_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_SKILL_MD_0E95F5A366'
 ---
 name: notebooklm-architecture
-description: Create reusable NotebookLM architecture source files that control a notebook's role, thinking logic, teaching method, output structure, formatting, and source-selection behavior. Use when the user asks to design, revise, or package NotebookLM control prompts, Soul Frameworks, Body Frameworks, source files, note-to-source workflows, YAML-like configuration content, teacher-facing NotebookLM templates, or reusable architecture instructions for NotebookLM.
+description: "建立可重用的 NotebookLM 架構來源檔，控制角色、思考邏輯、教學法、輸出結構與選源行為。觸發：NotebookLM 控制提示、Soul／Body Framework、來源檔、YAML 設定、教師用模板。"
 ---
 
 # NotebookLM Architecture
@@ -401,7 +401,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/presentation-workflow/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/presentation-workflow/SKILL.md" <<'AGENT_LAZYPACK_PRESENTATION_WORKFLOW_SKILL_MD_0E95F5A366'
 ---
 name: presentation-workflow
-description: Analyze and create presentations with an emphasis on NotebookLM slide generation, YAML-controlled visual style, and repeatable deck iteration. Use when Codex needs to read or critique a slide deck, plan a presentation, create slide content, generate or refine NotebookLM YAML style specifications, translate visual references such as Pinterest posters or landing pages into design language, define per-slide layouts and prompts, or revise NotebookLM-generated slides page by page.
+description: "Analyze, plan, create or revise presentations with NotebookLM slide generation and YAML visual-style specs. Covers deck critique, slide content, layouts and prompts."
 ---
 
 # Presentation Workflow

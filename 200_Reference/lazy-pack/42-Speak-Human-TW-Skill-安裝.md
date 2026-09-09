@@ -149,10 +149,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/speak-human-tw/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/speak-human-tw/SKILL.md" <<'AGENT_LAZYPACK_SPEAK_HUMAN_TW_SKILL_MD_0E95F5A366'
 ---
 name: speak-human-tw
-description: |
-  「說人話」：繁體中文的去 AI 味改寫 skill。審查與改寫文字，去除 AI 味道、校正中國用語與半形標點，讓文字讀起來像真人寫的。
-  觸發時機：用戶說「去 AI 味」「說人話」「這段好 AI」「改自然一點」「幫我潤稿去掉 AI 感」「校對一下再發」，或要求檢查電子報、社群貼文、銷售頁、課程文案、客服回信、簡報、公告、Email 等對外文字的語感。
-  不要觸發：逐字翻譯、模仿特定品牌 voice、事實查核（非風格問題）、程式碼／log／設定檔、要求「潤成雷蒙的語氣」（那是 content-writing skill 的事，本 skill 只去 AI 味、不加個人風格）。
+description: "說人話：繁中去 AI 味改寫。觸發：去 AI 味、說人話、這段好 AI、改自然一點、潤稿去掉 AI 感、校對一下再發。不觸發：翻譯、模仿品牌 voice、事實查核、程式碼。"
 license: MIT
 metadata:
   version: "1.4.0"

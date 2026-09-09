@@ -238,7 +238,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/landing-page/SKILL.md" <<'AGENT_LAZYPACK_LANDING_PAGE_SKILL_MD_0E95F5A366'
 ---
 name: landing-page
-description: Use when the user asks to create, rewrite, restyle, or convert a landing page, sales page, course page, event signup page, product launch page, or lead-capture page, including explicit $landing-page invocation. Supports guided generation from a rough offer and CMS HTML layout mode for preserving complete existing copy while converting it into semantic, CMS-ready HTML. Trigger phrases include landing page, landing-page skill, 銷售頁, 報名頁, 課程頁, 活動頁, 產品頁, 既有文案轉 HTML, CMS HTML, and 幫我做 landing page.
+description: "建立、改寫、換風格或轉換 landing page、銷售頁、報名頁、課程頁、活動頁、產品頁、名單蒐集頁。觸發：landing page、CMS HTML、既有文案轉 HTML、$landing-page。"
 metadata:
   short-description: Landing page generator and CMS HTML layout
 ---
