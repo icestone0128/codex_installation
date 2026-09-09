@@ -145,7 +145,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/youtube-transcript-collector/SKILL.md"
 cat > "{{SYNC_ROOT}}/skills/youtube-transcript-collector/SKILL.md" <<'AGENT_LAZYPACK_YOUTUBE_TRANSCRIPT_COLLECTOR_SKILL_MD_0E95F5A366'
 ---
 name: youtube-transcript-collector
-description: Build YouTube video URL inventory tables and fetch Traditional Chinese subtitle Markdown files with yt-dlp. Use when the user asks to find videos from a YouTube channel or URL set, create a 總表.md / summary table first, identify livestream replays and Chinese subtitle availability, then download or regenerate zh-TW / zh-Hant subtitle Markdown files one video at a time while avoiding YouTube rate limits.
+description: "用 yt-dlp 建立 YouTube 影片清單表並抓繁中字幕 Markdown。觸發：整理頻道影片、建總表、辨識直播重播與中文字幕、逐支下載 zh-TW／zh-Hant 字幕。"
 ---
 
 # YouTube Transcript Collector

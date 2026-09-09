@@ -158,7 +158,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366'
 ---
 name: video-tool-evaluation
-description: Use when Codex, Claude, or AntiGravity plans a video workflow, chooses among video tools/providers, creates or processes a multi-step video, writes a VideoSpec/storyboard, builds a HyperFrames composition, converts a website or Remotion project into video, or needs to confirm that every available video route was considered. Produces and validates TOOL_EVALUATION.md before implementation. Direct one-command execution with an already specified tool may consume an existing approved evaluation instead of creating a new one.
+description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard、把網站或 Remotion 專案轉成影片時使用。實作前先產出並驗證 TOOL_EVALUATION.md。"
 ---
 
 # Video Tool Evaluation
@@ -726,12 +726,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md")
 cat > "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD_0E95F5A366'
 ---
 name: video-processing-automation
-description: >
-  Use when the user asks Codex, Claude, or AntiGravity to process raw video into a YouTube-ready or
-  social-video-ready package: smart cut, silence removal, local/cloud
-  speech-to-subtitle, transcript cleanup, BGM ducking, title candidates, cover
-  prompt/image generation, metadata, short highlight clips, and final output packaging. Adapted into a
-  portable cross-agent workflow from mathruffian-dot/2026-YouTube.
+description: "把既有毛片處理成可上架的影片包：智慧剪接、去靜音、語音轉字幕、逐字稿清理、BGM ducking、標題與封面、metadata、精華短片、打包輸出。"
 metadata:
   short-description: YouTube/video processing automation workflow
 ---

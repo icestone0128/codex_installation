@@ -216,7 +216,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/social-cards/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/social-cards/SKILL.md" <<'AGENT_LAZYPACK_SOCIAL_CARDS_SKILL_MD_0E95F5A366'
 ---
 name: social-cards
-description: Use when the user asks to use Social Cards, $social-cards, make IG cards, social cards, carousel posts, "/cards", "做圖卡", "幫我做 IG 圖", or turn an article, note, URL, Markdown file, or pasted text into branded social-media PNG cards using bundled blue-dark, orange-light, or Pantone 285C brand templates.
+description: "觸發：Social Cards、$social-cards、做圖卡、幫我做 IG 圖、IG 圖卡、輪播貼文、/cards。把文章、筆記、網址或文字轉成品牌風格的社群 PNG 圖卡。"
 metadata:
   short-description: Social Cards
 ---

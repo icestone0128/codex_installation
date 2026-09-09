@@ -201,14 +201,15 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md" <<'AGENT_LAZYPACK_DOC_TO_MD_SKILL_MD_0E95F5A366'
 ---
 name: doc-to-md
-description: Convert PDF, TXT, EPUB, scanned PDF, image-heavy PDF, screenshots, or image folders to clean Markdown. Use when creating Obsidian-ready notes, extracting text, converting Simplified to Traditional Chinese, transcribing visuals, explaining charts/tables/diagrams, routing Doc/VLM work, producing one-file page-adjacent PDF output, or validating and packaging a final knowledge base.
+description: "把 PDF、TXT、EPUB、Word／PowerPoint／Excel、掃描 PDF、截圖或圖片資料夾轉成乾淨 Markdown。含簡轉繁、圖表轉述、Doc/VLM 路由與 Obsidian 筆記整備。"
 ---
 
 # doc-to-md Skill
 
-Convert PDF / TXT / EPUB / scanned PDFs / image-heavy PDFs / images to clean
-Markdown. The skill combines the original text-first `doc-to-md` workflow with
-the VLM-to-MD visual workflow.
+Convert PDF / TXT / EPUB / Office documents / scanned PDFs / image-heavy PDFs /
+images to clean Markdown. The skill combines the original text-first `doc-to-md`
+workflow with the VLM-to-MD visual workflow, plus an `anydoc` route for Office
+formats.
 
 **Routing model:**
 - `doc_to_md.py` handles text-first PDFs, EPUB, and TXT.
@@ -249,6 +250,39 @@ after `vlm_prep.py` renders pages or images into `assets/`.
 > scripts are bundled inside the skill folder at `scripts/`. If bundled scripts
 > exist and fixed installed programs are unavailable, run from the bundled path
 > with an available Python that already has the required dependencies.
+
+---
+
+## Step 0 — Office Documents Go To `anydoc`
+
+Word, PowerPoint, Excel, OpenDocument, RTF and CSV are **not** handled by
+`doc_md_router.py`. Route them to `anydoc` before considering any other step.
+
+```bash
+command -v anydoc || npm install -g @firecrawl/anydoc
+
+anydoc report.docx                # print Markdown to stdout
+anydoc deck.pptx -o deck.md       # write to a file
+```
+
+| Input | Route | Why |
+|-------|-------|-----|
+| `.docx` `.pptx` `.xlsx` `.odt` `.ods` `.odp` `.rtf` `.csv` | `anydoc` | Native parsers; local, free, sub-second |
+| `.pdf` with a text layer | `anydoc` or `doc_md_router.py` | Router wins when visual signals matter |
+| `.pdf` scanned or photographed | `doc_md_router.py --visual force` | **`anydoc` has no OCR and will fail** |
+| Images, screenshots, image folders | `vlm_prep.py` | Unchanged |
+
+Rules:
+
+- `anydoc` runs entirely on this machine and uploads nothing. Contracts,
+  quotations and anything holding personal data must take this route, never a
+  cloud parser.
+- No OCR. When `anydoc` returns empty or errors on a PDF, the file has no text
+  layer — fall back to the VLM route rather than retrying.
+- Verify the version before quoting behaviour: `anydoc --version`. Upstream is
+  `firecrawl/anydoc` (MIT); install and update through npm only.
+- Output is plain Markdown with tables preserved. Feed it into Step 3 summaries
+  the same way as text output from `doc_to_md.py`.
 
 ---
 

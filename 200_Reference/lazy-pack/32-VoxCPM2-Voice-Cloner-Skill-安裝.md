@@ -148,7 +148,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/SKILL.md" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SKILL_MD_0E95F5A366'
 ---
 name: voxcpm2-voice-cloner
-description: Use when the user asks to install or run VoxCPM2, clone an authorized voice, synthesize speech from a voice reference, design a synthetic voice, record or import a voice profile, list local voice profiles, or generate multi-speaker dialogue. Supports macOS Apple Silicon MPS, CUDA, and CPU through a local Python 3.12 runtime. Require explicit permission for every cloned real-person voice.
+description: "安裝或執行 VoxCPM2：克隆已授權的聲音、從參考音合成語音、設計合成聲線、錄製或匯入聲音 profile、多說話者對話。每個真人聲音都需明確授權。"
 metadata:
   short-description: Local authorized VoxCPM2 voice cloning
 ---

@@ -64,7 +64,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/visual-note-generator/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/visual-note-generator/SKILL.md" <<'AGENT_LAZYPACK_VISUAL_NOTE_GENERATOR_SKILL_MD_0E95F5A366'
 ---
 name: visual-note-generator
-description: Turn a photographed or scanned hand-drawn note into an upright, source-faithful 16:9 visual note using a replaceable personal Style Profile. Use when the user provides 手繪筆記、圖解筆記、白紙草圖、拍照筆記 or asks for Visual Note Generator, exact Traditional Chinese text preservation, Q-version character handling, a personalized hand-drawn style, or a finished 2K visual-note image. This skill is only for hand-drawn-note-to-image creation, not article rewriting, transcripts, social posts, prose-to-infographic work, or slide outlines.
+description: "把拍照或掃描的手繪筆記轉成正立、忠於原稿的 16:9 圖解筆記，使用可替換的 Style Profile。觸發：手繪筆記、圖解筆記、白紙草圖、拍照筆記、Visual Note Generator。"
 ---
 
 # Visual Note Generator

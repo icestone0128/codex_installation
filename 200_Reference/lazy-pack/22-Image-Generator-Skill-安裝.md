@@ -96,7 +96,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/image-generator/SKILL.md" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_SKILL_MD_0E95F5A366'
 ---
 name: image-generator
-description: Use when the user asks to generate, edit, restyle, or prepare images in Codex, Claude, or AntiGravity, including 生圖, 修圖, 圖像提示, 教學圖片, 封面, 插圖, 角色, 背景, transparent-background assets, thumbnails, comic panels, or visual assets for slides, websites, games, and Obsidian notes. Use the active agent's native image tool when available, with a shared approved fallback route.
+description: "觸發：生圖、修圖、圖像提示、教學圖片、封面、插圖、角色、背景、去背素材、縮圖、漫畫分格，或簡報、網站、遊戲、Obsidian 筆記用的視覺素材。優先用當前 Agent 的原生生圖工具。"
 metadata:
   short-description: Generate and edit images across three agents
 ---
@@ -132,6 +132,11 @@ capability or an approved shared fallback, not an automatic API-key setup.
   authorized, deliver the final prompt and exact placement/verification steps.
 - Verification: confirm subject fidelity, dimensions/aspect ratio, text policy,
   requested edits, file readability, and final placement identically.
+
+## 共用個人資產
+
+產出 Arry 個人或品牌用途的圖像時，先讀 `{{SYNC_ROOT}}/knowledge/arry-visual-identity.yaml`
+指標檔取得目前的視覺識別與角色資產；一般性、非品牌的生圖需求不需要載入。
 
 ## When To Use
 

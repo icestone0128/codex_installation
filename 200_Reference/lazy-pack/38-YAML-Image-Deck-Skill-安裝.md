@@ -123,7 +123,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/yaml-image-deck/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/yaml-image-deck/SKILL.md" <<'AGENT_LAZYPACK_YAML_IMAGE_DECK_SKILL_MD_0E95F5A366'
 ---
 name: yaml-image-deck
-description: Create consistent image-first slide decks from a structured YAML design system, layout registry, and per-slide content. Use when the user asks for a YAML image deck, NotebookLM-style image presentation, full-image PPTX, fixed visual grammar with controlled layouts, golden-sample style locking, or batch image slides across any subject. Supports baked slides and text-free plates with editable overlays.
+description: "用結構化 YAML 設計系統與版位登錄產生一致的圖像優先簡報。觸發：YAML 圖像簡報、NotebookLM 風格圖像簡報、全圖 PPTX、固定視覺語法、黃金樣張鎖定、批次圖卡。"
 ---
 
 # YAML Image Deck

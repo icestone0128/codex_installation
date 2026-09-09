@@ -105,7 +105,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/rightproblem-coach/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/rightproblem-coach/SKILL.md" <<'AGENT_LAZYPACK_RIGHTPROBLEM_COACH_SKILL_MD_0E95F5A366'
 ---
 name: rightproblem-coach
-description: 問題結構化教練。當需要：(1) 將模糊問題轉化為結構清晰的問題規格書 (2) 用 #問對問題 思考習慣分析問題根因 (3) 生成視覺化 HTML 問題規格書時使用此 Skill。基於密涅瓦大學 HC + PRD 分析框架。
+description: "問題結構化教練：把模糊問題轉成結構清晰的問題規格書。用「問對問題」思考習慣分析根因，並生成視覺化 HTML 規格書。基於密涅瓦大學 HC 與 PRD 分析框架。"
 ---
 
 # 問題結構化教練 v2.0

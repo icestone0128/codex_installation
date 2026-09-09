@@ -526,7 +526,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD_0E95F5A366'
 ---
 name: codex-skill-creator
-description: Builds, extracts, adapts, improves, validates, renames, and synchronizes custom Agent Skills shared by Codex, Claude, and AntiGravity. Use when creating or maintaining global or project-local skills, adapting third-party guides, or turning successful conversations into reusable cross-agent packages.
+description: "建立、擷取、改寫、改進、驗證、改名與同步 Codex／Claude／AntiGravity 共用的自訂 Agent Skills。維護全域或專案本地 skill、轉換第三方指南時使用。"
 metadata:
   short-description: Build cross-agent skills
 ---
@@ -731,6 +731,49 @@ Compare both against the baseline. If the skill is not better:
 Do not add a whole new framework because one case failed. Report both test results and the rules
 they caused you to change; a skill whose tests were never run is not finished, and must be reported
 as unfinished rather than complete.
+
+## Semantic Overlap Check Before Appending To A Rule File
+
+Applies whenever this workflow appends to a file that accumulates rules over
+time: `core-rules.md`, a project `AGENTS.md`, `MEMORY.md`, or an existing
+`SKILL.md`. Appending a new section is cheap; appending a rule that already
+exists in different words is not. Duplicated rules are loaded into context on
+every session, drift apart when only one copy is edited, and make the file
+harder to trust.
+
+Run this before writing, not after:
+
+1. Read the target file in full. Not a grep for a keyword — the existing rule
+   may use entirely different wording for the same idea.
+2. For each rule you are about to add, compare it **semantically** against the
+   existing content. Same meaning counts as overlap even when the phrasing,
+   scope wording or examples differ.
+3. If nothing overlaps, say so in one line and write.
+4. If something overlaps, list every overlapping pair — your proposed line and
+   the existing line it duplicates — and ask the user once, as a batch, not
+   rule by rule. Offer:
+   - **Skip the overlapping lines** (default recommendation): the existing
+     wording stands, the new section carries only what is genuinely new. The
+     file stays lean.
+   - **Replace the existing wording**: write the new version, and convert the
+     superseded line into a dated comment so it stays recoverable rather than
+     deleting it.
+   - **Keep both**: only when the two rules genuinely differ in scope and the
+     user says so.
+5. Record which lines were skipped or replaced in the completion report, so the
+   decision is visible later.
+
+Do not resolve an overlap silently in either direction. Writing both is how
+rule files rot; dropping the user's existing wording without asking is how
+their intent gets lost.
+
+The boundary markers used by managed-block tooling (`chezmoi` `modify_`
+scripts, `blockinfile`-style helpers) solve a different problem — they protect
+a region from being overwritten. They do not detect that the text *outside* the
+block already says the same thing. Use both: markers for safe rewriting,
+this check for content.
+
+---
 
 ## Workflow
 

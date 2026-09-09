@@ -365,13 +365,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_SKILL_MD_0E95F5A366'
 ---
 name: heptabase-cli
-description: >-
-  Reads and edits a Heptabase knowledge base through the `heptabase` CLI. Use when the user says
-  Heptabase, 白板, whiteboard, 卡片, card library, 日記, journal, AI Tutor, 學習課程, or asks to search
-  cards, read or append notes and journals, edit card properties or tags, read parsed PDF pages,
-  read audio or video transcripts, export a file from a card, place cards on a whiteboard, or browse
-  AI Tutor goals, courses, and lessons. Requires the desktop app running with CLI enabled. Not for
-  Obsidian or other note apps, and not for Heptabase features the CLI does not expose.
+description: "Read and edit a Heptabase knowledge base via the `heptabase` CLI. Triggers: Heptabase, 白板, whiteboard, 卡片, 日記, AI Tutor, 學習課程. Needs the desktop app running."
 allowed-tools: Bash(heptabase *) Bash(jq *) Bash(mktemp *)
 metadata:
   heptabase-cli-version-range: "0.5.x"

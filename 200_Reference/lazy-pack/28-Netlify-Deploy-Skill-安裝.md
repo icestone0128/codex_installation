@@ -86,7 +86,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/netlify-deploy/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/netlify-deploy/SKILL.md" <<'AGENT_LAZYPACK_NETLIFY_DEPLOY_SKILL_MD_0E95F5A366'
 ---
 name: netlify-deploy
-description: Use when installing, verifying, or using Netlify MCP or CLI from Codex, Claude, or AntiGravity, deploying static/frontend projects to Netlify, or connecting a Netlify frontend to an already prepared Google Apps Script Web App backend.
+description: "Use to install, verify or use Netlify MCP or CLI, deploy static or frontend projects to Netlify, or connect a Netlify frontend to a prepared Apps Script Web App backend."
 metadata:
   short-description: Netlify deploy workflow
 ---

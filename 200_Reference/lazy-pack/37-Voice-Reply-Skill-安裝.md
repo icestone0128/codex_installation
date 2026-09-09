@@ -92,12 +92,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-reply/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/voice-reply/SKILL.md" <<'AGENT_LAZYPACK_VOICE_REPLY_SKILL_MD_0E95F5A366'
 ---
 name: voice-reply
-description: >
-  Use when the user asks Codex, Claude, or AntiGravity to speak, read aloud,
-  use voice reply, summarize by voice, generate a short spoken answer, or
-  create TTS narration on macOS. Requires a female/male choice first: female
-  uses Anna Su then HsiaoChen fallback; male skips ElevenLabs and uses YunJhe;
-  macOS say remains the final fallback.
+description: "觸發：用語音回覆、念出來、朗讀、語音摘要、TTS 旁白。先確認男聲或女聲：女聲用 Anna Su 再 fallback HsiaoChen，男聲跳過 ElevenLabs 用 YunJhe，最後 fallback 是 macOS say。"
 metadata:
   short-description: Ask female or male, then use the matching TTS route
 ---

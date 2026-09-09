@@ -145,7 +145,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/gemini-free-api/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/gemini-free-api/SKILL.md" <<'AGENT_LAZYPACK_GEMINI_FREE_API_SKILL_MD_0E95F5A366'
 ---
 name: gemini-free-api
-description: Use when the user asks to set up, verify, troubleshoot, or safely use Google AI Studio Gemini API Free Tier in Codex, Claude, or AntiGravity projects, including GEMINI_API_KEY storage, free-tier checks, account-default API verification, and backend-safe API integration without exposing secrets.
+description: "觸發：設定、驗證、排除或安全使用 Google AI Studio Gemini API 免費層。含 GEMINI_API_KEY 保存、免費額度檢查、帳號預設 API 驗證與不外洩 secret 的後端整合。"
 metadata:
   short-description: Set up and verify Gemini API Free Tier safely for all three Agent environments
 ---
