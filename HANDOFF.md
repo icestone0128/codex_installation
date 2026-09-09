@@ -48,10 +48,8 @@
 - 待你決定：LazyPack Item 14/15 的 CC BY-NC-SA ShareAlike 標示缺口（public repo 未宣告授權）。
 - 待你決定：`~/.codex/memories` symlink 到 Drive 是否維持（建議維持，該 repo 無 remote，無外洩風險）。
 
-- 收工時記得跑 `arry-assistant/scripts/sync_obsidian_mirror.py`：本次改了 `knowledge/`
-  三個檔案（`agent-execution-strategy.md`、`context-management-strategy.md`、`我的工具清單.md`），
-  Arry 助手 Obsidian 鏡像尚未同步。
-- repo 有 37 個 LazyPack Item 加 `HANDOFF.md` 未 commit，尚未推送。
+- 本次已收工：commit `46ada34` 已推送到 `origin/main`，工作樹乾淨、與遠端同步。
+  Arry 助手 Obsidian 鏡像已同步（copied=3，`diff -qr` 驗證通過）；chezmoi status 乾淨。
 
 ## Blockers
 
@@ -59,6 +57,6 @@
 
 ## Last verified
 
-- 2026-09-10 07:45 CST，Claude Code；83 個 skill frontmatter YAML 全數通過驗證，
+- 2026-09-10 08:00 CST，Claude Code；83 個 skill frontmatter YAML 全數通過驗證，
   `codex debug prompt-input` 確認 0 個描述被截斷，`codex exec` 確認預算警告消失，
   anydoc `.docx` 轉換退出碼 0，Codex CLI 0.153.4；LazyPack 40 identical / 0 to change，Obsidian 鏡像 `diff -qr` 一致。
