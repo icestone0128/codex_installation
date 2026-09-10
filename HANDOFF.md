@@ -2,8 +2,8 @@
 
 ## Current state
 
-2026-09-10 已完成四層記憶與 Codex adapter 校正；Git 狀態以交付時的 live 檢查為準。
-完整敘事在 Obsidian 駕駛艙 `專案庫/codex_installation/專案工作流程.md` 的 2026-09-10 三則紀錄；
+2026-09-10 已完成四層記憶架構與 Codex adapter 校正；待處理 rollout 尚未完成。
+完整敘事在 Obsidian 駕駛艙 `專案庫/codex_installation/專案工作流程.md` 的 2026-09-10 四則紀錄；
 全域 skill 變更紀錄在 `全域 Skills/全域 Skills 同步.md`。以下只列會影響下次工作的狀態：
 
 - **常駐 context 已大幅下降**：`core-rules.md` 27,216 → 18,307 字元（≈8,838 tokens）；
@@ -25,7 +25,11 @@
 
 ## Next action
 
-- 無記憶修復待辦。後續專案正常依 `startup-sync` 讀取四層記憶；只有使用者明確要求時才寫入新的 durable memory。
+- **處理共享四層記憶 backlog**：原交接的 29 份並未處理。2026-09-10 15:36 live 重算為
+  截止點後 32 個 archived rollout，其中 1 個已有 `stage1_outputs`，目前實際缺少 31 個。
+- 不啟用 Codex 原生 memories、不改寫 `memories_1.sqlite`，也不建立第二份本機記憶；應由
+  共享工作流把每份 rollout 整理至 T3 `rollout_summaries/`，再把可重用內容依規則提升至
+  T2 索引或 T0／T1。批次寫入前要先備份目標檔案並驗證可恢復、可續跑、避免重複。
 - 若未來 Codex 宣布支援 symlink memory root，先在隔離環境驗證不會建立第二份資料，再評估是否調整目前停用設定。
 
 ## Blockers
@@ -42,3 +46,5 @@
   `01a08a30-07bb-72b2-8cef-1314784c18ea`，狀態資料庫記錄 `memory_mode=disabled`，正常回覆 `OK`；
   啟動後 logs 新增的 symlink-memory 錯誤為 0。LazyPack 40 identical / 0 to change、三個
   skill package 合法、三 Agent 相容性掃描 23 檔 0 findings，Obsidian 兩組鏡像一致。
+- 2026-09-10 15:36 CST，Codex App：重新核對原交接四項；archived rollout 253、
+  `stage1_outputs` 27、截止點後 31 個未處理、jobs 新排程 0。原本「無記憶修復待辦」的判斷已撤回。
