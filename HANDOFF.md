@@ -37,6 +37,18 @@
   懶人包舊版改名封存程序、全域 Skills 索引欄位要求（→ `shutdown-sync`）、開工 `git fetch` 落後／衝突檢查（→ `startup-sync`）。
 - `shutdown-sync` 原本**完全沒有** LazyPack 同步步驟（今天只靠 core-rules 才知道要做），已補為第 5 步並附腳本。
 
+- 記憶層完成分層重整：`MEMORY.md` 48,480 → 1,145 tokens（Task Group 日誌移入 `memories/archive/`），
+  `raw_memories.md` 與 `automation_memory_fallback.md` 一併封存（兩者原本無人引用）。
+  新增 `knowledge/memory-tiering.md`（T0 常駐／T1 開工／T2 按需／T3 封存，分層軸是載入觸發條件）
+  與 `extensions/ad_hoc/notes/INDEX.md`（46 則，原本無索引等同不可達）。
+- 查明 2026-08-21 Codex 原生記憶 pipeline 停擺原因：consolidation 會把既有記憶讀回當輸入，
+  48k tokens 的 `MEMORY.md` 撐爆 context，`memory_stage1` 2 筆失敗且 retry 歸零。根因已移除。
+- `startup-sync` 原本字面要求 read `MEMORY.md`（當時 48k tokens），已改為只讀協作偏好；
+  `shutdown-sync` 加入 `MEMORY.md` 分層守門（超過 3,000 tokens 就把 Task Group 移進 archive）。
+- 誤放在 `memories/skills/` 的 `obsidian-weekly-knowledge-refresh-secondbrain` 移入 `skills/`，
+  並修好 `disable-model-invocation` 與 `user-invocable: false` 並存導致完全無法觸發的問題。全域 skill 83 → 84。
+- 常駐 context 現況：core-rules 8,838 + 協作偏好 1,145 ≈ **9,983 tokens**。
+
 ## Next action
 
 - 前述「13 個 skill 未列入模型清單」已查明，**是刻意設定，非缺陷**：它們的
@@ -51,12 +63,18 @@
 - 本次已收工：commit `46ada34` 已推送到 `origin/main`，工作樹乾淨、與遠端同步。
   Arry 助手 Obsidian 鏡像已同步（copied=3，`diff -qr` 驗證通過）；chezmoi status 乾淨。
 
+- 觀察 Codex 記憶 pipeline 是否真的復活：`sqlite3 ~/.codex/memories_1.sqlite "SELECT kind,status,
+  COUNT(*),MAX(datetime(finished_at,'unixepoch','localtime')) FROM jobs GROUP BY kind,status;"`
+  若 `memory_consolidate_global` 的最後成功時間仍停在 2026-08-21，再查是否有其他阻塞。
+  2026-07-17 那 2 筆 `retry_remaining=0` 的 stage1 未重置（未改動 Codex 內部狀態 DB）。
+
+
 ## Blockers
 
 - 無。
 
 ## Last verified
 
-- 2026-09-10 08:00 CST，Claude Code；83 個 skill frontmatter YAML 全數通過驗證，
+- 2026-09-10 08:40 CST，Claude Code；83 個 skill frontmatter YAML 全數通過驗證，
   `codex debug prompt-input` 確認 0 個描述被截斷，`codex exec` 確認預算警告消失，
   anydoc `.docx` 轉換退出碼 0，Codex CLI 0.153.4；LazyPack 40 identical / 0 to change，Obsidian 鏡像 `diff -qr` 一致。
