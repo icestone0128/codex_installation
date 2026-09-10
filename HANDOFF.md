@@ -31,9 +31,18 @@
   並把該步驟改寫成依 T0／T1／T2／駕駛艙分流的路由表；同時移除與分層矛盾的
   「append to `MEMORY.md`」敘述。四層現在讀寫 owner 都齊備且可驗證。
 
+- 2026-09-10 補洞：清除 `sync_backup.py` 死參照（該腳本 2026-06-28 存在 12 小時即移除，
+  功能由 `arry-assistant/scripts/sync_obsidian_mirror.py` 取代）。同時發現
+  **`sync-lazypack-embeds.py` 只重建 skill package heredoc，不管 `CODEX_LAZYPACK_KNOWLEDGE_*`
+  內嵌區塊** —— 改 `knowledge/` 後 dry-run 仍報 `0 to change`，內嵌卻已漂移。
+  收工回報不可把 `0 to change` 當成 LazyPack 全綠。詳見 T2 第 53 則
+  `20260910-222900-lazypack-knowledge-embed-not-auto-synced.md`。
+
 ## Next action
 
 - 無待辦任務。以下為長期觀察項目：
+- 改動 `codex_symlink/knowledge/` 內容時，一併 `grep` LazyPack 是否內嵌同一份文件；
+  有就手動同步第二處，腳本不會提醒。
 - 目前無共享記憶 backlog。後續若有新的 archived rollout 需要整理，先執行
   `arry-assistant/scripts/process_shared_memory_backlog.py inventory`，再以 `process`／`verify` 續跑。
 - 若未來 Codex 宣布支援 symlink memory root，先在隔離環境驗證不會建立第二份資料，再評估是否調整目前停用設定。
@@ -43,6 +52,12 @@
 - 無。
 
 ## Last verified
+
+- 2026-09-10 22:44 CST，Claude Code 收工：chezmoi clean、`chezmoi add` 未使用；
+  `MEMORY.md` 1,145 tokens／clean；LazyPack 40 identical／0 to change 且 `懶人包/` 鏡像
+  `diff -qr` 一致（09 已手動補同步）；`Arry 助手/` 鏡像 `diff -qr` 一致；T2 增至 53 則。
+  UNARCHIVED=8／4 組全部來自其他 session 的驗證暫存（`compare.json`、`tool-results`、
+  `cache-break-state-*.json`、`check_part.py`），不需歸檔。
 
 - 2026-09-10 19:15 CST，Claude Code 收工：chezmoi clean、`chezmoi add` 未使用；
   `MEMORY.md` 分層檢查 1,145 tokens／clean；LazyPack 40 identical／0 to change；
