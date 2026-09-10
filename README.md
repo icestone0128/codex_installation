@@ -42,3 +42,9 @@
 `{{OBSIDIAN_PROJECTS}}/{{SETUP_PROJECT_NAME}}/專案工作流程.md`
 
 Obsidian 同步與鏡像對應：請參照 `AGENTS.md` 中的專屬同步規則。
+
+## Arry 助手記憶
+
+唯一主版本是 `{{SYNC_ROOT}}/memories`，Codex、Claude 與 AntiGravity 透過共用規則及 skills
+執行四層記憶。Codex 的 `~/.codex/memories` 保持為共享 symlink；原生 memories 功能維持
+停用，避免 Codex 因拒絕 symlink root 而另建或要求第二份本機記憶。
