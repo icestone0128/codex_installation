@@ -73,6 +73,28 @@ check_path "$SYNC_ROOT/core-rules.md" "portable core-rules exists"
 check_symlink_target "$CODEX_HOME/AGENTS.md" "$SYNC_ROOT/core-rules.md" "Codex AGENTS.md points to portable core-rules"
 check_symlink_target "$CODEX_HOME/skills" "$SYNC_ROOT/skills" "Codex skills points to portable skills"
 check_symlink_target "$CODEX_HOME/memories" "$SYNC_ROOT/memories" "Codex memories points to portable memories"
+
+if [ -f "$CODEX_HOME/config.toml" ]; then
+  if python3 - "$CODEX_HOME/config.toml" >/dev/null 2>&1 <<'PY'
+import sys
+import tomllib
+
+with open(sys.argv[1], "rb") as handle:
+    config = tomllib.load(handle)
+
+assert config.get("features", {}).get("memories") is False
+assert config.get("memories", {}).get("generate_memories") is False
+assert config.get("memories", {}).get("use_memories") is False
+PY
+  then
+    pass "Codex native memories disabled while portable symlink memory is canonical"
+  else
+    fail "Codex native memories disabled while portable symlink memory is canonical"
+  fi
+else
+  fail "Codex config exists for native memories guard"
+fi
+
 check_symlink_target "$CLAUDE_HOME/CLAUDE.md" "$SYNC_ROOT/core-rules.md" "Claude CLAUDE.md points to portable core-rules"
 check_symlink_target "$CLAUDE_HOME/skills" "$SYNC_ROOT/skills" "Claude skills points to portable skills"
 check_symlink_target "$GEMINI_HOME/GEMINI.md" "$SYNC_ROOT/core-rules.md" "AntiGravity GEMINI.md points to portable core-rules"

@@ -83,6 +83,7 @@ Arry 助手 AI 分身資料層：
 - 任何自訂 skill 的建立與維護都必須由全域 `codex-skill-creator` 工作流處理。
 - 全域 skills 的唯一主版本是 `codex_symlink/skills`；各 Agent home 只保留 chezmoi 管理的原生入口 symlink。
 - Arry 助手跨專案記憶與個人偏好放在 `codex_symlink/memories/MEMORY.md`。
+- `{{CODEX_HOME}}/memories` 必須保持為指向 `{{SYNC_ROOT}}/memories` 的 symlink；Codex 原生 memories 功能維持停用（`[features] memories = false`，`generate_memories = false`，`use_memories = false`），由 Arry 助手與開收工流程執行四層記憶，不建立第二份本機記憶。
 - Arry 助手跨專案 workflow 草稿放在 `codex_symlink/workflows/`。
 - Arry 助手跨策略總入口放在 `codex_symlink/knowledge/agent-execution-strategy.md`；需要實際執行、修改或同步時，先判斷任務階段，再按需載入詳細 Knowledge，不一次載入全部策略。
 - 任何 skill 不論全域或專案本地，都要做成可攜式版本：全域 skill 以 `codex_symlink/skills` 為主版本，並將可公開安裝內容內嵌到 repo `200_Reference/lazy-pack/` 對應序號文件、同步 Obsidian 全域 Skills 索引與 Obsidian 懶人包鏡像；專案 skill 保留完整 package 在該專案 `000_Agent/skills/` 並記錄到專案駕駛艙。

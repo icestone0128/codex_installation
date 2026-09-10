@@ -678,7 +678,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_0E95F5A366'
 ---
 name: cross-device-sync
-description: "安裝、bootstrap、稽核、修復或記錄跨裝置與跨 Agent 同步：chezmoi、dotfiles、全域 skills、core-rules、AGENTS.md、Arry 助手資料、Obsidian 駕駛艙、記憶、雲端同步、GitHub 備份、換新電腦。"
+description: "觸發：跨裝置同步、換新電腦、chezmoi、dotfiles、全域 skills、core-rules、Arry 助手資料、Obsidian 駕駛艙、記憶或 GitHub 備份。安裝、稽核、修復或記錄 Codex／Claude／AntiGravity 共用環境。"
 metadata:
   short-description: Bootstrap and verify cross-agent portability
 ---
@@ -891,6 +891,12 @@ Use this mapping when converting a single-agent source guide:
 | Source-specific memory folder | `SYNC_ROOT/memories` as durable source; any native memory hook is an adapter and must not fork the data |
 | `000_Agent` from source kit | Project-local assistant layer only; this user's global assistant layer is `ASSISTANT_ROOT` with `memories/`, `workflows/`, `knowledge/`, and `skills/` |
 | Source-specific credentials/local state | Do not sync; each device logs in independently |
+
+For Arry's Codex adapter, keep `~/.codex/memories` as the symlink to `SYNC_ROOT/memories` and
+set `[features] memories = false`, `generate_memories = false`, and `use_memories = false` in
+the device-local `config.toml`. Codex 0.153.4 rejects a symlink memory root during native
+memories startup. The portable four-tier memory remains active through `arry-assistant`,
+`startup-sync`, and `shutdown-sync`; never replace it with a second local memory directory.
 
 ## Sync Route Guidance
 
