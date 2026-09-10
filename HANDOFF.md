@@ -48,26 +48,23 @@
 - 誤放在 `memories/skills/` 的 `obsidian-weekly-knowledge-refresh-secondbrain` 移入 `skills/`，
   並修好 `disable-model-invocation` 與 `user-invocable: false` 並存導致完全無法觸發的問題。全域 skill 83 → 84。
 - 常駐 context 現況：core-rules 8,838 + 協作偏好 1,145 ≈ **9,983 tokens**。
+- CC BY-NC-SA ShareAlike 標示缺口已補齊：Item 13／14／15 與 Item 16 的主版本
+  （`cross-device-sync/references/codex-playbook.md`）都加上「本檔同以 CC BY-NC-SA 4.0 釋出」
+  與來源凍結說明（snapshot `b2cd801`，上游 2026-07-18 改為付費學員限定後不再取用）。
+  Item 42 查證後無缺口 —— 它來自不同 repo（`Raymondhou0917/speak-human-tw`，MIT），
+  LICENSE 已隨 package 內嵌且版本與 commit 都有釘。
+- `~/.codex/memories` symlink 依先前建議維持現狀（該 repo 無 remote，無外洩風險），此項結案。
 
 ## Next action
 
-- 前述「13 個 skill 未列入模型清單」已查明，**是刻意設定，非缺陷**：它們的
-  `agents/openai.yaml` 都有 `policy: allow_implicit_invocation: false`，
-  Codex 因此完全不把它們放進模型可見清單（零預算成本），但 `$skill-name` 手動呼叫正常。
-  13/13 精準吻合，隔離環境移除該行後即出現，`$grill-me` 實測可正常啟動並注入本文。
-  已排除的假設：數量上限、查詢相關性選取、frontmatter 鍵序、metadata 區塊。
-  這同時是預算管理最有效的槓桿，已寫進 `context-management-strategy.md`。
-- 待你決定：LazyPack Item 14/15 的 CC BY-NC-SA ShareAlike 標示缺口（public repo 未宣告授權）。
-- 待你決定：`~/.codex/memories` symlink 到 Drive 是否維持（建議維持，該 repo 無 remote，無外洩風險）。
-
-- 本次已收工：commit `46ada34` 已推送到 `origin/main`，工作樹乾淨、與遠端同步。
-  Arry 助手 Obsidian 鏡像已同步（copied=3，`diff -qr` 驗證通過）；chezmoi status 乾淨。
-
-- 觀察 Codex 記憶 pipeline 是否真的復活：`sqlite3 ~/.codex/memories_1.sqlite "SELECT kind,status,
-  COUNT(*),MAX(datetime(finished_at,'unixepoch','localtime')) FROM jobs GROUP BY kind,status;"`
-  若 `memory_consolidate_global` 的最後成功時間仍停在 2026-08-21，再查是否有其他阻塞。
+- **驗證記憶 pipeline 是否復活（需要你操作）**：用**互動式** Codex（桌面版或 `codex` CLI）開一次
+  session，然後跑：
+  `sqlite3 ~/.codex/memories_1.sqlite "SELECT kind,status,COUNT(*),MAX(datetime(finished_at,'unixepoch','localtime')) FROM jobs GROUP BY kind,status;"`
+  現況：253 個 rollout 只處理過 27 個，2026-08-21 之後累積 29 個未處理，jobs 表沒有新的排隊列。
+  非互動式 `codex exec` 不會觸發排程（config 有 `disable_on_external_context` 等閘門），
+  所以本次無法從這裡驗證。若互動式開啟後仍無新 job，再查 `[memories]` 的
+  `min_rollout_idle_hours`、`max_rollout_age_days`、`min_rate_limit_remaining_percent` 等預設值。
   2026-07-17 那 2 筆 `retry_remaining=0` 的 stage1 未重置（未改動 Codex 內部狀態 DB）。
-
 
 ## Blockers
 
@@ -75,6 +72,6 @@
 
 ## Last verified
 
-- 2026-09-10 08:40 CST，Claude Code；83 個 skill frontmatter YAML 全數通過驗證，
+- 2026-09-10 09:10 CST，Claude Code；83 個 skill frontmatter YAML 全數通過驗證，
   `codex debug prompt-input` 確認 0 個描述被截斷，`codex exec` 確認預算警告消失，
   anydoc `.docx` 轉換退出碼 0，Codex CLI 0.153.4；LazyPack 40 identical / 0 to change，Obsidian 鏡像 `diff -qr` 一致。

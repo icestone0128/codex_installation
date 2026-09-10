@@ -863,6 +863,7 @@ cat > "{{SYNC_ROOT}}/skills/brainstorm/references/source-adaptation.md" <<'AGENT
 - 來源摘要：`04-brainstorm.md`、「AI 規劃模式 by 雷小蒙」與 `obra/superpowers` brainstorming skill。
 - 保留：先釐清再實作、假設回顯、方案比較、計劃書與確認閘門。
 - 授權紀錄：原始說明標示雷小蒙版本為 CC BY-NC-SA 4.0；`obra/superpowers` 為 MIT。現行檔案只保存三 Agent 共用的改編流程與摘要，不複製原始安裝全文。
+- 來源凍結：CC 側內容取自授權變更前的版本；上游已於 2026-07-18 的 commit `ec7b3b8` 改為付費學員限定，之後的內容不再取用。凡實際沿用 CC BY-NC-SA 內容的部分，本檔同以 CC BY-NC-SA 4.0 釋出（ShareAlike）。
 
 ### RDQ ChatGPT／Codex 版
 

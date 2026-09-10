@@ -1685,7 +1685,7 @@ Yes. Use separate repos or a strict `.gitignore`. Public repos should exclude pe
 
 ## Attribution Note
 
-The source file credits Raymond Hou / 雷蒙 and is licensed CC BY-NC-SA 4.0 for personal use. Keep attribution in derived notes when quoting or redistributing source-derived material. This file is the Codex-specific adapter playbook inside a three-Agent shared skill; Claude and AntiGravity use the companion compatibility references and the same portability contract.
+The source file credits Raymond Hou / 雷蒙 and is licensed CC BY-NC-SA 4.0 for personal use. Anything reused from it is redistributed here under the same CC BY-NC-SA 4.0 terms (ShareAlike), with attribution kept and commercial use excluded. The integrated snapshot is frozen at `b2cd801` (2026-05-24); upstream relicensed to paid-students-only on 2026-07-18 (commit `ec7b3b8`), so no content from after that date is used. Keep attribution in derived notes when quoting or redistributing source-derived material. This file is the Codex-specific adapter playbook inside a three-Agent shared skill; Claude and AntiGravity use the companion compatibility references and the same portability contract.
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_REFERENCES_CODEX_PLAYBOOK_MD_4F30E54D07
 
 # cross-device-sync/references/global-settings-spec.md
