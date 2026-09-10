@@ -37,12 +37,16 @@
   內嵌區塊** —— 改 `knowledge/` 後 dry-run 仍報 `0 to change`，內嵌卻已漂移。
   收工回報不可把 `0 to change` 當成 LazyPack 全綠。詳見 T2 第 53 則
   `20260910-222900-lazypack-knowledge-embed-not-auto-synced.md`。
+  **已於同日提升為規則層閘門**（使用者同意後修改 `core-rules.md`〈同步義務〉與
+  `shutdown-sync/SKILL.md` 第 5 步）。修正時發現更深一層：第 5 步的**觸發條件**原本只涵蓋
+  「動了 `skills/`」，改 `knowledge/` 根本不會進入該步；觸發條件已擴充為
+  「`skills/` 或 `knowledge/`」。
 
 ## Next action
 
 - 無待辦任務。以下為長期觀察項目：
 - 改動 `codex_symlink/knowledge/` 內容時，一併 `grep` LazyPack 是否內嵌同一份文件；
-  有就手動同步第二處，腳本不會提醒。
+  有就手動同步第二處，腳本不會提醒。（已寫入 `shutdown-sync` 第 5 步，收工時會經過）
 - 目前無共享記憶 backlog。後續若有新的 archived rollout 需要整理，先執行
   `arry-assistant/scripts/process_shared_memory_backlog.py inventory`，再以 `process`／`verify` 續跑。
 - 若未來 Codex 宣布支援 symlink memory root，先在隔離環境驗證不會建立第二份資料，再評估是否調整目前停用設定。
@@ -53,6 +57,10 @@
 
 ## Last verified
 
+- 2026-09-10 22:48 CST，Claude Code：規則層修正後複驗 —— LazyPack 由 `39 identical, 1 to change`
+  重建為 `40 identical／0 to change`；`verify-lazypack-embeds.py --skill shutdown-sync` 回報
+  `IDENTICAL=1 DIFFERS=0 MISSING=0`；`懶人包/` 鏡像 `diff -qr` 一致；
+  Obsidian `全域 Skills 同步.md` 已補同步紀錄。
 - 2026-09-10 22:44 CST，Claude Code 收工：chezmoi clean、`chezmoi add` 未使用；
   `MEMORY.md` 1,145 tokens／clean；LazyPack 40 identical／0 to change 且 `懶人包/` 鏡像
   `diff -qr` 一致（09 已手動補同步）；`Arry 助手/` 鏡像 `diff -qr` 一致；T2 增至 53 則。
