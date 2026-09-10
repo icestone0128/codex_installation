@@ -26,8 +26,14 @@
 - 上游 `lifehacker-tw/claude-code-mini-course` 授權已於 2026-07-18（commit `ec7b3b8`）
   改為付費學員限定。本地整合凍結在 snapshot `b2cd801`，**該日之後的內容不得再取用**。
 
+- 2026-09-10 補洞：`memory_summary.md`（T1）原本**沒有任何寫入者** —— 原生 consolidation
+  停用後沒有流程接手，它只會被讀、不會被更新。已把寫入責任指派給 `shutdown-sync` 第 4 步，
+  並把該步驟改寫成依 T0／T1／T2／駕駛艙分流的路由表；同時移除與分層矛盾的
+  「append to `MEMORY.md`」敘述。四層現在讀寫 owner 都齊備且可驗證。
+
 ## Next action
 
+- 無待辦任務。以下為長期觀察項目：
 - 目前無共享記憶 backlog。後續若有新的 archived rollout 需要整理，先執行
   `arry-assistant/scripts/process_shared_memory_backlog.py inventory`，再以 `process`／`verify` 續跑。
 - 若未來 Codex 宣布支援 symlink memory root，先在隔離環境驗證不會建立第二份資料，再評估是否調整目前停用設定。
@@ -37,6 +43,12 @@
 - 無。
 
 ## Last verified
+
+- 2026-09-10 18:55 CST，Claude Code 開工檢查：獨立驗證 Codex 交接四項全數完成 ——
+  `process_shared_memory_backlog.py verify` 回傳 pending 0、LazyPack 40 identical／0 to change、
+  Obsidian 兩組鏡像 `diff -qr` 一致、chezmoi clean、84 個 skill frontmatter 全通過且 0 個超過 175 字元、
+  `MEMORY.md` 維持 1,145 tokens。Git 乾淨且與遠端同步。
+  另補上 T1 寫入者缺口（見 Current state 末項）。
 
 - 2026-09-10 09:10 CST，Claude Code。84 個 skill frontmatter YAML 全數通過；
   `codex debug prompt-input` 確認 0 個 description 被截斷、skills 預算警告消失；
