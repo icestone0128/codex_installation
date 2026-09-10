@@ -41,6 +41,8 @@
   `shutdown-sync/SKILL.md` 第 5 步）。修正時發現更深一層：第 5 步的**觸發條件**原本只涵蓋
   「動了 `skills/`」，改 `knowledge/` 根本不會進入該步；觸發條件已擴充為
   「`skills/` 或 `knowledge/`」。
+  2026-09-11 再壓縮常駐成本：`core-rules.md` 只留觸發點與指標，程序與成因下沉到
+  `shutdown-sync` 第 5 步，淨增 +206 字元（原 +625）。閘門強度不變。
 
 ## Next action
 
@@ -57,6 +59,10 @@
 
 ## Last verified
 
+- 2026-09-11 03:03 CST，Claude Code：`core-rules.md` 濃縮後複驗 —— LazyPack 由
+  `39 identical, 1 to change` 重建為 `40 identical／0 to change`；
+  `verify-lazypack-embeds.py --skill shutdown-sync` 回報 `IDENTICAL=1 DIFFERS=0 MISSING=0`；
+  `懶人包/` 鏡像 `diff -qr` 一致；已複查 `core-rules.md` 無 LazyPack 內嵌。
 - 2026-09-10 22:48 CST，Claude Code：規則層修正後複驗 —— LazyPack 由 `39 identical, 1 to change`
   重建為 `40 identical／0 to change`；`verify-lazypack-embeds.py --skill shutdown-sync` 回報
   `IDENTICAL=1 DIFFERS=0 MISSING=0`；`懶人包/` 鏡像 `diff -qr` 一致；
