@@ -27,6 +27,13 @@ secrets.*
 .env.*
 !.env.example
 !200_Reference/templates/env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Cloudflare / Wrangler local cache and private installation handoff
+.wrangler/
+100_Todo/drafts/*cloudflare-d1-handoff.md
 
 # Arry assistant private data lives in Google Drive codex_symlink, not this public repo
 000_Agent/memory/

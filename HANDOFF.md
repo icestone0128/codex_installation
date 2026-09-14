@@ -2,11 +2,11 @@
 
 ## Current state
 
-2026-09-13 已從授權 Waki 官網下載並更新私人 `waki-brain`：專案包建造器 v1.0 → v1.3，並匯入 13 包新版 Skill 內容。更新器已支援官方雙層 ZIP（專案包版＋Skill 版）與巢狀 ZIP 安全驗證。最終 compare、Skill validators、三 Agent compatibility audit 均通過；私人內容未進 public repo 或 LazyPack。
+2026-09-15 已新增 LazyPack Item 46，將 `mathruffian-dot/cloudflare-d1-oauth-agent-guide` v1.1 與本次 Cloudflare + D1 實際安裝整合為可公開重跑的讀寫版 runbook。內容包含 Wrangler keychain/device flow、六項 MCP 權限、OAuth 逾時復原、Codex／Claude／AntiGravity adapters、GET-only 驗收、撤銷流程與 Agent 執行提示詞。LazyPack 來源與 Obsidian 鏡像已以 `diff -qr` 確認一致，未收錄帳號、OAuth code、token、callback URL 或實體家目錄。
 
 ## Next action
 
-下次每週檢查沿用已修正的 `waki_brain.py`；官網有新版時先 dry-run，再依同一安全閘門套用。
+未來若要建立第一個 D1、執行 SQL/migration、建立 Worker binding 或部署，依 Item 46 另開任務並重新取得對雲端寫入的明確同意；不把這些動作併入安裝驗收。
 
 ## Blockers
 
@@ -14,4 +14,4 @@
 
 ## Last verified
 
-2026-09-13 22:34 CST，Codex：Waki status 13 packages、compare `up_to_date`、compatibility audit `scanned_files=160 findings=0`；本地 main 將提交並推送至 origin/main。
+2026-09-15 07:13 CST，Codex：Wrangler 4.131.1 與 Codex CLI 0.153.4 help gate 通過；上游 HEAD 為 `addbbadff948baec3bd8ca836dfc7f54a904e770`；LazyPack embed dry-run 為 40 identical / 0 to change；Item 46 Markdown fences、必要權限與三 Agent adapter 檢查通過；公開目標檔案未發現實體帳號、本機路徑或 OAuth callback 殘留。

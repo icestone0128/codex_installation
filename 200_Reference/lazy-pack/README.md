@@ -1,8 +1,10 @@
 # Codex 懶人包總目錄
 
-> 版本：2026-08-13 可自行安裝版
+> 版本：2026-09-15 可自行安裝版
 > 用途：讓下載者從零開始設定 Codex、Claude、AntiGravity 共用的全域規則與 skills，以及 plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
+
+2026-09-15 更新：新增 [[46-Cloudflare-D1-OAuth-安裝]]，將 `mathruffian-dot/cloudflare-d1-oauth-agent-guide` v1.1 與實際安裝經驗整合成一份可重跑的讀寫版 runbook。Wrangler 限定 `account:read`、`user:read`、`d1:write` 並使用 OS keychain；Cloudflare API MCP 只核准 User、Account、Offline access、D1 Metadata Read、D1 Read、D1 Write 六項。驗收仍為 GET-only，空 D1 清單也算通過，不為證明寫入權限而建立或修改雲端資源。
 
 2026-07-21 更新：Item 10 將 `HANDOFF.md` 收為開工必讀、收工必寫；Item 16 加入共享 `session-sync-checkpoint.sh`、三 Agent Python-tools 中立 bridge 與安全 shell loader，以可驗證 gate 執行 `chezmoi update`，並限制 `chezmoi add` 只用於新增白名單入口；Item 34 成為每台電腦重建共用 Python runtime 的主線項目。共享全域 skill 主版本固定為 `{{SYNC_ROOT}}/skills`，專案 skill 固定為 `<project-root>/000_Agent/skills`。
 
@@ -57,6 +59,7 @@
 | `{{GITHUB_EMAIL}}` | Git commit email | `123456+alex-dev@users.noreply.github.com` |
 | `{{REPO_NAME}}` | GitHub repo 名稱 | `my-project` |
 | `{{GOOGLE_ACCOUNT}}` | Google 帳號 | `alex@example.com` |
+| `{{CLOUDFLARE_ACCOUNT_NAME}}` | 要授權的 Cloudflare Account 顯示名稱 | 只在本機核對，不把 email 或 Account ID 寫入公開文件 |
 | `{{GOOGLE_WORKSPACE_MCP_CLIENT_ID_PATH}}` | Google Workspace MCP OAuth client ID 本機檔案 | `{{CODEX_HOME}}/secrets/google_workspace_mcp_oauth_client_id` |
 | `{{GOOGLE_WORKSPACE_MCP_CLIENT_SECRET_PATH}}` | Google Workspace MCP OAuth client secret 本機檔案 | `{{CODEX_HOME}}/secrets/google_workspace_mcp_oauth_client_secret` |
 | `{{GOOGLE_WORKSPACE_MCP_CREDENTIALS_DIR}}` | Google Workspace MCP OAuth token 本機目錄 | `{{CODEX_HOME}}/secrets/google_workspace_mcp_credentials` |
@@ -130,10 +133,11 @@
 43. [[43-Visual-Prompt-Kit-Skill-安裝]]
 44. [[44-Personal-Style-Loop-Skill-安裝]]
 45. [[45-Agent-Dev-Coach-Skill-安裝]]
+46. [[46-Cloudflare-D1-OAuth-安裝]]
 
 ## 全域 Skills 安裝總表
 
-公開可散布的全域 skill 完整內容已內嵌在對應的有序號懶人包文件中，不再另外提供獨立的 `skills/` 子目錄。安裝時請打開對應編號文件，使用文末「內建 Skill 完整安裝內容」。Item 39 是明確例外：它是 Arry 私人來源橋接型安裝群組，只內建公開安全的 installer／verifier，不內嵌私人身份、記憶或購課內容。Item 40 則是公開的上游改寫套件，完整內嵌 22 個穩定 skills 與版本追蹤工具。
+公開可散布的全域 skill 完整內容已內嵌在對應的有序號懶人包文件中，不再另外提供獨立的 `skills/` 子目錄。安裝時請打開對應編號文件，使用文末「內建 Skill 完整安裝內容」。Item 39 是明確例外：它是 Arry 私人來源橋接型安裝群組，只內建公開安全的 installer／verifier，不內嵌私人身份、記憶或購課內容。Item 40 則是公開的上游改寫套件，完整內嵌 22 個穩定 skills 與版本追蹤工具。Item 46 不是 skill，而是會修改本機與外部 OAuth 狀態的互動式安裝 runbook，不能當成無人值守腳本執行。
 
 ```text
 01：三 Agent 共用 `pdf`、`playwright` skills，並對 Codex／Claude／AntiGravity 各自的 plugins、connectors、MCP 與原生 browser 能力做 adapter 檢查
@@ -177,6 +181,7 @@
 43：visual-prompt-kit；完整內嵌文章轉視覺設計提案的 skill，含封面、輪播、Concept Card、Landing Page 圖卡與第四週 HTML 版位；一般版位只出 brief，生圖交 image-generator。第四週直接繼承第三週已確認的文案、圖片配置、正式圖像與 visual DNA，不重複詢問上游內容或風格；Part 僅作內部防漏，會自動完成全部 Part、合併、圖片置換與驗收，只交付完整單一 CMS HTML，成品完成後才詢問一次發布目標。**風格庫為外部依賴、不內嵌**，缺庫時走內建風格的無庫模式
 44：personal-style-loop；完整內嵌個人寫作風格訓練迴圈，含校準題／保留題的 Style Harness、收斂式回饋協議、風格素材庫 schema（`use_for`／`do_not_use_for` 與去識別化規則）與 Codex UI adapter；只學使用者自己的聲音，不模仿特定創作者。**使用者作品為外部依賴、不內嵌**，素材放各專案本地 `200_Reference/writing-samples/`，不足 2 篇時 skill 會停下來要求補齊
 45：agent-dev-coach；完整內嵌 agent 開發五關教練，含六份關卡 reference（拷問／規格／切票／TDD／雙軸審查／PRD 打包）、`spec.schema.json`、HTML 樣板、renderer 與 validator（模糊詞與 schema 雙重把關）與 Codex UI adapter；腳本已改為自我定位，可從學員專案任意工作目錄以絕對路徑呼叫。與 Item 40 的邊界：Item 40 是使用者自己做事的工具箱，本 Item 是帶人的單一連續流程，多了教練話術、HC 標籤、`.agent-flow/` 狀態機與每關必須明確同意才前進的閘門
+46：Cloudflare + D1 OAuth 讀寫安裝；不是 skill，整合 Wrangler CLI、Cloudflare API MCP、Codex／Claude／AntiGravity adapters、六項 MCP 權限、OAuth 逾時防重複、新對話 GET-only 驗收與撤銷流程。為複製實測效果而授予 D1 Write，但安裝驗收不使用寫入能力
 ```
 
 Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人身份與記憶路由，`voice-coach`、`waki-brain`、`productivity-coach` 含私人課程或購課內容。它們只存在私人 `{{SYNC_ROOT}}/skills` 與 Obsidian 全域索引；Item 39 只提供安裝／驗證橋接，不提供可重建 corpus。這是隱私與內容權利邊界，不是 Agent 相容性限制。
@@ -189,7 +194,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 跨 Agent 全域 skills | `{{SYNC_ROOT}}/skills` | 三個 Agent 共用的 skill package 主版本 |
 | Chezmoi bootstrap | `{{CHEZMOI_SOURCE}}` | 維護三個 Agent 的原生規則／skills 入口 templates；不保存 secrets |
 | Agent 原生入口 | `{{CODEX_HOME}}/*`、`{{CLAUDE_HOME}}/*`、`{{GEMINI_HOME}}/*` | symlink 到共享主版本，不複製內容 |
-| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/01...42.md` | Items 01～38、40～42 依各文件標示內嵌公開可散布內容；Item 39 只含私人來源橋接 installer／verifier |
+| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/<序號>-主題.md` | Items 01～46 依各文件標示內嵌公開可散布內容或提供可重跑 runbook；Item 39 只含私人來源橋接 installer／verifier |
 | 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每台電腦本機重建的 Python 工具 venv 與 wrapper；供 Codex／Claude／AntiGravity 和所有專案共用，Google Workspace MCP 也使用這個 runtime，不放模型或技能專屬 runtime |
 | 三 Agent Python 中立入口 | `{{HOME}}/.local/share/agent-tools/python-tools` | Item 16 的 chezmoi symlink，指向該機器的 Python tools runtime；三個 Agent 都從它的 `bin` 呼叫相同 wrapper |
 | 三 Agent Python env loader | `{{HOME}}/.config/agent-tools/python-tools.env` | Item 16 建立；透過不覆蓋既有內容的 `.zshenv`／`.zprofile`／`.profile`／`.bash_profile` 標記區塊載入 PATH |
@@ -251,7 +256,8 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 36 | Coach Skill | [[39-Coach-Skill-安裝]] | Arry 私人來源橋接；先同步私人 `{{SYNC_ROOT}}`，再一次驗證並啟用 `future-coach`、`voice-coach`、`waki-brain`、`productivity-coach`，不從 public repo 下載私人 corpus |
 | 37 | Engineering Methods Skill Suite | [[40-Engineering-Methods-Skill-Suite-安裝]] | 可直接安裝；22 個穩定工程／生產力 skills、跨 Agent adapters、完整上游 manifest 與只讀更新檢查；`grill-me` 是套件成員，`engineering-methods` 是統一路由 |
 | 38 | `clasp-setup` | [[41-Clasp-Apps-Script-Skill-安裝]] | 可直接安裝；clasp v3 CLI-first，支援 Apps Script 既有／新專案、原始碼同步、push 閘門、deployment 與 API 返回 Web App URL；MCP 僅為明確要求才評估的實驗路線 |
-| 39 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 39 | Cloudflare + D1 OAuth | [[46-Cloudflare-D1-OAuth-安裝]] | 互動式安裝 runbook；Wrangler 與 Cloudflare API MCP 取得 D1 讀寫權限，但驗收只列出 D1、只使用 GET；內含帳號衝突、keychain、六項選權、OAuth 逾時重試與三 Agent adapter |
+| 40 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
@@ -261,6 +267,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 - 需要 GitHub 時，安裝 GitHub CLI `gh` 並登入。
 - 需要 Firebase 時，準備 Firebase / Google 帳號與一個 Firebase project。
 - 需要 Firecrawl 時，準備 Firecrawl API key。
+- 需要 Cloudflare + D1 時，準備本人可登入的 Cloudflare 帳號；D1 不需另外註冊，詳見 [[46-Cloudflare-D1-OAuth-安裝]]。
 - 需要 Claude 使用 Google Drive／Gmail／Calendar 時，Item 02 的 Google Workspace MCP 是必要安裝；要先準備 `uv`、Python 3.12、Google Cloud OAuth Desktop client，並只啟用三個對應 API。
 - Codex 已有 Google Drive／Gmail／Calendar 官方 plugins 時優先原生 plugin，不重複註冊 Item 02 的同義 MCP；AntiGravity 使用自己的原生 MCP adapter 連同一個 loopback endpoint。
 
@@ -269,6 +276,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 - 不把 `.env`、API key、token、密碼、Admin 憑證、個資或敏感資料寫入 repo 或 Obsidian 筆記。
 - 需要 API key 的 MCP 只能記錄遮蔽範例，例如 `fc-***`。
 - Google Workspace OAuth client secret 與 OAuth token 只放在 `{{CODEX_HOME}}/secrets`；公開 LazyPack 只包含 installer 與 placeholder，不包含任何人的 OAuth client 或帳號授權。
+- Cloudflare OAuth 由 Wrangler 的 OS keychain 與各 Agent 客戶端自行管理；不複製、不讀取、不同步憑證檔或 keychain 內容。
 - 專案固定規則寫在專案根目錄 `AGENTS.md`。
 - 可攜式全域核心規則寫在 `{{GLOBAL_RULES}}`；三個 Agent 的原生規則入口由 chezmoi 指向同一份主檔。
 - 不要另外維護 `{{SYNC_ROOT}}/agents/AGENTS.md`，也不要在 Agent home 複製內容。
@@ -299,6 +307,7 @@ rg -n "<舊使用者名稱>|<舊 GitHub 帳號>|<舊 Firebase project id>|<舊�
 - 個人助手設定以 `09-個人助手設定` 為準；舊 Agent Folder 文檔只作為轉換來源，不直接照做。
 - Skill Creator 啟動包以 [[11-Codex-Skill-Creator-工作流]] 為準；外部／第三方 skill 教學只作為轉換來源，不直接照做。此項也支援把成功對話、prompt 或重複工作流萃取成三 Agent 共用 skill。
 - 外部工具整合以 [[12-外部工具整合工作流]] 為準。
+- Cloudflare + D1 OAuth 讀寫安裝與 GET-only 驗收以 [[46-Cloudflare-D1-OAuth-安裝]] 為準。
 - Brainstorm 規劃模式以 [[13-Brainstorm-規劃模式]] 為準；`brainstorm` 是唯一入口，Quick 與 RDQ 為內建模式。
 - Social Cards Skill 以 [[14-Social-Cards-Skill-安裝]] 為準。
 - Landing Page skill 以 [[15-Landing-Page-Skill-安裝]] 為準。
