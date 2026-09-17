@@ -1,5 +1,7 @@
 # 02-Codex-MCP-Essentials
 
+> 2026-09-17 更新：Google Workspace MCP 改為三 Agent 共用；安裝腳本支援 `--agent all|claude|codex|antigravity`，Codex 會停用同義的 Gmail／Google Calendar／Google Drive plugins，AntiGravity 以 `serverUrl` 寫入 `mcp_config.json`；本機權限範圍新增 `docs:full sheets:full slides:full`（擴權後需重新完成 OAuth 同意，並在 Google Cloud 啟用 Docs、Sheets、Slides API）。
+>
 > 2026-07-30 更新：新增 Claude-first 的 Google Workspace MCP 必要項，固定使用 `workspace-mcp==1.22.2`、本機 loopback HTTP 與共用 Python runtime；完整 installer、runner 與 macOS LaunchAgent template 放在 `02-assets/google-workspace-mcp/`。MCP 仍採「共用服務契約＋Codex／Claude／AntiGravity 原生 adapter」。
 >
 > 2026-08-02 更新：Google Workspace MCP 由使用者明確要求改為可實際操作，權限提升為 Drive／Gmail／Calendar `full` 加 `--tool-tier complete`，取代原本的 core read-only 預設。擴權後仍維持 loopback-only 綁定與 secrets 隔離，且寫入類動作（寄信、刪檔、修改行事曆）在各 Agent 執行前仍需逐次向使用者確認。
@@ -124,19 +126,21 @@ tool_timeout_sec = 120
 
 安裝方式請使用本文文末「內建 Skill 完整安裝內容」；本項會同步安裝 `SKILL.md` 與 `references/`。
 
-## Google Workspace MCP（Claude-first 必要項）
+## Google Workspace MCP（三 Agent 共用必要項）
 
-用途：在 Claude Code 沒有 Codex Google plugins 的環境中，提供同一個 Drive／Gmail／Calendar 工作面。來源是 [taylorwilsdon/google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)，Python package 固定為 `workspace-mcp==1.22.2`；更新版本前要先重跑權限與工具清單驗證。
+用途：讓 Codex、Claude、AntiGravity 透過同一個本機 MCP 使用 Drive／Gmail／Calendar，權限邊界、OAuth 授權與工具行為集中在一處。來源是 [taylorwilsdon/google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)，Python package 固定為 `workspace-mcp==1.22.2`；更新版本前要先重跑權限與工具清單驗證。
 
 新安裝的建議起點是最小權限；本機目前這台則是使用者明確要求後的可操作設定：
 
-- 只啟用 `calendar`、`drive`、`gmail`。
+- 新環境預設只啟用 `calendar`、`drive`、`gmail`；需要 Docs、Sheets、Slides 時再明確擴權。
 - 新環境建議起點：`--tool-tier core` 加三服務 `readonly`。
+- 本機目前設定（2026-09-17，使用者要求擴權）：再加上 `docs:full sheets:full slides:full`，共六個服務。擴權步驟：改 runner 的 `--permissions`、重啟 LaunchAgent、在 Google Cloud 啟用 Google Docs API、Google Sheets API、Google Slides API，再依工具回傳的授權連結重新完成 OAuth 同意。
 - 本機目前設定（2026-08-02，使用者要求）：`--tool-tier complete` 加 `calendar:full drive:full gmail:full`，可建立與修改 Drive 檔案、行事曆事件，並具備 Gmail 寄信 scope。
 - 擴權不改變其他邊界：HTTP server 只綁定 `127.0.0.1:8000`，不對區網或網際網路開放。
 - 擴權後由 Agent 行為層把關：寄信、刪除、覆蓋與其他不可逆動作，執行前一律逐次向使用者確認，不因為 scope 已開就自動執行。
 - OAuth client secret 與 token 只放在 `{{CODEX_HOME}}/secrets`，不寫進 repo、LazyPack、Obsidian 或 Agent 設定。
-- Codex 已有 Google Drive、Gmail、Calendar 官方 plugins 時繼續使用原生 plugins；避免在同一個 Agent 重複暴露兩套同義工具。Claude 預設連這個 MCP；AntiGravity 依其目前原生 MCP 入口加上同一 endpoint。
+- 三個 Agent 都連這個 MCP。Codex 若已啟用 Gmail、Google Calendar、Google Drive 官方 plugins，改為停用（`enabled = false`），避免同一個 Agent 同時出現兩套同義工具；AntiGravity 用 `mcp_config.json` 的 `serverUrl` 連同一個 endpoint。
+- OAuth 授權存在本機 MCP 服務，三個 Agent 共用同一份；授權失效時任一 Agent 呼叫工具都會拿到授權連結，由本人在瀏覽器完成同意後三邊一起恢復。
 
 ### 1. Google Cloud 最小設定
 
@@ -221,14 +225,22 @@ claude mcp add --transport http --scope user google-workspace http://127.0.0.1:8
 claude mcp list
 ```
 
-Codex adapter（只有在沒有或停用對應 Google plugins 時才加）：
+Codex adapter：
 
 ```bash
 codex mcp add google-workspace --url http://127.0.0.1:8000/mcp
 codex mcp list
 ```
 
-AntiGravity adapter：在目前版本的 MCP Store 或 `{{GEMINI_CONFIG}}/mcp_config.json` 加入相同 HTTP endpoint，再重載。若使用 Gemini CLI：
+接著在 `{{CODEX_CONFIG}}` 把已啟用的 `[plugins."gmail@openai-curated"]`、`[plugins."google-calendar@openai-curated"]`、`[plugins."google-drive@openai-curated"]` 改成 `enabled = false`（改前先備份），重開 Codex。
+
+AntiGravity adapter：在 `{{GEMINI_CONFIG}}/mcp_config.json` 的 `mcpServers` 加入下列項目，再重載 AntiGravity。遠端 MCP 的欄位是 `serverUrl`（AntiGravity 內建文件的寫法），不是 Claude 的 `url`／`type`：
+
+```json
+"google-workspace": { "serverUrl": "http://127.0.0.1:8000/mcp" }
+```
+
+`gemini mcp add` 寫的是 Gemini CLI 自己的設定，不是 AntiGravity IDE 讀的 `mcp_config.json`；只有也使用 Gemini CLI 時才另外執行：
 
 ```bash
 gemini mcp add --scope user --transport http google-workspace http://127.0.0.1:8000/mcp
@@ -291,7 +303,7 @@ claude mcp remove --scope user google-workspace
 4. Firecrawl：抓取 `https://example.com`。
 5. Filesystem：列出 `{{FILESYSTEM_ALLOWED_DIR}}` 內的一個測試資料夾。
 6. Browser plugin：開啟 `https://example.com` 並截圖。
-7. Google Workspace MCP：確認 endpoint handshake、三服務工具清單與目前 `--permissions` 設定相符，並各做一個低敏感 read-only 查詢；有原生 Google plugins 的 Codex 不重複安裝 adapter。
+7. Google Workspace MCP：確認 endpoint handshake、工具清單與目前 `--permissions` 設定的服務相符，並各做一個低敏感 read-only 查詢；Codex 的 Google plugins 保持停用，不與 MCP 並存 adapter。
 
 若任何一項失敗，先檢查 command 絕對路徑、API key、登入狀態與當前 Agent 是否已重載，再測試共用 CLI／API fallback。
 

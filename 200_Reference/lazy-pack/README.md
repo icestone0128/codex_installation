@@ -12,6 +12,8 @@
 
 2026-07-30 更新：新增 [[40-Engineering-Methods-Skill-Suite-安裝]]，把 `mattpocock/skills` 的 22 個穩定 engineering／productivity 方法改寫成 Codex、Claude、AntiGravity 共用套件；內建 `engineering-methods` 路由、`grill-me`、規格／ticket／TDD／review／debug／handoff 等 skills，以及只讀上游版本檢查與完整 41 項 manifest。19 個 deprecated、in-progress、misc、personal 項目只追蹤、不安裝。
 
+2026-09-17 更新：Item 02 的 Google Workspace MCP 改為 Codex、Claude、AntiGravity 三 Agent 共用，安裝腳本新增 `--agent all|claude|codex|antigravity`，Codex 同義 Google plugins 改為停用，權限範圍加入 Docs、Sheets、Slides；Item 16 開工／收工 checkpoint 新增三 Agent MCP 一致性與 `AGENTS.override.md` 檢查。
+
 2026-07-30 更新：Item 02 新增 Claude-first Google Workspace MCP 必要項。公開 LazyPack 內建 pinned `workspace-mcp` installer、loopback runner 與 macOS LaunchAgent template，預設只開 Drive／Gmail／Calendar core read-only；Codex 有官方 Google plugins 時不重複註冊同義 MCP，Claude 與 AntiGravity 使用各自原生 adapter。
 
 2026-08-26 更新：新增 [[45-Agent-Dev-Coach-Skill-安裝]]，把「我想做一個 agent」帶成能跑的程式型 agent。五關各有出口交付物：需求拷問（一次一題、附建議答案）→ 規格書（成功標準可驗證、禁模糊詞）→ 切票（tracer bullet 垂直切片、標 `Blocked by`）→ TDD 實作（在工具與 prompt-vs-code 的縫上先寫失敗測試）→ 雙軸審查（Standards 與 Spec 分開審、不跨軸重排序），另附隨時可用的 PRD 打包。內嵌 `SKILL.md`、六份關卡 reference、spec schema、HTML 樣板、renderer／validator 與 Codex UI adapter。**相對上游來源修正了腳本路徑**：原版用相對路徑呼叫 `scripts/`，在學員專案內必定解析失敗；本 Item 改為腳本自我定位＋`SKILL.md` 先解析 skill root，三個 Agent 共用同一段解析法。
@@ -82,7 +84,7 @@
 照這個順序做，下載者可以從空白環境建立 Codex、Claude、AntiGravity 共用專案架構。即使當下尚未安裝其中某個 Agent，Item 16 仍會預先建好入口：
 
 1. [[01-Codex-必裝-Skills-與-Plugins]]
-2. [[02-Codex-MCP-Essentials]]（含 Claude-first Google Workspace MCP 必要項）
+2. [[02-Codex-MCP-Essentials]]（含三 Agent 共用 Google Workspace MCP 必要項）
 3. [[03-連接-GitHub]]
 4. [[04-建立第二大腦-Obsidian]]
 5. [[05-第二大腦設定指南]]
@@ -269,7 +271,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 - 需要 Firecrawl 時，準備 Firecrawl API key。
 - 需要 Cloudflare + D1 時，準備本人可登入的 Cloudflare 帳號；D1 不需另外註冊，詳見 [[46-Cloudflare-D1-OAuth-安裝]]。
 - 需要 Claude 使用 Google Drive／Gmail／Calendar 時，Item 02 的 Google Workspace MCP 是必要安裝；要先準備 `uv`、Python 3.12、Google Cloud OAuth Desktop client，並只啟用三個對應 API。
-- Codex 已有 Google Drive／Gmail／Calendar 官方 plugins 時優先原生 plugin，不重複註冊 Item 02 的同義 MCP；AntiGravity 使用自己的原生 MCP adapter 連同一個 loopback endpoint。
+- Codex、Claude、AntiGravity 的 Google Drive／Gmail／Calendar 一律走 Item 02 的同一個本機 MCP；Codex 已啟用的 Google 官方 plugins 改為停用，避免同義工具並存；AntiGravity 以 `serverUrl` 連同一個 loopback endpoint。
 
 ## 共同安全規則
 

@@ -101,28 +101,16 @@ find "{{SYNC_ROOT}}/skills" -maxdepth 2 -name SKILL.md -print
 
 下載者可照 `11-Codex-Skill-Creator-工作流.md` 建立自己的版本，不需要沿用 `Arry` 命名。
 
-## Gmail 驗證流程
+## Gmail／Google Calendar／Google Drive 驗證流程
 
-1. 啟用 Gmail plugin / connector。
-2. 連接自己的 Google 帳號。
-3. 請當前 Agent 查詢 Gmail labels 或 mailbox profile。
-4. 若顯示已連接但查不到資料，重新確認授權。
+這三個 Google 服務不再使用 Codex 官方 plugins，改由 [[02-Codex-MCP-Essentials]] 的本機 Google Workspace MCP 提供，Codex、Claude、AntiGravity 共用同一個 endpoint 與 OAuth 授權。若 Codex 已啟用 Gmail、Google Calendar、Google Drive plugins，照 Item 02 改為停用。
+
+1. 依 Item 02 安裝並連上 Google Workspace MCP。
+2. 第一次呼叫工具時，用回傳的授權連結在瀏覽器以自己的 Google 帳號完成同意。
+3. 請當前 Agent 各做一次唯讀查詢：Gmail labels、今天或明天行程（確認時區）、列出最近 Drive 檔案。
+4. 若要編輯文件或寄信，先指定明確目標，並逐次確認。
 
 不要把實測帳號寫進文件；使用 `{{GOOGLE_ACCOUNT}}` 或自己的帳號。
-
-## Google Calendar 驗證流程
-
-1. 啟用 Google Calendar plugin。
-2. 連接自己的 Google 帳號。
-3. 請當前 Agent 查詢今天或明天行程。
-4. 確認時區正確。
-
-## Google Drive 驗證流程
-
-1. 啟用 Google Drive plugin。
-2. 連接自己的 Google 帳號。
-3. 請當前 Agent 搜尋一個測試文件或列出最近檔案。
-4. 若要編輯文件，先指定明確檔案，避免誤改。
 
 ## Notion 驗證流程
 

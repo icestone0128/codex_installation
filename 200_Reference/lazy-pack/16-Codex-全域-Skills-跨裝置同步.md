@@ -757,6 +757,7 @@ Policy:
 - Both phases run the bootstrap dry-run and `chezmoi status`.
 - Startup may run `chezmoi update` automatically only when the source has at least one commit, a configured remote, and a clean working tree. The script backs up all managed Agent entrypoints first. Otherwise update is a safe no-op and reports the reason once.
 - Shutdown does not pull or apply remote changes.
+- Both phases end with `scripts/audit-agent-parity.py` (read-only). It checks the MCPs listed in `assets/agent-mcp-parity.json` `required_everywhere` exist in Claude (`~/.claude.json`, `~/.claude/settings.json`), Codex (`config.toml` `mcp_servers`) and AntiGravity (`~/.gemini/config/mcp_config.json`); that Codex plugins listed under `duplicate_codex_plugins` are disabled; and that no `AGENTS.override.md` sits in `CODEX_HOME` or between the project root and its git root. It prints server names only, never URLs, args or env. Add a new shared MCP to `required_everywhere` only after all three adapters are configured.
 - Do not run `chezmoi add` on existing managed rule, skill, Python bridge, environment-loader, or profile-modifier entries. An isolated test confirmed that adding an existing managed symlink can remove its template attribute; in a headless Agent it may also attempt `/dev/tty`. That would replace portable template state with a machine-specific path.
 - `chezmoi add` is only for a genuinely new approved entrypoint. Extend the bootstrap whitelist and create its portable template first, back up the destination, then inspect the source diff and rerun the checkpoint. Changes inside `{{SYNC_ROOT}}` or the local Python runtime do not need `chezmoi add` because their own installers/sync channels own that content.
 - Project session state is separate from machine bootstrap: `startup-sync` always reads project-root `HANDOFF.md`; `shutdown-sync` always creates or refreshes it.
@@ -1023,6 +1024,19 @@ cat > "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardrails.json" <<'A
   }
 }
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_ASSETS_AGENT_GUARDRAILS_JSON_3CA8879092
+
+# cross-device-sync/assets/agent-mcp-parity.json
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-mcp-parity.json")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-mcp-parity.json" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_ASSETS_AGENT_MCP_PARITY_JSON_EB7A5D714B'
+{
+  "_comment": "三 Agent MCP 一致性檢查的可攜主版本。required_everywhere 列出 Codex、Claude、AntiGravity 都必須有的 MCP；其他 MCP 各 Agent 可以不同，只列出差異不算失敗。duplicate_codex_plugins 列出與某個 required MCP 同義、必須在 Codex 停用的 plugins。",
+  "_updated": "2026-09-17",
+  "required_everywhere": ["google-workspace"],
+  "duplicate_codex_plugins": {
+    "google-workspace": ["gmail@openai-curated", "google-calendar@openai-curated", "google-drive@openai-curated"]
+  }
+}
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_ASSETS_AGENT_MCP_PARITY_JSON_EB7A5D714B
 
 # cross-device-sync/references/agent-execution-compatibility.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/references/agent-execution-compatibility.md")"
@@ -2476,6 +2490,144 @@ if __name__ == "__main__":
     raise SystemExit(main())
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_AUDIT_AGENT_COMPATIBILITY_PY_5BE365A65B
 chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-compatibility.py"
+
+# cross-device-sync/scripts/audit-agent-parity.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-parity.py")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-parity.py" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_AUDIT_AGENT_PARITY_PY_0568BF2048'
+#!/usr/bin/env python3
+"""Read-only parity audit for Codex, Claude and AntiGravity.
+
+Reports:
+  MCP_PARITY   required MCPs missing per agent, plus agent-only MCPs (informational)
+  CODEX_DUP    Codex plugins still enabled next to a required MCP that replaces them
+  OVERRIDE     AGENTS.override.md files that silently replace Codex rules
+
+Master list: <SYNC_ROOT>/skills/cross-device-sync/assets/agent-mcp-parity.json
+Never writes anything. Output contains server names only, never URLs, args or env.
+Exit code is 0 unless --strict is given and a required item fails.
+"""
+from __future__ import annotations
+import argparse, json, os, sys
+from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python < 3.11
+    tomllib = None
+
+HOME = Path.home()
+
+
+def load_json(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def claude_servers() -> set[str] | None:
+    files = [HOME / ".claude.json", HOME / ".claude" / "settings.json"]
+    if not any(f.is_file() for f in files):
+        return None
+    names: set[str] = set()
+    for f in files:
+        names |= set(load_json(f).get("mcpServers", {}) or {})
+    return names
+
+
+def codex_config() -> dict | None:
+    path = Path(os.environ.get("CODEX_HOME", HOME / ".codex")) / "config.toml"
+    if not path.is_file() or tomllib is None:
+        return None
+    try:
+        return tomllib.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def codex_servers(cfg: dict | None) -> set[str] | None:
+    if cfg is None:
+        return None
+    return {n for n, v in (cfg.get("mcp_servers") or {}).items() if (v or {}).get("enabled", True)}
+
+
+def antigravity_servers() -> set[str] | None:
+    path = HOME / ".gemini" / "config" / "mcp_config.json"
+    if not path.is_file():
+        return None
+    return set(load_json(path).get("mcpServers", {}) or {})
+
+
+def override_files(project_root: Path | None) -> list[str]:
+    found = []
+    codex_home = Path(os.environ.get("CODEX_HOME", HOME / ".codex"))
+    if (codex_home / "AGENTS.override.md").is_file():
+        found.append("CODEX_HOME/AGENTS.override.md")
+    if project_root:
+        here = project_root.resolve()
+        for d in [here, *here.parents]:
+            if (d / "AGENTS.override.md").is_file():
+                found.append(f"{d.name}/AGENTS.override.md")
+            if (d / ".git").exists() or d == HOME:
+                break
+    return found
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--sync-root", required=True)
+    ap.add_argument("--project-root", default=os.getcwd())
+    ap.add_argument("--strict", action="store_true")
+    args = ap.parse_args()
+
+    master_path = Path(args.sync_root) / "skills" / "cross-device-sync" / "assets" / "agent-mcp-parity.json"
+    master = load_json(master_path)
+    if not master:
+        print("MCP_PARITY=master-missing")
+        return 1 if args.strict else 0
+    required = master.get("required_everywhere", [])
+
+    cfg = codex_config()
+    agents = {"claude": claude_servers(), "codex": codex_servers(cfg), "antigravity": antigravity_servers()}
+    failed = False
+
+    missing = []
+    for agent, names in agents.items():
+        if names is None:
+            missing.append(f"{agent}:config-unreadable")
+            continue
+        missing += [f"{agent}:{r}" for r in required if r not in names]
+    failed |= bool(missing)
+
+    readable = {a: n for a, n in agents.items() if n is not None}
+    only = []
+    for agent, names in readable.items():
+        others = set().union(*(n for a, n in readable.items() if a != agent)) if len(readable) > 1 else set()
+        extra = sorted(names - others)
+        if extra:
+            only.append(f"{agent}={','.join(extra)}")
+    print(f"MCP_PARITY required_missing={','.join(missing) or 'none'} agent_only={' '.join(only) or 'none'}")
+
+    dup = []
+    plugins = (cfg or {}).get("plugins", {}) or {}
+    for mcp, plugin_ids in (master.get("duplicate_codex_plugins") or {}).items():
+        for pid in plugin_ids:
+            if (plugins.get(pid) or {}).get("enabled") is True:
+                dup.append(pid)
+    failed |= bool(dup)
+    print(f"CODEX_DUP enabled_duplicates={','.join(dup) or 'none'}")
+
+    overrides = override_files(Path(args.project_root) if args.project_root else None)
+    failed |= bool(overrides)
+    print(f"OVERRIDE agents_override={','.join(overrides) or 'none'}")
+
+    return 1 if (args.strict and failed) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_AUDIT_AGENT_PARITY_PY_0568BF2048
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/audit-agent-parity.py"
 
 # cross-device-sync/scripts/bootstrap-agent-sync.sh
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/bootstrap-agent-sync.sh")"
@@ -4203,6 +4355,15 @@ run_unarchived_scan() {
   fi
 }
 
+run_agent_parity() {
+  parity_script="$sync_root/skills/cross-device-sync/scripts/audit-agent-parity.py"
+  if [ -f "$parity_script" ]; then
+    python3 "$parity_script" --sync-root "$sync_root" --project-root "$PWD" 2>&1 || true
+  else
+    printf 'MCP_PARITY=script-missing\n'
+  fi
+}
+
 printf 'Session sync checkpoint\n'
 printf 'PHASE=%s\n' "$phase"
 printf 'SYNC_ROOT=<configured>\n'
@@ -4231,6 +4392,7 @@ if [ -f "$guardrails_script" ]; then
 else
   printf 'GUARDRAILS=script-missing\n'
 fi
+run_agent_parity
   run_prune_sweep
   run_unarchived_scan
   exit 0
@@ -4246,6 +4408,7 @@ if [ -f "$guardrails_script" ]; then
 else
   printf 'GUARDRAILS=script-missing\n'
 fi
+run_agent_parity
   exit 0
 }
 
@@ -4321,6 +4484,7 @@ if [ -f "$guardrails_script" ]; then
 else
   printf 'GUARDRAILS=script-missing\n'
 fi
+run_agent_parity
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SESSION_SYNC_CHECKPOINT_SH_29BFBFC51C
 chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh"
 
