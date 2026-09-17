@@ -2117,7 +2117,7 @@ social-cards/
 ### 方式 1：直接複製資料夾（推薦）
 
 ```bash
-# 如果你跑過 å¤é¨ææ 01「AI 分身起始助手」
+# 如果你已經有個人 Agent 資料夾（含 000_Agent/）
 cp -r social-cards/ 000_Agent/skills/cards/
 
 # 或者用 來源工具 預設位置
@@ -2200,6 +2200,8 @@ AI 會帶你走完整個流程：選配色 → 選尺寸 → 確認帳號 → �
 - **License**：CC BY-NC-SA 4.0 · 個人使用、學習、分享自由；禁止商業用途
 - 出自 雷蒙三十 Starter Kit — cc.lifehacker.tw | CC BY-NC-SA 4.0
 - [迷你課](https://lifehacker.tw/courses/source-tool-tutorial) · [週報](https://raymondhouch.com/subscribe) · [Threads @raymond0917](https://www.threads.com/@raymond0917)
+
+> 本機修改紀錄：2026-09-17 將安裝範例中的一行註解改為通用說法，其餘內容與取得時的快照相同。
 AGENT_LAZYPACK_SOCIAL_CARDS_REFERENCES_UPSTREAM_README_MD_7C2DACA41D
 
 # social-cards/scripts/screenshot.mjs

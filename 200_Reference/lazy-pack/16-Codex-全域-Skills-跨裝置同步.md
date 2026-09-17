@@ -2079,8 +2079,8 @@ The current version keeps the useful operating model but exposes durable assets 
 | Source app rule file is the rule file | `AGENTS.md` is the project rule file; cross-tool global rules belong in `{{SYNC_ROOT}}/core-rules.md` |
 | Source app command shortcuts are user-facing entry points | Shared metadata and user intent define triggers; native invocation is an adapter |
 | Source app delegation format is part of the workflow | Shared task boundaries remain stable; each Agent uses its supported delegation or validation mechanism |
-| `000_Agent/` is created by the source guide | This user's global Arry Assistant data lives under `codex_symlink/`; project-local data may use each project's `000_Agent/` |
-| Source examples refer to Raymond/Raymond-Agent | Use Arry Assistant and the user's configured `{{SYNC_ROOT}}` / `{{OBSIDIAN_VAULT}}` placeholders |
+| The source guide creates a single `000_Agent/` data folder | This user's global Arry Assistant data lives under `codex_symlink/`; project-local data may use each project's `000_Agent/` |
+| Source examples use the original author's own agent name | Use Arry Assistant and the user's configured `{{SYNC_ROOT}}` / `{{OBSIDIAN_VAULT}}` placeholders |
 | One app folder is the shared source | Keep `{{SYNC_ROOT}}` as the shared content source and use per-agent entrypoint adapters managed by chezmoi |
 
 ## Shared Safety And Adapter Changes

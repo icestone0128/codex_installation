@@ -2,7 +2,7 @@
 created: 2026-05-20
 last_reviewed: 2026-08-02
 status: in-progress
-source: å¤é¨ææ 03 "外部工具整合包 by 雷小蒙"
+source: 外部工具整合教材（出處記錄於私有上游來源登錄表）
 adapted_for: Codex + Claude + AntiGravity
 ---
 
