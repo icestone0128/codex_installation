@@ -692,6 +692,7 @@ guardrails, not style preferences.
   - medium freedom for preferred patterns with controlled variation
   - low freedom for fragile, repetitive, or safety-critical operations that need deterministic scripts
 - Use progressive disclosure: metadata is always visible, `SKILL.md` is loaded on trigger, and detailed references are loaded only when needed.
+- **Keep `description` at 90 characters or fewer, triggers first.** Claude's envelope allows 1024, but Codex squeezes every description to fit a shared budget and cuts each one around 92 characters, so a longer description loses its tail and the trigger words with it. Write the triggering situation first — `Use when …` / 「觸發：…」 / 「要…時使用」 — and move capability lists, provider names, fallback chains, exclusions, paths, versions and workflow detail into the `SKILL.md` body, which the agent reads once the skill loads. Nothing is lost by moving it; a truncated description loses it for real. Chinese carries more meaning per character, so trigger-dense skills are usually written in Chinese. Measure with `len(" ".join(description.split()))`, and verify against the `Available skills` block of `codex debug prompt-input`.
 - Keep `SKILL.md` under 500 lines when practical. Move schemas, long examples, provider variants, and deep checklists into directly linked `references/` files; avoid reference chains deeper than one level.
 - Give `SKILL.md` a body the user can audit. Unless the skill's shape genuinely demands otherwise, cover: when to use it, when **not** to use it, required inputs, judgement and workflow, output format, stopping conditions, and acceptance criteria. The three most often skipped, and most often missed later, are **when not to use it**, **stopping conditions**, and **acceptance criteria**.
 - Version a new skill at `0.1.0` and record `last-updated`, both **inside `metadata:`**. The built-in validator only accepts `name`, `description`, `license`, `allowed-tools`, and `metadata` at the top level, so a top-level `version`, `last-updated`, or `user-invocable` fails validation. Treat the first release as provisional: on each real-world failure, fix the single largest gap and re-test it, rather than bolting on a new framework.
@@ -812,7 +813,7 @@ this check for content.
    - `SKILL.md` exists
    - frontmatter starts and ends with `---`
    - `name` matches the folder name
-   - `description` clearly names the triggering tasks
+   - `description` clearly names the triggering tasks and stays at 90 characters or fewer
    - referenced files actually exist
    - no source-only path or field controls shared behavior unless it is isolated and labeled as a native adapter
    - personal paths are either replaced with portable placeholders or clearly labeled as this user's local defaults
@@ -877,7 +878,7 @@ After the first skill is built:
 - Portable package exists in the correct place: `{{SETUP_REPO}}/200_Reference/lazy-pack/<對應序號文件>` for global, project `000_Agent/skills/<skill-name>` for project-local.
 - `SKILL.md` frontmatter includes `name` and `description`.
 - Shared frontmatter passes the portable envelope: valid non-reserved folder-matching `name`; non-empty third-person `description` of at most 1024 characters that states what the skill does and when to use it; no XML markup.
-- `description` includes concrete trigger phrases and use cases.
+- `description` includes concrete trigger phrases and use cases, is 90 characters or fewer, and leads with the trigger rather than the capability list.
 - Detailed material is in `references/`, not bloating `SKILL.md`.
 - The chosen instruction freedom matches task fragility; deterministic operations use scripts when appropriate.
 - New skills were initialized with the built-in helper when available, or the fallback was reported.
@@ -1581,6 +1582,7 @@ USAGE_CONDITION_PATTERN = re.compile(
     re.IGNORECASE,
 )
 VERSION_PATTERN = re.compile(r"^[0-9]+(?:\.[0-9]+){0,2}(?:[-.][0-9A-Za-z.-]+)?$")
+DESCRIPTION_BUDGET = 90
 EXCLUDED_DIRS = {
     ".git",
     ".mypy_cache",
@@ -1656,7 +1658,17 @@ def validate_skill(skill_dir: Path) -> tuple[str, list[str]]:
         raise SkillPackageError(
             "description must state when to use the skill with a concrete trigger or context"
         )
-    return name, []
+
+    warnings: list[str] = []
+    # Claude's envelope allows 1024 characters, but Codex truncates each description near 92 to
+    # fit a shared budget, which silently cuts the trigger words at the end. Warn, do not fail.
+    normalised = len(" ".join(description.split()))
+    if normalised > DESCRIPTION_BUDGET:
+        warnings.append(
+            f"description is {normalised} characters; keep it at {DESCRIPTION_BUDGET} or fewer so Codex "
+            "does not truncate it. Lead with the trigger and move detail into the SKILL.md body."
+        )
+    return name, warnings
 
 
 def collect_package_files(skill_dir: Path) -> list[Path]:
