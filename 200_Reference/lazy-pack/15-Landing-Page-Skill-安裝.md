@@ -243,7 +243,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/landing-page/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/landing-page/SKILL.md" <<'AGENT_LAZYPACK_LANDING_PAGE_SKILL_MD_0E95F5A366'
 ---
 name: landing-page
-description: "建立、改寫、換風格或轉換 landing page、銷售頁、報名頁、課程頁、活動頁、產品頁、名單蒐集頁。觸發：landing page、CMS HTML、既有文案轉 HTML、$landing-page。"
+description: "建立、改寫或轉換 landing page、銷售頁、報名頁、課程頁、活動頁、產品頁時使用。觸發：$landing-page。"
 metadata:
   short-description: Landing page generator and CMS HTML layout
 ---

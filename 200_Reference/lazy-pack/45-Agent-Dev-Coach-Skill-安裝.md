@@ -187,7 +187,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/agent-dev-coach/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/agent-dev-coach/SKILL.md" <<'AGENT_LAZYPACK_AGENT_DEV_COACH_SKILL_MD_0E95F5A366'
 ---
 name: agent-dev-coach
-description: "帶學員把模糊的 agent 想法走完五關：需求拷問 → 規格書 → 切票 → TDD 實作 → 雙軸審查，另附 PRD 打包。觸發：我想做一個 agent、幫我設計 agent、拷問我的需求、把討論打包成 PRD。"
+description: "觸發：我想做一個 agent、幫我設計 agent、拷問我的需求。帶完需求、規格、切票、TDD 與審查五關。"
 metadata:
   short-description: "五關教練：把模糊的 agent 想法帶成能跑的程式型 agent，另附隨時可用的 PRD 打包"
   version: "0.2.0"

@@ -91,7 +91,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-input-normalization/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/voice-input-normalization/SKILL.md" <<'AGENT_LAZYPACK_VOICE_INPUT_NORMALIZATION_SKILL_MD_0E95F5A366'
 ---
 name: voice-input-normalization
-description: "Use to install, update, remove, audit or package speech-to-text and voice-input normalization rules across Codex, Claude Code, AntiGravity and OpenCode global settings."
+description: "Use to install, audit or package speech-to-text and voice-input rules across the agents."
 metadata:
   short-description: Install speech-to-text correction rules
 ---

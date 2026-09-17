@@ -158,7 +158,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366'
 ---
 name: video-tool-evaluation
-description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard、把網站或 Remotion 專案轉成影片時使用。實作前先產出並驗證 TOOL_EVALUATION.md。"
+description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard 時使用。先驗證 TOOL_EVALUATION.md。"
 ---
 
 # Video Tool Evaluation
@@ -726,7 +726,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md")
 cat > "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD_0E95F5A366'
 ---
 name: video-processing-automation
-description: "已有影片檔要處理成可上架影片包時使用：智慧剪接、去靜音、語音轉字幕、逐字稿清理、BGM ducking、標題與封面、metadata、精華短片、打包輸出。"
+description: "已有影片檔要處理成可上架影片包時使用：剪接、去靜音、字幕、BGM、封面、精華短片、打包。"
 metadata:
   short-description: YouTube/video processing automation workflow
 ---

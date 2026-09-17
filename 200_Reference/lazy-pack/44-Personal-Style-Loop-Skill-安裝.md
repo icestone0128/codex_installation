@@ -181,8 +181,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/personal-style-loop/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/personal-style-loop/SKILL.md" <<'AGENT_LAZYPACK_PERSONAL_STYLE_LOOP_SKILL_MD_0E95F5A366'
 ---
 name: personal-style-loop
-description: >-
-  用校準題與保留題的迴圈，把使用者的寫作風格萃取成可重複調用的個人寫作規則。當使用者說「學我的語氣」「訓練我的寫作風格」「這篇寫得不像我」「幫我建立個人寫作 skill」「用我的口吻寫」時使用。單次潤稿、去 AI 味、模仿他人品牌或風格請改用其他 skill。
+description: "想讓 AI 學你的語氣、訓練個人寫作風格，或覺得「這篇不像我」時使用。用校準題與保留題迴圈萃取。"
 metadata:
   short-description: 訓練個人寫作風格迴圈
   version: "0.1.0"

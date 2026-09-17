@@ -121,7 +121,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366'
 ---
 name: video-tool-evaluation
-description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard、把網站或 Remotion 專案轉成影片時使用。實作前先產出並驗證 TOOL_EVALUATION.md。"
+description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard 時使用。先驗證 TOOL_EVALUATION.md。"
 ---
 
 # Video Tool Evaluation
@@ -1182,7 +1182,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SKILL_MD_0E95F5A366'
 ---
 name: video-spec-builder
-description: "想做影片、宣傳片、產品展示、動畫短片、抖音／YouTube 內容，或要改分鏡、節奏、鏡頭、字幕、配音、轉場時使用。以蘇格拉底式追問收集需求，輸出標準化 video-spec.md 供渲染。"
+description: "想做影片、宣傳片、產品展示或短影音，或要改分鏡、節奏、鏡頭、字幕、配音、轉場時使用。"
 ---
 
 [任务]

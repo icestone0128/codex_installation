@@ -126,7 +126,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/clasp-setup/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/clasp-setup/SKILL.md" <<'AGENT_LAZYPACK_CLASP_SETUP_SKILL_MD_0E95F5A366'
 ---
 name: clasp-setup
-description: "Use to connect, clone, pull, edit, push, deploy, inspect or troubleshoot Google Apps Script through clasp, including GAS web apps and container-bound scripts."
+description: "Use to connect, push, deploy or troubleshoot Google Apps Script through clasp."
 metadata:
   short-description: Safe clasp v3 and Apps Script workflow
 ---

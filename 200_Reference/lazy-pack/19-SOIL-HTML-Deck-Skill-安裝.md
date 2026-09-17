@@ -117,7 +117,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-html-deck/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/soil-html-deck/SKILL.md" <<'AGENT_LAZYPACK_SOIL_HTML_DECK_SKILL_MD_0E95F5A366'
 ---
 name: soil-html-deck
-description: "SOIL 風格 HTML 簡報，輸出單一可攜 .html。觸發：HTML slides、web slides、互動簡報、Reveal.js、線上分享簡報、直播簡報、Chart.js、文字雲、投票、比較滑桿。"
+description: "觸發：HTML slides、web slides、互動簡報、Reveal.js、線上或直播簡報。輸出單一可攜 .html。"
 metadata:
   short-description: SOIL HTML interactive slide deck
 ---

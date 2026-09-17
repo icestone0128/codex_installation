@@ -92,7 +92,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voice-reply/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/voice-reply/SKILL.md" <<'AGENT_LAZYPACK_VOICE_REPLY_SKILL_MD_0E95F5A366'
 ---
 name: voice-reply
-description: "觸發：用語音回覆、念出來、朗讀、語音摘要、TTS 旁白。先確認男聲或女聲：女聲用 Anna Su 再 fallback HsiaoChen，男聲跳過 ElevenLabs 用 YunJhe，最後 fallback 是 macOS say。"
+description: "觸發：用語音回覆、念出來、朗讀、語音摘要、TTS 旁白。先確認男聲或女聲再合成，不預設性別。"
 metadata:
   short-description: Ask female or male, then use the matching TTS route
 ---

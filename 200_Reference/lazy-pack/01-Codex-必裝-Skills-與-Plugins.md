@@ -427,7 +427,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/pdf/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/pdf/SKILL.md" <<'AGENT_LAZYPACK_PDF_SKILL_MD_0E95F5A366'
 ---
 name: "pdf"
-description: "Use when reading, creating or reviewing PDFs where rendering and layout matter. Render pages with Poppler to check visually; use reportlab, pdfplumber and pypdf."
+description: "Use when reading, creating or reviewing PDFs where rendering and layout matter."
 ---
 
 
@@ -771,7 +771,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/playwright/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/playwright/SKILL.md" <<'AGENT_LAZYPACK_PLAYWRIGHT_SKILL_MD_0E95F5A366'
 ---
 name: "playwright"
-description: "Use when automating a real browser from the terminal — navigation, forms, snapshots, screenshots, data extraction, UI-flow debugging — via playwright-cli."
+description: "Use when automating a real browser from the terminal via playwright-cli."
 ---
 
 

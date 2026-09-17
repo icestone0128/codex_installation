@@ -141,7 +141,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/notebooklm-architecture/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/notebooklm-architecture/SKILL.md" <<'AGENT_LAZYPACK_NOTEBOOKLM_ARCHITECTURE_SKILL_MD_0E95F5A366'
 ---
 name: notebooklm-architecture
-description: "建立可重用的 NotebookLM 架構來源檔，控制角色、思考邏輯、教學法、輸出結構與選源行為。觸發：NotebookLM 控制提示、Soul／Body Framework、來源檔、YAML 設定、教師用模板。"
+description: "觸發：NotebookLM 控制提示、Soul／Body Framework、來源檔、YAML 設定。建立可重用的架構來源檔。"
 ---
 
 # NotebookLM Architecture
@@ -401,7 +401,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/presentation-workflow/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/presentation-workflow/SKILL.md" <<'AGENT_LAZYPACK_PRESENTATION_WORKFLOW_SKILL_MD_0E95F5A366'
 ---
 name: presentation-workflow
-description: "Use when analyzing, planning, creating or revising presentations with NotebookLM slide generation and YAML visual-style specs: deck critique, slide content, layouts, prompts."
+description: "Use when planning, creating or revising presentations: critique, slides, layouts, prompts."
 ---
 
 # Presentation Workflow

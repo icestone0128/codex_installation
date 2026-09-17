@@ -153,7 +153,7 @@ metadata:
   upstream-path: "skills/engineering/ask-matt/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use when asking which engineering workflow fits, planning a large or foggy effort, or checking the mattpocock/skills integration. Routes the suite without taking over."
+description: "Use when asking which engineering workflow fits or planning a large, foggy effort."
 ---
 
 # Engineering Methods
@@ -863,7 +863,7 @@ metadata:
   upstream-path: "skills/engineering/code-review/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Review changes since a fixed point on two axes — repository standards and the originating spec — reported separately. Use for branch, PR or work-in-progress reviews."
+description: "Use for branch, PR or work-in-progress reviews against repo standards and the spec."
 ---
 
 Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
@@ -991,7 +991,7 @@ metadata:
   upstream-path: "skills/engineering/codebase-design/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Shared vocabulary for designing deep modules. Use to design or improve a module interface, find deepening opportunities, decide where a seam goes, or make code testable."
+description: "Use to design or improve a module interface, place a seam, or make code testable."
 ---
 
 # Codebase Design
@@ -1232,7 +1232,7 @@ metadata:
   upstream-path: "skills/engineering/diagnosing-bugs/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: Diagnosis loop for hard bugs and performance regressions. Use when the user says "diagnose"/"debug this", or reports something broken/throwing/failing/slow.
+description: "Use when asked to diagnose or debug, or when something is broken, failing or slow."
 ---
 
 # Diagnosing Bugs
@@ -1442,7 +1442,7 @@ metadata:
   upstream-path: "skills/engineering/domain-modeling/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Build and sharpen a project's domain model. Use to pin down domain terminology or a ubiquitous language, or to record an architectural decision."
+description: "Use to pin down domain terminology or record an architectural decision."
 ---
 
 # Domain Modeling
@@ -1656,7 +1656,7 @@ metadata:
   upstream-path: "skills/engineering/grill-with-docs/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked to be interviewed about a codebase plan while capturing domain terms and durable decisions. Grilling plus domain modeling, no implementation."
+description: "Use only when explicitly asked to be grilled on a codebase plan and capture domain terms."
 ---
 
 Run a `$grilling` session while applying `$domain-modeling`.
@@ -1696,7 +1696,7 @@ metadata:
   upstream-path: "skills/engineering/implement/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked to implement an approved spec, issue or ticket. Builds with TDD where useful and ends with a two-axis code review; commit stays separate."
+description: "Use only when explicitly asked to implement an approved spec, issue or ticket."
 ---
 
 # Implement
@@ -1747,7 +1747,7 @@ metadata:
   upstream-path: "skills/engineering/improve-codebase-architecture/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked for an architecture review, deepening opportunities, or a visual codebase design report. Waits for a chosen candidate before refactoring."
+description: "Use only when explicitly asked for an architecture review or deepening opportunities."
 ---
 
 # Improve Codebase Architecture
@@ -1990,7 +1990,7 @@ metadata:
   upstream-path: "skills/engineering/prototype/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Build a throwaway prototype to answer a design question. Use to sanity-check whether a state model or logic feels right, or explore what a UI should look like."
+description: "Use to sanity-check a state model, logic or UI with a throwaway prototype."
 ---
 
 # Prototype
@@ -2245,7 +2245,7 @@ metadata:
   upstream-path: "skills/engineering/research/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use when investigating an engineering question against primary sources and saving cited findings as Markdown in the repo. Obsidian digests go to secondbrain-research-digest."
+description: "Use when researching an engineering question against primary sources, with cited findings."
 ---
 
 Use a read-only background research agent when the active Agent supports it and
@@ -2340,7 +2340,7 @@ metadata:
   upstream-path: "skills/engineering/tdd/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
+description: "Use when the user wants test-first work, red-green-refactor, or integration tests."
 ---
 
 # Test-Driven Development
@@ -2545,7 +2545,7 @@ metadata:
   upstream-path: "skills/engineering/to-spec/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked to turn the current conversation into a specification or PRD and publish it. Synthesizes existing decisions without reopening the interview."
+description: "Use only when explicitly asked to turn this conversation into a spec or PRD."
 ---
 
 This skill takes the current conversation context and codebase understanding and produces a spec (you may know this document as a PRD). Do NOT interview the user — just synthesize what you already know.
@@ -2659,7 +2659,7 @@ metadata:
   upstream-path: "skills/engineering/to-tickets/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked to split a plan, spec or conversation into tracer-bullet tickets and publish them. Each ticket is a vertical slice with blocking edges."
+description: "Use only when explicitly asked to split a plan or spec into tracer-bullet tickets."
 ---
 
 # To Tickets
@@ -2802,7 +2802,7 @@ metadata:
   upstream-path: "skills/engineering/triage/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked to triage issues or external pull requests. Categorises, verifies, grills when needed, and confirms every external mutation first."
+description: "Use only when explicitly asked to triage issues or external pull requests."
 ---
 
 # Triage
@@ -3271,7 +3271,7 @@ metadata:
   upstream-path: "skills/engineering/wayfinder/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked to map a large, foggy, multi-session effort. Creates decision tickets, resolves the frontier, and stops once the route is clear."
+description: "Use only when explicitly asked to map a large, foggy, multi-session effort."
 ---
 
 A loose idea has arrived — too big for one agent session, and wrapped in fog: the way from here to the **destination** isn't visible yet. Wayfinding is about finding that way, not charging at the destination. This skill charts the way as a **shared map** on the repo's issue tracker, then works its **decision tickets** — questions whose resolution is a decision, not slices of a build to execute — one at a time until the route is clear.
@@ -3438,7 +3438,7 @@ metadata:
   upstream-path: "skills/engineering/setup-matt-pocock-skills/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked to set up or reconfigure the Engineering Methods suite for a repo. Adds tracker, triage-label and domain-document conventions only."
+description: "Use only when explicitly asked to set up the Engineering Methods suite for a repo."
 ---
 
 # Setup Engineering Methods
@@ -3790,7 +3790,7 @@ metadata:
   upstream-path: "skills/productivity/grill-me/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: Use only when the user explicitly asks for grill me, a relentless interview, or to stress-test a plan or design that does not need codebase documentation.
+description: "Use only when the user asks to be grilled or to stress-test a plan or design."
 ---
 
 Run a `$grilling` session. Keep it stateless: do not create project files,
@@ -3823,7 +3823,7 @@ metadata:
   upstream-path: "skills/productivity/grilling/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+description: "Use when the user wants to stress-test a plan or idea, or says grill."
 ---
 
 Interview the user relentlessly about every material aspect until both sides
@@ -3864,7 +3864,7 @@ metadata:
   upstream-path: "skills/productivity/handoff/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked for a task or conversation handoff to a fresh Agent session. Creates a redacted temporary handoff; never replaces the project root HANDOFF.md."
+description: "Use only when explicitly asked to hand a task to a fresh Agent session."
 ---
 
 Write a handoff document summarizing the current conversation so a fresh Agent
@@ -3912,7 +3912,7 @@ metadata:
   upstream-path: "skills/productivity/teach/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked for a stateful, multi-session teaching workspace. Builds mission-driven lessons, references, learning records and retrieval practice."
+description: "Use only when explicitly asked for a stateful, multi-session teaching workspace."
 ---
 
 The user has asked you to teach them something. This is a stateful request - they intend to learn the topic over multiple sessions.
@@ -4246,7 +4246,7 @@ metadata:
   upstream-path: "skills/productivity/writing-great-skills/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Use only when explicitly asked to study or apply the upstream skill-writing methodology. Explains what makes a skill predictable across Codex, Claude and AntiGravity."
+description: "Use only when explicitly asked to study or apply the upstream skill-writing methodology."
 ---
 
 A skill exists to wrangle determinism out of a stochastic system. **Predictability** — the agent taking the same _process_ every run, not producing the same output — is the root virtue; every lever below serves it.

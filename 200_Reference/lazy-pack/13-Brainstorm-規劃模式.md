@@ -244,7 +244,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/brainstorm/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/brainstorm/SKILL.md" <<'AGENT_LAZYPACK_BRAINSTORM_SKILL_MD_0E95F5A366'
 ---
 name: brainstorm
-description: "觸發：brainstorm、$brainstorm、/brainstorm、規劃模式、用 RDQ、先訪談我、先想清楚再動手、幫我釐清需求。先讓使用者選 Quick 或 RDQ，完成規格與計劃確認前不實作。"
+description: "觸發：brainstorm、$brainstorm、規劃模式、先訪談我、先想清楚再動手。先選 Quick 或 RDQ 再實作。"
 metadata:
   short-description: 先選 Quick 或 RDQ，再確認需求與計劃
 ---

@@ -174,7 +174,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366'
 ---
 name: video-tool-evaluation
-description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard、把網站或 Remotion 專案轉成影片時使用。實作前先產出並驗證 TOOL_EVALUATION.md。"
+description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard 時使用。先驗證 TOOL_EVALUATION.md。"
 ---
 
 # Video Tool Evaluation
@@ -742,7 +742,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/animejs/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/animejs/SKILL.md" <<'AGENT_LAZYPACK_ANIMEJS_SKILL_MD_0E95F5A366'
 ---
 name: animejs
-description: "Anime.js adapter patterns for HyperFrames. Use for Anime.js animations or timelines, registering on window.__hfAnime, or making them seek-driven and deterministic."
+description: "Use for Anime.js animations or timelines in HyperFrames, seek-driven and deterministic."
 ---
 
 # Anime.js for HyperFrames
@@ -865,7 +865,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/contribute-catalog/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/contribute-catalog/SKILL.md" <<'AGENT_LAZYPACK_CONTRIBUTE_CATALOG_SKILL_MD_0E95F5A366'
 ---
 name: contribute-catalog
-description: "Author a new HyperFrames registry block or component and ship it as an upstream PR. Use ONLY for contributing to the public catalog; in-project authoring uses hyperframes."
+description: "Use only for contributing a HyperFrames registry block or component upstream as a PR."
 ---
 
 # Contribute to HyperFrames Registry
@@ -1507,7 +1507,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/css-animations/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/css-animations/SKILL.md" <<'AGENT_LAZYPACK_CSS_ANIMATIONS_SKILL_MD_0E95F5A366'
 ---
 name: css-animations
-description: "CSS animation adapter patterns for HyperFrames. Use for keyframes, animation-delay timing, fill-mode, play-state, or CSS-only motion that must seek deterministically."
+description: "Use for CSS keyframes, delays, fill-mode or play-state that must seek in HyperFrames."
 ---
 
 # CSS Animations for HyperFrames
@@ -1640,7 +1640,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/gsap/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/gsap/SKILL.md" <<'AGENT_LAZYPACK_GSAP_SKILL_MD_0E95F5A366'
 ---
 name: gsap
-description: "Use when writing GSAP animations in HyperFrames: gsap.to/from/fromTo, easing, stagger, timelines (position, labels, nesting, playback), performance (transforms, quickTo)."
+description: "Use when writing GSAP animations, easing, stagger or timelines in HyperFrames."
 ---
 
 # GSAP
@@ -2384,7 +2384,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/hyperframes/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes
-description: "Use when authoring HyperFrames HTML video: compositions, animations, titles, overlays, audio-synced captions, voiceover, transitions. CLI: hyperframes-cli."
+description: "Use when authoring HyperFrames HTML video: compositions, animations, captions, voiceover."
 ---
 
 # HyperFrames
@@ -10209,7 +10209,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-cli/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/hyperframes-cli/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_CLI_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes-cli
-description: "Use when running the HyperFrames CLI dev loop: npx hyperframes init, lint, inspect, preview, render, doctor, browser, info, upgrade. Media tasks go to hyperframes-media."
+description: "Use when running the HyperFrames CLI: init, lint, preview, render, doctor, upgrade."
 ---
 
 # HyperFrames CLI
@@ -10379,7 +10379,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_MEDIA_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes-media
-description: "Use when preparing HyperFrames assets: TTS voiceover (gender-gated ElevenLabs/Edge-TTS, macOS say fallback), Whisper transcription, background removal for overlays."
+description: "Use when preparing HyperFrames assets: TTS voiceover, transcription, background removal."
 ---
 
 # HyperFrames Media Preprocessing
@@ -10699,7 +10699,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-registry/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/hyperframes-registry/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_REGISTRY_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes-registry
-description: "Install and wire HyperFrames registry blocks and components. Use for hyperframes add, wiring an installed item into index.html, or working with hyperframes.json."
+description: "Use for hyperframes add: install and wire registry blocks or components."
 ---
 
 # HyperFrames Registry
@@ -11291,7 +11291,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/lottie/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/lottie/SKILL.md" <<'AGENT_LAZYPACK_LOTTIE_SKILL_MD_0E95F5A366'
 ---
 name: lottie
-description: "Lottie and dotLottie adapter patterns for HyperFrames. Use for lottie-web JSON, .lottie files, dotlottie-web players, or making After Effects exports deterministic."
+description: "Use for Lottie or dotLottie players and After Effects exports in HyperFrames."
 ---
 
 # Lottie for HyperFrames
@@ -11412,7 +11412,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/remotion-to-hyperframes/SKILL.md" <<'AGENT_LAZYPACK_REMOTION_TO_HYPERFRAMES_SKILL_MD_0E95F5A366'
 ---
 name: remotion-to-hyperframes
-description: "Port an existing Remotion (React) composition to HyperFrames HTML. Use ONLY when explicitly asked to port, convert or migrate Remotion; otherwise use hyperframes."
+description: "Use only when explicitly asked to port or convert a Remotion composition to HyperFrames."
 ---
 
 # Remotion to HyperFrames
@@ -16365,7 +16365,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/tailwind/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/tailwind/SKILL.md" <<'AGENT_LAZYPACK_TAILWIND_SKILL_MD_0E95F5A366'
 ---
 name: tailwind
-description: "Tailwind CSS v4.2 browser-runtime patterns for HyperFrames. Use with hyperframes init --tailwind, utility classes in composition HTML, v4 theme tokens, v3-vs-v4 syntax."
+description: "Use with Tailwind v4 utility classes and theme tokens in HyperFrames compositions."
 ---
 
 # Tailwind CSS for HyperFrames
@@ -16522,7 +16522,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/three/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/three/SKILL.md" <<'AGENT_LAZYPACK_THREE_SKILL_MD_0E95F5A366'
 ---
 name: three
-description: "Three.js and WebGL adapter patterns for HyperFrames. Use for deterministic scenes, WebGL canvas layers, AnimationMixer timelines, camera motion, or shader-driven visuals."
+description: "Use for Three.js or WebGL scenes, canvas layers or shaders in HyperFrames."
 ---
 
 # Three.js for HyperFrames
@@ -16637,7 +16637,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/typegpu/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/typegpu/SKILL.md" <<'AGENT_LAZYPACK_TYPEGPU_SKILL_MD_0E95F5A366'
 ---
 name: typegpu
-description: "TypeGPU and raw WebGPU patterns for HyperFrames. Use for WGSL fragment shaders, compute pipelines, liquid glass, particle systems, or navigator.gpu canvas layers."
+description: "Use for WGSL shaders, compute pipelines or WebGPU canvas layers in HyperFrames."
 ---
 
 # TypeGPU / WebGPU for HyperFrames
@@ -16820,7 +16820,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/waapi/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/waapi/SKILL.md" <<'AGENT_LAZYPACK_WAAPI_SKILL_MD_0E95F5A366'
 ---
 name: waapi
-description: "Web Animations API patterns for HyperFrames. Use for element.animate(), currentTime seeking, document.getAnimations(), KeyframeEffect timing and fill modes."
+description: "Use for element.animate(), currentTime seeking or KeyframeEffect timing in HyperFrames."
 ---
 
 # Web Animations API for HyperFrames
@@ -16923,7 +16923,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/website-to-hyperframes/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/website-to-hyperframes/SKILL.md" <<'AGENT_LAZYPACK_WEBSITE_TO_HYPERFRAMES_SKILL_MD_0E95F5A366'
 ---
 name: website-to-hyperframes
-description: "Capture a website and build a HyperFrames video from it. Use when a URL is given and any video is wanted — promo, social ad, product tour. A pasted link alone is enough."
+description: "Use when a URL is given and a video is wanted: capture the site, build the video."
 ---
 
 # Website to HyperFrames

@@ -108,7 +108,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-tool-evaluation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_TOOL_EVALUATION_SKILL_MD_0E95F5A366'
 ---
 name: video-tool-evaluation
-description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard、把網站或 Remotion 專案轉成影片時使用。實作前先產出並驗證 TOOL_EVALUATION.md。"
+description: "規劃影片工作流、選影片工具或 provider、寫 VideoSpec 或 storyboard 時使用。先驗證 TOOL_EVALUATION.md。"
 ---
 
 # Video Tool Evaluation
@@ -676,7 +676,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-creation-automation/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-creation-automation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_CREATION_AUTOMATION_SKILL_MD_0E95F5A366'
 ---
 name: video-creation-automation
-description: "從零開始做影片、沒有現成素材時使用：選型、訪談素材、評估工具、寫 SCRIPT.md 與 DESIGN.md、備素材、算圖、打包。已有影片檔改用 video-processing-automation。"
+description: "從零開始做影片、沒有現成素材時使用：選型、訪談、寫 SCRIPT.md 與 DESIGN.md、算圖、打包。"
 metadata:
   short-description: Create videos from scratch when no video exists
 ---

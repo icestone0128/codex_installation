@@ -108,7 +108,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/diary-interview-assistant/SKILL.md" <<'AGENT_LAZYPACK_DIARY_INTERVIEW_ASSISTANT_SKILL_MD_0E95F5A366'
 ---
 name: diary-interview-assistant
-description: "觸發：日記訪談助手、Daily Interview Assistant、間歇式日記訪談、learning journal。逐題訪談後輸出 3 個可發表的寫作亮點、寫作點子與文章草稿提示。"
+description: "觸發：日記訪談助手、間歇式日記訪談、learning journal。訪談後輸出寫作亮點與文章草稿提示。"
 metadata:
   short-description: Interview diaries or empty-start reflections into writing insights
 ---

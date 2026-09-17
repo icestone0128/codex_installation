@@ -526,7 +526,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/SKILL.md" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SKILL_MD_0E95F5A366'
 ---
 name: codex-skill-creator
-description: "建立、擷取、改寫、改進、驗證、改名與同步 Codex／Claude／AntiGravity 共用的自訂 Agent Skills。維護全域或專案本地 skill、轉換第三方指南時使用。"
+description: "建立、擷取、改寫、驗證或同步三 Agent 共用的自訂 Agent Skills 時使用，全域或專案本地皆可。"
 metadata:
   short-description: Build cross-agent skills
 ---

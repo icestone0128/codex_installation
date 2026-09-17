@@ -682,7 +682,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/SKILL.md" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SKILL_MD_0E95F5A366'
 ---
 name: cross-device-sync
-description: "觸發：跨裝置同步、換新電腦、chezmoi、dotfiles、全域 skills、core-rules、Arry 助手資料、Obsidian 駕駛艙、記憶或 GitHub 備份。安裝、稽核、修復或記錄 Codex／Claude／AntiGravity 共用環境。"
+description: "觸發：跨裝置同步、換新電腦、chezmoi、全域 skills、core-rules、助手資料或 GitHub 備份的安裝與稽核。"
 metadata:
   short-description: Bootstrap and verify cross-agent portability
 ---

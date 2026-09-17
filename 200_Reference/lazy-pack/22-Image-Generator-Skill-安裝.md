@@ -96,7 +96,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/image-generator/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/image-generator/SKILL.md" <<'AGENT_LAZYPACK_IMAGE_GENERATOR_SKILL_MD_0E95F5A366'
 ---
 name: image-generator
-description: "觸發：生圖、修圖、圖像提示、教學圖片、封面、插圖、角色、背景、去背素材、縮圖、漫畫分格，或簡報、網站、遊戲、Obsidian 筆記用的視覺素材。優先用當前 Agent 的原生生圖工具。"
+description: "觸發：生圖、修圖、圖像提示、教學圖片、封面、插圖、角色、背景、去背素材、縮圖、漫畫分格。"
 metadata:
   short-description: Generate and edit images across three agents
 ---

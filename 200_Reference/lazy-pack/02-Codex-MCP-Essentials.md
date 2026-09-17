@@ -424,7 +424,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_SKILL_MD_0E95F5A366'
 ---
 name: heptabase-cli
-description: "Read and edit a Heptabase knowledge base via the `heptabase` CLI. Triggers: Heptabase, 白板, whiteboard, 卡片, 日記, AI Tutor, 學習課程. Needs the desktop app running."
+description: "要讀寫 Heptabase 白板、卡片、日記、AI Tutor 或學習課程時使用，需桌面版執行中。"
 allowed-tools: Bash(heptabase *) Bash(jq *) Bash(mktemp *)
 metadata:
   heptabase-cli-version-range: "0.5.x"

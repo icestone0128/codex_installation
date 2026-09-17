@@ -120,7 +120,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/soil-image-deck/SKILL.md" <<'AGENT_LAZYPACK_SOIL_IMAGE_DECK_SKILL_MD_0E95F5A366'
 ---
 name: soil-image-deck
-description: "SOIL 圖像優先教學簡報，每頁由 AI 生成整頁視覺驅動。觸發：SOIL 圖像簡報、純圖教學投影片、NotebookLM 風格教育簡報、YAML 驅動 SOIL deck、baked／plate PPTX。"
+description: "觸發：SOIL 圖像簡報、純圖教學投影片、YAML 驅動 SOIL deck。每頁由 AI 生成整頁視覺驅動。"
 ---
 
 # SOIL Image Deck

@@ -113,7 +113,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/audio-to-md/SKILL.md" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SKILL_MD_0E95F5A366'
 ---
 name: audio-to-md
-description: "要把錄音、podcast、會議、訪談、演講或課程錄影轉成帶時間戳的逐字稿 Markdown 時使用。Groq whisper-large-v3-turbo 優先，失敗或需 local-only 改用本機 faster-whisper，再校稿產出摘要。"
+description: "要把錄音、podcast、會議、訪談、演講或課程錄影轉成帶時間戳的逐字稿 Markdown 時使用。"
 ---
 
 # audio-to-md Skill
