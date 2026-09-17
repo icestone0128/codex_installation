@@ -11,10 +11,13 @@
 - Git 歷史已改寫移除外部教材出處字樣，201 個 commit 保留、最新檔案樹不變；本機已 `reset --hard origin/main` 對齊。
 - LazyPack 補齊今天所有修改：Item 09 內嵌公開版 `core-rules.md`（先前只 `touch` 空檔）、上游來源登錄表範本與兩個安裝決定；Item 02 三個安裝決定、擴權步驟與踩坑、`--check` 依實際權限驗證；Item 03 `core.quotepath`、commit 前檢查、Git 歷史字樣清除流程；Item 11 改寫比對腳本與驗證器修正；Item 16 歷史清除腳本。knowledge 與 core-rules 內嵌由私有腳本 `workflows/lazypack-knowledge-embeds.py` 重建（11 份一致）。
 
+- 13 個只寫功能的 skill description 補上觸發情境（英文 `Use when`、中文「…時使用」，觸發詞前置，≤175 字元），全域 skill 驗證失敗數由 13 降為 0；上游治理的 6 個已在私有登錄表標註本機修改。
+
 ## Next action
 
 1. 重新載入 AntiGravity，請它列出 Google 日曆，確認 `mcp_config.json` 的 `serverUrl` 設定實際可用；通過後在 Obsidian 駕駛艙標記完成。
-2. 待決定：回報與驗收紀律（四種回報狀態、含糊字眼自查、大任務新對話驗收）寫進規則；每週協作復盤做成新 skill（需 `codex-skill-creator` 訪談）。
+2. Codex 0.153.4 目前把 `Available skills` 的 description 壓到 92～94 字元（89 個可見 skill 中 59 個被截斷，非本次造成）。要讓完整描述可見必須再壓低總量，或對只手動呼叫的 skill 設 `allow_implicit_invocation: false`；目前先靠觸發詞前置因應。
+3. 待決定：回報與驗收紀律（四種回報狀態、含糊字眼自查、大任務新對話驗收）寫進規則；每週協作復盤做成新 skill（需 `codex-skill-creator` 訪談）。
 
 ## Blockers
 
