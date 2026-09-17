@@ -315,7 +315,11 @@ codex execpolicy check --pretty --rules ~/.codex/rules/default.rules -- git stat
 > [!WARNING]
 > **修改規則時三個 Agent 必須一起改並雙向實測。** 單邊修改已造成過三次不一致
 > （Claude 漏 `git clean -fd` 與 `--force-with-lease`、Codex 誤擋 `chmod -R 755`、
-> Claude 漏 `ask`）。已知洞：`git push origin main --force` 因前綴比對限制兩邊都擋不到。
+> Claude 漏 `ask`）。旗標不在開頭的寫法（如 `git push origin main --force`）：Claude 由主版本
+> `forbidden_claude_wildcard` 以萬用字元補擋；Codex 的 `prefix_rule` 只比對開頭，仍擋不到，需人工確認。
+>
+> Claude 萬用字元規則的實測方式：在沒有 remote 的拋棄式 git repo 執行
+> `git push origin main --force`、`git reset HEAD --hard` 應被拒絕；`git push origin fix-footer` 不應被拒絕。
 
 ## 開工／收工自動 checkpoint
 
@@ -950,7 +954,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardra
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardrails.json" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_ASSETS_AGENT_GUARDRAILS_JSON_3CA8879092'
 {
   "_comment": "跨 Agent 危險指令防護的可攜主版本。零本機絕對路徑，可直接跨機器套用。本檔隨 cross-device-sync skill 發布（assets/），LazyPack Item 16 會完整內嵌。修改後三個 Agent 必須一起同步並雙向實測（見 knowledge/prompt-defense-baseline.md §4.2）。",
-  "_updated": "2026-08-26",
+  "_updated": "2026-09-17",
   "forbidden": {
     "_comment": "絕對不執行。Claude 寫入 permissions.deny；Codex 寫入 rules/default.rules 的 arry-dangerous-rules 區塊。",
     "sudo": [
@@ -983,6 +987,17 @@ cat > "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardrails.json" <<'A
       "shutdown"
     ]
   },
+  "forbidden_claude_wildcard": {
+    "_comment": "只套用到 Claude（permissions.deny 原樣寫入，不加 :*）。補抓旗標不在開頭的寫法，例如 git push origin main --force。Codex prefix_rule 只能比對開頭、不支援萬用字元，因此不產生 Codex 規則。刻意不用 *-f* 這類無空白邊界的寫法，會誤擋 fix-footer 之類的分支名。",
+    "git_history_anywhere": [
+      "git push * --force*",
+      "git push * -f",
+      "git push * -f *",
+      "git reset * --hard*",
+      "git branch * -D",
+      "git branch * -D *"
+    ]
+  },
   "ask": {
     "_comment": "執行前詢問使用者。Claude 寫入 permissions.ask；Codex 寫成 decision=\"prompt\"。2026-08-26 起 git_publish 清空，commit/push 不再詢問，理由見 excluded。",
     "git_publish": []
@@ -996,7 +1011,7 @@ cat > "{{SYNC_ROOT}}/skills/cross-device-sync/assets/agent-guardrails.json" <<'A
   },
   "known_gaps": {
     "_comment": "已知且目前無法修補，需人工留意。",
-    "git push origin main --force": "兩邊都是前綴比對，--force 不在固定位置就抓不到。force push 前需人工確認。",
+    "git push origin main --force": "Claude 已由 forbidden_claude_wildcard 補上（2026-09-17 實測）。Codex 仍是前綴比對，--force 不在開頭就抓不到；在 Codex 裡 force push 前需人工確認。",
     "antigravity": "AntiGravity 無指令 deny 機制（globalPermissionGrants 只有 allow）。其防線是 enableTerminalSandbox 與 core-rules.md 判斷層。"
   },
   "apply": {
@@ -2222,7 +2237,7 @@ cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/apply-agent-guardrails.py"
 """Apply or verify the portable cross-agent guardrails.
 
 Master: <SYNC_ROOT>/skills/cross-device-sync/assets/agent-guardrails.json (no machine-specific paths; ships inside the skill so LazyPack embeds it).
-Targets: ~/.claude/settings.json (permissions.deny / permissions.ask)
+Targets: ~/.claude/settings.json (permissions.deny / permissions.ask; forbidden_claude_wildcard is Claude-only)
          ~/.codex/rules/default.rules (arry-dangerous-rules block)
 
 AntiGravity has no command-deny mechanism and is intentionally skipped.
@@ -2246,13 +2261,18 @@ def load_master(sync_root: Path) -> dict:
     return json.loads(p.read_text(encoding="utf-8"))
 
 
-def wanted(master: dict) -> tuple[list[str], list[str]]:
+def wanted(master: dict) -> tuple[list[str], list[str], list[str]]:
     forbidden: list[str] = []
     for key, val in master["forbidden"].items():
         if key != "_comment":
             forbidden.extend(val)
+    # Claude supports * anywhere; Codex prefix_rule cannot express these, so they stay Claude-only.
+    wildcard: list[str] = []
+    for key, val in master.get("forbidden_claude_wildcard", {}).items():
+        if key != "_comment":
+            wildcard.extend(val)
     ask = list(master["ask"]["git_publish"])
-    return forbidden, ask
+    return forbidden, wildcard, ask
 
 
 def backup(path: Path, backups: Path) -> Path | None:
@@ -2269,14 +2289,14 @@ def claude_state(path: Path) -> tuple[set[str], set[str]]:
     if not path.is_file():
         return set(), set()
     perms = json.loads(path.read_text(encoding="utf-8")).get("permissions", {})
-    strip = lambda x: re.sub(r"^Bash\(|:\*\)$", "", x)
+    strip = lambda x: re.sub(r"^Bash\(|(:\*)?\)$", "", x)
     return {strip(x) for x in perms.get("deny", [])}, {strip(x) for x in perms.get("ask", [])}
 
 
-def apply_claude(path: Path, forbidden: list[str], ask: list[str]) -> None:
+def apply_claude(path: Path, forbidden: list[str], wildcard: list[str], ask: list[str]) -> None:
     data = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
     perms = data.setdefault("permissions", {})
-    perms["deny"] = [f"Bash({c}:*)" for c in forbidden]
+    perms["deny"] = [f"Bash({c}:*)" for c in forbidden] + [f"Bash({c})" for c in wildcard]
     perms["ask"] = [f"Bash({c}:*)" for c in ask]
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -2326,19 +2346,19 @@ def main() -> None:
 
     sync_root = Path(args.sync_root).expanduser()
     master = load_master(sync_root)
-    forbidden, ask = wanted(master)
+    forbidden, wildcard, ask = wanted(master)
     claude = Path.home() / ".claude" / "settings.json"
     codex = Path.home() / ".codex" / "rules" / "default.rules"
     backups = sync_root / "backups"
 
-    print(f"MASTER forbidden={len(forbidden)} ask={len(ask)}")
+    print(f"MASTER forbidden={len(forbidden)} claude_wildcard={len(wildcard)} ask={len(ask)}")
 
     have_deny, have_ask = claude_state(claude)
-    drift = sorted(set(forbidden) ^ have_deny) + sorted(set(ask) ^ have_ask)
+    drift = sorted(set(forbidden + wildcard) ^ have_deny) + sorted(set(ask) ^ have_ask)
 
     if args.apply:
         b1 = backup(claude, backups)
-        apply_claude(claude, forbidden, ask)
+        apply_claude(claude, forbidden, wildcard, ask)
         print(f"APPLIED claude: {claude}  BACKUP={b1}")
         b2 = backup(codex, backups)
         apply_codex(codex, render_codex_block(master, ask))
