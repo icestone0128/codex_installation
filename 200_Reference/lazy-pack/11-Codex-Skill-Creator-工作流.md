@@ -601,7 +601,7 @@ Do not symlink `000_Agent/skills` into `{{SYNC_ROOT}}/skills`.
 
 Choose the branch before writing files:
 
-- Source-adapter mode: external or third-party skill material needs conversion into shared instructions and three native adapters. Read `references/codex-bootstrap-adapter.md`.
+- Source-adapter mode: external or third-party skill material needs conversion into shared instructions and three native adapters. Read `references/codex-bootstrap-adapter.md`. Follow the global rule on third-party material: rewrite in your own words, then prove it. Keep a local copy of the source outside any repo (for a private GitHub source, fetch it with `gh api`), run `scripts/check_source_overlap.py --source <source copy> <adapted files>`, and rewrite every run it reports at 40 or more characters until it exits 0. Commands, paths and API names inside code fences are ignored because they are facts. Record the source, path and compared commit in the private upstream registry, never in the skill or any repo.
 - Conversation-extraction mode: the user wants to turn a successful conversation, prompt, output style, debugging pattern, or repeated workflow into a reusable skill. Read `references/conversation-to-skill.md`.
 - Direct-maintenance mode: an existing shared skill needs a small improvement, validation, or sync repair. Read the target skill and patch only the needed sections.
 - First-skill interview mode: the user wants help finding a practical first skill. Use the short interview below.
@@ -1458,6 +1458,100 @@ If the packaging helper cannot run, validate the package manually, archive the n
 - the ZIP was not uploaded without authorization
 AGENT_LAZYPACK_CODEX_SKILL_CREATOR_REFERENCES_STANDALONE_CLAUDE_PACKAGE_MD_AF2B981C30
 
+# codex-skill-creator/scripts/check_source_overlap.py
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/check_source_overlap.py")"
+cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/check_source_overlap.py" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SCRIPTS_CHECK_SOURCE_OVERLAP_PY_449E740BC3'
+#!/usr/bin/env python3
+"""Check how much adapted text still matches its external source verbatim.
+
+Use after converting third-party material (course guides, other people's skills or prompts)
+into your own skill, rules or LazyPack text. It finds runs of identical wording between the
+source files and the adapted files so they can be rewritten before publishing.
+
+Method: both sides are normalised (Unicode NFKC, lower case, whitespace and punctuation
+removed), fenced code blocks in the adapted files are ignored because commands and paths are
+facts rather than prose, and shared character n-grams are merged into runs.
+
+Exit code 1 when any run reaches --max-run characters, otherwise 0.
+
+Example:
+  python3 check_source_overlap.py --source ./upstream-copy --max-run 40 SKILL.md references/*.md
+"""
+from __future__ import annotations
+import argparse, re, sys, unicodedata
+from pathlib import Path
+
+
+def normalise(text: str) -> tuple[str, list[int]]:
+    chars, index = [], []
+    for i, ch in enumerate(text):
+        c = unicodedata.normalize("NFKC", ch)
+        if not c.strip() or unicodedata.category(c[0])[0] in "PSZ":
+            continue
+        chars.append(c.lower())
+        index.append(i)
+    return "".join(chars), index
+
+
+def strip_fences(text: str) -> str:
+    return re.sub(r"```.*?```", lambda m: " " * len(m.group(0)), text, flags=re.S)
+
+
+def source_files(paths: list[str]) -> list[Path]:
+    files: list[Path] = []
+    for p in map(Path, paths):
+        files += sorted(f for f in p.rglob("*") if f.is_file()) if p.is_dir() else [p]
+    return [f for f in files if f.suffix.lower() in {".md", ".txt", ".yaml", ".yml", ".json", ".html"}]
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--source", action="append", required=True, help="source file or directory (repeatable)")
+    ap.add_argument("--ngram", type=int, default=20, help="n-gram length in normalised characters (default 20)")
+    ap.add_argument("--max-run", type=int, default=40, help="fail when a shared run reaches this length (default 40)")
+    ap.add_argument("--show", type=int, default=8, help="longest runs to print per file (default 8)")
+    ap.add_argument("targets", nargs="+", help="adapted files to check")
+    args = ap.parse_args()
+
+    k = args.ngram
+    shingles: set[str] = set()
+    sources = source_files(args.source)
+    if not sources:
+        sys.exit("ERROR no readable source files")
+    for f in sources:
+        t, _ = normalise(f.read_text(encoding="utf-8", errors="ignore"))
+        shingles.update(t[i:i + k] for i in range(len(t) - k + 1))
+
+    failed = False
+    for target in map(Path, args.targets):
+        raw = strip_fences(target.read_text(encoding="utf-8", errors="ignore"))
+        t, index = normalise(raw)
+        hits = [t[i:i + k] in shingles for i in range(max(0, len(t) - k + 1))]
+        runs, i = [], 0
+        while i < len(hits):
+            if hits[i]:
+                j = i
+                while j < len(hits) and hits[j]:
+                    j += 1
+                runs.append((i, j + k - 1))
+                i = j
+            else:
+                i += 1
+        long_runs = sorted((r for r in runs if r[1] - r[0] >= args.max_run), key=lambda r: r[0] - r[1])
+        coverage = sum(b - a for a, b in runs) / max(1, len(t))
+        print(f"{target}: chars={len(t)} shared_coverage={coverage:.1%} runs>={args.max_run}={len(long_runs)}")
+        for a, b in long_runs[:args.show]:
+            fragment = raw[index[a]:index[min(b, len(index) - 1)] + 1].replace("\n", " ")
+            print(f"  len={b - a:4d} | {fragment[:140]}")
+        failed |= bool(long_runs)
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SCRIPTS_CHECK_SOURCE_OVERLAP_PY_449E740BC3
+chmod +x "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/check_source_overlap.py"
+
 # codex-skill-creator/scripts/package_claude_skill.py
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py")"
 cat > "{{SYNC_ROOT}}/skills/codex-skill-creator/scripts/package_claude_skill.py" <<'AGENT_LAZYPACK_CODEX_SKILL_CREATOR_SCRIPTS_PACKAGE_CLAUDE_SKILL_PY_26DB4AC9F2'
@@ -1482,8 +1576,8 @@ OBVIOUS_NON_THIRD_PERSON = re.compile(
     r"^(?:i(?:\s|['’]m\b|['’]ll\b|['’]ve\b)|we\b|you\b)", re.IGNORECASE
 )
 USAGE_CONDITION_PATTERN = re.compile(
-    r"\b(?:use when|use for|when|for requests?|for tasks?|triggered by)\b"
-    r"|(?:當|適用於|用於|觸發|需要.{0,20}時)",
+    r"\b(?:use when|use for|use to|use only when|use only for|use with|use this when|when|for requests?|for tasks?|triggered by|triggers?)\b"
+    r"|(?:當|適用於|用於|觸發|時使用|時啟用|時觸發|需要.{0,20}時)",
     re.IGNORECASE,
 )
 VERSION_PATTERN = re.compile(r"^[0-9]+(?:\.[0-9]+){0,2}(?:[-.][0-9A-Za-z.-]+)?$")

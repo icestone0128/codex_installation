@@ -12,12 +12,14 @@ WORKSPACE_MCP_READY_ATTEMPTS="${WORKSPACE_MCP_READY_ATTEMPTS:-15}"
 # --agent all|claude|codex|antigravity (default all). REGISTER_* env vars still override per agent.
 AGENT_TARGET="all"
 CHECK_ONLY=0
-for arg in "$@"; do
-  case "$arg" in
+while [[ $# -gt 0 ]]; do
+  case "$1" in
     --check) CHECK_ONLY=1 ;;
-    --agent=*) AGENT_TARGET="${arg#--agent=}" ;;
-    *) printf 'Unknown argument: %s\n' "$arg" >&2; exit 2 ;;
+    --agent=*) AGENT_TARGET="${1#--agent=}" ;;
+    --agent) AGENT_TARGET="${2:?--agent requires all|claude|codex|antigravity}"; shift ;;
+    *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
   esac
+  shift
 done
 case "$AGENT_TARGET" in
   all|claude|codex|antigravity) ;;
@@ -101,21 +103,46 @@ verify_installation() {
       return 1
     fi
 
-    for expected_tool in list_calendars search_drive_files search_gmail_messages; do
+    # The contract follows the runner's --permissions: every enabled service must expose its
+    # read tool, and write-capable tools are forbidden only when every service is readonly.
+    local permissions
+    permissions="$(grep -oE -- '--permissions[^\\]*' "$RUNNER_TARGET" | head -1 | sed 's/--permissions//')"
+    if [[ -z "$permissions" ]]; then
+      printf 'Cannot read --permissions from %s\n' "$RUNNER_TARGET" >&2
+      return 1
+    fi
+
+    local entry service level all_readonly=1
+    for entry in $permissions; do
+      service="${entry%%:*}"
+      level="${entry#*:}"
+      [[ "$level" == "readonly" ]] || all_readonly=0
+      case "$service" in
+        calendar) expected_tool="list_calendars" ;;
+        drive) expected_tool="search_drive_files" ;;
+        gmail) expected_tool="search_gmail_messages" ;;
+        docs) expected_tool="search_docs" ;;
+        sheets) expected_tool="list_spreadsheets" ;;
+        slides) expected_tool="get_presentation" ;;
+        *) log "no read-tool mapping for service $service; skipped"; continue ;;
+      esac
       if ! grep -F "$expected_tool" "$workspace_tools" >/dev/null; then
-        printf 'Expected read-only tool is missing: %s\n' "$expected_tool" >&2
+        printf 'Expected tool for %s is missing: %s\n' "$service" "$expected_tool" >&2
         return 1
       fi
     done
 
-    for forbidden_tool in manage_event create_drive_file create_drive_folder send_gmail_message; do
-      if grep -F "$forbidden_tool" "$workspace_tools" >/dev/null; then
-        printf 'Unexpected write-capable tool is enabled: %s\n' "$forbidden_tool" >&2
-        return 1
-      fi
-    done
-
-    log "read-only tool contract passed"
+    if [[ "$all_readonly" == "1" ]]; then
+      for forbidden_tool in manage_event create_drive_file create_drive_folder send_gmail_message; do
+        if grep -F "$forbidden_tool" "$workspace_tools" >/dev/null; then
+          printf 'Unexpected write-capable tool is enabled: %s\n' "$forbidden_tool" >&2
+          return 1
+        fi
+      done
+      log "read-only tool contract passed ($permissions)"
+    else
+      log "tool contract passed for write-enabled permissions ($permissions)"
+    fi
   else
     log "endpoint check skipped; start $RUNNER_TARGET, then rerun with --check"
   fi

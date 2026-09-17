@@ -9,7 +9,7 @@
 - Google Workspace MCP：Codex、Claude、AntiGravity 統一走本機 `127.0.0.1:8000/mcp`；Codex 同義 Google plugins 停用；權限擴為 calendar／drive／gmail／docs／sheets／slides，OAuth 已重新同意。Item 02 安裝腳本支援 `--agent all|claude|codex|antigravity`。
 - `cross-device-sync`：開工／收工 checkpoint 新增唯讀 `audit-agent-parity.py`（三 Agent 必要 MCP、Codex 同義 plugins、`AGENTS.override.md`）。
 - Git 歷史已改寫移除外部教材出處字樣，201 個 commit 保留、最新檔案樹不變；本機已 `reset --hard origin/main` 對齊。
-- LazyPack Item 09 的 9 份 knowledge 內嵌全部與主版本一致（公開版經去識別化）；收工改用私有腳本 `workflows/lazypack-knowledge-embeds.py` 重建，不再手動比對。
+- LazyPack 補齊今天所有修改：Item 09 內嵌公開版 `core-rules.md`（先前只 `touch` 空檔）、上游來源登錄表範本與兩個安裝決定；Item 02 三個安裝決定、擴權步驟與踩坑、`--check` 依實際權限驗證；Item 03 `core.quotepath`、commit 前檢查、Git 歷史字樣清除流程；Item 11 改寫比對腳本與驗證器修正；Item 16 歷史清除腳本。knowledge 與 core-rules 內嵌由私有腳本 `workflows/lazypack-knowledge-embeds.py` 重建（11 份一致）。
 
 ## Next action
 

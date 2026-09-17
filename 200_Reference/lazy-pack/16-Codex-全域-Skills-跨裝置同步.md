@@ -757,6 +757,8 @@ Policy:
 - Both phases run the bootstrap dry-run and `chezmoi status`.
 - Startup may run `chezmoi update` automatically only when the source has at least one commit, a configured remote, and a clean working tree. The script backs up all managed Agent entrypoints first. Otherwise update is a safe no-op and reports the reason once.
 - Shutdown does not pull or apply remote changes.
+- Agents that do not install a shared MCP should remove it from `required_everywhere`; otherwise every checkpoint reports it missing.
+- `scripts/prepare-history-scrub.sh` (with `scrub-history.pl`) prepares and verifies a history rewrite that removes unwanted wording from a branch, in a throwaway clone. It never pushes; force-push and `reset --hard` stay with the repository owner.
 - Both phases end with `scripts/audit-agent-parity.py` (read-only). It checks the MCPs listed in `assets/agent-mcp-parity.json` `required_everywhere` exist in Claude (`~/.claude.json`, `~/.claude/settings.json`), Codex (`config.toml` `mcp_servers`) and AntiGravity (`~/.gemini/config/mcp_config.json`); that Codex plugins listed under `duplicate_codex_plugins` are disabled; and that no `AGENTS.override.md` sits in `CODEX_HOME` or between the project root and its git root. It prints server names only, never URLs, args or env. Add a new shared MCP to `required_everywhere` only after all three adapters are configured.
 - Do not run `chezmoi add` on existing managed rule, skill, Python bridge, environment-loader, or profile-modifier entries. An isolated test confirmed that adding an existing managed symlink can remove its template attribute; in a headless Agent it may also attempt `/dev/tty`. That would replace portable template state with a machine-specific path.
 - `chezmoi add` is only for a genuinely new approved entrypoint. Extend the bootstrap whitelist and create its portable template first, back up the destination, then inspect the source diff and rerun the checkpoint. Changes inside `{{SYNC_ROOT}}` or the local Python runtime do not need `chezmoi add` because their own installers/sync channels own that content.
@@ -3122,6 +3124,95 @@ printf 'Run: chezmoi diff && chezmoi status && chezmoi doctor\n'
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_BOOTSTRAP_AGENT_SYNC_SH_E2A05A691B
 chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/bootstrap-agent-sync.sh"
 
+# cross-device-sync/scripts/prepare-history-scrub.sh
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prepare-history-scrub.sh")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prepare-history-scrub.sh" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PREPARE_HISTORY_SCRUB_SH_D57F65245A'
+#!/usr/bin/env bash
+# Prepare and verify a Git history rewrite that removes unwanted wording (for example the name of
+# an external source) from every commit and commit message of one branch.
+#
+# It works on a fresh clone inside --workdir and NEVER pushes. Force-pushing and realigning local
+# clones are irreversible, so the script only prints those commands for the repository owner to run.
+#
+# Usage:
+#   prepare-history-scrub.sh --repo-url URL --rules FILE --workdir DIR [--branch main]
+#
+# Rules file: one rule per line, "<perl regex><TAB><replacement>", applied in order, case-insensitive.
+# Put more specific rules before general ones. Keep the rules file outside any repository.
+set -euo pipefail
+
+branch="main"; repo_url=""; rules=""; workdir=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repo-url) repo_url="${2:?}"; shift ;;
+    --rules) rules="${2:?}"; shift ;;
+    --workdir) workdir="${2:?}"; shift ;;
+    --branch) branch="${2:?}"; shift ;;
+    *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
+  esac
+  shift
+done
+[[ -n "$repo_url" && -f "$rules" && -n "$workdir" ]] || { printf 'Required: --repo-url, --rules (existing file), --workdir\n' >&2; exit 2; }
+
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+scrubber="$script_dir/scrub-history.pl"
+rules="$(cd "$(dirname "$rules")" && pwd)/$(basename "$rules")"
+patterns="$(grep -vE '^\s*(#|$)' "$rules" | cut -f1 | paste -sd'|' -)"
+[[ -n "$patterns" ]] || { printf 'Rules file has no rules\n' >&2; exit 2; }
+
+mkdir -p "$workdir"
+repo="$workdir/repo-$(date +%Y%m%d-%H%M%S)"
+git clone -q --no-local "$repo_url" "$repo"
+cd "$repo"
+git checkout -q "$branch"
+
+count_matches() { # $1 = ref
+  local msg content
+  msg="$(git log "$1" --format='%s%n%b' | perl -CS -ne "\$c += () = /$patterns/gi; END { print \$c+0 }")"
+  content="$(git log "$1" -p --format= | perl -CS -ne "\$c += () = /$patterns/gi; END { print \$c+0 }")"
+  printf '%s %s' "$msg" "$content"
+}
+
+before_count="$(git rev-list "$branch" --count)"
+read -r before_msg before_content <<<"$(count_matches "$branch")"
+head_matches="$(git ls-files -z | xargs -0 perl -CSD -e 'my ($p,@f)=@ARGV; my $n=0; for my $x (@f) { next unless -f $x && -T $x; open(my $h,"<",$x) or next; local $/; my $t=<$h>; $n++ if $t =~ /$p/i } print $n' "$patterns")"
+before_tree="$(git rev-parse "$branch^{tree}")"
+printf 'BEFORE commits=%s message_matches=%s content_matches=%s files_matching_at_tip=%s\n' \
+  "$before_count" "$before_msg" "$before_content" "$head_matches"
+
+FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f \
+  --tree-filter "find . -type f -not -path './.git/*' -print0 | xargs -0 perl '$scrubber' '$rules'" \
+  --msg-filter "perl '$scrubber' --stdin '$rules'" \
+  -- "$branch" >"$workdir/filter-branch.log" 2>&1
+
+after_count="$(git rev-list "$branch" --count)"
+read -r after_msg after_content <<<"$(count_matches "$branch")"
+after_tree="$(git rev-parse "$branch^{tree}")"
+printf 'AFTER  commits=%s message_matches=%s content_matches=%s\n' "$after_count" "$after_msg" "$after_content"
+
+status=0
+[[ "$after_count" == "$before_count" ]] || { printf 'FAIL commit count changed\n'; status=1; }
+[[ "$after_msg" == "0" && "$after_content" == "0" ]] || { printf 'FAIL wording still present; add or reorder rules\n'; status=1; }
+if [[ "$head_matches" == "0" ]]; then
+  [[ "$after_tree" == "$before_tree" ]] && printf 'OK tip tree unchanged (%s)\n' "$after_tree" || { printf 'FAIL tip tree changed although the tip had no matches\n'; status=1; }
+else
+  printf 'NOTE the branch tip itself contained matches, so its tree changed; review with: git -C %s diff %s %s\n' "$repo" "$before_tree" "$after_tree"
+fi
+[[ "$status" == "0" ]] || exit "$status"
+
+cat <<MSG
+READY rewritten clone: $repo
+Checked only refs/heads/$branch; refs/original holds the pre-rewrite backup and is not counted.
+
+Owner-only steps (irreversible, not run by this script):
+  git -C "$repo" push --force origin $branch
+Then, in every existing clone with no uncommitted work:
+  git fetch origin
+  git reset --hard origin/$branch
+MSG
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PREPARE_HISTORY_SCRUB_SH_D57F65245A
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prepare-history-scrub.sh"
+
 # cross-device-sync/scripts/project-venv.sh
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/project-venv.sh")"
 cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/project-venv.sh" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_PROJECT_VENV_SH_C6AE258E40'
@@ -4174,6 +4265,41 @@ if __name__ == "__main__":
     sys.exit(main())
 AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SCAN_UNARCHIVED_ARTIFACTS_PY_9046016D36
 chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/scan-unarchived-artifacts.py"
+
+# cross-device-sync/scripts/scrub-history.pl
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/scrub-history.pl")"
+cat > "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/scrub-history.pl" <<'AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SCRUB_HISTORY_PL_1F017D8AB8'
+#!/usr/bin/perl
+# Apply a replacement list to files in place, or to STDIN with --stdin.
+# Replacement file: one rule per line, "<perl regex><TAB><replacement>"; blank lines and lines
+# starting with # are ignored. Regexes are applied in file order, case-insensitively.
+use strict; use warnings; use utf8;
+binmode(STDIN, ':encoding(UTF-8)'); binmode(STDOUT, ':encoding(UTF-8)');
+my $stdin = 0;
+if (@ARGV && $ARGV[0] eq '--stdin') { $stdin = 1; shift @ARGV; }
+my $rules_file = shift @ARGV or die "usage: scrub-history.pl [--stdin] RULES [FILES...]\n";
+open(my $rf, '<:encoding(UTF-8)', $rules_file) or die "cannot read $rules_file\n";
+my @rules;
+while (my $line = <$rf>) {
+  chomp $line;
+  next if $line =~ /^\s*(#|$)/;
+  my ($pattern, $replacement) = split /\t/, $line, 2;
+  die "rule without TAB separator: $line\n" unless defined $replacement;
+  push @rules, [qr/$pattern/i, $replacement];
+}
+sub scrub { my $t = shift; $t =~ s/$_->[0]/$_->[1]/g for @rules; return $t; }
+if ($stdin) { local $/; my $t = <STDIN> // ''; print scrub($t); exit 0; }
+for my $file (@ARGV) {
+  next unless -f $file && -T $file;   # skip binary files
+  open(my $in, '<:encoding(UTF-8)', $file) or next;
+  local $/; my $orig = <$in>; close $in;
+  my $new = scrub($orig);
+  next if $new eq $orig;
+  open(my $out, '>:encoding(UTF-8)', $file) or die "cannot write $file\n";
+  print $out $new; close $out;
+}
+AGENT_LAZYPACK_CROSS_DEVICE_SYNC_SCRIPTS_SCRUB_HISTORY_PL_1F017D8AB8
+chmod +x "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/scrub-history.pl"
 
 # cross-device-sync/scripts/session-sync-checkpoint.sh
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/session-sync-checkpoint.sh")"

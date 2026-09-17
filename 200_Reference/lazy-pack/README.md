@@ -12,6 +12,8 @@
 
 2026-07-30 更新：新增 [[40-Engineering-Methods-Skill-Suite-安裝]]，把 `mattpocock/skills` 的 22 個穩定 engineering／productivity 方法改寫成 Codex、Claude、AntiGravity 共用套件；內建 `engineering-methods` 路由、`grill-me`、規格／ticket／TDD／review／debug／handoff 等 skills，以及只讀上游版本檢查與完整 41 項 manifest。19 個 deprecated、in-progress、misc、personal 項目只追蹤、不安裝。
 
+2026-09-17 更新（二）：Item 09 改為內嵌維護者實際使用的全域規則公開版 `core-rules.md`（已有規則檔不覆蓋，另存範本比對）、上游來源登錄表範本，並新增兩個安裝決定（外部教材改寫後可否整合、出處記在哪）；Item 02 新增三個安裝決定（接哪些 Agent、開哪些服務與權限、Codex 同義 plugins）、擴權步驟與踩坑、`--check` 依實際權限驗證；Item 03 新增 `core.quotepath off`、commit 前三項檢查與選用的 Git 歷史字樣清除流程；Item 11 新增外部教材改寫比對腳本 `check_source_overlap.py` 並放寬 skill 驗證器的觸發語句判斷；Item 16 新增 `prepare-history-scrub.sh`。
+
 2026-09-17 更新：Item 02 的 Google Workspace MCP 改為 Codex、Claude、AntiGravity 三 Agent 共用，安裝腳本新增 `--agent all|claude|codex|antigravity`，Codex 同義 Google plugins 改為停用，權限範圍加入 Docs、Sheets、Slides；Item 16 開工／收工 checkpoint 新增三 Agent MCP 一致性與 `AGENTS.override.md` 檢查。
 
 2026-07-30 更新：Item 02 新增 Claude-first Google Workspace MCP 必要項。公開 LazyPack 內建 pinned `workspace-mcp` installer、loopback runner 與 macOS LaunchAgent template，預設只開 Drive／Gmail／Calendar core read-only；Codex 有官方 Google plugins 時不重複註冊同義 MCP，Claude 與 AntiGravity 使用各自原生 adapter。

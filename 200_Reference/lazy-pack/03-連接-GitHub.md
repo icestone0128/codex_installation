@@ -42,9 +42,58 @@ gh auth login
 ```bash
 git config --global user.name "{{GITHUB_USER}}"
 git config --global user.email "{{GITHUB_EMAIL}}"
+git config --global core.quotepath off
 ```
 
 建議使用 GitHub noreply email，避免暴露個人信箱。
+
+`core.quotepath off` 讓 `git status`、`git log --name-only` 直接顯示中文檔名，不會變成 `\346\210\221` 這類跳脫碼，Agent 比對檔名與路徑時也不會誤判。
+
+另外，commit 或 push 前固定做三項檢查（全域規則〈commit 與 push 的現行處理〉有完整版）：
+
+```bash
+gh repo view --json nameWithOwner,visibility -q '.nameWithOwner+" "+.visibility'   # 確認擁有者與公開／私人
+git diff --cached --name-status                                                     # 只 add 指定檔案，不用 git add -A／git add .
+git diff --cached --name-only -z | xargs -0 -I{} find {} -maxdepth 0 -type f -size +50M   # 有輸出就停，大檔不進 GitHub
+```
+
+## 清除 Git 歷史中不想公開的字樣（選用）
+
+適用情境：repo 的舊 commit 或 commit 訊息裡留有不該公開的字樣，例如外部教材出處、內部專案代號。只改目前檔案不夠，任何人都能翻歷史看到。
+
+先問使用者一個決定：
+
+1. **要清除 Git 歷史嗎？**
+   - 只改目前檔案，保留歷史（預設、最安全）：一般瀏覽 repo 看不到，但翻歷史仍查得到。
+   - 改寫歷史並強制推送：所有 commit 的 SHA 都會改變；別人的 clone、fork 或已用完整 SHA 存下的連結可能仍留有舊內容，要徹底清除需另外聯絡 GitHub Support。
+
+選擇改寫時，用 Item 16 內嵌的 `cross-device-sync/scripts/prepare-history-scrub.sh`。它只在暫存副本改寫並驗證，**不會推送**：
+
+```bash
+# 替換清單放在 repo 以外；一行一條「perl regex<TAB>替換文字」，較具體的規則放前面
+printf 'OldSourceName Kit\t外部教材\nOldSourceName\t外部教材\n' > "$HOME/scrub-rules.tsv"
+
+bash "{{SYNC_ROOT}}/skills/cross-device-sync/scripts/prepare-history-scrub.sh" \
+  --repo-url "https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}.git" \
+  --rules "$HOME/scrub-rules.tsv" \
+  --workdir "$HOME/history-scrub-work"
+```
+
+腳本會自動驗證：commit 數不變、commit 訊息與每個版本內容的殘留都是 0；若最新版本本來就沒有這些字樣，最新檔案樹必須和改寫前完全相同。只檢查目標分支，`refs/original` 裡的改寫前備份不算。二進位檔不會修改。
+
+驗證通過後才做以下兩步。這兩步不可逆，由 repo 擁有者本人執行，Agent 不代為執行：
+
+1. 用腳本印出的指令，從改寫後的副本強制推送。
+2. 每個既有 clone 在沒有未提交修改的前提下，先 `git fetch origin`，再 `git reset --hard origin/main` 對齊。
+
+推送前先確認沒有分支保護、fork 或 PR 會留住舊歷史：
+
+```bash
+gh api "repos/{{GITHUB_USER}}/{{REPO_NAME}}" --jq '{forks_count,visibility,default_branch}'
+gh pr list -R "{{GITHUB_USER}}/{{REPO_NAME}}" --state all --limit 5
+```
+
+若本機 `git fetch` 出現 `cannot lock ref ... expected <舊 SHA>`，通常是遠端參考已經被另一個 fetch 更新；確認 `git rev-parse origin/main` 與 `git ls-remote origin refs/heads/main` 一致即可，不必重跑。
 
 ## 建立或連接 Repo
 

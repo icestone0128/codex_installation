@@ -142,6 +142,27 @@ tool_timeout_sec = 120
 - 三個 Agent 都連這個 MCP。Codex 若已啟用 Gmail、Google Calendar、Google Drive 官方 plugins，改為停用（`enabled = false`），避免同一個 Agent 同時出現兩套同義工具；AntiGravity 用 `mcp_config.json` 的 `serverUrl` 連同一個 endpoint。
 - OAuth 授權存在本機 MCP 服務，三個 Agent 共用同一份；授權失效時任一 Agent 呼叫工具都會拿到授權連結，由本人在瀏覽器完成同意後三邊一起恢復。
 
+### 0. 安裝前的三個決定（一次一題）
+
+先問使用者，已回答過就不重問。括號內是維護者本機的實際選擇，照選就會得到相同效果。
+
+1. **哪些 Agent 要接這個 MCP？**
+   - 三個都接（本機選擇）：安裝腳本加 `--agent all`，Codex、Claude、AntiGravity 用同一個 endpoint 與同一份 OAuth 授權。
+   - 只接其中一個：`--agent claude`、`--agent codex` 或 `--agent antigravity`；沒接的 Agent 就不會有 Google 工具，並要把 Item 16 `agent-mcp-parity.json` 的 `required_everywhere` 移除 `google-workspace`。
+2. **要開哪些 Google 服務、到什麼權限？**
+   - 六個服務完整權限（本機選擇）：`calendar:full drive:full gmail:full docs:full sheets:full slides:full`，可以讀寫文件、試算表、簡報、行事曆並寄信；寄信、刪除、覆寫仍逐次確認。
+   - 三個服務唯讀（最小權限）：`calendar:readonly drive:readonly gmail:readonly`，只能查，不能改。
+   - 自訂：依需要組合；每個服務都要在 Google Cloud 啟用對應 API。
+3. **Codex 已啟用 Gmail／Google Calendar／Google Drive 官方 plugins 時怎麼辦？**
+   - 停用 plugins，只走 MCP（本機選擇）：同一個 Agent 不會出現兩套同義工具，權限邊界集中在一處；安裝腳本會先備份 `config.toml` 再改成 `enabled = false`。
+   - 保留 plugins、不幫 Codex 接 MCP：改用 `--agent claude` 或 `--agent antigravity`。
+
+依答案修改 `02-assets/google-workspace-mcp/run_google_workspace_mcp.sh` 的 `--permissions`，再執行：
+
+```bash
+bash 02-assets/google-workspace-mcp/install_google_workspace_mcp.sh --agent=all
+```
+
 ### 1. Google Cloud 最小設定
 
 建議建立一個專用 Google Cloud project；若帳號已達 project quota，可沿用既有 project，但只新增獨立 OAuth client，不改 Firebase 或其他服務設定。
@@ -269,6 +290,32 @@ bash 02-assets/google-workspace-mcp/install_google_workspace_mcp.sh --check
 - 若採用本機目前的 `complete` 加 `full` 設定，工具清單會包含上述寫入工具；smoke test 仍只做唯讀查詢，不用真實資料驗證寫入或寄信。
 
 新增 Docs／Sheets／Slides／Tasks 或從 read-only 擴權，都要回到最小權限評估並取得使用者明確要求；不要把 `complete` tier 當成安裝成功捷徑或預設值。擴權後必須重新完成 OAuth 同意，舊 token 的 scope 不會自動升級。
+
+Codex 驗證（`codex exec` 每次都重新載入工具清單，適合確認 Codex adapter 真的叫得到）：
+
+```bash
+cd /tmp && codex exec --skip-git-repo-check -s read-only \
+  "只用 google-workspace MCP 列出我的 Google 日曆數量，不做任何寫入。最後一行輸出 CODEX_GOOGLE_VERIFY calendar=<ok|fail>"
+```
+
+AntiGravity 驗證：改完 `mcp_config.json` 後重新載入 AntiGravity，請它列出 Google 日曆；工具清單裡看得到 `google-workspace` 才算接上。
+
+#### 擴權步驟與踩坑
+
+擴權（例如加入 Docs、Sheets、Slides）照這個順序：
+
+1. 改 runner 的 `--permissions`，並讓 `02-assets/google-workspace-mcp/run_google_workspace_mcp.sh` 與本機 `{{CODEX_HOME}}/python-tools/bin/google-workspace-mcp-server` 保持一致。
+2. 重啟服務：`launchctl kickstart -k "gui/$(id -u)/com.lazy-pack.google-workspace-mcp"`。
+3. 在 Google Cloud 啟用對應 API（Google Docs API、Google Sheets API、Google Slides API）。
+4. 呼叫一個新服務的工具，依回傳的授權連結由本人在瀏覽器重新同意。
+5. 再跑一次 `install_google_workspace_mcp.sh --check`，它會依 `--permissions` 逐一確認每個服務的工具都在。
+
+常見誤判：
+
+- **重啟後約 1 分鐘才開始監聽**：這段時間 `curl` 回 `000`，不是壞掉；等 `lsof -nP -iTCP:8000 -sTCP:LISTEN` 有結果再驗證。
+- **不要用清單類工具判斷擴權成功**：`list_spreadsheets`、`search_docs` 走的是 Drive API，舊權限也會成功。要叫真的用到該服務 API 的工具：Sheets 用 `read_sheet_values`、Docs 用 `inspect_doc_structure`、Slides 用 `get_presentation`。
+- **已連線的對話第一次呼叫回 `session expired`**：服務重啟造成，重試一次即可；新工具會自動出現在現有對話。
+- **AntiGravity 欄位名稱是 `serverUrl`**，不是 Claude 的 `type`／`url`；`gemini mcp add` 寫的是 Gemini CLI 設定，不會進 AntiGravity 的 `mcp_config.json`。
 
 ### 5. 更新、停用與撤銷
 
