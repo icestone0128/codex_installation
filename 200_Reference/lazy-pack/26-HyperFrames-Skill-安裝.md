@@ -1640,7 +1640,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/gsap/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/gsap/SKILL.md" <<'AGENT_LAZYPACK_GSAP_SKILL_MD_0E95F5A366'
 ---
 name: gsap
-description: "GSAP reference for HyperFrames: gsap.to/from/fromTo, easing, stagger, defaults, timelines (position parameter, labels, nesting, playback), performance (transforms, quickTo)."
+description: "Use when writing GSAP animations in HyperFrames: gsap.to/from/fromTo, easing, stagger, timelines (position, labels, nesting, playback), performance (transforms, quickTo)."
 ---
 
 # GSAP
@@ -2384,7 +2384,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/hyperframes/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes
-description: "Author HyperFrames HTML video: compositions, animations, titles, overlays, audio-synced captions, voiceover, transitions. CLI: hyperframes-cli. Assets: hyperframes-media."
+description: "Use when authoring HyperFrames HTML video: compositions, animations, titles, overlays, audio-synced captions, voiceover, transitions. CLI: hyperframes-cli."
 ---
 
 # HyperFrames
@@ -10209,7 +10209,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-cli/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/hyperframes-cli/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_CLI_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes-cli
-description: "HyperFrames CLI dev loop: npx hyperframes init, lint, inspect, preview, render, doctor, browser, info, upgrade. For tts/transcribe/remove-background use hyperframes-media."
+description: "Use when running the HyperFrames CLI dev loop: npx hyperframes init, lint, inspect, preview, render, doctor, browser, info, upgrade. Media tasks go to hyperframes-media."
 ---
 
 # HyperFrames CLI
@@ -10379,7 +10379,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/hyperframes-media/SKILL.md" <<'AGENT_LAZYPACK_HYPERFRAMES_MEDIA_SKILL_MD_0E95F5A366'
 ---
 name: hyperframes-media
-description: "HyperFrames asset prep: TTS voiceover (gender-gated ElevenLabs/Edge-TTS, macOS say fallback), Whisper transcription, background removal for transparent overlays."
+description: "Use when preparing HyperFrames assets: TTS voiceover (gender-gated ElevenLabs/Edge-TTS, macOS say fallback), Whisper transcription, background removal for overlays."
 ---
 
 # HyperFrames Media Preprocessing

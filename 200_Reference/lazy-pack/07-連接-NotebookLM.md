@@ -401,7 +401,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/presentation-workflow/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/presentation-workflow/SKILL.md" <<'AGENT_LAZYPACK_PRESENTATION_WORKFLOW_SKILL_MD_0E95F5A366'
 ---
 name: presentation-workflow
-description: "Analyze, plan, create or revise presentations with NotebookLM slide generation and YAML visual-style specs. Covers deck critique, slide content, layouts and prompts."
+description: "Use when analyzing, planning, creating or revising presentations with NotebookLM slide generation and YAML visual-style specs: deck critique, slide content, layouts, prompts."
 ---
 
 # Presentation Workflow

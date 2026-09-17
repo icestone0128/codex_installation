@@ -1182,7 +1182,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/video-spec-builder/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_SPEC_BUILDER_SKILL_MD_0E95F5A366'
 ---
 name: video-spec-builder
-description: 当用户说想做一个视频、宣传片、产品演示、动画短片、抖音/YouTube 内容，或者说要改分镜、调节奏、换镜头、调字幕、加配音、改转场时使用。通过苏格拉底式追问收集视频需求，主动激发渲染层的全部能力（TTS / 字幕 / 3D / shader / 音频反应等），输出标准化的 video-spec.md 用于渲染。
+description: "想做影片、宣傳片、產品展示、動畫短片、抖音／YouTube 內容，或要改分鏡、節奏、鏡頭、字幕、配音、轉場時使用。以蘇格拉底式追問收集需求，輸出標準化 video-spec.md 供渲染。"
 ---
 
 [任务]

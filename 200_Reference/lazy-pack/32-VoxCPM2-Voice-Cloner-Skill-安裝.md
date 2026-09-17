@@ -148,7 +148,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/SKILL.md" <<'AGENT_LAZYPACK_VOXCPM2_VOICE_CLONER_SKILL_MD_0E95F5A366'
 ---
 name: voxcpm2-voice-cloner
-description: "安裝或執行 VoxCPM2：克隆已授權的聲音、從參考音合成語音、設計合成聲線、錄製或匯入聲音 profile、多說話者對話。每個真人聲音都需明確授權。"
+description: "要安裝或執行 VoxCPM2 時使用：克隆已授權的聲音、從參考音合成語音、設計合成聲線、錄製或匯入聲音 profile、多說話者對話。每個真人聲音都需明確授權。"
 metadata:
   short-description: Local authorized VoxCPM2 voice cloning
 ---

@@ -726,7 +726,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md")
 cat > "{{SYNC_ROOT}}/skills/video-processing-automation/SKILL.md" <<'AGENT_LAZYPACK_VIDEO_PROCESSING_AUTOMATION_SKILL_MD_0E95F5A366'
 ---
 name: video-processing-automation
-description: "把既有毛片處理成可上架的影片包：智慧剪接、去靜音、語音轉字幕、逐字稿清理、BGM ducking、標題與封面、metadata、精華短片、打包輸出。"
+description: "已有影片檔要處理成可上架影片包時使用：智慧剪接、去靜音、語音轉字幕、逐字稿清理、BGM ducking、標題與封面、metadata、精華短片、打包輸出。"
 metadata:
   short-description: YouTube/video processing automation workflow
 ---

@@ -2245,7 +2245,7 @@ metadata:
   upstream-path: "skills/engineering/research/SKILL.md"
   upstream-baseline: "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
   adaptation: "Codex-Claude-AntiGravity shared package"
-description: "Investigate an engineering question against primary sources and capture cited findings as a Markdown file in the repo. Obsidian digests go to secondbrain-research-digest."
+description: "Use when investigating an engineering question against primary sources and saving cited findings as Markdown in the repo. Obsidian digests go to secondbrain-research-digest."
 ---
 
 Use a read-only background research agent when the active Agent supports it and

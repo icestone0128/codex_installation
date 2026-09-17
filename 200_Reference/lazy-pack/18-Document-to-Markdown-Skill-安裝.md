@@ -201,7 +201,7 @@ mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/doc-to-md/SKILL.md" <<'AGENT_LAZYPACK_DOC_TO_MD_SKILL_MD_0E95F5A366'
 ---
 name: doc-to-md
-description: "把 PDF、TXT、EPUB、Word／PowerPoint／Excel、掃描 PDF、截圖或圖片資料夾轉成乾淨 Markdown。含簡轉繁、圖表轉述、Doc/VLM 路由與 Obsidian 筆記整備。"
+description: "要把 PDF、TXT、EPUB、Word／PowerPoint／Excel、掃描 PDF、截圖或圖片資料夾轉成乾淨 Markdown 時使用。含簡轉繁、圖表轉述、Doc/VLM 路由與 Obsidian 筆記整備。"
 ---
 
 # doc-to-md Skill
