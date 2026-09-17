@@ -9,12 +9,12 @@
 - Google Workspace MCP：Codex、Claude、AntiGravity 統一走本機 `127.0.0.1:8000/mcp`；Codex 同義 Google plugins 停用；權限擴為 calendar／drive／gmail／docs／sheets／slides，OAuth 已重新同意。Item 02 安裝腳本支援 `--agent all|claude|codex|antigravity`。
 - `cross-device-sync`：開工／收工 checkpoint 新增唯讀 `audit-agent-parity.py`（三 Agent 必要 MCP、Codex 同義 plugins、`AGENTS.override.md`）。
 - Git 歷史已改寫移除外部教材出處字樣，201 個 commit 保留、最新檔案樹不變；本機已 `reset --hard origin/main` 對齊。
+- LazyPack Item 09 的 9 份 knowledge 內嵌全部與主版本一致（公開版經去識別化）；收工改用私有腳本 `workflows/lazypack-knowledge-embeds.py` 重建，不再手動比對。
 
 ## Next action
 
 1. 重新載入 AntiGravity，請它列出 Google 日曆，確認 `mcp_config.json` 的 `serverUrl` 設定實際可用；通過後在 Obsidian 駕駛艙標記完成。
 2. 待決定：回報與驗收紀律（四種回報狀態、含糊字眼自查、大任務新對話驗收）寫進規則；每週協作復盤做成新 skill（需 `codex-skill-creator` 訪談）。
-3. LazyPack Item 09 內嵌的 `agent-execution-strategy.md`、`context-management-strategy.md` 與主版本不一致，主版本含個人項目，需去識別化後再同步。
 
 ## Blockers
 
