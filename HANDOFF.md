@@ -17,13 +17,12 @@
 
 ## Next action
 
-1. 重新載入 AntiGravity，請它列出 Google 日曆，確認 `mcp_config.json` 的 `serverUrl` 設定實際可用；通過後在 Obsidian 駕駛艙標記完成。
-2. 本週日跑自動化時試跑 `agent-weekly-review`，確認五個數字、待拍板 ≤3 與「先筆記庫後協作」串接實際可用；趨勢 CSV 第一列在該次建立。
+1. 本週日跑自動化時試跑 `agent-weekly-review`，確認五個數字、待拍板 ≤3 與「先筆記庫後協作」串接實際可用；趨勢 CSV 第一列在該次建立。
 
 ## Blockers
 
-無。AntiGravity 驗證需要使用者在 App 內重新載入。
+無。
 
 ## Last verified
 
-2026-09-18 06:30 CST，Claude（Claude Code 桌面版）：`origin/main` 與本機皆為 `68a59fb`、工作區乾淨；全域 skill 85 個，`quick_validate` 與 `package_claude_skill.py validate` 全過、description 全部 ≤90 字元、Codex prompt 實測截斷 0 個；`sync-lazypack-embeds` 41 identical；私有 knowledge／core-rules 內嵌 11 identical；Item 47 隔離安裝與主版本 `diff -r` 一致；懶人包與 Arry 助手鏡像 `diff -qr` 一致。
+2026-09-18 06:48 CST，AntiGravity：成功呼叫 `google-workspace` MCP 之 `list_calendars` 並正確取得 7 個日曆，驗證 `mcp_config.json` 的 `serverUrl` 設定完全正常使用；Obsidian 駕駛艙已同步更新。
