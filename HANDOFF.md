@@ -12,12 +12,12 @@
 - LazyPack 補齊今天所有修改：Item 09 內嵌公開版 `core-rules.md`（先前只 `touch` 空檔）、上游來源登錄表範本與兩個安裝決定；Item 02 三個安裝決定、擴權步驟與踩坑、`--check` 依實際權限驗證；Item 03 `core.quotepath`、commit 前檢查、Git 歷史字樣清除流程；Item 11 改寫比對腳本與驗證器修正；Item 16 歷史清除腳本。knowledge 與 core-rules 內嵌由私有腳本 `workflows/lazypack-knowledge-embeds.py` 重建（11 份一致）。
 
 - 84 個 skill 的 description 全部壓到 ≤90 字元（總量 11,264 → 5,985），Codex prompt 實測 0 個被截斷、無預算警告；先前 13 個只寫功能者一併補上觸發情境
+- 每週協作復盤：新增全域 skill `agent-weekly-review`（唯讀收集腳本＋週報流程，預設不寫檔），LazyPack Item 47；與 `obsidian-weekly-knowledge-refresh-secondbrain` 串接為「先筆記庫後協作」，週報落點 Obsidian `專案庫/codex_installation/週報/`。
 - 交付回報紀律：`core-rules.md` 新增〈交付回報與驗收〉（四種狀態、紅旗詞自查、證據當次取得、大任務新對話驗收），細節為 `verification-checklist.md` Phase 7 並接進收工必查、PR 必查與變更規模對照表；兩份皆內嵌於 LazyPack Item 09。
 
 ## Next action
 
 1. 重新載入 AntiGravity，請它列出 Google 日曆，確認 `mcp_config.json` 的 `serverUrl` 設定實際可用；通過後在 Obsidian 駕駛艙標記完成。
-2. 待決定：每週協作復盤是否做成新 skill（需 `codex-skill-creator` 訪談）。
 
 ## Blockers
 

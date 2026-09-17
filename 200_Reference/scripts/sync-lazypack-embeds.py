@@ -306,6 +306,7 @@ SECTIONS = {
     "43-Visual-Prompt-Kit-Skill-安裝.md": ["visual-prompt-kit"],
     "44-Personal-Style-Loop-Skill-安裝.md": ["personal-style-loop"],
     "45-Agent-Dev-Coach-Skill-安裝.md": ["agent-dev-coach"],
+    "47-Agent-Weekly-Review-Skill-安裝.md": ["agent-weekly-review"],
 }
 
 SINGLE_BLOCKS = {

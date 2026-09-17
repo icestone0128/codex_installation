@@ -4,6 +4,8 @@
 > 用途：讓下載者從零開始設定 Codex、Claude、AntiGravity 共用的全域規則與 skills，以及 plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
 
+2026-09-18 更新：新增 [[47-Agent-Weekly-Review-Skill-安裝]]，內嵌 `agent-weekly-review` 每週協作復盤 skill 與唯讀訊號收集腳本；預設只在對話輸出週報，使用者同意才寫檔。
+
 2026-09-15 更新：新增 [[46-Cloudflare-D1-OAuth-安裝]]，將 `mathruffian-dot/cloudflare-d1-oauth-agent-guide` v1.1 與實際安裝經驗整合成一份可重跑的讀寫版 runbook。Wrangler 限定 `account:read`、`user:read`、`d1:write` 並使用 OS keychain；Cloudflare API MCP 只核准 User、Account、Offline access、D1 Metadata Read、D1 Read、D1 Write 六項。驗收仍為 GET-only，空 D1 清單也算通過，不為證明寫入權限而建立或修改雲端資源。
 
 2026-07-21 更新：Item 10 將 `HANDOFF.md` 收為開工必讀、收工必寫；Item 16 加入共享 `session-sync-checkpoint.sh`、三 Agent Python-tools 中立 bridge 與安全 shell loader，以可驗證 gate 執行 `chezmoi update`，並限制 `chezmoi add` 只用於新增白名單入口；Item 34 成為每台電腦重建共用 Python runtime 的主線項目。共享全域 skill 主版本固定為 `{{SYNC_ROOT}}/skills`，專案 skill 固定為 `<project-root>/000_Agent/skills`。
@@ -138,6 +140,7 @@
 44. [[44-Personal-Style-Loop-Skill-安裝]]
 45. [[45-Agent-Dev-Coach-Skill-安裝]]
 46. [[46-Cloudflare-D1-OAuth-安裝]]
+47. [[47-Agent-Weekly-Review-Skill-安裝]]
 
 ## 全域 Skills 安裝總表
 
@@ -185,6 +188,7 @@
 43：visual-prompt-kit；完整內嵌文章轉視覺設計提案的 skill，含封面、輪播、Concept Card、Landing Page 圖卡與第四週 HTML 版位；一般版位只出 brief，生圖交 image-generator。第四週直接繼承第三週已確認的文案、圖片配置、正式圖像與 visual DNA，不重複詢問上游內容或風格；Part 僅作內部防漏，會自動完成全部 Part、合併、圖片置換與驗收，只交付完整單一 CMS HTML，成品完成後才詢問一次發布目標。**風格庫為外部依賴、不內嵌**，缺庫時走內建風格的無庫模式
 44：personal-style-loop；完整內嵌個人寫作風格訓練迴圈，含校準題／保留題的 Style Harness、收斂式回饋協議、風格素材庫 schema（`use_for`／`do_not_use_for` 與去識別化規則）與 Codex UI adapter；只學使用者自己的聲音，不模仿特定創作者。**使用者作品為外部依賴、不內嵌**，素材放各專案本地 `200_Reference/writing-samples/`，不足 2 篇時 skill 會停下來要求補齊
 45：agent-dev-coach；完整內嵌 agent 開發五關教練，含六份關卡 reference（拷問／規格／切票／TDD／雙軸審查／PRD 打包）、`spec.schema.json`、HTML 樣板、renderer 與 validator（模糊詞與 schema 雙重把關）與 Codex UI adapter；腳本已改為自我定位，可從學員專案任意工作目錄以絕對路徑呼叫。與 Item 40 的邊界：Item 40 是使用者自己做事的工具箱，本 Item 是帶人的單一連續流程，多了教練話術、HC 標籤、`.agent-flow/` 狀態機與每關必須明確同意才前進的閘門
+47：每週 AI 協作復盤 skill `agent-weekly-review`；跨 repo 收集 git 紀錄、HANDOFF、踩坑筆記與 skills 預算，數字＋分區＋最多三件待拍板，可與筆記庫每週整理串成同一份清單
 46：Cloudflare + D1 OAuth 讀寫安裝；不是 skill，整合 Wrangler CLI、Cloudflare API MCP、Codex／Claude／AntiGravity adapters、六項 MCP 權限、OAuth 逾時防重複、新對話 GET-only 驗收與撤銷流程。為複製實測效果而授予 D1 Write，但安裝驗收不使用寫入能力
 ```
 
@@ -198,7 +202,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 跨 Agent 全域 skills | `{{SYNC_ROOT}}/skills` | 三個 Agent 共用的 skill package 主版本 |
 | Chezmoi bootstrap | `{{CHEZMOI_SOURCE}}` | 維護三個 Agent 的原生規則／skills 入口 templates；不保存 secrets |
 | Agent 原生入口 | `{{CODEX_HOME}}/*`、`{{CLAUDE_HOME}}/*`、`{{GEMINI_HOME}}/*` | symlink 到共享主版本，不複製內容 |
-| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/<序號>-主題.md` | Items 01～46 依各文件標示內嵌公開可散布內容或提供可重跑 runbook；Item 39 只含私人來源橋接 installer／verifier |
+| LazyPack 安裝文件 | `{{SETUP_REPO}}/200_Reference/lazy-pack/<序號>-主題.md` | Items 01～47 依各文件標示內嵌公開可散布內容或提供可重跑 runbook；Item 39 只含私人來源橋接 installer／verifier |
 | 全域 Python 工具 runtime | `{{CODEX_HOME}}/python-tools` | 每台電腦本機重建的 Python 工具 venv 與 wrapper；供 Codex／Claude／AntiGravity 和所有專案共用，Google Workspace MCP 也使用這個 runtime，不放模型或技能專屬 runtime |
 | 三 Agent Python 中立入口 | `{{HOME}}/.local/share/agent-tools/python-tools` | Item 16 的 chezmoi symlink，指向該機器的 Python tools runtime；三個 Agent 都從它的 `bin` 呼叫相同 wrapper |
 | 三 Agent Python env loader | `{{HOME}}/.config/agent-tools/python-tools.env` | Item 16 建立；透過不覆蓋既有內容的 `.zshenv`／`.zprofile`／`.profile`／`.bash_profile` 標記區塊載入 PATH |
@@ -261,7 +265,8 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 37 | Engineering Methods Skill Suite | [[40-Engineering-Methods-Skill-Suite-安裝]] | 可直接安裝；22 個穩定工程／生產力 skills、跨 Agent adapters、完整上游 manifest 與只讀更新檢查；`grill-me` 是套件成員，`engineering-methods` 是統一路由 |
 | 38 | `clasp-setup` | [[41-Clasp-Apps-Script-Skill-安裝]] | 可直接安裝；clasp v3 CLI-first，支援 Apps Script 既有／新專案、原始碼同步、push 閘門、deployment 與 API 返回 Web App URL；MCP 僅為明確要求才評估的實驗路線 |
 | 39 | Cloudflare + D1 OAuth | [[46-Cloudflare-D1-OAuth-安裝]] | 互動式安裝 runbook；Wrangler 與 Cloudflare API MCP 取得 D1 讀寫權限，但驗收只列出 D1、只使用 GET；內含帳號衝突、keychain、六項選權、OAuth 逾時重試與三 Agent adapter |
-| 40 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 40 | `agent-weekly-review` | [[47-Agent-Weekly-Review-Skill-安裝]] | 可直接安裝；每週協作復盤，唯讀收集跨 repo git 紀錄、HANDOFF、踩坑筆記與 skills 預算，預設只在對話輸出週報，使用者同意才寫檔 |
+| 41 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
