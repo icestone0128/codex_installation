@@ -4,7 +4,7 @@
 > 用途：讓下載者從零開始設定 Codex、Claude、AntiGravity 共用的全域規則與 skills，以及 plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
 
-2026-09-18 更新：新增 [[47-Agent-Weekly-Review-Skill-安裝]]，內嵌 `agent-weekly-review` 每週協作復盤 skill 與唯讀訊號收集腳本；預設只在對話輸出週報，使用者同意才寫檔。
+2026-09-20 更新：`agent-weekly-review` 已與 Obsidian 每週知識重整 automation 串接；automation 完成 vault 重整後先詢問是否執行協作復盤，確認後才執行，並仍只在對話輸出週報，使用者同意才寫檔。
 
 2026-09-15 更新：新增 [[46-Cloudflare-D1-OAuth-安裝]]，將 `mathruffian-dot/cloudflare-d1-oauth-agent-guide` v1.1 與實際安裝經驗整合成一份可重跑的讀寫版 runbook。Wrangler 限定 `account:read`、`user:read`、`d1:write` 並使用 OS keychain；Cloudflare API MCP 只核准 User、Account、Offline access、D1 Metadata Read、D1 Read、D1 Write 六項。驗收仍為 GET-only，空 D1 清單也算通過，不為證明寫入權限而建立或修改雲端資源。
 

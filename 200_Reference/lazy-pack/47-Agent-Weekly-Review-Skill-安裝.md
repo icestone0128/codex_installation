@@ -214,11 +214,11 @@ metadata:
 
 `obsidian-weekly-knowledge-refresh-secondbrain` 整理的是筆記庫，本 skill 盤點的是人與 AI 的協作，兩者資料來源不同、不重疊。固定順序是**先 vault 後協作**：
 
-1. 跑完 vault 每週知識重整，取得本週筆記與 `知識庫/log.md` 的更新結果。
+1. 跑完 vault 每週知識重整，取得本週筆記與 `知識庫/log.md` 的更新結果。由「Obsidian 每週知識重整」automation 觸發時，先詢問使用者是否接續執行本 skill，確認後才開始。
 2. 接著跑本 skill；vault 那一輪列出的待確認項目，一併納入本週報的「需要你拍板」，不要讓使用者在兩份報告之間自己對照。
 3. 兩份都完成後，在 Obsidian 週報標明「vault 重整已同步完成」。
 
-使用者只跑其中一個時不要自動補跑另一個，問一句就好。
+使用者單獨手動要求其中一個時不要自動補跑另一個，問一句就好；完整的「Obsidian 每週知識重整」automation 流程也必須先詢問，不能把 vault automation 視為已同意協作復盤。
 
 ## 停止條件（必須問人）
 
