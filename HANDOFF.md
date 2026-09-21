@@ -2,27 +2,21 @@
 
 ## Current state
 
-2026-09-17 完成一輪外部教材比對整合，全部已推送至 `origin/main`（改寫歷史後的 HEAD `fad9a77`）：
-
-- 危險指令攔截：Claude deny 新增萬用字元規則，補擋旗標在後的 force push／`reset --hard`／`branch -D`（主檔 `cross-device-sync/assets/agent-guardrails.json`）；Codex 前綴比對限制照舊記錄。
-- 規則：刪使用者檔案改用 `trash`；提問選項不做假輸入框；commit／push 前新增 `gh repo view` 可見性實查、只 add 指定檔案、50 MB 大檔掃描；第三方教材整合規則放回，出處只記在私有位置不進 GitHub。
-- Google Workspace MCP：Codex、Claude、AntiGravity 統一走本機 `127.0.0.1:8000/mcp`；Codex 同義 Google plugins 停用；權限擴為 calendar／drive／gmail／docs／sheets／slides，OAuth 已重新同意。Item 02 安裝腳本支援 `--agent all|claude|codex|antigravity`。
-- `cross-device-sync`：開工／收工 checkpoint 新增唯讀 `audit-agent-parity.py`（三 Agent 必要 MCP、Codex 同義 plugins、`AGENTS.override.md`）。
-- Git 歷史已改寫移除外部教材出處字樣，201 個 commit 保留、最新檔案樹不變；本機已 `reset --hard origin/main` 對齊。
-- LazyPack 補齊今天所有修改：Item 09 內嵌公開版 `core-rules.md`（先前只 `touch` 空檔）、上游來源登錄表範本與兩個安裝決定；Item 02 三個安裝決定、擴權步驟與踩坑、`--check` 依實際權限驗證；Item 03 `core.quotepath`、commit 前檢查、Git 歷史字樣清除流程；Item 11 改寫比對腳本與驗證器修正；Item 16 歷史清除腳本。knowledge 與 core-rules 內嵌由私有腳本 `workflows/lazypack-knowledge-embeds.py` 重建（11 份一致）。
-
-- 84 個 skill 的 description 全部壓到 ≤90 字元（總量 11,264 → 5,985），Codex prompt 實測 0 個被截斷、無預算警告；先前 13 個只寫功能者一併補上觸發情境
-- 每週協作復盤：新增全域 skill `agent-weekly-review`（唯讀收集腳本＋週報流程，預設不寫檔），LazyPack Item 47；與 `obsidian-weekly-knowledge-refresh-secondbrain` 串接為「先筆記庫後協作」，週報落點 Obsidian `專案庫/codex_installation/週報/`。
-- 交付回報紀律：`core-rules.md` 新增〈交付回報與驗收〉（四種狀態、紅旗詞自查、證據當次取得、大任務新對話驗收），細節為 `verification-checklist.md` Phase 7 並接進收工必查、PR 必查與變更規模對照表；兩份皆內嵌於 LazyPack Item 09。
+- Supabase Dashboard 已用 GitHub 帳號登入；官方 Supabase CLI 2.117.0 已透過 Homebrew 安裝並完成本機登入。
+- 第一枚 PAT 因完整值進入瀏覽器自動化輸出而立即撤銷；替代 PAT 只經頁面 Copy 與本機剪貼簿交給 CLI，沒有寫入 repo、LazyPack、Obsidian 或 Agent 設定。
+- `supabase projects list` 退出碼為 0，帳號目前有 0 個 cloud project；未建立 organization、project、database、migration 或 Edge Function，也沒有執行部署。
+- LazyPack 新增 Item 48 與 README 導覽，已同步 Obsidian 鏡像並推送 commit `151bab1` 至 `origin/main`。
+- 私有 `upstream-sources.md` 與 `我的工具清單.md` 已以 Claude Code 的最新版本為基礎補寫，Arry 助手過濾鏡像驗證通過。
 
 ## Next action
 
-1. 本週日跑自動化時試跑 `agent-weekly-review`，確認五個數字、待拍板 ≤3 與「先筆記庫後協作」串接實際可用；趨勢 CSV 第一列在該次建立。
+1. 真正要部署應用程式時，先決定 Supabase organization、project 名稱、region 與 database password，再另開任務建立 project。
+2. 在應用程式 repo 執行 `supabase init`、`supabase link --project-ref <REF>`、`supabase db push --dry-run`；只有審查 migration 後才執行部署。
 
 ## Blockers
 
-無。
+目前沒有技術阻塞；部署尚缺目標 cloud project 的建立決定。
 
 ## Last verified
 
-2026-09-18 06:48 CST，AntiGravity：成功呼叫 `google-workspace` MCP 之 `list_calendars` 並正確取得 7 個日曆，驗證 `mcp_config.json` 的 `serverUrl` 設定完全正常使用；Obsidian 駕駛艙已同步更新。
+2026-09-21 23:50 CST，Codex：`supabase --version` 回傳 2.117.0；`supabase projects list` 退出碼 0 且 projects 為空；LazyPack／Arry 助手 Obsidian 鏡像 `diff -qr` 通過；public repo、staged secret 與 50 MB 檢查通過；Item 48 已推送至 `origin/main`。
