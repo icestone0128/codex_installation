@@ -55,6 +55,7 @@ Obsidian vault：`{{OBSIDIAN_VAULT}}`
 - 新增、修改、刪除任何全域 skill 後，一律同步更新上述 Obsidian 筆記。
 - 全域 skill 的主版本是 symlink 實體目錄 `{{SYNC_ROOT}}/skills`；LazyPack 不是主版本，而是 repo 內可公開 push、可讓使用者下載安裝的自含式可攜化版本。
 - 新增、修改、刪除 symlink 實體目錄內任何全域 skill 後，也要同步更新 repo `200_Reference/lazy-pack/` 對應序號文件中的「內建 Skill 完整安裝內容」，讓 LazyPack 自含式安裝內容覆蓋所有應公開安裝的全域 skills、必要 references/scripts/assets 與安裝說明。
+- LazyPack 不寫死任何軟體版本（2026-09-22 使用者決定）：安裝器一律在安裝當下抓最新版（npm `@latest`、pip／uv 不加 `==` 並用 `--upgrade`、GitHub release 用 API 查最新版並以 release 公布的 SHA-256 驗證、git 來源追蹤上游預設分支），文件也不寫「目前版本是 X」。例外只有四類：上游要求的 Python 直譯器相容上限（如 `--python 3.12`，要寫明理由）、產生的 HTML／影片範本裡的 CDN 函式庫網址、最低需求寫法（「X 以上」）、上游審查紀錄的 commit 與內嵌快照版本。任何 LazyPack 變更後都要跑 `200_Reference/scripts/check-lazypack-version-pins.py`，必須是 `0 version pin(s)`；要修就修主版本（skill、repo 腳本或 knowledge），不直接改產生出來的內嵌內容。
 - LazyPack 允許和全域 skills 目錄結構不同：可用一份序號文件包多個 skills，也可包含 MCP、plugin、Obsidian、GitHub、Firebase、NotebookLM 等非 skill 安裝項目；但 README 的安裝總表必須清楚標出哪些是完整內嵌安裝、哪些只是外部依賴或必裝檢查。
 - 個人專用或含個人記憶/身份設定的全域 skill 不放入公開 LazyPack；目前 `future-coach` 是 Arry 個人專用 skill，不公開安裝，也不算 LazyPack 缺口。
 - 同步後要實際比對 `{{SYNC_ROOT}}/skills`、Codex／Claude／AntiGravity 三個原生入口、`200_Reference/lazy-pack/` 對應序號文件內嵌的 skill 名稱、LazyPack README 安裝總表與 Obsidian `全域 Skills 同步.md`；不可只更新其中一處。

@@ -2,7 +2,7 @@
 
 > 2026-09-17 更新：Google Workspace MCP 改為三 Agent 共用；安裝腳本支援 `--agent all|claude|codex|antigravity`，Codex 會停用同義的 Gmail／Google Calendar／Google Drive plugins，AntiGravity 以 `serverUrl` 寫入 `mcp_config.json`；本機權限範圍新增 `docs:full sheets:full slides:full`（擴權後需重新完成 OAuth 同意，並在 Google Cloud 啟用 Docs、Sheets、Slides API）。
 >
-> 2026-07-30 更新：新增 Claude-first 的 Google Workspace MCP 必要項，固定使用 `workspace-mcp==1.22.2`、本機 loopback HTTP 與共用 Python runtime；完整 installer、runner 與 macOS LaunchAgent template 放在 `02-assets/google-workspace-mcp/`。MCP 仍採「共用服務契約＋Codex／Claude／AntiGravity 原生 adapter」。
+> 2026-07-30 更新：新增 Claude-first 的 Google Workspace MCP 必要項，安裝時自動取 `workspace-mcp` 最新版、本機 loopback HTTP 與共用 Python runtime；完整 installer、runner 與 macOS LaunchAgent template 放在 `02-assets/google-workspace-mcp/`。MCP 仍採「共用服務契約＋Codex／Claude／AntiGravity 原生 adapter」。
 >
 > 2026-08-02 更新：Google Workspace MCP 由使用者明確要求改為可實際操作，權限提升為 Drive／Gmail／Calendar `full` 加 `--tool-tier complete`，取代原本的 core read-only 預設。擴權後仍維持 loopback-only 綁定與 secrets 隔離，且寫入類動作（寄信、刪檔、修改行事曆）在各 Agent 執行前仍需逐次向使用者確認。
 
@@ -128,7 +128,7 @@ tool_timeout_sec = 120
 
 ## Google Workspace MCP（三 Agent 共用必要項）
 
-用途：讓 Codex、Claude、AntiGravity 透過同一個本機 MCP 使用 Drive／Gmail／Calendar，權限邊界、OAuth 授權與工具行為集中在一處。來源是 [taylorwilsdon/google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)，Python package 固定為 `workspace-mcp==1.22.2`；更新版本前要先重跑權限與工具清單驗證。
+用途：讓 Codex、Claude、AntiGravity 透過同一個本機 MCP 使用 Drive／Gmail／Calendar，權限邊界、OAuth 授權與工具行為集中在一處。來源是 [taylorwilsdon/google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)，Python package 為 `workspace-mcp`，安裝與重跑安裝器時一律取 PyPI 最新版；每次安裝或更新後都要重跑權限與工具清單驗證。
 
 新安裝的建議起點是最小權限；本機目前這台則是使用者明確要求後的可操作設定：
 
@@ -319,11 +319,10 @@ AntiGravity 驗證：改完 `mcp_config.json` 後重新載入 AntiGravity，請�
 
 ### 5. 更新、停用與撤銷
 
-版本更新必須明確指定並重新驗證：
+更新到最新版就是重跑安裝器（會自動取最新版），完成後重跑上方的權限與工具清單驗證：
 
 ```bash
-WORKSPACE_MCP_VERSION=<已審查版本> \
-  bash 02-assets/google-workspace-mcp/install_google_workspace_mcp.sh
+bash 02-assets/google-workspace-mcp/install_google_workspace_mcp.sh
 ```
 
 停用 Claude adapter：

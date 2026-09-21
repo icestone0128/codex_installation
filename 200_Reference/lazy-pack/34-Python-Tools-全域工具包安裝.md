@@ -14,10 +14,9 @@
 - PDF：`pypdf`、`PyMuPDF`、`pdfplumber`、`pdf2image`、`reportlab`、`fpdf2`、`ocrmypdf`
 - 圖片與圖表：`pillow`、`matplotlib`、`qrcode`
 - 轉檔與 AI 前處理：`markitdown[pdf,docx,pptx,xlsx]`
-- 影音輔助：`edge-tts`、`yt-dlp`、`youtube-transcript-api`、Groq SDK
-  `1.6.0`、ElevenLabs SDK `2.59.0`、OpenCC
-  `opencc-python-reimplemented 0.1.7`
-- 影片共用命令：官方 Auto-Editor `31.4.0` standalone、FFmpeg Full
+- 影音輔助：`edge-tts`、`yt-dlp`、`youtube-transcript-api`、Groq SDK、ElevenLabs SDK、OpenCC
+  `opencc-python-reimplemented`（全部安裝時取最新版）
+- 影片共用命令：官方 Auto-Editor standalone（安裝時查 GitHub 最新 release，並用 release 公布的 SHA-256 驗證）、FFmpeg Full
   `ffmpeg` / `ffprobe` wrappers；FFmpeg Full 含 `subtitles`、`ass`、
   `drawtext` 與 libass
 - Windows Office 自動化項：`pywin32`。這是 Windows-only；安裝腳本只會在 Windows native bash (`MINGW` / `MSYS` / `CYGWIN`) 環境加入，不安裝到 macOS / Linux / WSL runtime。
@@ -250,15 +249,14 @@ tesseract --list-langs | grep -E '^(chi_tra|chi_sim|eng|osd)$'
 本機已完成：
 
 - 建立 `{{CODEX_HOME}}/python-tools/teaching-file-tools/.venv`
-- 使用 `uv` 建立 Python 3.12.13 venv，避開系統 Python 3.14.6 的套件相容風險
+- 使用 `uv` 建立 Python 3.12 venv，避開系統最新版 Python 的套件相容風險（Python 3.12 是相容上限，不是鎖定套件版本）
 - 安裝來源工具包指定的核心 Python 套件與影音選用套件；`markitdown` 改用 `markitdown[pdf,docx,pptx,xlsx]`，確保 PDF / Word / PowerPoint / Excel 轉 Markdown 依賴完整
-- 影音共用工具更新為 Auto-Editor `31.4.0`、FFmpeg Full `8.1.2_1`、
-  ImageMagick `7.1.2-29`、Groq SDK `1.6.0`、ElevenLabs SDK `2.59.0`
-  與 OpenCC `0.1.7`
+- 影音共用工具 Auto-Editor、FFmpeg Full、ImageMagick、Groq SDK、ElevenLabs SDK
+  與 OpenCC 一律安裝當下最新版；重跑安裝器即更新
 - FFmpeg Full 已驗證 `subtitles`、`ass`、`drawtext`、`loudnorm` 與
   `sidechaincompress`；一般 Homebrew FFmpeg 可並存，但三 Agent PATH
   優先使用共用 Full wrapper
-- 安裝 `tesseract 5.5.2`、`tesseract-lang 4.1.0` 與 `ghostscript 10.07.1`，並確認 `poppler` / `pdftoppm`、`ffmpeg`、`soffice` 可用；語言包包含 `chi_tra`、`chi_sim`、`eng`、`osd`
+- 安裝 `tesseract`、`tesseract-lang` 與 `ghostscript`（Homebrew 最新版），並確認 `poppler` / `pdftoppm`、`ffmpeg`、`soffice` 可用；語言包包含 `chi_tra`、`chi_sim`、`eng`、`osd`
 - 保留 `{{HOME}}/.cache/uv` 與 `{{HOME}}/.local/share/uv` 原位，不移入 `python-tools`
 - 將技能 runtime 整理為本機實體資料夾：`{{CODEX_HOME}}/audio-to-md`、`{{CODEX_HOME}}/voxcpm2-voice-cloner`、`{{CODEX_HOME}}/doc-to-md`、`{{CODEX_HOME}}/vlm-to-md`
 - 移除舊路徑 symlink，並把實際入口改成對應的 `{{CODEX_HOME}}/<skill-name>` 路徑
@@ -297,7 +295,7 @@ VoxCPM2 doctor：通過，mps=True
 
 ## 踩坑與修正
 
-- `python3` 是 3.14.6 時，不適合直接當教學工具 runtime 基準；改用 `uv venv --python 3.12`。
+- 系統 `python3` 若已是最新版（例如 3.14），部分套件還沒有對應 wheel，不適合直接當教學工具 runtime 基準；改用 `uv venv --python 3.12`。
 - `uv` venv 不一定內建 `pip`，不要用 `python -m pip freeze` 當唯一驗證；可用 `uv pip` 或 `importlib.metadata`。
 - `markitdown` 只裝裸套件時不一定包含所有文件格式依賴；安裝腳本固定使用 `markitdown[pdf,docx,pptx,xlsx]`，驗證腳本另外檢查 `mammoth`，避免 Word 轉 Markdown 依賴缺漏。
 - `{{HOME}}/.cache/uv` 是 uv cache，維持原位；`{{HOME}}/.local/share/uv` 是 uv tool 安裝清單與工具環境，也維持原位。
@@ -370,7 +368,6 @@ UV_BIN="${UV_BIN:-}"
 INSTALL_SYSTEM_TOOLS="${INSTALL_SYSTEM_TOOLS:-1}"
 INSTALL_OFFICE_TOOLS="${INSTALL_OFFICE_TOOLS:-0}"
 INSTALL_AUTO_EDITOR="${INSTALL_AUTO_EDITOR:-1}"
-AUTO_EDITOR_VERSION="${AUTO_EDITOR_VERSION:-31.4.0}"
 EXTRA_PIP_PACKAGES=()
 
 log() {
@@ -421,37 +418,52 @@ fi
 
 mkdir -p "$PYTHON_TOOLS_HOME/bin" "$PYTHON_TOOLS_HOME/matplotlib-cache"
 
+# Python 3.12 is a compatibility ceiling, not a version pin: several teaching/media packages
+# do not yet ship wheels for the newest system Python. All packages below install latest.
 "$UV_BIN" venv --python 3.12 "$PYTHON_TOOLS_VENV"
+
+# Resolve the newest stable GitHub release asset and its SHA-256 digest at install time.
+# Prints "<download-url> <sha256>"; refuses to continue when GitHub publishes no digest.
+github_latest_asset() {
+  repo="$1"
+  asset="$2"
+  curl --http1.1 -fsSL --retry 5 --retry-delay 2 \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/repos/$repo/releases/latest" \
+    | "$PYTHON_TOOLS_VENV/bin/python" -c '
+import json, sys
+asset = sys.argv[1]
+release = json.load(sys.stdin)
+for item in release.get("assets", []):
+    if item.get("name") == asset:
+        digest = (item.get("digest") or "").removeprefix("sha256:")
+        if not digest:
+            sys.exit("release asset has no published SHA-256 digest: " + asset)
+        print(item["browser_download_url"], digest, release.get("tag_name", ""))
+        break
+else:
+    sys.exit("asset not found in latest release: " + asset)
+' "$asset"
+}
 
 install_auto_editor() {
   os="$(uname -s)"
   arch="$(uname -m)"
   case "$os/$arch" in
-    Darwin/arm64)
-      asset="auto-editor-macos-arm64"
-      digest="14707c80f4fae359c344e160b028366ec7de3b85362df11067ea1c01422ea799"
-      ;;
-    Darwin/x86_64)
-      asset="auto-editor-macos-x86_64"
-      digest="de2fa7ab430f5e7252c4b0a495338e10bbcce4537d7d9b0409f43c57aad972ff"
-      ;;
-    Linux/aarch64|Linux/arm64)
-      asset="auto-editor-linux-aarch64"
-      digest="83217a9e2117ea628c90b6bb1981c3aa22902cd33a245b743196039b4feb6865"
-      ;;
-    Linux/x86_64)
-      asset="auto-editor-linux-x86_64"
-      digest="495aafb6609e2ab8155f2ff854f213907457c84743ad0ed0ce6f5c7123fea670"
-      ;;
+    Darwin/arm64) asset="auto-editor-macos-arm64" ;;
+    Darwin/x86_64) asset="auto-editor-macos-x86_64" ;;
+    Linux/aarch64|Linux/arm64) asset="auto-editor-linux-aarch64" ;;
+    Linux/x86_64) asset="auto-editor-linux-x86_64" ;;
     *)
-      log "No pinned Auto-Editor binary for $os/$arch; install the official release manually."
+      log "No official Auto-Editor binary for $os/$arch; install the official release manually."
       return
       ;;
   esac
 
+  read -r url digest tag < <(github_latest_asset "WyattBlue/auto-editor" "$asset")
+  log "Auto-Editor latest release: $tag"
   temp_dir="$(mktemp -d)"
   archive="$temp_dir/$asset"
-  url="https://github.com/WyattBlue/auto-editor/releases/download/$AUTO_EDITOR_VERSION/$asset"
   curl --http1.1 -fL --retry 5 --retry-delay 2 "$url" -o "$archive"
   if command -v shasum >/dev/null 2>&1; then
     printf '%s  %s\n' "$digest" "$archive" | shasum -a 256 -c -
@@ -472,12 +484,12 @@ case "$(uname -s)" in
     ;;
 esac
 
-"$UV_BIN" pip install \
+"$UV_BIN" pip install --upgrade \
   --python "$PYTHON_TOOLS_VENV/bin/python" \
   python-docx docxcompose openpyxl xlsxwriter pandas python-pptx \
   pypdf PyMuPDF pdfplumber pdf2image reportlab fpdf2 pillow matplotlib \
   qrcode 'markitdown[pdf,docx,pptx,xlsx]' ocrmypdf docx2pdf edge-tts yt-dlp youtube-transcript-api \
-  'groq==1.6.0' 'elevenlabs==2.59.0' 'opencc-python-reimplemented==0.1.7' \
+  groq elevenlabs opencc-python-reimplemented \
   "${EXTRA_PIP_PACKAGES[@]}"
 
 cat > "$PYTHON_TOOLS_HOME/bin/python-tools-python" <<SH

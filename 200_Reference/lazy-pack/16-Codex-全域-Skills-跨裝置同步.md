@@ -901,8 +901,8 @@ Use this mapping when converting a single-agent source guide:
 
 For Arry's Codex adapter, keep `~/.codex/memories` as the symlink to `SYNC_ROOT/memories` and
 set `[features] memories = false`, `generate_memories = false`, and `use_memories = false` in
-the device-local `config.toml`. Codex 0.153.4 rejects a symlink memory root during native
-memories startup. The portable four-tier memory remains active through `arry-assistant`,
+the device-local `config.toml`. Codex (as last tested; re-test after upgrades) rejects a symlink memory root during
+native memories startup. The portable four-tier memory remains active through `arry-assistant`,
 `startup-sync`, and `shutdown-sync`; never replace it with a second local memory directory.
 
 ## Sync Route Guidance

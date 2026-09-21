@@ -11,7 +11,7 @@
 - 來源 commit：`a0171ce`。
 - 2026-06-04 已補入 Groq Python SDK 安裝、Groq Google 登入建立 API key、安全複製與 `{{SECRETS_DIR}}/groq_api_key` 保存流程。
 - 2026-06-29 依實際重跑影片後製流程，補入 `espeakng-loader` 檢查、專案詞彙表 `200_Reference/vocabulary.md`、CFR source 保留、SRT 清理順序與 ffprobe 驗收。
-- 2026-07-28 補入官方 Auto-Editor 31.4.0、FFmpeg Full、ImageMagick、
+- 2026-07-28 補入官方 Auto-Editor、FFmpeg Full、ImageMagick、
   faster-whisper、whisper.cpp、SenseVoice、MacWhisper、BGM ducking 與
   FFmpeg/libass 字幕 routes；本機模型與 binary 由內建 optional tools
   installer 重建。
@@ -32,7 +32,7 @@
 
 ## 前置條件
 
-- LazyPack Item 34 的共用 Python 3.12 runtime、Auto-Editor 31.4.0、
+- LazyPack Item 34 的共用 Python 3.12 runtime、Auto-Editor（安裝時取最新版）、
   FFmpeg Full、ImageMagick、Groq／ElevenLabs／OpenCC packages。
 - 執行本 Skill 的
   `scripts/install_optional_video_tools.sh`，安裝 whisper.cpp 模型、
@@ -112,8 +112,7 @@ test -d "{{SYNC_ROOT}}/skills/video-processing-automation/scripts" && echo "scri
   的 SRT route。
 - 官方 Python `openai-whisper` 與 faster-whisper 功能重複，且會加入
   PyTorch 與另一份大型模型，已從本工作流移除。
-- Arry 本機 MacWhisper 14.4.1 的 `mw` CLI 已實測可用；不同安裝版本或
-  授權需先驗證 `macwhisper-cli --help`，其 SRT 仍要做繁中與時間碼驗證。
+- MacWhisper 的 `mw` CLI 已實測可用；每次安裝或升級後，以及不同授權，都需先驗證 `macwhisper-cli --help`，其 SRT 仍要做繁中與時間碼驗證。
 - Homebrew `ffmpeg-full` 是 keg-only；必須經 Item 34 共用 wrapper，
   不能只看 `/opt/homebrew/bin/ffmpeg`。
 - `resegment.py` 需要 word-level JSON；本地 Whisper segment-only SRT 不適合重切。
@@ -1201,8 +1200,8 @@ python-tools-python \
 
 ### MacWhisper
 
-MacWhisper is the last Whisper option. Arry's installed MacWhisper 14.4.1
-exposes a working `mw` CLI. Treat this as an installation-dependent option and
+MacWhisper is the last Whisper option. MacWhisper exposes a working `mw` CLI
+(re-verify after every upgrade). Treat this as an installation-dependent option and
 verify it instead of assuming a license tier:
 
 ```bash
@@ -1414,7 +1413,7 @@ not wanted. The video stream is copied without scaling, reframing, or cropping.
 | faster-whisper | SRT | Local; Item 33 runtime | First fallback when Groq is unavailable or local-only |
 | whisper.cpp `whisper-cli` | SRT | Local; standalone q5 model | Explicit fast Apple Silicon preview |
 | SenseVoice | TXT + optional rich tags | Local; native q8 model | Chinese/Cantonese cross-check, emotion, and audio events |
-| MacWhisper 14.4.1 | SRT + manual exports | Local; installed build/license | Last Whisper option and GUI/manual review |
+| MacWhisper | SRT + manual exports | Local; installed build/license | Last Whisper option and GUI/manual review |
 
 Use the shared router for normal work so a lower-level example cannot invert
 the preference:
@@ -1816,8 +1815,8 @@ cat > "{{SYNC_ROOT}}/skills/video-processing-automation/references/stt-route-gui
   **whisper.cpp** 來自 `ggml-org/whisper.cpp`。後兩者都是在本機執行
   Whisper 模型的替代引擎，可使用同系列模型，但程式、模型格式、速度與
   記憶體需求不同。
-- **MacWhisper** 是包裝 Whisper 的 macOS 應用程式；Arry 目前安裝的
-  14.4.1 已實測可使用內建 `mw` CLI，但不同版本或授權需先跑 `mw --help`
+- **MacWhisper** 是包裝 Whisper 的 macOS 應用程式；已實測可使用
+  內建 `mw` CLI，但每次升級或不同授權都需先跑 `mw --help`
   驗證，不由工作流猜測。
 - **SenseVoice** 不是 Whisper。它是另一套語音理解模型，除了轉文字，也能
   判斷語言、情緒，以及音樂、笑聲、掌聲、咳嗽等聲音事件。
@@ -1831,7 +1830,7 @@ cat > "{{SYNC_ROOT}}/skills/video-processing-automation/references/stt-route-gui
 | faster-whisper `large-v3-turbo` | SRT | 分段與時間碼適合正式字幕；沿用既有 audio-to-md runtime | 在 Apple M2 CPU 上較慢 | Groq 無法使用時的第一備援 |
 | whisper.cpp `large-v3-turbo-q5_0` | SRT | Apple Silicon Metal 加速、啟動快、模型較小 | q5 量化可能有輕微精度損失 | 明確要求快速預覽時使用 |
 | SenseVoice Small q8 | TXT + 語言／情緒／事件標籤 | 中文、粵語快，能做 Whisper 沒有的語音理解 | 目前 pinned native runtime 沒有可用的 SRT 時間碼 | 中文校對與內容分析 |
-| MacWhisper 14.4.1 | SRT／多種匯出 | GUI 與目前可用的 `mw` CLI | 授權依安裝狀態；本次時間碼需額外驗證 | Whisper 路線最後選項 |
+| MacWhisper | SRT／多種匯出 | GUI 與目前可用的 `mw` CLI | 授權依安裝狀態；本次時間碼需額外驗證 | Whisper 路線最後選項 |
 
 官方 Python `openai-whisper` 經 2026-07-29 實裝與同場測試後沒有保留。
 CPU 版與 faster-whisper 在三段測試音訊的文字幾乎相同，但轉錄明顯更慢；
@@ -1850,9 +1849,9 @@ MPS 版另有逐字時間碼失敗、英文空白與混合語言退化問題。�
 | 路線 | 繁中 CER／耗時 | 英文 WER／耗時 | 混合 CER／英文詞／耗時 | 本機模型大小 |
 | --- | ---: | ---: | ---: | ---: |
 | Groq `whisper-large-v3-turbo` | 0%／0.93 秒 | 0%／0.68 秒 | 16.2%／80%／0.90 秒 | 0 |
-| whisper.cpp 1.9.1 q5_0 | 0%／3.43 秒 | 0%／2.39 秒 | 16.2%／80%／2.49 秒 | 0.535 GiB |
-| MacWhisper 14.4.1 WhisperKit large-v3 | 0%／7.54 秒 | 0%／2.11 秒 | 16.2%／80%／2.27 秒 | 1.511 GiB |
-| faster-whisper 1.2.1 CPU int8 | 0%／7.27 秒 | 0%／6.82 秒 | 16.2%／80%／7.07 秒 | 1.507 GiB |
+| whisper.cpp q5_0 | 0%／3.43 秒 | 0%／2.39 秒 | 16.2%／80%／2.49 秒 | 0.535 GiB |
+| MacWhisper WhisperKit large-v3 | 0%／7.54 秒 | 0%／2.11 秒 | 16.2%／80%／2.27 秒 | 1.511 GiB |
+| faster-whisper CPU int8 | 0%／7.27 秒 | 0%／6.82 秒 | 16.2%／80%／7.07 秒 | 1.507 GiB |
 | OpenAI 20250625 CPU | 0%／48.31 秒 | 0%／15.90 秒 | 16.2%／80%／21.51 秒 | 1.507 GiB |
 | OpenAI 20250625 MPS | 0%／72.50 秒 | 100%／61.55 秒 | 113.2%／0%／77.41 秒 | 1.507 GiB |
 
@@ -1910,7 +1909,7 @@ MPS 版另有逐字時間碼失敗、英文空白與混合語言退化問題。�
 | Groq Whisper API | 1.09 秒 | 繁中完整，2 個原始段落、69 個 word timestamps；既有 `resegment.py` 產出 6 段合理 SRT；音訊會上傳 |
 | SenseVoice | 2.09 秒 | 中文與標點完整，並輸出 `zh`、`NEUTRAL`、`Speech` 標籤；沒有字幕時間碼 |
 | whisper.cpp | 4.32–4.52 秒 | 內容正確；強制 28 字切段會拆開中文字詞，故預設保留原始長段，只作預覽 |
-| MacWhisper 14.4.1 | 冷啟動 37.80 秒；暖啟動 4.54–5.22 秒 | 內容正確但原始輸出為簡中，且本次第二段開始時間多出約 4 秒，正式使用前要驗證 |
+| MacWhisper | 冷啟動 37.80 秒；暖啟動 4.54–5.22 秒 | 內容正確但原始輸出為簡中，且本次第二段開始時間多出約 4 秒，正式使用前要驗證 |
 | faster-whisper | 11.63–12.74 秒 | 內容正確，原生產生兩個合理時間段，最適合正式 SRT |
 
 同一 Whisper 模型系列的準確率主要受模型大小、量化、音訊品質與解碼參數
@@ -2777,7 +2776,7 @@ SENSEVOICE_HOME="${SENSEVOICE_HOME:-$CODEX_HOME/sensevoice}"
 WHISPER_CPP_HOME="${WHISPER_CPP_HOME:-$CODEX_HOME/whisper-cpp}"
 INSTALL_MACWHISPER="${INSTALL_MACWHISPER:-1}"
 FORCE_MACWHISPER_UPDATE="${FORCE_MACWHISPER_UPDATE:-0}"
-SENSEVOICE_RELEASE="runtime-llamacpp-v0.1.9"
+SENSEVOICE_TAG_PREFIX="runtime-llamacpp-"
 WHISPER_MODEL_NAME="ggml-large-v3-turbo-q5_0.bin"
 
 log() {
@@ -2797,6 +2796,55 @@ sha256_check() {
   fi
 }
 
+
+# Newest stable release whose tag starts with a prefix, plus the asset's SHA-256.
+# Prints "<download-url> <sha256> <tag>"; refuses to continue without a published digest.
+github_latest_asset() {
+  repo="$1"
+  tag_prefix="$2"
+  asset="$3"
+  curl --http1.1 -fsSL --retry 5 --retry-delay 2 \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/repos/$repo/releases?per_page=50" \
+    | python3 -c '
+import json, sys
+prefix, asset = sys.argv[1], sys.argv[2]
+for release in json.load(sys.stdin):
+    if release.get("draft") or release.get("prerelease"):
+        continue
+    if not release.get("tag_name", "").startswith(prefix):
+        continue
+    for item in release.get("assets", []):
+        if item.get("name") == asset:
+            digest = (item.get("digest") or "").removeprefix("sha256:")
+            if not digest:
+                sys.exit("release asset has no published SHA-256 digest: " + asset)
+            print(item["browser_download_url"], digest, release["tag_name"])
+            sys.exit(0)
+    sys.exit("asset missing from newest matching release: " + asset)
+sys.exit("no stable release matches tag prefix: " + prefix)
+' "$tag_prefix" "$asset"
+}
+
+# Current SHA-256 of a Hugging Face LFS file on the main branch.
+hf_sha256() {
+  repo="$1"
+  file="$2"
+  curl --http1.1 -fsSL --retry 5 --retry-delay 2 \
+    "https://huggingface.co/api/models/$repo/tree/main" \
+    | python3 -c '
+import json, sys
+name = sys.argv[1]
+for item in json.load(sys.stdin):
+    if item.get("path") == name:
+        oid = (item.get("lfs") or {}).get("oid", "")
+        if not oid:
+            sys.exit("no LFS SHA-256 published for: " + name)
+        print(oid)
+        sys.exit(0)
+sys.exit("file not found on main branch: " + name)
+' "$file"
+}
 download_with_resume() {
   url="$1"
   target="$2"
@@ -2844,28 +2892,20 @@ install_sensevoice() {
   os="$(uname -s)"
   arch="$(uname -m)"
   case "$os/$arch" in
-    Darwin/arm64)
-      asset="funasr-llamacpp-macos-arm64.tar.gz"
-      digest="2d5786784ad09d8f4def1d942f678728638fe601d00acf0dad7cf094a9328363"
-      ;;
-    Linux/aarch64|Linux/arm64)
-      asset="funasr-llamacpp-linux-arm64.tar.gz"
-      digest="521866e75594e56eb5023b65eb1ecf6ab7c3b5069522b71cd33aa37b8406ed4b"
-      ;;
-    Linux/x86_64)
-      asset="funasr-llamacpp-linux-x64-avx2.tar.gz"
-      digest="51f33822a5191f7963d8ceedba2dd76fe7d810a4388b931b25b8be4f1a8e320d"
-      ;;
+    Darwin/arm64) asset="funasr-llamacpp-macos-arm64.tar.gz" ;;
+    Linux/aarch64|Linux/arm64) asset="funasr-llamacpp-linux-arm64.tar.gz" ;;
+    Linux/x86_64) asset="funasr-llamacpp-linux-x64-avx2.tar.gz" ;;
     *)
-      log "No pinned SenseVoice binary for $os/$arch; install the official runtime manually."
+      log "No official SenseVoice binary for $os/$arch; install the official runtime manually."
       return
       ;;
   esac
 
+  read -r url digest tag < <(github_latest_asset "QwenAudio/SenseVoice" "$SENSEVOICE_TAG_PREFIX" "$asset")
+  log "SenseVoice runtime latest release: $tag"
   temp_dir="$(mktemp -d)"
   trap 'rm -rf "$temp_dir"' EXIT
   archive="$temp_dir/$asset"
-  url="https://github.com/QwenAudio/SenseVoice/releases/download/$SENSEVOICE_RELEASE/$asset"
   download_with_resume "$url" "$archive"
   sha256_check "$digest" "$archive"
   tar -xzf "$archive" -C "$temp_dir"
@@ -2876,17 +2916,15 @@ install_sensevoice() {
   download_with_resume \
     "https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF/resolve/main/sensevoice-small-q8.gguf" \
     "$sensevoice_model"
-  sha256_check \
-    "4ae45c94422de949b387e2e0fb10d7e14e4c42c69db30c3444ecc7d4b844b7c5" \
-    "$sensevoice_model"
+  expected_digest="$(hf_sha256 FunAudioLLM/SenseVoiceSmall-GGUF sensevoice-small-q8.gguf)"
+  sha256_check "$expected_digest" "$sensevoice_model"
 
   vad_model="$SENSEVOICE_HOME/models/fsmn-vad.gguf"
   download_with_resume \
     "https://huggingface.co/FunAudioLLM/fsmn-vad-GGUF/resolve/main/fsmn-vad.gguf" \
     "$vad_model"
-  sha256_check \
-    "1270f2559c495f4e7b6e739541151027d360761a3fda43fc147034f5719f5479" \
-    "$vad_model"
+  expected_digest="$(hf_sha256 FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf)"
+  sha256_check "$expected_digest" "$vad_model"
 }
 
 install_whisper_model() {
@@ -2894,9 +2932,8 @@ install_whisper_model() {
   download_with_resume \
     "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$WHISPER_MODEL_NAME" \
     "$model"
-  sha256_check \
-    "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2" \
-    "$model"
+  expected_digest="$(hf_sha256 ggerganov/whisper.cpp "$WHISPER_MODEL_NAME")"
+  sha256_check "$expected_digest" "$model"
 }
 
 write_wrappers() {

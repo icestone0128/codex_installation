@@ -14,15 +14,15 @@
 - 保留：既有專案 clone／pull、Apps Script Web App 操作、deployment ID 與可選 MCP 提示。
 - 改寫：使用 clasp v3 正式指令 `create-script`、`clone-script`、`create-deployment`、`list-deployments`、`update-deployment`、`open-web-app`。
 - 不吸收：只寫 `~/.claude/skills`、`~/.agents/skills` 的安裝方式、「Node 22+」固定值、個人 Gmail 預設、直接組合 `/macros/s/<id>/exec` URL，以及將實驗性 MCP 當預設。
-- 實際前置以 live npm `engines` 為準；2026-08-12 檢視的 `@google/clasp` 3.3.0 要求 Node `>=20`。
-- 指令相容邊界：3.3.0 的 `create`、`clone`、`deploy`、`deployments`、`list`、`status`、`undeploy` 仍是可用 alias；本 Item 推薦正式 v3 名稱是為了清楚與向前相容，不代表舊名不存在。
+- 實際前置以 live npm `engines` 為準，不寫固定 Node 版本；一律用 `@google/clasp@latest` 取得最新版。
+- 指令相容邊界：clasp v3 指令系列的 `create`、`clone`、`deploy`、`deployments`、`list`、`status`、`undeploy` 仍是可用 alias；本 Item 推薦正式 v3 名稱是為了清楚與向前相容，不代表舊名不存在。
 - 真正破壞相容的舊形態另列：`login --status` 已移除；`open`／`open --web`／`open --addon` 與 `apis enable|disable` 已重整為獨立 v3 指令。
 
 ## 三 Agent 共用契約
 
 - 主版本：`{{SYNC_ROOT}}/skills/clasp-setup`。
 - Codex、Claude、AntiGravity 皆透過 Item 16 的 chezmoi 原生 symlink 入口讀取同一 package。
-- 共用 CLI：`npx -y @google/clasp@3`。
+- 共用 CLI：`npx -y @google/clasp@latest`。
 - 共用安全邊界：OAuth、新建、pull、push、deployment 與刪除都要依操作類型取得明確授權；不把 Agent 的設定格式直接複製給另一個 Agent。
 
 ## 安裝
@@ -38,9 +38,9 @@
 ```bash
 node --version
 npm --version
-npm view @google/clasp@3 version engines --json
-npx -y @google/clasp@3 --version
-npx -y @google/clasp@3 --help
+npm view @google/clasp@latest version engines --json
+npx -y @google/clasp@latest --version
+npx -y @google/clasp@latest --help
 test -f "{{SYNC_ROOT}}/skills/clasp-setup/SKILL.md"
 ```
 
@@ -51,8 +51,8 @@ test -f "{{SYNC_ROOT}}/skills/clasp-setup/SKILL.md"
 ### 登入
 
 ```bash
-npx -y @google/clasp@3 login
-npx -y @google/clasp@3 show-authorized-user --json
+npx -y @google/clasp@latest login
+npx -y @google/clasp@latest show-authorized-user --json
 ```
 
 `login` 會改變本機 OAuth 狀態，必須先說明帳號與 consent 邊界。回報只說明已／未授權，不回傳 email 或 raw JSON。
@@ -60,7 +60,7 @@ npx -y @google/clasp@3 show-authorized-user --json
 ### 既有線上專案
 
 ```bash
-npx -y @google/clasp@3 clone-script "<script-id-or-url>" --rootDir "<source-dir>"
+npx -y @google/clasp@latest clone-script "<script-id-or-url>" --rootDir "<source-dir>"
 ```
 
 已有本機 `.clasp.json` 時，先核對 target、Git 狀態與本地變更；`pull` 會寫入本機，不覆蓋未保存的修改。
@@ -68,20 +68,20 @@ npx -y @google/clasp@3 clone-script "<script-id-or-url>" --rootDir "<source-dir>
 ### 新專案
 
 ```bash
-npx -y @google/clasp@3 create-script --type standalone --title "<title>"
-npx -y @google/clasp@3 create-script --type sheets --title "<title>"
-npx -y @google/clasp@3 create-script --title "<title>" --parentId "<drive-file-id>"
+npx -y @google/clasp@latest create-script --type standalone --title "<title>"
+npx -y @google/clasp@latest create-script --type sheets --title "<title>"
+npx -y @google/clasp@latest create-script --title "<title>" --parentId "<drive-file-id>"
 ```
 
-`--type sheets|docs|slides|forms` 會新建 container 與 bound script；要綁定既有 Drive 檔案時，使用 `--parentId` 的 standalone 路線。clasp 3.3.0 help 文字雖提到 web app／API，實際實作不接受 `--type webapp|api`；Web App 要建 standalone project，再部署對應 entry point。
+`--type sheets|docs|slides|forms` 會新建 container 與 bound script；要綁定既有 Drive 檔案時，使用 `--parentId` 的 standalone 路線。clasp v3 help 文字雖提到 web app／API，實際實作不接受 `--type webapp|api`；Web App 要建 standalone project，再部署對應 entry point。
 
 ### Push 安全閘門
 
 Clasp push 是整個線上專案的來源同步，不是單檔 patch。執行前要核對 `.clasp.json`、`.claspignore`、Git／備份基線與實際上傳清單：
 
 ```bash
-npx -y @google/clasp@3 show-file-status --json
-npx -y @google/clasp@3 push
+npx -y @google/clasp@latest show-file-status --json
+npx -y @google/clasp@latest push
 ```
 
 不為繞過 mismatch 直接使用 `push --force`。
@@ -89,10 +89,10 @@ npx -y @google/clasp@3 push
 ### Web App deployment
 
 ```bash
-npx -y @google/clasp@3 create-deployment --description "<description>"
-npx -y @google/clasp@3 list-deployments
-npx -y @google/clasp@3 --json open-web-app "<deployment-id>"
-npx -y @google/clasp@3 update-deployment "<deployment-id>" --description "<description>"
+npx -y @google/clasp@latest create-deployment --description "<description>"
+npx -y @google/clasp@latest list-deployments
+npx -y @google/clasp@latest --json open-web-app "<deployment-id>"
+npx -y @google/clasp@latest update-deployment "<deployment-id>" --description "<description>"
 ```
 
 以 `open-web-app` 回傳 URL；不將 script ID 當 deployment ID，不手動拼接 `/exec` URL。如要保留原 URL，更新已確認 deployment，不反覆新建。
@@ -140,8 +140,10 @@ steps.
 
 ## Route And Scope
 
-- Use `npx -y @google/clasp@3` by default. A global npm install is optional and
-  requires separate authorization.
+- Use `npx -y @google/clasp@latest` by default so every run resolves the newest
+  release. A global npm install is optional and requires separate authorization.
+- This workflow uses the clasp v3 command family. If `--version` reports a newer
+  major, compare `--help` against `references/clasp-v3-workflow.md` before use.
 - Treat the CLI channel and Google OAuth credential as separate decisions. The
   skill needs no API key.
 - Use this skill for Apps Script project source, manifests, versions, and
@@ -202,13 +204,12 @@ Run these without changing auth or cloud state:
 ```bash
 node --version
 npm --version
-npm view @google/clasp@3 version engines --json
-npx -y @google/clasp@3 --version
-npx -y @google/clasp@3 --help
+npm view @google/clasp@latest version engines --json
+npx -y @google/clasp@latest --version
+npx -y @google/clasp@latest --help
 ```
 
 - Trust the live npm `engines` declaration instead of a hard-coded Node version.
-  At the 2026-08-12 source review, clasp 3.3.0 declared Node `>=20`.
 - If npm cache permissions fail, use a task-specific temporary cache such as
   `NPM_CONFIG_CACHE=/private/tmp/clasp-npm-cache`; do not broaden the whole home
   directory or Homebrew prefix.
@@ -225,8 +226,8 @@ Explain that Google opens a browser, state which account should be selected,
 and let the user complete consent:
 
 ```bash
-npx -y @google/clasp@3 login
-npx -y @google/clasp@3 show-authorized-user --json
+npx -y @google/clasp@latest login
+npx -y @google/clasp@latest show-authorized-user --json
 ```
 
 - In a remote or headless environment, use `login --no-localhost` and wait for
@@ -245,7 +246,7 @@ npx -y @google/clasp@3 show-authorized-user --json
 3. If no local project exists, clone into the confirmed destination:
 
 ```bash
-npx -y @google/clasp@3 clone-script "<script-id-or-url>" --rootDir "<source-dir>"
+npx -y @google/clasp@latest clone-script "<script-id-or-url>" --rootDir "<source-dir>"
 ```
 
 4. Before `pull`, check Git status or create a timestamped backup because pull
@@ -258,14 +259,14 @@ npx -y @google/clasp@3 clone-script "<script-id-or-url>" --rootDir "<source-dir>
 Confirm that the folder has no `.clasp.json`, then choose the project type:
 
 ```bash
-npx -y @google/clasp@3 create-script --type standalone --title "<title>"
-npx -y @google/clasp@3 create-script --type sheets --title "<title>"
-npx -y @google/clasp@3 create-script --title "<title>" --parentId "<drive-file-id>"
+npx -y @google/clasp@latest create-script --type standalone --title "<title>"
+npx -y @google/clasp@latest create-script --type sheets --title "<title>"
+npx -y @google/clasp@latest create-script --title "<title>" --parentId "<drive-file-id>"
 ```
 
 Use `--parentId` without a non-standalone `--type` to bind the script to an
 existing supported Drive file. Use `--type sheets|docs|slides|forms` when clasp
-should create a new container and its bound script. Despite the broad v3.3.0
+should create a new container and its bound script. Despite the broad
 help wording, `--type webapp` and `--type api` are not accepted container types;
 create a standalone script and deploy the required entry point instead.
 Creation is a cloud write and requires confirmation.
@@ -279,14 +280,14 @@ Creation is a cloud write and requires confirmation.
 3. Inspect the exact upload set:
 
 ```bash
-npx -y @google/clasp@3 show-file-status --json
+npx -y @google/clasp@latest show-file-status --json
 ```
 
 4. Confirm the target project and upload set with the user.
 5. Push without force first:
 
 ```bash
-npx -y @google/clasp@3 push
+npx -y @google/clasp@latest push
 ```
 
 6. Report the changed file set and whether the push succeeded. Do not deploy
@@ -301,16 +302,16 @@ npx -y @google/clasp@3 push
 - Use explicit v3 command names:
 
 ```bash
-npx -y @google/clasp@3 create-deployment --description "<description>"
-npx -y @google/clasp@3 list-deployments
-npx -y @google/clasp@3 --json open-web-app "<deployment-id>"
+npx -y @google/clasp@latest create-deployment --description "<description>"
+npx -y @google/clasp@latest list-deployments
+npx -y @google/clasp@latest --json open-web-app "<deployment-id>"
 ```
 
 - To preserve an existing URL, update the confirmed deployment instead of
   creating another one:
 
 ```bash
-npx -y @google/clasp@3 update-deployment "<deployment-id>" --description "<description>"
+npx -y @google/clasp@latest update-deployment "<deployment-id>" --description "<description>"
 ```
 
 - Use the URL returned by `open-web-app`; never substitute `scriptId` for
@@ -339,7 +340,7 @@ npx -y @google/clasp@3 update-deployment "<deployment-id>" --description "<descr
 
 ## Agent Execution Notes
 
-- Shared steps: use the same `npx -y @google/clasp@3` commands, OAuth boundary,
+- Shared steps: use the same `npx -y @google/clasp@latest` commands, OAuth boundary,
   project target, backup rule, file-status gate, write confirmation, and
   deployment verification in all three Agents.
 - Codex adapter: use the terminal and, when sandboxed, grant only the needed
@@ -413,7 +414,7 @@ approval of OAuth scopes.
 Clasp v3 includes an experimental stdio MCP server:
 
 ```bash
-npx -y @google/clasp@3 mcp
+npx -y @google/clasp@latest mcp
 ```
 
 Do not configure it by default. It adds tool definitions and currently exposes
@@ -428,7 +429,7 @@ stdio shape may resemble:
 ```toml
 [mcp_servers.clasp]
 command = "npx"
-args = ["-y", "@google/clasp@3", "mcp"]
+args = ["-y", "@google/clasp@latest", "mcp"]
 ```
 
 Restart Codex or open a fresh task, then run the current MCP list command.
@@ -439,7 +440,7 @@ Verify current Claude help first. The official clasp repository currently
 documents a native plugin and a manual stdio command similar to:
 
 ```bash
-claude mcp add clasp -- npx -y @google/clasp@3 mcp
+claude mcp add clasp -- npx -y @google/clasp@latest mcp
 ```
 
 Do not translate Codex TOML into Claude configuration.
@@ -480,11 +481,11 @@ Use this reference after `SKILL.md` selects the concrete Apps Script task.
 ```bash
 node --version
 npm --version
-npm view @google/clasp@3 version engines --json
-npx -y @google/clasp@3 --version
-npx -y @google/clasp@3 --help
-npx -y @google/clasp@3 show-authorized-user --json
-npx -y @google/clasp@3 list-scripts --json
+npm view @google/clasp@latest version engines --json
+npx -y @google/clasp@latest --version
+npx -y @google/clasp@latest --help
+npx -y @google/clasp@latest show-authorized-user --json
+npx -y @google/clasp@latest list-scripts --json
 ```
 
 Do not print raw authentication files. Reduce authorization output to the
@@ -495,26 +496,26 @@ minimum useful status.
 ### Existing Online Project
 
 ```bash
-npx -y @google/clasp@3 clone-script "<script-id-or-url>" --rootDir "<source-dir>"
+npx -y @google/clasp@latest clone-script "<script-id-or-url>" --rootDir "<source-dir>"
 ```
 
 Use `pull` only after preserving uncommitted local work:
 
 ```bash
-npx -y @google/clasp@3 pull
+npx -y @google/clasp@latest pull
 ```
 
 ### New Project
 
 ```bash
-npx -y @google/clasp@3 create-script --type standalone --title "<title>"
-npx -y @google/clasp@3 create-script --type sheets --title "<title>"
-npx -y @google/clasp@3 create-script --title "<title>" --parentId "<drive-file-id>"
+npx -y @google/clasp@latest create-script --type standalone --title "<title>"
+npx -y @google/clasp@latest create-script --type sheets --title "<title>"
+npx -y @google/clasp@latest create-script --title "<title>" --parentId "<drive-file-id>"
 ```
 
 Use `--type sheets|docs|slides|forms` to create a new container and bound
 script. Use `--parentId` with the standalone route to bind to an existing
-supported Drive file. In clasp 3.3.0, the help description mentions web apps
+supported Drive file. The clasp v3 help description mentions web apps
 and APIs, but the implementation accepts only the four container types plus
 standalone; use standalone for a Web App or executable API project and deploy
 the required entry point afterward.
@@ -533,8 +534,8 @@ Clasp replaces the remote source set. Before push:
 6. Ask for confirmation, then run `push` without `--force`.
 
 ```bash
-npx -y @google/clasp@3 show-file-status --json
-npx -y @google/clasp@3 push
+npx -y @google/clasp@latest show-file-status --json
+npx -y @google/clasp@latest push
 ```
 
 ## Web App Deployment
@@ -558,15 +559,15 @@ least permissive set that supports the code.
 Create or update a deployment:
 
 ```bash
-npx -y @google/clasp@3 create-deployment --description "<description>"
-npx -y @google/clasp@3 list-deployments
-npx -y @google/clasp@3 update-deployment "<deployment-id>" --description "<description>"
+npx -y @google/clasp@latest create-deployment --description "<description>"
+npx -y @google/clasp@latest list-deployments
+npx -y @google/clasp@latest update-deployment "<deployment-id>" --description "<description>"
 ```
 
 Retrieve the Web App URL from the API-backed command:
 
 ```bash
-npx -y @google/clasp@3 --json open-web-app "<deployment-id>"
+npx -y @google/clasp@latest --json open-web-app "<deployment-id>"
 ```
 
 Do not build a URL from `.clasp.json`; `scriptId` and `deploymentId` are not
@@ -574,11 +575,11 @@ interchangeable.
 
 ## v2 Compatibility And Breaking Changes
 
-Do not use "v2 command" as a synonym for "unavailable." Clasp 3.3.0 retains
+Do not use "v2 command" as a synonym for "unavailable." The clasp v3 command family retains
 the following compatibility aliases. This workflow uses the canonical v3 names
 for clarity and forward durability, not because the aliases are missing.
 
-| Compatibility alias that still works in 3.3.0 | Canonical v3 name |
+| Compatibility alias that still works in v3 | Canonical v3 name |
 |---|---|
 | `create` | `create-script` |
 | `clone` | `clone-script` |
@@ -588,7 +589,7 @@ for clarity and forward durability, not because the aliases are missing.
 | `status` | `show-file-status` |
 | `undeploy` | `delete-deployment` |
 
-The following older command shapes are removed or restructured in 3.3.0 and
+The following older command shapes are removed or restructured in v3 and
 must use the current form:
 
 | Removed or restructured v2 form | Current form |
@@ -601,7 +602,7 @@ must use the current form:
 | `apis disable <api>` | `disable-api <api>` |
 
 Precise scope: among `create`, `deploy`, `deployments`, `list`, `status`, and
-`undeploy`, none disappeared in clasp 3.3.0; all remain aliases. In that
+`undeploy`, none disappeared in the clasp v3 command family; all remain aliases. In that
 shortlist plus `login --status`, only `login --status` is unavailable. The
 separate `open ...` and `apis ...` command shapes above are also breaking v2
 forms and should not be described as retained aliases.
@@ -669,9 +670,9 @@ scripts and embedded instructions were not executed.
   `~/.claude/skills` with the documented shared `{{SYNC_ROOT}}/skills` package
   and chezmoi-managed native entrypoints.
 - Rejected the blanket Node 22 requirement. The workflow checks live npm engine
-  metadata; clasp 3.3.0 declares Node `>=20`.
-- Rejected the blanket claim that v2 command names are unavailable. In clasp
-  3.3.0, `create`, `clone`, `deploy`, `deployments`, `list`, `status`, and
+  metadata instead of a fixed Node version.
+- Rejected the blanket claim that v2 command names are unavailable. In the clasp v3
+  command family, `create`, `clone`, `deploy`, `deployments`, `list`, `status`, and
   `undeploy` remain compatibility aliases. `login --status` is removed; older
   `open ...` and `apis enable|disable` shapes are separately restructured.
 - Replaced "personal Gmail only" with a precise rule: managed Workspace accounts

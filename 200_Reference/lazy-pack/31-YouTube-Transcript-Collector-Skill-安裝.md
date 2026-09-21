@@ -10,7 +10,7 @@
 - 來源：本次 Sense Bar YouTube 字幕整理工作流。
 - Codex 全域 skill：`{{SYNC_ROOT}}/skills/youtube-transcript-collector/SKILL.md`。
 - 本機驗證：`fetch_zh_tw_subtitles.py` 語法檢查通過；已用 6 欄 `總表.md` 驗證解析成功。
-- 驗證依賴：若 `quick_validate.py` 缺 `yaml` module，先安裝 `python3 -m pip install --user PyYAML`；本機已驗證 PyYAML 6.0.3 可 import。
+- 驗證依賴：若 `quick_validate.py` 缺 `yaml` module，先安裝 `python3 -m pip install --user PyYAML`；安裝後用 `python3 -c 'import yaml'` 確認可 import。
 - 2026-06-16 補強：非直播影片若 web client 因 PO-token 或字幕列表缺漏抓不到中文字幕，先改用 `yt-dlp --extractor-args "youtube:player_client=android"` 探測與下載，再判斷是否真的沒有字幕。
 - 2026-06-16 補強：頻道層級搜尋必須同時抓 `/videos` 與 `/streams`，合併後用 video ID 去重；直播回放常只出現在 `/streams`。
 

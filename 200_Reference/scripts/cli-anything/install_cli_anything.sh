@@ -3,7 +3,6 @@
 set -euo pipefail
 
 CLI_ANYTHING_REPO="${CLI_ANYTHING_REPO:-https://github.com/HKUDS/CLI-Anything.git}"
-CLI_ANYTHING_COMMIT="${CLI_ANYTHING_COMMIT:-dc7392489222dbcc520817609290755d6dd8b0bb}"
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 PYTHON_TOOLS_ROOT="${PYTHON_TOOLS_ROOT:-$CODEX_HOME/python-tools}"
 SOURCE_DIR="${SOURCE_DIR:-$PYTHON_TOOLS_ROOT/CLI-Anything}"
@@ -42,7 +41,11 @@ else
   git clone "$CLI_ANYTHING_REPO" "$SOURCE_DIR"
 fi
 
-git -C "$SOURCE_DIR" -c advice.detachedHead=false checkout "$CLI_ANYTHING_COMMIT"
+# Always track the upstream default branch so every install gets the latest source.
+git -C "$SOURCE_DIR" fetch origin
+git -C "$SOURCE_DIR" remote set-head origin --auto >/dev/null
+git -C "$SOURCE_DIR" -c advice.detachedHead=false checkout --detach origin/HEAD
+log "source at latest upstream commit: $(git -C "$SOURCE_DIR" rev-parse --short HEAD)"
 
 skill_dir="$CODEX_HOME/skills/cli-anything"
 if [[ -e "$skill_dir" ]]; then
@@ -58,7 +61,7 @@ log "creating CLI-Hub virtual environment"
 UV_CACHE_DIR="$UV_CACHE_DIR" uv venv --python "$PYTHON_VERSION" --allow-existing "$HUB_ROOT/.venv"
 
 log "installing cli-anything-hub"
-UV_CACHE_DIR="$UV_CACHE_DIR" uv pip install --python "$HUB_ROOT/.venv/bin/python" cli-anything-hub
+UV_CACHE_DIR="$UV_CACHE_DIR" uv pip install --upgrade --python "$HUB_ROOT/.venv/bin/python" cli-anything-hub
 
 log "writing cli-hub wrapper"
 cat > "$BIN_DIR/cli-hub" <<EOF

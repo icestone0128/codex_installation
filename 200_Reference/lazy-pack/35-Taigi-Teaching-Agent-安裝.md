@@ -67,7 +67,7 @@ bash "{{SETUP_REPO}}/200_Reference/scripts/taigi-teaching-agent/install_taigi_te
 安裝器會：
 
 1. clone `mathruffian-dot/taigi-teaching-agent`。
-2. checkout 驗證過的 commit `bf55f6fae291d21a483d30225607435e13b2bb66`。
+2. 切到上游預設分支的最新 commit；已安裝時重跑會自動更新（追蹤檔有本機修改時跳過並提示）。
 3. 用 `uv venv --python 3.12 --allow-existing` 建立或沿用專用 `.venv`。
 4. 安裝 `requirements.txt`。
 5. 從 `config.example.json` 建立本機 `config.json`。
@@ -97,7 +97,7 @@ bash "{{SETUP_REPO}}/200_Reference/scripts/taigi-teaching-agent/install_taigi_te
 
 已完成：
 
-- `uv venv --python 3.12 --allow-existing` 建立 Python 3.12.13 venv。
+- `uv venv --python 3.12 --allow-existing` 建立 Python 3.12 venv（相容上限，不是鎖定套件版本）。
 - `uv pip install -r requirements.txt` 安裝 63 個 packages。
 - 新增本機 `setup_macos.sh`。
 - 新增 wrapper `{{CODEX_HOME}}/python-tools/bin/taigi-teaching-agent`。
@@ -161,7 +161,6 @@ PYTHON_TOOLS_HOME="${PYTHON_TOOLS_HOME:-$CODEX_HOME/python-tools}"
 TAIGI_HOME="${TAIGI_HOME:-$PYTHON_TOOLS_HOME/taigi-teaching-agent}"
 BIN_DIR="${BIN_DIR:-$PYTHON_TOOLS_HOME/bin}"
 SOURCE_REPO="${SOURCE_REPO:-https://github.com/mathruffian-dot/taigi-teaching-agent.git}"
-SOURCE_COMMIT="${SOURCE_COMMIT:-bf55f6fae291d21a483d30225607435e13b2bb66}"
 PYTHON_VERSION="${PYTHON_VERSION:-3.12}"
 
 if ! command -v git >/dev/null 2>&1; then
@@ -184,13 +183,22 @@ elif [ -e "$TAIGI_HOME" ]; then
   exit 1
 else
   git clone "$SOURCE_REPO" "$TAIGI_HOME"
-  git -C "$TAIGI_HOME" checkout --detach "$SOURCE_COMMIT"
+fi
+
+# Always move to the latest upstream default branch; keep local edits untouched.
+if [ -n "$(git -C "$TAIGI_HOME" status --porcelain --untracked-files=no)" ]; then
+  echo "Tracked files have local changes; skipping upstream update: $TAIGI_HOME" >&2
+else
+  git -C "$TAIGI_HOME" fetch origin
+  git -C "$TAIGI_HOME" remote set-head origin --auto >/dev/null
+  git -C "$TAIGI_HOME" -c advice.detachedHead=false checkout --detach origin/HEAD
+  echo "Source at latest upstream commit: $(git -C "$TAIGI_HOME" rev-parse --short HEAD)"
 fi
 
 cd "$TAIGI_HOME"
 
 uv venv --python "$PYTHON_VERSION" --allow-existing .venv
-uv pip install -r requirements.txt --python "$TAIGI_HOME/.venv/bin/python"
+uv pip install --upgrade -r requirements.txt --python "$TAIGI_HOME/.venv/bin/python"
 
 if [ ! -f "$TAIGI_HOME/config.json" ]; then
   cp "$TAIGI_HOME/config.example.json" "$TAIGI_HOME/config.json"
@@ -210,7 +218,7 @@ fi
 
 cd "$ROOT"
 uv venv --python "$PYTHON_VERSION" --allow-existing .venv
-uv pip install -r requirements.txt --python "$ROOT/.venv/bin/python"
+uv pip install --upgrade -r requirements.txt --python "$ROOT/.venv/bin/python"
 
 if [ ! -f "$ROOT/config.json" ]; then
   cp "$ROOT/config.example.json" "$ROOT/config.json"

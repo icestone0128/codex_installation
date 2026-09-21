@@ -439,7 +439,7 @@ cat > "{{SYNC_ROOT}}/skills/voxcpm2-voice-cloner/references/upstream.md" <<'AGEN
 - Requested source: `https://github.com/mathruffian-dot/voxcpm2-voice-cloner`
 - Audited source commit: `3d151de3ce5e51762af4f28756ac47e00a867257`
 - Official runtime: `https://github.com/OpenBMB/VoxCPM`
-- Official package: `voxcpm==2.0.3`
+- Official package: `voxcpm` (PyPI; setup installs the latest release)
 
 The source README states that its scripts are MIT-licensed and VoxCPM2 is Apache-2.0. The requested source snapshot does not contain a standalone LICENSE file, so preserve attribution and re-check licensing before redistributing source-derived code outside this personal LazyPack.
 
@@ -776,14 +776,15 @@ fi
 mkdir -p "$RUNTIME_HOME/voices" "$RUNTIME_HOME/output"
 
 if [ ! -x "$VENV/bin/python" ]; then
+  # Python 3.12 is the newest interpreter VoxCPM2 officially supports (3.10-3.12), not a pin.
   uv venv --python 3.12 "$VENV"
 fi
 
-uv pip install --python "$VENV/bin/python" \
+uv pip install --upgrade --python "$VENV/bin/python" \
   "numpy<2.5.0" \
   "six" \
   "brotli" \
-  "voxcpm==2.0.3" \
+  "voxcpm" \
   "gradio>=5,<7" \
   "sounddevice>=0.5,<1" \
   "soundfile>=0.13,<1" \

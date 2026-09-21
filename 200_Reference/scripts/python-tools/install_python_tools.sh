@@ -8,7 +8,6 @@ UV_BIN="${UV_BIN:-}"
 INSTALL_SYSTEM_TOOLS="${INSTALL_SYSTEM_TOOLS:-1}"
 INSTALL_OFFICE_TOOLS="${INSTALL_OFFICE_TOOLS:-0}"
 INSTALL_AUTO_EDITOR="${INSTALL_AUTO_EDITOR:-1}"
-AUTO_EDITOR_VERSION="${AUTO_EDITOR_VERSION:-31.4.0}"
 EXTRA_PIP_PACKAGES=()
 
 log() {
@@ -59,37 +58,52 @@ fi
 
 mkdir -p "$PYTHON_TOOLS_HOME/bin" "$PYTHON_TOOLS_HOME/matplotlib-cache"
 
+# Python 3.12 is a compatibility ceiling, not a version pin: several teaching/media packages
+# do not yet ship wheels for the newest system Python. All packages below install latest.
 "$UV_BIN" venv --python 3.12 "$PYTHON_TOOLS_VENV"
+
+# Resolve the newest stable GitHub release asset and its SHA-256 digest at install time.
+# Prints "<download-url> <sha256>"; refuses to continue when GitHub publishes no digest.
+github_latest_asset() {
+  repo="$1"
+  asset="$2"
+  curl --http1.1 -fsSL --retry 5 --retry-delay 2 \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/repos/$repo/releases/latest" \
+    | "$PYTHON_TOOLS_VENV/bin/python" -c '
+import json, sys
+asset = sys.argv[1]
+release = json.load(sys.stdin)
+for item in release.get("assets", []):
+    if item.get("name") == asset:
+        digest = (item.get("digest") or "").removeprefix("sha256:")
+        if not digest:
+            sys.exit("release asset has no published SHA-256 digest: " + asset)
+        print(item["browser_download_url"], digest, release.get("tag_name", ""))
+        break
+else:
+    sys.exit("asset not found in latest release: " + asset)
+' "$asset"
+}
 
 install_auto_editor() {
   os="$(uname -s)"
   arch="$(uname -m)"
   case "$os/$arch" in
-    Darwin/arm64)
-      asset="auto-editor-macos-arm64"
-      digest="14707c80f4fae359c344e160b028366ec7de3b85362df11067ea1c01422ea799"
-      ;;
-    Darwin/x86_64)
-      asset="auto-editor-macos-x86_64"
-      digest="de2fa7ab430f5e7252c4b0a495338e10bbcce4537d7d9b0409f43c57aad972ff"
-      ;;
-    Linux/aarch64|Linux/arm64)
-      asset="auto-editor-linux-aarch64"
-      digest="83217a9e2117ea628c90b6bb1981c3aa22902cd33a245b743196039b4feb6865"
-      ;;
-    Linux/x86_64)
-      asset="auto-editor-linux-x86_64"
-      digest="495aafb6609e2ab8155f2ff854f213907457c84743ad0ed0ce6f5c7123fea670"
-      ;;
+    Darwin/arm64) asset="auto-editor-macos-arm64" ;;
+    Darwin/x86_64) asset="auto-editor-macos-x86_64" ;;
+    Linux/aarch64|Linux/arm64) asset="auto-editor-linux-aarch64" ;;
+    Linux/x86_64) asset="auto-editor-linux-x86_64" ;;
     *)
-      log "No pinned Auto-Editor binary for $os/$arch; install the official release manually."
+      log "No official Auto-Editor binary for $os/$arch; install the official release manually."
       return
       ;;
   esac
 
+  read -r url digest tag < <(github_latest_asset "WyattBlue/auto-editor" "$asset")
+  log "Auto-Editor latest release: $tag"
   temp_dir="$(mktemp -d)"
   archive="$temp_dir/$asset"
-  url="https://github.com/WyattBlue/auto-editor/releases/download/$AUTO_EDITOR_VERSION/$asset"
   curl --http1.1 -fL --retry 5 --retry-delay 2 "$url" -o "$archive"
   if command -v shasum >/dev/null 2>&1; then
     printf '%s  %s\n' "$digest" "$archive" | shasum -a 256 -c -
@@ -110,12 +124,12 @@ case "$(uname -s)" in
     ;;
 esac
 
-"$UV_BIN" pip install \
+"$UV_BIN" pip install --upgrade \
   --python "$PYTHON_TOOLS_VENV/bin/python" \
   python-docx docxcompose openpyxl xlsxwriter pandas python-pptx \
   pypdf PyMuPDF pdfplumber pdf2image reportlab fpdf2 pillow matplotlib \
   qrcode 'markitdown[pdf,docx,pptx,xlsx]' ocrmypdf docx2pdf edge-tts yt-dlp youtube-transcript-api \
-  'groq==1.6.0' 'elevenlabs==2.59.0' 'opencc-python-reimplemented==0.1.7' \
+  groq elevenlabs opencc-python-reimplemented \
   "${EXTRA_PIP_PACKAGES[@]}"
 
 cat > "$PYTHON_TOOLS_HOME/bin/python-tools-python" <<SH

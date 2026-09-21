@@ -3,7 +3,6 @@
 set -euo pipefail
 umask 077
 
-WORKSPACE_MCP_VERSION="${WORKSPACE_MCP_VERSION:-1.22.2}"
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 PYTHON_TOOLS_HOME="${PYTHON_TOOLS_HOME:-$CODEX_HOME/python-tools}"
 SECRETS_DIR="${SECRETS_DIR:-$CODEX_HOME/secrets}"
@@ -200,12 +199,14 @@ chmod 700 \
   "$SECRETS_DIR/google_workspace_mcp_credentials" \
   "$LOG_DIR"
 
-log "installing workspace-mcp==$WORKSPACE_MCP_VERSION"
+log "installing latest workspace-mcp"
+# Python 3.12 is a compatibility ceiling shared with the Item 34 runtime, not a package pin.
 env \
   UV_TOOL_DIR="$UV_TOOL_DIR" \
   UV_TOOL_BIN_DIR="$BIN_DIR" \
   UV_CACHE_DIR="$UV_CACHE_DIR" \
-  uv tool install --force --python 3.12 "workspace-mcp==$WORKSPACE_MCP_VERSION"
+  uv tool install --force --upgrade --python 3.12 workspace-mcp
+log "installed: $(env UV_TOOL_DIR="$UV_TOOL_DIR" UV_TOOL_BIN_DIR="$BIN_DIR" uv tool list 2>/dev/null | grep -m1 '^workspace-mcp ' || echo 'workspace-mcp (version unknown)')"
 
 install -m 0755 "$RUNNER_SOURCE" "$RUNNER_TARGET"
 

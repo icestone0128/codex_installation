@@ -132,9 +132,9 @@ supabase projects list
 | 項目 | 實測結果 |
 | :-- | :-- |
 | 系統 | macOS／Darwin arm64 |
-| Node.js／npm | Node.js 25.9.0、npm 11.12.1；npm 安裝路線最低要求仍以官方文件的 Node.js 20+ 為準 |
-| Git／Homebrew | Apple Git 2.54.0、Homebrew 7.0.5 |
-| Supabase CLI | 2.117.0，Homebrew 安裝 |
+| Node.js／npm | 使用當下最新版；npm 安裝路線最低要求以官方文件的 Node.js 20+ 為準 |
+| Git／Homebrew | 使用當下最新版 |
+| Supabase CLI | Homebrew 安裝當下最新版，`supabase --version` 可正常輸出 |
 | Dashboard | GitHub 登入成功 |
 | CLI 登入 | 30 天 PAT 經頁面 Copy 與本機剪貼簿送入 CLI；登入訊息成功後立即清空剪貼簿 |
 | 唯讀驗收 | `supabase projects list` exit code 0；帳號當時為 0 projects |

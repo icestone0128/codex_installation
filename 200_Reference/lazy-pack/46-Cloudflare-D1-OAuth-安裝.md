@@ -3,7 +3,7 @@
 > 版本：1.0
 > 修訂日期：2026-09-15
 > 用途：讓 Wrangler CLI 與桌面 AI Agent 透過 Cloudflare 官方 OAuth 連上指定帳號的 D1，授予讀寫權限，但安裝驗收只進行唯讀查詢。
-> 實測環境：macOS arm64、zsh、Node.js 25.9.0、npm 11.12.1、Wrangler 4.131.1、Codex CLI 0.153.4。
+> 實測環境：macOS arm64、zsh；Node.js、npm、Wrangler、Codex CLI 皆為安裝當下最新版（用各自的 `--version` 確認）。
 
 ## 來源與本版差異
 
@@ -131,7 +131,7 @@ wrangler --version
 command -v wrangler
 ```
 
-2026-09-15 實測基準為 Wrangler 4.131.1。如果導師或組織要重現當日參數行為，可在風險評估後將 `@latest` 改為 `@4.131.1`；新安裝一般應使用當前版並重跑 help gate。
+一律安裝 `@latest`，不指定版本；每次安裝或升級後都重跑下方的 help gate，確認參數仍然相同。
 
 ### Cloudflare 官方建議路線：專案本地安裝
 
@@ -296,7 +296,7 @@ codex mcp list
 
 ### Claude Code adapter（指令已查證，本帳號未實做 Cloudflare OAuth）
 
-當前實測 Claude Code 2.1.205 支援 HTTP MCP 與 `login`。只有在使用者選擇 Claude adapter 時才新增：
+Claude Code 支援 HTTP MCP 與 `login`（先用 `claude mcp --help` 確認當前版本的參數）。只有在使用者選擇 Claude adapter 時才新增：
 
 ```bash
 claude --version

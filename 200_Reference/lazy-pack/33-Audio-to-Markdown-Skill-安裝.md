@@ -1707,7 +1707,7 @@ if not exist "%VENV_PY%" (
 echo.
 echo [Step 3/4] Installing faster-whisper (may take 1-3 min)...
 "%VENV_PY%" -m pip install --upgrade pip --quiet
-"%VENV_PY%" -m pip install -r "%SKILL_SRC%\scripts\requirements.txt" --quiet
+"%VENV_PY%" -m pip install --upgrade -r "%SKILL_SRC%\scripts\requirements.txt" --quiet
 if errorlevel 1 ( echo    install failed, screenshot for teacher. & pause & exit /b 1 )
 echo    packages installed
 
@@ -1897,7 +1897,7 @@ fi
 echo ""
 echo "📥 Step 3/4：安裝 faster-whisper（含影音解碼，可能 1-3 分鐘）..."
 "$INSTALL_DIR/venv/bin/pip" install --upgrade pip --quiet 2>/dev/null
-if ! "$INSTALL_DIR/venv/bin/pip" install -r "$SKILL_SRC/scripts/requirements.txt" --quiet; then
+if ! "$INSTALL_DIR/venv/bin/pip" install --upgrade -r "$SKILL_SRC/scripts/requirements.txt" --quiet; then
     echo "   ❌ 套件安裝失敗。請確認 Python 版本為 3.12，或截圖回報老師。"
     exit 1
 fi
@@ -2015,7 +2015,7 @@ AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_PLACE_DESKTOP_LAUNCHER_PS1_AEB4369737
 # audio-to-md/scripts/requirements.txt
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/audio-to-md/scripts/requirements.txt")"
 cat > "{{SYNC_ROOT}}/skills/audio-to-md/scripts/requirements.txt" <<'AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_REQUIREMENTS_TXT_7A3CE58E94'
-faster-whisper==1.2.1
+faster-whisper
 AGENT_LAZYPACK_AUDIO_TO_MD_SCRIPTS_REQUIREMENTS_TXT_7A3CE58E94
 
 # audio-to-md/scripts/transcribe.bat
