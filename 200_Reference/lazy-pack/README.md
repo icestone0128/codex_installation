@@ -1,8 +1,10 @@
 # Codex 懶人包總目錄
 
-> 版本：2026-09-15 可自行安裝版
+> 版本：2026-09-21 可自行安裝版
 > 用途：讓下載者從零開始設定 Codex、Claude、AntiGravity 共用的全域規則與 skills，以及 plugins、MCP、Obsidian、GitHub、Firebase、NotebookLM 與專案初始化流程。
 > 原則：文件中的 `{{...}}` 都是下載者必須替換的值；公開懶人包、內嵌安裝腳本與 templates 不展示作者本機實體安裝目錄。
+
+2026-09-21 更新：新增 [[48-Supabase-CLI-部署基礎安裝]]。它依官方 CLI 與 Dashboard 實測重寫 MIT 上游 Item 04：以官方 CLI、原生憑證儲存、migration `--dry-run` 與明確部署確認為主；不安裝高權限 Supabase MCP、不要求 `service_role` key、不自動建立雲端專案。Dashboard 目前沒有 Google 登入按鈕，帳號可使用當下可見的 GitHub、ChatGPT、SSO 或 email/password 路線登入。
 
 2026-09-20 更新：`agent-weekly-review` 已與 Obsidian 每週知識重整 automation 串接；automation 完成 vault 重整後先詢問是否執行協作復盤，確認後才執行，並仍只在對話輸出週報，使用者同意才寫檔。
 
@@ -141,10 +143,11 @@
 45. [[45-Agent-Dev-Coach-Skill-安裝]]
 46. [[46-Cloudflare-D1-OAuth-安裝]]
 47. [[47-Agent-Weekly-Review-Skill-安裝]]
+48. [[48-Supabase-CLI-部署基礎安裝]]
 
 ## 全域 Skills 安裝總表
 
-公開可散布的全域 skill 完整內容已內嵌在對應的有序號懶人包文件中，不再另外提供獨立的 `skills/` 子目錄。安裝時請打開對應編號文件，使用文末「內建 Skill 完整安裝內容」。Item 39 是明確例外：它是 Arry 私人來源橋接型安裝群組，只內建公開安全的 installer／verifier，不內嵌私人身份、記憶或購課內容。Item 40 則是公開的上游改寫套件，完整內嵌 22 個穩定 skills 與版本追蹤工具。Item 46 不是 skill，而是會修改本機與外部 OAuth 狀態的互動式安裝 runbook，不能當成無人值守腳本執行。
+公開可散布的全域 skill 完整內容已內嵌在對應的有序號懶人包文件中，不再另外提供獨立的 `skills/` 子目錄。安裝時請打開對應編號文件，使用文末「內建 Skill 完整安裝內容」。Item 39 是明確例外：它是 Arry 私人來源橋接型安裝群組，只內建公開安全的 installer／verifier，不內嵌私人身份、記憶或購課內容。Item 40 則是公開的上游改寫套件，完整內嵌 22 個穩定 skills 與版本追蹤工具。Items 46、48 不是 skill，而是會修改本機或外部 OAuth 狀態的互動式安裝 runbook，不能當成無人值守腳本執行。
 
 ```text
 01：三 Agent 共用 `pdf`、`playwright` skills，並對 Codex／Claude／AntiGravity 各自的 plugins、connectors、MCP 與原生 browser 能力做 adapter 檢查
@@ -190,6 +193,7 @@
 45：agent-dev-coach；完整內嵌 agent 開發五關教練，含六份關卡 reference（拷問／規格／切票／TDD／雙軸審查／PRD 打包）、`spec.schema.json`、HTML 樣板、renderer 與 validator（模糊詞與 schema 雙重把關）與 Codex UI adapter；腳本已改為自我定位，可從學員專案任意工作目錄以絕對路徑呼叫。與 Item 40 的邊界：Item 40 是使用者自己做事的工具箱，本 Item 是帶人的單一連續流程，多了教練話術、HC 標籤、`.agent-flow/` 狀態機與每關必須明確同意才前進的閘門
 47：每週 AI 協作復盤 skill `agent-weekly-review`；跨 repo 收集 git 紀錄、HANDOFF、踩坑筆記與 skills 預算，數字＋分區＋最多三件待拍板，可與筆記庫每週整理串成同一份清單
 46：Cloudflare + D1 OAuth 讀寫安裝；不是 skill，整合 Wrangler CLI、Cloudflare API MCP、Codex／Claude／AntiGravity adapters、六項 MCP 權限、OAuth 逾時防重複、新對話 GET-only 驗收與撤銷流程。為複製實測效果而授予 D1 Write，但安裝驗收不使用寫入能力
+48：Supabase CLI 部署基礎；不是 skill，使用官方 CLI、Dashboard 登入與 CLI 原生憑證儲存，建立 `init → link → db push --dry-run → 明確確認後部署` 的跨 Agent 共用路線；不安裝 MCP、不傳遞 `service_role` key、不自動建立雲端專案
 ```
 
 Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人身份與記憶路由，`voice-coach`、`waki-brain`、`productivity-coach` 含私人課程或購課內容。它們只存在私人 `{{SYNC_ROOT}}/skills` 與 Obsidian 全域索引；Item 39 只提供安裝／驗證橋接，不提供可重建 corpus。這是隱私與內容權利邊界，不是 Agent 相容性限制。
@@ -266,7 +270,8 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 | 38 | `clasp-setup` | [[41-Clasp-Apps-Script-Skill-安裝]] | 可直接安裝；clasp v3 CLI-first，支援 Apps Script 既有／新專案、原始碼同步、push 閘門、deployment 與 API 返回 Web App URL；MCP 僅為明確要求才評估的實驗路線 |
 | 39 | Cloudflare + D1 OAuth | [[46-Cloudflare-D1-OAuth-安裝]] | 互動式安裝 runbook；Wrangler 與 Cloudflare API MCP 取得 D1 讀寫權限，但驗收只列出 D1、只使用 GET；內含帳號衝突、keychain、六項選權、OAuth 逾時重試與三 Agent adapter |
 | 40 | `agent-weekly-review` | [[47-Agent-Weekly-Review-Skill-安裝]] | 可直接安裝；每週協作復盤，唯讀收集跨 repo git 紀錄、HANDOFF、踩坑筆記與 skills 預算，預設只在對話輸出週報，使用者同意才寫檔 |
-| 41 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
+| 41 | Supabase CLI 部署基礎 | [[48-Supabase-CLI-部署基礎安裝]] | 互動式安裝 runbook；以官方 CLI 與本機憑證儲存處理登入，先 preview migration 再確認部署，不預設安裝 MCP 或建立雲端專案 |
+| 42 | 其他內容製作類 skills | 對應序號文件 | 視需求安裝 |
 
 ## 共用前置條件
 
@@ -277,6 +282,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 - 需要 Firebase 時，準備 Firebase / Google 帳號與一個 Firebase project。
 - 需要 Firecrawl 時，準備 Firecrawl API key。
 - 需要 Cloudflare + D1 時，準備本人可登入的 Cloudflare 帳號；D1 不需另外註冊，詳見 [[46-Cloudflare-D1-OAuth-安裝]]。
+- 需要 Supabase 時，準備本人可登入的 Supabase Dashboard 帳號；登入提供者以 Dashboard 當下可見選項為準，詳見 [[48-Supabase-CLI-部署基礎安裝]]。
 - 需要 Claude 使用 Google Drive／Gmail／Calendar 時，Item 02 的 Google Workspace MCP 是必要安裝；要先準備 `uv`、Python 3.12、Google Cloud OAuth Desktop client，並只啟用三個對應 API。
 - Codex、Claude、AntiGravity 的 Google Drive／Gmail／Calendar 一律走 Item 02 的同一個本機 MCP；Codex 已啟用的 Google 官方 plugins 改為停用，避免同義工具並存；AntiGravity 以 `serverUrl` 連同一個 loopback endpoint。
 
@@ -286,6 +292,7 @@ Coach Skill 的四個成員都屬 Arry 私人 Skill：`future-coach` 含個人�
 - 需要 API key 的 MCP 只能記錄遮蔽範例，例如 `fc-***`。
 - Google Workspace OAuth client secret 與 OAuth token 只放在 `{{CODEX_HOME}}/secrets`；公開 LazyPack 只包含 installer 與 placeholder，不包含任何人的 OAuth client 或帳號授權。
 - Cloudflare OAuth 由 Wrangler 的 OS keychain 與各 Agent 客戶端自行管理；不複製、不讀取、不同步憑證檔或 keychain 內容。
+- Supabase CLI PAT 由 CLI 的 OS 原生憑證儲存管理；不複製到 `{{SECRETS_DIR}}`、repo、MCP 設定、LazyPack 或任何 Agent 設定檔。
 - 專案固定規則寫在專案根目錄 `AGENTS.md`。
 - 可攜式全域核心規則寫在 `{{GLOBAL_RULES}}`；三個 Agent 的原生規則入口由 chezmoi 指向同一份主檔。
 - 不要另外維護 `{{SYNC_ROOT}}/agents/AGENTS.md`，也不要在 Agent home 複製內容。
@@ -317,6 +324,7 @@ rg -n "<舊使用者名稱>|<舊 GitHub 帳號>|<舊 Firebase project id>|<舊�
 - Skill Creator 啟動包以 [[11-Codex-Skill-Creator-工作流]] 為準；外部／第三方 skill 教學只作為轉換來源，不直接照做。此項也支援把成功對話、prompt 或重複工作流萃取成三 Agent 共用 skill。
 - 外部工具整合以 [[12-外部工具整合工作流]] 為準。
 - Cloudflare + D1 OAuth 讀寫安裝與 GET-only 驗收以 [[46-Cloudflare-D1-OAuth-安裝]] 為準。
+- Supabase CLI 安裝、登入、migration 預覽與部署安全閘門以 [[48-Supabase-CLI-部署基礎安裝]] 為準。
 - Brainstorm 規劃模式以 [[13-Brainstorm-規劃模式]] 為準；`brainstorm` 是唯一入口，Quick 與 RDQ 為內建模式。
 - Social Cards Skill 以 [[14-Social-Cards-Skill-安裝]] 為準。
 - Landing Page skill 以 [[15-Landing-Page-Skill-安裝]] 為準。
