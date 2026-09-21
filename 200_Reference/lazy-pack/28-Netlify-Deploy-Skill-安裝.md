@@ -125,7 +125,7 @@ tool_timeout_sec = 180
 
 ## Prerequisites
 
-- Node.js 22 or newer.
+- Node.js 22.13.0 or newer (Netlify CLI 27+ requirement; also satisfies Netlify MCP's Node.js 22+ prerequisite).
 - Netlify account.
 - The active Agent is restarted or opened in a fresh session after editing its MCP config.
 - Netlify CLI is optional but recommended for login troubleshooting: `npm install -g netlify-cli`, then `netlify login` and `netlify status`.
