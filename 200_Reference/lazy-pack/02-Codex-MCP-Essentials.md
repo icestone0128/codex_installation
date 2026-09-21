@@ -118,7 +118,7 @@ tool_timeout_sec = 120
 這一項歸在 02，因為它是外部工具 / CLI 連線能力，不放在 01 的基礎 plugin 檢查裡。使用前請確認：
 
 - 已安裝 Heptabase desktop app。
-- Heptabase CLI 可用，並符合 skill 相容版本 `0.5.x`（用 `heptabase --version` 確認）。
+- Heptabase CLI 可用，且 `heptabase --version` 落在 skill frontmatter `heptabase-cli-version-range` 宣告的相容範圍內；超出範圍時先更新本 skill（取上游 `heptameta/heptabase-cli-skills` 最新版），不要硬用。
   CLI 沒有自己的更新機制：PATH 上的 `heptabase` 是 wrapper，實際執行桌面 app 內的 bundle，
   版本只會隨 app 更新而變動，Homebrew 管不到。
 - Heptabase desktop app 的 local CLI server 已啟用；如果 read-only 指令回報無法連線，先執行 `heptabase start` 或在桌面 app 的 Settings > AI Features 啟用 CLI。
@@ -418,22 +418,48 @@ set -e
 
 # ---- heptabase-cli ----
 mkdir -p "{{SYNC_ROOT}}/skills/heptabase-cli"
+# heptabase-cli/LICENSE
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/LICENSE")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/LICENSE" <<'AGENT_LAZYPACK_HEPTABASE_CLI_LICENSE_C693279643'
+MIT License
+
+Copyright (c) 2026 Heptabase
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+AGENT_LAZYPACK_HEPTABASE_CLI_LICENSE_C693279643
+
 # heptabase-cli/SKILL.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md")"
 cat > "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_SKILL_MD_0E95F5A366'
 ---
 name: heptabase-cli
-description: "要讀寫 Heptabase 白板、卡片、日記、AI Tutor 或學習課程時使用，需桌面版執行中。"
+description: "要讀寫 Heptabase 白板、卡片、日記、AI Tutor，或開啟 Heptabase 連結時使用；需桌面版執行中。"
 allowed-tools: Bash(heptabase *) Bash(jq *) Bash(mktemp *)
 metadata:
-  heptabase-cli-version-range: "0.5.x"
-  last-updated: "2026-08-26"
+  heptabase-cli-version-range: "0.6.x"
+  last-updated: "2026-09-22"
 ---
 
 ## Prerequisites
 
 - CLI installed from the desktop app. The command is `heptabase` on macOS/Linux; Windows installs `heptabase.cmd` for cmd/PowerShell and a `heptabase` shim for POSIX shells.
-- Check version compatibility before use with `heptabase --version`. If the installed CLI version is outside this skill's compatibility range (`0.5.x`), you MUST stop and ask the user to update either the Heptabase desktop app or this skill package before continuing.
+- Check version compatibility before use with `heptabase --version`. If the installed CLI version is outside this skill's compatibility range (`0.6.x`), you MUST stop and ask the user to update either the Heptabase desktop app or this skill package before continuing.
 - The CLI has no updater of its own. `heptabase` on PATH is a thin wrapper that runs the bundle inside the desktop app, so the CLI version moves only when the app is updated. Homebrew does not manage it.
 
 ## Command discovery
@@ -453,16 +479,18 @@ Use these as quick recipes for frequent requests. For less common flags or if a 
 - **Recent cards:** `heptabase card list --sort createdTime --direction descending --limit 20`
 - **Today's journal:** `heptabase journal read $(date +%Y-%m-%d)`
 - **Search cards by keyword:** `heptabase card list -q "<keyword>" --limit 20`
-- **List tag properties:** `heptabase tag properties <tagId>`
-- **List cards with property values:** `heptabase tag cards <tagId> --include-properties`
-- **Read card properties:** `heptabase card properties <cardIdOrDate>`
-- **Set card property:** first read `references/property-values.md`, then use `heptabase card set-property <cardIdOrDate> --property-id <propertyId> --value "Published"` for strings/options or `--json-value ...` for typed JSON values.
+- **Create a note from markdown:** `heptabase note create --content "# Title\n\nBody"` (marks Created by AI by default; add `--no-created-by-ai` for human-owned content).
+- **Create today's journal from markdown:** `heptabase journal create --content "Body"` (marks Created by AI by default; add `--no-created-by-ai` for human-owned content).
+- **Append markdown to a note:** `heptabase note append <cardId> --content "More content"`.
+- **Edit note content with JSON save:** first read `references/card-content-schema.md`, then use `heptabase note read <cardId>`, modify the returned ProseMirror JSON, and save with `heptabase note save <cardId> --content-md5 <contentMd5> --content-file <path>`.
+- **Work with properties:** use `heptabase tag cards <tagId> --include-properties` to list tagged cards with values, or `heptabase card properties <cardIdOrDate>` to inspect one card. Before writing, read `references/property-values.md`, inspect definitions with `heptabase tag properties <tagId>`, then use `heptabase card set-property <cardIdOrDate> --property-id <propertyId> --value "Published"` for strings/options or `--json-value ...` for typed JSON values.
 - **Read parsed PDF content:** first read `references/pdf-reading.md`, then use `heptabase pdf metadata <pdfCardId>` to discover `totalPages`, and read a page range with `heptabase pdf read <pdfCardId> --start-page N --end-page N`.
 - **Read transcript content:** first read `references/transcript-reading.md`, then use `heptabase audio metadata <audioCardId>` or `heptabase video metadata <videoCardId>` to discover `transcriptStatus` and `durationSeconds`, and read overlapping transcript entries in a time range with `heptabase audio read <audioCardId> --start-seconds 0 --end-seconds 300` or `heptabase video read <videoCardId> --start-seconds 0 --end-seconds 300`.
-- **Read a file from a PDF/media card:** first read `references/file-reading.md`, then use `heptabase file list --card-id <cardId>` to find the right file `id`, run `mktemp -d`, and pass the returned directory path to `heptabase file export <fileId> --output-dir <scratchDir>`. Read the returned `path` with your native file-reading tool.
-- **Read a file by `fileId`:** first read `references/file-reading.md`, then run `mktemp -d` and pass the returned directory path to `heptabase file export <fileId> --output-dir <scratchDir>`. Read the returned `path` with your native file-reading tool.
-- **List cards on a whiteboard:** `heptabase whiteboard cards <whiteboardId>`
-- **Add a card to a whiteboard:** `heptabase whiteboard add-card --whiteboard-id <whiteboardId> --card-id <cardIdOrDate>`
+- **Read an attached file:** first read `references/file-reading.md`. If needed, find its ID with `heptabase file list --card-id <cardId>`, then run `mktemp -d` and `heptabase file export <fileId> --output-dir <scratchDir>`. Read the returned `path` with your native file-reading tool.
+- **Inspect a whiteboard:** `heptabase whiteboard read <whiteboardId> --mode structure`, then `heptabase whiteboard read-layout <whiteboardId>`.
+- **Read chat messages:** Copy a chat ID from `whiteboard read` output, then use `heptabase object read chat <chatId> --offset <n> --limit <n>` to paginate non-removed messages with their displayed author, timestamp, quoted content, and message content. For a whiteboard chat-messages element, use `heptabase object read chatMessagesElement <elementId> --offset <n> --limit <n>`.
+- **Check or view whiteboard layout:** run `heptabase whiteboard lint <whiteboardId>`. For visual review, first read `references/whiteboard.md`, then use `heptabase whiteboard screenshot <whiteboardId> --output <existingDirectory>/whiteboard.png` and inspect the returned local path.
+- **Change whiteboard layout or a mind map:** first read `references/whiteboard.md`; for mind maps, also read `references/mind-maps.md`. Commands with nested or batch input use `--input <path|->` and canonical JSON.
 - **Add a local file to a whiteboard:** `heptabase local-file add --whiteboard-id <whiteboardId> --path <absolutePath>`. One absolute path per call; it places a placeholder, it does not copy the file into Heptabase.
 
 ## AI Tutor: goals, courses, lessons
@@ -477,6 +505,26 @@ Three read-only command groups, arranged as a hierarchy: a **goal** is a top-lev
 - **Read lesson chat messages:** `heptabase lesson list-messages <lessonId> --limit 20 --offset 0` — max 100 per page; page through with `--offset` rather than raising the limit past 100.
 
 All of these take UUIDs, not titles. Resolve a title to an id with the list command one level up; do not guess an id.
+
+## Heptabase URLs (Deep links)
+
+When the user shares a Heptabase URL (aka. deep link), use the CLI to read it — do NOT open it in a browser if the user does not explicitly ask you to (the app requires authentication and browsers used by agents are typically not logged in).
+
+URL patterns and how to handle them:
+
+- **Journal card:** `https://app.heptabase.com/<workspaceId>/card/<YYYY-MM-DD>` → `heptabase journal read <YYYY-MM-DD>`
+- **Card by UUID:** `https://app.heptabase.com/<workspaceId>/card/<uuid>` → first run `heptabase card properties <uuid>` to discover the card type, then read its content with the matching command (`heptabase note read <uuid>`, `heptabase pdf metadata <uuid>`, etc.).
+- **Whiteboard:** `https://app.heptabase.com/<workspaceId>/whiteboard/<uuid>` → run `heptabase whiteboard read <uuid> --mode structure` and `heptabase whiteboard read-layout <uuid>`. Read `references/whiteboard.md` before any layout mutation or visual judgment.
+
+The `<workspaceId>` segment in the URL is not needed by the CLI — extract only the card/whiteboard ID.
+
+## Note and journal card content editing
+
+Use `create` / `append` with Markdown for ordinary writing. Before calling `heptabase note save` / `heptabase journal save` with ProseMirror JSON, you MUST read `references/card-content-schema.md`. Also read it before generating Markdown that uses Heptabase-specific extensions such as card mentions, whiteboard mentions, dates, videos, math, or toggle/todo lists.
+
+## Created by AI marking
+
+`note create` and `journal create` mark content as Created by AI by default. Before deciding whether to pass `--no-created-by-ai`, you MUST read `references/created-by-ai.md`.
 
 ## Property editing
 
@@ -494,15 +542,31 @@ Before reading parsed PDF content, you MUST read `references/pdf-reading.md`.
 
 Before reading parsed media transcripts, you MUST read `references/transcript-reading.md`.
 
+## Whiteboard work
+
+Before deliberate placement, movement, arrangement, resizing, sectioning, connection work, removal, or visual verification, you MUST read `references/whiteboard.md`. It defines exact placement references, selection and destination shapes, read-before-write rules, and the verification loop.
+
+For mind-map creation or structural edits, also read `references/mind-maps.md`. Read the current mind map again before updating it so stable structural node IDs are current.
+
+The existing `whiteboard cards`, `add-card`, and `remove-card` commands are narrow legacy commands. Prefer `whiteboard read`, `read-layout`, and the canonical `--input` commands for structured whiteboard work.
+
+The canonical mutation commands cover whiteboard hierarchy and shortcuts; object placement and cross-whiteboard moves; move, arrange, align, resize, color, and removal; Sections and connections; and mind-map creation and updates. Run `heptabase whiteboard --help` for the current list and read the linked references for nested input.
+
+## Canonical JSON input
+
+Commands with nested or batch data accept `--input <path|->`; `-` reads JSON from stdin. Build JSON with `jq` or write it to a temporary file. Do not interpolate untrusted text into hand-built shell JSON.
+
+Inspect every mutation result. A handled top-level `status: "failed"` is printed and exits with status `1`. A successful top-level result exits with `0` even when item results contain `failureReasonCode` fields, so check them before reporting full success.
+
 ## All output is JSON
 
-Every command prints JSON to stdout. You can parse it with `jq` or pipe it to other tools.
+Every command prints JSON to stdout. You can parse it with `jq` or pipe it to other tools. `whiteboard screenshot` writes the PNG to `--output` and prints metadata only; it never prints image bytes.
 
 ## Troubleshooting
 
 - **Desktop app must be running.** The CLI communicates with a local server inside the app. If the app is closed, all commands fail. Run `heptabase start` to launch and wait for readiness.
 - **Codex sandbox may block the local CLI server.** If Heptabase starts but Codex says the CLI server is not ready, read `references/codex-sandbox.md`; retry `heptabase` commands outside the sandbox when Codex supports escalation.
-- **Mutations are serialized.** Write operations (create, save, append, trash, restore, tag add/remove, card set-property, file export, whiteboard add-card/remove-card) run one at a time to prevent conflicts. Reads are concurrent.
+- **Mutations are serialized.** Write operations run one at a time to prevent conflicts. Reads are concurrent.
 - **Request body size limit.** The server rejects request bodies larger than 1 MB.
 - **Request timeout.** The server times out requests that take longer than 10 seconds to send their body.
 
@@ -510,14 +574,455 @@ Every command prints JSON to stdout. You can parse it with `jq` or pipe it to ot
 
 - **Auto-enabling local server/CLI install not supported.** If the local CLI server is disabled or CLI wiring is missing, the skill cannot repair it by itself; ask the user to enable Local CLI Server and CLI install from desktop settings first.
 - **File export is local-file-only.** `heptabase file export` works only when the file metadata and raw file are already available locally in the desktop app. It does not download missing files from cloud storage.
-- **Binary/media upload workflows not supported.** This skill is for JSON/text operations on notes/journals/tags/cards and AI Tutor reads, not file upload or media-processing APIs.
-- **Whiteboard creation/edit/delete not supported yet.** You can list whiteboards and add, list, or remove cards on them, but you can't create, rename, move, or delete whiteboards.
+- **Binary/media upload workflows not supported.** This skill can export locally available files and whiteboard PNGs, but it cannot upload files or call media-processing APIs.
+- **Whiteboard scope is intentionally bounded.** The CLI cannot delete a whiteboard or underlying Card, move content across spaces, create arbitrary shapes, or perform one semantic whole-board auto-layout command. `remove-objects` removes canvas placements, not source Cards.
+- **No CLI undo command or Agent history.** Whiteboard mutations use the app's normal domain actions, but the CLI does not expose Agent chat undo, tool-call persistence, or the Agent screenshot checklist. Read first and verify the result yourself.
+- **Whiteboard content is local.** Whiteboard reads use content available in the running desktop app and do not run backend-only PDF, web, or YouTube enrichment. Use dedicated PDF and media commands for full source content. Full web card content is not available through the CLI; use the source URL in the whiteboard output.
+- **Screenshots are schematic.** They support spatial review but do not replace semantic reads or deterministic lint.
 - **Property filtering not supported yet.** You can read tag property schemas, read property values, and set one property value on a card, but you can't query cards by property value.
 
 ## Warnings
 
 - **Use the CLI as the only data access path.** Never directly read, write, or modify Heptabase app data through local database files, app storage, cache files, internal endpoints, or any other non-CLI mechanism. If the CLI does not support the requested operation, stop and report that it is not supported.
 AGENT_LAZYPACK_HEPTABASE_CLI_SKILL_MD_0E95F5A366
+
+# heptabase-cli/references/card-content-schema.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/card-content-schema.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/references/card-content-schema.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_CARD_CONTENT_SCHEMA_MD_1B1BEA64CB'
+# Card Content Schema
+
+This reference covers note and journal content writes through the Heptabase CLI.
+
+Read this before generating ProseMirror JSON: the card content schema is strict, and guessed structures can fail validation or damage card content.
+
+Prefer Markdown for ordinary writing and appending. Use ProseMirror JSON only when you need to preserve existing structure or create schema nodes/marks that Markdown cannot express.
+
+## Top-Level JSON Shape
+
+A ProseMirror document is a JSON object:
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": { "id": null },
+      "content": [{ "type": "text", "text": "Hello" }]
+    }
+  ]
+}
+```
+
+The `text` node is special: put the characters in a `text` property (not in `attrs`), and put optional formatting in a `marks` array on the same object. See [Marks](#marks) and [Paragraph With Marks And Link](#paragraph-with-marks-and-link).
+
+The document must contain at least one block. `{"type":"doc","content":[]}` is invalid.
+
+When editing existing content, preserve existing `id` values from `read`. For new blocks, omit `id` or set it to `null`; the CLI save handler backfills valid IDs. Do not create custom string IDs yourself.
+
+## Markdown Content
+
+For everyday note content, you can use Markdown instead of JSON. The table below maps Markdown syntax to the ProseMirror nodes and marks the CLI creates:
+
+<!-- prettier-ignore -->
+| Markdown | ProseMirror result |
+| --- | --- |
+| `# H1` through `###### H6` | `heading` |
+| Plain text paragraphs | `paragraph` |
+| `>` quote | `blockquote` |
+| `- item` | `bullet_list_item` |
+| `1. item` | `numbered_list_item` |
+| `- [ ] item`, `- [x] item` | `todo_list_item` |
+| `+ item` | `toggle_list_item` |
+| Triple backtick fences | `code_block` |
+| `---` | `horizontal_rule` |
+| Markdown tables | `table` |
+| `![](src)`, `![](src "title")` | `image` block (`alt` is ignored so no need to set it) |
+| `{{video URL}}`, `{{youtube URL}}`, `{{vimeo URL}}`, `{{bilibili URL}}` | `video` block |
+| `{{card UUID}}` | inline `card` mention |
+| `{{pdf_card UUID}}` | inline `pdf_card` mention |
+| `{{whiteboard UUID}}` | inline `whiteboard` mention |
+| `{{date YYYY-MM-DD}}` | inline `date` mention |
+| `$x$`, `$$x$$` | `math_inline`, `math_display` |
+| `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``, `[link](url)` | marks |
+
+Below is an example with inline mentions, an image block, a standalone video line (note the blank lines), and a todo item:
+
+```markdown
+# Sprint notes
+
+Discussed in {{card 11111111-1111-4111-8111-111111111111}} on {{date 2026-06-04}}.
+
+This is an image:
+
+![](https://example.com/diagram.png)
+
+This is a video:
+
+{{youtube https://www.youtube.com/watch?v=example}}
+
+- [ ] Summarize the recording
+```
+
+Video markdown rules:
+
+- The whole line must be only `{{video URL}}`, `{{youtube URL}}`, `{{vimeo URL}}`, or `{{bilibili URL}}` — no text before or after on the same line.
+- Put a blank line before and after the video line when other blocks are nearby.
+- Invalid: `Watch this: {{youtube https://...}}` (trailing text prevents a `video` block).
+
+## ProseMirror Nodes
+
+### Blocks
+
+<!-- prettier-ignore -->
+| Node | Content | Attrs |
+| --- | --- | --- |
+| `doc` | `block+` | none |
+| `paragraph` | `inline*` | `id?: UUID string or null` |
+| `heading` | `inline*` | `id?: UUID string or null`, `level?: 1-6` (default `1`) |
+| `blockquote` | `block+` | `id?: UUID string or null` |
+| `horizontal_rule` | none | `id?: UUID string or null` |
+| `code_block` | `text*` | `id?: UUID string or null`, `params?: string or null` (see [Code Block Params](#code-block-params); default `""`) |
+| `math_display` | `text*` | `id?: UUID string or null` |
+| `bullet_list_item` | `paragraph block*` | `id?: UUID string or null`, `folded?: boolean`, `format?: 0, 1, 2, "0", "1", "2", or null` |
+| `numbered_list_item` | `paragraph block*` | `id?: UUID string or null`, `order?: positive integer or null`, `format?: 0, 1, 2, "0", "1", "2", or null` |
+| `todo_list_item` | `paragraph block*` | `id?: UUID string or null`, `checked?: boolean`, `dueDate?: YYYY-MM-DD string or null`, `lastCheckedTime?: ISO 8601 string or null`, `lastUpdatedTime?: ISO 8601 string` (see [Timestamp Attrs](#timestamp-attrs)) |
+| `toggle_list_item` | `heading` or `paragraph`, then `block*` | `id?: UUID string or null`, `folded?: boolean` |
+| `table` | `table_row+` | `id?: UUID string or null`, `hasRowHeader?: boolean`, `hasColumnHeader?: boolean` |
+| `table_row` | zero or more `table_cell` or `table_header` nodes | `id?: UUID string or null` |
+| `table_cell`, `table_header` | `block+` | `id?: UUID string or null`, `colspan?: positive integer`, `rowspan?: positive integer`, `colwidth?: positive integer[] or null`, `backgroundColor?: editor color or null`, `textColor?: editor color or null` (see [Editor Colors](#editor-colors)) |
+| `image` | none | `id?: UUID string or null`, `src?: string or null`, `fileId?: UUID string or null`, `width?: string or null`, `originalHeight?: number or null`, `originalWidth?: number or null`, `alignment?: left, center, or right`, `reference?: media reference or null` (preserve from `read`; do not create manually); **legacy markdown:** `alt`, `title` |
+| `video` | none | `id?: UUID string or null`, `fileId?: UUID string or null`, `url?: string or null`, `width?: string or null`, `alignment?: left, center, or right`, `originalWidth?: number or null`, `originalHeight?: number or null`, `reference?: media reference or null` (preserve from `read`; do not create manually); **deprecated:** `source` (legacy iframe embeds; omit on new content) |
+| `audio` | none | `id?: UUID string or null`, `url?: string or null`, `fileId?: UUID string or null`, `reference?: media reference or null` (preserve from `read`; do not create manually) |
+| `file` | none | `id?: UUID string or null`, `fileId?: UUID string or null`, `url?: string or null`, `reference?: media reference or null` (preserve from `read`; do not create manually) |
+| `bookmark` | none | `url: full URL string`, `id?: UUID string or null`, `title?: string or null`, `description?: string or null`, `thumbnailUrl?: string or null`, `faviconUrl?: string or null`, `siteName?: string or null`, `lastUpdatedTime?: ISO 8601 string or null` (see [Timestamp Attrs](#timestamp-attrs)) |
+| `embed` | none | supported `objectType`: `note`, `journal`, `highlightElement`, `image`, `video`, or `audio`; `objectId: UUID string` (or `YYYY-MM-DD` when `objectType` is `journal`), `id?: UUID string or null`; `originalWidth`, `originalHeight`, `width`, and `alignment` |
+| `mention` | none | supported `objectType`: `note`, `journal`, `highlightElement`, `image`, `video`, or `audio`; `objectId: UUID string` (or `YYYY-MM-DD` when `objectType` is `journal`), `id?: UUID string or null` |
+
+Block media nodes cannot appear inside a paragraph. Use inline mention nodes for inline references.
+
+#### Code Block Params
+
+Code block `params` are serialized as `[!]<language>[:displayMode]`, where `!` enables line wrapping and `displayMode` applies to Mermaid blocks (`code`, `preview`, or `split`). See [Code Block](#code-block).
+
+#### Timestamp Attrs
+
+Use ISO 8601 strings for timestamp attrs, for example `2026-05-26T00:00:00.000Z`.
+
+#### Media References
+
+Media `reference` attrs are internal metadata. Preserve them when editing existing JSON from `read`, but do not create them manually. If present, the value must be either `null` or an object with `objectType` and `objectId`. Supported `objectType` values are `card`, `textElement`, `journal`, `highlightElement`, `mediaElement`, `mediaCard`, `pdfCard`, `insight`, `chatMessage`, `chat2AccountRelation`, and `webCard`. `objectId` must be a UUID string, except `journal` references use a `YYYY-MM-DD` date string.
+
+#### Editor Colors
+
+Editor colors for `table_cell` / `table_header` `backgroundColor` and `textColor` are `gray`, `brown`, `orange`, `yellow`, `green`, `blue`, `purple`, `pink`, and `red`.
+
+### Inline Nodes
+
+<!-- prettier-ignore -->
+| Node | Attrs |
+| --- | --- |
+| `text` | none |
+| `math_inline` | none |
+| `hard_break` | none |
+| `web` | `url: full URL string`, `title?: string or null` |
+| `date` | `date: string` (`YYYY-MM-DD`) |
+| `whiteboard` | `whiteboardId: UUID string` |
+| `card` | `cardId: UUID string` |
+| `pdf_card` | `pdfCardId: UUID string` |
+| `section` | `sectionId: UUID string` |
+| `tag` | `tagId: UUID string` |
+| `highlight_element` | `highlightElementId: UUID string` |
+| `image_card`, `video_card`, `audio_card` | `cardId: UUID string` |
+| `web_card` | `webCardId: UUID string` |
+| `chat` | `chatId: UUID string`, `chatMessageId?: UUID string or null`, `quotedChatMessageId?: UUID string or null` |
+
+- **`text`** — Put characters in `text` (required) and optional formatting in `marks`. See [Top-Level JSON Shape](#top-level-json-shape) and [Marks](#marks).
+- **`math_inline`** — Put the TeX inside `content` as a child `text` node. See [Math](#math).
+- **`people`** — Do not use `people`. It exists in a special editor schema, but the CLI save schema rejects it.
+
+### Marks
+
+Marks only attach to `text` nodes. Each mark is an entry in that node's `marks` array: `{ "type": "<mark>", "attrs": ... }` (many marks have no `attrs`).
+
+When you save as Markdown, you can get bold, italic, and stuff from the syntax in [Markdown Content](#markdown-content). But you cannot get underline or text/background color that way because there is no Markdown syntax for them — save as JSON (ProseMirror) if you need those marks.
+
+<!-- prettier-ignore -->
+| Mark | Attrs | Notes |
+| --- | --- | --- |
+| `em` | none | italic |
+| `strong` | none | bold |
+| `strike` | none | strikethrough |
+| `underline` | none | underline |
+| `code` | none | inline code |
+| `link` | `href: non-empty string` | `href` is required; **deprecated (legacy markdown):** `title`, `data-internal-href`, `edited` — preserve from `read` if present, do not set on new links |
+| `color` | `type: text or background`, `color: gray, brown, orange, yellow, green, blue, purple, pink, or red` | both attrs are required when the mark is present |
+| `highlight` | `ids: UUID string[]` | read-only highlight/comment metadata; do not create manually |
+| `anchor` | `ids: UUID string[]` | read-only anchor metadata; do not create manually |
+
+### Deprecated attributes
+
+Some attrs remain in the schema as legacy. When **creating** new JSON, omit them unless you are round-tripping an existing document from `read`:
+
+<!-- prettier-ignore -->
+| Node or mark | Deprecated attrs | Notes |
+| --- | --- | --- |
+| `image` | `alt`, `title` | Markdown import ignores them; use `fileId` / `src` and `alignment` instead |
+| `video` | `source` | Legacy iframe `data-source`; use `fileId` or `url` |
+| `link` | `title`, `data-internal-href`, `edited` | Use `href` only for new external links; internal links are resolved by the app |
+
+## Examples
+
+### Minimal Note
+
+```json
+{
+  "type": "doc",
+  "content": [{ "type": "heading", "attrs": { "level": 1, "id": null } }]
+}
+```
+
+### Paragraph With Marks And Link
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": { "id": null },
+      "content": [
+        { "type": "text", "text": "This is " },
+        { "type": "text", "marks": [{ "type": "strong" }], "text": "bold" },
+        { "type": "text", "text": " and " },
+        { "type": "text", "marks": [{ "type": "em" }], "text": "italic" },
+        { "type": "text", "text": ", with " },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": { "href": "https://heptabase.com" }
+            }
+          ],
+          "text": "a link"
+        },
+        { "type": "text", "text": "." }
+      ]
+    }
+  ]
+}
+```
+
+### Todo Item
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "todo_list_item",
+      "attrs": {
+        "id": null,
+        "checked": false,
+        "lastUpdatedTime": "2026-05-26T00:00:00.000Z"
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": { "id": null },
+          "content": [{ "type": "text", "text": "Review schema rules" }]
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Code Block
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "code_block",
+      "attrs": { "id": null, "params": "typescript" },
+      "content": [{ "type": "text", "text": "const answer = 42;" }]
+    },
+    {
+      "type": "code_block",
+      "attrs": { "id": null, "params": "!mermaid:preview" },
+      "content": [{ "type": "text", "text": "flowchart TD\n  A[Draft] --> B[Review]" }]
+    }
+  ]
+}
+```
+
+Use `!` to enable line wrapping, for example `!typescript`. For Mermaid code blocks, append `:code`, `:preview`, or `:split` to choose the display mode.
+
+### Inline Card Mention
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": { "id": null },
+      "content": [
+        { "type": "text", "text": "See also: " },
+        {
+          "type": "card",
+          "attrs": { "cardId": "11111111-1111-4111-8111-111111111111" }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Mirror Embed
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "embed",
+      "attrs": {
+        "id": null,
+        "objectType": "note",
+        "objectId": "11111111-1111-4111-8111-111111111111",
+        "width": "100%",
+        "alignment": "center"
+      }
+    }
+  ]
+}
+```
+
+### Math
+
+`math_display` is a block; `math_inline` is an inline sibling next to `text` inside a paragraph. Neither uses `attrs` or a top-level `text` property for the formula. Put the TeX string in `content` as a single child `text` node. Multiple child `text` nodes are schema-valid, but prefer one child `text` node when creating new math content.
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "math_display",
+      "attrs": { "id": null },
+      "content": [{ "type": "text", "text": "\\int_0^1 x^2 \\,dx = \\frac{1}{3}" }]
+    },
+    {
+      "type": "paragraph",
+      "attrs": { "id": null },
+      "content": [
+        { "type": "text", "text": "Inline: " },
+        {
+          "type": "math_inline",
+          "content": [{ "type": "text", "text": "a^2 + b^2 = c^2" }]
+        },
+        { "type": "text", "text": " in a sentence." }
+      ]
+    }
+  ]
+}
+```
+
+### Table
+
+```json
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "table",
+      "attrs": { "id": null, "hasRowHeader": false, "hasColumnHeader": true },
+      "content": [
+        {
+          "type": "table_row",
+          "attrs": { "id": null },
+          "content": [
+            {
+              "type": "table_header",
+              "attrs": { "colspan": 1, "rowspan": 1 },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": { "id": null },
+                  "content": [{ "type": "text", "text": "Name" }]
+                }
+              ]
+            },
+            {
+              "type": "table_header",
+              "attrs": { "colspan": 1, "rowspan": 1 },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": { "id": null },
+                  "content": [{ "type": "text", "text": "Status" }]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table_row",
+          "attrs": { "id": null },
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": { "colspan": 1, "rowspan": 1 },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": { "id": null },
+                  "content": [{ "type": "text", "text": "Schema docs" }]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "attrs": { "colspan": 1, "rowspan": 1 },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": { "id": null },
+                  "content": [{ "type": "text", "text": "Draft" }]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Dos
+
+- Do read first and edit the returned `content` when replacing a card or journal.
+- Do pass the latest `contentMd5` to `save`.
+- Do preserve existing `id` values from `read`.
+- Do use `id: null` or omit `id` on new blocks; the save handler backfills valid IDs.
+- Do resolve real target IDs with CLI reads/lists before creating inline mentions or embeds.
+
+## Don'ts
+
+- Don't write an empty document.
+- Don't put text in `attrs.text`.
+- Don't create custom string IDs for new blocks.
+- Don't invent UUIDs for `cardId`, `whiteboardId`, `pdfCardId`, `tagId`, or other references.
+- Don't use `people` inline mentions through the CLI schema.
+- Don't add `highlight` or `anchor` marks when creating new content.
+- Don't set deprecated attrs on new content; preserve them only when editing existing JSON from `read`.
+- Don't assume `embed` and block `mention` can target every card type; use only `note`, `journal`, `highlightElement`, `image`, `video`, or `audio`.
+- Don't edit Heptabase local database files directly to bypass the CLI.
+AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_CARD_CONTENT_SCHEMA_MD_1B1BEA64CB
 
 # heptabase-cli/references/codex-sandbox.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/codex-sandbox.md")"
@@ -552,6 +1057,45 @@ network_access = true
 
 Restart Codex and retry the command.
 AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_CODEX_SANDBOX_MD_5151D78187
+
+# heptabase-cli/references/created-by-ai.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/created-by-ai.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/references/created-by-ai.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_CREATED_BY_AI_MD_A981F7F3D9'
+# Created by AI Marking
+
+`note create` and `journal create` mark new content as **Created by AI** by default.
+
+For notes, Card Library’s Created by AI filter keeps them separate from human-owned cards.
+For journals, the same create-time mark is stored as `aiArtifactInfo`; later `append` / `save` cannot change it. Journals are not shown in the Card Library Created by AI filter.
+
+## Default (mark)
+
+Use the default when you are drafting, researching, summarizing, or otherwise generating content as an agent. Leave the mark on so the user can filter AI-created notes in Card Library.
+
+```bash
+heptabase note create --content "# Draft\n\n..."
+heptabase journal create --content "..."
+```
+
+## Opt out (`--no-created-by-ai`)
+
+Pass `--no-created-by-ai` when the user wants the note or journal as **theirs** — for example:
+
+- They ask you to capture or write something they will own and edit as a normal note or journal
+- They are dictating or you are acting only as a scribe
+- They explicitly say not to mark it as Created by AI
+
+```bash
+heptabase note create --no-created-by-ai --content "# My note\n\n..."
+heptabase journal create --no-created-by-ai --content "..."
+```
+
+## Timing
+
+- The mark is set **only at create time**. Later `append` / `save` do not add or remove it.
+- Prefer deciding before the first `create`. Do not create unmarked then recreate just to change the mark.
+- For journals, the mark is written only when the journal date did not already have a journal row (filling an existing empty journal does not add the mark).
+AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_CREATED_BY_AI_MD_A981F7F3D9
 
 # heptabase-cli/references/file-reading.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/file-reading.md")"
@@ -651,6 +1195,241 @@ Now read `/tmp/hepta-read/report-55555555-5555-4555-8555-555555555555.pdf` with 
 - `file export` says the file is unavailable locally: ask the user to open/sync the file in Heptabase, then retry.
 - Invalid or missing `--output-dir`: create a scratch directory with `mktemp -d` and retry.
 AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_FILE_READING_MD_0BE79148E0
+
+# heptabase-cli/references/mind-maps.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/mind-maps.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/references/mind-maps.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_MIND_MAPS_MD_A1B781DF4B'
+# Mind maps
+
+Read this together with `whiteboard.md`. A mind map is an editable rooted tree with stable structural node IDs.
+
+## Design defaults
+
+- Design the semantic tree before choosing rich node types.
+- Use one concise text root.
+- Use mostly short `textNode` labels, with one concept per node and parallel wording among siblings.
+- Default to 4–7 top-level branches, 2–4 levels, and about 20–50 nodes. The 300-node limit is a ceiling, not a target.
+- Default to horizontal layout. Omit side, edge color, and collapsed state unless the user or existing map calls for them.
+- For updates, preserve the map's current wording, depth, node mix, layout, colors, sides, and collapsed state. Make the smallest requested change.
+
+## Node types
+
+| Type | Use |
+| --- | --- |
+| `textNode` | Default concise label owned by the mind map. Plain text only. |
+| `cardNode` | A regular Card whose independent identity matters. It may create a Card, reference one, or consume a Card placement. Only regular Cards are supported; PDF, web, media, and journal sources are not. |
+| `highlightElementNode` | Consume an existing standalone Highlight Element placement. The command cannot create a new Highlight Element. |
+| `textElementNode` | Create a visual Text Element or consume an existing standalone Text Element placement. |
+
+Build the full text-node skeleton first. Use rich nodes only where added detail or independent identity matters.
+
+## Create a mind map
+
+Create one complete flat, ordered tree with `create-mind-map --input <path|->`:
+
+```bash
+heptabase whiteboard create-mind-map --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "layout": "horizontal",
+  "destination": { "type": "auto" },
+  "nodes": [
+    {
+      "nodeKey": "root",
+      "parentNodeKey": null,
+      "node": { "type": "textNode", "content": "Customer onboarding" }
+    },
+    {
+      "nodeKey": "activation",
+      "parentNodeKey": "root",
+      "node": { "type": "textNode", "content": "Activation" }
+    },
+    {
+      "nodeKey": "first-value",
+      "parentNodeKey": "activation",
+      "node": { "type": "textNode", "content": "First value" }
+    },
+    {
+      "nodeKey": "risks",
+      "parentNodeKey": "root",
+      "node": { "type": "textNode", "content": "Risks" }
+    }
+  ]
+}
+```
+
+Rules:
+
+- `nodeKey` is unique within the call.
+- Exactly one node has `parentNodeKey: null`.
+- Every other parent key must exist, and the graph must be connected and acyclic.
+- Array order is sibling order under each parent.
+- `side: "left"` or `"right"` is meaningful only on a direct child of the root. Omit it to balance branches automatically.
+- `edgeColor` accepts `yellow`, `red`, `blue`, `green`, `black`, `orange`, `purple`, or `white`; normally omit it.
+
+## Rich node definitions
+
+Create a reusable Card:
+
+```json
+{
+  "type": "cardNode",
+  "source": {
+    "type": "newCard",
+    "content": "# Activation evidence\n\nDetailed explanation"
+  }
+}
+```
+
+Reference a regular Card without consuming a whiteboard placement:
+
+```json
+{
+  "type": "cardNode",
+  "source": { "type": "existingCard", "cardId": "<cardId>" }
+}
+```
+
+Consume one current Card placement into the map:
+
+```json
+{
+  "type": "cardNode",
+  "source": { "type": "cardInstance", "id": "inst:<placementId>" }
+}
+```
+
+Consume a Highlight Element placement:
+
+```json
+{
+  "type": "highlightElementNode",
+  "source": { "type": "highlightElementInstance", "id": "inst:<placementId>" }
+}
+```
+
+Create or consume a Text Element:
+
+```json
+{
+  "type": "textElementNode",
+  "source": { "type": "newTextElement", "content": "**Supporting detail**" }
+}
+```
+
+```json
+{
+  "type": "textElementNode",
+  "source": { "type": "textElement", "id": "inst:<placementId>" }
+}
+```
+
+Before consuming a placement, read the target whiteboard layout and use its exact `inst:` ID when available. Consuming turns that standalone placement into a structural node and can change its Section membership and connected relations. Do not consume an object merely to copy its text.
+
+## Read before updating
+
+Use the canonical `mindMapId`, not the Mind Map Instance ID:
+
+```bash
+heptabase object read mindMap <mindMapId>
+```
+
+Copy current structural `mindMapNodeId` values from that output. Do not reuse node IDs from an old read after another edit.
+
+## Update operations
+
+`update-mind-map` takes an ordered operation list:
+
+```bash
+heptabase whiteboard update-mind-map --input input.json
+```
+
+```json
+{
+  "mindMapId": "<mindMapId>",
+  "operations": [
+    {
+      "operation": "addNode",
+      "nodeKey": "risk-mitigation",
+      "parent": { "type": "existingNode", "mindMapNodeId": "<risksNodeId>" },
+      "position": { "type": "last" },
+      "node": { "type": "textNode", "content": "Mitigation" }
+    },
+    {
+      "operation": "setCollapsed",
+      "target": { "type": "newNode", "nodeKey": "risk-mitigation" },
+      "isCollapsed": true
+    }
+  ]
+}
+```
+
+Operations run sequentially. A `newNode` reference may target only an earlier `addNode` in the same call.
+
+Supported operations:
+
+| Operation | Important fields |
+| --- | --- |
+| `addNode` | `nodeKey`, `parent`, optional `position`, `side`, `edgeColor`, and `node` |
+| `updateTextNode` | `target`, complete replacement plain-text `content`; only for `textNode` |
+| `moveNode` | `target`, new `parent`, optional `position` and root-child `side` |
+| `deleteSubtree` | `target`; deletes it and all descendants, but cannot delete the root |
+| `setLayout` | `layout`: `horizontal` or `vertical` |
+| `setCollapsed` | `target`, `isCollapsed` |
+| `setEdgeColor` | non-root `target`, `edgeColor`; applies to its subtree |
+
+Node references:
+
+```json
+{ "type": "existingNode", "mindMapNodeId": "<mindMapNodeId>" }
+```
+
+```json
+{ "type": "newNode", "nodeKey": "<earlierNodeKey>" }
+```
+
+Sibling positions:
+
+```json
+{ "type": "first" }
+```
+
+```json
+{ "type": "last" }
+```
+
+```json
+{ "type": "before", "sibling": { "type": "existingNode", "mindMapNodeId": "<siblingId>" } }
+```
+
+```json
+{ "type": "after", "sibling": { "type": "newNode", "nodeKey": "<earlierNodeKey>" } }
+```
+
+The root cannot be moved, deleted, or recolored with `setEdgeColor`. `updateTextNode` cannot change a node type or edit Card, Highlight Element, or Text Element content.
+
+Deleting a Card node removes its map placement but keeps the canonical Card. Deleting a Highlight Element or Text Element node removes that attached canvas element rather than detaching it as a standalone placement.
+
+## Atomicity and limits
+
+- Creation and update are all-or-nothing. Invalid structure, source ambiguity, scope failure, or a bad sequential operation commits nothing.
+- One update accepts at most 100 operations.
+- The final map accepts at most 300 nodes.
+- A compiled change above 1,000 persisted actions fails. Split a large update into smaller calls that each leave a valid map.
+- Inspect `status`, `operationFailureReasonCode`, and any reported operation index, node key, source ID, or candidate instance IDs before continuing.
+
+## Verify
+
+After creation or update:
+
+1. Run `heptabase object read mindMap <mindMapId>` and confirm hierarchy, order, wording, node types, and stable IDs.
+2. Run `heptabase whiteboard read-layout <whiteboardId>` and `heptabase whiteboard lint <whiteboardId>`.
+3. Export and inspect a focused schematic screenshot as described in `whiteboard.md`.
+4. Check that surrounding objects, Sections, and connections remain correct. Repair and repeat before claiming completion.
+AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_MIND_MAPS_MD_A1B781DF4B
 
 # heptabase-cli/references/pdf-reading.md
 mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/pdf-reading.md")"
@@ -846,6 +1625,387 @@ heptabase video read <videoCardId> --start-seconds 0 --end-seconds 300
 - `transcriptStatus: "failed"`: parsed transcript content is not available for this media card.
 - `transcriptStatus: null`: this media card has not been transcribed yet. Ask the user to generate a transcript in Heptabase first.
 AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_TRANSCRIPT_READING_MD_21904738FE
+
+# heptabase-cli/references/whiteboard.md
+mkdir -p "$(dirname "{{SYNC_ROOT}}/skills/heptabase-cli/references/whiteboard.md")"
+cat > "{{SYNC_ROOT}}/skills/heptabase-cli/references/whiteboard.md" <<'AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_WHITEBOARD_MD_D094E5C56F'
+# Whiteboard work
+
+Use this reference for whiteboard structure reads, layout changes, and visual checks. Copy IDs and object types from current CLI output. Do not guess them.
+
+## Read before writing
+
+Start each layout-changing turn from current state:
+
+```bash
+heptabase whiteboard read <whiteboardId> --mode structure
+heptabase whiteboard read-layout <whiteboardId>
+```
+
+Use `--mode content` when grouping or order depends on meaning. Add `--include-connection-ids` when inspecting or repairing routes.
+
+For a focused layout read, send canonical JSON:
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "focus": {
+    "objects": [
+      { "id": "inst:<placementId>", "objectType": "card" },
+      { "id": "<sectionId>", "objectType": "section" }
+    ],
+    "padding": 160
+  },
+  "shouldIncludeConnectionIds": true
+}
+```
+
+Pass it as a file or through stdin:
+
+```bash
+heptabase whiteboard read-layout --input input.json
+jq -n --arg id '<whiteboardId>' '{whiteboardId: $id}' | heptabase whiteboard read-layout --input -
+```
+
+`focus` and `viewport` are mutually exclusive. A viewport has `x`, `y`, `width`, and `height`.
+
+## Object references
+
+Most whiteboard inputs use:
+
+```json
+{ "id": "<objectId>", "objectType": "<objectType>" }
+```
+
+- Copy `objectType` exactly from `whiteboard read` or `read-layout`.
+- Use the exact `inst:<placementId>` whenever layout output provides it. A canonical object may have more than one visible placement.
+- `place-objects` is different: it takes canonical source IDs or a journal date, never `inst:` IDs.
+- Read both source and destination layouts before a cross-whiteboard move.
+
+## Selections and destinations
+
+Selections:
+
+```json
+{ "type": "objects", "objects": [{ "id": "inst:<placementId>", "objectType": "card" }] }
+```
+
+```json
+{ "type": "box", "box": { "x": 0, "y": 0, "width": 1200, "height": 800 } }
+```
+
+```json
+{ "type": "all" }
+```
+
+`all` is only supported by `move-objects-across`. A box is resolved against current layout at execution time, so reread and reconfirm it if the board may have changed.
+
+Destinations:
+
+```json
+{ "type": "auto" }
+```
+
+```json
+{ "type": "point", "x": 100, "y": 200 }
+```
+
+```json
+{ "type": "delta", "dx": 300, "dy": 0 }
+```
+
+```json
+{
+  "type": "nextTo",
+  "objectId": "inst:<anchorPlacementId>",
+  "objectType": "card",
+  "side": "right",
+  "gap": 120,
+  "alignment": "center"
+}
+```
+
+```json
+{ "type": "inSection", "sectionId": "<sectionId>" }
+```
+
+`place-objects` and `create-shortcut` support `auto`, `point`, `nextTo`, and `inSection`. `move-objects` supports `delta`, `point`, and `nextTo`. `arrange-objects` has an optional `point` or `nextTo` anchor.
+
+## Safe layout loop
+
+1. Read semantic structure and current layout. Include connection IDs when routes are in scope.
+2. Define the smallest authorized object set. Preserve unrelated content and the board's existing visual rules.
+3. Resize objects before arranging them. Treat input order as reading order.
+4. Apply one coherent mutation group and inspect all handled failure fields in the JSON result.
+5. Reread the changed area and run `heptabase whiteboard lint <whiteboardId>`.
+6. Export and inspect a focused screenshot. Repair and repeat. For substantial work, finish with a whole-board screenshot and lint.
+
+A clean lint result does not prove the layout is understandable. A screenshot does not replace reading content or linting geometry.
+
+## Placement and hierarchy
+
+Create and move hierarchy with flat flags:
+
+```bash
+heptabase whiteboard create --title "Projects" --parent-whiteboard-id <parentWhiteboardId>
+heptabase whiteboard move <whiteboardId> --target-parent-whiteboard-id <parentWhiteboardId>
+heptabase object rename whiteboard <whiteboardId> --new-name "Projects"
+```
+
+Omit `--target-parent-whiteboard-id` to move a whiteboard to root. A shortcut does not change hierarchy:
+
+```bash
+heptabase whiteboard create-shortcut --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<destinationWhiteboardId>",
+  "linkedWhiteboardId": "<linkedWhiteboardId>",
+  "destination": { "type": "auto" }
+}
+```
+
+Place existing source objects:
+
+```bash
+heptabase whiteboard place-objects --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "objects": [
+    { "id": "<cardId>", "objectType": "card" },
+    { "id": "<pdfCardId>", "objectType": "pdfCard" }
+  ],
+  "destination": { "type": "auto" }
+}
+```
+
+Supported placement types are `card`, `journal`, `pdfCard`, `imageCard`, `videoCard`, `audioCard`, and `webCard`.
+
+## Move, arrange, and align
+
+Move one or more selections on the same whiteboard:
+
+```bash
+heptabase whiteboard move-objects --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "moves": [
+    {
+      "selection": {
+        "type": "objects",
+        "objects": [{ "id": "inst:<placementId>", "objectType": "card" }]
+      },
+      "destination": {
+        "type": "nextTo",
+        "objectId": "<sectionId>",
+        "objectType": "section",
+        "side": "right"
+      }
+    }
+  ]
+}
+```
+
+Move a selection to another whiteboard:
+
+```bash
+heptabase whiteboard move-objects-across --input input.json
+```
+
+```json
+{
+  "sourceWhiteboardId": "<sourceWhiteboardId>",
+  "destinationWhiteboardId": "<destinationWhiteboardId>",
+  "selection": { "type": "all" }
+}
+```
+
+This keeps relative layout and relations fully inside the moved group. Relations crossing the selection boundary are removed and reported. Cross-space moves are not supported.
+
+Arrange objects in input order:
+
+```bash
+heptabase whiteboard arrange-objects --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "objects": [
+    { "id": "inst:<firstPlacementId>", "objectType": "card" },
+    { "id": "inst:<secondPlacementId>", "objectType": "card" }
+  ],
+  "layout": { "type": "row", "gap": 0, "alignment": "center" },
+  "anchor": { "type": "point", "x": 100, "y": 200 }
+}
+```
+
+Layout shapes are:
+
+- Row: `type`, optional `gap`, optional `alignment` of `top`, `center`, or `bottom`.
+- Column: `type`, optional `gap`, optional `alignment` of `left`, `center`, or `right`.
+- Grid: `type`, optional `columns`, `rowGap`, and `columnGap`.
+
+Use a grid only for genuine peers. Use exact center alignment for a direct connected handoff.
+
+Align targets to their own selection bounds or stationary references:
+
+```bash
+heptabase whiteboard align-objects --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "targetObjects": [{ "id": "inst:<placementId>", "objectType": "card" }],
+  "referenceObjects": [{ "id": "inst:<referencePlacementId>", "objectType": "card" }],
+  "alignment": "centerVertically"
+}
+```
+
+Alignment values are `left`, `centerHorizontally`, `right`, `top`, `centerVertically`, and `bottom`. Alignment changes only one axis.
+
+Never arrange or move a Section together with one of its descendants. Moving a Section already carries its members.
+
+## Resize, color, remove, and section
+
+Resize examples:
+
+```bash
+heptabase whiteboard resize-objects --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "resizes": [
+    { "id": "inst:<readerCardPlacementId>", "objectType": "card", "mode": "fitToContent" },
+    { "id": "inst:<sourcePlacementId>", "objectType": "pdfCard", "mode": "defaultSize" },
+    { "id": "inst:<mediaPlacementId>", "objectType": "imageCard", "mode": "setSize", "width": 600 },
+    { "id": "inst:<foldablePlacementId>", "objectType": "card", "mode": "setFolded", "isFolded": false }
+  ]
+}
+```
+
+Use `fitToContent` for content meant to be read on the canvas and `defaultSize` for long sources or previews. Media normally sets one dimension to preserve aspect ratio. Do not include the same object twice in one resize call. Fit a containing Section in a later call after its members change.
+
+Color input uses `updates` with `yellow`, `red`, `blue`, `green`, `black`, `orange`, `purple`, or `white`:
+
+```bash
+heptabase whiteboard recolor-objects --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "updates": [{ "id": "inst:<placementId>", "objectType": "card", "color": "blue" }]
+}
+```
+
+Remove placements without deleting source Cards:
+
+```bash
+heptabase whiteboard remove-objects --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "removals": [{ "id": "inst:<placementId>", "objectType": "card" }]
+}
+```
+
+Removing a Section frame leaves its members. Create a Section only after its members are arranged:
+
+```bash
+heptabase whiteboard create-section --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "title": "Research",
+  "color": "yellow",
+  "objects": [{ "id": "inst:<placementId>", "objectType": "card" }]
+}
+```
+
+A new Section wraps current geometry; it does not arrange scattered objects. Use Sections for meaningful scope, phase, category, or navigation.
+
+## Connections
+
+Read layout with `--include-connection-ids` before changing a route. Create only relationships that grouping alone does not show:
+
+```bash
+heptabase whiteboard create-connections --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "connections": [
+    {
+      "from": { "id": "inst:<sourcePlacementId>", "objectType": "card", "position": "right" },
+      "to": { "id": "inst:<targetPlacementId>", "objectType": "card", "position": "left" },
+      "direction": "oneWay",
+      "routeType": "straight"
+    }
+  ]
+}
+```
+
+Endpoint positions are `auto`, `top`, `right`, `bottom`, and `left`. Directions are `oneWay`, `twoWay`, and `none`. Routes are `straight`, `elbow`, and `curve`. Omit control points first; add the fewest needed only for a real obstacle.
+
+Update one connection with a partial patch:
+
+```bash
+heptabase whiteboard update-connection --input input.json
+```
+
+```json
+{
+  "whiteboardId": "<whiteboardId>",
+  "connectionId": "<connectionId>",
+  "from": { "position": "right" },
+  "to": { "position": "left" },
+  "routeType": "straight"
+}
+```
+
+After any endpoint move, resize, or route update, reread and inspect every affected route. Keep important paths traceable and avoid crossings through unrelated readable objects.
+
+## Visual verification
+
+Capture the whole board:
+
+```bash
+heptabase whiteboard screenshot <whiteboardId> --output <existingDirectory>/whiteboard.png
+```
+
+Capture a changed area by passing the same `focus` shape used by `read-layout`:
+
+```bash
+heptabase whiteboard screenshot --input focus.json --output <existingDirectory>/focus.png
+```
+
+The output path must end in `.png` and its parent directory must exist. Existing files are not replaced unless `--force` is set. Do not use `--force` unless replacement is intended.
+
+Inspect the returned absolute path with the agent's image-reading tool. Check grouping, reading order, spacing, alignment, containment, route clarity, whitespace, and the complete changed area. Repair and recapture every material problem before claiming completion.
+
+## Result handling
+
+- Check `status`, `operationFailureReasonCode`, per-item `failureReasonCode`, warning fields, and candidate instance IDs.
+- Arrangement, alignment, mind-map creation, and mind-map updates are coupled operations that fail as a unit when their structure is invalid.
+- Some placement, movement, resize, color, removal, Section, and connection batches can return mixed item results. Do not silently treat partial success as completion.
+- The CLI has no undo command. Use current reads, small scopes, and post-write checks.
+AGENT_LAZYPACK_HEPTABASE_CLI_REFERENCES_WHITEBOARD_MD_D094E5C56F
 
 test -f "{{SYNC_ROOT}}/skills/heptabase-cli/SKILL.md" && echo "heptabase-cli installed for Codex, Claude, and AntiGravity"
 ````
