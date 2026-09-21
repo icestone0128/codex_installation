@@ -1,6 +1,6 @@
 # Codex 懶人包 #48：Supabase CLI 與部署基礎安裝
 
-> 版本：v1.0　更新日期：2026-09-21
+> 版本：v1.1　更新日期：2026-09-22
 > 適用：macOS、Codex、Claude Code、AntiGravity 共用的 Supabase CLI 工作流
 > 上游參考：`mathruffian-dot/codex-lazy-packs` Item 04（MIT，最後比對 `574818e2d80b31807b74fcf62dd5b90b9e46ef3f`）。本 Item 依官方現況重寫，不直接複製上游內容。
 
@@ -18,6 +18,20 @@
 
 此 Item 改用官方 CLI：登入 token 由 Supabase CLI 的原生憑證儲存管理，日後真正部署仍以 migration review、`--dry-run` 與明確確認為閘門。若未來確實需要 Supabase MCP，請另開任務，先界定目標專案、最小 scope、可用工具與資料風險；不得以 `service_role` key 當成預設答案。
 
+## 上游 Item 04 對照
+
+本 Item 有參考上游全部流程，但目標由「讓 Agent 直接操作資料庫」改為「先安全建立可部署的 CLI 基礎」。以下不是遺漏，而是逐項採用、替換或延後：
+
+| 上游內容 | 本 Item 的處理 | 原因 |
+| :-- | :-- | :-- |
+| 以 GitHub 註冊 Supabase | 採用，但改為依 Dashboard 當下可見的登入提供者選擇 | 登入按鈕會變動；2026-09-21 實測沒有 Google、可用 GitHub |
+| 立即建立 project、選 region、設定 database password | 延後到有明確 organization、名稱、region 與密碼決定後再做 | 會建立雲端資源，可能牽涉額度、帳單與資料落點 |
+| 把 Project URL 與 `service_role` key 交給 Agent | 不採用 | `service_role` 可繞過 RLS，不應成為一般安裝的預設憑證 |
+| 安裝 `@supabase/mcp-server-supabase` | 以官方 Supabase CLI 取代 | CLI 已足以完成 migration 與 Edge Function 部署，權限與審查路徑更清楚 |
+| 建立、寫入、查詢再刪除 `test_table` | 不在安裝驗收中執行 | 尚未有測試 project；不為證明連線而修改雲端資料 |
+| 每週 cron／curl 防暫停 | 不自動建立 | 目前沒有 project；建立後應先核對當時方案政策與精確目標，避免無意義排程與長期憑證 |
+| MCP 刪除／重裝排錯 | 改為 PAT 撤銷、`supabase logout` 與 CLI 移除流程 | 本 Item 沒有安裝 MCP，因此不應留下不存在的元件 |
+
 ## 登入與憑證邊界
 
 | 用途 | 通道 | 保存位置 | 不可做的事 |
@@ -27,7 +41,7 @@
 | CI/CD | scoped PAT | GitHub Actions Secrets 或等效 secret store | 不把 token 寫進 workflow 原始碼 |
 | 資料庫連線 | database password / platform credential | 本機憑證儲存或執行時 secret | 不放入 `supabase/config.toml`、repo 或前端 |
 
-Dashboard 的登入選項會變動。2026-09-21 實測有 GitHub、ChatGPT、SSO、email/password；沒有 Google 按鈕。請選你實際可用的提供者。建立帳號、輸入密碼、2FA 與最後授權一律由本人完成。
+Dashboard 的登入選項會變動。2026-09-21 實測有 GitHub、ChatGPT、SSO、email/password；沒有 Google 按鈕。請選你實際可用的提供者。GitHub OAuth 當時要求讀取 `user:email`，本人應在同意頁核對後再授權；建立帳號、輸入密碼、2FA 與最後授權一律由本人完成。
 
 登入後，`supabase login` 會開啟瀏覽器產生 CLI PAT。它可存取 Supabase Management API；一般互動式開發可使用 CLI 管理的原生憑證。日後交給 CI 或 Agent 自動化時，應建立**只涵蓋必要 organization／project／操作的 scoped PAT**，並在離職、遺失裝置或不再使用時，從 Supabase Account Tokens 頁面撤銷。
 
@@ -76,6 +90,57 @@ supabase projects list
 `supabase projects list` 是低風險的唯讀驗證。沒有任何專案時，空清單也是成功結果。不要把 PAT 複製貼給 Agent；若 CLI 沒有 native credential storage 而建立 `~/.supabase/access-token`，確認它未被同步或 Git 追蹤，並限制為目前使用者可讀。
 
 如果由瀏覽器自動化協助登入，權杖產生後不要再讀取頁面文字、DOM 或 accessibility snapshot，因為完整 PAT 可能被帶進工具輸出。安全做法是由本人接手複製，或讓自動化直接按 `Copy` 後用本機剪貼簿送入 CLI，而且不讀回剪貼簿內容；若完整 PAT 曾出現在聊天、log、截圖或工具輸出，立即撤銷並重新建立。
+
+### 非互動終端機／Agent 執行環境的登入備援
+
+有些 Agent 命令通道會強制 JSON 輸出，直接執行 `supabase login` 可能出現：
+
+```text
+Cannot prompt for input in JSON output mode
+```
+
+這不是帳號失敗，而是該通道不能顯示互動式提示。macOS 可採用下列安全流程：
+
+1. 本人到 Supabase Dashboard 的 Account Tokens 頁面建立短效 PAT。
+2. 在頁面按 `Copy`；不要把 PAT 貼進聊天，也不要讓 Agent 讀取剪貼簿或重新擷取權杖頁面。
+3. 在本機終端機執行：
+
+```bash
+supabase login --token "$(pbpaste)"
+pbcopy < /dev/null
+supabase projects list
+```
+
+第一行的 shell history 只會保存 `$(pbpaste)`，不會保存展開後的 PAT；第二行在登入成功後清空剪貼簿。Linux／Windows 或無剪貼簿工具的環境，優先由本人在可互動終端機執行 `supabase login`，不要把 PAT 交給 Agent 中轉。
+
+### 實際遇到的訊息與判讀
+
+| 現象 | 判讀 | 解法 |
+| :-- | :-- | :-- |
+| Dashboard 沒有預期的 Google 登入按鈕 | 提供者與 UI 已變動 | 使用當下可見、屬於本人的 GitHub、ChatGPT、SSO 或 email/password；不要硬找舊按鈕 |
+| `Cannot prompt for input in JSON output mode` | Agent 終端機不能互動，不是 Supabase 帳號壞掉 | 使用上面的短效 PAT＋本機剪貼簿流程 |
+| 權杖頁面被 DOM、snapshot、截圖或 log 讀到完整 PAT | secret 已離開安全邊界 | 立即在 Account Tokens 撤銷，重新建立後只按 `Copy`，不要再擷取頁面內容 |
+| `Cannot find project ref. Have you run supabase link?`，後面仍是 `{"projects":[],"message":""}` 且 exit code 0 | CLI 已登入，但目前 repo 未 link、帳號也可能尚無 project | 空清單可視為唯讀登入驗收成功；等建立目標 project 後再 `supabase link` |
+| Account Tokens 警告 token 可控制整個帳號 | 目前建立的是高權限管理 PAT | 使用短期限、只存本機；不再需要時先在 Dashboard 撤銷，再 `supabase logout` |
+| Agent 無法直接操作 macOS Terminal 視窗 | UI 安全限制，不代表 CLI 不可用 | 改用 Agent 的本機 shell 執行同一條不含明文 PAT 的 `pbpaste` 命令，或由本人在 Terminal 執行 |
+| `supabase` 找不到 | CLI 尚未安裝或 shell PATH 未重新載入 | 重跑 Homebrew 安裝並開新終端機；或在 Node.js 20+ 專案使用 `npx supabase` |
+
+## 本次實測基線
+
+2026-09-21～2026-09-22 實際完成下列路線，公開文件不包含帳號、PAT 或其他 secret：
+
+| 項目 | 實測結果 |
+| :-- | :-- |
+| 系統 | macOS／Darwin arm64 |
+| Node.js／npm | Node.js 25.9.0、npm 11.12.1；npm 安裝路線最低要求仍以官方文件的 Node.js 20+ 為準 |
+| Git／Homebrew | Apple Git 2.54.0、Homebrew 7.0.5 |
+| Supabase CLI | 2.117.0，Homebrew 安裝 |
+| Dashboard | GitHub 登入成功 |
+| CLI 登入 | 30 天 PAT 經頁面 Copy 與本機剪貼簿送入 CLI；登入訊息成功後立即清空剪貼簿 |
+| 唯讀驗收 | `supabase projects list` exit code 0；帳號當時為 0 projects |
+| 雲端變更 | 0；未建立 organization、project、table、migration、Function 或排程 |
+
+下載者做到「CLI 有版本、Dashboard 可登入、CLI 可列出 project（空清單亦可）」就已達到本 Item 的相同效果。建立第一個 cloud project 與實際部署屬於下一階段，不應在通用安裝流程中替所有人自動執行。
 
 ## Phase 4：未來建立專案與部署
 
