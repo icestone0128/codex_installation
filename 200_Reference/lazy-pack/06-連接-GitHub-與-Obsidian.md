@@ -24,11 +24,18 @@
 2. 使用 Filesystem MCP 授權 `{{OBSIDIAN_VAULT}}` 或其上層必要資料夾。
 3. 使用 Obsidian MCP，例如 `mcpvault`。
 
-如果使用 `mcpvault`，先找 command：
+如果使用 `mcpvault`（上游 [`bitbonsai/mcpvault`](https://github.com/bitbonsai/mcpvault)，MIT）：
+
+### 共用步驟：安裝（每次都取最新版）
 
 ```bash
+npm install -g @bitbonsai/mcpvault@latest
 command -v mcpvault
 ```
+
+以 `command -v mcpvault` 的輸出當作 `{{MCPVAULT_COMMAND}}`；之後要更新，重跑第一行即可。mcpvault 會擋掉 vault 內任何深度的隱藏檔與隱藏資料夾（`.git`、`.obsidian`、`.env` 等），筆記不要放在隱藏資料夾裡。只需要讀取時可在參數加 `--read-only`。
+
+### Codex adapter
 
 在 `{{CODEX_CONFIG}}` 加入：
 
@@ -38,6 +45,24 @@ command = "{{MCPVAULT_COMMAND}}"
 args = ["{{OBSIDIAN_VAULT}}"]
 startup_timeout_sec = 20
 tool_timeout_sec = 60
+```
+
+### Claude adapter
+
+```bash
+claude mcp add --scope user obsidian -- "{{MCPVAULT_COMMAND}}" "{{OBSIDIAN_VAULT}}"
+claude mcp list
+```
+
+### AntiGravity adapter
+
+在 `{{GEMINI_CONFIG}}/mcp_config.json` 的 `mcpServers` 加入：
+
+```json
+"obsidian": {
+  "command": "{{MCPVAULT_COMMAND}}",
+  "args": ["{{OBSIDIAN_VAULT}}"]
+}
 ```
 
 ## 專案駕駛艙規則
@@ -73,8 +98,8 @@ tool_timeout_sec = 60
 
 ## 驗證
 
-1. Codex 能讀專案 `AGENTS.md`。
-2. Codex 能讀 Obsidian 駕駛艙。
+1. 當前 Agent 能讀專案 `AGENTS.md`。
+2. 當前 Agent 能讀 Obsidian 駕駛艙；使用 mcpvault 時，Codex、Claude、AntiGravity 各自重載後都要能列出 vault 筆記。
 3. `git remote -v` 能顯示 GitHub remote。
 4. 收工時能清楚說明：repo 狀態、Obsidian 駕駛艙位置、下一步。
 

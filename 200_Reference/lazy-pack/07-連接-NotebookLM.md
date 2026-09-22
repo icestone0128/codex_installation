@@ -5,7 +5,7 @@
 
 ## 目標
 
-讓 Codex 能讀取 NotebookLM，並固定 NotebookLM 成品下載與整理路徑。
+讓 Codex、Claude、AntiGravity 都能讀取 NotebookLM，並固定 NotebookLM 成品下載與整理路徑。
 
 ## 前置條件
 
@@ -33,15 +33,32 @@ mkdir -p "{{NOTEBOOKLM_OUTPUT}}"/{slides,infographics,audio,video,docs,sheets,mi
 - `mindmaps`：心智圖
 - `quizzes`：測驗
 
-## NotebookLM MCP 設定
+## NotebookLM MCP 安裝與設定
 
-先找出 NotebookLM MCP command 的實際位置：
+上游：[`jacob-bd/gemini-notebook-mcp-cli`](https://github.com/jacob-bd/gemini-notebook-mcp-cli)（MIT；舊名 `notebooklm-mcp-cli`，PyPI 套件名稱與 `nlm`、`notebooklm-mcp` 指令名稱不變）。
+
+### 共用步驟：安裝（每次都取最新版）
 
 ```bash
+uv tool install --force --upgrade --python 3.12 notebooklm-mcp-cli
+nlm login
+nlm login --check
 command -v notebooklm-mcp
 ```
 
-若找不到，代表尚未安裝或不在 PATH。不同安裝方式會得到不同路徑，請以你的電腦實際輸出為準。
+- Python 3.12 是相容上限，不是鎖定套件版本；上游要求 Python 3.11 以上。
+- 之後要更新，重跑第一行即可。`nlm login --check` 顯示 `Authentication valid` 才算完成。
+- 以 `command -v notebooklm-mcp` 的輸出當作 `{{NOTEBOOKLM_MCP_COMMAND}}`。
+
+### 共用契約：下載資料夾
+
+MCP 的下載工具只會把檔案寫進單一下載資料夾（上游的安全修補，防止惡意來源把檔案寫到 shell 設定或 Agent 規則檔）。沒設定時會存到 `~/Downloads/gemini-notebook`。三個 Agent 都要設定同一個環境變數，讓成品落在 `{{NOTEBOOKLM_OUTPUT}}`，並可指定 `slides/`、`audio/` 等子資料夾：
+
+```text
+NOTEBOOKLM_DOWNLOAD_DIR={{NOTEBOOKLM_OUTPUT}}
+```
+
+### Codex adapter
 
 在 `{{CODEX_CONFIG}}` 加入：
 
@@ -51,16 +68,32 @@ command = "{{NOTEBOOKLM_MCP_COMMAND}}"
 args = []
 startup_timeout_sec = 30
 tool_timeout_sec = 120
+
+[mcp_servers.notebooklm.env]
+NOTEBOOKLM_DOWNLOAD_DIR = "{{NOTEBOOKLM_OUTPUT}}"
 ```
 
-範例：
+### Claude adapter
 
-```toml
-[mcp_servers.notebooklm]
-command = "{{NOTEBOOKLM_MCP_COMMAND}}"
-args = []
-startup_timeout_sec = 30
-tool_timeout_sec = 120
+```bash
+claude mcp add --scope user notebooklm \
+  -e NOTEBOOKLM_DOWNLOAD_DIR="{{NOTEBOOKLM_OUTPUT}}" \
+  -- "{{NOTEBOOKLM_MCP_COMMAND}}"
+claude mcp list
+```
+
+`claude mcp list` 顯示 `notebooklm ... ✔ Connected` 才算完成。
+
+### AntiGravity adapter
+
+在 `{{GEMINI_CONFIG}}/mcp_config.json` 的 `mcpServers` 加入：
+
+```json
+"notebooklm": {
+  "command": "{{NOTEBOOKLM_MCP_COMMAND}}",
+  "args": [],
+  "env": { "NOTEBOOKLM_DOWNLOAD_DIR": "{{NOTEBOOKLM_OUTPUT}}" }
+}
 ```
 
 ## 可選：安裝 NotebookLM 內容製作 Skills
@@ -100,28 +133,16 @@ done
 1. 重載本次已設定的 Codex、Claude 或 AntiGravity adapter。
 2. 請當前 Agent 檢查 NotebookLM 工具是否可用。
 3. 測試列出 notebooks 或讀取一個測試 notebook。
-4. 下載任何 NotebookLM 成品後，放入 `{{NOTEBOOKLM_OUTPUT}}` 對應子資料夾。
-
-## 設定範本
-
-曾成功使用：
-
-```toml
-[mcp_servers.notebooklm]
-command = "{{NOTEBOOKLM_MCP_COMMAND}}"
-args = []
-startup_timeout_sec = 30
-tool_timeout_sec = 120
-```
-
-這是模板值，下載者必須改成自己的 `{{NOTEBOOKLM_MCP_COMMAND}}`。
+4. 用 MCP 下載成品時，確認檔案落在 `{{NOTEBOOKLM_OUTPUT}}` 對應子資料夾，而不是 `~/Downloads/gemini-notebook`。
 
 ## 踩坑修正
 
 - MCP 設定改完後，工具不一定立刻出現，通常要重載當前 Agent；三 Agent 的 MCP／OAuth session 要分別驗證。
 - 不要假設 `nlm mcp` 一定能當 Codex MCP command；以 `command -v notebooklm-mcp` 或實際可執行檔為準。
 - 如果 NotebookLM 工具未載入，先檢查 `command` 是否是完整絕對路徑。
-- Google 帳號登入狀態會影響 NotebookLM 讀取；必要時重新登入 MCP 或 Google connector。
+- Google 帳號登入狀態會影響 NotebookLM 讀取；先跑 `nlm login --check`，失效時重跑 `nlm login`。無人值守的機器可用 `nlm auth refresh` 更新登入狀態。
+- MCP 下載的檔案跑到 `~/Downloads/gemini-notebook`：代表該 Agent 的 adapter 沒設 `NOTEBOOKLM_DOWNLOAD_DIR`，補上後重載 Agent。
+- 登入逾時或網域不符：Google 把 NotebookLM 改名為 Gemini Notebook，登入可能轉到 `notebook.google.com`；舊版 CLI 會登入逾時，更新到最新版即可。
 
 <!-- BEGIN EMBEDDED_SKILLS -->
 
