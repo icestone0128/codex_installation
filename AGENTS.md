@@ -122,6 +122,27 @@ Arry 助手 AI 分身資料層：
 - Arry 助手全域資料層已移至 `codex_symlink/`；本專案 `000_Agent/` 只保留指向說明。
 - 既有專案重新初始化時，只依架構補缺與更新狀態，不覆蓋既有設定或 Git 歷史。
 
+## 每週更新檢查
+
+`200_Reference/scripts/weekly-update-check.sh` 是本機所有 CLI、MCP runtime 與 App 的更新入口。由 Claude 排程任務 `weekly-update-check` 在每週日 06:00（系統會加幾分鐘分散負載）執行；要手動跑也一律用這支腳本，不要自己下 brew／npm／uv 指令。
+
+規則（2026-09-23 使用者決定）：
+
+- 範圍是**所有** Homebrew formula 與 cask（含 `--greedy` 才看得到的自動更新 cask）、所有 npm 全域套件、uv 工具與 uv 管理的 Python、Google Workspace MCP runtime。
+- **所有更新都直接安裝，包含大版本**，不事前詢問；排程任務事後負責讀大版本的升級說明並回報不相容變更。
+- 不執行 `sudo`，不 commit，不 push。
+
+運作流程：
+
+1. `--dry-run`（預設）只列出落後項目；`--apply` 才會安裝。用 `.lock` 目錄避免同時執行兩份。
+2. Homebrew：先 `brew update`，再升級所有 formula；每個落後的 cask 會先用可續傳的 `curl` 把安裝檔抓進 Homebrew 快取（`sha256(url)--檔名`），比對 cask 公布的 SHA-256，校驗不符就丟棄並讓 Homebrew 自己重抓。這是為了讓下載很慢時不會卡死或裝到壞檔。
+3. 升級 cask 前，會用 AppleScript 正常結束對應的 GUI App（例如 Obsidian），升級後再開回來；40 秒內關不掉就跳過該 cask 並回報，不強制結束。
+4. npm 全域套件依 `npm -g outdated --json` 逐一 `npm install -g <pkg>@latest`。
+5. uv：`uv tool upgrade --all`，再對每個已安裝的 Python 小版本系列跑 `uv python upgrade`（venv 跟著 symlink 走，不用重建）。
+6. Google Workspace MCP：直接執行 LazyPack Item 02 的安裝器（它本來就一律取最新版），再重啟 LaunchAgent。
+7. 驗證：MCP 是否在 `127.0.0.1:8000` 監聽、共用 Python 工具包驗證腳本、Claude MCP 連線數、Heptabase CLI 是否還在 skill 宣告的相容範圍內，最後列出所有工具的當前版本。
+8. 報告與各步驟 log 寫到 `~/.local/share/agent-tools/weekly-update-check/`（本機可重生資料，不進專案與 Obsidian）。結束代碼 0 代表全部成功，1 代表至少一步失敗。
+
 ## 不要做
 
 - 不要把每日進度寫進 AGENTS.md。
@@ -138,6 +159,8 @@ Arry 助手 AI 分身資料層：
 - `200_Reference/lazy-pack/` - 經驗證的 Codex 安裝說明、除錯紀錄與內嵌全域技能安裝檔；這是必須跟著本 repo commit/push 到 GitHub 的公開 LazyPack 發布資料夾。
 - `200_Reference/past-work/docs/` - 過往本地文件入口備份，目前不部署。
 - `200_Reference/scripts/sync-health.sh` - 唯讀的跨裝置同步健康檢查腳本。
+- `200_Reference/scripts/check-lazypack-version-pins.py` - 檢查 LazyPack 有沒有寫死軟體版本；任何 LazyPack 變更後都要跑，必須是 `0 version pin(s)`。
+- `200_Reference/scripts/weekly-update-check.sh` - 每週本機工具與 App 更新腳本，見〈每週更新檢查〉。
 - `000_Agent/` - 僅保留指向說明，不存放真實個人記憶或偏好。
 - `100_Todo/` - 專案本地待辦、草稿與工作中素材。
 - `200_Reference/` - 專案本地參考資料、範本與過往作品。
