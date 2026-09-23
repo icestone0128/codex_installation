@@ -8,6 +8,8 @@ UV_BIN="${UV_BIN:-}"
 INSTALL_SYSTEM_TOOLS="${INSTALL_SYSTEM_TOOLS:-1}"
 INSTALL_OFFICE_TOOLS="${INSTALL_OFFICE_TOOLS:-0}"
 INSTALL_AUTO_EDITOR="${INSTALL_AUTO_EDITOR:-1}"
+# Expanded with the ${arr[@]+"${arr[@]}"} guard below: under `set -u`, bash 3.2
+# (the macOS system bash) treats an empty array expansion as an unbound variable.
 EXTRA_PIP_PACKAGES=()
 
 log() {
@@ -60,7 +62,8 @@ mkdir -p "$PYTHON_TOOLS_HOME/bin" "$PYTHON_TOOLS_HOME/matplotlib-cache"
 
 # Python 3.12 is a compatibility ceiling, not a version pin: several teaching/media packages
 # do not yet ship wheels for the newest system Python. All packages below install latest.
-"$UV_BIN" venv --python 3.12 "$PYTHON_TOOLS_VENV"
+# --allow-existing reuses the venv instead of failing; uv refuses to recreate one.
+"$UV_BIN" venv --allow-existing --python 3.12 "$PYTHON_TOOLS_VENV"
 
 # Resolve the newest stable GitHub release asset and its SHA-256 digest at install time.
 # Prints "<download-url> <sha256>"; refuses to continue when GitHub publishes no digest.
@@ -130,7 +133,7 @@ esac
   pypdf PyMuPDF pdfplumber pdf2image reportlab fpdf2 pillow matplotlib \
   qrcode 'markitdown[pdf,docx,pptx,xlsx]' ocrmypdf docx2pdf edge-tts yt-dlp youtube-transcript-api \
   groq elevenlabs opencc-python-reimplemented \
-  "${EXTRA_PIP_PACKAGES[@]}"
+  ${EXTRA_PIP_PACKAGES[@]+"${EXTRA_PIP_PACKAGES[@]}"}
 
 cat > "$PYTHON_TOOLS_HOME/bin/python-tools-python" <<SH
 #!/usr/bin/env bash

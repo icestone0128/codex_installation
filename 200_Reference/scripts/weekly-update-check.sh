@@ -26,6 +26,7 @@ MODE="dry-run"
 REPORT_DIR="${WEEKLY_UPDATE_REPORT_DIR:-${AGENT_DATA_HOME:-$HOME/.local/share/agent-tools}/weekly-update-check}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_MCP_INSTALLER="$SCRIPT_DIR/../lazy-pack/02-assets/google-workspace-mcp/install_google_workspace_mcp.sh"
+PYTHON_TOOLS_INSTALLER="$SCRIPT_DIR/python-tools/install_python_tools.sh"
 PYTHON_TOOLS_VERIFIER="$SCRIPT_DIR/python-tools/verify_python_tools.py"
 LAUNCH_AGENT_LABEL="com.lazy-pack.google-workspace-mcp"
 MCP_URL="http://127.0.0.1:8000/mcp"
@@ -235,6 +236,30 @@ if command -v uv >/dev/null 2>&1; then
   fi
 else
   step_failed "找不到 uv"
+fi
+say ""
+
+# ------------------------------------------- shared Python tools (Item 34) ---
+# brew/npm/uv above never touch this runtime: Auto-Editor, the Groq and
+# ElevenLabs SDKs and OpenCC live inside the Item 34 venv, so they only move
+# when its installer runs (it always resolves the newest release).
+say "## 共用 Python 工具包（Item 34）"
+say ""
+if [ -f "$PYTHON_TOOLS_INSTALLER" ]; then
+  if applying; then
+    if bash "$PYTHON_TOOLS_INSTALLER" >>"$REPORT.pythontools.log" 2>&1; then
+      say "- ✅ 安裝器完成（Auto-Editor 與 venv 內套件一律取最新版）"
+      if command -v auto-editor >/dev/null 2>&1; then
+        say "- auto-editor：$(auto-editor --version 2>&1 | head -1)"
+      fi
+    else
+      step_failed "共用 Python 工具包安裝器失敗，詳見 $REPORT.pythontools.log"
+    fi
+  else
+    say "（dry-run：不執行安裝器）"
+  fi
+else
+  step_failed "找不到安裝器：$PYTHON_TOOLS_INSTALLER"
 fi
 say ""
 
