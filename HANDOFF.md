@@ -7,6 +7,7 @@
 - `heptabase-cli` skill 依上游 `heptameta/heptabase-cli-skills`（MIT，commit `0716461`）升到 CLI 相容範圍 `0.6.x`，新增 4 份 references 與 LICENSE，保留本機的中文 description、AI Tutor 章節與 `local-file add` recipe。
 - Claude 補上 `notebooklm` 與 `obsidian` 兩個 MCP，三個 Agent 一致；`nlm` 升到 0.11.6、`mcpvault` 升到 0.16.0。因應 nlm 的下載限制修補，三個 adapter 都設了 `NOTEBOOKLM_DOWNLOAD_DIR`。LazyPack Item 06、07 補上安裝步驟與三 Agent adapter。
 - 新增每週自動更新：`200_Reference/scripts/weekly-update-check.sh` 加 Claude 排程任務 `weekly-update-check`（每週日 06:00，系統加幾分鐘抖動）。涵蓋所有 Homebrew formula／cask、npm 全域、uv 工具與 Python、Item 34 共用 Python 工具包、Google Workspace MCP；cask 安裝檔先用可續傳 curl 下載並比對 SHA-256，升級前以正常方式關閉對應 App、升級後重開。`~/.claude/settings.json` 已加只放行這支腳本的 allow 規則（設定變更需重開 App 生效）。
+- npm 12 起預設封鎖相依套件的 install scripts（`netlify-cli`、`esbuild`、`sharp` 會裝不完整）。`weekly-update-check.sh` 的 npm 區段改帶 `--allow-scripts` 並列出仍被擋的套件；全域 skill `netlify-deploy` 同步補上安裝指令與 Node 需求（以 npm 當前宣告的 `^22.22.2 || ^24.15.0 || >=26` 為準）。由另一 session 完成並推送（`abace64`）。
 - 修掉 Item 34 安裝器兩個既有 bug：`uv venv` 未加 `--allow-existing` 導致重跑必失敗；bash 3.2 在 `set -u` 下展開空陣列報 unbound。修好後共用 venv 套件才首次真正更新（auto-editor 31.6.0、groq 1.7.0、elevenlabs 2.68.0、yt-dlp 2026.8.19）。
 
 ## Next action
@@ -21,4 +22,4 @@
 
 ## Last verified
 
-2026-09-23 09:00 CST，Claude（Opus 5）：`weekly-update-check.sh --apply` 失敗步驟 0；`sync-lazypack-embeds.py --dry-run` 41 identical／0 to change；`lazypack-knowledge-embeds.py` 11 identical／0 to change；`check-lazypack-version-pins.py` 0 version pin(s)；repo LazyPack 與 Obsidian 懶人包 `diff -qr` 一致；Arry 助手鏡像 `diff -qr` 通過；Google Workspace MCP 監聽中、Claude 9 個 MCP 全連線、共用 Python 工具包驗證通過；6 個 commit 已推送至 `origin/main`（最新 `b1bb5bd`）。
+2026-09-23 23:53 CST，Claude（Opus 5）：`npm install --help` 確認 `--allow-scripts` 存在於 npm 12.1.0；`weekly-update-check.sh` `bash -n` 通過；`sync-lazypack-embeds.py --dry-run` 41 identical／0 to change；`lazypack-knowledge-embeds.py` 11 identical；`check-lazypack-version-pins.py` 0 version pin(s)；`netlify-deploy` 驗證 VALID；repo LazyPack 與 Obsidian 懶人包 `diff -qr` 一致；工作區乾淨，`main` 與 `origin/main` 同步（最新 `abace64`）。
