@@ -126,10 +126,12 @@ $names | ForEach-Object {
 先預覽會從 npm 下載並修改全域 Node 套件；取得同意後才執行：
 
 ```bash
-npm install -g wrangler@latest
+npm install -g --allow-scripts=esbuild,workerd,fsevents wrangler@latest
 wrangler --version
 command -v wrangler
 ```
+
+npm 12 起預設擋下相依套件的安裝腳本；Wrangler 需要 `esbuild`、`workerd`（macOS 另有 `fsevents`）的安裝步驟，所以用 `--allow-scripts` 明列。舊版 npm 會忽略這個參數。
 
 一律安裝 `@latest`，不指定版本；每次安裝或升級後都重跑下方的 help gate，確認參數仍然相同。
 

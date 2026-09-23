@@ -36,10 +36,12 @@ npx -y @netlify/mcp
 Netlify CLI 可選安裝：
 
 ```bash
-npm install -g netlify-cli
+npm install -g --allow-scripts=netlify-cli,esbuild,sharp netlify-cli
 netlify login
 netlify status
 ```
+
+npm 12 起預設擋下相依套件的安裝腳本，要用 `--allow-scripts` 明列允許的套件；舊版 npm 會忽略這個參數並顯示 unknown config 警告，不影響安裝。npm 對 Node.js 的最低需求是 22 系列 22.22.2 以上，或 24.15.0 以上／26 以上。
 
 `login`、site 建立、link、環境變數與部署都會改變外部狀態；要先確認 team、site、output folder 與 preview／production。
 
@@ -125,7 +127,7 @@ tool_timeout_sec = 180
 
 ## Prerequisites
 
-- Node.js 22.13.0 or newer (Netlify CLI 27+ requirement; also satisfies Netlify MCP's Node.js 22+ prerequisite).
+- Node.js 22.22.2 or newer on the 22 line, or 24.15.0+ / 26+ (the current npm requires `^22.22.2 || ^24.15.0 || >=26`; this also covers Netlify CLI 27+'s Node.js 22.13.0+ and Netlify MCP's Node.js 22+ prerequisites).
 - Netlify account.
 - The active Agent is restarted or opened in a fresh session after editing its MCP config.
 - Netlify CLI is optional but recommended for login troubleshooting: `npm install -g netlify-cli`, then `netlify login` and `netlify status`.
@@ -138,11 +140,17 @@ tool_timeout_sec = 180
 Install the CLI when the user wants local login, account checks, site linking, fallback deploys, environment-variable management, or deployment troubleshooting outside the MCP tool surface:
 
 ```bash
-npm install -g netlify-cli
+npm install -g --allow-scripts=netlify-cli,esbuild,sharp netlify-cli
 netlify login
 netlify --version
 netlify status
 ```
+
+npm 12 and later block dependency install scripts unless the package is named
+in `--allow-scripts`; without it, `netlify-cli`, `esbuild`, and `sharp` skip
+their install steps. Older npm ignores the flag with an unknown-config warning.
+If the install output still lists "install scripts blocked" packages, confirm
+they come from Netlify CLI's dependency tree and add them to the list.
 
 Use `NPM_CONFIG_CACHE=/private/tmp/npm-cache` if npm cache permissions are
 broken or the current Codex sandbox has not been granted `~/.npm` write access.

@@ -99,8 +99,10 @@ service cloud.firestore {
 官方建議用 npm 安裝 Firebase CLI，讓電腦上可直接使用 `firebase` 指令：
 
 ```bash
-npm install -g firebase-tools
+npm install -g --allow-scripts=protobufjs,re2 firebase-tools
 ```
+
+npm 12 起預設擋下相依套件的安裝腳本；Firebase CLI 的 `protobufjs` 與 `re2` 需要安裝步驟，所以用 `--allow-scripts` 明列。舊版 npm 會忽略這個參數。
 
 安裝前先確認 Node.js 與 npm 可用：
 
@@ -129,7 +131,7 @@ firebase login
 若 npm 回報 cache 權限問題，例如 `~/.npm` 內有舊的 root-owned 檔案，可先改用臨時 cache 路徑安裝：
 
 ```bash
-npm install -g firebase-tools --cache /private/tmp/npm-cache
+npm install -g --allow-scripts=protobufjs,re2 firebase-tools --cache /private/tmp/npm-cache
 ```
 
 若錯誤發生在全域 npm 目錄，例如 `/opt/homebrew/lib/node_modules/firebase-tools` 無法建立，代表目前使用者沒有該全域目錄寫入權限。這時需要用系統授權方式執行全域安裝，或改用不需要全域安裝的 `npx` 方式。

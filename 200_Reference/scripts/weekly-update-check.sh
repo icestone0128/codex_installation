@@ -183,6 +183,12 @@ say ""
 # --------------------------------------------------------------------- npm ---
 say "## npm 全域套件"
 say ""
+# npm 12+ blocks dependency install scripts unless the package is listed in
+# allow-scripts. These are the packages our global CLIs need (netlify-cli,
+# wrangler, gemini-cli, firebase-tools and their native deps). Add a name here
+# when the report shows a new "install scripts blocked" warning. npm 11 ignores
+# the flag.
+NPM_ALLOW_SCRIPTS="netlify-cli,esbuild,workerd,fsevents,sharp,unix-dgram,node-pty,@github/keytar,protobufjs,re2"
 if command -v npm >/dev/null 2>&1; then
   npm_outdated="$(npm -g outdated --json 2>/dev/null | python3 -c "
 import sys, json
@@ -199,8 +205,15 @@ for name, info in data.items():
       while IFS= read -r line; do
         pkg="${line%% *}"
         [ -n "$pkg" ] || continue
-        if npm install -g "$pkg@latest" >>"$REPORT.npm.log" 2>&1; then
+        npm_out="$(npm install -g --allow-scripts="$NPM_ALLOW_SCRIPTS" "$pkg@latest" 2>&1)"
+        npm_rc=$?
+        printf '%s\n' "$npm_out" >>"$REPORT.npm.log"
+        if [ "$npm_rc" -eq 0 ]; then
           say "- ✅ $pkg 已升級"
+          blocked="$(printf '%s\n' "$npm_out" | awk '/install scripts blocked/{f=1;next} f&&/^npm warn install-scripts   [^ ]/{print $4} f&&!/^npm warn install-scripts/{f=0}' | sort -u | tr '\n' ' ')"
+          if [ -n "$blocked" ]; then
+            say "  - ⚠️ 安裝腳本仍被擋：$blocked（確認可信後加進 NPM_ALLOW_SCRIPTS 再重跑）"
+          fi
         else
           step_failed "npm $pkg 升級失敗，詳見 $REPORT.npm.log"
         fi

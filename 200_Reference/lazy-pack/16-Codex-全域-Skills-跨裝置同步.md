@@ -90,7 +90,8 @@ Gemini CLI 需要 Node.js 20 以上。macOS 已有 Homebrew 與 Node.js 時，20
 brew install --cask claude-code
 
 # Gemini CLI：Google 官方 npm stable package
-npm install -g @google/gemini-cli@latest
+# npm 12 起預設擋安裝腳本；keytar 與 node-pty 需要原生建置步驟
+npm install -g --allow-scripts=@github/keytar,node-pty @google/gemini-cli@latest
 ```
 
 Claude Code 官方也提供 macOS、Linux 與 WSL 的原生安裝器；非 Homebrew 環境可依官方當期文件使用：
